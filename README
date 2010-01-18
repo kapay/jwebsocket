@@ -1,0 +1,55 @@
+Thank you for downloading sebsocket server. This is the READEME file comes with WebSocket server.
+
+For the latest version of websocket server visit http://github.com/narup/websocket
+
+
+What is websocket?
+websocket is a simple statndalone java based HTML5 websocket server API implementation. It is a very simple implementation so that java developers can play around with HTML5 Web Socket based applications or prototype application without taking a hassle of setting up any servers.
+
+Licensing.
+
+This is free and anyone can do anything with this code.
+
+
+Documentation
+
+No real documentation yet, trying to come up with a working example.
+
+
+Installing 
+Just download the jar from http://github.com/narup/websocket and put it in your classpath
+
+Usage
+1. Implement WebSocketHandler Interface and write your application code on the appropriate webscoket events 
+2. Run the server as java StartWebSocketServer -config path-to-config-file
+
+example of config file:
+
+<?xml version="1.0" encoding="utf-8"?>
+<websocket xmlns="http://dev.w3.org/html5/websockets/">
+	<configurations>
+		<host>websocket-server</host>
+		<port>8080</port>
+		<documentRoot>/</documentRoot>
+	</configurations>
+	<handlers>
+		<handler>
+			<handlerName>com.jwebsocket.example.TestHandler</handlerName>
+			<properties>
+				<property>
+					<key>appName</key>
+					<value>TestHandler</value>
+				</property>
+			</properties>
+		</handler>
+	</handlers>
+</websocket>
+
+
+
+References:
+http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-68 - The Web Socket protocol
+http://dev.w3.org/html5/websockets/ - HTML5 web socket API description
+http://mina.apache.org/ - Apache MINA framework
+  
+
