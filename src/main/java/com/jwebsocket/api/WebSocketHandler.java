@@ -25,8 +25,10 @@ import java.util.Properties;
 
 /**
  * Base interface that represents the WebSocket server application and recieves all the 
- * websocket events. This has to be implemented by the main Web Socket application with 
- * the application specfific codes on different WebSocket events.
+ * WebSocket events. 
+ * The application has to implement this interface in order to recieve all the WebSocket 
+ * events.
+ * 
  * 
  * @author <a href="http://blog.purans.net">
  *         Puran Singh</a>
@@ -63,7 +65,7 @@ public interface WebSocketHandler {
 	/**
 	 * Notifies the handler when the web socket is closed, either by the client
 	 * or due to some exception.
-	 * Handler should do all the clean up work in this method.
+	 * Handlers implementing this method should do all the clean up work in this method.
 	 * @param socket the web socket object which is closed
 	 */
 	void onClose();
