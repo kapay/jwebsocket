@@ -1,0 +1,46 @@
+<html>
+
+<head>
+<title>Web Socket Test</title>
+</head>
+
+<body>
+
+<script type="text/javascript">
+
+var socket;
+
+if (window.WebSocket) {
+	socket = new WebSocket("ws://localhost:8080/test");
+	socket.onmessage = function(event) { alert(event.data); };
+	socket.onopen = function(event) {alert("web socket opened");};
+	socket.onclose = function(event) { 
+		alert("Web Socket Closed!"); 
+	};
+	
+} else {
+	alert("Your browser sucks.  It doesn't have Web Sockets.");
+}
+
+function send(message) {
+if (window.WebSocket) {
+		if (socket.readyState == WebSocket.OPEN) {
+			socket.send(message);
+		} else {
+			alert("socket is not open");
+		}
+
+} else {
+	alert("Your browser sucks.  It doesn't have Web Sockets.");
+}
+}
+
+</script>
+
+<form>
+	<input type="text" name="message" /><input type="button" value="Send Web Socket Data" onclick="send(this.form.message.value)" />
+</form>
+
+</body>
+
+</html>
