@@ -70,5 +70,5 @@ public interface WebSocket {
 	 * {@code CLOSED = 2}
 	 * @return the status value
 	 */
-	int getStatus();
+	int getReadyState();
 }
