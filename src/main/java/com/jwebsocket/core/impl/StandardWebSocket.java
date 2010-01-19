@@ -36,16 +36,16 @@ import com.jwebsocket.core.server.StartWebSocketServer;
  * @version $Id$
  * 
  */
-public class StandardWebSocket implements WebSocket {
+public final class StandardWebSocket implements WebSocket {
 
 	public static final int CONNECTING = 0;
 	public static final int OPEN = 1;
 	public static final int CLOSED = 2;
 
-	private IoSession session;
-	private WebSocketCallback callback;
+	private final IoSession session;
+	private final WebSocketCallback callback;
 
-	private int status = CLOSED;
+	private int readyState = CLOSED;
 
 	/**
 	 * private default constructor
@@ -53,8 +53,10 @@ public class StandardWebSocket implements WebSocket {
 	 * @param status
 	 *            the status of the web socket connection
 	 */
-	private StandardWebSocket(int status) {
-		this.status = status;
+	private StandardWebSocket(int readyState) {
+		this.readyState = readyState;
+		this.session = null;
+		this.callback = null;
 	}
 
 	/**
@@ -67,10 +69,10 @@ public class StandardWebSocket implements WebSocket {
 	 *            callback for handling callback operations in handler
 	 */
 	private StandardWebSocket(IoSession session, WebSocketCallback callback,
-			int status) {
+			int readyState) {
 		this.session = session;
 		this.callback = callback;
-		this.status = status;
+		this.readyState = readyState;
 	}
 
 	/**
@@ -112,11 +114,11 @@ public class StandardWebSocket implements WebSocket {
 	 */
 	@Override
 	public void close() throws WebSocketException {
-		if (status == CLOSED) {
+		if (readyState == CLOSED) {
 			throw new WebSocketException(
 					"WebSocket is already closed, cannot close closed socket");
 		} else {
-			status = CLOSED;
+			readyState = CLOSED;
 			session.close();
 		}
 	}
@@ -133,10 +135,10 @@ public class StandardWebSocket implements WebSocket {
 
 	@Override
 	public boolean isOpen() {
-		if (status == CLOSED) {
+		if (readyState == CLOSED) {
 			return false;
 		}
-		return (session.isConnected() && status == OPEN);
+		return (session.isConnected() && readyState == OPEN);
 	}
 
 	/**
@@ -144,7 +146,7 @@ public class StandardWebSocket implements WebSocket {
 	 */
 	@Override
 	public void send(Object message) throws WebSocketException {
-		if (session != null && status == OPEN) {
+		if (session != null && readyState == OPEN) {
 			callback.send(message);
 		} else {
 			throw new WebSocketException(
@@ -156,8 +158,8 @@ public class StandardWebSocket implements WebSocket {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getStatus() {
-		return status;
+	public int getReadyState() {
+		return readyState;
 	}
 
 }
