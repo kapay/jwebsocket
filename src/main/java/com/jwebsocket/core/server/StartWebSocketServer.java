@@ -50,7 +50,7 @@ import com.jwebsocket.api.WebSocketException;
  * @version $Id$
  * 
  */
-public class StartWebSocketServer {
+public final class StartWebSocketServer {
 
 	/** Tile server revision number */
 	public static final String VERSION_STRING = "";
@@ -131,9 +131,23 @@ public class StartWebSocketServer {
 	 */
 	private void start(String filePath) {
 		try {
+			//load the configuration from the config file
 			loadConfiguration(filePath);
+			
+			//TODO: need to implement this
+			initialize();
+			
 			// Create an acceptor
 			NioSocketAcceptor acceptor = new NioSocketAcceptor();
+			
+			//disable the connection of the clients on unbind
+			acceptor.setCloseOnDeactivation(false);
+			
+			//Allow the port to be reused even if the socket is in TIME_WAIT state
+			acceptor.setReuseAddress(true);
+			
+			//No Nagle's algorithm
+			acceptor.getSessionConfig().setTcpNoDelay(true);
 
 			// Create a service configuration
 			acceptor.getFilterChain()
@@ -161,6 +175,13 @@ public class StartWebSocketServer {
 					"Exception occurred while starting up the WebSocket server",
 					ex);
 		}
+	}
+
+	/**
+	 * perform initalization
+	 */
+	private void initialize() {
+		//TODO: implement this
 	}
 
 	/**
