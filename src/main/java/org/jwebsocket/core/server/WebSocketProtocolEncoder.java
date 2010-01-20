@@ -65,12 +65,12 @@ public class WebSocketProtocolEncoder implements MessageEncoder<Response> {
 			//because as per the standard the data framing specification may 
 			//change in the future.
 			buf.put(WebSocketProtocol.DATA_FRAME_START);
-			buf.put(message.getBody());
+			buf.put(message.getBody("UTF-8").getBytes("UTF-8"));
 			buf.put(WebSocketProtocol.DATA_FRAME_END);
 		} else {
 			try {
 				// output all headers except the content length
-				CharsetEncoder encoder = Charset.defaultCharset().newEncoder();
+				CharsetEncoder encoder = Charset.forName("UTF-8").newEncoder();
 				buf.putString("HTTP/1.1 ", encoder);
 				buf.putString(String.valueOf(message.getResponseCode()),
 						encoder);
@@ -85,9 +85,13 @@ public class WebSocketProtocolEncoder implements MessageEncoder<Response> {
 				buf.put(CRLF);
 				for (Entry<String, List<String>> entry : message.getHeaders()
 						.entrySet()) {
+					String value = entry.getValue().get(0);
 					buf.putString(entry.getKey(), encoder);
 					buf.putString(": ", encoder);
-					buf.putString(entry.getValue().get(0), encoder);
+					if (entry.getKey().equals("Content-Type")) {
+						value = "text/html utf-8";
+					}
+					buf.putString(value, encoder);
 					buf.put(CRLF);
 				}
 				// now the content length is the body length
