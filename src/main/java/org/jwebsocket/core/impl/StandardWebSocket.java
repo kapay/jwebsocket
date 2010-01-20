@@ -119,7 +119,6 @@ public final class StandardWebSocket implements WebSocket {
 					"WebSocket is already closed, cannot close closed socket");
 		} else {
 			readyState = CLOSED;
-			session.close();
 		}
 	}
 
@@ -160,6 +159,69 @@ public final class StandardWebSocket implements WebSocket {
 	@Override
 	public int getReadyState() {
 		return readyState;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean containsAttribute(Object key) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Object getAttribute(Object key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Object getAttributeValue(Object key, Object defaultValue) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Object removeAttribute(Object key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean removeAttribute(Object key, Object value) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Object setAttribute(Object key, Object value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Object setAttribute(Object key) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

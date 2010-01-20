@@ -21,22 +21,25 @@
  */
 package org.jwebsocket.example;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import org.jwebsocket.api.WebSocket;
+import org.jwebsocket.api.WebSocketException;
 import org.jwebsocket.api.WebSocketHandler;
 
-
 /**
- * @author <a href="http://blog.purans.net">
- *         Puran Singh</a>
- *         &lt;<a href="mailto:puran@programmer.net">
- *          puran@programmer.net
- *         </a>>
+ * @author <a href="http://blog.purans.net"> Puran Singh</a> &lt;<a
+ *         href="mailto:puran@programmer.net"> puran@programmer.net </a>>
  * @version $Id$
- *
+ * 
  */
 public class TestHandler implements WebSocketHandler {
+
+	private Map<String, WebSocket> chatMembers = new HashMap<String, WebSocket>();
 
 	@Override
 	public void init(Properties properties) {
@@ -44,18 +47,56 @@ public class TestHandler implements WebSocketHandler {
 	}
 
 	@Override
-	public void onClose() {
+	public void onClose(WebSocket socket) {
 		System.out.print("Handler Closed");
+		String user = socket.getAttribute("user").toString();
+		System.out.println(user+" left the chat room");
+		chatMembers.remove(user);
+		try {
+			broadcast(user+" left the chat room");
+			socket.close();
+		} catch (Exception e) {
+		}
 	}
 
 	@Override
 	public void onException(WebSocket socket, Throwable cause) {
 		System.out.print("Hanlder Exception");
 	}
+	
+	private  void broadcast(String message) throws WebSocketException {
+		Set<Entry<String, WebSocket>> sessions = chatMembers.entrySet();
+		
+		for (Entry<String, WebSocket> session : sessions) {
+			WebSocket webSocket = session.getValue();
+			webSocket.send(message);
+		}
+	}
 
 	@Override
 	public void onMessage(WebSocket socket, Object message) {
-		System.out.print("Handler Message:" + message.toString());
+		if (message == null || message.toString().length() == 0) {
+			// ignore blank message
+			return;
+		}
+		String messageStr = message.toString();
+		String[] messageArray = messageStr.split("[:]");
+
+		String user = messageArray[0].trim();
+		String msg = messageArray[1].trim();
+		try {
+			if (msg.equalsIgnoreCase("join")) {
+				socket.setAttribute("user", user);
+				System.out.println(user+" joined the chat room");
+				chatMembers.put(user, socket);
+				broadcast(user+ " joined the chat room");
+			} else {
+				socket.send(user + " says:" + msg);
+			}
+		} catch (WebSocketException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override

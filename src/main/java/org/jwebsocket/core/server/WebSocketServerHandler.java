@@ -242,7 +242,8 @@ public class WebSocketServerHandler extends IoHandlerAdapter {
 
 	@Override
 	public void sessionClosed(IoSession session) {
-		handler.onClose();
+		webSocket = StandardWebSocket.getClosedWebSocket();
+		handler.onClose(webSocket);
 		session.close();
 	}
 

@@ -68,7 +68,7 @@ public interface WebSocketHandler {
 	 * Handlers implementing this method should do all the clean up work in this method.
 	 * @param socket the web socket object which is closed
 	 */
-	void onClose();
+	void onClose(WebSocket socket);
 
 	/**
 	 * Notifies the handler when there's any exception.

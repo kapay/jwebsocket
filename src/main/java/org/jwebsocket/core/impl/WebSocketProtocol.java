@@ -114,6 +114,7 @@ public final class WebSocketProtocol {
 			char ch = (char) byteData[i];
 			buffer.append(ch);
 		}
-		return buffer.toString();
+		String data = String.valueOf(buffer.array());
+		return data;
 	}
 }

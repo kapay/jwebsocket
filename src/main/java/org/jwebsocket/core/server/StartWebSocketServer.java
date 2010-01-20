@@ -69,8 +69,10 @@ public final class StartWebSocketServer {
 	private static final String CONFIGURATIONS = "configurations";
 	private static final String HANDLERS = "handlers";
 
+	/** initialize the configuration */
 	private static Configuration configuration = new StartWebSocketServer.Configuration();
 
+	/** initialize the handlers */
 	private static Handlers handlers = new StartWebSocketServer.Handlers();
 	
 	private ConfigHandler configHandler = new ConfigHandler();
