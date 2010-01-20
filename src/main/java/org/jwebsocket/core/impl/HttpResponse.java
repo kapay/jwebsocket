@@ -23,6 +23,7 @@ package org.jwebsocket.core.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -177,6 +178,16 @@ public class HttpResponse implements Response {
 	@Override
 	public void setResponseCode(int responseCode) {
 		this.responseCode = responseCode;
+	}
+
+	@Override
+	public String getBody(String encoding) {
+		try {
+			return body.toString("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			//in case of exception return default
+			return body.toString();
+		}
 	}
 
 }

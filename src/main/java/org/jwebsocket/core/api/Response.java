@@ -85,4 +85,11 @@ public interface Response {
 	 * @return the body length
 	 */
 	int getBodyLength();
+	
+	/**
+	 * Returns the string value of the response body using specified encoding
+	 * @param encoding the encoding standard
+	 * @return string body 
+	 */
+	String getBody(String encoding);
 }

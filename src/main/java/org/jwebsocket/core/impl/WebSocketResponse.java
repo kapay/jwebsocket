@@ -23,6 +23,7 @@ package org.jwebsocket.core.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.jwebsocket.core.api.Headers;
 import org.jwebsocket.core.api.Response;
@@ -95,7 +96,7 @@ public class WebSocketResponse implements Response {
 	public byte[] getBody() {
 		return body.toByteArray();
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -127,5 +128,17 @@ public class WebSocketResponse implements Response {
 	public boolean isWebSocketHandShakeResponse() {
 		return false;
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getBody(String encoding) {
+		try {
+			return body.toString("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			//in case of exception return default
+			return body.toString();
+		}
+	}
 }

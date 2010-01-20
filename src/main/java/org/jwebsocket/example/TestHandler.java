@@ -91,7 +91,6 @@ public class TestHandler implements WebSocketHandler {
 		String serverMessage = "";
 		try {
 			if (msg.equalsIgnoreCase("join")) {
-				System.out.println("join:" + socket.getId());
 				socket.setAttribute("user", user);
 				System.out.println(user + " joined the chat room");
 				chatMembers.put(user, socket);
