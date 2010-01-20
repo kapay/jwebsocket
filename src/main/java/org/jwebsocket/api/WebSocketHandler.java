@@ -63,15 +63,19 @@ public interface WebSocketHandler {
 	void onMessage(WebSocket socket, Object message);
 
 	/**
-	 * Notifies the handler when the web socket is closed, either by the client
-	 * or due to some exception.
+	 * Notifies the handler when the web socket connection is closed, either by the User-Agent
+	 * or the client or because of some exception.
+	 * 
 	 * Handlers implementing this method should do all the clean up work in this method.
 	 * @param socket the web socket object which is closed
 	 */
 	void onClose(WebSocket socket);
 
 	/**
-	 * Notifies the handler when there's any exception.
+	 * Notifies the handler when there's any exception. It is recommended to close
+	 * the socket connection manually by calling {@code socket.close()} in case 
+	 * of exception
+	 * 
 	 * @param socket the closed web socket object
 	 * @param cause the cause of the exception
 	 */

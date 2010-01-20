@@ -27,9 +27,12 @@ import org.jwebsocket.api.WebSocketException;
 import org.jwebsocket.core.api.WebSocketCallback;
 import org.jwebsocket.core.server.StartWebSocketServer;
 
-
 /**
- * standard implementation of a {@code WebSocket} interface
+ * Standard implementation of a {@code WebSocket} interface to represent 
+ * the single socket connection it also maintains session specific attributes
+ * through MINA's {@code IoSession} object internally.
+ * 
+ * This class cannot be overridden
  * 
  * @author <a href="http://blog.purans.net"> Puran Singh</a> &lt;<a
  *         href="mailto:puran@programmer.net"> puran@programmer.net </a>>
@@ -42,22 +45,14 @@ public final class StandardWebSocket implements WebSocket {
 	public static final int OPEN = 1;
 	public static final int CLOSED = 2;
 
+	/** two more status for internal operation */
+	public static final int UNKNOWN = -1;
+	public static final int CLOSING = 3;
+
 	private final IoSession session;
 	private final WebSocketCallback callback;
 
-	private int readyState = CLOSED;
-
-	/**
-	 * private default constructor
-	 * @param session the session object
-	 * @param status
-	 *            the status of the web socket connection
-	 */
-	private StandardWebSocket(IoSession session, int readyState) {
-		this.readyState = readyState;
-		this.session = session;
-		this.callback = null;
-	}
+	private volatile int readyState;
 
 	/**
 	 * constructor to create web socket object based on session and web socket
@@ -76,23 +71,12 @@ public final class StandardWebSocket implements WebSocket {
 	}
 
 	/**
-	 * static factory method that returns the websocket which is closed or not
-	 * yet open;
+	 * Returns the new WebSocket connection with UNKNOWN status
 	 * 
-	 * @param session the closed session object
-	 * @return the closed status web socket object
+	 * @return the websocket connection
 	 */
-	public static WebSocket getClosedWebSocket(IoSession session) {
-		return new StandardWebSocket(session, CLOSED);
-	}
-	
-	/**
-	 * returns the closed web socket connection
-	 * @param closedState the CLOSED state value of 2
-	 * @return the closed web socket object
-	 */
-	public static WebSocket getClosedWebSocket(int closedState) {
-		return new StandardWebSocket(null, CLOSED);
+	public static StandardWebSocket getWebSocket() {
+		return new StandardWebSocket(null, null, UNKNOWN);
 	}
 
 	/**
@@ -100,8 +84,8 @@ public final class StandardWebSocket implements WebSocket {
 	 * 
 	 * @return the connecting web socket object
 	 */
-	public static WebSocket getConnectingWebSocket() {
-		return new StandardWebSocket(null, CONNECTING);
+	public static StandardWebSocket getConnectingWebSocket() {
+		return new StandardWebSocket(null, null, CONNECTING);
 	}
 
 	/**
@@ -114,9 +98,63 @@ public final class StandardWebSocket implements WebSocket {
 	 *            the callback for delegating calls to the server handler
 	 * @return the web socket object
 	 */
-	public static WebSocket getOpenedWebSocket(IoSession session,
+	public static StandardWebSocket getOpenedWebSocket(IoSession session,
 			WebSocketCallback callback) {
 		return new StandardWebSocket(session, callback, OPEN);
+	}
+
+	/**
+	 * static method that returns the closing websocket which is in a connecting
+	 * process
+	 * 
+	 * @param session
+	 *            the session object
+	 * @param callback
+	 *            the callback object for closing connection
+	 * @return the connecting web socket object
+	 */
+	public static StandardWebSocket getClosingWebSocket(IoSession session,
+			WebSocketCallback callback) {
+		return new StandardWebSocket(session, callback, CLOSING);
+	}
+
+	/**
+	 * static factory method that returns the websocket which is closed or not
+	 * yet open;
+	 * 
+	 * @param session
+	 *            the closed session object
+	 * @return the closed status web socket object
+	 */
+	public static StandardWebSocket getClosedWebSocket(IoSession session) {
+		return new StandardWebSocket(session, null, CLOSED);
+	}
+
+	/**
+	 * Returns {@code true} if the session is unknown to the 
+	 * {@code WebSocketHandler} implementations
+	 * 
+	 * @return true or false if it is known/unknown to the application handlers
+	 */
+	public boolean isUnknownToHandlers(IoSession session) {
+		if (this.session == null || session == null) {
+			return true;
+		}
+
+		if (this.session.getId() != session.getId()) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc} 
+	 * TODO: fix this to make id unique for each sockect
+	 * connection
+	 */
+	@Override
+	public long getId() {
+		return session.getId();
 	}
 
 	/**
@@ -129,6 +167,10 @@ public final class StandardWebSocket implements WebSocket {
 					"WebSocket is already closed, cannot close closed socket");
 		} else {
 			readyState = CLOSED;
+		}
+		//if socket is either closing or open then clean up
+		if (this.callback != null && this.session != null) {
+			this.callback.cleanupSession(this.session);
 		}
 	}
 
@@ -144,7 +186,8 @@ public final class StandardWebSocket implements WebSocket {
 
 	@Override
 	public boolean isOpen() {
-		if (readyState == CLOSED) {
+		if (readyState == CLOSED || readyState == UNKNOWN
+				|| readyState == CLOSING || readyState == CONNECTING) {
 			return false;
 		}
 		return (session.isConnected() && readyState == OPEN);

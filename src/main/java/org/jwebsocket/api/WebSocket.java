@@ -35,6 +35,13 @@ package org.jwebsocket.api;
  * 
  */
 public interface WebSocket {
+	
+	/**
+	 * returns the unique identifier of the session
+	 * @return the long id of the session
+	 */
+	long getId();
+	
 	/**
 	 * Send the message to the client
 	 * 

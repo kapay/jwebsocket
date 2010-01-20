@@ -48,25 +48,29 @@ public class TestHandler implements WebSocketHandler {
 
 	@Override
 	public void onClose(WebSocket socket) {
-		System.out.print("Handler Closed");
+		System.out.print(" Handler Closed:" + socket.getId());
 		String user = socket.getAttribute("user").toString();
-		System.out.println(user+" left the chat room");
+		System.out.println(user + " left the chat room");
 		chatMembers.remove(user);
 		try {
-			broadcast(user+" left the chat room");
-			socket.close();
+			broadcast(user + " left the chat room");
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void onException(WebSocket socket, Throwable cause) {
-		System.out.print("Hanlder Exception");
+		try {
+			socket.close();
+		} catch (WebSocketException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	private  void broadcast(String message) throws WebSocketException {
+
+	private void broadcast(String message) throws WebSocketException {
 		Set<Entry<String, WebSocket>> sessions = chatMembers.entrySet();
-		
+
 		for (Entry<String, WebSocket> session : sessions) {
 			WebSocket webSocket = session.getValue();
 			webSocket.send(message);
@@ -84,15 +88,18 @@ public class TestHandler implements WebSocketHandler {
 
 		String user = messageArray[0].trim();
 		String msg = messageArray[1].trim();
+		String serverMessage = "";
 		try {
 			if (msg.equalsIgnoreCase("join")) {
+				System.out.println("join:" + socket.getId());
 				socket.setAttribute("user", user);
-				System.out.println(user+" joined the chat room");
+				System.out.println(user + " joined the chat room");
 				chatMembers.put(user, socket);
-				broadcast(user+ " joined the chat room");
+				serverMessage = user + " joined the chat room";
 			} else {
-				socket.send(user + " says:" + msg);
+				serverMessage = user + " says:" + msg;
 			}
+			broadcast(serverMessage);
 		} catch (WebSocketException e) {
 			e.printStackTrace();
 		}

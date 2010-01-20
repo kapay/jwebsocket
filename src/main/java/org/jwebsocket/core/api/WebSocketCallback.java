@@ -21,6 +21,7 @@
  */
 package org.jwebsocket.core.api;
 
+import org.apache.mina.common.IoSession;
 import org.jwebsocket.api.WebSocketException;
 
 /**
@@ -40,4 +41,10 @@ public interface WebSocketCallback {
 	 * @param object the object to send to the client
 	 */
 	void send(Object object) throws WebSocketException;
+	
+	/**
+	 * close out the session completely and make sure that session is closed
+	 * @param session the session object to close.
+	 */
+	void cleanupSession(IoSession session);
 }
