@@ -82,7 +82,7 @@ public class WebSocketServerHandler extends IoHandlerAdapter {
 	/**
 	 * initialize the WebSocket with closed connection
 	 */
-	private static WebSocket webSocket = StandardWebSocket.getClosedWebSocket();
+	private static WebSocket webSocket = StandardWebSocket.getClosedWebSocket(StandardWebSocket.CLOSED);
 
 	@SuppressWarnings("unchecked")
 	/**
@@ -147,7 +147,7 @@ public class WebSocketServerHandler extends IoHandlerAdapter {
 				} catch (UnsupportedEncodingException e) {
 					LOGGER.error(
 							"IO Exception while writing handshake response", e);
-					webSocket = StandardWebSocket.getClosedWebSocket();
+					this.exceptionCaught(session, e);
 					handler.onException(webSocket, e);
 				}
 			} else if (!headers.getFirstHeaderValue(HttpRequest.CONTEXT)
@@ -242,9 +242,8 @@ public class WebSocketServerHandler extends IoHandlerAdapter {
 
 	@Override
 	public void sessionClosed(IoSession session) {
-		webSocket = StandardWebSocket.getClosedWebSocket();
+		webSocket = StandardWebSocket.getClosedWebSocket(session);
 		handler.onClose(webSocket);
-		session.close();
 	}
 
 	@Override
@@ -254,8 +253,7 @@ public class WebSocketServerHandler extends IoHandlerAdapter {
 
 	@Override
 	public void exceptionCaught(IoSession session, Throwable cause) {
-		session.close();
-		webSocket = StandardWebSocket.getClosedWebSocket();
+		webSocket = StandardWebSocket.getClosedWebSocket(session);
 		handler.onException(webSocket, cause);
 	}
 	
