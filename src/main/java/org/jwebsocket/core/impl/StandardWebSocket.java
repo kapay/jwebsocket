@@ -49,13 +49,13 @@ public final class StandardWebSocket implements WebSocket {
 
 	/**
 	 * private default constructor
-	 * 
+	 * @param session the session object
 	 * @param status
 	 *            the status of the web socket connection
 	 */
-	private StandardWebSocket(int readyState) {
+	private StandardWebSocket(IoSession session, int readyState) {
 		this.readyState = readyState;
-		this.session = null;
+		this.session = session;
 		this.callback = null;
 	}
 
@@ -79,10 +79,20 @@ public final class StandardWebSocket implements WebSocket {
 	 * static factory method that returns the websocket which is closed or not
 	 * yet open;
 	 * 
+	 * @param session the closed session object
 	 * @return the closed status web socket object
 	 */
-	public static WebSocket getClosedWebSocket() {
-		return new StandardWebSocket(CLOSED);
+	public static WebSocket getClosedWebSocket(IoSession session) {
+		return new StandardWebSocket(session, CLOSED);
+	}
+	
+	/**
+	 * returns the closed web socket connection
+	 * @param closedState the CLOSED state value of 2
+	 * @return the closed web socket object
+	 */
+	public static WebSocket getClosedWebSocket(int closedState) {
+		return new StandardWebSocket(null, CLOSED);
 	}
 
 	/**
@@ -91,7 +101,7 @@ public final class StandardWebSocket implements WebSocket {
 	 * @return the connecting web socket object
 	 */
 	public static WebSocket getConnectingWebSocket() {
-		return new StandardWebSocket(CONNECTING);
+		return new StandardWebSocket(null, CONNECTING);
 	}
 
 	/**
@@ -166,8 +176,7 @@ public final class StandardWebSocket implements WebSocket {
 	 */
 	@Override
 	public boolean containsAttribute(Object key) {
-		// TODO Auto-generated method stub
-		return false;
+		return session.containsAttribute(key);
 	}
 
 	/**
@@ -175,8 +184,7 @@ public final class StandardWebSocket implements WebSocket {
 	 */
 	@Override
 	public Object getAttribute(Object key) {
-		// TODO Auto-generated method stub
-		return null;
+		return session.getAttribute(key);
 	}
 
 	/**
@@ -184,8 +192,7 @@ public final class StandardWebSocket implements WebSocket {
 	 */
 	@Override
 	public Object getAttributeValue(Object key, Object defaultValue) {
-		// TODO Auto-generated method stub
-		return null;
+		return session.getAttribute(key, defaultValue);
 	}
 
 	/**
@@ -193,8 +200,7 @@ public final class StandardWebSocket implements WebSocket {
 	 */
 	@Override
 	public Object removeAttribute(Object key) {
-		// TODO Auto-generated method stub
-		return null;
+		return session.removeAttribute(key);
 	}
 
 	/**
@@ -202,8 +208,7 @@ public final class StandardWebSocket implements WebSocket {
 	 */
 	@Override
 	public boolean removeAttribute(Object key, Object value) {
-		// TODO Auto-generated method stub
-		return false;
+		return session.removeAttribute(key, value);
 	}
 
 	/**
@@ -211,8 +216,7 @@ public final class StandardWebSocket implements WebSocket {
 	 */
 	@Override
 	public Object setAttribute(Object key, Object value) {
-		// TODO Auto-generated method stub
-		return null;
+		return session.setAttribute(key, value);
 	}
 
 	/**
@@ -220,8 +224,7 @@ public final class StandardWebSocket implements WebSocket {
 	 */
 	@Override
 	public Object setAttribute(Object key) {
-		// TODO Auto-generated method stub
-		return null;
+		return session.setAttribute(key);
 	}
 
 }
