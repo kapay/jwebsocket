@@ -37,6 +37,8 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.jwebsocket.api.WebSocketException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.core.io.Resource;
 import org.xml.sax.SAXException;
@@ -68,6 +70,8 @@ public final class StartWebSocketServer {
 	
 	private static final String CONFIGURATIONS = "configurations";
 	private static final String HANDLERS = "handlers";
+	
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** initialize the configuration */
 	private static Configuration configuration = new StartWebSocketServer.Configuration();
@@ -170,8 +174,7 @@ public final class StartWebSocketServer {
 				port = Integer.parseInt(portValue);
 			}
 			acceptor.bind(new InetSocketAddress(port));
-
-			// System.out.println("Server now listening on port " + port);
+			LOGGER.info("Server started and listening on port " + port);
 		} catch (Exception ex) {
 			throw new WebServiceException(
 					"Exception occurred while starting up the WebSocket server",
