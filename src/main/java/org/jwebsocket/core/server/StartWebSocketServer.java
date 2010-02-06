@@ -137,10 +137,12 @@ public final class StartWebSocketServer {
 	 */
 	private void start(String filePath) {
 		try {
+			LOGGER.info("Loading Server Configuration...");
 			//load the configuration from the config file
 			loadConfiguration(filePath);
 			
 			//TODO: need to implement this
+			LOGGER.info("Initializing...");
 			initialize();
 			
 			// Create an acceptor
