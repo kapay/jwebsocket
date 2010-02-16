@@ -15,127 +15,136 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server.impl;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
 import org.jwebsocket.server.api.ConnectorContext;
+import org.jwebsocket.server.api.JWebSocketConnector;
 
 /**
+ * Abstract implementation of {@code JWebSocketConnector} interface
+ * 
  * @author Puran Singh
- * @version $Id$
+ * @version $Id: JWebSocketBaseConnector.java 58 2010-02-15 19:21:56Z
+ *          mailtopuran $
  * 
  */
-public class JWebSocketBaseConnector {
-	
+public abstract class JWebSocketBaseConnector implements JWebSocketConnector {
+
 	private ConnectorContext context;
+
+	private volatile boolean connectorStarted = false;
 
 	public JWebSocketBaseConnector() {
 	}
-	
-	public JWebSocketBaseConnector (ConnectorContext context) {
+
+	public JWebSocketBaseConnector(ConnectorContext context) {
 		this.context = context;
 	}
 
 	public void start() {
-		
+		connectorStarted = true;
 	}
-	
+
 	/**
-     * sends the handshake back to the browser client
-     * according to the WebSocket spec.
-     * @throws UnsupportedEncodingException
-     * @throws IOException
-     */
-    protected void sendHandshake() {
-    }
-    
-	/**
-	 * 
-	 * @param aData
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
+	 * {@inheritDoc}
 	 */
 	public void sendString(String aData) {
+		context.sendString(aData);
 	}
 
 	/**
-    *
-    */
+	 * {@inheritDoc}
+	 */
+	public void onHandShakeResponse() {
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void clientThreadStarted() {
-		// method may be overwriten on demand
 	}
 
 	/**
-	 * 
-	 * @param aHeader
+	 * {@inheritDoc}
 	 */
 	public void headerReceived(String aHeader) {
 		// method may be overwriten on demand
 	}
 
 	/**
-    *
-    */
+	 * {@inheritDoc}
+	 */
 	public void headerParsed() {
 		// method may be overwriten on demand
 	}
 
 	/**
-    *
-    */
+	 * {@inheritDoc}
+	 */
 	public void handshakeSent() {
 		// method may be overwriten on demand
 	}
 
 	/**
-    *
-    */
+	 * {@inheritDoc}
+	 */
 	public void timeoutExceeded() {
 		// method may be overwriten on demand
 	}
 
 	/**
-    *
-    */
+	 * {@inheritDoc}
+	 */
 	public void clientClosed() {
 		// method may be overwriten on demand
 	}
 
 	/**
-	 * 
-	 * @param line
+	 * {@inheritDoc}
 	 */
 	public void dataReceived(String line) {
 		// method may be overwriten on demand
 	}
 
 	/**
-    *
-    */
+	 * {@inheritDoc}
+	 */
 	public void clientThreadStopped() {
 		// method may be overwriten on demand
 	}
 
 	/**
-	 * 
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * {@inheritDoc}
 	 */
 	public void terminate() {
+		connectorStarted = false;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isAlive() {
+		return connectorStarted;
 	}
 
 	/**
-	 * @return the origin
+	 * {@inheritDoc}
 	 */
 	public String getOrigin() {
 		return null;
 	}
 
 	/**
-	 * @return the location
+	 * {@inheritDoc}
 	 */
 	public String getLocation() {
 		return null;
 	}
 
+	/**
+	 * Returns the context associated with the connector client
+	 * @return the context object
+	 */
+	protected ConnectorContext getContext() {
+		return context;
+	}
 }

@@ -1,6 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Main Class: Command line IF, Logger Init and Args-Parser
-//	Copyright (c) 2010 jwebsocket.org
+//	jWebSocket - Copyright (c) 2010 jwebsocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -21,4 +20,51 @@ package org.jwebsocket.server.api;
  *
  */
 public interface JWebSocketConnector {
+	
+	/**
+	 * method that sends the string data to the output 
+	 * @param aData the string data to send
+	 */
+	void sendString(String aData);
+	
+	/**
+	 * method that is invoked when the jWebSocket server sends the handshake 
+	 * response to the client. The connector clients that implement this method 
+	 * can perform any action before the WebSocket handshake response is sent.
+	 */
+	void onHandShakeResponse();
+	
+	void clientThreadStarted();
+	
+	void headerReceived(String aHeader);
+	
+	void headerParsed();
+	
+	void handshakeSent();
+	
+	void timeoutExceeded();
+	
+	void clientClosed();
+	
+	void dataReceived(String line);
+	
+	void clientThreadStopped();
+	
+	void start();
+	
+	/**
+	 * callback method which is invoked when the connector is terminated 
+	 * naturally or unnaturally. 
+	 */
+	void terminate();
+	/**
+	 * Returns {@code true} if the client connector is running, {@code false} 
+	 * otherwise.
+	 * @return true or false based on the status of the connector.
+	 */
+	boolean isAlive();
+	
+	String getOrigin();
+	
+	String getLocation();
 }

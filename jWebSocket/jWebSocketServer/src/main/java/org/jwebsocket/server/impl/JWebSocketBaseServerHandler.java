@@ -40,6 +40,7 @@ import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameEncoder;
 import org.jboss.netty.util.CharsetUtil;
 import org.jwebsocket.server.JWebSocketBaseServer;
 import org.jwebsocket.server.api.ConnectorContext;
+import org.jwebsocket.server.api.JWebSocketConnector;
 
 /**
  * Handler class for the jWebSocket base server that recieves the events based on 
@@ -62,7 +63,7 @@ public class JWebSocketBaseServerHandler extends SimpleChannelUpstreamHandler {
 	private JWebSocketBaseServer server;
 	
 	/**the client connector*/
-	private JWebSocketBaseConnector client;
+	private JWebSocketConnector client;
 
 	/**
 	 * default constructor
@@ -97,12 +98,11 @@ public class JWebSocketBaseServerHandler extends SimpleChannelUpstreamHandler {
 	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
 		super.channelConnected(ctx, e);
-		
 		//create context 
-		ConnectorContext context = new JWebSocketConnectorContext(ctx);
+		ConnectorContext context = new JWebSocketConnectorContext(ctx, server);
 		
 		// since the client is connected initialize the client connector
-		client = server.createJWebSocketClient(context);
+		client = server.createJWebSocketConnector(context);
 
 		// start the client
 		client.start();
@@ -271,7 +271,7 @@ public class JWebSocketBaseServerHandler extends SimpleChannelUpstreamHandler {
 						.getHeader(HttpHeaders.Names.UPGRADE))) {
 			
 			//fire event on connector client that handshake is about to be sent
-			client.sendHandshake();
+			client.onHandShakeResponse();
 			
 			// Create the WebSocket handshake response.
 			HttpResponse res = new DefaultHttpResponse(

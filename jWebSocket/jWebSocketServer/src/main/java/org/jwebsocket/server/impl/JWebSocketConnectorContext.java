@@ -14,9 +14,14 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server.impl;
 
+import java.net.InetSocketAddress;
+import java.security.MessageDigest;
+import java.util.Formatter;
+
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
 import org.jwebsocket.server.api.ConnectorContext;
+import org.jwebsocket.server.api.JWebSocketServer;
 
 /**
  * Standard Implementation of {@code ConnectorContext} which wraps the {@code
@@ -24,12 +29,14 @@ import org.jwebsocket.server.api.ConnectorContext;
  * access all the low level methods provided by Netty Framework.
  * 
  * @author Puran Singh
- * @version $Id$
+ * @version $Id: JWebSocketConnectorContext.java 58 2010-02-15 19:21:56Z
+ *          mailtopuran $
  * 
  */
 public class JWebSocketConnectorContext implements ConnectorContext {
 
 	private ChannelHandlerContext channelHandlerContext;
+	private JWebSocketServer server;
 
 	/**
 	 * default constructor
@@ -37,8 +44,9 @@ public class JWebSocketConnectorContext implements ConnectorContext {
 	 * @param context
 	 *            the channel handler context object
 	 */
-	public JWebSocketConnectorContext(ChannelHandlerContext context) {
+	public JWebSocketConnectorContext(ChannelHandlerContext context, JWebSocketServer server) {
 		this.channelHandlerContext = context;
+		this.server = server;
 	}
 
 	/**
@@ -48,4 +56,42 @@ public class JWebSocketConnectorContext implements ConnectorContext {
 		channelHandlerContext.getChannel().write(
 				new DefaultWebSocketFrame(stringData));
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getLocalPort() {
+		InetSocketAddress address = (InetSocketAddress) channelHandlerContext
+				.getChannel().getLocalAddress();
+		return address.getPort();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getSessionId() {
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("MD5");
+			byte[] lBufTarget = md.digest();
+			Formatter formatter = new Formatter();
+			for (byte b : lBufTarget) {
+				formatter.format("%02x", b);
+			}
+			return (formatter.toString());
+		} catch (Exception ex) {
+			// log.error("getMD5: " + ex.getMessage());
+			System.out.println("getMD5: " + ex.getMessage());
+		}
+		return null;
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public JWebSocketServer getJWebSocketServer() {
+		return server;
+	}
+
 }

@@ -18,6 +18,7 @@ package org.jwebsocket.server.impl;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.server.api.ConnectorContext;
+import org.jwebsocket.server.api.JWebSocketConnector;
 /**
  * 
  * @author alex
@@ -37,7 +38,7 @@ public class JWebSocketJSONServer extends JWebSocketTokenServer {
 	}
 
 	@Override
-	public JWebSocketBaseConnector createJWebSocketClient(ConnectorContext context) {
+	public JWebSocketBaseConnector createJWebSocketConnector(ConnectorContext context) {
 		return new JWebSocketJSONConnector(context);
 	}
 	
@@ -64,7 +65,7 @@ public class JWebSocketJSONServer extends JWebSocketTokenServer {
 	}
 
 	@Override
-	public void clientStarted(JWebSocketBaseConnector client) {
+	public void clientStarted(JWebSocketConnector client) {
 		log.info("Connected new client.");
 	}
 

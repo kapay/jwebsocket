@@ -14,35 +14,45 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server.api;
 
+import java.util.List;
+
 /**
- * Context interface for the connector clients
  * @author Puran Singh
- * @version $Id$
+ * @version $Id:$
  * 
- * TODO: add more methods to hide the core engine implementation specific details 
  */
-public interface ConnectorContext {
+public interface JWebSocketServer {
+	/**
+	 * Notifies that the server is started for the first time
+	 */
+	 void serverStarted();
+
+	/**
+	 * Notifies server is stopped
+	 */
+	public void serverStopped();
+
+	/**
+	 * Notifies when client connector is started
+	 * @param client the started client
+	 */
+	void clientStarted(JWebSocketConnector client);
 	
 	/**
-	 * sends the string data to the output of WebSocket 
-	 * @param stringData the string data 
+	 * Method that creates the connector client for the given context
+	 * @param context the connector context object
+	 * @return the connector client object
+	 * 
+	 * Here are the few implementation of this method that will return:
+	 * {@code JWebSocketJSONServer} will return {@code JWebSocketJSONConnector}
+	 * {@code JWebSocketXMLServer} will return {@code JWebSocketXMLConnector}
+	 * {@code JWebSocketCSVServer} will return {@code JWebSocketCSVConnector}
 	 */
-	void sendString(String stringData);
-	/**
-	 * Returns the session id 
-	 * @return the session id
-	 */
-	String getSessionId();
+	JWebSocketConnector createJWebSocketConnector(ConnectorContext context);
 	
 	/**
-	 * Returns the local port.
-	 * @return the port number
+	 * Returns the list of connector clients connected to this server 
+	 * @return the connector clients
 	 */
-	int getLocalPort();
-	
-	/**
-	 * Returns the server instance
-	 * @return the server 
-	 */
-	JWebSocketServer getJWebSocketServer();
+	List<JWebSocketConnector> getClients();
 }

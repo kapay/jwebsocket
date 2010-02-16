@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
@@ -29,10 +30,12 @@ import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jwebsocket.server.api.ConnectorContext;
+import org.jwebsocket.server.api.JWebSocketConnector;
+import org.jwebsocket.server.api.JWebSocketServer;
 import org.jwebsocket.server.api.JWebSocketServerException;
-import org.jwebsocket.server.impl.JWebSocketBaseConnector;
 import org.jwebsocket.server.impl.JWebSocketBaseServerHandler;
 import org.jwebsocket.server.impl.JWebSocketServerPipeLineFactory;
+import org.jwebsocket.server.impl.JWebSocketTokenConnector;
 
 /**
  * Base server class which handles the operation specific to JWebSocket 
@@ -44,7 +47,7 @@ import org.jwebsocket.server.impl.JWebSocketServerPipeLineFactory;
  * @version $Id$
  * 
  */
-public class JWebSocketBaseServer {
+public abstract class JWebSocketBaseServer implements JWebSocketServer {
 
 	/**
 	 * vendor string
@@ -72,7 +75,7 @@ public class JWebSocketBaseServer {
 	 */
 	public final static int DEFAULT_TIMEOUT = 120000;
 
-	private final List<JWebSocketBaseConnector> clients = new FastList<JWebSocketBaseConnector>();
+	private final List<JWebSocketConnector> clients = new FastList<JWebSocketConnector>();
 	
 	private static final ChannelGroup allChannels = new DefaultChannelGroup("time-server");
 	
@@ -112,18 +115,16 @@ public class JWebSocketBaseServer {
 	 * this event is fired when the client connector is started
 	 * @param client  the started client
 	 */
-	public void clientStarted(JWebSocketBaseConnector client) {
+	public void clientStarted(JWebSocketConnector client) {
 	}
 	
     ////////////EVENT HANDLER METHODS ////////////////////
 	
 	/**
-	 * This Method needs to be overwritten your descendant classes if you
-	 * want to maintain you own client objects.
-	 * @return the client connector object
+	 *{@inheritDoc}
 	 */
-	public JWebSocketBaseConnector createJWebSocketClient(ConnectorContext context) {
-		return new JWebSocketBaseConnector(context);
+	public JWebSocketConnector createJWebSocketConnector(ConnectorContext context) {
+		return new JWebSocketTokenConnector(context);
 	}
 	
 	/**
@@ -133,7 +134,7 @@ public class JWebSocketBaseServer {
 		isRunning = false;
 		try {
 			// terminate all client threads
-			for (JWebSocketBaseConnector client : getClients()) {
+			for (JWebSocketConnector client : getClients()) {
 				client.terminate();
 			}
 		} catch (Exception ex) {
@@ -199,7 +200,7 @@ public class JWebSocketBaseServer {
 	 * Returns the list of clients running against this server
 	 * @return the read only client list
 	 */
-	public List<JWebSocketBaseConnector> getClients() {
+	public List<JWebSocketConnector> getClients() {
 		return Collections.unmodifiableList(clients);
 	}
 	
@@ -208,7 +209,7 @@ public class JWebSocketBaseServer {
 	 * @param client the connector client object
 	 * @throws JWebSocketServerException 
 	 */
-	public void addClient(JWebSocketBaseConnector client) throws JWebSocketServerException {
+	public void addClient(JWebSocketConnector client) throws JWebSocketServerException {
 		if (client != null) {
 			clients.add(client);
 		} else {
@@ -221,7 +222,7 @@ public class JWebSocketBaseServer {
 	 * this server
 	 * @param connector the connector client to remove from server list.
 	 */
-	public void remove(JWebSocketBaseConnector connector) {
+	public void remove(JWebSocketConnector connector) {
 		getClients().remove(connector);
 	}
 }
