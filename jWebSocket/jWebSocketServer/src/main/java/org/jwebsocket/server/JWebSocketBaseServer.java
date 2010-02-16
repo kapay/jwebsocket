@@ -81,6 +81,7 @@ public abstract class JWebSocketBaseServer implements JWebSocketServer {
 	
 	private int port = DEFAULT_PORT;
 	
+	//TODO: i need to figure this out.. it's weird i haven't used this.
 	private int sessionTimeOut = DEFAULT_TIMEOUT;
 	
 	private volatile boolean isRunning = false;
@@ -142,7 +143,6 @@ public abstract class JWebSocketBaseServer implements JWebSocketServer {
 	}
 	
 	/**
-	 * 
 	 * @param aPort
 	 * @param aSessionTimeout
 	 * @throws IOException
