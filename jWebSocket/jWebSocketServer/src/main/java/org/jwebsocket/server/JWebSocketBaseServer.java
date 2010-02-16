@@ -130,7 +130,7 @@ public abstract class JWebSocketBaseServer implements JWebSocketServer {
 	/**
 	 * method that terminates the server on demand
 	 */
-	protected void terminate() {
+	public void terminate() {
 		isRunning = false;
 		try {
 			// terminate all client threads
@@ -192,7 +192,7 @@ public abstract class JWebSocketBaseServer implements JWebSocketServer {
 	 * @return true or false 
 	 */
 	public boolean isAlive() {
-		return true;
+		return isRunning;
 	}
 	
 	/**

@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * @author Puran Singh
- * @version $Id:$
+ * @version $Id$
  * 
  */
 public interface JWebSocketServer {
@@ -55,4 +55,14 @@ public interface JWebSocketServer {
 	 * @return the connector clients
 	 */
 	List<JWebSocketConnector> getClients();
+	/**
+	 * terminate the server on demand
+	 */
+	void terminate();
+	
+	/**
+	 * Returns {@ocde true} if the server is running {@code false} otherwise
+	 * @return true or false based on the server status
+	 */
+	boolean isAlive();
 }
