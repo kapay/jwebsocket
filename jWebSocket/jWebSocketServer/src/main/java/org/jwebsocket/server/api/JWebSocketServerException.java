@@ -1,6 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Main Class: Command line IF, Logger Init and Args-Parser
-//	Copyright (c) 2010 jwebsocket.org
+//	jWebSocket - Copyright (c) 2010 jwebsocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
