@@ -15,9 +15,9 @@
 package org.jwebsocket.server.impl;
 
 import org.apache.log4j.Logger;
-import org.jwebsocket.server.JWebSocketBaseServer;
 import org.jwebsocket.server.api.ConnectorContext;
 import org.jwebsocket.server.api.JWebSocketConnector;
+import org.jwebsocket.server.impl.netty.JWebSocketBaseServer;
 
 /**
  * @author Alexander Schulze

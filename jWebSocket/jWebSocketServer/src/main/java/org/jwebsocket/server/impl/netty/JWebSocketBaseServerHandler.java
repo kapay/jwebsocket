@@ -12,7 +12,7 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.server.impl;
+package org.jwebsocket.server.impl.netty;
 
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelEvent;
@@ -37,7 +37,6 @@ import org.jboss.netty.handler.codec.http.websocket.WebSocketFrame;
 import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameDecoder;
 import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameEncoder;
 import org.jboss.netty.util.CharsetUtil;
-import org.jwebsocket.server.JWebSocketBaseServer;
 import org.jwebsocket.server.api.ConnectorContext;
 import org.jwebsocket.server.api.JWebSocketConnector;
 

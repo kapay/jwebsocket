@@ -55,6 +55,12 @@ public interface JWebSocketServer {
 	 * @return the connector clients
 	 */
 	List<JWebSocketConnector> getClients();
+	
+	/**
+	 * start the jWebSocket Server Engine
+	 */
+	void start();
+	
 	/**
 	 * terminate the server on demand
 	 */

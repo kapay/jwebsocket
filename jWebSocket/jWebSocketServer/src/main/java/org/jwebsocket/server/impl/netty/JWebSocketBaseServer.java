@@ -12,7 +12,7 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.server;
+package org.jwebsocket.server.impl.netty;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -32,8 +32,6 @@ import org.jwebsocket.server.api.ConnectorContext;
 import org.jwebsocket.server.api.JWebSocketConnector;
 import org.jwebsocket.server.api.JWebSocketServer;
 import org.jwebsocket.server.api.JWebSocketServerException;
-import org.jwebsocket.server.impl.JWebSocketBaseServerHandler;
-import org.jwebsocket.server.impl.JWebSocketServerPipeLineFactory;
 import org.jwebsocket.server.impl.JWebSocketTokenConnector;
 
 /**
@@ -155,7 +153,7 @@ public abstract class JWebSocketBaseServer implements JWebSocketServer {
 	 * Starts the server on demand, initializes the server handler and use 
 	 * Netty framework for actual start process.
 	 */
-	protected void start() {
+	public void start() {
 		// Configure the server.
 		//TODO: figure out more on how advanced we can configure
 		ServerBootstrap bootstrap = new ServerBootstrap(

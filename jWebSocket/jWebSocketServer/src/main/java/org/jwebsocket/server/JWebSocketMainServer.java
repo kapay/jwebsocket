@@ -20,6 +20,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.jwebsocket.server.impl.JWebSocketJSONServer;
+import org.jwebsocket.server.impl.netty.JWebSocketBaseServer;
 
 /**
  * This is the main entry point of the jWebSocketServer that initializes all the
