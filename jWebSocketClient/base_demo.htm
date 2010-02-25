@@ -1,0 +1,155 @@
+<!--
+//	****************************************************************************
+//	jWebSocket Base Demo (uses jWebSocket Client and Server)
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
+//	****************************************************************************
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//	more details.
+//	You should have received a copy of the GNU General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/>.
+//	****************************************************************************
+-->
+
+<html>
+	<head>
+		<meta http-equiv="Content-Language" content="de">
+		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+		<title>jWebSocket Base Demo</title>
+		<link rel="stylesheet" type="text/css" href="res/css/jwebsocket.css">
+		<script src="res/js/jwebsocket.js" type="text/javascript"></script>
+		<script type="text/javascript" language="JavaScript">
+
+			var eLog = null;
+
+			function log( aString ) {
+				eLog.innerHTML +=
+					aString + "<br>";
+				if( eLog.scrollHeight > eLog.clientHeight ) {
+					eLog.scrollTop = eLog.scrollHeight - eLog.clientHeight;
+				}
+			}
+
+			function clearLog() {
+				eLog.innerHTML = "";
+				eLog.scrollTop = 0;
+			}
+
+
+			var lWSC = null;
+
+			function connect() {
+				var lURL = jws.DEFAULT_URL_BASE;
+
+				log( "Connecting to " + lURL + " ..." );
+				try {
+					lWSC.connect( lURL, {
+
+						// OnOpen callback
+						OnOpen: function( aEvent ) {
+							log( "jWebSocket connection established." );
+						},
+
+						// OnMessage callback
+						OnMessage: function( aEvent ) {
+							log( "jWebSocket message received: '" + aEvent.data + "'" );
+						},
+
+						// OnClose callback
+						OnClose: function( aEvent ) {
+							log( "jWebSocket connection closed." );
+						}
+
+					});
+				} catch( ex ) {
+					log( "Exception: " + ex.message );
+				}
+			}
+
+			function disconnect() {
+				if( lWSC ) {
+					log( "Disconnecting..." );
+					try {
+						lWSC.disconnect();
+						log( "Disconnected." );
+					} catch( ex ) {
+						log( "Exception: " + ex.message );
+					}
+				}
+			}
+
+			function send() {
+				var lMsg = eMessage.value;
+				log( "Sending '" + lMsg + "'..." );
+				try {
+					lWSC.sendStream( lMsg + "\n" );
+					log( "Message sent." );
+				} catch( ex ) {
+					log( "Exception: " + ex.message );
+				}
+			}
+
+			function initPage() {
+				eLog = jws.$( "sdivChat" );
+				eMessage = jws.$( "stxfMsg" );
+
+				if( window.WebSocket ) {
+					lWSC = new jws.jWebSocketBaseClient();
+				} else {
+					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
+					jws.$( "sbtnDisconnect" ).setAttribute( "disabled", "disabled" );
+					jws.$( "sbtnClear" ).setAttribute( "disabled", "disabled" );
+					jws.$( "stxfMsg" ).setAttribute( "disabled", "disabled" );
+					jws.$( "sbtnSend" ).setAttribute( "disabled", "disabled" );
+					var lMsg = "Unfortunately your browser does not (yet) support WebSockets!\nPlease use a HTML 5 compliant browser!";
+					alert( lMsg );
+					log( lMsg );
+				}
+			}
+
+			function exitPage() {
+				disconnect();
+			}
+
+		</script>
+	</head>
+
+	<body
+		onload="initPage();"
+		onunload="exitPage();"
+		>
+		<script type="text/javascript">
+			var lFrameElem = this.frameElement;
+			if( !lFrameElem ) {
+				location.replace( "index.htm?page=base_demo.htm" );
+			}
+		</script>
+		<h1>jWebSocket Base Demo</h1>
+		<p>This demo shows how to easily set up a minimum communication w/o any protocol between a jWebSocket client and a jWebSocket server.
+		This example is based on the class <code>org.jWebSocket.connectors.UserConnector</code> which simply echos the text/plain request back to the client.
+		Currently only Google's Chrome Browser from Version 4.0.249 support HTML 5 WebSockets, you can download it
+			<a target="_blank" href="http://www.google.com/chrome/eula.html?extra=betachannel">
+		here</a>  <img border="0" src="images/new_win.png">.</p>
+		<div id="sdivChat" class="sdivContainer"
+			 style="position:relative; height:300px; overflow:auto;">
+		</div>
+		<div class="sdivContainer">
+			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
+				<tr class="strDlg">
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnect" type="button" value="Connect" onclick="connect();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Disconnect" onclick="disconnect();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+					<td class="stdDlg" width="5">Message</td>
+					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSend" type="button" value="Echo" onclick="send();"></td>
+				</tr>
+			</table>
+		</div>
+
+	</body>
+</html>
