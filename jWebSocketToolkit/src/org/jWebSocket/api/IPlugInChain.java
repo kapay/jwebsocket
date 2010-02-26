@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Wrapper for Token based PlugIns (Convenience Class)
+//	jWebSocket - PlugInChain Interface
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,59 +13,49 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.plugins;
+package org.jWebSocket.api;
 
-import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.processors.TokenConnector;
-import org.jWebSocket.kit.Token;
+import org.jWebSocket.plugins.PlugInResponse;
 
 /**
  *
  * @author aschulze
  */
-public class TokenPlugIn extends BasePlugIn {
-
-	private String namespace = null;
+public interface IPlugInChain {
 
 	/**
-	 *
+	 * is called by the server when the engine has been started.
+	 * @param aEngine
+	 */
+	void engineStarted(IWebSocketEngine aEngine);
+
+	/**
+	 * is called by the server when the engine has been stopped.
+	 * @param aEngine
+	 */
+	void engineStopped(IWebSocketEngine aEngine);
+
+	/**
+	 * is called by the server when a new connector has been started,
+	 * i.e. a new client has connected.
 	 * @param aConnector
 	 */
-	public void connectorStarted(BaseConnector aConnector) {
-	}
+	void connectorStarted(IWebSocketConnector aConnector);
 
 	/**
-	 *
+	 * is called when a data packet from a client was received
+	 * and has to be processed.
+	 * @param aResponse
 	 * @param aConnector
-	 * @param aToken
+	 * @param aDataPacket
 	 * @return
 	 */
-	public void processToken(PlugInResponse aAction, TokenConnector aConnector, Token aToken) {
-	}
-
-	@Override
-	public void processData(PlugInResponse aAction, BaseConnector aConnector, Object aObject) {
-		processToken(aAction, (TokenConnector) aConnector, (Token) aObject);
-	}
+	PlugInResponse processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
-	 *
+	 * is called by the server when a connector has been stopped,
+	 * i.e. a client has disconnected.
 	 * @param aConnector
 	 */
-	public void connectorTerminated(BaseConnector aConnector) {
-	}
-
-	/**
-	 * @return the namespace
-	 */
-	public String getNamespace() {
-		return namespace;
-	}
-
-	/**
-	 * @param namespace the namespace to set
-	 */
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
-	}
+	void connectorStopped(IWebSocketConnector aConnector);
 }

@@ -25,9 +25,9 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.connectors.TokenConnector;
+import org.jWebSocket.processors.TokenConnector;
 import org.jWebSocket.demo.DemoRPCServer;
-import org.jWebSocket.server.Token;
+import org.jWebSocket.kit.Token;
 import org.jWebSocket.server.TokenServer;
 
 /**
@@ -139,7 +139,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		lRRPCToken.put("rmethod", lMethod);
 		lRRPCToken.put("rargs", lArgs);
 
-		TokenServer lServer = (TokenServer) aConnector.getWebSocketServer();
+		// TokenServer lServer = (TokenServer) aConnector.getWebSocketServer();
 
 		aConnector.sendToken(lRRPCToken);
 	}

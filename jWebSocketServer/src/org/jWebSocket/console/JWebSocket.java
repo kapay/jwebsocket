@@ -15,17 +15,19 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.console;
 
+import org.apache.log4j.Logger;
+import org.jWebSocket.api.IWebSocketEngine;
 import org.jWebSocket.config.Config;
+import org.jWebSocket.demo.DemoPlugIn;
+import org.jWebSocket.engines.TCPEngine;
+import org.jWebSocket.kit.WebSocketException;
+import org.jWebSocket.logging.Logging;
 import org.jWebSocket.plugins.KeepAlivePlugIn;
+import org.jWebSocket.plugins.PlugInChain;
 import org.jWebSocket.plugins.RPCPlugIn;
 import org.jWebSocket.plugins.SystemPlugIn;
-import org.jWebSocket.logging.Logging;
-import org.jWebSocket.plugins.PlugInChain;
-import org.apache.log4j.Logger;
-import org.jWebSocket.demo.DemoPlugIn;
 import org.jWebSocket.server.BaseServer;
 import org.jWebSocket.server.TokenServer;
-import org.jWebSocket.server.UserServer;
 
 /**
  * This class is the main class for the jWebSocket server
@@ -77,8 +79,7 @@ public class JWebSocket {
 		// BEFORE instantiating any jWebSocket classes
 		Logging.initLogs(loglevel);
 
-		BaseServer jwss = null;
-		PlugInChain plugIns = new PlugInChain();
+		BaseServer server = null;
 
 		// the following lines may not be removed due to GNU GPL 3.0 license!
 		System.out.println("jWebSocket Ver. " + Config.VERSION_STR);
@@ -86,32 +87,40 @@ public class JWebSocket {
 		System.out.println(Config.LICENSE);
 
 		System.out.println(
-				"Listening on port " + port + ", default (sub)prot " + prot + ", "
-				+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
+			"Listening on port " + port + ", default (sub)prot " + prot + ", "
+			+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
 		if (prot.equalsIgnoreCase("token")) {
-			// add the SystemPlugIn listener (for the jWebSocket default functionality)
-			plugIns.add(new SystemPlugIn());
-			// add the keep alive plug-in
-			plugIns.add(new KeepAlivePlugIn());
-			// add the RPCPlugIn plug-in
-			plugIns.add(new RPCPlugIn());
-			// add the demo listener (for the time stream demo)
-			plugIns.add(new DemoPlugIn());
-			// instantiate the Token server and bind listeners to it
-			jwss = new TokenServer(port, sessionTimeout, plugIns);
+
+			// first of all create the low-level engine
+			try {
+				IWebSocketEngine engine = new TCPEngine(port, sessionTimeout);
+				// instantiate the Token server and bind engine to it
+				server = new TokenServer(engine);
+				// add the SystemPlugIn listener (for the jWebSocket default functionality)
+				server.addPlugIn(new SystemPlugIn());
+				// add the keep alive plug-in
+				server.addPlugIn(new KeepAlivePlugIn());
+				// add the RPCPlugIn plug-in
+				server.addPlugIn(new RPCPlugIn());
+				// add the demo listener (for the time stream demo)
+				server.addPlugIn(new DemoPlugIn());
+			} catch (WebSocketException ex) {
+				System.out.println("Error: " + ex.getMessage());
+			}
+
 		} else if (prot.equalsIgnoreCase("plain")) {
-			jwss = new UserServer(port, sessionTimeout, null);
+			server = new UserServer(port, sessionTimeout, null);
 		} else {
 			System.out.println("Invalid argument.");
 			System.out.println("java -jar jWebSocket.jar prot=[plain|token] port=["
-					+ Config.MIN_IN_PORT + "-" + Config.MAX_IN_PORT + "]");
+				+ Config.MIN_IN_PORT + "-" + Config.MAX_IN_PORT + "]");
 		}
 
-		if (jwss != null) {
+		if (server != null) {
 			log.debug("jWebSocket server starting...");
-			jwss.start();
+			server.start();
 			log.debug("jWebSocket server running...");
-			while (jwss.isAlive()) {
+			while (server.isAlive()) {
 				try {
 					Thread.sleep(200);
 				} catch (InterruptedException ex) {

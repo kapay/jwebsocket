@@ -1,6 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Template for User Specific WebSocket Server
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	jWebSocket - Copyright (c) 2010 jwebsocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -13,30 +12,33 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.server;
-
-import org.jWebSocket.kit.Header;
-import org.jWebSocket.plugins.PlugInChain;
-import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.processors.UserConnector;
-import java.net.Socket;
+package org.jWebSocket.kit;
 
 /**
+ * Exception class to represent JWebSocketServer related exception
+ * @author Puran Singh
+ * @version $Id: JWebSocketServerException.java 61 2010-02-16 07:20:51Z mailtopuran $
  *
- * @author aschulze
  */
-public class UserServer extends BaseServer {
+public class WebSocketException extends Exception {
 
 	/**
-	 *
-	 * @param aPort
+	 * creates the exception with given message
+	 * @param error the error messae
 	 */
-	public UserServer(int aPort, int aSessionTimeout, PlugInChain aListeners) {
-		super(aPort, aSessionTimeout, aListeners);
+	public WebSocketException(String error) {
+		super(error);
+	}
+	
+	/**
+	 * creates the exception with given message
+	 * @param error the error messae
+	 * @param throwable the cause 
+	 */
+	public WebSocketException(String error, Throwable throwable) {
+		super(error, throwable);
 	}
 
-	@Override
-	public BaseConnector createConnector(Socket aClientSocket, Header aHeader) {
-		return new UserConnector(this, aClientSocket, aHeader);
-	}
+	private static final long serialVersionUID = 1L;
+	
 }

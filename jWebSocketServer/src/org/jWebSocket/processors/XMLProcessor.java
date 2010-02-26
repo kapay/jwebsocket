@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Template for User Specific WebSocket Server
+//	jWebSocket - XML Connector
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,30 +13,45 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.server;
+package org.jWebSocket.processors;
 
-import org.jWebSocket.kit.Header;
-import org.jWebSocket.plugins.PlugInChain;
-import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.processors.UserConnector;
-import java.net.Socket;
+import java.util.List;
+import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.kit.Token;
 
 /**
  *
  * @author aschulze
  */
-public class UserServer extends BaseServer {
+public class XMLProcessor extends BasePacketProcessor {
 
-	/**
-	 *
-	 * @param aPort
-	 */
-	public UserServer(int aPort, int aSessionTimeout, PlugInChain aListeners) {
-		super(aPort, aSessionTimeout, aListeners);
+	public Token packetToToken(IDataPacket aDataPacket) {
+		// todo: implement!
+		Token lArgs = new Token();
+		return lArgs;
 	}
 
-	@Override
-	public BaseConnector createConnector(Socket aClientSocket, Header aHeader) {
-		return new UserConnector(this, aClientSocket, aHeader);
+	private String stringToXML(String aString) {
+		// todo: implement!
+		String lRes = null;
+		return lRes;
 	}
+
+	private String listToXML(List aList) {
+		// todo: implement!
+		String lRes = null;
+		return lRes;
+	}
+
+	private String objectToXML(Object aObj) {
+		// todo: implement!
+		String lRes = null;
+		return lRes;
+	}
+
+	public IDataPacket tokenToPacket(Token aToken) {
+		// todo: implement!
+		return null;
+	}
+
 }

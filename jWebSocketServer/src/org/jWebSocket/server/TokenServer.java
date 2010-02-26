@@ -15,15 +15,17 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.server;
 
+import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.kit.Header;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.jWebSocket.config.Config;
-import org.jWebSocket.connectors.CSVConnector;
-import org.jWebSocket.connectors.JSONConnector;
-import org.jWebSocket.connectors.TokenConnector;
-import org.jWebSocket.connectors.XMLConnector;
+import org.jWebSocket.processors.CSVProcessor;
+import org.jWebSocket.processors.JSONProcessor;
+import org.jWebSocket.processors.TokenConnector;
+import org.jWebSocket.processors.XMLProcessor;
 import org.jWebSocket.plugins.PlugInChain;
 import org.jWebSocket.connectors.BaseConnector;
 import org.apache.log4j.Logger;
@@ -42,8 +44,8 @@ public class TokenServer extends BaseServer {
 	 * @param aSessionTimeout
 	 * @param aListeners
 	 */
-	public TokenServer(int aPort, int aSessionTimeout, PlugInChain aListeners) {
-		super(aPort, aSessionTimeout, aListeners);
+	public TokenServer(IWebSocketEngine aEngine) {
+		super(aEngine);
 	}
 
 	@Override
@@ -61,11 +63,11 @@ public class TokenServer extends BaseServer {
 		String lSubProt = aHeader.getSubProtocol(Config.SUB_PROT_JSON);
 		log.info("Instantiating " + lSubProt + " connector...");
 		if (lSubProt.equalsIgnoreCase(Config.SUB_PROT_XML)) {
-			return new XMLConnector(this, aClientSocket, aHeader);
+			return new XMLProcessor(this, aClientSocket, aHeader);
 		} else if (lSubProt.equalsIgnoreCase(Config.SUB_PROT_CSV)) {
-			return new CSVConnector(this, aClientSocket, aHeader);
+			return new CSVProcessor(this, aClientSocket, aHeader);
 		} else {
-			return new JSONConnector(this, aClientSocket, aHeader);
+			return new JSONProcessor(this, aClientSocket, aHeader);
 		}
 	}
 

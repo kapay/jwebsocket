@@ -17,11 +17,11 @@ package org.jWebSocket.demo;
 
 import org.apache.log4j.Logger;
 import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.connectors.TokenConnector;
+import org.jWebSocket.processors.TokenConnector;
 import org.jWebSocket.plugins.BasePlugIn;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
-import org.jWebSocket.server.Token;
+import org.jWebSocket.kit.Token;
 import org.jWebSocket.streaming.TimeStream;
 
 /**

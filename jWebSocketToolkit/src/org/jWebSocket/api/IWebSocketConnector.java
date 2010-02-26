@@ -1,6 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Template for User Specific WebSocket Server
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	jWebSocket - Copyright (c) 2010 jwebsocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -13,30 +12,33 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.server;
-
-import org.jWebSocket.kit.Header;
-import org.jWebSocket.plugins.PlugInChain;
-import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.processors.UserConnector;
-import java.net.Socket;
+package org.jWebSocket.api;
 
 /**
  *
  * @author aschulze
  */
-public class UserServer extends BaseServer {
+public interface IWebSocketConnector {
 
 	/**
-	 *
-	 * @param aPort
+	 * starts and initializes the connector.
 	 */
-	public UserServer(int aPort, int aSessionTimeout, PlugInChain aListeners) {
-		super(aPort, aSessionTimeout, aListeners);
-	}
+	void startConnector();
 
-	@Override
-	public BaseConnector createConnector(Socket aClientSocket, Header aHeader) {
-		return new UserConnector(this, aClientSocket, aHeader);
-	}
+	/**
+	 * stops and cleans up the connector.
+	 */
+	void stopConnector();
+
+	/**
+	 * processes an incoming datapacket from a WebSocket client.
+	 * @param aDataPacket
+	 */
+	void processPacket(IDataPacket aDataPacket);
+
+	/**
+	 * sends a datapacket to a WebSocket client.
+	 * @param aDataPacket
+	 */
+	void sendPacket(IDataPacket aDataPacket);
 }

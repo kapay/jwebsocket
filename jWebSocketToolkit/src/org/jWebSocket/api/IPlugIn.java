@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Wrapper for Token based PlugIns (Convenience Class)
+//	jWebSocket - Basic PlugIn Class
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,59 +13,45 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.plugins;
+package org.jWebSocket.api;
 
-import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.processors.TokenConnector;
-import org.jWebSocket.kit.Token;
+import org.jWebSocket.plugins.PlugInResponse;
 
 /**
  *
  * @author aschulze
  */
-public class TokenPlugIn extends BasePlugIn {
+public interface IPlugIn {
 
-	private String namespace = null;
+	/**
+	 * is called by the server when the engine has been started.
+	 * @param aEngine
+	 */
+	void engineStarted(IWebSocketEngine aEngine);
+
+	/**
+	 * is called by the server when the engine has been stopped.
+	 * @param aEngine
+	 */
+	void engineStopped(IWebSocketEngine aEngine);
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStarted(BaseConnector aConnector) {
-	}
+	public void connectorStarted(IWebSocketConnector aConnector);
 
 	/**
 	 *
+	 * @param aResponse
 	 * @param aConnector
-	 * @param aToken
-	 * @return
+	 * @param aDataPacket
 	 */
-	public void processToken(PlugInResponse aAction, TokenConnector aConnector, Token aToken) {
-	}
-
-	@Override
-	public void processData(PlugInResponse aAction, BaseConnector aConnector, Object aObject) {
-		processToken(aAction, (TokenConnector) aConnector, (Token) aObject);
-	}
+	public void processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public void connectorTerminated(BaseConnector aConnector) {
-	}
-
-	/**
-	 * @return the namespace
-	 */
-	public String getNamespace() {
-		return namespace;
-	}
-
-	/**
-	 * @param namespace the namespace to set
-	 */
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
-	}
+	public void connectorStopped(IWebSocketConnector aConnector);
 }

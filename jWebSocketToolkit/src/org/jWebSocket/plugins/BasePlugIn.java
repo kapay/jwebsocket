@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Wrapper for Token based PlugIns (Convenience Class)
+//	jWebSocket - Basic PlugIn Class
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -15,57 +15,38 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.plugins;
 
-import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.processors.TokenConnector;
-import org.jWebSocket.kit.Token;
+import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.IPlugIn;
+import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.api.IWebSocketEngine;
 
 /**
  *
  * @author aschulze
  */
-public class TokenPlugIn extends BasePlugIn {
+public abstract class BasePlugIn implements IPlugIn {
 
-	private String namespace = null;
+	public abstract void engineStarted(IWebSocketEngine aEngine);
 
-	/**
-	 *
-	 * @param aConnector
-	 */
-	public void connectorStarted(BaseConnector aConnector) {
-	}
-
-	/**
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 * @return
-	 */
-	public void processToken(PlugInResponse aAction, TokenConnector aConnector, Token aToken) {
-	}
-
-	@Override
-	public void processData(PlugInResponse aAction, BaseConnector aConnector, Object aObject) {
-		processToken(aAction, (TokenConnector) aConnector, (Token) aObject);
-	}
+	public abstract void engineStopped(IWebSocketEngine aEngine);
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public void connectorTerminated(BaseConnector aConnector) {
-	}
+	public abstract void connectorStarted(IWebSocketConnector aConnector);
 
 	/**
-	 * @return the namespace
+	 *
+	 * @param aResponse 
+	 * @param aConnector
+	 * @param aDataPacket
 	 */
-	public String getNamespace() {
-		return namespace;
-	}
+	public abstract void processData(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
-	 * @param namespace the namespace to set
+	 *
+	 * @param aConnector
 	 */
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
-	}
+	public abstract void connectorStopped(IWebSocketConnector aConnector);
 }
