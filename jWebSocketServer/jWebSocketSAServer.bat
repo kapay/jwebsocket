@@ -1,3 +1,0 @@
-@echo off
-rem Start the jWebSocket stand-alone server...
-java -jar jWebSocketSAServer.jar %1 %2 %3 %4 %5 %6 
