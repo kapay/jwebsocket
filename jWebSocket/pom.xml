@@ -10,7 +10,6 @@
 	<modules>
 		<module>jWebSocketServer</module>
 	</modules>
-
 	<build>
 		<plugins>
 			<plugin>
