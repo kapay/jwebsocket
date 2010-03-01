@@ -17,18 +17,16 @@ package org.jWebSocket.console;
 
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.api.IWebSocketServer;
 import org.jWebSocket.config.Config;
-import org.jWebSocket.demo.DemoPlugIn;
 import org.jWebSocket.engines.TCPEngine;
 import org.jWebSocket.kit.WebSocketException;
 import org.jWebSocket.logging.Logging;
 import org.jWebSocket.plugins.TokenPlugInChain;
+import org.jWebSocket.plugins.streaming.DemoPlugIn;
 import org.jWebSocket.plugins.system.KeepAlivePlugIn;
-import org.jWebSocket.plugins.PlugInChain;
 import org.jWebSocket.plugins.rpc.RPCPlugIn;
 import org.jWebSocket.plugins.system.SystemPlugIn;
-import org.jWebSocket.server.BaseServer;
-import org.jWebSocket.server.CustomServer;
 import org.jWebSocket.server.TokenServer;
 
 /**
@@ -47,7 +45,7 @@ public class JWebSocket {
 	 */
 	public static void main(String[] args) {
 
-		String prot = "token"; // [plain|token]
+		String prot = "json"; // [plain|json|csv|xml]
 		String loglevel = "debug";
 		int port = Config.DEFAULT_PORT_TOKEN;
 		int sessionTimeout = Config.DEFAULT_TIMEOUT;
@@ -81,7 +79,7 @@ public class JWebSocket {
 		// BEFORE instantiating any jWebSocket classes
 		Logging.initLogs(loglevel);
 
-		BaseServer server = null;
+		IWebSocketServer server = null;
 
 		// the following lines may not be removed due to GNU GPL 3.0 license!
 		System.out.println("jWebSocket Ver. " + Config.VERSION_STR);
@@ -89,17 +87,18 @@ public class JWebSocket {
 		System.out.println(Config.LICENSE);
 
 		System.out.println(
-				"Listening on port " + port + ", default (sub)prot " + prot + ", "
-				+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
-		if (prot.equalsIgnoreCase("token")) {
-
+			"Listening on port " + port + ", default (sub)prot " + prot + ", "
+			+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
+		if (prot.equalsIgnoreCase(Config.SUB_PROT_JSON)
+			|| prot.equalsIgnoreCase(Config.SUB_PROT_CSV)
+			|| prot.equalsIgnoreCase(Config.SUB_PROT_XML)) {
 			try {
 				// create the low-level engine
 				IWebSocketEngine engine = new TCPEngine(port, sessionTimeout);
 				// instantiate the Token server and bind engine to it
 				server = new TokenServer();
 				// the token server already instantiates a plug-in chain
-				TokenPlugInChain plugInChain = server.getPlugInChain();
+				TokenPlugInChain plugInChain = ((TokenServer) server).getPlugInChain();
 				// let the server support the engine
 				server.addEngine(engine);
 				// add the SystemPlugIn listener (for the jWebSocket default functionality)
@@ -115,16 +114,16 @@ public class JWebSocket {
 			}
 
 		} else if (prot.equalsIgnoreCase("plain")) {
-			server = new CustomServer();
+			// server = new CustomServer();
 		} else {
 			System.out.println("Invalid argument.");
-			System.out.println("java -jar jWebSocket.jar prot=[plain|token] port=["
-					+ Config.MIN_IN_PORT + "-" + Config.MAX_IN_PORT + "]");
+			System.out.println("java -jar jWebSocket.jar prot=[plain|json|csv|xml] port=["
+				+ Config.MIN_IN_PORT + "-" + Config.MAX_IN_PORT + "]");
 		}
 
 		if (server != null) {
 			log.debug("jWebSocket server starting...");
-			try{
+			try {
 				server.startServer();
 				log.debug("jWebSocket server running...");
 				while (server.isAlive()) {
@@ -135,7 +134,7 @@ public class JWebSocket {
 					}
 				}
 				log.info("jWebSocket server successfully terminated.");
-			} catch(WebSocketException ex)	 {
+			} catch (WebSocketException ex) {
 				log.error("jWebSocket server could not be started: " + ex.getMessage());
 			}
 		}
