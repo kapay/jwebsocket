@@ -538,17 +538,6 @@ is divided into following sections:
     <target name="-post-jar">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
-        <!-- added by Alex from jWebSocket.org (start) -->
-        <jar jarfile="dist/jWebSocketSAServer.jar">
-            <zipfileset src="${dist.jar}" excludes="META-INF/*" />
-            <zipfileset src="lib/ext/commons-lang-2.4.jar" excludes="META-INF/*" />
-            <zipfileset src="lib/ext/log4j-1.2.15.jar" excludes="META-INF/*" />
-            <zipfileset src="lib/ext/javolution-5.4.3.jar" excludes="META-INF/*" />
-            <manifest>
-                <attribute name="Main-Class" value="org.jWebSocket.console.JWebSocket"/>
-            </manifest>
-        </jar>
-        <!-- added by Alex from jWebSocket.org (end) -->
     </target>
     <target depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass,-do-jar-with-libraries,-do-jar-with-libraries-without-mainclass,-do-jar-with-libraries-without-manifest,-post-jar" description="Build JAR." name="jar"/>
     <!--
