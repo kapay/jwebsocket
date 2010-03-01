@@ -18,6 +18,7 @@ package org.jWebSocket.plugins;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.server.TokenServer;
 import org.jWebSocket.token.Token;
 
 /**
@@ -81,7 +82,17 @@ public class TokenPlugIn extends BasePlugIn {
 	 */
 	@Override
 	public TokenPlugInChain getPlugInChain() {
-		return (TokenPlugInChain)getPlugInChain();
+		return (TokenPlugInChain)super.getPlugInChain();
 	}
+
+	public TokenServer getServer() {
+		TokenServer lServer = null;
+		TokenPlugInChain plugInChain = getPlugInChain();
+		if( plugInChain != null ) {
+			lServer = plugInChain.getServer();
+		}
+		return lServer;
+	}
+
 
 }

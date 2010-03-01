@@ -52,7 +52,6 @@ public class Token {
 		return items.keySet().iterator();
 	}
 
-
 	/**
 	 *
 	 * @param aType
@@ -131,5 +130,15 @@ public class Token {
 	 */
 	public void setNS(String aType) {
 		items.put("ns", aType);
+	}
+
+	@Override
+	public String toString() {
+		String lRes = "{";
+		for (Iterator<String> i = items.keySet().iterator(); i.hasNext();) {
+			String lKey = i.next();
+			lRes += lKey + "=" + items.get(lKey) + ( i.hasNext() ? "," : "}" );
+		}
+		return lRes;
 	}
 }

@@ -21,7 +21,6 @@ import org.jWebSocket.config.Config;
 import org.jWebSocket.plugins.IPlugIn;
 import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.api.IWebSocketEngine;
-import org.jWebSocket.plugins.PlugInChain;
 import org.jWebSocket.packetProcessors.CSVProcessor;
 import org.jWebSocket.packetProcessors.JSONProcessor;
 import org.jWebSocket.plugins.TokenPlugInChain;
@@ -39,11 +38,9 @@ public class TokenServer extends BaseServer {
 
 	/**
 	 *
-	 * @param aPort
-	 * @param aSessionTimeout
-	 * @param aListeners
 	 */
 	public TokenServer() {
+		super();
 		plugInChain = new TokenPlugInChain(this);
 	}
 
@@ -59,16 +56,19 @@ public class TokenServer extends BaseServer {
 
 	@Override
 	public void engineStarted(IWebSocketEngine aEngine) {
+		log.debug("Processing engine started...");
 		plugInChain.engineStarted(aEngine);
 	}
 
 	@Override
 	public void engineStopped(IWebSocketEngine aEngine) {
+		log.debug("Processing engine stopped...");
 		plugInChain.engineStopped(aEngine);
 	}
 
 	@Override
 	public void connectorStarted(IWebSocketConnector aConnector) {
+		log.debug("Processing connector started...");
 		// notify plugins that a connector has started,
 		// i.e. a client was sconnected.
 		if (plugInChain != null) {
@@ -78,6 +78,7 @@ public class TokenServer extends BaseServer {
 
 	@Override
 	public void connectorStopped(IWebSocketConnector aConnector) {
+		log.debug("Processing connector stopped...");
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
 		if (plugInChain != null) {
@@ -86,7 +87,7 @@ public class TokenServer extends BaseServer {
 	}
 
 	private Token packetToToken(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
-		String lSubProt = aConnector.getHeader().getSubProtocol(null);
+		String lSubProt = aConnector.getHeader().getSubProtocol(Config.SUB_PROT_DEFAULT);
 		Token lToken = null;
 		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
 			lToken = JSONProcessor.packetToToken(aDataPacket);
@@ -102,12 +103,20 @@ public class TokenServer extends BaseServer {
 	public void processPacket(IWebSocketEngine aEngine, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
 		Token lToken = packetToToken(aConnector, aDataPacket);
 		if (lToken != null) {
+			log.debug("Processing token '" + lToken.toString() + "'...");
 			plugInChain.processToken(aConnector, lToken);
+		} else {
+			log.error("Packet could not be converted into token.");
 		}
 	}
 
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
 	public void sendToken(IWebSocketConnector aConnector, Token aToken) {
-		String lSubProt = aConnector.getHeader().getSubProtocol(null);
+		String lSubProt = aConnector.getHeader().getSubProtocol(Config.SUB_PROT_DEFAULT);
 		IDataPacket lPacket = null;
 		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
@@ -116,11 +125,8 @@ public class TokenServer extends BaseServer {
 		} else if (lSubProt.equals(Config.SUB_PROT_XML)) {
 			lPacket = XMLProcessor.tokenToPacket(aToken);
 		}
+		log.debug("Sending token '" + aToken.toString() + "'...");
 		super.sendPacket(aConnector, lPacket);
-	}
-
-	@Override
-	public void broadcastPacket(IDataPacket aDataPacket) {
 	}
 
 	/**
