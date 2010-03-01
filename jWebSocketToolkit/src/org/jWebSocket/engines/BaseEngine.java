@@ -24,6 +24,9 @@ public abstract class BaseEngine implements IWebSocketEngine {
 	private final List<IWebSocketConnector> connectors = new FastList<IWebSocketConnector>();
 	private int sessionTimeout = Config.DEFAULT_TIMEOUT;
 
+	/**
+	 *
+	 */
 	public BaseEngine() {
 	}
 
@@ -101,7 +104,7 @@ public abstract class BaseEngine implements IWebSocketEngine {
 	}
 
 	/**
-	 * @param sessionTimeout the sessionTimeout to set
+	 * @param aSessionTimeout
 	 */
 	public void setSessionTimeout(int aSessionTimeout) {
 		this.sessionTimeout = aSessionTimeout;
@@ -111,7 +114,7 @@ public abstract class BaseEngine implements IWebSocketEngine {
 	 * @return the connectors
 	 */
 	public List<IWebSocketConnector> getConnectors() {
-		return Collections.unmodifiableList(connectors);
+		return connectors;
 	}
 
 	/**

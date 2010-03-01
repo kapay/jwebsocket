@@ -15,7 +15,6 @@
 package org.jWebSocket.api;
 
 import java.util.List;
-import org.jWebSocket.kit.Header;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
@@ -28,11 +27,15 @@ public interface IWebSocketEngine {
 
 	/**
 	 * starts the engine.
+	 *
+	 * @throws WebSocketException
 	 */
 	void startEngine() throws WebSocketException;
 
 	/**
 	 * stops the engine.
+	 *
+	 * @throws WebSocketException
 	 */
 	void stopEngine() throws WebSocketException;
 
@@ -77,7 +80,7 @@ public interface IWebSocketEngine {
 	 *
 	 *
 	 * @param aConnector
-	 * @param aData
+	 * @param aDataPacket
 	 */
 	void processPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket);
 
@@ -85,14 +88,15 @@ public interface IWebSocketEngine {
 	 * sends a data packet to a certain connector.
 	 *
 	 * @param aConnector
-	 * @param aData
+	 * @param aDataPacket
 	 */
 	void sendPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
 	 * broadcasts a data packet to all connectors.
 	 *
-	 * @param aData
+	 *
+	 * @param aDataPacket
 	 */
 	void broadcastPacket(IDataPacket aDataPacket);
 
@@ -102,6 +106,20 @@ public interface IWebSocketEngine {
 	 * @param aConnector
 	 */
 	void removeConnector(IWebSocketConnector aConnector);
+
+	/**
+	 *
+	 * @return
+	 */
+	public IWebSocketServer getServer();
+
+	/**
+	 *
+	 * @param server
+	 */
+	public void setServer(IWebSocketServer server);
+
+
 }
 
 

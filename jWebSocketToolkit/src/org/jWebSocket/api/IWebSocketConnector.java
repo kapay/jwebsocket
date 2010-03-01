@@ -56,16 +56,56 @@ public interface IWebSocketConnector {
 	 */
 	void setHeader(Header aHeader);
 
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
 	Object getVar(String aKey);
+	/**
+	 *
+	 * @param aKey
+	 * @param aValue
+	 */
 	void setVar(String aKey, Object aValue);
 
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
 	boolean getBoolean(String aKey);
+	/**
+	 *
+	 * @param aKey
+	 * @param aValue
+	 */
 	void setBoolean(String aKey, boolean aValue);
 
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
 	String getString(String aKey);
+	/**
+	 *
+	 * @param aKey
+	 * @param aValue
+	 */
 	void setString(String aKey, String aValue);
 
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
 	int getInt(String aKey);
+	/**
+	 *
+	 * @param aKey
+	 * @param aValue
+	 */
 	void setInt(String aKey, int aValue);
 
 }

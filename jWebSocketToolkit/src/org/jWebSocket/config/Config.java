@@ -87,6 +87,10 @@ public class Config {
 	 * XML Sub Protocol
 	 */
 	public final static String SUB_PROT_XML = "xml";
+	/**
+	 * Default sub protocol if not explicitely specified by client (json).
+	 */
+	public final static String SUB_PROT_DEFAULT = SUB_PROT_JSON;
 
 	/**
 	 * separator between the path and the argument list in the URL.
