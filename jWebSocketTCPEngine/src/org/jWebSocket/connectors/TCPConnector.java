@@ -5,15 +5,17 @@
 package org.jWebSocket.connectors;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.logging.Level;
+import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.api.IWebSocketEngine;
 import org.jWebSocket.kit.DataPacket;
-import org.jWebSocket.kit.Header;
 
 /**
  *
@@ -21,6 +23,7 @@ import org.jWebSocket.kit.Header;
  */
 public class TCPConnector extends BaseConnector {
 
+	private static Logger log = Logger.getLogger(TCPConnector.class);
 	private BufferedReader br = null;
 	private PrintStream os = null;
 	private Socket clientSocket = null;
@@ -33,9 +36,11 @@ public class TCPConnector extends BaseConnector {
 
 	@Override
 	public void startConnector() {
+		log.debug("Starting TCP connector...");
 		ClientProcessor clientProc = new ClientProcessor(this);
 		Thread clientThread = new Thread(clientProc);
 		clientThread.start();
+		log.info("Started TCP engine on port " + clientSocket.getPort() + ".");
 	}
 
 	@Override
@@ -51,6 +56,14 @@ public class TCPConnector extends BaseConnector {
 
 	@Override
 	public void sendPacket(IDataPacket aDataPacket) {
+		os.write(0);
+		try {
+			os.write(aDataPacket.getByteArray());
+		} catch (IOException ex) {
+			log.error(ex.getClass().getName() + ": " + ex.getMessage());
+		}
+		os.write(255);
+		os.flush();
 	}
 
 	public Socket getClientSocket() {
@@ -112,7 +125,7 @@ public class TCPConnector extends BaseConnector {
 							}
 						}
 					} catch (SocketTimeoutException ex) {
-						// engine.connectorStopped(connector); // due to timeout
+						log.error(ex.getClass().getName() + ": " + ex.getMessage());
 						line = null;
 					}
 					if (line != null) {
@@ -133,7 +146,7 @@ public class TCPConnector extends BaseConnector {
 
 			} catch (Exception ex) {
 				// ignore this exception for now
-				System.out.println("BaseConnector: " + ex.getClass().getName() + ": " + ex.getMessage());
+				log.error(ex.getClass().getName() + ": " + ex.getMessage());
 			}
 		}
 	}
