@@ -16,9 +16,9 @@
 package org.jWebSocket.sharedDOM;
 
 import org.apache.log4j.Logger;
+import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.config.Config;
-import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.connectors.TokenConnector;
+import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
 import org.jWebSocket.token.Token;
 
@@ -42,11 +42,7 @@ public class SharedDOMPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void connectorStarted(BaseConnector aConnector) {
-	}
-
-	@Override
-	public void processToken(PlugInResponse aAction, TokenConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aAction, IWebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
@@ -57,8 +53,5 @@ public class SharedDOMPlugIn extends TokenPlugIn {
 		}
 	}
 
-	@Override
-	public void connectorTerminated(BaseConnector aConnector) {
-	}
 
 }

@@ -16,13 +16,11 @@
 package org.jWebSocket.plugins.streaming;
 
 import org.apache.log4j.Logger;
+import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.config.Config;
-import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.connectors.TokenConnector;
-import org.jWebSocket.kit.Token;
-import org.jWebSocket.plugins.KeepAlivePlugIn;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
+import org.jWebSocket.token.Token;
 
 /**
  *
@@ -30,7 +28,7 @@ import org.jWebSocket.plugins.TokenPlugIn;
  */
 public class StreamingPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logger.getLogger(KeepAlivePlugIn.class);
+	private static Logger log = Logger.getLogger(StreamingPlugIn.class);
 	private String NS_STREAMING_DEFAULT = Config.NS_BASE + ".plugins.streaming";
 
 	/**
@@ -42,11 +40,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void connectorStarted(BaseConnector aConnector) {
-	}
-
-	@Override
-	public void processToken(PlugInResponse aAction, TokenConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aAction, IWebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
@@ -57,10 +51,6 @@ public class StreamingPlugIn extends TokenPlugIn {
 				//
 			}
 		}
-	}
-
-	@Override
-	public void connectorTerminated(BaseConnector aConnector) {
 	}
 
 }

@@ -15,11 +15,9 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.plugins.streaming;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
-import org.jWebSocket.connectors.BaseConnector;
+import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.server.BaseServer;
 
 /**
@@ -29,7 +27,7 @@ import org.jWebSocket.server.BaseServer;
 public class BaseStream extends Thread {
 
 	private static Logger log = Logger.getLogger(BaseStream.class);
-	private FastList<BaseConnector> clients = new FastList<BaseConnector>();
+	private FastList<IWebSocketConnector> clients = new FastList<IWebSocketConnector>();
 	private boolean isRunning = false;
 	private String streamID = null;
 	public final FastList<Object> queue = new FastList<Object>();
@@ -44,21 +42,21 @@ public class BaseStream extends Thread {
 	/**
 	 *
 	 */
-	public void registerClient(BaseConnector aClient) {
+	public void registerClient(IWebSocketConnector aClient) {
 		clients.add(aClient);
 	}
 
 	/**
 	 *
 	 */
-	public boolean isClientRegistered(BaseConnector aClient) {
+	public boolean isClientRegistered(IWebSocketConnector aClient) {
 		return clients.indexOf(aClient) >= 0;
 	}
 
 	/**
 	 *
 	 */
-	public void unregisterClient(BaseConnector aClient) {
+	public void unregisterClient(IWebSocketConnector aClient) {
 		clients.remove(aClient);
 	}
 
@@ -88,7 +86,7 @@ public class BaseStream extends Thread {
 		}
 	}
 
-	protected void processClient(BaseConnector aClient, Object aObject) {
+	protected void processClient(IWebSocketConnector aClient, Object aObject) {
 		/*
 		try {
 			aClient.send(aObject);

@@ -16,10 +16,12 @@
 package org.jWebSocket.plugins.system;
 
 import org.apache.log4j.Logger;
+import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.config.Config;
-import org.jWebSocket.connectors.BaseConnector;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
+import org.jWebSocket.server.TokenServer;
+import org.jWebSocket.token.Token;
 
 /**
  *
@@ -39,11 +41,7 @@ public class KeepAlivePlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void connectorStarted(BaseConnector aConnector) {
-	}
-
-	@Override
-	public void processToken(PlugInResponse aAction, TokenConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aResponse, IWebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
@@ -54,26 +52,22 @@ public class KeepAlivePlugIn extends TokenPlugIn {
 		}
 	}
 
-	@Override
-	public void connectorTerminated(BaseConnector aConnector) {
-	}
-
 	/**
 	 *
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void ping(TokenConnector aConnector, Token aToken) {
-		Token lResponseToken = aConnector.createResponse(aToken);
+	public void ping(IWebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
 		String lEcho = aToken.getString("echo");
 
 		log.debug("Processing 'Ping' (echo='" + lEcho + "')...");
 
 		if (lEcho.equalsIgnoreCase("true")) {
+			Token lResponseToken = lServer.createResponse(aToken);
 			// todo: here could optionally send a time stamp
 			// lResponseToken.put("","");
-			aConnector.sendResponse(lResponseToken);
+			lServer.sendToken(aConnector, lResponseToken);
 		}
-
 	}
 }

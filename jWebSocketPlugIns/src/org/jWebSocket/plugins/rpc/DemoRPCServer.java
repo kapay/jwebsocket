@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Token In- and Outbound Stream
+//	jWebSocket - RPC demo Server
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,33 +13,32 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.plugins.streaming;
+package org.jWebSocket.plugins.rpc;
 
-import org.apache.log4j.Logger;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.token.Token;
+import org.jWebSocket.util.Tools;
 
 /**
  *
  * @author aschulze
  */
-public class TokenStream extends BaseStream {
-
-	private static Logger log = Logger.getLogger(TokenStream.class);
+public class DemoRPCServer {
 
 	/**
-	 *
+	 * simply returns the MD5 sum of the given string.
+	 * @param aArg
+	 * @return MD5 sum of the given string.
 	 */
-	public TokenStream(String aStreamID) {
-		super(aStreamID);
+	public Object getMD5(String aArg) {
+		return (Tools.getMD5(aArg));
 	}
 
-	@Override
-	protected void processClient(IWebSocketConnector aClient, Object aObject) {
-		Token lEventToken = new Token("event");
-		lEventToken.put( "name", "stream" );
-		lEventToken.put("msg", aObject);
-		lEventToken.put("streamID", getStreamID());
-		// ((TokenConnector) aClient).sendToken(lEventToken);
+	/**
+	 * usually protected (i.e. cannot be called from client
+	 * until explicitely granted).
+	 * @param aArg
+	 * @return MD5 sum of the given string.
+	 */
+	public Object getProtected(String aArg) {
+		return "Protected method has now been granted for RPC";
 	}
 }

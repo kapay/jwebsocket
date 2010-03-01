@@ -60,7 +60,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void getClients(IWebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getPlugInChain().getServer();
+		TokenServer lServer = getServer();
 		Token lResponseToken = lServer.createResponse(aToken);
 
 		log.debug("Processing 'getClients'...");
@@ -69,8 +69,8 @@ public class SystemPlugIn extends TokenPlugIn {
 			String lPool = aToken.getString("pool");
 			Integer lMode = aToken.getInteger("mode", 0);
 			// List lClients = lServer.getAllClients(lPool, lMode);
-			lResponseToken.put("clients", lClients);
-			lResponseToken.put("count", lClients.size());
+			// lResponseToken.put("clients", lClients);
+			// lResponseToken.put("count", lClients.size());
 		} else {
 			lResponseToken.put("code", -1);
 			lResponseToken.put("msg", "not logged in");
