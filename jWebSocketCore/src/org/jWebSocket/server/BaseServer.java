@@ -78,6 +78,9 @@ public class BaseServer implements IWebSocketServer {
 	}
 
 	public void broadcastPacket(IDataPacket aDataPacket) {
+		for (Iterator<IWebSocketConnector> i = getAllConnectors().iterator(); i.hasNext();) {
+			sendPacket(i.next(), aDataPacket);
+		}
 	}
 
 	/**
