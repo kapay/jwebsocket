@@ -25,12 +25,10 @@ public class TCPConnector extends BaseConnector {
 	private PrintStream os = null;
 	private Socket clientSocket = null;
 	private boolean isRunning = false;
-	private Header header = null;
 
-	public TCPConnector(IWebSocketEngine aEngine, Socket aClientSocket, Header aHeader) {
+	public TCPConnector(IWebSocketEngine aEngine, Socket aClientSocket) {
 		super(aEngine);
 		clientSocket = aClientSocket;
-		header = aHeader;
 	}
 
 	@Override

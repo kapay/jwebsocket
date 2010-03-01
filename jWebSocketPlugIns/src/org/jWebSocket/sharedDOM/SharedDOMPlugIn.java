@@ -13,12 +13,13 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.plugins;
+package org.jWebSocket.sharedDOM;
 
 import org.apache.log4j.Logger;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.connectors.BaseConnector;
 import org.jWebSocket.connectors.TokenConnector;
+import org.jWebSocket.plugins.TokenPlugIn;
 import org.jWebSocket.token.Token;
 
 /**

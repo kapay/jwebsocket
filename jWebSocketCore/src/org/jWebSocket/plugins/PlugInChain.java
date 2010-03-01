@@ -19,12 +19,20 @@ import javolution.util.FastList;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.api.IWebSocketServer;
 
 /**
  *
  * @author aschulze
  */
-public class PlugInChain extends FastList<IPlugIn> implements IPlugInChain {
+public class PlugInChain implements IPlugInChain {
+
+	private FastList<IPlugIn> plugins = new FastList<IPlugIn>();
+	private IWebSocketServer server = null;
+
+	public PlugInChain(IWebSocketServer aServer) {
+		server = aServer;
+	}
 
 	public void engineStarted(IWebSocketEngine aEngine) {
 	}
@@ -37,8 +45,8 @@ public class PlugInChain extends FastList<IPlugIn> implements IPlugInChain {
 	 * @param aConnector
 	 */
 	public void connectorStarted(IWebSocketConnector aConnector) {
-		for (int i = 0; i < size(); i++) {
-			get(i).connectorStarted(aConnector);
+		for (int i = 0; i < plugins.size(); i++) {
+			plugins.get(i).connectorStarted(aConnector);
 		}
 	}
 
@@ -50,8 +58,8 @@ public class PlugInChain extends FastList<IPlugIn> implements IPlugInChain {
 	 */
 	public PlugInResponse processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
 		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (int i = 0; i < size(); i++) {
-			get(i).processPacket(lPluginResponse, aConnector, aDataPacket);
+		for (int i = 0; i < plugins.size(); i++) {
+			plugins.get(i).processPacket(lPluginResponse, aConnector, aDataPacket);
 			if (lPluginResponse.isChainAborted()) {
 				break;
 			}
@@ -64,8 +72,23 @@ public class PlugInChain extends FastList<IPlugIn> implements IPlugInChain {
 	 * @param aConnector
 	 */
 	public void connectorStopped(IWebSocketConnector aConnector) {
-		for (int i = 0; i < size(); i++) {
-			get(i).connectorStopped(aConnector);
+		for (int i = 0; i < plugins.size(); i++) {
+			plugins.get(i).connectorStopped(aConnector);
 		}
+	}
+
+	public void addPlugIn(IPlugIn aPlugIn) {
+		plugins.add(aPlugIn);
+	}
+
+	public void removePlugIn(IPlugIn aPlugIn) {
+		plugins.remove(aPlugIn);
+	}
+
+	/**
+	 * @return the server
+	 */
+	public IWebSocketServer getServer() {
+		return server;
 	}
 }

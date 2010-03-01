@@ -39,7 +39,7 @@ public class Config {
 	/**
 	 * Current version of the jWebSocket package.
 	 */
-	public static final String VERSION_STR = "0.6.7.0224 beta";
+	public static final String VERSION_STR = "0.7.0.0302 beta";
 	/**
 	 * Namespace base for tokens and plug-ins.
 	 */

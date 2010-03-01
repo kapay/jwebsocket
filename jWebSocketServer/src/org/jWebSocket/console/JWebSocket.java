@@ -22,6 +22,7 @@ import org.jWebSocket.demo.DemoPlugIn;
 import org.jWebSocket.engines.TCPEngine;
 import org.jWebSocket.kit.WebSocketException;
 import org.jWebSocket.logging.Logging;
+import org.jWebSocket.plugins.TokenPlugInChain;
 import org.jWebSocket.plugins.system.KeepAlivePlugIn;
 import org.jWebSocket.plugins.PlugInChain;
 import org.jWebSocket.plugins.rpc.RPCPlugIn;
@@ -97,16 +98,18 @@ public class JWebSocket {
 				IWebSocketEngine engine = new TCPEngine(port, sessionTimeout);
 				// instantiate the Token server and bind engine to it
 				server = new TokenServer();
+				// the token server already instantiates a plug-in chain
+				TokenPlugInChain plugInChain = server.getPlugInChain();
 				// let the server support the engine
 				server.addEngine(engine);
 				// add the SystemPlugIn listener (for the jWebSocket default functionality)
-				server.addPlugIn(new SystemPlugIn());
+				plugInChain.addPlugIn(new SystemPlugIn());
 				// add the keep alive plug-in
-				server.addPlugIn(new KeepAlivePlugIn());
+				plugInChain.addPlugIn(new KeepAlivePlugIn());
 				// add the RPCPlugIn plug-in
-				server.addPlugIn(new RPCPlugIn());
+				plugInChain.addPlugIn(new RPCPlugIn());
 				// add the demo listener (for the time stream demo)
-				server.addPlugIn(new DemoPlugIn());
+				plugInChain.addPlugIn(new DemoPlugIn());
 			} catch (WebSocketException ex) {
 				System.out.println("Error: " + ex.getMessage());
 			}

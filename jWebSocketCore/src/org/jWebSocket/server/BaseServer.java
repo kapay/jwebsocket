@@ -4,7 +4,10 @@
  */
 package org.jWebSocket.server;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import javolution.util.FastList;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
@@ -21,23 +24,23 @@ public class BaseServer implements IWebSocketServer {
 	private FastList<IWebSocketEngine> engines = null;
 
 	public void addEngine(IWebSocketEngine aEngine) {
-		engines.add(aEngine);
+		getEngines().add(aEngine);
 	}
 
 	public void removeEngine(IWebSocketEngine aEngine) {
-		engines.remove(aEngine);
+		getEngines().remove(aEngine);
 	}
 
 	public void startServer()
 			throws WebSocketException {
-		for (Iterator<IWebSocketEngine> i = engines.iterator(); i.hasNext();) {
+		for (Iterator<IWebSocketEngine> i = getEngines().iterator(); i.hasNext();) {
 			i.next().startEngine();
 		}
 	}
 
 	public boolean isAlive() {
 		boolean lIsAlive = false;
-		for (Iterator<IWebSocketEngine> i = engines.iterator(); !lIsAlive && i.hasNext();) {
+		for (Iterator<IWebSocketEngine> i = getEngines().iterator(); !lIsAlive && i.hasNext();) {
 			lIsAlive = i.next().isAlive();
 		}
 		return lIsAlive;
@@ -45,7 +48,7 @@ public class BaseServer implements IWebSocketServer {
 
 	public void stopServer()
 			throws WebSocketException {
-		for (Iterator<IWebSocketEngine> i = engines.iterator(); i.hasNext();) {
+		for (Iterator<IWebSocketEngine> i = getEngines().iterator(); i.hasNext();) {
 			i.next().stopEngine();
 		}
 	}
@@ -69,5 +72,32 @@ public class BaseServer implements IWebSocketServer {
 	}
 
 	public void broadcastPacket(IDataPacket aDataPacket) {
+	}
+
+	/**
+	 * @return the engines
+	 */
+	public List<IWebSocketEngine> getEngines() {
+		return Collections.unmodifiableList(engines);
+	}
+
+	/**
+	 * returns all connectors of the passed engine.
+	 * @return the engines
+	 */
+	public List<IWebSocketConnector> getConnectors(IWebSocketEngine aEngine) {
+		return Collections.unmodifiableList(aEngine.getConnectors());
+	}
+
+	/**
+	 * returns all connectors of all engines connected to the server.
+	 * @return the engines
+	 */
+	public List<IWebSocketConnector> getAllConnectors() {
+		ArrayList clients = new ArrayList();
+		for (Iterator i = engines.iterator(); i.hasNext();) {
+			clients.addAll(((IWebSocketEngine)i.next()).getConnectors());
+		}
+		return Collections.unmodifiableList(clients);
 	}
 }

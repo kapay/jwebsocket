@@ -15,14 +15,13 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.plugins.system;
 
-import java.util.List;
 import org.apache.log4j.Logger;
+import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.config.Config;
-import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.connectors.TokenConnector;
-import org.jWebSocket.kit.Token;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
+import org.jWebSocket.server.TokenServer;
+import org.jWebSocket.token.Token;
 
 /**
  * implements the jWebSocket system tokens like login, logout, send,
@@ -43,44 +42,33 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void connectorStarted(BaseConnector aConnector) {
-	}
-
-	;
-
-	@Override
-	public void processToken(PlugInResponse aAction, TokenConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aResponse, IWebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
 		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
 			if (lType.equals("getClients")) {
 				getClients(aConnector, aToken);
-				aAction.abortChain();
+				aResponse.abortChain();
 			}
 		}
 	}
-
-	@Override
-	public void connectorTerminated(BaseConnector aConnector) {
-	}
-
-	;
 
 	/**
 	 *
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void getClients(TokenConnector aConnector, Token aToken) {
-		Token lResponseToken = aConnector.createResponse(aToken);
+	public void getClients(IWebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getPlugInChain().getServer();
+		Token lResponseToken = lServer.createResponse(aToken);
 
 		log.debug("Processing 'getClients'...");
 
-		if (aConnector.isLoggedIn()) {
+		if (aConnector.getBoolean(NS_SYSTEM_DEFAULT + ".isLoggedIn")) {
 			String lPool = aToken.getString("pool");
 			Integer lMode = aToken.getInteger("mode", 0);
-			List lClients = aConnector.getTokenServer().getClients(lPool, lMode);
+			// List lClients = lServer.getAllClients(lPool, lMode);
 			lResponseToken.put("clients", lClients);
 			lResponseToken.put("count", lClients.size());
 		} else {
@@ -88,6 +76,6 @@ public class SystemPlugIn extends TokenPlugIn {
 			lResponseToken.put("msg", "not logged in");
 		}
 
-		aConnector.sendResponse(lResponseToken);
+		lServer.sendToken(aConnector, lResponseToken);
 	}
 }

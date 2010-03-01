@@ -16,10 +16,17 @@
 package org.jWebSocket.server;
 
 import org.apache.log4j.Logger;
+import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.config.Config;
 import org.jWebSocket.plugins.IPlugIn;
 import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.api.IWebSocketEngine;
 import org.jWebSocket.plugins.PlugInChain;
+import org.jWebSocket.packetProcessors.CSVProcessor;
+import org.jWebSocket.packetProcessors.JSONProcessor;
+import org.jWebSocket.plugins.TokenPlugInChain;
+import org.jWebSocket.token.Token;
+import org.jWebSocket.packetProcessors.XMLProcessor;
 
 /**
  *
@@ -28,8 +35,7 @@ import org.jWebSocket.plugins.PlugInChain;
 public class TokenServer extends BaseServer {
 
 	private static Logger log = Logger.getLogger(TokenServer.class);
-
-	private PlugInChain plugInChain = null;
+	private TokenPlugInChain plugInChain = null;
 
 	/**
 	 *
@@ -38,27 +44,30 @@ public class TokenServer extends BaseServer {
 	 * @param aListeners
 	 */
 	public TokenServer() {
-		plugInChain = new PlugInChain();
+		plugInChain = new TokenPlugInChain(this);
 	}
 
 	/**
-	 * adds a plugin to the plugin chain of the server.
+	 * removes a plugin from the plugin chain of the server.
 	 * @param aPlugIn
 	 */
-	public void addPlugIn(IPlugIn aPlugIn) {
+	public void removePlugIn(IPlugIn aPlugIn) {
 		if (plugInChain != null) {
-			plugInChain.add(aPlugIn);
+			plugInChain.removePlugIn(aPlugIn);
 		}
 	}
 
+	@Override
 	public void engineStarted(IWebSocketEngine aEngine) {
 		plugInChain.engineStarted(aEngine);
 	}
 
+	@Override
 	public void engineStopped(IWebSocketEngine aEngine) {
 		plugInChain.engineStopped(aEngine);
 	}
 
+	@Override
 	public void connectorStarted(IWebSocketConnector aConnector) {
 		// notify plugins that a connector has started,
 		// i.e. a client was sconnected.
@@ -67,6 +76,7 @@ public class TokenServer extends BaseServer {
 		}
 	}
 
+	@Override
 	public void connectorStopped(IWebSocketConnector aConnector) {
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
@@ -75,5 +85,68 @@ public class TokenServer extends BaseServer {
 		}
 	}
 
+	private Token packetToToken(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+		String lSubProt = aConnector.getHeader().getSubProtocol(null);
+		Token lToken = null;
+		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
+			lToken = JSONProcessor.packetToToken(aDataPacket);
+		} else if (lSubProt.equals(Config.SUB_PROT_CSV)) {
+			lToken = CSVProcessor.packetToToken(aDataPacket);
+		} else if (lSubProt.equals(Config.SUB_PROT_XML)) {
+			lToken = XMLProcessor.packetToToken(aDataPacket);
+		}
+		return lToken;
+	}
 
+	@Override
+	public void processPacket(IWebSocketEngine aEngine, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+		Token lToken = packetToToken(aConnector, aDataPacket);
+		if (lToken != null) {
+			plugInChain.processToken(aConnector, lToken);
+		}
+	}
+
+	public void sendToken(IWebSocketConnector aConnector, Token aToken) {
+		String lSubProt = aConnector.getHeader().getSubProtocol(null);
+		IDataPacket lPacket = null;
+		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
+			lPacket = JSONProcessor.tokenToPacket(aToken);
+		} else if (lSubProt.equals(Config.SUB_PROT_CSV)) {
+			lPacket = CSVProcessor.tokenToPacket(aToken);
+		} else if (lSubProt.equals(Config.SUB_PROT_XML)) {
+			lPacket = XMLProcessor.tokenToPacket(aToken);
+		}
+		super.sendPacket(aConnector, lPacket);
+	}
+
+	@Override
+	public void broadcastPacket(IDataPacket aDataPacket) {
+	}
+
+	/**
+	 * creates a standard response 
+	 * @param aInToken
+	 * @return
+	 */
+	public Token createResponse(Token aInToken) {
+		String lTokenId = aInToken.getString("utid");
+		String lType = aInToken.getString("type");
+		Token lResToken = new Token("result");
+		lResToken.put("code", 0);
+		lResToken.put("msg", "ok");
+		if (lTokenId != null) {
+			lResToken.put("utid", lTokenId);
+		}
+		if (lType != null) {
+			lResToken.put("reqType", lType);
+		}
+		return lResToken;
+	}
+
+	/**
+	 * @return the plugInChain
+	 */
+	public TokenPlugInChain getPlugInChain() {
+		return plugInChain;
+	}
 }

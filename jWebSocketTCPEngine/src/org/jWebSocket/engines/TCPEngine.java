@@ -43,7 +43,7 @@ public class TCPEngine extends BaseEngine {
 	private boolean isRunning = false;
 
 	public TCPEngine(int aPort, int aSessionTimeout)
-		throws WebSocketException {
+			throws WebSocketException {
 		startEngine(aPort, aSessionTimeout);
 	}
 
@@ -54,7 +54,7 @@ public class TCPEngine extends BaseEngine {
 	 * @throws WebSocketException
 	 */
 	public void startEngine(int aPort, int aSessionTimeout)
-		throws WebSocketException {
+			throws WebSocketException {
 		try {
 			serverSocket = new ServerSocket(aPort);
 			setSessionTimeout(aSessionTimeout);
@@ -72,7 +72,7 @@ public class TCPEngine extends BaseEngine {
 
 	@Override
 	public void stopEngine()
-		throws WebSocketException {
+			throws WebSocketException {
 		// inherited method stops all connectors
 		super.stopEngine();
 		isRunning = false;
@@ -92,7 +92,7 @@ public class TCPEngine extends BaseEngine {
 	 * @throws IOException
 	 */
 	public static Header processHandshake(Socket aClientSocket)
-		throws UnsupportedEncodingException, IOException {
+			throws UnsupportedEncodingException, IOException {
 
 		Header header = new Header();
 
@@ -173,12 +173,12 @@ public class TCPEngine extends BaseEngine {
 
 		// now that we have parsed the header send handshake...
 		String res =
-			"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
-			+ "Upgrade: WebSocket\r\n"
-			+ "Connection: Upgrade\r\n"
-			+ "WebSocket-Origin: " + origin + "\r\n"
-			+ "WebSocket-Location: " + location + "\r\n"
-			+ "\r\n";
+				"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
+				+ "Upgrade: WebSocket\r\n"
+				+ "Connection: Upgrade\r\n"
+				+ "WebSocket-Origin: " + origin + "\r\n"
+				+ "WebSocket-Location: " + location + "\r\n"
+				+ "\r\n";
 		// uncomment for debug purposes
 		// System.out.println("BaseServer: Sent handshake \n" + res);
 
@@ -243,7 +243,8 @@ public class TCPEngine extends BaseEngine {
 						clientSocket.setSoTimeout(lSessionTimeout);
 
 						// create connector and pass header
-						IWebSocketConnector connector = new TCPConnector(engine, clientSocket, header);
+						IWebSocketConnector connector = new TCPConnector(engine, clientSocket);
+						connector.setHeader(header);
 						getConnectors().add(connector);
 						connector.startConnector();
 

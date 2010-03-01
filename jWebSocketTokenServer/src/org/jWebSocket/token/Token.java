@@ -16,13 +16,17 @@
 package org.jWebSocket.token;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.IWebSocketConnector;
 
 /**
  *
  * @author aschulze
  */
-public class Token extends HashMap<String, Object> {
+public class Token {
+
+	private HashMap<String, Object> items = new HashMap<String, Object>();
 
 	/**
 	 *
@@ -30,13 +34,24 @@ public class Token extends HashMap<String, Object> {
 	public Token() {
 	}
 
-	public Token packetToToken(IDataPacket aDataPacket) {
-		return null;
+	/**
+	 *
+	 */
+	public Token(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
 	}
 
-	public IDataPacket tokenToPacket(Token aToken) {
-		return null;
+	public void put(String aKey, Object aValue) {
+		items.put(aKey, aValue);
 	}
+
+	public Object get(String aKey) {
+		return items.get(aKey);
+	}
+
+	public Iterator getKeys() {
+		return items.keySet().iterator();
+	}
+
 
 	/**
 	 *
@@ -62,7 +77,7 @@ public class Token extends HashMap<String, Object> {
 	 * @return
 	 */
 	public String getString(String aArg) {
-		return (String) get(aArg);
+		return (String) items.get(aArg);
 	}
 
 	/**
@@ -72,7 +87,7 @@ public class Token extends HashMap<String, Object> {
 	 * @return
 	 */
 	public Integer getInteger(String aArg, Integer aDefault) {
-		Object lObj = get(aArg);
+		Object lObj = items.get(aArg);
 		Integer lResult = aDefault;
 		if (lObj != null) {
 			if (lObj instanceof String) {
@@ -91,7 +106,7 @@ public class Token extends HashMap<String, Object> {
 	 * @return
 	 */
 	public String getType() {
-		return (String) get("type");
+		return (String) items.get("type");
 	}
 
 	/**
@@ -99,7 +114,7 @@ public class Token extends HashMap<String, Object> {
 	 * @param aType
 	 */
 	public void setType(String aType) {
-		put("type", aType);
+		items.put("type", aType);
 	}
 
 	/**
@@ -107,7 +122,7 @@ public class Token extends HashMap<String, Object> {
 	 * @return
 	 */
 	public String getNS() {
-		return (String) get("ns");
+		return (String) items.get("ns");
 	}
 
 	/**
@@ -115,6 +130,6 @@ public class Token extends HashMap<String, Object> {
 	 * @param aType
 	 */
 	public void setNS(String aType) {
-		put("ns", aType);
+		items.put("ns", aType);
 	}
 }

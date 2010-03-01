@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Wrapper for Token based PlugIns (Convenience Class)
+//	jWebSocket - XML Connector
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,58 +13,44 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.plugins;
+package org.jWebSocket.packetProcessors;
 
-import org.jWebSocket.connectors.BaseConnector;
+import java.util.List;
+import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.token.Token;
 
 /**
  *
  * @author aschulze
  */
-public class TokenPlugIn extends BasePlugIn {
+public class XMLProcessor  {
 
-	private String namespace = null;
-
-	/**
-	 *
-	 * @param aConnector
-	 */
-	public void connectorStarted(IWebSocketConnector aConnector) {
+	public static Token packetToToken(IDataPacket aDataPacket) {
+		// todo: implement!
+		Token lArgs = new Token();
+		return lArgs;
 	}
 
-	/**
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 * @return
-	 */
-	public void processToken(PlugInResponse aAction, TokenConnector aConnector, Token aToken) {
+	private static String stringToXML(String aString) {
+		// todo: implement!
+		String lRes = null;
+		return lRes;
 	}
 
-	@Override
-	public void processData(PlugInResponse aAction, BaseConnector aConnector, Object aObject) {
-		processToken(aAction, (TokenConnector) aConnector, (Token) aObject);
+	private static String listToXML(List aList) {
+		// todo: implement!
+		String lRes = null;
+		return lRes;
 	}
 
-	/**
-	 *
-	 * @param aConnector
-	 */
-	public void connectorStopped(IWebSocketConnector aConnector) {
+	private static String objectToXML(Object aObj) {
+		// todo: implement!
+		String lRes = null;
+		return lRes;
 	}
 
-	/**
-	 * @return the namespace
-	 */
-	public String getNamespace() {
-		return namespace;
-	}
-
-	/**
-	 * @param namespace the namespace to set
-	 */
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
+	public static IDataPacket tokenToPacket(Token aToken) {
+		// todo: implement!
+		return null;
 	}
 }

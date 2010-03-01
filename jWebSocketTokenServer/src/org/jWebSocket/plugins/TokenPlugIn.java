@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Basic PlugIn Class
+//	jWebSocket - Wrapper for Token based PlugIns (Convenience Class)
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -18,34 +18,70 @@ package org.jWebSocket.plugins;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.token.Token;
 
 /**
  *
  * @author aschulze
  */
-public abstract class BasePlugIn implements IPlugIn {
+public class TokenPlugIn extends BasePlugIn {
 
-	public abstract void engineStarted(IWebSocketEngine aEngine);
+	private String namespace = null;
 
-	public abstract void engineStopped(IWebSocketEngine aEngine);
+	public void engineStarted(IWebSocketEngine aEngine) {
+	}
 
-	/**
-	 *
-	 * @param aConnector
-	 */
-	public abstract void connectorStarted(IWebSocketConnector aConnector);
-
-	/**
-	 *
-	 * @param aResponse 
-	 * @param aConnector
-	 * @param aDataPacket
-	 */
-	public abstract void processData(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket);
+	public void engineStopped(IWebSocketEngine aEngine) {
+	}
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public abstract void connectorStopped(IWebSocketConnector aConnector);
+	public void connectorStarted(IWebSocketConnector aConnector) {
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 * @return
+	 */
+	public void processToken(PlugInResponse aResponse, IWebSocketConnector aConnector, Token aToken) {
+	}
+
+	@Override
+	public void processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+		//
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 */
+	public void connectorStopped(IWebSocketConnector aConnector) {
+	}
+
+	/**
+	 * @return the namespace
+	 */
+	public String getNamespace() {
+		return namespace;
+	}
+
+	/**
+	 * @param namespace the namespace to set
+	 */
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
+	}
+
+	/**
+	 * @return the plugInChain
+	 */
+	@Override
+	public TokenPlugInChain getPlugInChain() {
+		return (TokenPlugInChain)getPlugInChain();
+	}
+
 }

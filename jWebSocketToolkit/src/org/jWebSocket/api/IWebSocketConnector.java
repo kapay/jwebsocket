@@ -14,6 +14,8 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.api;
 
+import org.jWebSocket.kit.Header;
+
 /**
  *
  * @author aschulze
@@ -41,4 +43,29 @@ public interface IWebSocketConnector {
 	 * @param aDataPacket
 	 */
 	void sendPacket(IDataPacket aDataPacket);
+
+	/**
+	 *
+	 * @return
+	 */
+	Header getHeader();
+
+	/**
+	 *
+	 * @param aHeader
+	 */
+	void setHeader(Header aHeader);
+
+	Object getVar(String aKey);
+	void setVar(String aKey, Object aValue);
+
+	boolean getBoolean(String aKey);
+	void setBoolean(String aKey, boolean aValue);
+
+	String getString(String aKey);
+	void setString(String aKey, String aValue);
+
+	int getInt(String aKey);
+	void setInt(String aKey, int aValue);
+
 }

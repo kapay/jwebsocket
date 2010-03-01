@@ -18,8 +18,6 @@ package org.jWebSocket.plugins.system;
 import org.apache.log4j.Logger;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.connectors.BaseConnector;
-import org.jWebSocket.connectors.TokenConnector;
-import org.jWebSocket.kit.Token;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
 

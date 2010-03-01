@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - CSV Token Processor
+//	jWebSocket - WebSocket JSON Token Processor
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,37 +13,38 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.token;
+package org.jWebSocket.packetProcessors;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.commons.lang.text.StrTokenizer;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.kit.DataPacket;
+import org.jWebSocket.token.Token;
 
 /**
  *
  * @author aschulze
  */
-public class CSVToken extends Token {
+public class JSONProcessor {
 
-	@Override
-	public Token packetToToken(IDataPacket aDataPacket) {
+	public static Token packetToToken(IDataPacket aDataPacket) {
 		Token lToken = new Token();
 		try {
-			String aData = aDataPacket.getString("UTF-8");
-			String[] lItems = aData.split(",");
+			String lStr = aDataPacket.getString("UTF-8");
+			// cut starting and trailing curly braces
+			lStr = lStr.trim().substring(1, lStr.length() - 1);
+			// String[] lItems = aData.split(",");
+			StrTokenizer lTokens = new StrTokenizer(lStr, ',', '\"');
+			String[] lItems = lTokens.getTokenArray();
 			for (int i = 0; i < lItems.length; i++) {
-				String[] lKeyVal = lItems[i].split("=", 2);
+				// String[] lKeyVal = lItems[i].split(":", 2);
+				lTokens = new StrTokenizer(lItems[i], ':', '\"');
+				String[] lKeyVal = lTokens.getTokenArray();
 				if (lKeyVal.length == 2) {
 					String lVal = lKeyVal[1];
-					if (lVal.length() <= 0) {
-						lToken.put(lKeyVal[0], null);
-					} else if (lVal.startsWith("\"") && lVal.endsWith("\"")) {
-						// unescape commata by \x2C
-						lVal = lVal.replace("\\x2C", ",");
-						// unescape quotes by \x22
-						lVal = lVal.replace("\\x22", "\"");
+					if (lVal.startsWith("\"") && lVal.endsWith("\"")) {
 						lToken.put(lKeyVal[0], lVal.substring(1, lVal.length() - 1));
 					} else {
 						lToken.put(lKeyVal[0], lVal);
@@ -55,50 +56,45 @@ public class CSVToken extends Token {
 		return lToken;
 	}
 
-	private String stringToCSV(String aString) {
-		// escape commata by \x2C
-		aString = aString.replace(",", "\\x2C");
-		// escape quotes by \x22
-		aString = aString.replace("\"", "\\x22");
+	private static String stringToJSON(String aString) {
 		return ("\"" + aString + "\"");
 	}
 
-	private String listToCSV(List aList) {
+	private static String listToJSON(List aList) {
 		String lRes = "";
 		for (Object lItem : aList) {
-			String llRes = objectToCSV(lItem);
-			lRes += llRes + "|";
+			String llRes = objectToJSON(lItem);
+			lRes += llRes + ",";
 		}
 		if (lRes.length() > 1) {
 			lRes = lRes.substring(0, lRes.length() - 1);
 		}
-		lRes = "[" + lRes + "]";
-		return lRes;
+		return ("[" + lRes + "]");
 	}
 
-	private String objectToCSV(Object aObj) {
+	private static String objectToJSON(Object aObj) {
 		String lRes;
 		if (aObj instanceof String) {
-			lRes = stringToCSV((String) aObj);
+			lRes = stringToJSON((String) aObj);
 		} else if (aObj instanceof List) {
-			lRes = listToCSV((List) aObj);
+			lRes = listToJSON((List) aObj);
 		} else {
 			lRes = aObj.toString();
 		}
 		return lRes;
 	}
 
-	@Override
-	public IDataPacket tokenToPacket(Token aToken) {
-		String lData = "";
-		Iterator lIterator = aToken.keySet().iterator();
+	public static IDataPacket tokenToPacket(Token aToken) {
+		String lData = "{";
+		Iterator lIterator = aToken.getKeys();
 		while (lIterator.hasNext()) {
 			String lKey = (String) lIterator.next();
 			Object lVal = aToken.get(lKey);
 			lData +=
-				lKey + "=" + objectToCSV(lVal)
-				+ (lIterator.hasNext() ? "," : "");
+					lKey + ":" + objectToJSON(lVal)
+					+ (lIterator.hasNext() ? "," : "");
 		}
+		lData += "}";
 		IDataPacket lPacket = null;
 		try {
 			lPacket = new DataPacket(lData, "UTF-8");

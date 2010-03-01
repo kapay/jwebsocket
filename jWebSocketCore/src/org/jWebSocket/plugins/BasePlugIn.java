@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - XML Connector
+//	jWebSocket - Basic PlugIn Class
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,46 +13,48 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.token;
+package org.jWebSocket.plugins;
 
-import java.util.List;
 import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.api.IWebSocketEngine;
 
 /**
  *
  * @author aschulze
  */
-public class XMLToken extends Token {
+public abstract class BasePlugIn implements IPlugIn {
 
-	@Override
-	public Token packetToToken(IDataPacket aDataPacket) {
-		// todo: implement!
-		Token lArgs = new Token();
-		return lArgs;
+	private IPlugInChain plugInChain = null;
+
+	public abstract void engineStarted(IWebSocketEngine aEngine);
+
+	public abstract void engineStopped(IWebSocketEngine aEngine);
+
+	/**
+	 *
+	 * @param aConnector
+	 */
+	public abstract void connectorStarted(IWebSocketConnector aConnector);
+
+	/**
+	 *
+	 * @param aResponse 
+	 * @param aConnector
+	 * @param aDataPacket
+	 */
+	public abstract void processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket);
+
+	/**
+	 *
+	 * @param aConnector
+	 */
+	public abstract void connectorStopped(IWebSocketConnector aConnector);
+
+	/**
+	 * @return the plugInChain
+	 */
+	public IPlugInChain getPlugInChain() {
+		return plugInChain;
 	}
-
-	private String stringToXML(String aString) {
-		// todo: implement!
-		String lRes = null;
-		return lRes;
-	}
-
-	private String listToXML(List aList) {
-		// todo: implement!
-		String lRes = null;
-		return lRes;
-	}
-
-	private String objectToXML(Object aObj) {
-		// todo: implement!
-		String lRes = null;
-		return lRes;
-	}
-
-	@Override
-	public IDataPacket tokenToPacket(Token aToken) {
-		// todo: implement!
-		return null;
-	}
-
 }

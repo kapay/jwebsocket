@@ -18,7 +18,6 @@ package org.jWebSocket.plugins;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.api.IWebSocketEngine;
-import org.jWebSocket.plugins.PlugInResponse;
 
 /**
  *
@@ -61,4 +60,8 @@ public interface IPlugInChain {
 	 * @param aConnector
 	 */
 	void connectorStopped(IWebSocketConnector aConnector);
+
+	void addPlugIn(IPlugIn aPlugIn);
+	void removePlugIn(IPlugIn aPlugIn);
+
 }
