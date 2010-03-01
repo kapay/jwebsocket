@@ -131,4 +131,17 @@ public class BaseConnector implements IWebSocketConnector {
 	public void setInt(String aKey, int aValue) {
 		setVar(aKey, aValue);
 	}
+
+	/**
+	 * 
+	 * @param aKey
+	 */
+	public void removeVar(String aKey) {
+		customVars.remove(aKey);
+	}
+
+	public String generateUID() {
+		return null;
+	}
+
 }

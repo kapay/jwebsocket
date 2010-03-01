@@ -78,7 +78,9 @@ public class CSVProcessor  {
 
 	private static String objectToCSV(Object aObj) {
 		String lRes;
-		if (aObj instanceof String) {
+		if( aObj == null ) {
+			lRes = "null";
+		} else if (aObj instanceof String) {
 			lRes = stringToCSV((String) aObj);
 		} else if (aObj instanceof List) {
 			lRes = listToCSV((List) aObj);

@@ -74,7 +74,9 @@ public class JSONProcessor {
 
 	private static String objectToJSON(Object aObj) {
 		String lRes;
-		if (aObj instanceof String) {
+		if( aObj == null ) {
+			lRes = "null";
+		} else if (aObj instanceof String) {
 			lRes = stringToJSON((String) aObj);
 		} else if (aObj instanceof List) {
 			lRes = listToJSON((List) aObj);

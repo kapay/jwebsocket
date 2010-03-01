@@ -32,11 +32,4 @@ public class TokenPlugInChain extends PlugInChain {
 		return lPluginResponse;
 	}
 
-	/**
-	 * @return the server
-	 */
-	@Override
-	public TokenServer getServer() {
-		return (TokenServer)super.getServer();
-	}
 }

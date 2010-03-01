@@ -77,19 +77,11 @@ public class TokenPlugIn extends BasePlugIn {
 		this.namespace = namespace;
 	}
 
-	/**
-	 * @return the plugInChain
-	 */
-	@Override
-	public TokenPlugInChain getPlugInChain() {
-		return (TokenPlugInChain)super.getPlugInChain();
-	}
-
 	public TokenServer getServer() {
 		TokenServer lServer = null;
-		TokenPlugInChain plugInChain = getPlugInChain();
+		TokenPlugInChain plugInChain = (TokenPlugInChain)getPlugInChain();
 		if( plugInChain != null ) {
-			lServer = plugInChain.getServer();
+			lServer = (TokenServer)plugInChain.getServer();
 		}
 		return lServer;
 	}

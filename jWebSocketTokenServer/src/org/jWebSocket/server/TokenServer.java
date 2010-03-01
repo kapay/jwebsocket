@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.server;
 
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.config.Config;
@@ -127,6 +128,19 @@ public class TokenServer extends BaseServer {
 		}
 		log.debug("Sending token '" + aToken.toString() + "'...");
 		super.sendPacket(aConnector, lPacket);
+	}
+
+	/**
+	 * iterates through all connectors of all engines and sends the token to
+	 * each connector. The token format is considered for each connection
+	 * individually so that the application can broadcast a token to all kinds
+	 * of clients.
+	 * @param aToken
+	 */
+	public void broadcastToken(Token aToken) {
+		for (Iterator<IWebSocketConnector> i = getAllConnectors().iterator(); i.hasNext();) {
+			sendToken(i.next(), aToken);
+		}
 	}
 
 	/**

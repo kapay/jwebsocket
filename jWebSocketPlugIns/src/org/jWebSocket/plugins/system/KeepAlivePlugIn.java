@@ -32,6 +32,8 @@ public class KeepAlivePlugIn extends TokenPlugIn {
 	private static Logger log = Logger.getLogger(KeepAlivePlugIn.class);
 	private String NS_KEEPALIVE_DEFAULT = Config.NS_BASE + ".plugins.keepAlive";
 
+	// TODO: Embed Keep-Alive into SystemPlugin!
+
 	/**
 	 *
 	 */
@@ -65,7 +67,8 @@ public class KeepAlivePlugIn extends TokenPlugIn {
 
 		if (lEcho.equalsIgnoreCase("true")) {
 			Token lResponseToken = lServer.createResponse(aToken);
-			// todo: here could optionally send a time stamp
+			// TODO: here could optionally send a time stamp
+			// TODO: implement response time on client!
 			// lResponseToken.put("","");
 			lServer.sendToken(aConnector, lResponseToken);
 		}

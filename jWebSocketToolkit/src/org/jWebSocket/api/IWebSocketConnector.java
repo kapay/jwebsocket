@@ -62,6 +62,7 @@ public interface IWebSocketConnector {
 	 * @return
 	 */
 	Object getVar(String aKey);
+
 	/**
 	 *
 	 * @param aKey
@@ -75,6 +76,7 @@ public interface IWebSocketConnector {
 	 * @return
 	 */
 	boolean getBoolean(String aKey);
+
 	/**
 	 *
 	 * @param aKey
@@ -88,6 +90,7 @@ public interface IWebSocketConnector {
 	 * @return
 	 */
 	String getString(String aKey);
+
 	/**
 	 *
 	 * @param aKey
@@ -101,11 +104,24 @@ public interface IWebSocketConnector {
 	 * @return
 	 */
 	int getInt(String aKey);
+
 	/**
 	 *
 	 * @param aKey
 	 * @param aValue
 	 */
 	void setInt(String aKey, int aValue);
+
+	/**
+	 * 
+	 * @param aKey
+	 */
+	void removeVar(String aKey);
+
+	/**
+	 * 
+	 * @return
+	 */
+	String generateUID();
 
 }

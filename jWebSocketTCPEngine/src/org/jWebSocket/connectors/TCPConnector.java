@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
@@ -87,14 +86,12 @@ public class TCPConnector extends BaseConnector {
 				br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
 				os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
 
-				// allow descending classes to handle handshakeSent event
-				// handshakeSent();
-
 				// start client listener loop
 				isRunning = true;
 				while (isRunning) {
 					// try to read line within timeout
 					try {
+						// TODO: optimize protocol packet handling!
 						line = br.readLine();
 						if (line == null) {
 							// System.out.println("line is null");
@@ -103,25 +100,16 @@ public class TCPConnector extends BaseConnector {
 						} else {
 							// cut off potential starting 0x00 and 0xff characters
 							byte[] ba = line.getBytes();
-							/*
-							// System.out.println("Got chars: " + line.charAt(0) + ", " + line.charAt(1) + ", " + line.charAt(2));
-							if( ba.length >= 3 ) {
-							System.out.println("Got 3+ bytes: " + ba[0] + ", " + ba[1] + ", " + ba[2] );
-							} else if( ba.length >= 2 ) {
-							System.out.println("Got 2+ bytes: " + ba[0] + ", " + ba[1] );
-							} else if( ba.length >= 1 ) {
-							System.out.println("Got 1+ bytes: " + ba[0]);
+
+							int i = 0;
+							while (i < ba.length && ba[i] != 0) {
+								i++;
 							}
-							 */
-							// if no content or only one byte different from 0...
-							if (ba.length <= 0 | (ba.length == 1 && ba[0] != 0)) {
+							if( i < ba.length ) {
+								i++;
+								line = new String(ba, i, ba.length - i, "UTF-8");
+							} else {
 								line = null;
-								// if byte 0 at pos. 0 is found may be an empty string was sent
-							} else if (ba.length >= 1 && ba[0] == 0 && line.length() >= 1) {
-								line = line.substring(1);
-								// if byte 0 at pos. 1 the rest must be the user data
-							} else if (ba.length >= 2 && ba[1] == 0 && line.length() >= 2) {
-								line = line.substring(2);
 							}
 						}
 					} catch (SocketTimeoutException ex) {
@@ -150,4 +138,11 @@ public class TCPConnector extends BaseConnector {
 			}
 		}
 	}
+
+	@Override
+	public String generateUID() {
+		String lUID = clientSocket.getInetAddress().getHostAddress() + "@" + clientSocket.getPort();
+		return lUID;
+	}
+
 }
