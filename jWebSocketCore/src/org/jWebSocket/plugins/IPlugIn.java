@@ -56,4 +56,16 @@ public interface IPlugIn {
 	 * @param aConnector
 	 */
 	public void connectorStopped(IWebSocketConnector aConnector);
+
+	/**
+	 *
+	 * @param aPlugInChain
+	 */
+	public void setPlugInChain(IPlugInChain aPlugInChain);
+
+	/**
+	 * @return the plugInChain
+	 */
+	public IPlugInChain getPlugInChain();
+
 }

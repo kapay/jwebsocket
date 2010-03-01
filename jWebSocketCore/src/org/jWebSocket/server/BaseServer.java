@@ -23,32 +23,37 @@ public class BaseServer implements IWebSocketServer {
 
 	private FastList<IWebSocketEngine> engines = null;
 
+	public BaseServer() {
+		engines = new FastList<IWebSocketEngine>();
+	}
+
 	public void addEngine(IWebSocketEngine aEngine) {
-		getEngines().add(aEngine);
+		engines.add(aEngine);
+		aEngine.setServer(this);
 	}
 
 	public void removeEngine(IWebSocketEngine aEngine) {
-		getEngines().remove(aEngine);
+		engines.remove(aEngine);
 	}
 
 	public void startServer()
-			throws WebSocketException {
-		for (Iterator<IWebSocketEngine> i = getEngines().iterator(); i.hasNext();) {
+		throws WebSocketException {
+		for (Iterator<IWebSocketEngine> i = engines.iterator(); i.hasNext();) {
 			i.next().startEngine();
 		}
 	}
 
 	public boolean isAlive() {
 		boolean lIsAlive = false;
-		for (Iterator<IWebSocketEngine> i = getEngines().iterator(); !lIsAlive && i.hasNext();) {
+		for (Iterator<IWebSocketEngine> i = engines.iterator(); !lIsAlive && i.hasNext();) {
 			lIsAlive = i.next().isAlive();
 		}
 		return lIsAlive;
 	}
 
 	public void stopServer()
-			throws WebSocketException {
-		for (Iterator<IWebSocketEngine> i = getEngines().iterator(); i.hasNext();) {
+		throws WebSocketException {
+		for (Iterator<IWebSocketEngine> i = engines.iterator(); i.hasNext();) {
 			i.next().stopEngine();
 		}
 	}
@@ -69,6 +74,7 @@ public class BaseServer implements IWebSocketServer {
 	}
 
 	public void sendPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+		aConnector.sendPacket(aDataPacket);
 	}
 
 	public void broadcastPacket(IDataPacket aDataPacket) {
@@ -78,7 +84,7 @@ public class BaseServer implements IWebSocketServer {
 	 * @return the engines
 	 */
 	public List<IWebSocketEngine> getEngines() {
-		return Collections.unmodifiableList(engines);
+		return (engines != null ? Collections.unmodifiableList(engines) : null);
 	}
 
 	/**
@@ -96,7 +102,7 @@ public class BaseServer implements IWebSocketServer {
 	public List<IWebSocketConnector> getAllConnectors() {
 		ArrayList clients = new ArrayList();
 		for (Iterator i = engines.iterator(); i.hasNext();) {
-			clients.addAll(((IWebSocketEngine)i.next()).getConnectors());
+			clients.addAll(((IWebSocketEngine) i.next()).getConnectors());
 		}
 		return Collections.unmodifiableList(clients);
 	}

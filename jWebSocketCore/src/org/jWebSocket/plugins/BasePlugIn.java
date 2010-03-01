@@ -52,6 +52,14 @@ public abstract class BasePlugIn implements IPlugIn {
 	public abstract void connectorStopped(IWebSocketConnector aConnector);
 
 	/**
+	 *
+	 * @param aPlugInChain
+	 */
+	public void setPlugInChain(IPlugInChain aPlugInChain) {
+		plugInChain = aPlugInChain;
+	}
+
+	/**
 	 * @return the plugInChain
 	 */
 	public IPlugInChain getPlugInChain() {

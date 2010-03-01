@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.plugins;
 
+import java.util.List;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.api.IWebSocketEngine;
@@ -61,7 +62,22 @@ public interface IPlugInChain {
 	 */
 	void connectorStopped(IWebSocketConnector aConnector);
 
+	/**
+	 *
+	 * @return
+	 */
+	List<IPlugIn> getPlugIns();
+
+	/**
+	 * 
+	 * @param aPlugIn
+	 */
 	void addPlugIn(IPlugIn aPlugIn);
+
+	/**
+	 *
+	 * @param aPlugIn
+	 */
 	void removePlugIn(IPlugIn aPlugIn);
 
 }

@@ -15,6 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.plugins;
 
+import java.util.Iterator;
+import java.util.List;
 import javolution.util.FastList;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
@@ -30,6 +32,10 @@ public class PlugInChain implements IPlugInChain {
 	private FastList<IPlugIn> plugins = new FastList<IPlugIn>();
 	private IWebSocketServer server = null;
 
+	/**
+	 *
+	 * @param aServer
+	 */
 	public PlugInChain(IWebSocketServer aServer) {
 		server = aServer;
 	}
@@ -53,18 +59,17 @@ public class PlugInChain implements IPlugInChain {
 	/**
 	 *
 	 * @param aConnector
-	 * @param aObject
 	 * @return
 	 */
 	public PlugInResponse processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
 		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (int i = 0; i < plugins.size(); i++) {
-			plugins.get(i).processPacket(lPluginResponse, aConnector, aDataPacket);
+		for (Iterator<IPlugIn> i = plugins.iterator(); i.hasNext();) {
+			i.next().processPacket(lPluginResponse, aConnector, aDataPacket);
 			if (lPluginResponse.isChainAborted()) {
 				break;
 			}
 		}
-		return null;
+		return lPluginResponse;
 	}
 
 	/**
@@ -77,12 +82,31 @@ public class PlugInChain implements IPlugInChain {
 		}
 	}
 
-	public void addPlugIn(IPlugIn aPlugIn) {
-		plugins.add(aPlugIn);
+	/**
+	 *
+	 * @return
+	 */
+	public List<IPlugIn> getPlugIns() {
+		return plugins;
 	}
 
+
+	/**
+	 *
+	 * @param aPlugIn
+	 */
+	public void addPlugIn(IPlugIn aPlugIn) {
+		plugins.add(aPlugIn);
+		aPlugIn.setPlugInChain(this);
+	}
+
+	/**
+	 *
+	 * @param aPlugIn
+	 */
 	public void removePlugIn(IPlugIn aPlugIn) {
 		plugins.remove(aPlugIn);
+		aPlugIn.setPlugInChain(null);
 	}
 
 	/**
@@ -91,4 +115,6 @@ public class PlugInChain implements IPlugInChain {
 	public IWebSocketServer getServer() {
 		return server;
 	}
+
+
 }
