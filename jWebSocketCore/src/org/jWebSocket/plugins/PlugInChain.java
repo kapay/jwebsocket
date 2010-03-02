@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Listener Chain for incoming requests (per server)
+//	jWebSocket - Plug in chain for incoming requests (per server)
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -15,9 +15,9 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.plugins;
 
-import java.util.Iterator;
 import java.util.List;
 import javolution.util.FastList;
+import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
 import org.jWebSocket.api.IWebSocketEngine;
@@ -29,6 +29,7 @@ import org.jWebSocket.api.IWebSocketServer;
  */
 public class PlugInChain implements IPlugInChain {
 
+	private static Logger log = Logger.getLogger(PlugInChain.class);
 	private FastList<IPlugIn> plugins = new FastList<IPlugIn>();
 	private IWebSocketServer server = null;
 
@@ -51,8 +52,18 @@ public class PlugInChain implements IPlugInChain {
 	 * @param aConnector
 	 */
 	public void connectorStarted(IWebSocketConnector aConnector) {
-		for (int i = 0; i < plugins.size(); i++) {
-			plugins.get(i).connectorStarted(aConnector);
+		log.debug("Notifying plug-ins that connector started...");
+		try {
+			for (IPlugIn plugIn : getPlugIns()) {
+				try {
+					// log.debug("Notifying plug-in " + plugIn + " that connector started...");
+					plugIn.connectorStarted(aConnector);
+				} catch (Exception ex) {
+					log.error("Connector started (1): " + ex.getClass().getName() + ": " + ex.getMessage());
+				}
+			}
+		} catch (Exception ex) {
+			log.error("Connector started (2): " + ex.getClass().getName() + ": " + ex.getMessage());
 		}
 	}
 
@@ -62,9 +73,15 @@ public class PlugInChain implements IPlugInChain {
 	 * @return
 	 */
 	public PlugInResponse processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+		log.debug("Processing packet for plug-ins...");
 		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (Iterator<IPlugIn> i = plugins.iterator(); i.hasNext();) {
-			i.next().processPacket(lPluginResponse, aConnector, aDataPacket);
+		for (IPlugIn plugIn : getPlugIns()) {
+			try {
+				// log.debug("Processing packet for plug-in " + plugIn + "...");
+				plugIn.processPacket(lPluginResponse, aConnector, aDataPacket);
+			} catch (Exception ex) {
+				log.error("Processing packet: " + ex.getClass().getName() + ": " + ex.getMessage());
+			}
 			if (lPluginResponse.isChainAborted()) {
 				break;
 			}
@@ -77,8 +94,14 @@ public class PlugInChain implements IPlugInChain {
 	 * @param aConnector
 	 */
 	public void connectorStopped(IWebSocketConnector aConnector) {
-		for (int i = 0; i < plugins.size(); i++) {
-			plugins.get(i).connectorStopped(aConnector);
+		log.debug("Notifying plug-ins that connector stopped...");
+		for (IPlugIn plugIn : getPlugIns()) {
+			try {
+				// log.debug("Notifying plug-in " + plugIn + " that connector stopped...");
+				plugIn.connectorStopped(aConnector);
+			} catch (Exception ex) {
+				log.error("Connector stopped: " + ex.getClass().getName() + ": " + ex.getMessage());
+			}
 		}
 	}
 
@@ -89,7 +112,6 @@ public class PlugInChain implements IPlugInChain {
 	public List<IPlugIn> getPlugIns() {
 		return plugins;
 	}
-
 
 	/**
 	 *
@@ -115,6 +137,4 @@ public class PlugInChain implements IPlugInChain {
 	public IWebSocketServer getServer() {
 		return server;
 	}
-
-
 }

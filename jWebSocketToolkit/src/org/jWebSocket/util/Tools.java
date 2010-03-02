@@ -24,6 +24,11 @@ import java.util.Formatter;
  */
 public class Tools {
 
+	/**
+	 * returns the MD5 sum of the given string.
+	 * @param aMsg
+	 * @return
+	 */
 	public static String getMD5(String aMsg) {
 		MessageDigest md = null;
 		try {
@@ -42,4 +47,21 @@ public class Tools {
 		return null;
 	}
 
+	/**
+	 * returns the hex value of the given int.
+	 * @param aInt
+	 * @param aLen
+	 * @return
+	 */
+	public static String intToHex(int aInt, int aLen) {
+		String lRes = Integer.toHexString(aInt);
+		if (aLen > 0 && lRes.length() > aLen ) {
+			lRes = lRes.substring(0, aLen);
+		} else {
+			while(lRes.length() < aLen) {
+				lRes = "0" + lRes.substring(0, aLen);
+			}
+		}
+		return lRes;
+	}
 }

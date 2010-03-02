@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.api;
 
+import java.net.InetAddress;
 import org.jWebSocket.kit.Header;
 
 /**
@@ -123,5 +124,17 @@ public interface IWebSocketConnector {
 	 * @return
 	 */
 	String generateUID();
+
+	/**
+	 *
+	 * @return
+	 */
+	int getRemotePort();
+
+	/**
+	 *
+	 * @return
+	 */
+	InetAddress getRemoteHost();
 
 }

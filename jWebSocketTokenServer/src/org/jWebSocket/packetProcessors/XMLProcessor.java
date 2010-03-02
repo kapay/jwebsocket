@@ -16,6 +16,7 @@
 package org.jWebSocket.packetProcessors;
 
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.token.Token;
 
@@ -24,6 +25,8 @@ import org.jWebSocket.token.Token;
  * @author aschulze
  */
 public class XMLProcessor  {
+
+	private static Logger log = Logger.getLogger(XMLProcessor.class);
 
 	public static Token packetToToken(IDataPacket aDataPacket) {
 		// todo: implement!

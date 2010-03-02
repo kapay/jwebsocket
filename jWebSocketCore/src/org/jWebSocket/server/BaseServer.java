@@ -1,13 +1,25 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - Basic server (dispatcher)
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//	more details.
+//	You should have received a copy of the GNU General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/>.
+//	---------------------------------------------------------------------------
 package org.jWebSocket.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javolution.util.FastList;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
@@ -23,6 +35,9 @@ public class BaseServer implements IWebSocketServer {
 
 	private FastList<IWebSocketEngine> engines = null;
 
+	/**
+	 *
+	 */
 	public BaseServer() {
 		engines = new FastList<IWebSocketEngine>();
 	}
@@ -92,6 +107,7 @@ public class BaseServer implements IWebSocketServer {
 
 	/**
 	 * returns all connectors of the passed engine.
+	 * @param aEngine
 	 * @return the engines
 	 */
 	public List<IWebSocketConnector> getConnectors(IWebSocketEngine aEngine) {
@@ -106,6 +122,39 @@ public class BaseServer implements IWebSocketServer {
 		ArrayList clients = new ArrayList();
 		for (Iterator i = engines.iterator(); i.hasNext();) {
 			clients.addAll(((IWebSocketEngine) i.next()).getConnectors());
+		}
+		return Collections.unmodifiableList(clients);
+	}
+
+	/**
+	 * returns only those connectors that match the passed shared variables.
+	 * @param aFilter
+	 * @return
+	 */
+	public List<IWebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
+		ArrayList clients = new ArrayList();
+		for (IWebSocketEngine lEngine : engines) {
+			for (IWebSocketConnector lConnector : lEngine.getConnectors()) {
+				boolean lMatch = true;
+				for (String lKey : aFilter.keySet()) {
+					Object lVarVal = lConnector.getVar(lKey);
+					lMatch = (lVarVal != null);
+					if (lMatch) {
+						Object lFilterVal = aFilter.get(lKey);
+						if (lVarVal instanceof String && lFilterVal instanceof String) {
+							lMatch = ((String) lVarVal).matches((String) lFilterVal);
+						} else {
+							lMatch = lVarVal.equals(lFilterVal);
+						}
+						if (!lMatch) {
+							break;
+						}
+					}
+				}
+				if (lMatch) {
+					clients.add(lConnector);
+				}
+			}
 		}
 		return Collections.unmodifiableList(clients);
 	}

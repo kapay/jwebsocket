@@ -16,8 +16,10 @@
 package org.jWebSocket.packetProcessors;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.kit.DataPacket;
 import org.jWebSocket.token.Token;
@@ -27,6 +29,8 @@ import org.jWebSocket.token.Token;
  * @author aschulze
  */
 public class CSVProcessor  {
+
+	private static Logger log = Logger.getLogger(CSVProcessor.class);
 
 	public static Token packetToToken(IDataPacket aDataPacket) {
 		Token lToken = new Token();
@@ -51,6 +55,7 @@ public class CSVProcessor  {
 				}
 			}
 		} catch (UnsupportedEncodingException ex) {
+			log.error(ex.getClass().getName() + ": " + ex.getMessage());
 		}
 		return lToken;
 	}
@@ -63,9 +68,9 @@ public class CSVProcessor  {
 		return ("\"" + aString + "\"");
 	}
 
-	private static String listToCSV(List aList) {
+	private static String collectionToCSV(Collection aCollection) {
 		String lRes = "";
-		for (Object lItem : aList) {
+		for (Object lItem : aCollection) {
 			String llRes = objectToCSV(lItem);
 			lRes += llRes + "|";
 		}
@@ -76,16 +81,17 @@ public class CSVProcessor  {
 		return lRes;
 	}
 
+
 	private static String objectToCSV(Object aObj) {
 		String lRes;
 		if( aObj == null ) {
 			lRes = "null";
 		} else if (aObj instanceof String) {
 			lRes = stringToCSV((String) aObj);
-		} else if (aObj instanceof List) {
-			lRes = listToCSV((List) aObj);
+		} else if (aObj instanceof Collection) {
+			lRes = collectionToCSV((Collection) aObj);
 		} else {
-			lRes = aObj.toString();
+			lRes = "\"" + aObj.toString() + "\"";
 		}
 		return lRes;
 	}
@@ -104,6 +110,7 @@ public class CSVProcessor  {
 		try {
 			lPacket = new DataPacket(lData, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
+			log.error(ex.getClass().getName() + ": " + ex.getMessage());
 		}
 		return lPacket;
 	}

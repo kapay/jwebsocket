@@ -37,7 +37,7 @@ public class Logging {
 	public static void initLogs(String aLogLevel) {
 		PatternLayout layout = new PatternLayout();
 		// layout.setConversionPattern("%d{HH:mm:ss,SSS} %p - %C{1}: %m%n");
-		layout.setConversionPattern("%d{HH:mm:ss,SSS} %-5p - %C{1}: %m%n");
+		layout.setConversionPattern("%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n");
 		// delete all potentially already existing appenders
 		rootLogger.removeAllAppenders();
 

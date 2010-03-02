@@ -15,7 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.server;
 
-import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.config.Config;
@@ -104,10 +103,10 @@ public class TokenServer extends BaseServer {
 	public void processPacket(IWebSocketEngine aEngine, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
 		Token lToken = packetToToken(aConnector, aDataPacket);
 		if (lToken != null) {
-			log.debug("Processing token '" + lToken.toString() + "'...");
+			log.debug("Processing token '" + lToken.toString() + " from '" + aConnector + "'...");
 			plugInChain.processToken(aConnector, lToken);
 		} else {
-			log.error("Packet could not be converted into token.");
+			log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
 		}
 	}
 
@@ -126,7 +125,7 @@ public class TokenServer extends BaseServer {
 		} else if (lSubProt.equals(Config.SUB_PROT_XML)) {
 			lPacket = XMLProcessor.tokenToPacket(aToken);
 		}
-		log.debug("Sending token '" + aToken.toString() + "'...");
+		log.debug("Sending token '" + aToken + "' to '" + aConnector + "'...");
 		super.sendPacket(aConnector, lPacket);
 	}
 
@@ -138,8 +137,9 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 */
 	public void broadcastToken(Token aToken) {
-		for (Iterator<IWebSocketConnector> i = getAllConnectors().iterator(); i.hasNext();) {
-			sendToken(i.next(), aToken);
+		log.debug("Broadcasting token '" + aToken + " to all connectors...");
+		for (IWebSocketConnector lConnector : getAllConnectors()) {
+			sendToken(lConnector, aToken);
 		}
 	}
 
@@ -151,7 +151,7 @@ public class TokenServer extends BaseServer {
 	public Token createResponse(Token aInToken) {
 		String lTokenId = aInToken.getString("utid");
 		String lType = aInToken.getString("type");
-		Token lResToken = new Token("result");
+		Token lResToken = new Token("response");
 		lResToken.put("code", 0);
 		lResToken.put("msg", "ok");
 		if (lTokenId != null) {

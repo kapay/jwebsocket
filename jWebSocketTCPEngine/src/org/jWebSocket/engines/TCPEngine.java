@@ -45,6 +45,12 @@ public class TCPEngine extends BaseEngine {
 	private ServerSocket serverSocket = null;
 	private boolean isRunning = false;
 
+	/**
+	 *
+	 * @param aPort
+	 * @param aSessionTimeout
+	 * @throws WebSocketException
+	 */
 	public TCPEngine(int aPort, int aSessionTimeout)
 		throws WebSocketException {
 		startEngine(aPort, aSessionTimeout);
@@ -87,8 +93,16 @@ public class TCPEngine extends BaseEngine {
 			serverSocket.close();
 			log.info("TCP engine stopped.");
 		} catch (Exception ex) {
-			log.error("Error on stopping TCP engine:" + ex.getMessage());
+			log.error("Stopping TCP engine:" + ex.getMessage());
 		}
+	}
+
+	@Override
+	public void connectorStopped(IWebSocketConnector aConnector) {
+		super.connectorStopped(aConnector);
+		// once a connector stopped remove it from the list of connectors
+		log.debug("Removing connector from engine...");
+		getConnectors().remove(aConnector);
 	}
 
 	/**
@@ -158,8 +172,7 @@ public class TCPEngine extends BaseEngine {
 					String[] lKeyValuePair = lArgs[i].split(Config.KEYVAL_SEPARATOR, 2);
 					if (lKeyValuePair.length == 2) {
 						args.put(lKeyValuePair[0], lKeyValuePair[1]);
-						// uncomment for debug purposes
-						// System.out.println("BaseServer: arg" + i + ": " + lKeyValuePair[0] + "=" + lKeyValuePair[1]);
+						log.debug("arg" + i + ": " + lKeyValuePair[0] + "=" + lKeyValuePair[1]);
 					}
 				}
 			}
@@ -202,7 +215,7 @@ public class TCPEngine extends BaseEngine {
 
 	public void processPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
 		IWebSocketServer lServer = getServer();
-		if( lServer != null ) {
+		if (lServer != null) {
 			lServer.processPacket(this, aConnector, aDataPacket);
 		} else {
 			log.error("Engine has no server assigned.");
@@ -214,10 +227,17 @@ public class TCPEngine extends BaseEngine {
 		return true;
 	}
 
+	/**
+	 *
+	 */
 	public class ServerProcessor implements Runnable {
 
 		private IWebSocketEngine engine = null;
 
+		/**
+		 *
+		 * @param aEngine
+		 */
 		public ServerProcessor(IWebSocketEngine aEngine) {
 			engine = aEngine;
 		}
@@ -250,22 +270,29 @@ public class TCPEngine extends BaseEngine {
 						clientSocket.setSoTimeout(lSessionTimeout);
 
 						// create connector and pass header
+						// log.debug("Instantiating connector...");
 						IWebSocketConnector connector = new TCPConnector(engine, clientSocket);
+						// log.debug("Setting header to engine...");
 						connector.setHeader(header);
+						// log.debug("Adding connector to engine...");
 						getConnectors().add(connector);
+						log.debug("Starting connector...");
 						connector.startConnector();
+						// log.debug("Notifying server...");
 
 						// allow descendant classes to handle connector started event
 						connectorStarted(connector);
 
 					} catch (UnsupportedEncodingException ex) {
-						log.error("UnsupportedEncodingException: " + ex.getMessage());
+						log.error("(encoding) " + ex.getClass().getName() + ": " + ex.getMessage());
 					} catch (IOException ex) {
-						log.error("IOException: " + ex.getMessage());
+						log.error("(io) " + ex.getClass().getName() + ": " + ex.getMessage());
+					} catch (Exception ex) {
+						log.error("(other) " + ex.getClass().getName() + ": " + ex.getMessage());
 					}
 				} catch (Exception ex) {
 					isRunning = false;
-					log.error("Exception on starting ServerSocket " + ex.getMessage());
+					log.error("(accept) " + ex.getClass().getName() + ": " + ex.getMessage());
 				}
 			}
 

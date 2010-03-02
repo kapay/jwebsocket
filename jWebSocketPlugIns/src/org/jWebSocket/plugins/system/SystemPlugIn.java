@@ -15,6 +15,9 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.plugins.system;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IWebSocketConnector;
@@ -34,6 +37,15 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logger.getLogger(SystemPlugIn.class);
 	private static final String NS_SYSTEM_DEFAULT = Config.NS_BASE + ".plugins.system";
+	// specify token types processed by system plug-in
+	private static final String TT_WELCOME = "welcome";
+	private static final String TT_GOODBYE = "goodBye";
+	private static final String TT_EVENT = "event";
+	private static final String TT_LOGIN = "login";
+	private static final String TT_LOGOUT = "logout";
+	private static final String TT_GETCLIENTS = "getClients";
+	private static final String TT_PING = "ping";
+	// specify shared connector variables
 	private static final String VAR_SESSIONID = NS_SYSTEM_DEFAULT + ".sessionId";
 	private static final String VAR_USERNAME = NS_SYSTEM_DEFAULT + ".username";
 	private static final String VAR_GROUP = NS_SYSTEM_DEFAULT + ".group";
@@ -52,15 +64,17 @@ public class SystemPlugIn extends TokenPlugIn {
 		String lNS = aToken.getNS();
 
 		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
-			if (lType.equals("login")) {
+			if (lType.equals(TT_LOGIN)) {
 				login(aConnector, aToken);
 				aResponse.abortChain();
-			} else if (lType.equals("logout")) {
+			} else if (lType.equals(TT_LOGOUT)) {
 				logout(aConnector, aToken);
 				aResponse.abortChain();
-			} else if (lType.equals("getClients")) {
+			} else if (lType.equals(TT_GETCLIENTS)) {
 				getClients(aConnector, aToken);
 				aResponse.abortChain();
+			} else if (lType.equals(TT_PING)) {
+				ping(aConnector, aToken);
 			}
 		}
 	}
@@ -70,7 +84,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		super.connectorStarted(aConnector);
 		Random rand = new Random(System.nanoTime());
 		setSessionId(aConnector, Tools.getMD5(aConnector.generateUID() + "." + rand.nextInt()));
-		sendWelcomeToken(aConnector);
+		sendWelcome(aConnector);
+
 		broadcastConnectEvent();
 	}
 
@@ -110,23 +125,26 @@ public class SystemPlugIn extends TokenPlugIn {
 	 *
 	 */
 	public void broadcastConnectEvent() {
+		log.debug("Broadcasting connect...");
 		TokenServer lServer = getServer();
+
 		// broadcast connect event to other clients of the jWebSocket network
-		Token lEventToken = new Token("event");
+		Token lEventToken = new Token(TT_EVENT);
 		lEventToken.put("name", "connect");
-		lEventToken.put("clientCount", getServer().getAllConnectors().size());
+		lEventToken.put("clientCount", lServer.getAllConnectors().size());
 
 		lServer.broadcastToken(lEventToken);
 	}
 
-	private void sendWelcomeToken(IWebSocketConnector aConnector) {
+	private void sendWelcome(IWebSocketConnector aConnector) {
+		log.debug("Sending welcome...");
 		TokenServer lServer = getServer();
 
 		// send "welcome" token to client
-		Token lOutToken = new Token("welcome");
-		lOutToken.put("vendor", Config.VENDOR);
-		lOutToken.put("version", Config.VERSION_STR);
-		lOutToken.put("usid", getSessionId(aConnector));
+		Token lWelcome = new Token(TT_WELCOME);
+		lWelcome.put("vendor", Config.VENDOR);
+		lWelcome.put("version", Config.VERSION_STR);
+		lWelcome.put("usid", getSessionId(aConnector));
 		/*
 		try {
 		lOutToken.put("timeout", this.getClientSocket().getSoTimeout());
@@ -134,27 +152,79 @@ public class SystemPlugIn extends TokenPlugIn {
 		lOutToken.put("timeout", -1);
 		}
 		 */
-		lServer.sendToken(aConnector, lOutToken);
+		lServer.sendToken(aConnector, lWelcome);
+	}
+
+	/**
+	 *
+	 */
+	private void broadcastLoginEvent(IWebSocketConnector aConnector) {
+		log.debug("Broadcasting login event...");
+		TokenServer lServer = getServer();
+
+		// broadcast login event to other clients of the jWebSocket network
+		Token lEvent = new Token(TT_EVENT);
+		lEvent.put("name", "login");
+		lEvent.put("username", getUsername(aConnector));
+		lEvent.put("clientCount", lServer.getAllConnectors().size());
+
+		lServer.broadcastToken(lEvent);
+	}
+
+	/**
+	 *
+	 */
+	private void broadcastLogoutEvent(IWebSocketConnector aConnector) {
+		log.debug("Broadcasting logout event...");
+		TokenServer lServer = getServer();
+
+		// broadcast login event to other clients of the jWebSocket network
+		Token lEvent = new Token(TT_EVENT);
+		lEvent.put("name", "logout");
+		lEvent.put("username", getUsername(aConnector));
+		lEvent.put("clientCount", lServer.getAllConnectors().size());
+
+		lServer.broadcastToken(lEvent);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aReason
+	 */
+	private void sendGoodBye(IWebSocketConnector aConnector, String aReason) {
+		log.debug("Sending good bye...");
+		TokenServer lServer = getServer();
+
+		// send "goodBye" token to client
+		Token lGoodBye = new Token(TT_GOODBYE);
+		lGoodBye.put("vendor", Config.VENDOR);
+		lGoodBye.put("version", Config.VERSION_STR);
+		lGoodBye.put("usid", getSessionId(aConnector));
+		// lGoodBye.put("port", this.getClientSocket().getPort());
+		if (aReason != null) {
+			lGoodBye.put("reason", aReason);
+		}
+
+		lServer.sendToken(aConnector, lGoodBye);
 	}
 
 	private void login(IWebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		Token lResponseToken = lServer.createResponse(aToken);
 
-		log.debug("Processing 'login'...");
-
 		String lUsername = aToken.getString("username");
+		// TODO: Add authentication and password check
 		String lPassword = aToken.getString("password");
 		String lGroup = aToken.getString("group");
+
+		log.debug("Processing 'login' (username='" + lUsername + "', group='" + lGroup + "') from '" + aConnector + "'...");
+
 		if (lUsername != null) {
-			log.debug("login " + lUsername);
 			lResponseToken.put("username", lUsername);
 			// set shared variables
 			setUsername(aConnector, lUsername);
 			setGroup(aConnector, lGroup);
-
-			// broadcast "login event" to other clients
-			// broadcastLoginEvent();
 		} else {
 			lResponseToken.put("code", -1);
 			lResponseToken.put("msg", "missing arguments for 'login' command");
@@ -162,26 +232,32 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		// send response to client
 		lServer.sendToken(aConnector, lResponseToken);
+
+		// if successfully logged in...
+		if (lUsername != null) {
+			// broadcast "login event" to other clients
+			broadcastLoginEvent(aConnector);
+		}
 	}
 
 	private void logout(IWebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
-		Token lResponseToken = lServer.createResponse(aToken);
+		Token lResponse = lServer.createResponse(aToken);
 
-		log.debug("Processing 'logout'...");
+		log.debug("Processing 'logout' (username='" + getUsername(aConnector) + "') from '" + aConnector + "'...");
 
-		if (aConnector.getBoolean(NS_SYSTEM_DEFAULT + ".isLoggedIn")) {
+		if (getUsername(aConnector) != null) {
 			// send good bye token as response to client
-			// sendGoodByeToken("logout");
+			sendGoodBye(aConnector, "logout");
 			// and broadcast the logout event
-			// broadcastLogoutEvent();
+			broadcastLogoutEvent(aConnector);
 			// resetting the username is the only required signal for logout
 			removeUsername(aConnector);
 			removeGroup(aConnector);
 		} else {
-			lResponseToken.put("code", -1);
-			lResponseToken.put("msg", "not logged in");
-			lServer.sendToken(aConnector, lResponseToken);
+			lResponse.put("code", -1);
+			lResponse.put("msg", "not logged in");
+			lServer.sendToken(aConnector, lResponse);
 		}
 	}
 
@@ -208,18 +284,43 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
+	public void ping(IWebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		String lEcho = aToken.getString("echo");
+
+		log.debug("Processing 'Ping' (echo='" + lEcho + "') from '" + aConnector + "'...");
+
+		if (lEcho.equalsIgnoreCase("true")) {
+			Token lResponseToken = lServer.createResponse(aToken);
+			// TODO: here could optionally send a time stamp
+			// TODO: implement response time on client!
+			// lResponseToken.put("","");
+			lServer.sendToken(aConnector, lResponseToken);
+		}
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
 	public void getClients(IWebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		Token lResponseToken = lServer.createResponse(aToken);
 
-		log.debug("Processing 'getClients'...");
+		log.debug("Processing 'getClients' from '" + aConnector + "'...");
 
-		if (aConnector.getBoolean(NS_SYSTEM_DEFAULT + ".isLoggedIn")) {
+		if (getUsername(aConnector) != null) {
 			String lGroup = aToken.getString("group");
 			Integer lMode = aToken.getInteger("mode", 0);
-			// List lClients = lServer.getAllClients(lGROUP, lMode);
-			// lResponseToken.put("clients", lClients);
-			// lResponseToken.put("count", lClients.size());
+			HashMap lFilter = new HashMap();
+			lFilter.put(VAR_USERNAME, ".*");
+			List<String> listOut = new ArrayList();
+			for (IWebSocketConnector lConnector : lServer.selectConnectors(lFilter)) {
+				listOut.add(getUsername(lConnector) + "@" + lConnector.getRemotePort());
+			}
+			lResponseToken.put("clients", listOut);
+			lResponseToken.put("count", listOut.size());
 		} else {
 			lResponseToken.put("code", -1);
 			lResponseToken.put("msg", "not logged in");

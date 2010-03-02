@@ -24,7 +24,6 @@ import org.jWebSocket.kit.WebSocketException;
 import org.jWebSocket.logging.Logging;
 import org.jWebSocket.plugins.TokenPlugInChain;
 import org.jWebSocket.plugins.streaming.DemoPlugIn;
-import org.jWebSocket.plugins.system.KeepAlivePlugIn;
 import org.jWebSocket.plugins.rpc.RPCPlugIn;
 import org.jWebSocket.plugins.system.SystemPlugIn;
 import org.jWebSocket.server.TokenServer;
@@ -103,8 +102,6 @@ public class JWebSocket {
 				server.addEngine(engine);
 				// add the SystemPlugIn listener (for the jWebSocket default functionality)
 				plugInChain.addPlugIn(new SystemPlugIn());
-				// add the keep alive plug-in
-				plugInChain.addPlugIn(new KeepAlivePlugIn());
 				// add the RPCPlugIn plug-in
 				plugInChain.addPlugIn(new RPCPlugIn());
 				// add the demo listener (for the time stream demo)

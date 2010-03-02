@@ -137,8 +137,8 @@ public class Token {
 		String lRes = "{";
 		for (Iterator<String> i = items.keySet().iterator(); i.hasNext();) {
 			String lKey = i.next();
-			lRes += lKey + "=" + items.get(lKey) + ( i.hasNext() ? "," : "}" );
+			lRes += lKey + "=" + items.get(lKey) + ( i.hasNext() ? "," : "" );
 		}
-		return lRes;
+		return lRes + "}";
 	}
 }

@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import org.apache.log4j.Logger;
@@ -31,6 +32,12 @@ public class TCPConnector extends BaseConnector {
 	public TCPConnector(IWebSocketEngine aEngine, Socket aClientSocket) {
 		super(aEngine);
 		clientSocket = aClientSocket;
+		try {
+			br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
+			os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName() + " instantiating " + getClass().getSimpleName() + ": " + ex.getMessage());
+		}
 	}
 
 	@Override
@@ -55,14 +62,14 @@ public class TCPConnector extends BaseConnector {
 
 	@Override
 	public void sendPacket(IDataPacket aDataPacket) {
-		os.write(0);
 		try {
+			os.write(0);
 			os.write(aDataPacket.getByteArray());
+			os.write(255);
+			os.flush();
 		} catch (IOException ex) {
-			log.error(ex.getClass().getName() + ": " + ex.getMessage());
+			log.error(ex.getClass().getSimpleName() + " sending data packet: " + ex.getMessage());
 		}
-		os.write(255);
-		os.flush();
 	}
 
 	public Socket getClientSocket() {
@@ -83,9 +90,6 @@ public class TCPConnector extends BaseConnector {
 			IWebSocketEngine engine = getEngine();
 
 			try {
-				br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
-				os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
-
 				// start client listener loop
 				isRunning = true;
 				while (isRunning) {
@@ -93,10 +97,12 @@ public class TCPConnector extends BaseConnector {
 					try {
 						// TODO: optimize protocol packet handling!
 						line = br.readLine();
+						// if line is null the end of the stream is reached
+						// this means the connection has been closed
+						// by the client
 						if (line == null) {
-							// System.out.println("line is null");
 							// stream has been closed
-							engine.connectorStopped(connector); // due to timeout
+							// engine.connectorStopped(connector);
 						} else {
 							// cut off potential starting 0x00 and 0xff characters
 							byte[] ba = line.getBytes();
@@ -105,20 +111,32 @@ public class TCPConnector extends BaseConnector {
 							while (i < ba.length && ba[i] != 0) {
 								i++;
 							}
-							if( i < ba.length ) {
+							if (i < ba.length) {
 								i++;
 								line = new String(ba, i, ba.length - i, "UTF-8");
 							} else {
 								line = null;
 							}
 						}
+
 					} catch (SocketTimeoutException ex) {
-						log.error(ex.getClass().getName() + ": " + ex.getMessage());
+						log.error("(timeout) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+						line = null;
+					} catch (Exception ex) {
+						log.error("(other) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 						line = null;
 					}
+
 					if (line != null) {
 						DataPacket dataPacket = new DataPacket(line);
-						engine.processPacket(connector, dataPacket);
+						// ensure that potential exceptions in a plug in
+						// do not abort the connector
+						try {
+							engine.processPacket(connector, dataPacket);
+						} catch (Exception ex) {
+							log.error(ex.getClass().getSimpleName() + "in processPacket of connector " + connector.getClass().getSimpleName() + ": " + ex.getMessage());
+							line = null;
+						}
 					} else {
 						isRunning = false;
 					}
@@ -134,7 +152,7 @@ public class TCPConnector extends BaseConnector {
 
 			} catch (Exception ex) {
 				// ignore this exception for now
-				log.error(ex.getClass().getName() + ": " + ex.getMessage());
+				log.error("(close) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			}
 		}
 	}
@@ -143,6 +161,26 @@ public class TCPConnector extends BaseConnector {
 	public String generateUID() {
 		String lUID = clientSocket.getInetAddress().getHostAddress() + "@" + clientSocket.getPort();
 		return lUID;
+	}
+
+	@Override
+	public int getRemotePort() {
+		return clientSocket.getPort();
+	}
+
+	@Override
+	public InetAddress getRemoteHost() {
+		return clientSocket.getInetAddress();
+	}
+
+	@Override
+	public String toString() {
+		String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
+		String lUsername = getString("org.jWebSocket.plugins.system.username");
+		if( lUsername != null ) {
+			lRes += " (" + lUsername + ")";
+		}
+		return lRes;
 	}
 
 }

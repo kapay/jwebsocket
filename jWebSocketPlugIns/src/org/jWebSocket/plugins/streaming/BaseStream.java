@@ -30,10 +30,15 @@ public class BaseStream extends Thread {
 	private FastList<IWebSocketConnector> clients = new FastList<IWebSocketConnector>();
 	private boolean isRunning = false;
 	private String streamID = null;
+	/**
+	 *
+	 */
 	public final FastList<Object> queue = new FastList<Object>();
 
 	/**
 	 *
+	 *
+	 * @param aStreamID
 	 */
 	public BaseStream(String aStreamID) {
 		this.streamID = aStreamID;
@@ -41,6 +46,8 @@ public class BaseStream extends Thread {
 
 	/**
 	 *
+	 *
+	 * @param aClient
 	 */
 	public void registerClient(IWebSocketConnector aClient) {
 		clients.add(aClient);
@@ -48,6 +55,9 @@ public class BaseStream extends Thread {
 
 	/**
 	 *
+	 *
+	 * @param aClient
+	 * @return
 	 */
 	public boolean isClientRegistered(IWebSocketConnector aClient) {
 		return clients.indexOf(aClient) >= 0;
@@ -55,6 +65,8 @@ public class BaseStream extends Thread {
 
 	/**
 	 *
+	 *
+	 * @param aClient
 	 */
 	public void unregisterClient(IWebSocketConnector aClient) {
 		clients.remove(aClient);
@@ -62,6 +74,8 @@ public class BaseStream extends Thread {
 
 	/**
 	 *
+	 *
+	 * @param aServer
 	 */
 	public void registerAllClients(BaseServer aServer) {
 		// clients.add(aServer);
@@ -69,6 +83,8 @@ public class BaseStream extends Thread {
 
 	/**
 	 *
+	 *
+	 * @param aServer
 	 */
 	public void unregisterAllClients(BaseServer aServer) {
 		// clients.remove(aServer);
@@ -76,6 +92,8 @@ public class BaseStream extends Thread {
 
 	/**
 	 *
+	 *
+	 * @param aObject
 	 */
 	public void put(Object aObject) {
 		synchronized (queue) {
@@ -86,6 +104,11 @@ public class BaseStream extends Thread {
 		}
 	}
 
+	/**
+	 *
+	 * @param aClient
+	 * @param aObject
+	 */
 	protected void processClient(IWebSocketConnector aClient, Object aObject) {
 		/*
 		try {
@@ -98,6 +121,10 @@ public class BaseStream extends Thread {
 		 */
 	}
 
+	/**
+	 *
+	 * @param aObject
+	 */
 	protected void processItem(Object aObject) {
 		for (int i = 0; i < clients.size(); i++) {
 			processClient(clients.get(i), aObject);

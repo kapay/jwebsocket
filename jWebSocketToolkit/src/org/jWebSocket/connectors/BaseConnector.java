@@ -1,5 +1,6 @@
 package org.jWebSocket.connectors;
 
+import java.net.InetAddress;
 import java.util.HashMap;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.api.IWebSocketConnector;
@@ -144,4 +145,11 @@ public class BaseConnector implements IWebSocketConnector {
 		return null;
 	}
 
+	public int getRemotePort() {
+		return -1;
+	}
+
+	public InetAddress getRemoteHost() {
+		return null;
+	}
 }

@@ -16,9 +16,11 @@
 package org.jWebSocket.packetProcessors;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.lang.text.StrTokenizer;
+import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.kit.DataPacket;
 import org.jWebSocket.token.Token;
@@ -28,6 +30,8 @@ import org.jWebSocket.token.Token;
  * @author aschulze
  */
 public class JSONProcessor {
+
+	private static Logger log = Logger.getLogger(JSONProcessor.class);
 
 	public static Token packetToToken(IDataPacket aDataPacket) {
 		Token lToken = new Token();
@@ -52,6 +56,7 @@ public class JSONProcessor {
 				}
 			}
 		} catch (UnsupportedEncodingException ex) {
+			log.error(ex.getClass().getName() + ": " + ex.getMessage());
 		}
 		return lToken;
 	}
@@ -60,16 +65,17 @@ public class JSONProcessor {
 		return ("\"" + aString + "\"");
 	}
 
-	private static String listToJSON(List aList) {
+	private static String collectionToJSON(Collection aCollection) {
 		String lRes = "";
-		for (Object lItem : aList) {
+		for (Object lItem : aCollection) {
 			String llRes = objectToJSON(lItem);
 			lRes += llRes + ",";
 		}
 		if (lRes.length() > 1) {
 			lRes = lRes.substring(0, lRes.length() - 1);
 		}
-		return ("[" + lRes + "]");
+		lRes = "[" + lRes + "]";
+		return lRes;
 	}
 
 	private static String objectToJSON(Object aObj) {
@@ -78,10 +84,10 @@ public class JSONProcessor {
 			lRes = "null";
 		} else if (aObj instanceof String) {
 			lRes = stringToJSON((String) aObj);
-		} else if (aObj instanceof List) {
-			lRes = listToJSON((List) aObj);
+		} else if (aObj instanceof Collection) {
+			lRes = collectionToJSON((Collection) aObj);
 		} else {
-			lRes = aObj.toString();
+			lRes = "\"" + aObj.toString() + "\"";
 		}
 		return lRes;
 	}
@@ -101,6 +107,7 @@ public class JSONProcessor {
 		try {
 			lPacket = new DataPacket(lData, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
+			log.error(ex.getClass().getName() + ": " + ex.getMessage());
 		}
 		return lPacket;
 	}

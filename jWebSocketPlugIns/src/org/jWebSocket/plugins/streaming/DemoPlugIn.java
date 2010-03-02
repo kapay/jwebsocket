@@ -17,6 +17,7 @@ package org.jWebSocket.plugins.streaming;
 
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.config.Config;
 import org.jWebSocket.connectors.BaseConnector;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
@@ -31,8 +32,10 @@ public class DemoPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logger.getLogger(DemoPlugIn.class);
 	private TimeStream timeStream = null;
+	private String NS_DEMO_DEFAULT = Config.NS_BASE + ".plugins.demo";
 
 	public DemoPlugIn() {
+		this.setNamespace(NS_DEMO_DEFAULT);
 		timeStream = new TimeStream("timeStream");
 		timeStream.start();
 	}
@@ -40,26 +43,30 @@ public class DemoPlugIn extends TokenPlugIn {
 	@Override
 	public void processToken(PlugInResponse aResponse, IWebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
+		String lNS = aToken.getNS();
 
 		String lStream;
-		if (lType.equals("regAtStream")) {
-			log.debug("Processing '" + lType + "'...");
-			lStream = (String) aToken.get("stream");
-			if (!timeStream.isClientRegistered(aConnector)) {
-				log.debug("Registering client at stream '" + lStream + "'...");
-				timeStream.registerClient(aConnector);
+ 		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+
+			if (lType.equals("regAtStream")) {
+				log.debug("Processing '" + lType + "'...");
+				lStream = (String) aToken.get("stream");
+				if (!timeStream.isClientRegistered(aConnector)) {
+					log.debug("Registering client at stream '" + lStream + "'...");
+					timeStream.registerClient(aConnector);
+				}
+				// else...
+				// todo: error handling
+			} else if (lType.equals("unregFromStream")) {
+				log.debug("Processing '" + lType + "'...");
+				lStream = (String) aToken.get("stream");
+				if (timeStream.isClientRegistered(aConnector)) {
+					log.debug("Unregistering client from stream '" + lStream + "'...");
+					timeStream.unregisterClient(aConnector);
+				}
+				// else...
+				// TODO: implement error handling
 			}
-			// else...
-			// todo: error handling
-		} else if (lType.equals("unregFromStream")) {
-			log.debug("Processing '" + lType + "'...");
-			lStream = (String) aToken.get("stream");
-			if (timeStream.isClientRegistered(aConnector)) {
-				log.debug("Unregistering client from stream '" + lStream + "'...");
-				timeStream.unregisterClient(aConnector);
-			}
-			// else...
-			// todo: error handling
 		}
 	}
 
