@@ -16,8 +16,7 @@
 package org.jWebSocket.plugins.streaming;
 
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.token.Token;
+import org.jWebSocket.server.TokenServer;
 
 /**
  *
@@ -26,20 +25,24 @@ import org.jWebSocket.token.Token;
 public class TokenStream extends BaseStream {
 
 	private static Logger log = Logger.getLogger(TokenStream.class);
+	private TokenServer server = null;
 
 	/**
 	 *
+	 *
+	 * @param aStreamID
+	 * @param aServer
 	 */
-	public TokenStream(String aStreamID) {
+	public TokenStream(String aStreamID, TokenServer aServer) {
 		super(aStreamID);
+		server = aServer;
 	}
 
-	@Override
-	protected void processClient(IWebSocketConnector aClient, Object aObject) {
-		Token lEventToken = new Token("event");
-		lEventToken.put( "name", "stream" );
-		lEventToken.put("msg", aObject);
-		lEventToken.put("streamID", getStreamID());
-		// ((TokenConnector) aClient).sendToken(lEventToken);
+	/**
+	 * @return the server
+	 */
+	public TokenServer getServer() {
+		return server;
 	}
+
 }

@@ -17,6 +17,9 @@ package org.jWebSocket.plugins.streaming;
 
 import java.util.Date;
 import org.apache.log4j.Logger;
+import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.server.TokenServer;
+import org.jWebSocket.token.Token;
 
 /**
  *
@@ -31,8 +34,8 @@ public class TimeStream extends TokenStream {
 	/**
 	 *
 	 */
-	public TimeStream(String aStreamID) {
-		super(aStreamID);
+	public TimeStream(String aStreamID, TokenServer aServer) {
+		super(aStreamID, aServer);
 		startTimerThread();
 	}
 
@@ -46,6 +49,15 @@ public class TimeStream extends TokenStream {
 		isRunning = false;
 	}
 
+	@Override
+	protected void processConnector(IWebSocketConnector aConnector, Object aObject) {
+		try {
+			getServer().sendToken(aConnector, (Token)aObject);
+		} catch (Exception ex) {
+			log.error("(processConnector) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
+	}
+
 	public class TimerThread implements Runnable {
 
 		@Override
@@ -55,15 +67,19 @@ public class TimeStream extends TokenStream {
 			while (isRunning) {
 				try {
 					sleep(1000);
-					String lData = new Date().toString();
+
+					Token lEventToken = new Token("event");
+					lEventToken.put("name", "stream");
+					lEventToken.put("msg", new Date().toString());
+					lEventToken.put("streamID", getStreamID());
+
 					// log.debug("Time streamer queues '" + lData + "'...");
-					put(lData);
+					put(lEventToken);
 				} catch (InterruptedException ex) {
-					log.error("Exception: " + ex.getMessage());
+					log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
 			}
 			log.debug("Time stream stopped.");
 		}
 	}
-
 }

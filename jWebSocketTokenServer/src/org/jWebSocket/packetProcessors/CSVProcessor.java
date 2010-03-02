@@ -55,7 +55,7 @@ public class CSVProcessor  {
 				}
 			}
 		} catch (UnsupportedEncodingException ex) {
-			log.error(ex.getClass().getName() + ": " + ex.getMessage());
+			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 		return lToken;
 	}
@@ -110,7 +110,7 @@ public class CSVProcessor  {
 		try {
 			lPacket = new DataPacket(lData, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
-			log.error(ex.getClass().getName() + ": " + ex.getMessage());
+			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 		return lPacket;
 	}

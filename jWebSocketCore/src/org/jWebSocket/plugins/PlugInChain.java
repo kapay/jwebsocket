@@ -59,11 +59,11 @@ public class PlugInChain implements IPlugInChain {
 					// log.debug("Notifying plug-in " + plugIn + " that connector started...");
 					plugIn.connectorStarted(aConnector);
 				} catch (Exception ex) {
-					log.error("Connector started (1): " + ex.getClass().getName() + ": " + ex.getMessage());
+					log.error("Connector started (1): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
 			}
 		} catch (Exception ex) {
-			log.error("Connector started (2): " + ex.getClass().getName() + ": " + ex.getMessage());
+			log.error("Connector started (2): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 	}
 
@@ -80,7 +80,7 @@ public class PlugInChain implements IPlugInChain {
 				// log.debug("Processing packet for plug-in " + plugIn + "...");
 				plugIn.processPacket(lPluginResponse, aConnector, aDataPacket);
 			} catch (Exception ex) {
-				log.error("Processing packet: " + ex.getClass().getName() + ": " + ex.getMessage());
+				log.error("Processing packet: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			}
 			if (lPluginResponse.isChainAborted()) {
 				break;
@@ -100,7 +100,7 @@ public class PlugInChain implements IPlugInChain {
 				// log.debug("Notifying plug-in " + plugIn + " that connector stopped...");
 				plugIn.connectorStopped(aConnector);
 			} catch (Exception ex) {
-				log.error("Connector stopped: " + ex.getClass().getName() + ": " + ex.getMessage());
+				log.error("Connector stopped: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			}
 		}
 	}

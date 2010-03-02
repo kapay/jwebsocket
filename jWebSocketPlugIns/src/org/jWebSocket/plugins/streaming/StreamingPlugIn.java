@@ -30,6 +30,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logger.getLogger(StreamingPlugIn.class);
 	private String NS_STREAMING_DEFAULT = Config.NS_BASE + ".plugins.streaming";
+	private TimeStream timeStream = null;
 
 	/**
 	 *
@@ -40,17 +41,46 @@ public class StreamingPlugIn extends TokenPlugIn {
 	}
 
 	@Override
+	public void connectorStarted(IWebSocketConnector aConnector) {
+		if (timeStream == null) {
+			timeStream = new TimeStream("timeStream", getServer());
+			timeStream.start();
+		}
+	}
+
+	@Override
 	public void processToken(PlugInResponse aAction, IWebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
+		String lStream;
+
 		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
 			if (lType.equals("register")) {
-				//
+				log.debug("Processing '" + lType + "'...");
+				lStream = (String) aToken.get("stream");
+				if (!timeStream.isConnectorRegistered(aConnector)) {
+					log.debug("Registering client at stream '" + lStream + "'...");
+					timeStream.registerConnector(aConnector);
+				}
+				// else...
+				// todo: error handling
 			} else if (lType.equals("unregister")) {
-				//
+				log.debug("Processing '" + lType + "'...");
+				lStream = (String) aToken.get("stream");
+				if (timeStream.isConnectorRegistered(aConnector)) {
+					log.debug("Unregistering client from stream '" + lStream + "'...");
+					timeStream.unregisterConnector(aConnector);
+				}
+				// else...
+				// TODO: implement error handling
 			}
 		}
 	}
 
+	@Override
+	public void connectorStopped(IWebSocketConnector aConnector) {
+		// if a connector terminates, unregister it from stream
+		timeStream.unregisterConnector(aConnector);
+	}
 }

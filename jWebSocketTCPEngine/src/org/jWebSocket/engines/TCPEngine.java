@@ -284,15 +284,15 @@ public class TCPEngine extends BaseEngine {
 						connectorStarted(connector);
 
 					} catch (UnsupportedEncodingException ex) {
-						log.error("(encoding) " + ex.getClass().getName() + ": " + ex.getMessage());
+						log.error("(encoding) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					} catch (IOException ex) {
-						log.error("(io) " + ex.getClass().getName() + ": " + ex.getMessage());
+						log.error("(io) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					} catch (Exception ex) {
-						log.error("(other) " + ex.getClass().getName() + ": " + ex.getMessage());
+						log.error("(other) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					}
 				} catch (Exception ex) {
 					isRunning = false;
-					log.error("(accept) " + ex.getClass().getName() + ": " + ex.getMessage());
+					log.error("(accept) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
 			}
 

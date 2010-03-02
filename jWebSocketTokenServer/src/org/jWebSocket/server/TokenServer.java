@@ -86,7 +86,13 @@ public class TokenServer extends BaseServer {
 		}
 	}
 
-	private Token packetToToken(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+	/**
+	 *
+	 * @param aConnector
+	 * @param aDataPacket
+	 * @return
+	 */
+	public Token packetToToken(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(Config.SUB_PROT_DEFAULT);
 		Token lToken = null;
 		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
@@ -97,6 +103,25 @@ public class TokenServer extends BaseServer {
 			lToken = XMLProcessor.packetToToken(aDataPacket);
 		}
 		return lToken;
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 * @return
+	 */
+	public IDataPacket tokenToPacket(IWebSocketConnector aConnector, Token aToken) {
+		String lSubProt = aConnector.getHeader().getSubProtocol(Config.SUB_PROT_DEFAULT);
+		IDataPacket lPacket = null;
+		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
+			lPacket = JSONProcessor.tokenToPacket(aToken);
+		} else if (lSubProt.equals(Config.SUB_PROT_CSV)) {
+			lPacket = CSVProcessor.tokenToPacket(aToken);
+		} else if (lSubProt.equals(Config.SUB_PROT_XML)) {
+			lPacket = XMLProcessor.tokenToPacket(aToken);
+		}
+		return lPacket;
 	}
 
 	@Override
@@ -116,17 +141,8 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 */
 	public void sendToken(IWebSocketConnector aConnector, Token aToken) {
-		String lSubProt = aConnector.getHeader().getSubProtocol(Config.SUB_PROT_DEFAULT);
-		IDataPacket lPacket = null;
-		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
-			lPacket = JSONProcessor.tokenToPacket(aToken);
-		} else if (lSubProt.equals(Config.SUB_PROT_CSV)) {
-			lPacket = CSVProcessor.tokenToPacket(aToken);
-		} else if (lSubProt.equals(Config.SUB_PROT_XML)) {
-			lPacket = XMLProcessor.tokenToPacket(aToken);
-		}
 		log.debug("Sending token '" + aToken + "' to '" + aConnector + "'...");
-		super.sendPacket(aConnector, lPacket);
+		super.sendPacket(aConnector, tokenToPacket(aConnector, aToken));
 	}
 
 	/**

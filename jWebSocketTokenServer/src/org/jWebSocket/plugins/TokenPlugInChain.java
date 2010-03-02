@@ -28,7 +28,7 @@ public class TokenPlugInChain extends PlugInChain {
 			try {
 				((TokenPlugIn) plugIn).processToken(lPluginResponse, aConnector, aToken);
 			} catch (Exception ex) {
-				log.error("(plugin '" + ((TokenPlugIn) plugIn).getNamespace() + "')" + ex.getClass().getName() + ": " + ex.getMessage());
+				log.error("(plugin '" + ((TokenPlugIn) plugIn).getNamespace() + "')" + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			}
 			if (lPluginResponse.isChainAborted()) {
 				break;

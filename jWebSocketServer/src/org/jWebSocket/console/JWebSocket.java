@@ -23,8 +23,8 @@ import org.jWebSocket.engines.TCPEngine;
 import org.jWebSocket.kit.WebSocketException;
 import org.jWebSocket.logging.Logging;
 import org.jWebSocket.plugins.TokenPlugInChain;
-import org.jWebSocket.plugins.streaming.DemoPlugIn;
 import org.jWebSocket.plugins.rpc.RPCPlugIn;
+import org.jWebSocket.plugins.streaming.StreamingPlugIn;
 import org.jWebSocket.plugins.system.SystemPlugIn;
 import org.jWebSocket.server.TokenServer;
 
@@ -104,8 +104,8 @@ public class JWebSocket {
 				plugInChain.addPlugIn(new SystemPlugIn());
 				// add the RPCPlugIn plug-in
 				plugInChain.addPlugIn(new RPCPlugIn());
-				// add the demo listener (for the time stream demo)
-				plugInChain.addPlugIn(new DemoPlugIn());
+				// add the streaming plug-in (e.g. for the time stream demo)
+				plugInChain.addPlugIn(new StreamingPlugIn());
 			} catch (WebSocketException ex) {
 				System.out.println("Error: " + ex.getMessage());
 			}
@@ -127,7 +127,7 @@ public class JWebSocket {
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException ex) {
-						log.debug(ex.getClass().getName() + " " + ex.getMessage());
+						log.debug(ex.getClass().getSimpleName() + " " + ex.getMessage());
 					}
 				}
 				log.info("jWebSocket server successfully terminated.");

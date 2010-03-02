@@ -18,6 +18,7 @@ package org.jWebSocket.plugins.streaming;
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.kit.DataPacket;
 import org.jWebSocket.server.BaseServer;
 
 /**
@@ -27,7 +28,7 @@ import org.jWebSocket.server.BaseServer;
 public class BaseStream extends Thread {
 
 	private static Logger log = Logger.getLogger(BaseStream.class);
-	private FastList<IWebSocketConnector> clients = new FastList<IWebSocketConnector>();
+	private FastList<IWebSocketConnector> connectors = new FastList<IWebSocketConnector>();
 	private boolean isRunning = false;
 	private String streamID = null;
 	/**
@@ -47,29 +48,29 @@ public class BaseStream extends Thread {
 	/**
 	 *
 	 *
-	 * @param aClient
+	 * @param aConnector
 	 */
-	public void registerClient(IWebSocketConnector aClient) {
-		clients.add(aClient);
+	public void registerConnector(IWebSocketConnector aConnector) {
+		connectors.add(aConnector);
 	}
 
 	/**
 	 *
 	 *
-	 * @param aClient
+	 * @param aConnector
 	 * @return
 	 */
-	public boolean isClientRegistered(IWebSocketConnector aClient) {
-		return clients.indexOf(aClient) >= 0;
+	public boolean isConnectorRegistered(IWebSocketConnector aConnector) {
+		return connectors.indexOf(aConnector) >= 0;
 	}
 
 	/**
 	 *
 	 *
-	 * @param aClient
+	 * @param aConnector
 	 */
-	public void unregisterClient(IWebSocketConnector aClient) {
-		clients.remove(aClient);
+	public void unregisterConnector(IWebSocketConnector aConnector) {
+		connectors.remove(aConnector);
 	}
 
 	/**
@@ -77,7 +78,7 @@ public class BaseStream extends Thread {
 	 *
 	 * @param aServer
 	 */
-	public void registerAllClients(BaseServer aServer) {
+	public void registerAllConnectors(BaseServer aServer) {
 		// clients.add(aServer);
 	}
 
@@ -86,13 +87,12 @@ public class BaseStream extends Thread {
 	 *
 	 * @param aServer
 	 */
-	public void unregisterAllClients(BaseServer aServer) {
+	public void unregisterAllConnectors(BaseServer aServer) {
 		// clients.remove(aServer);
 	}
 
 	/**
-	 *
-	 *
+	 * puts a data packet into the stream queue.
 	 * @param aObject
 	 */
 	public void put(Object aObject) {
@@ -106,28 +106,25 @@ public class BaseStream extends Thread {
 
 	/**
 	 *
-	 * @param aClient
+	 * @param aConnector
 	 * @param aObject
 	 */
-	protected void processClient(IWebSocketConnector aClient, Object aObject) {
-		/*
+	protected void processConnector(IWebSocketConnector aConnector, Object aObject) {
 		try {
-			aClient.send(aObject);
-		} catch (UnsupportedEncodingException ex) {
+			aConnector.sendPacket(new DataPacket(aObject.toString()));
+		} catch (Exception ex) {
 			log.error("Exception: " + ex.getMessage());
-		} catch (IOException ex) {
-			//
 		}
-		 */
 	}
 
 	/**
-	 *
+	 * iterates through all registered connectors and 
+	 * runs processConnector for each.
 	 * @param aObject
 	 */
 	protected void processItem(Object aObject) {
-		for (int i = 0; i < clients.size(); i++) {
-			processClient(clients.get(i), aObject);
+		for (IWebSocketConnector lConnector : connectors) {
+			processConnector(lConnector, aObject);
 		}
 	}
 
@@ -137,8 +134,8 @@ public class BaseStream extends Thread {
 		while (isRunning) {
 			synchronized (queue) {
 				if (queue.size() > 0) {
-					Object lObj = queue.remove(0);
-					processItem(lObj);
+					Object lObject = queue.remove(0);
+					processItem(lObject);
 				} else {
 					try {
 						queue.wait();
