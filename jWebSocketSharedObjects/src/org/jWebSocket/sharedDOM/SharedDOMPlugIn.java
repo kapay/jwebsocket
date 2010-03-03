@@ -16,7 +16,7 @@
 package org.jWebSocket.sharedDOM;
 
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
@@ -28,30 +28,27 @@ import org.jWebSocket.token.Token;
  */
 public class SharedDOMPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logger.getLogger(SharedDOMPlugIn.class);
+    private static Logger log = Logger.getLogger(SharedDOMPlugIn.class);
+    // if namespace changed update client plug-in accordingly!
+    private String NS_SHAREDDOM_DEFAULT = Config.NS_BASE + ".plugins.sharedDOM";
 
-	// if namespace changed update client plug-in accordingly!
-	private String NS_SHAREDDOM_DEFAULT = Config.NS_BASE + ".plugins.sharedDOM";
+    /**
+     *
+     */
+    public SharedDOMPlugIn() {
+        // specify default name space
+        this.setNamespace(NS_SHAREDDOM_DEFAULT);
+    }
 
-	/**
-	 *
-	 */
-	public SharedDOMPlugIn() {
-		// specify default name space
-		this.setNamespace(NS_SHAREDDOM_DEFAULT);
-	}
+    @Override
+    public void processToken(PlugInResponse aAction, WebSocketConnector aConnector, Token aToken) {
+        String lType = aToken.getType();
+        String lNS = aToken.getNS();
 
-	@Override
-	public void processToken(PlugInResponse aAction, IWebSocketConnector aConnector, Token aToken) {
-		String lType = aToken.getType();
-		String lNS = aToken.getNS();
-
-		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
-			// remote procedure call
-			if (lType.equals("...")) {
-			}
-		}
-	}
-
-
+        if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+            // remote procedure call
+            if (lType.equals("...")) {
+            }
+        }
+    }
 }
