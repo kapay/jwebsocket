@@ -22,8 +22,7 @@ jws.NS_BASE = "org.jWebSocket";
 
 // some namespace global constants
 jws.CUR_TOKEN_ID = 0;
-jws.DEFAULT_URL_BASE = "ws://" + ( self.location.hostname ? self.location.hostname : "localhost" ) + ":8787";
-jws.DEFAULT_URL_TOKEN = "ws://" + ( self.location.hostname ? self.location.hostname : "localhost" ) + ":8788";
+jws.JWS_SERVER_URL = "ws://" + ( self.location.hostname ? self.location.hostname : "localhost" ) + ":8787";
 
 jws.$ = function( aId ) {
 	return document.getElementById( aId );
@@ -514,71 +513,7 @@ jws.SystemClientPlugIn = {
 		}
 		aOptions.mode = jws.SystemClientPlugIn.ALL_CLIENTS;
 		return this.getClients( aOptions );
-	}
-
-}
-
-// add the JWebSocket SystemClient PlugIn into the BaseClient class
-jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.SystemClientPlugIn );
-
-
-//	---------------------------------------------------------------------------
-//  jWebSocket Client Streaming Plug-In
-//	---------------------------------------------------------------------------
-
-jws.StreamingPlugIn = {
-
-	// namespace for client streaming plugin
-	// if namespace changed update server plug-in accordingly!
-	NS: jws.NS_BASE + ".plugins.streaming",
-
-	registerStream: function( aStream ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
-			this.sendToken({
-				ns: jws.StreamingPlugIn.NS,
-				type: "regAtStream",
-				stream: aStream
-			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
-		}
-		return lRes;
 	},
-
-	unregisterStream: function( aStream ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
-			this.sendToken({
-				ns: jws.StreamingPlugIn.NS,
-				type: "unregFromStream",
-				stream: aStream
-			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
-		}
-		return lRes;
-	}
-
-}
-
-// add the JWebSocket SystemClient PlugIn into the BaseClient class
-jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StreamingPlugIn );
-
-
-//	---------------------------------------------------------------------------
-//  jWebSocket Client Ping and Keep Alive Plug-In
-//	---------------------------------------------------------------------------
-
-jws.KeepAliveClientPlugIn = {
-
-	// namespace for client keep alive plugin
-	// if namespace changed update server plug-in accordingly!
-	NS: jws.NS_BASE + ".plugins.keepAlive",
 
 	ping: function( aOptions ) {
 		var lEcho = false;
@@ -590,7 +525,7 @@ jws.KeepAliveClientPlugIn = {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
-				ns: jws.KeepAliveClientPlugIn.NS,
+				ns: jws.SystemClientPlugIn.NS,
 				type: "ping",
 				echo: lEcho
 			});
@@ -653,11 +588,58 @@ jws.KeepAliveClientPlugIn = {
 			this.hKeepAlive = null;
 		}
 	}
+}
+
+// add the JWebSocket SystemClient PlugIn into the BaseClient class
+jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.SystemClientPlugIn );
+
+
+//	---------------------------------------------------------------------------
+//  jWebSocket Client Streaming Plug-In
+//	---------------------------------------------------------------------------
+
+jws.StreamingPlugIn = {
+
+	// namespace for client streaming plugin
+	// if namespace changed update server plug-in accordingly!
+	NS: jws.NS_BASE + ".plugins.streaming",
+
+	registerStream: function( aStream ) {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				ns: jws.StreamingPlugIn.NS,
+				type: "register",
+				stream: aStream
+			});
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	unregisterStream: function( aStream ) {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				ns: jws.StreamingPlugIn.NS,
+				type: "unregister",
+				stream: aStream
+			});
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	}
 
 }
 
-// add the jWebSocket Client Ping and Keep Alive Plug-In
-jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.KeepAliveClientPlugIn );
+// add the JWebSocket SystemClient PlugIn into the BaseClient class
+jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StreamingPlugIn );
 
 
 //	---------------------------------------------------------------------------

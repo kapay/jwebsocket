@@ -44,7 +44,7 @@
 			var lWSC = null;
 
 			function connect() {
-				var lURL = jws.DEFAULT_URL_TOKEN;
+				var lURL = jws.JWS_SERVER_URL;
 
 				log( "Connecting to " + lURL + " ..." );
 				var lRes = lWSC.connect( lURL, {
@@ -72,7 +72,6 @@
 			function disconnect() {
 				if( lWSC ) {
 					log( "Disconnecting..." );
-					debugger;
 					var lRes = lWSC.disconnect();
 					log( lWSC.resultToString( lRes ) );
 				}

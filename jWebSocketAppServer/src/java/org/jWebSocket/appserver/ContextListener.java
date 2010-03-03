@@ -6,14 +6,17 @@ package org.jWebSocket.appserver;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import org.jWebSocket.demo.DemoPlugIn;
-import org.jWebSocket.plugins.KeepAlivePlugIn;
-import org.jWebSocket.plugins.PlugInChain;
-import org.jWebSocket.plugins.RPCPlugIn;
-import org.jWebSocket.plugins.SystemPlugIn;
+import org.apache.log4j.Logger;
+import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.engines.TCPEngine;
+import org.jWebSocket.kit.WebSocketException;
 import org.jWebSocket.logging.Logging;
+import org.jWebSocket.plugins.TokenPlugInChain;
+import org.jWebSocket.plugins.rpc.RPCPlugIn;
+import org.jWebSocket.plugins.streaming.StreamingPlugIn;
+import org.jWebSocket.plugins.system.SystemPlugIn;
 import org.jWebSocket.server.TokenServer;
-import org.jWebSocket.server.UserServer;
+import org.jWebsocket.server.CustomServer;
 
 /**
  * Web application lifecycle listener.
@@ -21,41 +24,75 @@ import org.jWebSocket.server.UserServer;
  */
 public class ContextListener implements ServletContextListener {
 
-	private TokenServer jwss_token = null;
-	private UserServer jwss_user = null;
+	private TokenServer tokenServer = null;
+	private CustomServer customServer = null;
+	private static Logger log = null;
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		System.out.println("Initialising Context...");
 
 		Logging.initLogs("debug");
+	    log = Logger.getLogger(ContextListener.class);
+		log.debug("Initialising Context...");
 
-		// run jWebSocket User Server on Port 8787
-		// don't miss to release the according firewall port!
-		System.out.println("Starting custom server on 8787...");
-		jwss_user = new UserServer(8787, 120000, null);
-		jwss_user.start();
+		// create the low-level engine
+		WebSocketEngine engine = null;
+		try {
+			engine = new TCPEngine(8787, 120000);
+		} catch (Exception ex) {
+			log.error("Instantating engine: " + ex.getMessage());
+			return;
+		}
 
-		// run jWebSocket Token Server on Port 8788
-		// include some plug-ins for demonstration purposes
-		// don't miss to release the according firewall port!
+		// create the token server (based on the TCP engine)
+		try {
+			// instantiate the Token server and bind engine to it
+			tokenServer = new TokenServer();
+			// the token server already instantiates a plug-in chain
+			TokenPlugInChain plugInChain = tokenServer.getPlugInChain();
+			// let the server support the engine
+			tokenServer.addEngine(engine);
+			// add the SystemPlugIn listener (for the jWebSocket default functionality)
+			plugInChain.addPlugIn(new SystemPlugIn());
+			// add the RPCPlugIn plug-in
+			plugInChain.addPlugIn(new RPCPlugIn());
+			// add the streaming plug-in (e.g. for the time stream demo)
+			plugInChain.addPlugIn(new StreamingPlugIn());
 
-		PlugInChain plugins = new PlugInChain();
-		plugins.add(new SystemPlugIn());
-		plugins.add(new KeepAlivePlugIn());
-		plugins.add(new RPCPlugIn());
-		plugins.add(new DemoPlugIn());
+			log.info("Starting token server...");
+			tokenServer.startServer();
+		} catch (Exception ex) {
+			log.error("Instantiating TokenServer: " + ex.getMessage());
+		}
 
-		// instantiate the JSON server and bind demo listeners to it
-		System.out.println("Starting Token server on 8788...");
-		jwss_token = new TokenServer(8788, 120000, plugins);
-		jwss_token.start();
-
+		// create the custom server (based on the TCP engine as well)
+		try {
+			// instantiate the custom server and bind engine to it
+			customServer = new CustomServer();
+			// the custom server already instantiates a plug-in chain
+			// BasePlugInChain plugInChain = customServer.getPlugInChain();
+			// let the server support the engine
+			customServer.addEngine(engine);
+			// add the SystemPlugIn listener (for the jWebSocket default functionality)
+			// customServer.addPlugIn(new SystemPlugIn());
+			log.info("Starting custom server...");
+			customServer.startServer();
+		} catch (Exception ex) {
+			log.error("Instantating CustomServer: " + ex.getMessage());
+		}
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-		jwss_token.terminate();
-		jwss_user.terminate();
+		try {
+			tokenServer.stopServer();
+		} catch (WebSocketException ex) {
+			log.error("Stopping TokenServer: " + ex.getMessage());
+		}
+		try {
+			customServer.stopServer();
+		} catch (WebSocketException ex) {
+			log.error("Stopping CustomServer: " + ex.getMessage());
+		}
 	}
 }

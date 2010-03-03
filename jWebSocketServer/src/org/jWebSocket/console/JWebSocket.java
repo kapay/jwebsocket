@@ -103,7 +103,7 @@ public class JWebSocket {
         try {
             engine = new TCPEngine(port, sessionTimeout);
         } catch (Exception ex) {
-            System.out.println("Error instantating CustomServer: " + ex.getMessage());
+            System.out.println("Error instantating engine: " + ex.getMessage());
             return;
         }
 

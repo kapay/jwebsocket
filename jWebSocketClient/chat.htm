@@ -92,11 +92,11 @@
 				}
 
 				// adjust this URL to your jWebSocket server
-				// var lURL = jws.DEFAULT_URL_TOKEN + "/path1/path2/res.text2?arg1=value1&arg2=value2";
-				// var lURL = jws.DEFAULT_URL_TOKEN;
-				// var lURL = jws.DEFAULT_URL_TOKEN + "/;prot=csv,timeout=180000";
-				var lURL = jws.DEFAULT_URL_TOKEN + "/;prot=json,timeout=240000";
-				// var lURL = jws.DEFAULT_URL_TOKEN + "/chrome;prot=json,timeout=180000";
+				// var lURL = jws.JWS_SERVER_URL + "/path1/path2/res.text2?arg1=value1&arg2=value2";
+				// var lURL = jws.JWS_SERVER_URL;
+				// var lURL = jws.JWS_SERVER_URL + "/;prot=csv,timeout=180000";
+				var lURL = jws.JWS_SERVER_URL + "/;prot=json,timeout=360000";
+				// var lURL = jws.JWS_SERVER_URL + "/chrome;prot=json,timeout=180000";
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
 				// try to establish connection to jWebSocket server
@@ -190,6 +190,7 @@
 				if( lRes.code != 0 ) {
 					log( SYS, OUT, "broadcast: " + lRes.msg );
 				}
+				eMessage.value = "";
 				doFocus( eMessage );
 			}
 
@@ -253,8 +254,8 @@
 				// check if WebSockets are supported by the browser
 				if( window.WebSocket ) {
 					// instaniate new TokenClient, either JSON, CSV or XML
-					// lWSC = new jws.jWebSocketJSONClient();
-					lWSC = new jws.jWebSocketCSVClient();
+					lWSC = new jws.jWebSocketJSONClient();
+					// lWSC = new jws.jWebSocketCSVClient();
 
 					eUsername.addEventListener( "keydown", usrKeyDnLsnr, false );
 					eMessage.addEventListener( "keydown", msgKeyDnLsnr, false );
