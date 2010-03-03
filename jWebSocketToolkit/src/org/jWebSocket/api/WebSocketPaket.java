@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Basic PlugIn Class
+//	jWebSocket - Data Packet
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,59 +13,67 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jWebSocket.plugins;
+package org.jWebSocket.api;
 
-import org.jWebSocket.api.WebSocketPaket;
-import org.jWebSocket.api.WebSocketConnector;
-import org.jWebSocket.api.WebSocketEngine;
+import java.io.UnsupportedEncodingException;
 
 /**
  *
  * @author aschulze
  */
-public interface PlugIn {
-
-	/**
-	 * is called by the server when the engine has been started.
-	 * @param aEngine
-	 */
-	void engineStarted(WebSocketEngine aEngine);
-
-	/**
-	 * is called by the server when the engine has been stopped.
-	 * @param aEngine
-	 */
-	void engineStopped(WebSocketEngine aEngine);
+public interface WebSocketPaket {
 
 	/**
 	 *
-	 * @param aConnector
+	 * @param aByteArray
 	 */
-	public void connectorStarted(WebSocketConnector aConnector);
+	void setByteArray(byte[] aByteArray);
 
 	/**
 	 *
-	 * @param aResponse
-	 * @param aConnector
-	 * @param aDataPacket
+	 * @param aString
 	 */
-	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket);
+	void setString(String aString);
 
 	/**
 	 *
-	 * @param aConnector
+	 * @param aString
+	 * @param aEncoding
+	 * @throws UnsupportedEncodingException
 	 */
-	public void connectorStopped(WebSocketConnector aConnector);
+	void setString(String aString, String aEncoding) throws UnsupportedEncodingException;
 
 	/**
 	 *
-	 * @param aPlugInChain
+	 * @param aString
 	 */
-	public void setPlugInChain(PlugInChain aPlugInChain);
+	void setUTF8(String aString);
+
 
 	/**
-	 * @return the plugInChain
+	 *
+	 * @return
 	 */
-	public PlugInChain getPlugInChain();
+	byte[] getByteArray();
+	
+	/**
+	 *
+	 * @return
+	 */
+	String getString();
+
+	/**
+	 *
+	 * @param aEncoding
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	String getString(String aEncoding) throws UnsupportedEncodingException;
+
+	/**
+	 *
+	 * @return
+	 */
+	String getUTF8();
 
 }

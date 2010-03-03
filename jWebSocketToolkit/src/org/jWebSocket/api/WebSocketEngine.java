@@ -1,5 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Copyright (c) 2010 jwebsocket.org
+//	jWebSocket - Engine API
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -82,7 +83,7 @@ public interface WebSocketEngine {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	void processPacket(WebSocketConnector aConnector, IDataPacket aDataPacket);
+	void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket);
 
 	/**
 	 * sends a data packet to a certain connector.
@@ -90,7 +91,7 @@ public interface WebSocketEngine {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	void sendPacket(WebSocketConnector aConnector, IDataPacket aDataPacket);
+	void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket);
 
 	/**
 	 * broadcasts a data packet to all connectors.
@@ -98,7 +99,7 @@ public interface WebSocketEngine {
 	 *
 	 * @param aDataPacket
 	 */
-	void broadcastPacket(IDataPacket aDataPacket);
+	void broadcastPacket(WebSocketPaket aDataPacket);
 
 	/**
 	 * removes a certain connector from the engine.

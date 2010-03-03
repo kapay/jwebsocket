@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - WebSocket Token Server (abstract)
+//	jWebSocket - WebSocket Token Server (manages JSON, CSV and XML Tokens)
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -17,7 +17,7 @@ package org.jWebSocket.server;
 
 import java.util.HashMap;
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.plugins.PlugIn;
 import org.jWebSocket.api.WebSocketConnector;
@@ -101,7 +101,7 @@ public class TokenServer extends BaseServer {
 	 * @param aDataPacket
 	 * @return
 	 */
-	public Token packetToToken(WebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public Token packetToToken(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(Config.SUB_PROT_DEFAULT);
 		Token lToken = null;
 		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
@@ -120,9 +120,9 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 * @return
 	 */
-	public IDataPacket tokenToPacket(WebSocketConnector aConnector, Token aToken) {
+	public WebSocketPaket tokenToPacket(WebSocketConnector aConnector, Token aToken) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(Config.SUB_PROT_DEFAULT);
-		IDataPacket lPacket = null;
+		WebSocketPaket lPacket = null;
 		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
 		} else if (lSubProt.equals(Config.SUB_PROT_CSV)) {
@@ -134,7 +134,7 @@ public class TokenServer extends BaseServer {
 	}
 
 	@Override
-	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		// is the data packet supposed to be interpreted as token?
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
 			Token lToken = packetToToken(aConnector, aDataPacket);

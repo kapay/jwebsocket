@@ -1,13 +1,24 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - Base Engine Implementation
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//	more details.
+//	You should have received a copy of the GNU General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/>.
+//	---------------------------------------------------------------------------
 package org.jWebSocket.engines;
 
 import java.util.Collections;
 import java.util.List;
 import javolution.util.FastList;
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.api.WebSocketServer;
@@ -82,14 +93,14 @@ public class BaseEngine implements WebSocketEngine {
 		return false;
 	}
 
-	public void processPacket(WebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 	}
 
-	public void sendPacket(WebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		aConnector.sendPacket(aDataPacket);
 	}
 
-	public void broadcastPacket(IDataPacket aDataPacket) {
+	public void broadcastPacket(WebSocketPaket aDataPacket) {
 		for (WebSocketConnector connector : connectors) {
 			connector.sendPacket(aDataPacket);
 		}

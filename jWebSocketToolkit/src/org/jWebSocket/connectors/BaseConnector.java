@@ -1,11 +1,26 @@
+//	---------------------------------------------------------------------------
+//	jWebSocket - Base Connector Implementation
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//	more details.
+//	You should have received a copy of the GNU General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/>.
+//	---------------------------------------------------------------------------
 package org.jWebSocket.connectors;
 
 import java.net.InetAddress;
 import java.util.HashMap;
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
-import org.jWebSocket.kit.Header;
+import org.jWebSocket.kit.RequestHeader;
 
 /**
  *
@@ -14,7 +29,7 @@ import org.jWebSocket.kit.Header;
 public class BaseConnector implements WebSocketConnector {
 
 	private WebSocketEngine engine = null;
-	private Header header = null;
+	private RequestHeader header = null;
 	private HashMap<String, Object> customVars = new HashMap<String, Object>();
 
 	/**
@@ -33,11 +48,11 @@ public class BaseConnector implements WebSocketConnector {
 		engine.connectorStopped(this);
 	}
 
-	public void processPacket(IDataPacket aDataPacket) {
+	public void processPacket(WebSocketPaket aDataPacket) {
 		engine.processPacket(this, aDataPacket);
 	}
 
-	public void sendPacket(IDataPacket aDataPacket) {
+	public void sendPacket(WebSocketPaket aDataPacket) {
 	}
 
 	/**
@@ -50,14 +65,14 @@ public class BaseConnector implements WebSocketConnector {
 	/**
 	 * @return the header
 	 */
-	public Header getHeader() {
+	public RequestHeader getHeader() {
 		return header;
 	}
 
 	/**
 	 * @param header the header to set
 	 */
-	public void setHeader(Header header) {
+	public void setHeader(RequestHeader header) {
 		this.header = header;
 	}
 

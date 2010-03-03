@@ -16,11 +16,11 @@
 package org.jWebsocket.server;
 
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.plugins.PlugIn;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
-import org.jWebSocket.plugins.PlugInChain;
+import org.jWebSocket.plugins.BasePlugInChain;
 import org.jWebSocket.server.BaseServer;
 
 /**
@@ -30,18 +30,18 @@ import org.jWebSocket.server.BaseServer;
 public class CustomServer extends BaseServer {
 
 	private static Logger log = Logger.getLogger(CustomServer.class);
-	private PlugInChain plugInChain = null;
+	private BasePlugInChain plugInChain = null;
 
 	/**
 	 *
 	 */
 	public CustomServer() {
 		super();
-		plugInChain = new PlugInChain(this);
+		plugInChain = new BasePlugInChain(this);
 	}
 
 	@Override
-	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		log.debug("Processing data packet '" + aDataPacket.getUTF8() + "'...");
 		broadcastPacket(aDataPacket);
 	}
@@ -85,7 +85,7 @@ public class CustomServer extends BaseServer {
 	/**
 	 * @return the plugInChain
 	 */
-	public PlugInChain getPlugInChain() {
+	public BasePlugInChain getPlugInChain() {
 		return plugInChain;
 	}
 

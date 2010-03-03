@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javolution.util.FastList;
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.api.WebSocketServer;
@@ -89,14 +89,14 @@ public class BaseServer implements WebSocketServer {
 	public void connectorStopped(WebSocketConnector aConnector) {
 	}
 
-	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 	}
 
-	public void sendPacket(WebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		aConnector.sendPacket(aDataPacket);
 	}
 
-	public void broadcastPacket(IDataPacket aDataPacket) {
+	public void broadcastPacket(WebSocketPaket aDataPacket) {
 		for (WebSocketConnector lConnector : getAllConnectors()) {
 			sendPacket(lConnector, aDataPacket);
 		}

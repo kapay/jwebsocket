@@ -1,5 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Copyright (c) 2010 jwebsocket.org
+//	jWebSocket - Connector API
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -15,7 +16,7 @@
 package org.jWebSocket.api;
 
 import java.net.InetAddress;
-import org.jWebSocket.kit.Header;
+import org.jWebSocket.kit.RequestHeader;
 
 /**
  *
@@ -37,25 +38,25 @@ public interface WebSocketConnector {
 	 * processes an incoming datapacket from a WebSocket client.
 	 * @param aDataPacket
 	 */
-	void processPacket(IDataPacket aDataPacket);
+	void processPacket(WebSocketPaket aDataPacket);
 
 	/**
 	 * sends a datapacket to a WebSocket client.
 	 * @param aDataPacket
 	 */
-	void sendPacket(IDataPacket aDataPacket);
+	void sendPacket(WebSocketPaket aDataPacket);
 
 	/**
 	 *
 	 * @return
 	 */
-	Header getHeader();
+	RequestHeader getHeader();
 
 	/**
 	 *
 	 * @param aHeader
 	 */
-	void setHeader(Header aHeader);
+	void setHeader(RequestHeader aHeader);
 
 	/**
 	 *

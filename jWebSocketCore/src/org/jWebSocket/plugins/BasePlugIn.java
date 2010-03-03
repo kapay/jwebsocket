@@ -15,7 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.plugins;
 
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 
@@ -25,7 +25,7 @@ import org.jWebSocket.api.WebSocketEngine;
  */
 public abstract class BasePlugIn implements PlugIn {
 
-	private IPlugInChain plugInChain = null;
+	private PlugInChain plugInChain = null;
 
 	public abstract void engineStarted(WebSocketEngine aEngine);
 
@@ -43,7 +43,7 @@ public abstract class BasePlugIn implements PlugIn {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	public abstract void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, IDataPacket aDataPacket);
+	public abstract void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket);
 
 	/**
 	 *
@@ -55,14 +55,14 @@ public abstract class BasePlugIn implements PlugIn {
 	 *
 	 * @param aPlugInChain
 	 */
-	public void setPlugInChain(IPlugInChain aPlugInChain) {
+	public void setPlugInChain(PlugInChain aPlugInChain) {
 		plugInChain = aPlugInChain;
 	}
 
 	/**
 	 * @return the plugInChain
 	 */
-	public IPlugInChain getPlugInChain() {
+	public PlugInChain getPlugInChain() {
 		return plugInChain;
 	}
 }

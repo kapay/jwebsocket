@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Plug in chain for incoming requests (per server)
+//	jWebSocket - PlugInChain Interface
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -16,125 +16,68 @@
 package org.jWebSocket.plugins;
 
 import java.util.List;
-import javolution.util.FastList;
-import org.apache.log4j.Logger;
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
-import org.jWebSocket.api.WebSocketServer;
 
 /**
  *
  * @author aschulze
  */
-public class PlugInChain implements IPlugInChain {
-
-	private static Logger log = Logger.getLogger(PlugInChain.class);
-	private FastList<PlugIn> plugins = new FastList<PlugIn>();
-	private WebSocketServer server = null;
+public interface PlugInChain {
 
 	/**
-	 *
-	 * @param aServer
+	 * is called by the server when the engine has been started.
+	 * @param aEngine
 	 */
-	public PlugInChain(WebSocketServer aServer) {
-		server = aServer;
-	}
-
-	public void engineStarted(WebSocketEngine aEngine) {
-	}
-
-	public void engineStopped(WebSocketEngine aEngine) {
-	}
+	void engineStarted(WebSocketEngine aEngine);
 
 	/**
-	 *
+	 * is called by the server when the engine has been stopped.
+	 * @param aEngine
+	 */
+	void engineStopped(WebSocketEngine aEngine);
+
+	/**
+	 * is called by the server when a new connector has been started,
+	 * i.e. a new client has connected.
 	 * @param aConnector
 	 */
-	public void connectorStarted(WebSocketConnector aConnector) {
-		log.debug("Notifying plug-ins that connector started...");
-		try {
-			for (PlugIn plugIn : getPlugIns()) {
-				try {
-					// log.debug("Notifying plug-in " + plugIn + " that connector started...");
-					plugIn.connectorStarted(aConnector);
-				} catch (Exception ex) {
-					log.error("Connector started (1): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-				}
-			}
-		} catch (Exception ex) {
-			log.error("Connector started (2): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-		}
-	}
+	void connectorStarted(WebSocketConnector aConnector);
 
 	/**
-	 *
+	 * is called when a data packet from a client was received
+	 * and has to be processed.
+	 * @param aResponse
 	 * @param aConnector
+	 * @param aDataPacket
 	 * @return
 	 */
-	public PlugInResponse processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, IDataPacket aDataPacket) {
-		log.debug("Processing packet for plug-ins...");
-		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (PlugIn plugIn : getPlugIns()) {
-			try {
-				// log.debug("Processing packet for plug-in " + plugIn + "...");
-				plugIn.processPacket(lPluginResponse, aConnector, aDataPacket);
-			} catch (Exception ex) {
-				log.error("Processing packet: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-			}
-			if (lPluginResponse.isChainAborted()) {
-				break;
-			}
-		}
-		return lPluginResponse;
-	}
+	PlugInResponse processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket);
 
 	/**
-	 *
+	 * is called by the server when a connector has been stopped,
+	 * i.e. a client has disconnected.
 	 * @param aConnector
 	 */
-	public void connectorStopped(WebSocketConnector aConnector) {
-		log.debug("Notifying plug-ins that connector stopped...");
-		for (PlugIn plugIn : getPlugIns()) {
-			try {
-				// log.debug("Notifying plug-in " + plugIn + " that connector stopped...");
-				plugIn.connectorStopped(aConnector);
-			} catch (Exception ex) {
-				log.error("Connector stopped: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-			}
-		}
-	}
+	void connectorStopped(WebSocketConnector aConnector);
 
 	/**
 	 *
 	 * @return
 	 */
-	public List<PlugIn> getPlugIns() {
-		return plugins;
-	}
+	List<PlugIn> getPlugIns();
+
+	/**
+	 * 
+	 * @param aPlugIn
+	 */
+	void addPlugIn(PlugIn aPlugIn);
 
 	/**
 	 *
 	 * @param aPlugIn
 	 */
-	public void addPlugIn(PlugIn aPlugIn) {
-		plugins.add(aPlugIn);
-		aPlugIn.setPlugInChain(this);
-	}
+	void removePlugIn(PlugIn aPlugIn);
 
-	/**
-	 *
-	 * @param aPlugIn
-	 */
-	public void removePlugIn(PlugIn aPlugIn) {
-		plugins.remove(aPlugIn);
-		aPlugIn.setPlugInChain(null);
-	}
-
-	/**
-	 * @return the server
-	 */
-	public WebSocketServer getServer() {
-		return server;
-	}
 }

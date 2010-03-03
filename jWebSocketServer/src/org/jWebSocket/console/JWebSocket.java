@@ -22,7 +22,7 @@ import org.jWebSocket.config.Config;
 import org.jWebSocket.engines.TCPEngine;
 import org.jWebSocket.kit.WebSocketException;
 import org.jWebSocket.logging.Logging;
-import org.jWebSocket.plugins.PlugInChain;
+import org.jWebSocket.plugins.BasePlugInChain;
 import org.jWebSocket.plugins.TokenPlugInChain;
 import org.jWebSocket.plugins.rpc.RPCPlugIn;
 import org.jWebSocket.plugins.streaming.StreamingPlugIn;
@@ -137,7 +137,7 @@ public class JWebSocket {
 			// instantiate the custom server and bind engine to it
 			customServer = new CustomServer();
 			// the custom server already instantiates a plug-in chain
-			// PlugInChain plugInChain = customServer.getPlugInChain();
+			// BasePlugInChain plugInChain = customServer.getPlugInChain();
 			// let the server support the engine
 			customServer.addEngine(engine);
 			// add the SystemPlugIn listener (for the jWebSocket default functionality)

@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - XML Connector
+//	jWebSocket - XML Token Processor
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -17,7 +17,7 @@ package org.jWebSocket.packetProcessors;
 
 import java.util.List;
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.token.Token;
 
 /**
@@ -28,7 +28,7 @@ public class XMLProcessor  {
 
 	private static Logger log = Logger.getLogger(XMLProcessor.class);
 
-	public static Token packetToToken(IDataPacket aDataPacket) {
+	public static Token packetToToken(WebSocketPaket aDataPacket) {
 		// todo: implement!
 		Token lArgs = new Token();
 		return lArgs;
@@ -52,7 +52,7 @@ public class XMLProcessor  {
 		return lRes;
 	}
 
-	public static IDataPacket tokenToPacket(Token aToken) {
+	public static WebSocketPaket tokenToPacket(Token aToken) {
 		// todo: implement!
 		return null;
 	}

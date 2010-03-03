@@ -18,7 +18,7 @@ package org.jWebSocket.plugins.streaming;
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketConnector;
-import org.jWebSocket.kit.DataPacket;
+import org.jWebSocket.kit.RawPacket;
 import org.jWebSocket.server.BaseServer;
 
 /**
@@ -111,7 +111,7 @@ public class BaseStream extends Thread {
 	 */
 	protected void processConnector(WebSocketConnector aConnector, Object aObject) {
 		try {
-			aConnector.sendPacket(new DataPacket(aObject.toString()));
+			aConnector.sendPacket(new RawPacket(aObject.toString()));
 		} catch (Exception ex) {
 			log.error("Exception: " + ex.getMessage());
 		}

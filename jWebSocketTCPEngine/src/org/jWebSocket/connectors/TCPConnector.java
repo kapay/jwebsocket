@@ -12,10 +12,10 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
-import org.jWebSocket.kit.DataPacket;
+import org.jWebSocket.kit.RawPacket;
 
 /**
  *
@@ -55,13 +55,13 @@ public class TCPConnector extends BaseConnector {
 	}
 
 	@Override
-	public void processPacket(IDataPacket aDataPacket) {
+	public void processPacket(WebSocketPaket aDataPacket) {
 		// pass the data packet to the engine
 		getEngine().processPacket(this, aDataPacket);
 	}
 
 	@Override
-	public void sendPacket(IDataPacket aDataPacket) {
+	public void sendPacket(WebSocketPaket aDataPacket) {
 		try {
 			os.write(0);
 			os.write(aDataPacket.getByteArray());
@@ -128,7 +128,7 @@ public class TCPConnector extends BaseConnector {
 					}
 
 					if (line != null) {
-						DataPacket dataPacket = new DataPacket(line);
+						RawPacket dataPacket = new RawPacket(line);
 						// ensure that potential exceptions in a plug in
 						// do not abort the connector
 						try {

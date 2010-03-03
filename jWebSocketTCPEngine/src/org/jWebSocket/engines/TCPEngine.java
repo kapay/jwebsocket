@@ -27,13 +27,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IDataPacket;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.api.WebSocketServer;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.connectors.TCPConnector;
-import org.jWebSocket.kit.Header;
+import org.jWebSocket.kit.RequestHeader;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
@@ -113,10 +113,10 @@ public class TCPEngine extends BaseEngine {
 	 * @throws UnsupportedEncodingException
 	 * @throws IOException
 	 */
-	public static Header processHandshake(Socket aClientSocket)
+	public static RequestHeader processHandshake(Socket aClientSocket)
 		throws UnsupportedEncodingException, IOException {
 
-		Header header = new Header();
+		RequestHeader header = new RequestHeader();
 
 		String host = null;
 		String origin = null;
@@ -215,7 +215,7 @@ public class TCPEngine extends BaseEngine {
 	}
 
 	@Override
-	public void processPacket(WebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		List<WebSocketServer> lServers = getServers();
 		for (WebSocketServer lServer : lServers) {
 			lServer.processPacket(this, aConnector, aDataPacket);
@@ -258,7 +258,7 @@ public class TCPEngine extends BaseEngine {
 
 					try {
 						// process handshake to parse header data
-						Header header = processHandshake(clientSocket);
+						RequestHeader header = processHandshake(clientSocket);
 
 						// set socket timeout to given amount of milliseconds
 						// check min and max timeout ranges

@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Header Object
+//	jWebSocket - Request RequestHeader Object
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -21,7 +21,7 @@ import java.util.HashMap;
  *
  * @author aschulze
  */
-public class Header {
+public class RequestHeader {
 
 	private HashMap<String, Object> args = new HashMap<String, Object>();
 

@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - WebSocket JSON Token Processor
+//	jWebSocket - JSON Token Processor
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -21,8 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.lang.text.StrTokenizer;
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.kit.DataPacket;
+import org.jWebSocket.api.WebSocketPaket;
+import org.jWebSocket.kit.RawPacket;
 import org.jWebSocket.token.Token;
 
 /**
@@ -33,7 +33,7 @@ public class JSONProcessor {
 
 	private static Logger log = Logger.getLogger(JSONProcessor.class);
 
-	public static Token packetToToken(IDataPacket aDataPacket) {
+	public static Token packetToToken(WebSocketPaket aDataPacket) {
 		Token lToken = new Token();
 		try {
 			String lStr = aDataPacket.getString("UTF-8");
@@ -92,7 +92,7 @@ public class JSONProcessor {
 		return lRes;
 	}
 
-	public static IDataPacket tokenToPacket(Token aToken) {
+	public static WebSocketPaket tokenToPacket(Token aToken) {
 		String lData = "{";
 		Iterator lIterator = aToken.getKeys();
 		while (lIterator.hasNext()) {
@@ -103,9 +103,9 @@ public class JSONProcessor {
 					+ (lIterator.hasNext() ? "," : "");
 		}
 		lData += "}";
-		IDataPacket lPacket = null;
+		WebSocketPaket lPacket = null;
 		try {
-			lPacket = new DataPacket(lData, "UTF-8");
+			lPacket = new RawPacket(lData, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
 			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
