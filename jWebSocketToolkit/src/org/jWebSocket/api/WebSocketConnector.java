@@ -19,129 +19,155 @@ import java.net.InetAddress;
 import org.jWebSocket.kit.RequestHeader;
 
 /**
- *
+ * Specifies the API for web socket connectors. Connectors are the low level
+ * link to the client. Connectors are maintained by the engine only but can be
+ * accessed up to the application. Each connector provides a map for shared
+ * custom variables (public) which can be used in all overlying tiers.
  * @author aschulze
  */
 public interface WebSocketConnector {
 
 	/**
-	 * starts and initializes the connector.
+	 * Starts and initializes the connector. Usually a connector is implemented
+	 * as as thread which waits on incoming data. The listener thread should
+	 * implement a timeout to close a connection after a configurable time of
+	 * inactivity on the connection. Further the {@code connectorStarted} method
+	 * of the overlying engine is called if the connector successfully started.
 	 */
 	void startConnector();
 
 	/**
-	 * stops and cleans up the connector.
+	 * Stops and cleans up the connector. Usually here the listener thread for
+	 * this connection is stopped. Further the {@code connectorStopped} method
+	 * of the overlying engine is called if the connector successfully started.
 	 */
 	void stopConnector();
 
 	/**
-	 * processes an incoming datapacket from a WebSocket client.
-	 * @param aDataPacket
+	 * Processes an incoming datapacket from a WebSocket client. Usually the
+	 * data packet is not processed in any way but only passed up to the
+	 * {@code processPacket} method of the overlying engine.
+	 * @param aDataPacket raw web socket data packet
 	 */
 	void processPacket(WebSocketPaket aDataPacket);
 
 	/**
-	 * sends a datapacket to a WebSocket client.
-	 * @param aDataPacket
+	 * Sends a datapacket to a WebSocket client. Here the packet is finally
+	 * passed to client via the web socket connection.
+	 * @param aDataPacket raw web socket data packet
 	 */
 	void sendPacket(WebSocketPaket aDataPacket);
 
 	/**
-	 *
-	 * @return
+	 * Returns the request header from the client during the connection
+	 * establishment. In the request header all fields of the client request
+	 * and its URL parameters are stored.
+	 * @return RequestHeader object
 	 */
 	RequestHeader getHeader();
 
 	/**
-	 *
-	 * @param aHeader
+	 * Sets the request header. This methode is called after the hand shake
+	 * of the web socket protocol has been accomplished and all data of the
+	 * request header is known.
+	 * @param aHeader RequestHeader object
 	 */
 	void setHeader(RequestHeader aHeader);
 
 	/**
-	 *
-	 * @param aKey
-	 * @return
+	 * Returns the given custom variable as an Object. Custom variables in a
+	 * connector are public and can be shared over all modules of an
+	 * application.
+	 * @param aKey Name of the shared custom variable
+	 * @return Object
 	 */
 	Object getVar(String aKey);
 
 	/**
-	 *
-	 * @param aKey
-	 * @param aValue
+	 * Set the given custom variable to the passed value. Custom variables in a
+	 * connector are public and can be shared over all modules of an
+	 * application.
+	 * @param aKey Name of the shared custom variable
+	 * @param aValue Object
 	 */
 	void setVar(String aKey, Object aValue);
 
 	/**
-	 *
-	 * @param aKey
-	 * @return
+	 * Returns the boolean object of the passed variable or null if the variable
+	 * does not exist.
+	 * @param aKey Name of the shared custom variable
+	 * @return Boolean object
 	 */
 	Boolean getBoolean(String aKey);
 
 	/**
-	 *
-	 * @param aKey
-	 * @return
+	 * Returns the boolean value of the passed variable. If the variable does
+	 * not exist always {@code false} is returned.
+	 * @param aKey Name of the shared custom variable
+	 * @return boolean value (simple type, not an Object)
 	 */
 	boolean getBool(String aKey);
 
 	/**
-	 *
-	 * @param aKey
-	 * @param aValue
+	 * Sets the boolean value of the given shared custom variable.
+	 * @param aKey Name of the shared custom variable
+	 * @param aValue Boolean value
 	 */
 	void setBoolean(String aKey, Boolean aValue);
 
 	/**
-	 *
-	 * @param aKey
-	 * @return
+	 * Returns the string object of the passed variable or null if the variable
+	 * does not exist. The default character encoding is applied.
+	 * @param aKey Name of the shared custom variable
+	 * @return String
 	 */
 	String getString(String aKey);
 
 	/**
-	 *
-	 * @param aKey
-	 * @param aValue
+	 * Sets the string value of the given shared custom variable.
+	 * @param aKey Name of the shared custom variable
+	 * @param aValue String
 	 */
 	void setString(String aKey, String aValue);
 
 	/**
-	 *
-	 * @param aKey
-	 * @return
+	 * Returns the integer object of the passed variable or null if the variable
+	 * does not exist.
+	 * @param aKey Name of the shared custom variable
+	 * @return Integer object
 	 */
 	Integer getInteger(String aKey);
 
 	/**
-	 *
-	 * @param aKey
-	 * @param aValue
+	 * Sets the integer value of the given shared custom variable.
+	 * @param aKey Name of the shared custom variable
+	 * @param aValue Integer value
 	 */
 	void setInteger(String aKey, Integer aValue);
 
 	/**
-	 * 
-	 * @param aKey
+	 * Removes the given shared custom variable from the connector.
+	 * After this operation the variable is not accessible anymore.
+	 * @param aKey Name of the shared custom variable
 	 */
 	void removeVar(String aKey);
 
 	/**
-	 * 
-	 * @return
+	 * Generates a unique ID for this connector to be used to calculate
+	 * a session ID in overlying tiers.
+	 * @return a unique ID for this connector
 	 */
 	String generateUID();
 
 	/**
-	 *
-	 * @return
+	 * Returns the remote port of the connected client.
+	 * @return int Number of the remote port.
 	 */
 	int getRemotePort();
 
 	/**
-	 *
-	 * @return
+	 * Returns the IP number of the connected remote host.
+	 * @return InetAddress object of the given remote host
 	 */
 	InetAddress getRemoteHost();
 

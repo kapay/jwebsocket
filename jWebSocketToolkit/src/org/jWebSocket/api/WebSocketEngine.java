@@ -19,109 +19,132 @@ import java.util.List;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
- * @author Puran Singh
+ * Specifies the API for jWebSocket engines. An engine maintains multiple 
+ * connectors. The engine does neither parse nor process but data packets but
+ * only passes them from either an underlying connector to the above server(s)
+ * or from one of the higher level servers to one or more connectors of a
+ * particular engine.
  * @author Alexander Schulze
- * @version $Id: JWebSocketServer.java 63 2010-02-17 04:08:28Z mailtopuran $
+ * @author Puran Singh
+ * @version $Id: WebSocketEngine.java 2010-03-03
  *
  */
 public interface WebSocketEngine {
 
 	/**
-	 * starts the engine.
+	 * Starts the engine. Usually an engine is implemented as a thread which
+	 * waits for new clients to be connected via a WebSocketConnector. So here
+	 * usually the listener threads for incoming connections are instantiated.
 	 *
 	 * @throws WebSocketException
 	 */
 	void startEngine() throws WebSocketException;
 
 	/**
-	 * stops the engine.
-	 *
+	 * Stops the engine. Here usually first all connected clients are stopped
+	 * and afterwards the listener threads for incoming new clients is stopped
+	 * as well.
 	 * @throws WebSocketException
 	 */
 	void stopEngine() throws WebSocketException;
 
 	/**
-	 * notifies the server that the engine is started for the first time.
+	 * Is called after the web socket engine has been started sucessfully.
+	 * Here usually the engine notifies the server(s) above that the engine
+	 * is started.
 	 */
 	void engineStarted();
 
 	/**
-	 * notifies the server that the engine has stopped.
+	 * Is called after the web socket engine has (been) stopped sucessfully.
+	 * Here usually the engine notifies the server(s) above that the engine
+	 * has stopped.
 	 */
 	public void engineStopped();
 
 	/**
-	 * notifies the server that a client connector has been  started.
-	 *
+	 * Is called after a new client has connected. Here usually the engine
+	 * notifies the server(s) above that a new connection has been established.
 	 * @param aConnector
 	 */
 	void connectorStarted(WebSocketConnector aConnector);
 
 	/**
-	 * notifies the server that a client connector has been  stopped.
-	 *
+	 * Is called after a new client has disconnected. Here usually the engine
+	 * notifies the server(s) above that a connection has been closed.
 	 * @param aConnector
 	 */
 	void connectorStopped(WebSocketConnector aConnector);
 
 	/**
-	 * Returns the list of connector clients connected to this server
+	 * Returns the list of clients connected to this engine. Please consider
+	 * that a server can support multiple engines. This method only returns
+	 * the clients of this engine.
 	 * @return the connector clients
 	 */
 	List<WebSocketConnector> getConnectors();
 
 	/**
-	 * Returns {@ocde true} if the server is running {@code false} otherwise
+	 * Returns {@code true} if the engine is running or {@code false} otherwise.
+	 * The alive status usually represents the state of the main engine listener
+	 * thread.
 	 * @return true or false based on the server status
 	 */
 	boolean isAlive();
 
 	/**
-	 * processes incoming data from a certain connector
-	 *
-	 *
+	 * Processes an incoming data packet from a certain connector. The
+	 * implementation of the engine usually simply passes the packets to the
+	 * server(s) of the overlying communication tier.
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
 	void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket);
 
 	/**
-	 * sends a data packet to a certain connector.
-	 *
+	 * Sends a data packet to a certain connector.
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
 	void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket);
 
 	/**
-	 * broadcasts a data packet to all connectors.
-	 *
-	 *
+	 * Broadcasts a data packet to all connectors. Usually the implementation
+	 * simply iterates through the list of connectors and calls their sendPacket
+	 * method.
 	 * @param aDataPacket
 	 */
 	void broadcastPacket(WebSocketPaket aDataPacket);
 
 	/**
-	 * removes a certain connector from the engine.
-	 *
+	 * Removes a certain connector from the engine. This usually has not to be
+	 * done by the application but by the engine implementations only.
 	 * @param aConnector
 	 */
 	void removeConnector(WebSocketConnector aConnector);
 
 	/**
-	 *
+	 * Returns a list of all servers that are currenly bound to this engine.
+	 * This list of servers is maintained by the engine and should not be
+	 * manipulated by the application.
 	 * @return
 	 */
 	public List<WebSocketServer> getServers();
 
 	/**
-	 *
+	 * Registers a server at the engine so that the engine is able to notify
+	 * the server in case of new connections and incoming data packets from
+	 * a connector. This method is not supposed to be called directly from the
+	 * application.
 	 * @param aServer
 	 */
 	public void addServer(WebSocketServer aServer);
 
 	/**
-	 *
+	 * Unregisters a server from the engine so that the engine won't notify
+	 * the server in case of new connections or incoming data packets from
+	 * a connector. This method is not supposed to be called directly from the
+	 * application.
 	 * @param aServer
 	 */
 	public void removeServer(WebSocketServer aServer);

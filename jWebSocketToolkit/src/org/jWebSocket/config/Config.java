@@ -22,22 +22,22 @@ package org.jWebSocket.config;
 public class Config {
 
 	/**
-	 * jWebSocket copyright. MAY NOT BE CHANGED due to GNU GPL v3.0 license!
+	 * jWebSocket copyright string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.
 	 */
 	public static final String COPYRIGHT = "(C) 2010 Innotrade GmbH, Germany, Herzogenrath";
 	/**
-	 * jWebSocket license. MAY NOT BE CHANGED due to GNU GPL v3.0 license!
+	 * jWebSocket license string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.
 	 */
 	public static final String LICENSE = "Distributed under GNU GPL License Version 3.0 (http://www.gnu.org/licenses/gpl-3.0.html)";
 	/**
-	 * jWebSocket vendor. MAY NOT BE CHANGED due to GNU GPL v3.0 license!
+	 * jWebSocket vendor string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.
 	 */
 	public static final String VENDOR = "jWebSocket.org";
 	/**
-	 * Current version of the jWebSocket package.
+	 * Current version string of the jWebSocket package.
 	 */
 	public static final String VERSION_STR = "0.7.0.0302 beta";
 	/**
@@ -93,17 +93,17 @@ public class Config {
 	public final static String SUB_PROT_DEFAULT = SUB_PROT_JSON;
 
 	/**
-	 * separator between the path and the argument list in the URL.
+	 * Separator between the path and the argument list in the URL.
 	 */
 	public static String PATHARG_SEPARATOR = ";";
 
 	/**
-	 * separator between the various arguments.
+	 * Separator between the various arguments.
 	 */
 	public static String ARGARG_SEPARATOR = ",";
 
 	/**
-	 * separator between the key and the value of each argument.
+	 * Separator between the key and the value of each argument.
 	 */
 	public static String KEYVAL_SEPARATOR = "=";
 

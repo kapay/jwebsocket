@@ -70,9 +70,9 @@ public class TCPEngine extends BaseEngine {
 			serverSocket = new ServerSocket(aPort);
 			setSessionTimeout(aSessionTimeout);
 
-			ServerProcessor serverProc = new ServerProcessor(this);
-			Thread serverThread = new Thread(serverProc);
-			serverThread.start();
+			EngineListener listener = new EngineListener(this);
+			Thread engineThread = new Thread(listener);
+			engineThread.start();
 
 		} catch (IOException ex) {
 			throw new WebSocketException(ex.getMessage());
@@ -231,7 +231,7 @@ public class TCPEngine extends BaseEngine {
 	/**
 	 *
 	 */
-	public class ServerProcessor implements Runnable {
+	private class EngineListener implements Runnable {
 
 		private WebSocketEngine engine = null;
 
@@ -239,7 +239,7 @@ public class TCPEngine extends BaseEngine {
 		 *
 		 * @param aEngine
 		 */
-		public ServerProcessor(WebSocketEngine aEngine) {
+		public EngineListener(WebSocketEngine aEngine) {
 			engine = aEngine;
 		}
 
