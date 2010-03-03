@@ -16,32 +16,32 @@
 package org.jWebSocket.plugins;
 
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
 
 /**
  *
  * @author aschulze
  */
-public interface IPlugIn {
+public interface PlugIn {
 
 	/**
 	 * is called by the server when the engine has been started.
 	 * @param aEngine
 	 */
-	void engineStarted(IWebSocketEngine aEngine);
+	void engineStarted(WebSocketEngine aEngine);
 
 	/**
 	 * is called by the server when the engine has been stopped.
 	 * @param aEngine
 	 */
-	void engineStopped(IWebSocketEngine aEngine);
+	void engineStopped(WebSocketEngine aEngine);
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStarted(IWebSocketConnector aConnector);
+	public void connectorStarted(WebSocketConnector aConnector);
 
 	/**
 	 *
@@ -49,13 +49,13 @@ public interface IPlugIn {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	public void processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket);
+	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStopped(IWebSocketConnector aConnector);
+	public void connectorStopped(WebSocketConnector aConnector);
 
 	/**
 	 *

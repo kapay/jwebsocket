@@ -15,12 +15,13 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.server;
 
+import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
 import org.jWebSocket.config.Config;
-import org.jWebSocket.plugins.IPlugIn;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.plugins.PlugIn;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.packetProcessors.CSVProcessor;
 import org.jWebSocket.packetProcessors.JSONProcessor;
 import org.jWebSocket.plugins.TokenPlugInChain;
@@ -34,6 +35,10 @@ import org.jWebSocket.packetProcessors.XMLProcessor;
 public class TokenServer extends BaseServer {
 
 	private static Logger log = Logger.getLogger(TokenServer.class);
+	// specify name space for token server
+	private static final String NS_TOKENSERVER = Config.NS_BASE + ".tokenserver";
+	// specify shared connector variables
+	private static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
 	private TokenPlugInChain plugInChain = null;
 
 	/**
@@ -48,40 +53,44 @@ public class TokenServer extends BaseServer {
 	 * removes a plugin from the plugin chain of the server.
 	 * @param aPlugIn
 	 */
-	public void removePlugIn(IPlugIn aPlugIn) {
-		if (plugInChain != null) {
-			plugInChain.removePlugIn(aPlugIn);
-		}
+	public void removePlugIn(PlugIn aPlugIn) {
+		plugInChain.removePlugIn(aPlugIn);
 	}
 
 	@Override
-	public void engineStarted(IWebSocketEngine aEngine) {
+	public void engineStarted(WebSocketEngine aEngine) {
 		log.debug("Processing engine started...");
 		plugInChain.engineStarted(aEngine);
 	}
 
 	@Override
-	public void engineStopped(IWebSocketEngine aEngine) {
+	public void engineStopped(WebSocketEngine aEngine) {
 		log.debug("Processing engine stopped...");
 		plugInChain.engineStopped(aEngine);
 	}
 
 	@Override
-	public void connectorStarted(IWebSocketConnector aConnector) {
-		log.debug("Processing connector started...");
-		// notify plugins that a connector has started,
-		// i.e. a client was sconnected.
-		if (plugInChain != null) {
+	public void connectorStarted(WebSocketConnector aConnector) {
+		String lSubProt = aConnector.getHeader().getSubProtocol(null);
+		if (lSubProt.equals(Config.SUB_PROT_JSON)
+			|| lSubProt.equals(Config.SUB_PROT_CSV)
+			|| lSubProt.equals(Config.SUB_PROT_XML)) {
+
+			aConnector.setBoolean(VAR_IS_TOKENSERVER, true);
+
+			log.debug("Processing connector started...");
+			// notify plugins that a connector has started,
+			// i.e. a client was sconnected.
 			plugInChain.connectorStarted(aConnector);
 		}
 	}
 
 	@Override
-	public void connectorStopped(IWebSocketConnector aConnector) {
-		log.debug("Processing connector stopped...");
+	public void connectorStopped(WebSocketConnector aConnector) {
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
-		if (plugInChain != null) {
+		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
+			log.debug("Processing connector stopped...");
 			plugInChain.connectorStopped(aConnector);
 		}
 	}
@@ -92,7 +101,7 @@ public class TokenServer extends BaseServer {
 	 * @param aDataPacket
 	 * @return
 	 */
-	public Token packetToToken(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public Token packetToToken(WebSocketConnector aConnector, IDataPacket aDataPacket) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(Config.SUB_PROT_DEFAULT);
 		Token lToken = null;
 		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
@@ -111,7 +120,7 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 * @return
 	 */
-	public IDataPacket tokenToPacket(IWebSocketConnector aConnector, Token aToken) {
+	public IDataPacket tokenToPacket(WebSocketConnector aConnector, Token aToken) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(Config.SUB_PROT_DEFAULT);
 		IDataPacket lPacket = null;
 		if (lSubProt.equals(Config.SUB_PROT_JSON)) {
@@ -125,13 +134,16 @@ public class TokenServer extends BaseServer {
 	}
 
 	@Override
-	public void processPacket(IWebSocketEngine aEngine, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
-		Token lToken = packetToToken(aConnector, aDataPacket);
-		if (lToken != null) {
-			log.debug("Processing token '" + lToken.toString() + " from '" + aConnector + "'...");
-			plugInChain.processToken(aConnector, lToken);
-		} else {
-			log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
+	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, IDataPacket aDataPacket) {
+		// is the data packet supposed to be interpreted as token?
+		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
+			Token lToken = packetToToken(aConnector, aDataPacket);
+			if (lToken != null) {
+				log.debug("Processing token '" + lToken.toString() + " from '" + aConnector + "'...");
+				plugInChain.processToken(aConnector, lToken);
+			} else {
+				log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
+			}
 		}
 	}
 
@@ -140,9 +152,13 @@ public class TokenServer extends BaseServer {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void sendToken(IWebSocketConnector aConnector, Token aToken) {
-		log.debug("Sending token '" + aToken + "' to '" + aConnector + "'...");
-		super.sendPacket(aConnector, tokenToPacket(aConnector, aToken));
+	public void sendToken(WebSocketConnector aConnector, Token aToken) {
+		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
+			log.debug("Sending token '" + aToken + "' to '" + aConnector + "'...");
+			super.sendPacket(aConnector, tokenToPacket(aConnector, aToken));
+		} else {
+			log.warn("Connector not supposed to handle tokens.");
+		}
 	}
 
 	/**
@@ -154,8 +170,10 @@ public class TokenServer extends BaseServer {
 	 */
 	public void broadcastToken(Token aToken) {
 		log.debug("Broadcasting token '" + aToken + " to all connectors...");
-		for (IWebSocketConnector lConnector : getAllConnectors()) {
-			sendToken(lConnector, aToken);
+		HashMap lFilter = new HashMap();
+		lFilter.put(VAR_IS_TOKENSERVER, true);
+		for (WebSocketConnector lConnector : selectConnectors(lFilter)) {
+			sendPacket(lConnector, tokenToPacket(lConnector, aToken));
 		}
 	}
 

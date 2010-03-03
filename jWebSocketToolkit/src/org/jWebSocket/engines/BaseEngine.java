@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import javolution.util.FastList;
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
-import org.jWebSocket.api.IWebSocketServer;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.api.WebSocketServer;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.kit.WebSocketException;
 
@@ -18,10 +18,10 @@ import org.jWebSocket.kit.WebSocketException;
  *
  * @author aschulze
  */
-public abstract class BaseEngine implements IWebSocketEngine {
+public class BaseEngine implements WebSocketEngine {
 
-	private IWebSocketServer server = null;
-	private final List<IWebSocketConnector> connectors = new FastList<IWebSocketConnector>();
+	private final List<WebSocketServer> servers = new FastList<WebSocketServer>();
+	private final List<WebSocketConnector> connectors = new FastList<WebSocketConnector>();
 	private int sessionTimeout = Config.DEFAULT_TIMEOUT;
 
 	/**
@@ -39,7 +39,7 @@ public abstract class BaseEngine implements IWebSocketEngine {
 	public void stopEngine() throws WebSocketException {
 		try {
 			// stop all connectors
-			for (IWebSocketConnector connector : getConnectors()) {
+			for (WebSocketConnector connector : getConnectors()) {
 				connector.stopConnector();
 			}
 		} catch (Exception ex) {
@@ -51,48 +51,51 @@ public abstract class BaseEngine implements IWebSocketEngine {
 	}
 
 	public void engineStarted() {
-		// notify server that the engine has started
-		if( server != null ) {
-			server.engineStarted(this);
+		// notify servers that the engine has started
+		for (WebSocketServer lServer : servers) {
+			lServer.engineStarted(this);
 		}
 	}
 
 	public void engineStopped() {
-		// notify server that the engine has stopped
-		if( server != null ) {
-			server.engineStopped(this);
+		// notify servers that the engine has stopped
+		for (WebSocketServer lServer : servers) {
+			lServer.engineStopped(this);
 		}
 	}
 
-	public void connectorStarted(IWebSocketConnector aConnector) {
-		// notify server that a connector has started
-		if( server != null ) {
-			server.connectorStarted(aConnector);
+	public void connectorStarted(WebSocketConnector aConnector) {
+		// notify servers that a connector has started
+		for (WebSocketServer lServer : servers) {
+			lServer.connectorStarted(aConnector);
 		}
 	}
 
-	public void connectorStopped(IWebSocketConnector aConnector) {
-		// notify server that a connector has stopped
-		if( server != null ) {
-			server.connectorStopped(aConnector);
+	public void connectorStopped(WebSocketConnector aConnector) {
+		// notify servers that a connector has stopped
+		for (WebSocketServer lServer : servers) {
+			lServer.connectorStopped(aConnector);
 		}
 	}
 
-	public abstract boolean isAlive();
+	public boolean isAlive() {
+		return false;
+	}
 
-	public abstract void processPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket);
+	public void processPacket(WebSocketConnector aConnector, IDataPacket aDataPacket) {
+	}
 
-	public void sendPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void sendPacket(WebSocketConnector aConnector, IDataPacket aDataPacket) {
 		aConnector.sendPacket(aDataPacket);
-	};
+	}
 
 	public void broadcastPacket(IDataPacket aDataPacket) {
-		for (IWebSocketConnector connector : connectors) {
+		for (WebSocketConnector connector : connectors) {
 			connector.sendPacket(aDataPacket);
 		}
 	}
 
-	public void removeConnector(IWebSocketConnector aConnector) {
+	public void removeConnector(WebSocketConnector aConnector) {
 		connectors.remove(aConnector);
 	}
 
@@ -113,21 +116,26 @@ public abstract class BaseEngine implements IWebSocketEngine {
 	/**
 	 * @return the connectors
 	 */
-	public List<IWebSocketConnector> getConnectors() {
+	public List<WebSocketConnector> getConnectors() {
 		return connectors;
 	}
 
 	/**
 	 * @return the server
 	 */
-	public IWebSocketServer getServer() {
-		return server;
+	public List<WebSocketServer> getServers() {
+		return Collections.unmodifiableList(servers);
 	}
 
 	/**
-	 * @param server the server to set
 	 */
-	public void setServer(IWebSocketServer server) {
-		this.server = server;
+	public void addServer(WebSocketServer aServer) {
+		this.servers.add(aServer);
+	}
+
+	/**
+	 */
+	public void removeServer(WebSocketServer aServer) {
+		this.servers.remove(aServer);
 	}
 }

@@ -10,7 +10,7 @@ import org.jWebSocket.kit.WebSocketException;
  *
  * @author aschulze
  */
-public interface IWebSocketServer {
+public interface WebSocketServer {
 
 	/**
 	 * starts the server and all underlying engines.
@@ -36,37 +36,37 @@ public interface IWebSocketServer {
 	 * adds a new engine to the server.
 	 * @param aEngine
 	 */
-	void addEngine(IWebSocketEngine aEngine);
+	void addEngine(WebSocketEngine aEngine);
 
 	/**
 	 * removes a already bound engine from the server.
 	 * @param aEngine
 	 */
-	void removeEngine(IWebSocketEngine aEngine);
+	void removeEngine(WebSocketEngine aEngine);
 
 	/**
 	 * is called from the underlying engine when the engine is started.
 	 * @param aEngine
 	 */
-	void engineStarted(IWebSocketEngine aEngine);
+	void engineStarted(WebSocketEngine aEngine);
 
 	/**
 	 * is called from the underlying engine when the engine is stopped.
 	 * @param aEngine
 	 */
-	void engineStopped(IWebSocketEngine aEngine);
+	void engineStopped(WebSocketEngine aEngine);
 
 	/**
 	 * notifies the application that a client connector has been started.
 	 * @param aConnector
 	 */
-	void connectorStarted(IWebSocketConnector aConnector);
+	void connectorStarted(WebSocketConnector aConnector);
 
 	/**
 	 * notifies the application that a client connector has been stopped.
 	 * @param aConnector
 	 */
-	void connectorStopped(IWebSocketConnector aConnector);
+	void connectorStopped(WebSocketConnector aConnector);
 
 	/**
 	 * is called when the underlying engine received a packet from a connector.
@@ -74,14 +74,14 @@ public interface IWebSocketServer {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	void processPacket(IWebSocketEngine aEngine, IWebSocketConnector aConnector, IDataPacket aDataPacket);
+	void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
 	 * sends a packet to a certain connector.
 	 * @param aConnector 
 	 * @param aDataPacket
 	 */
-	void sendPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket);
+	void sendPacket(WebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
 	 * broadcasts a datapacket to all connectors.

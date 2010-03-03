@@ -13,8 +13,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.kit.DataPacket;
 
 /**
@@ -29,7 +29,7 @@ public class TCPConnector extends BaseConnector {
 	private Socket clientSocket = null;
 	private boolean isRunning = false;
 
-	public TCPConnector(IWebSocketEngine aEngine, Socket aClientSocket) {
+	public TCPConnector(WebSocketEngine aEngine, Socket aClientSocket) {
 		super(aEngine);
 		clientSocket = aClientSocket;
 		try {
@@ -78,16 +78,16 @@ public class TCPConnector extends BaseConnector {
 
 	public class ClientProcessor implements Runnable {
 
-		IWebSocketConnector connector = null;
+		WebSocketConnector connector = null;
 
-		public ClientProcessor(IWebSocketConnector aConnector) {
+		public ClientProcessor(WebSocketConnector aConnector) {
 			connector = aConnector;
 		}
 
 		@Override
 		public void run() {
 			String line;
-			IWebSocketEngine engine = getEngine();
+			WebSocketEngine engine = getEngine();
 
 			try {
 				// start client listener loop
@@ -134,7 +134,7 @@ public class TCPConnector extends BaseConnector {
 						try {
 							engine.processPacket(connector, dataPacket);
 						} catch (Exception ex) {
-							log.error(ex.getClass().getSimpleName() + "in processPacket of connector " + connector.getClass().getSimpleName() + ": " + ex.getMessage());
+							log.error(ex.getClass().getSimpleName() + " in processPacket of connector " + connector.getClass().getSimpleName() + ": " + ex.getMessage());
 							line = null;
 						}
 					} else {

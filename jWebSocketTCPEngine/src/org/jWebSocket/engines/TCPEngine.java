@@ -24,12 +24,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
-import org.jWebSocket.api.IWebSocketServer;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.api.WebSocketServer;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.connectors.TCPConnector;
 import org.jWebSocket.kit.Header;
@@ -98,7 +99,7 @@ public class TCPEngine extends BaseEngine {
 	}
 
 	@Override
-	public void connectorStopped(IWebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector) {
 		super.connectorStopped(aConnector);
 		// once a connector stopped remove it from the list of connectors
 		log.debug("Removing connector from engine...");
@@ -213,17 +214,17 @@ public class TCPEngine extends BaseEngine {
 		return header;
 	}
 
-	public void processPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
-		IWebSocketServer lServer = getServer();
-		if (lServer != null) {
+	@Override
+	public void processPacket(WebSocketConnector aConnector, IDataPacket aDataPacket) {
+		List<WebSocketServer> lServers = getServers();
+		for (WebSocketServer lServer : lServers) {
 			lServer.processPacket(this, aConnector, aDataPacket);
-		} else {
-			log.error("Engine has no server assigned.");
 		}
-
 	}
 
+	@Override
 	public boolean isAlive() {
+		// TODO: Check isAlive state of TCPEngine
 		return true;
 	}
 
@@ -232,13 +233,13 @@ public class TCPEngine extends BaseEngine {
 	 */
 	public class ServerProcessor implements Runnable {
 
-		private IWebSocketEngine engine = null;
+		private WebSocketEngine engine = null;
 
 		/**
 		 *
 		 * @param aEngine
 		 */
-		public ServerProcessor(IWebSocketEngine aEngine) {
+		public ServerProcessor(WebSocketEngine aEngine) {
 			engine = aEngine;
 		}
 
@@ -271,7 +272,7 @@ public class TCPEngine extends BaseEngine {
 
 						// create connector and pass header
 						// log.debug("Instantiating connector...");
-						IWebSocketConnector connector = new TCPConnector(engine, clientSocket);
+						WebSocketConnector connector = new TCPConnector(engine, clientSocket);
 						// log.debug("Setting header to engine...");
 						connector.setHeader(header);
 						// log.debug("Adding connector to engine...");
@@ -306,7 +307,7 @@ public class TCPEngine extends BaseEngine {
 	 * @param aRemotePort
 	 * @return
 	 */
-	public IWebSocketConnector getConnectorByRemotePort(int aRemotePort) {
+	public WebSocketConnector getConnectorByRemotePort(int aRemotePort) {
 		Iterator lIterator = getConnectors().iterator();
 		while (lIterator.hasNext()) {
 			TCPConnector lConnector = (TCPConnector) lIterator.next();

@@ -19,9 +19,9 @@ import java.util.List;
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
-import org.jWebSocket.api.IWebSocketServer;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.api.WebSocketServer;
 
 /**
  *
@@ -30,31 +30,31 @@ import org.jWebSocket.api.IWebSocketServer;
 public class PlugInChain implements IPlugInChain {
 
 	private static Logger log = Logger.getLogger(PlugInChain.class);
-	private FastList<IPlugIn> plugins = new FastList<IPlugIn>();
-	private IWebSocketServer server = null;
+	private FastList<PlugIn> plugins = new FastList<PlugIn>();
+	private WebSocketServer server = null;
 
 	/**
 	 *
 	 * @param aServer
 	 */
-	public PlugInChain(IWebSocketServer aServer) {
+	public PlugInChain(WebSocketServer aServer) {
 		server = aServer;
 	}
 
-	public void engineStarted(IWebSocketEngine aEngine) {
+	public void engineStarted(WebSocketEngine aEngine) {
 	}
 
-	public void engineStopped(IWebSocketEngine aEngine) {
+	public void engineStopped(WebSocketEngine aEngine) {
 	}
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStarted(IWebSocketConnector aConnector) {
+	public void connectorStarted(WebSocketConnector aConnector) {
 		log.debug("Notifying plug-ins that connector started...");
 		try {
-			for (IPlugIn plugIn : getPlugIns()) {
+			for (PlugIn plugIn : getPlugIns()) {
 				try {
 					// log.debug("Notifying plug-in " + plugIn + " that connector started...");
 					plugIn.connectorStarted(aConnector);
@@ -72,10 +72,10 @@ public class PlugInChain implements IPlugInChain {
 	 * @param aConnector
 	 * @return
 	 */
-	public PlugInResponse processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public PlugInResponse processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, IDataPacket aDataPacket) {
 		log.debug("Processing packet for plug-ins...");
 		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (IPlugIn plugIn : getPlugIns()) {
+		for (PlugIn plugIn : getPlugIns()) {
 			try {
 				// log.debug("Processing packet for plug-in " + plugIn + "...");
 				plugIn.processPacket(lPluginResponse, aConnector, aDataPacket);
@@ -93,9 +93,9 @@ public class PlugInChain implements IPlugInChain {
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStopped(IWebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector) {
 		log.debug("Notifying plug-ins that connector stopped...");
-		for (IPlugIn plugIn : getPlugIns()) {
+		for (PlugIn plugIn : getPlugIns()) {
 			try {
 				// log.debug("Notifying plug-in " + plugIn + " that connector stopped...");
 				plugIn.connectorStopped(aConnector);
@@ -109,7 +109,7 @@ public class PlugInChain implements IPlugInChain {
 	 *
 	 * @return
 	 */
-	public List<IPlugIn> getPlugIns() {
+	public List<PlugIn> getPlugIns() {
 		return plugins;
 	}
 
@@ -117,7 +117,7 @@ public class PlugInChain implements IPlugInChain {
 	 *
 	 * @param aPlugIn
 	 */
-	public void addPlugIn(IPlugIn aPlugIn) {
+	public void addPlugIn(PlugIn aPlugIn) {
 		plugins.add(aPlugIn);
 		aPlugIn.setPlugInChain(this);
 	}
@@ -126,7 +126,7 @@ public class PlugInChain implements IPlugInChain {
 	 *
 	 * @param aPlugIn
 	 */
-	public void removePlugIn(IPlugIn aPlugIn) {
+	public void removePlugIn(PlugIn aPlugIn) {
 		plugins.remove(aPlugIn);
 		aPlugIn.setPlugInChain(null);
 	}
@@ -134,7 +134,7 @@ public class PlugInChain implements IPlugInChain {
 	/**
 	 * @return the server
 	 */
-	public IWebSocketServer getServer() {
+	public WebSocketServer getServer() {
 		return server;
 	}
 }

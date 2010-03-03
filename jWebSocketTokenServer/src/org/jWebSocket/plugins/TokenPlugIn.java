@@ -16,8 +16,8 @@
 package org.jWebSocket.plugins;
 
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.server.TokenServer;
 import org.jWebSocket.token.Token;
 
@@ -29,17 +29,17 @@ public class TokenPlugIn extends BasePlugIn {
 
 	private String namespace = null;
 
-	public void engineStarted(IWebSocketEngine aEngine) {
+	public void engineStarted(WebSocketEngine aEngine) {
 	}
 
-	public void engineStopped(IWebSocketEngine aEngine) {
+	public void engineStopped(WebSocketEngine aEngine) {
 	}
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStarted(IWebSocketConnector aConnector) {
+	public void connectorStarted(WebSocketConnector aConnector) {
 	}
 
 	/**
@@ -48,11 +48,11 @@ public class TokenPlugIn extends BasePlugIn {
 	 * @param aToken
 	 * @return
 	 */
-	public void processToken(PlugInResponse aResponse, IWebSocketConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 	}
 
 	@Override
-	public void processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, IDataPacket aDataPacket) {
 		//
 	}
 
@@ -60,7 +60,7 @@ public class TokenPlugIn extends BasePlugIn {
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStopped(IWebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector) {
 	}
 
 	/**

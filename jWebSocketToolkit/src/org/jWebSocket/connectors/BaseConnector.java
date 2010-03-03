@@ -3,17 +3,17 @@ package org.jWebSocket.connectors;
 import java.net.InetAddress;
 import java.util.HashMap;
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.kit.Header;
 
 /**
  *
  * @author aschulze
  */
-public class BaseConnector implements IWebSocketConnector {
+public class BaseConnector implements WebSocketConnector {
 
-	private IWebSocketEngine engine = null;
+	private WebSocketEngine engine = null;
 	private Header header = null;
 	private HashMap<String, Object> customVars = new HashMap<String, Object>();
 
@@ -21,7 +21,7 @@ public class BaseConnector implements IWebSocketConnector {
 	 *
 	 * @param aEngine
 	 */
-	public BaseConnector(IWebSocketEngine aEngine) {
+	public BaseConnector(WebSocketEngine aEngine) {
 		engine = aEngine;
 	}
 
@@ -43,7 +43,7 @@ public class BaseConnector implements IWebSocketConnector {
 	/**
 	 * @return the engine
 	 */
-	public IWebSocketEngine getEngine() {
+	public WebSocketEngine getEngine() {
 		return engine;
 	}
 
@@ -84,8 +84,18 @@ public class BaseConnector implements IWebSocketConnector {
 	 * @param aKey
 	 * @return
 	 */
-	public boolean getBoolean(String aKey) {
+	public Boolean getBoolean(String aKey) {
 		return (Boolean) getVar(aKey);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	public boolean getBool(String aKey) {
+		Boolean lBool = getBoolean(aKey);
+		return (lBool != null && lBool);
 	}
 
 	/**
@@ -93,7 +103,7 @@ public class BaseConnector implements IWebSocketConnector {
 	 * @param aKey
 	 * @param aValue
 	 */
-	public void setBoolean(String aKey, boolean aValue) {
+	public void setBoolean(String aKey, Boolean aValue) {
 		setVar(aKey, aValue);
 	}
 
@@ -120,7 +130,7 @@ public class BaseConnector implements IWebSocketConnector {
 	 * @param aKey
 	 * @return
 	 */
-	public int getInt(String aKey) {
+	public Integer getInteger(String aKey) {
 		return (Integer) getVar(aKey);
 	}
 
@@ -129,7 +139,7 @@ public class BaseConnector implements IWebSocketConnector {
 	 * @param aKey
 	 * @param aValue
 	 */
-	public void setInt(String aKey, int aValue) {
+	public void setInteger(String aKey, Integer aValue) {
 		setVar(aKey, aValue);
 	}
 

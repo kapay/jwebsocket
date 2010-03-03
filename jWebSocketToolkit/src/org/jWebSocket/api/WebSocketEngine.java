@@ -23,7 +23,7 @@ import org.jWebSocket.kit.WebSocketException;
  * @version $Id: JWebSocketServer.java 63 2010-02-17 04:08:28Z mailtopuran $
  *
  */
-public interface IWebSocketEngine {
+public interface WebSocketEngine {
 
 	/**
 	 * starts the engine.
@@ -54,20 +54,20 @@ public interface IWebSocketEngine {
 	 *
 	 * @param aConnector
 	 */
-	void connectorStarted(IWebSocketConnector aConnector);
+	void connectorStarted(WebSocketConnector aConnector);
 
 	/**
 	 * notifies the server that a client connector has been  stopped.
 	 *
 	 * @param aConnector
 	 */
-	void connectorStopped(IWebSocketConnector aConnector);
+	void connectorStopped(WebSocketConnector aConnector);
 
 	/**
 	 * Returns the list of connector clients connected to this server
 	 * @return the connector clients
 	 */
-	List<IWebSocketConnector> getConnectors();
+	List<WebSocketConnector> getConnectors();
 
 	/**
 	 * Returns {@ocde true} if the server is running {@code false} otherwise
@@ -82,7 +82,7 @@ public interface IWebSocketEngine {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	void processPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket);
+	void processPacket(WebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
 	 * sends a data packet to a certain connector.
@@ -90,7 +90,7 @@ public interface IWebSocketEngine {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	void sendPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket);
+	void sendPacket(WebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
 	 * broadcasts a data packet to all connectors.
@@ -105,19 +105,25 @@ public interface IWebSocketEngine {
 	 *
 	 * @param aConnector
 	 */
-	void removeConnector(IWebSocketConnector aConnector);
+	void removeConnector(WebSocketConnector aConnector);
 
 	/**
 	 *
 	 * @return
 	 */
-	public IWebSocketServer getServer();
+	public List<WebSocketServer> getServers();
 
 	/**
 	 *
-	 * @param server
+	 * @param aServer
 	 */
-	public void setServer(IWebSocketServer server);
+	public void addServer(WebSocketServer aServer);
+
+	/**
+	 *
+	 * @param aServer
+	 */
+	public void removeServer(WebSocketServer aServer);
 
 
 }

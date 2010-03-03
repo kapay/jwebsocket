@@ -18,7 +18,7 @@ package org.jWebSocket.token;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.api.WebSocketConnector;
 
 /**
  *
@@ -37,7 +37,7 @@ public class Token {
 	/**
 	 *
 	 */
-	public Token(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public Token(WebSocketConnector aConnector, IDataPacket aDataPacket) {
 	}
 
 	public void put(String aKey, Object aValue) {

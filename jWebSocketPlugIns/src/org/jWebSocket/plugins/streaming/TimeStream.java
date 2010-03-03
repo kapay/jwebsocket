@@ -17,7 +17,7 @@ package org.jWebSocket.plugins.streaming;
 
 import java.util.Date;
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.server.TokenServer;
 import org.jWebSocket.token.Token;
 
@@ -50,7 +50,7 @@ public class TimeStream extends TokenStream {
 	}
 
 	@Override
-	protected void processConnector(IWebSocketConnector aConnector, Object aObject) {
+	protected void processConnector(WebSocketConnector aConnector, Object aObject) {
 		try {
 			getServer().sendToken(aConnector, (Token)aObject);
 		} catch (Exception ex) {

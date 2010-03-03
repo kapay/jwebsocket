@@ -23,6 +23,7 @@ public interface IDataPacket {
 	 * @param aString
 	 */
 	void setString(String aString);
+
 	/**
 	 *
 	 * @param aString
@@ -33,9 +34,17 @@ public interface IDataPacket {
 
 	/**
 	 *
+	 * @param aString
+	 */
+	void setUTF8(String aString);
+
+
+	/**
+	 *
 	 * @return
 	 */
 	byte[] getByteArray();
+	
 	/**
 	 *
 	 * @return
@@ -49,4 +58,11 @@ public interface IDataPacket {
 	 * @throws UnsupportedEncodingException
 	 */
 	String getString(String aEncoding) throws UnsupportedEncodingException;
+
+	/**
+	 *
+	 * @return
+	 */
+	String getUTF8();
+
 }

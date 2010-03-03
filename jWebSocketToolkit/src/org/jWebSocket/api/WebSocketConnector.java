@@ -21,7 +21,7 @@ import org.jWebSocket.kit.Header;
  *
  * @author aschulze
  */
-public interface IWebSocketConnector {
+public interface WebSocketConnector {
 
 	/**
 	 * starts and initializes the connector.
@@ -76,14 +76,21 @@ public interface IWebSocketConnector {
 	 * @param aKey
 	 * @return
 	 */
-	boolean getBoolean(String aKey);
+	Boolean getBoolean(String aKey);
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	boolean getBool(String aKey);
 
 	/**
 	 *
 	 * @param aKey
 	 * @param aValue
 	 */
-	void setBoolean(String aKey, boolean aValue);
+	void setBoolean(String aKey, Boolean aValue);
 
 	/**
 	 *
@@ -104,14 +111,14 @@ public interface IWebSocketConnector {
 	 * @param aKey
 	 * @return
 	 */
-	int getInt(String aKey);
+	Integer getInteger(String aKey);
 
 	/**
 	 *
 	 * @param aKey
 	 * @param aValue
 	 */
-	void setInt(String aKey, int aValue);
+	void setInteger(String aKey, Integer aValue);
 
 	/**
 	 * 

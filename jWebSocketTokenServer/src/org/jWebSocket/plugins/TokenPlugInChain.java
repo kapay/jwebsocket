@@ -6,8 +6,8 @@ package org.jWebSocket.plugins;
 
 import java.util.Iterator;
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketServer;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketServer;
 import org.jWebSocket.token.Token;
 
 /**
@@ -18,13 +18,13 @@ public class TokenPlugInChain extends PlugInChain {
 
 	private static Logger log = Logger.getLogger(TokenPlugInChain.class);
 
-	public TokenPlugInChain(IWebSocketServer aServer) {
+	public TokenPlugInChain(WebSocketServer aServer) {
 		super(aServer);
 	}
 
-	public PlugInResponse processToken(IWebSocketConnector aConnector, Token aToken) {
+	public PlugInResponse processToken(WebSocketConnector aConnector, Token aToken) {
 		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (IPlugIn plugIn : getPlugIns()) {
+		for (PlugIn plugIn : getPlugIns()) {
 			try {
 				((TokenPlugIn) plugIn).processToken(lPluginResponse, aConnector, aToken);
 			} catch (Exception ex) {

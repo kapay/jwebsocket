@@ -17,91 +17,95 @@ package org.jWebSocket.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javolution.util.FastList;
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
-import org.jWebSocket.api.IWebSocketServer;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.api.WebSocketServer;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
  *
  * @author aschulze
  */
-public class BaseServer implements IWebSocketServer {
+public class BaseServer implements WebSocketServer {
 
-	private FastList<IWebSocketEngine> engines = null;
+	private FastList<WebSocketEngine> engines = null;
 
 	/**
 	 *
 	 */
 	public BaseServer() {
-		engines = new FastList<IWebSocketEngine>();
+		engines = new FastList<WebSocketEngine>();
 	}
 
-	public void addEngine(IWebSocketEngine aEngine) {
+	public void addEngine(WebSocketEngine aEngine) {
 		engines.add(aEngine);
-		aEngine.setServer(this);
+		aEngine.addServer(this);
 	}
 
-	public void removeEngine(IWebSocketEngine aEngine) {
+	public void removeEngine(WebSocketEngine aEngine) {
 		engines.remove(aEngine);
+		aEngine.removeServer(this);
+
 	}
 
 	public void startServer()
 		throws WebSocketException {
-		for (Iterator<IWebSocketEngine> i = engines.iterator(); i.hasNext();) {
-			i.next().startEngine();
+		for (WebSocketEngine lEngine : engines) {
+			lEngine.startEngine();
 		}
 	}
 
 	public boolean isAlive() {
-		boolean lIsAlive = false;
-		for (Iterator<IWebSocketEngine> i = engines.iterator(); !lIsAlive && i.hasNext();) {
-			lIsAlive = i.next().isAlive();
+		boolean lIsAlive = true;
+		for (WebSocketEngine lEngine : engines) {
+			if (!lEngine.isAlive()) {
+				lIsAlive = false;
+				break;
+			}
 		}
 		return lIsAlive;
 	}
 
 	public void stopServer()
 		throws WebSocketException {
-		for (Iterator<IWebSocketEngine> i = engines.iterator(); i.hasNext();) {
-			i.next().stopEngine();
+		for (WebSocketEngine lEngine : engines) {
+			lEngine.stopEngine();
 		}
 	}
 
-	public void engineStarted(IWebSocketEngine aEngine) {
+	public void engineStarted(WebSocketEngine aEngine) {
 	}
 
-	public void engineStopped(IWebSocketEngine aEngine) {
+	public void engineStopped(WebSocketEngine aEngine) {
 	}
 
-	public void connectorStarted(IWebSocketConnector aConnector) {
+	public void connectorStarted(WebSocketConnector aConnector) {
 	}
 
-	public void connectorStopped(IWebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector) {
 	}
 
-	public void processPacket(IWebSocketEngine aEngine, IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, IDataPacket aDataPacket) {
 	}
 
-	public void sendPacket(IWebSocketConnector aConnector, IDataPacket aDataPacket) {
+	public void sendPacket(WebSocketConnector aConnector, IDataPacket aDataPacket) {
 		aConnector.sendPacket(aDataPacket);
 	}
 
 	public void broadcastPacket(IDataPacket aDataPacket) {
-		for (Iterator<IWebSocketConnector> i = getAllConnectors().iterator(); i.hasNext();) {
-			sendPacket(i.next(), aDataPacket);
+		for (WebSocketConnector lConnector : getAllConnectors()) {
+			sendPacket(lConnector, aDataPacket);
 		}
 	}
 
 	/**
 	 * @return the engines
 	 */
-	public List<IWebSocketEngine> getEngines() {
+	public List<WebSocketEngine> getEngines() {
 		return (engines != null ? Collections.unmodifiableList(engines) : null);
 	}
 
@@ -110,7 +114,7 @@ public class BaseServer implements IWebSocketServer {
 	 * @param aEngine
 	 * @return the engines
 	 */
-	public List<IWebSocketConnector> getConnectors(IWebSocketEngine aEngine) {
+	public List<WebSocketConnector> getConnectors(WebSocketEngine aEngine) {
 		return Collections.unmodifiableList(aEngine.getConnectors());
 	}
 
@@ -118,10 +122,10 @@ public class BaseServer implements IWebSocketServer {
 	 * returns all connectors of all engines connected to the server.
 	 * @return the engines
 	 */
-	public List<IWebSocketConnector> getAllConnectors() {
+	public List<WebSocketConnector> getAllConnectors() {
 		ArrayList clients = new ArrayList();
-		for (Iterator i = engines.iterator(); i.hasNext();) {
-			clients.addAll(((IWebSocketEngine) i.next()).getConnectors());
+		for (WebSocketEngine lEngine : engines) {
+			clients.addAll(lEngine.getConnectors());
 		}
 		return Collections.unmodifiableList(clients);
 	}
@@ -131,10 +135,10 @@ public class BaseServer implements IWebSocketServer {
 	 * @param aFilter
 	 * @return
 	 */
-	public List<IWebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
+	public List<WebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
 		ArrayList clients = new ArrayList();
-		for (IWebSocketEngine lEngine : engines) {
-			for (IWebSocketConnector lConnector : lEngine.getConnectors()) {
+		for (WebSocketEngine lEngine : engines) {
+			for (WebSocketConnector lConnector : lEngine.getConnectors()) {
 				boolean lMatch = true;
 				for (String lKey : aFilter.keySet()) {
 					Object lVarVal = lConnector.getVar(lKey);
@@ -143,6 +147,8 @@ public class BaseServer implements IWebSocketServer {
 						Object lFilterVal = aFilter.get(lKey);
 						if (lVarVal instanceof String && lFilterVal instanceof String) {
 							lMatch = ((String) lVarVal).matches((String) lFilterVal);
+						} else if (lVarVal instanceof Boolean) {
+							lMatch = ((Boolean) lVarVal).equals((Boolean) lFilterVal);
 						} else {
 							lMatch = lVarVal.equals(lFilterVal);
 						}

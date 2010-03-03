@@ -16,26 +16,26 @@
 package org.jWebSocket.plugins;
 
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
 
 /**
  *
  * @author aschulze
  */
-public abstract class BasePlugIn implements IPlugIn {
+public abstract class BasePlugIn implements PlugIn {
 
 	private IPlugInChain plugInChain = null;
 
-	public abstract void engineStarted(IWebSocketEngine aEngine);
+	public abstract void engineStarted(WebSocketEngine aEngine);
 
-	public abstract void engineStopped(IWebSocketEngine aEngine);
+	public abstract void engineStopped(WebSocketEngine aEngine);
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public abstract void connectorStarted(IWebSocketConnector aConnector);
+	public abstract void connectorStarted(WebSocketConnector aConnector);
 
 	/**
 	 *
@@ -43,13 +43,13 @@ public abstract class BasePlugIn implements IPlugIn {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	public abstract void processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket);
+	public abstract void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
 	 *
 	 * @param aConnector
 	 */
-	public abstract void connectorStopped(IWebSocketConnector aConnector);
+	public abstract void connectorStopped(WebSocketConnector aConnector);
 
 	/**
 	 *

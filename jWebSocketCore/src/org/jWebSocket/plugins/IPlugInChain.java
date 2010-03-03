@@ -17,8 +17,8 @@ package org.jWebSocket.plugins;
 
 import java.util.List;
 import org.jWebSocket.api.IDataPacket;
-import org.jWebSocket.api.IWebSocketConnector;
-import org.jWebSocket.api.IWebSocketEngine;
+import org.jWebSocket.api.WebSocketConnector;
+import org.jWebSocket.api.WebSocketEngine;
 
 /**
  *
@@ -30,20 +30,20 @@ public interface IPlugInChain {
 	 * is called by the server when the engine has been started.
 	 * @param aEngine
 	 */
-	void engineStarted(IWebSocketEngine aEngine);
+	void engineStarted(WebSocketEngine aEngine);
 
 	/**
 	 * is called by the server when the engine has been stopped.
 	 * @param aEngine
 	 */
-	void engineStopped(IWebSocketEngine aEngine);
+	void engineStopped(WebSocketEngine aEngine);
 
 	/**
 	 * is called by the server when a new connector has been started,
 	 * i.e. a new client has connected.
 	 * @param aConnector
 	 */
-	void connectorStarted(IWebSocketConnector aConnector);
+	void connectorStarted(WebSocketConnector aConnector);
 
 	/**
 	 * is called when a data packet from a client was received
@@ -53,31 +53,31 @@ public interface IPlugInChain {
 	 * @param aDataPacket
 	 * @return
 	 */
-	PlugInResponse processPacket(PlugInResponse aResponse, IWebSocketConnector aConnector, IDataPacket aDataPacket);
+	PlugInResponse processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, IDataPacket aDataPacket);
 
 	/**
 	 * is called by the server when a connector has been stopped,
 	 * i.e. a client has disconnected.
 	 * @param aConnector
 	 */
-	void connectorStopped(IWebSocketConnector aConnector);
+	void connectorStopped(WebSocketConnector aConnector);
 
 	/**
 	 *
 	 * @return
 	 */
-	List<IPlugIn> getPlugIns();
+	List<PlugIn> getPlugIns();
 
 	/**
 	 * 
 	 * @param aPlugIn
 	 */
-	void addPlugIn(IPlugIn aPlugIn);
+	void addPlugIn(PlugIn aPlugIn);
 
 	/**
 	 *
 	 * @param aPlugIn
 	 */
-	void removePlugIn(IPlugIn aPlugIn);
+	void removePlugIn(PlugIn aPlugIn);
 
 }

@@ -41,6 +41,13 @@ public class DataPacket implements IDataPacket {
 		data = aString.getBytes(aEncoding);
 	}
 
+	public void setUTF8(String aString) {
+		try {
+			data = aString.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			// ignore exception here
+		}
+	}
 	public byte[] getByteArray() {
 		return data;
 	}
@@ -52,5 +59,13 @@ public class DataPacket implements IDataPacket {
 	public String getString(String aEncoding)
 		throws UnsupportedEncodingException {
 		return new String(data, aEncoding);
+	}
+
+	public String getUTF8() {
+		try {
+			return new String(data, "UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			return null;
+		}
 	}
 }

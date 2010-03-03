@@ -16,7 +16,7 @@
 package org.jWebSocket.plugins.streaming;
 
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
@@ -41,7 +41,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void connectorStarted(IWebSocketConnector aConnector) {
+	public void connectorStarted(WebSocketConnector aConnector) {
 		if (timeStream == null) {
 			timeStream = new TimeStream("timeStream", getServer());
 			timeStream.start();
@@ -49,7 +49,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void processToken(PlugInResponse aAction, IWebSocketConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aAction, WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
@@ -79,7 +79,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void connectorStopped(IWebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector) {
 		// if a connector terminates, unregister it from stream
 		timeStream.unregisterConnector(aConnector);
 	}

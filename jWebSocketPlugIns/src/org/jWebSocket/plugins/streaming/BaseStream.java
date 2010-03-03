@@ -17,7 +17,7 @@ package org.jWebSocket.plugins.streaming;
 
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.kit.DataPacket;
 import org.jWebSocket.server.BaseServer;
 
@@ -28,7 +28,7 @@ import org.jWebSocket.server.BaseServer;
 public class BaseStream extends Thread {
 
 	private static Logger log = Logger.getLogger(BaseStream.class);
-	private FastList<IWebSocketConnector> connectors = new FastList<IWebSocketConnector>();
+	private FastList<WebSocketConnector> connectors = new FastList<WebSocketConnector>();
 	private boolean isRunning = false;
 	private String streamID = null;
 	/**
@@ -50,7 +50,7 @@ public class BaseStream extends Thread {
 	 *
 	 * @param aConnector
 	 */
-	public void registerConnector(IWebSocketConnector aConnector) {
+	public void registerConnector(WebSocketConnector aConnector) {
 		connectors.add(aConnector);
 	}
 
@@ -60,7 +60,7 @@ public class BaseStream extends Thread {
 	 * @param aConnector
 	 * @return
 	 */
-	public boolean isConnectorRegistered(IWebSocketConnector aConnector) {
+	public boolean isConnectorRegistered(WebSocketConnector aConnector) {
 		return connectors.indexOf(aConnector) >= 0;
 	}
 
@@ -69,7 +69,7 @@ public class BaseStream extends Thread {
 	 *
 	 * @param aConnector
 	 */
-	public void unregisterConnector(IWebSocketConnector aConnector) {
+	public void unregisterConnector(WebSocketConnector aConnector) {
 		connectors.remove(aConnector);
 	}
 
@@ -109,7 +109,7 @@ public class BaseStream extends Thread {
 	 * @param aConnector
 	 * @param aObject
 	 */
-	protected void processConnector(IWebSocketConnector aConnector, Object aObject) {
+	protected void processConnector(WebSocketConnector aConnector, Object aObject) {
 		try {
 			aConnector.sendPacket(new DataPacket(aObject.toString()));
 		} catch (Exception ex) {
@@ -123,7 +123,7 @@ public class BaseStream extends Thread {
 	 * @param aObject
 	 */
 	protected void processItem(Object aObject) {
-		for (IWebSocketConnector lConnector : connectors) {
+		for (WebSocketConnector lConnector : connectors) {
 			processConnector(lConnector, aObject);
 		}
 	}

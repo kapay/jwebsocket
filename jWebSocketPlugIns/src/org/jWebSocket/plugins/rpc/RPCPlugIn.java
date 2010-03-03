@@ -23,7 +23,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.IWebSocketConnector;
+import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
@@ -55,13 +55,13 @@ public class RPCPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void connectorStarted(IWebSocketConnector aConnector) {
+	public void connectorStarted(WebSocketConnector aConnector) {
 		// currently this is the only supported RPCPlugIn server
 		rpcServer = new DemoRPCServer();
 	}
 
 	@Override
-	public void processToken(PlugInResponse aResponse, IWebSocketConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
@@ -81,7 +81,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @param aConnector 
 	 * @param aToken
 	 */
-	public void rpc(IWebSocketConnector aConnector, Token aToken) {
+	public void rpc(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		Token lResponseToken = lServer.createResponse(aToken);
 
@@ -121,7 +121,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void rrpc(IWebSocketConnector aConnector, Token aToken) {
+	public void rrpc(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		// get the remote namespace
 		String lRNS = aToken.getString("rns");
