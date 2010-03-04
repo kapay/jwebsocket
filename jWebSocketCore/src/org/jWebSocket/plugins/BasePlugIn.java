@@ -15,9 +15,9 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.plugins;
 
-import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.api.WebSocketPaket;
 
 /**
  *

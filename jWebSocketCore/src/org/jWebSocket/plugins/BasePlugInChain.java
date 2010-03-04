@@ -16,11 +16,13 @@
 package org.jWebSocket.plugins;
 
 import java.util.List;
+
 import javolution.util.FastList;
+
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketServer;
 
 /**

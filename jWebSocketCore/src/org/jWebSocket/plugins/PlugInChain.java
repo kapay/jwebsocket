@@ -16,9 +16,10 @@
 package org.jWebSocket.plugins;
 
 import java.util.List;
-import org.jWebSocket.api.WebSocketPaket;
+
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.api.WebSocketPaket;
 
 /**
  *
