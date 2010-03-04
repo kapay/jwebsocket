@@ -19,7 +19,8 @@ import java.security.MessageDigest;
 import java.util.Formatter;
 
 /**
- *
+ * Provides some convenience methods to support the web socket
+ * development.
  * @author aschulze
  */
 public class Tools {

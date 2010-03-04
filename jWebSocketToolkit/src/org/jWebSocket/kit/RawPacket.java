@@ -19,21 +19,37 @@ import java.io.UnsupportedEncodingException;
 import org.jWebSocket.api.WebSocketPaket;
 
 /**
- *
+ * Implements the low level data packets which are interchanged between
+ * client and server. Data packets do not have a special format at this
+ * communication level.
  * @author aschulze
  */
 public class RawPacket implements WebSocketPaket {
 
 	byte[] data = null;
 
+	/**
+	 *
+	 * @param aByteArray
+	 */
 	public RawPacket(byte[] aByteArray) {
 		setByteArray(aByteArray);
 	}
 
+	/**
+	 *
+	 * @param aString
+	 */
 	public RawPacket(String aString) {
 		setString(aString);
 	}
 
+	/**
+	 *
+	 * @param aString
+	 * @param aEncoding
+	 * @throws UnsupportedEncodingException
+	 */
 	public RawPacket(String aString, String aEncoding)
 		throws UnsupportedEncodingException {
 		setString(aString, aEncoding);

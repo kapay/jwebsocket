@@ -127,7 +127,7 @@ public interface WebSocketEngine {
 	 * Returns a list of all servers that are currenly bound to this engine.
 	 * This list of servers is maintained by the engine and should not be
 	 * manipulated by the application.
-	 * @return
+	 * @return List of servers bound to the engine.
 	 */
 	public List<WebSocketServer> getServers();
 

@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Data Packet
+//	jWebSocket - Data Packet API
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -18,25 +18,29 @@ package org.jWebSocket.api;
 import java.io.UnsupportedEncodingException;
 
 /**
- *
+ * Specifies the API for low level data packets which are interchanged between
+ * client and server. Data packets do not have a special format at this
+ * communication level.
  * @author aschulze
  */
 public interface WebSocketPaket {
 
 	/**
-	 *
+	 * Sets the value of the data packet to the given array of bytes.
 	 * @param aByteArray
 	 */
 	void setByteArray(byte[] aByteArray);
 
 	/**
-	 *
+	 * Sets the value of the data packet to the given string by using
+	 * default encoding.
 	 * @param aString
 	 */
 	void setString(String aString);
 
 	/**
-	 *
+	 * Sets the value of the data packet to the given string by using
+	 * the passed encoding.
 	 * @param aString
 	 * @param aEncoding
 	 * @throws UnsupportedEncodingException
@@ -44,35 +48,38 @@ public interface WebSocketPaket {
 	void setString(String aString, String aEncoding) throws UnsupportedEncodingException;
 
 	/**
-	 *
+	 * Sets the value of the data packet to the given string by using
+	 * UTF-8 encoding.
 	 * @param aString
 	 */
 	void setUTF8(String aString);
 
-
 	/**
-	 *
-	 * @return
+	 * Returns the content of the data packet as an array of bytes.
+	 * @return Data packet as array of bytes.
 	 */
 	byte[] getByteArray();
 	
 	/**
-	 *
-	 * @return
+	 * Returns the content of the data packet as a string using default
+	 * encoding.
+	 * @return Raw Data packet as string with default encoding.
 	 */
 	String getString();
 
 	/**
-	 *
+	 * Returns the content of the data packet as a string using the passed
+	 * encoding.
 	 * @param aEncoding
-	 * @return
+	 * @return String using the passed encoding.
 	 * @throws UnsupportedEncodingException
 	 */
 	String getString(String aEncoding) throws UnsupportedEncodingException;
 
 	/**
-	 *
-	 * @return
+	 * Interprets the data packet as a UTF8 string and returns the string
+	 * in UTF-8 encoding. If an exception occurs "null" is returned.
+	 * @return Data packet as UTF-8 string or {@code null} if not convertible.
 	 */
 	String getUTF8();
 

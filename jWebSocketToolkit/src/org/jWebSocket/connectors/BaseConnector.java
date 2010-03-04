@@ -23,7 +23,10 @@ import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.kit.RequestHeader;
 
 /**
- *
+ * Provides the basic implementation of the jWebSocket connectors.
+ * The {@code BaseConnector} is supposed to be used as ancestor for the
+ * connector implementations like e.g. the {@code TCPConnector} or the
+ * {@code NettyConnector }.
  * @author aschulze
  */
 public class BaseConnector implements WebSocketConnector {
@@ -33,7 +36,7 @@ public class BaseConnector implements WebSocketConnector {
 	private HashMap<String, Object> customVars = new HashMap<String, Object>();
 
 	/**
-	 *
+	 * 
 	 * @param aEngine
 	 */
 	public BaseConnector(WebSocketEngine aEngine) {
@@ -76,92 +79,43 @@ public class BaseConnector implements WebSocketConnector {
 		this.header = header;
 	}
 
-	/**
-	 *
-	 * @param aKey
-	 * @return
-	 */
 	public Object getVar(String aKey) {
 		return customVars.get(aKey);
 	}
 
-	/**
-	 *
-	 * @param aKey
-	 * @param aValue
-	 */
 	public void setVar(String aKey, Object aValue) {
 		customVars.put(aKey, aValue);
 	}
 
-	/**
-	 *
-	 * @param aKey
-	 * @return
-	 */
 	public Boolean getBoolean(String aKey) {
 		return (Boolean) getVar(aKey);
 	}
 
-	/**
-	 *
-	 * @param aKey
-	 * @return
-	 */
 	public boolean getBool(String aKey) {
 		Boolean lBool = getBoolean(aKey);
 		return (lBool != null && lBool);
 	}
 
-	/**
-	 *
-	 * @param aKey
-	 * @param aValue
-	 */
 	public void setBoolean(String aKey, Boolean aValue) {
 		setVar(aKey, aValue);
 	}
 
-	/**
-	 *
-	 * @param aKey
-	 * @return
-	 */
 	public String getString(String aKey) {
 		return (String) getVar(aKey);
 	}
 
-	/**
-	 *
-	 * @param aKey
-	 * @param aValue
-	 */
 	public void setString(String aKey, String aValue) {
 		setVar(aKey, aValue);
 	}
 
-	/**
-	 *
-	 * @param aKey
-	 * @return
-	 */
 	public Integer getInteger(String aKey) {
 		return (Integer) getVar(aKey);
 	}
 
-	/**
-	 *
-	 * @param aKey
-	 * @param aValue
-	 */
 	public void setInteger(String aKey, Integer aValue) {
 		setVar(aKey, aValue);
 	}
 
-	/**
-	 * 
-	 * @param aKey
-	 */
 	public void removeVar(String aKey) {
 		customVars.remove(aKey);
 	}

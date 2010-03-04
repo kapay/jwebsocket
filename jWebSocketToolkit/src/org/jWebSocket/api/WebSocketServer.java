@@ -18,69 +18,73 @@ package org.jWebSocket.api;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
- *
+ * Specifies the API of the jWebSocket server core and its capabilities. Each 
+ * server can be bound to one or multiple engines. Each engine can drive or
+ * more servers above.
+ * The servers usually are not supposed to directly implement any business
+ * logic - except for very small or special non token based applications.
+ * For applications it is recommended to implement them in plug-ins based on
+ * the token server.
  * @author aschulze
  */
 public interface WebSocketServer {
 
 	/**
-	 * starts the server and all underlying engines.
-	 *
+	 * Starts the server and all underlying engines.
 	 * @throws WebSocketException
 	 */
 	void startServer() throws WebSocketException;
 
 	/**
-	 * states if at least one of the engines is still running.
-	 * @return
+	 * States if at least one of the engines is still running.
+	 * @return Boolean state if at least one of the underlying engines is still running.
 	 */
 	boolean isAlive();
 
 	/**
-	 * stops the server and all underlying engines.
-	 *
+	 * Stops the server and all underlying engines.
 	 * @throws WebSocketException
 	 */
 	void stopServer() throws WebSocketException;
 
 	/**
-	 * adds a new engine to the server.
+	 * Adds a new engine to the server.
 	 * @param aEngine
 	 */
 	void addEngine(WebSocketEngine aEngine);
 
 	/**
-	 * removes a already bound engine from the server.
+	 * Removes a already bound engine from the server.
 	 * @param aEngine
 	 */
 	void removeEngine(WebSocketEngine aEngine);
 
 	/**
-	 * is called from the underlying engine when the engine is started.
+	 * Is called from the underlying engine when the engine is started.
 	 * @param aEngine
 	 */
 	void engineStarted(WebSocketEngine aEngine);
 
 	/**
-	 * is called from the underlying engine when the engine is stopped.
+	 * Is called from the underlying engine when the engine is stopped.
 	 * @param aEngine
 	 */
 	void engineStopped(WebSocketEngine aEngine);
 
 	/**
-	 * notifies the application that a client connector has been started.
+	 * Notifies the application that a client connector has been started.
 	 * @param aConnector
 	 */
 	void connectorStarted(WebSocketConnector aConnector);
 
 	/**
-	 * notifies the application that a client connector has been stopped.
+	 * Notifies the application that a client connector has been stopped.
 	 * @param aConnector
 	 */
 	void connectorStopped(WebSocketConnector aConnector);
 
 	/**
-	 * is called when the underlying engine received a packet from a connector.
+	 * Is called when the underlying engine received a packet from a connector.
 	 * @param aEngine
 	 * @param aConnector
 	 * @param aDataPacket
@@ -88,14 +92,14 @@ public interface WebSocketServer {
 	void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket);
 
 	/**
-	 * sends a packet to a certain connector.
+	 * Sends a packet to a certain connector.
 	 * @param aConnector 
 	 * @param aDataPacket
 	 */
 	void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket);
 
 	/**
-	 * broadcasts a datapacket to all connectors.
+	 * Broadcasts a datapacket to all connectors.
 	 * @param aDataPacket
 	 */
 	void broadcastPacket(WebSocketPaket aDataPacket);

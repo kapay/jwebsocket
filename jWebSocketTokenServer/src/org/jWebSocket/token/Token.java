@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Token
+//	jWebSocket - Token Implementation
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -17,11 +17,9 @@ package org.jWebSocket.token;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import org.jWebSocket.api.WebSocketPaket;
-import org.jWebSocket.api.WebSocketConnector;
 
 /**
- *
+ * A token is 
  * @author aschulze
  */
 public class Token {
@@ -36,18 +34,26 @@ public class Token {
 
 	/**
 	 *
+	 * @param aKey
+	 * @param aValue
 	 */
-	public Token(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
-	}
-
 	public void put(String aKey, Object aValue) {
 		items.put(aKey, aValue);
 	}
 
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
 	public Object get(String aKey) {
 		return items.get(aKey);
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public Iterator getKeys() {
 		return items.keySet().iterator();
 	}
@@ -137,7 +143,7 @@ public class Token {
 		String lRes = "{";
 		for (Iterator<String> i = items.keySet().iterator(); i.hasNext();) {
 			String lKey = i.next();
-			lRes += lKey + "=" + items.get(lKey) + ( i.hasNext() ? "," : "" );
+			lRes += lKey + "=" + items.get(lKey) + (i.hasNext() ? "," : "");
 		}
 		return lRes + "}";
 	}

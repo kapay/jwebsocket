@@ -26,7 +26,10 @@ import org.jWebSocket.config.Config;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
- *
+ * Provides the basic implementation of the jWebSocket engines.
+ * The {@code BaseEngine} is supposed to be used as ancestor for the
+ * engine implementations like e.g. the {@code TCPEngine} or the
+ * {@code NettyEngine}.
  * @author aschulze
  */
 public class BaseEngine implements WebSocketEngine {

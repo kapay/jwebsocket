@@ -21,7 +21,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 /**
- *
+ * Provides the common used jWebSocket logging support based on
+ * Apache's log4j.
  * @author aschulze
  */
 public class Logging {

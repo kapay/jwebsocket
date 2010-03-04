@@ -16,10 +16,10 @@
 package org.jWebSocket.config;
 
 /**
- *
+ * Provides a global shared container for the jWebSocket configuration settings.
  * @author aschulze
  */
-public class Config {
+public abstract class Config {
 
 	// TODO: Provide a configuration file (e.g. jWebSocket.xml) and loader class to load individual configuration settings.
 
@@ -55,13 +55,9 @@ public class Config {
 	 */
 	public static int MAX_IN_PORT = 65535;
 	/**
-	 * Default Port for optional user specific WebSocket protocols.
+	 * Default socket port for jWebSocket clients.
 	 */
-	public static int DEFAULT_PORT_USER = 8787;
-	/**
-	 * Default Port for standard token based WebSocket protocols (JSON, CSV and XML).
-	 */
-	public static int DEFAULT_PORT_TOKEN = 8788;
+	public static int DEFAULT_PORT = 8787;
 	/**
 	 * Default Session Timeout for client connections (120000ms = 2min)
 	 */
@@ -100,12 +96,12 @@ public class Config {
 	public static String PATHARG_SEPARATOR = ";";
 
 	/**
-	 * Separator between the various arguments.
+	 * Separator between the various URL arguments.
 	 */
 	public static String ARGARG_SEPARATOR = ",";
 
 	/**
-	 * Separator between the key and the value of each argument.
+	 * Separator between the key and the value of each URL argument.
 	 */
 	public static String KEYVAL_SEPARATOR = "=";
 

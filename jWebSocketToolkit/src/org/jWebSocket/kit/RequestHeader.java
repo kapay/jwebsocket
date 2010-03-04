@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Request RequestHeader Object
+//	jWebSocket - RequestHeader Object
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -18,7 +18,9 @@ package org.jWebSocket.kit;
 import java.util.HashMap;
 
 /**
- *
+ * Holds the header of the initial WebSocket request from the client
+ * to the server. The RequestHeader internally maintains a HashMap to store
+ * key/values pairs.
  * @author aschulze
  */
 public class RequestHeader {
@@ -26,7 +28,7 @@ public class RequestHeader {
 	private HashMap<String, Object> args = new HashMap<String, Object>();
 
 	/**
-	 *
+	 * Puts a new object value to the request header.
 	 * @param aKey
 	 * @param aValue
 	 */
@@ -35,27 +37,40 @@ public class RequestHeader {
 	}
 
 	/**
-	 *
+	 * Returns the object value for the given key or {@code null} if the
+	 * key does not exist in the header.
 	 * @param aKey
-	 * @return
+	 * @return object value for the given key or {@code null}.
 	 */
 	public Object get(String aKey) {
 		return args.get(aKey);
 	}
 
 	/**
-	 *
+	 * Returns the string value for the given key or {@code null} if the
+	 * key does not exist in the header.
 	 * @param aKey
-	 * @return
+	 * @return String value for the given key or {@code null}.
 	 */
 	public String getString(String aKey) {
 		return (String) args.get(aKey);
 	}
 
+	/**
+	 * Returns a HashMap of the optional URL arguments passed by the client.
+	 * @return HashMap of the optional URL arguments.
+	 */
 	public HashMap getArgs() {
 		return (HashMap) args.get("args");
 	}
 
+	/**
+	 * Returns the sub protocol passed by the client or a default value 
+	 * if no sub protocol has been passed either in the header or in the
+	 * URL arguments.
+	 * @param aDefault
+	 * @return Sub protocol passed by the client or default value.
+	 */
 	public String getSubProtocol(String aDefault) {
 		HashMap lArgs = getArgs();
 		String lSubProt = null;
@@ -65,6 +80,13 @@ public class RequestHeader {
 		return (lSubProt != null ? lSubProt : aDefault);
 	}
 
+	/**
+	 * Returns the session timeout passed by the client or a default value
+	 * if no session timeout has been passed either in the header or in the
+	 * URL arguments.
+	 * @param aDefault
+	 * @return Session timeout passed by the client or default value.
+	 */
 	public Integer getTimeout(Integer aDefault) {
 		HashMap lArgs = getArgs();
 		Integer lTimeout = null;

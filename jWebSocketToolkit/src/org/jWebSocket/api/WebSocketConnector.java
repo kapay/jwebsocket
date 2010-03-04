@@ -19,7 +19,7 @@ import java.net.InetAddress;
 import org.jWebSocket.kit.RequestHeader;
 
 /**
- * Specifies the API for web socket connectors. Connectors are the low level
+ * Specifies the API for jWebSocket connectors. Connectors are the low level
  * link to the client. Connectors are maintained by the engine only but can be
  * accessed up to the application. Each connector provides a map for shared
  * custom variables (public) which can be used in all overlying tiers.
