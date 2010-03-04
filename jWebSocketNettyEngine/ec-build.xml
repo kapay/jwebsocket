@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<project name="FatJar jWebSocketNettyEngine.jar (experimental)" default="main" basedir=".">
+    <target name="main">
+        <fatjar.build output="jar/jWebSocketNettyEngine.jar">
+            <fatjar.manifest/>
+            <fatjar.filesource path="classes" relpath=""/>
+        </fatjar.build>
+    </target>
+</project>
