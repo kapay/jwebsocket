@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
@@ -252,7 +253,7 @@ public class TCPEngine extends BaseEngine {
 			isRunning = true;
 			while (isRunning) {
 				try {
-					// accept is blocking so here is no need 
+					// accept is blocking so here is no need
 					// to put any sleeps into this loop
 					Socket clientSocket = serverSocket.accept();
 
