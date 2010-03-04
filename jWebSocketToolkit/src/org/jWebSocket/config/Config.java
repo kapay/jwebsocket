@@ -21,6 +21,8 @@ package org.jWebSocket.config;
  */
 public class Config {
 
+	// TODO: Provide a configuration file (e.g. jWebSocket.xml) and loader class to load individual configuration settings.
+
 	/**
 	 * jWebSocket copyright string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.

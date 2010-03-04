@@ -31,8 +31,12 @@ public class Logging {
 	 */
 	public static Logger rootLogger = Logger.getRootLogger();
 
+	// TODO: Load the conversion pattern and the logging target from a configuration file (e.g. jWebSocket.xml)
+
 	/**
-	 *
+	 * Initializes the Apache log4j system to produce the desired logging
+	 * output.
+	 * @param aLogLevel
 	 */
 	public static void initLogs(String aLogLevel) {
 		PatternLayout layout = new PatternLayout();

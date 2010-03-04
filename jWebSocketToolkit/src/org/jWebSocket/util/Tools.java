@@ -25,9 +25,9 @@ import java.util.Formatter;
 public class Tools {
 
 	/**
-	 * returns the MD5 sum of the given string.
-	 * @param aMsg
-	 * @return
+	 * Returns the MD5 sum of the given string. The output always has 32 digits.
+	 * @param aMsg String the string to calculate the MD5 sum for.
+	 * @return MD5 sum of the given string.
 	 */
 	public static String getMD5(String aMsg) {
 		MessageDigest md = null;
@@ -48,10 +48,12 @@ public class Tools {
 	}
 
 	/**
-	 * returns the hex value of the given int.
-	 * @param aInt
-	 * @param aLen
-	 * @return
+	 * Returns the hex value of the given int as a string. If {@code aLen} is
+	 * greater than zero the output is cut or filled to the given length
+	 * otherwise the exact number of digits is returned.
+	 * @param aInt Integer to be converted into a hex-string.
+	 * @param aLen Number of hex digits (optionally filled or cut if needed)
+	 * @return Hex-string of the given integer.
 	 */
 	public static String intToHex(int aInt, int aLen) {
 		String lRes = Integer.toHexString(aInt);
