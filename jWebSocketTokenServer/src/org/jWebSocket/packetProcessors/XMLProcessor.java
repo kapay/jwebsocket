@@ -16,6 +16,7 @@
 package org.jWebSocket.packetProcessors;
 
 import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.token.Token;
