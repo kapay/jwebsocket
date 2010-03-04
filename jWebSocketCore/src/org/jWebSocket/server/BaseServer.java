@@ -125,7 +125,7 @@ public class BaseServer implements WebSocketServer {
 	 * @return the engines
 	 */
 	public List<WebSocketConnector> getAllConnectors() {
-		ArrayList clients = new ArrayList();
+		ArrayList<WebSocketConnector> clients = new ArrayList<WebSocketConnector>();
 		for (WebSocketEngine lEngine : engines) {
 			clients.addAll(lEngine.getConnectors());
 		}
@@ -138,7 +138,7 @@ public class BaseServer implements WebSocketServer {
 	 * @return
 	 */
 	public List<WebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
-		ArrayList clients = new ArrayList();
+		ArrayList<WebSocketConnector> clients = new ArrayList<WebSocketConnector>();
 		for (WebSocketEngine lEngine : engines) {
 			for (WebSocketConnector lConnector : lEngine.getConnectors()) {
 				boolean lMatch = true;

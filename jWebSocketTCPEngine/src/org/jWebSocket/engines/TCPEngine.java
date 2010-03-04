@@ -122,7 +122,7 @@ public class TCPEngine extends BaseEngine {
 		String host = null;
 		String origin = null;
 		String location = null;
-		Map args = new HashMap<String, String>();
+		Map<String, String> args = new HashMap<String, String>();
 		String path = "";
 		String searchString = "";
 

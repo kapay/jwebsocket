@@ -358,7 +358,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			Integer lMode = aToken.getInteger("mode", 0);
 			HashMap lFilter = new HashMap();
 			lFilter.put(VAR_USERNAME, ".*");
-			List<String> listOut = new ArrayList();
+			List<String> listOut = new ArrayList<String>();
 			for (WebSocketConnector lConnector : lServer.selectConnectors(lFilter)) {
 				listOut.add(getUsername(lConnector) + "@" + lConnector.getRemotePort());
 			}
