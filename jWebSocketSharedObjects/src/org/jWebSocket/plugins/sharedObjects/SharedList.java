@@ -16,6 +16,7 @@
 package org.jWebSocket.plugins.sharedObjects;
 
 import javolution.util.FastList;
+
 import org.jWebSocket.plugins.TokenPlugIn;
 
 /**
