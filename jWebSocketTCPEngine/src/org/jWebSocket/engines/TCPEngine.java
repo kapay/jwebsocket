@@ -24,52 +24,51 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
-import org.jWebSocket.api.WebSocketServer;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.connectors.TCPConnector;
 import org.jWebSocket.kit.RequestHeader;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
- *
+ * Implementation of the jWebSocket TCP engine. The TCP engine provide a Java
+ * Socket implementation of the WebSocket protocol. It contains the handshake
  * @author aschulze
  */
 public class TCPEngine extends BaseEngine {
 
 	private static Logger log = Logger.getLogger(TCPEngine.class);
 	private ServerSocket serverSocket = null;
+	private int listenerPort = 8787;
+	private int sessionTimeout = 120000;
 	private boolean isRunning = false;
 
 	/**
-	 *
-	 * @param aPort
-	 * @param aSessionTimeout
+	 * Constructor of the TCP engine. The port and the default session timeout
+	 * have to be passed. The session timout passed here is used only when no
+	 * explicit timeout per connection is specified.
+	 * @param aPort TCP port the engine listens on.
+	 * @param aSessionTimeout The default server side session time out.
 	 * @throws WebSocketException
 	 */
 	public TCPEngine(int aPort, int aSessionTimeout)
 		throws WebSocketException {
-		startEngine(aPort, aSessionTimeout);
+		listenerPort = aPort;
+		sessionTimeout = aSessionTimeout;
+//		startEngine();
 	}
 
-	/**
-	 *
-	 * @param aPort
-	 * @param aSessionTimeout
-	 * @throws WebSocketException
-	 */
-	public void startEngine(int aPort, int aSessionTimeout)
+	@Override
+	public void startEngine()
 		throws WebSocketException {
 		log.debug("Starting TCP engine...");
 		try {
-			serverSocket = new ServerSocket(aPort);
-			setSessionTimeout(aSessionTimeout);
+			serverSocket = new ServerSocket(listenerPort);
+			setSessionTimeout(sessionTimeout);
 
 			EngineListener listener = new EngineListener(this);
 			Thread engineThread = new Thread(listener);
@@ -100,21 +99,18 @@ public class TCPEngine extends BaseEngine {
 	}
 
 	@Override
-	public void connectorStopped(WebSocketConnector aConnector) {
-		super.connectorStopped(aConnector);
-		// once a connector stopped remove it from the list of connectors
-		log.debug("Removing connector from engine...");
-		getConnectors().remove(aConnector);
+	public void connectorStarted(WebSocketConnector aConnector) {
+		log.debug("Detected new connector at port " + aConnector.getRemotePort() + ".");
+		super.connectorStarted(aConnector);
 	}
 
-	/**
-	 *
-	 * @param aClientSocket
-	 * @return
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
-	 */
-	public static RequestHeader processHandshake(Socket aClientSocket)
+	@Override
+	public void connectorStopped(WebSocketConnector aConnector) {
+		log.debug("Detected stopped connector at port " + aConnector.getRemotePort() + ".");
+		super.connectorStopped(aConnector);
+	}
+	
+	private RequestHeader processHandshake(Socket aClientSocket)
 		throws UnsupportedEncodingException, IOException {
 
 		RequestHeader header = new RequestHeader();
@@ -216,22 +212,16 @@ public class TCPEngine extends BaseEngine {
 	}
 
 	@Override
-	public void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
-		List<WebSocketServer> lServers = getServers();
-		for (WebSocketServer lServer : lServers) {
-			lServer.processPacket(this, aConnector, aDataPacket);
-		}
-	}
-
-	@Override
+	/*
+	 * Returns {@code true} if the TCP engine is running or {@code false} 
+	 * otherwise. The alive status represents the state of the TCP engine
+	 * listener thread.
+	 */
 	public boolean isAlive() {
 		// TODO: Check isAlive state of TCPEngine
 		return true;
 	}
 
-	/**
-	 *
-	 */
 	private class EngineListener implements Runnable {
 
 		private WebSocketEngine engine = null;
@@ -303,19 +293,4 @@ public class TCPEngine extends BaseEngine {
 		}
 	}
 
-	/**
-	 *
-	 * @param aRemotePort
-	 * @return
-	 */
-	public WebSocketConnector getConnectorByRemotePort(int aRemotePort) {
-		Iterator lIterator = getConnectors().iterator();
-		while (lIterator.hasNext()) {
-			TCPConnector lConnector = (TCPConnector) lIterator.next();
-			if (lConnector.getClientSocket().getPort() == aRemotePort) {
-				return lConnector;
-			}
-		}
-		return null;
-	}
 }

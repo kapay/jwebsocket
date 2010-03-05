@@ -18,7 +18,7 @@ import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.kit.RawPacket;
 
 /**
- *
+ * Implementation of the jWebSocket TCP socket connector.
  * @author aschulze
  */
 public class TCPConnector extends BaseConnector {
@@ -29,6 +29,12 @@ public class TCPConnector extends BaseConnector {
 	private Socket clientSocket = null;
 	private boolean isRunning = false;
 
+	/**
+	 * Usually connectors are instantiated by their engine only, not by the
+	 * application.
+	 * @param aEngine
+	 * @param aClientSocket
+	 */
 	public TCPConnector(WebSocketEngine aEngine, Socket aClientSocket) {
 		super(aEngine);
 		clientSocket = aClientSocket;
@@ -46,23 +52,28 @@ public class TCPConnector extends BaseConnector {
 		ClientProcessor clientProc = new ClientProcessor(this);
 		Thread clientThread = new Thread(clientProc);
 		clientThread.start();
-		log.info("Started TCP engine on port " + clientSocket.getPort() + ".");
+		log.info("Started TCP connector on port " + clientSocket.getPort() + ".");
 	}
 
 	@Override
 	public void stopConnector() {
+		log.debug("Stopping TCP connector...");
+		int lPort = clientSocket.getPort();
 		isRunning = false;
+		// TODO: Do we need to wait here? At least optionally?
+		log.info("Stopped TCP connector on port " + lPort + ".");
 	}
 
 	@Override
 	public void processPacket(WebSocketPaket aDataPacket) {
-		// pass the data packet to the engine
+		// forward the data packet to the engine
 		getEngine().processPacket(this, aDataPacket);
 	}
 
 	@Override
 	public void sendPacket(WebSocketPaket aDataPacket) {
 		try {
+			// each packet is enclosed in 0x00<data>0xFF
 			os.write(0);
 			os.write(aDataPacket.getByteArray());
 			os.write(255);
@@ -72,14 +83,14 @@ public class TCPConnector extends BaseConnector {
 		}
 	}
 
-	public Socket getClientSocket() {
-		return null;
-	}
+	private class ClientProcessor implements Runnable {
 
-	public class ClientProcessor implements Runnable {
+		private WebSocketConnector connector = null;
 
-		WebSocketConnector connector = null;
-
+		/**
+		 *
+		 * @param aConnector
+		 */
 		public ClientProcessor(WebSocketConnector aConnector) {
 			connector = aConnector;
 		}
@@ -177,10 +188,9 @@ public class TCPConnector extends BaseConnector {
 	public String toString() {
 		String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
 		String lUsername = getString("org.jWebSocket.plugins.system.username");
-		if( lUsername != null ) {
+		if (lUsername != null) {
 			lRes += " (" + lUsername + ")";
 		}
 		return lRes;
 	}
-
 }
