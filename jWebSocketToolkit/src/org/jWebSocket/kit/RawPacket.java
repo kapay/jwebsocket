@@ -26,28 +26,31 @@ import org.jWebSocket.api.WebSocketPaket;
  */
 public class RawPacket implements WebSocketPaket {
 
-	byte[] data = null;
+	private byte[] data = null;
 
 	/**
-	 *
-	 * @param aByteArray
+	 * Instantiates a new data packet and initializes its value to the passed
+	 * array of bytes.
+	 * @param aByteArray byte array to be used as value for the data packet.
 	 */
 	public RawPacket(byte[] aByteArray) {
 		setByteArray(aByteArray);
 	}
 
 	/**
-	 *
-	 * @param aString
+	 * Instantiates a new data packet and initializes its value to the passed
+	 * string using the default encoding.
+	 * @param aString string to be used as value for the data packet.
 	 */
 	public RawPacket(String aString) {
 		setString(aString);
 	}
 
 	/**
-	 *
-	 * @param aString
-	 * @param aEncoding
+	 * Instantiates a new data packet and initializes its value to the passed
+	 * string using the passed encoding (should always be "UTF-8").
+	 * @param aString string to be used as value for the data packet.
+	 * @param aEncoding should always be "UTF-8"
 	 * @throws UnsupportedEncodingException
 	 */
 	public RawPacket(String aString, String aEncoding)

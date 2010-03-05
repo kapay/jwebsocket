@@ -27,17 +27,15 @@ import org.apache.log4j.PatternLayout;
  */
 public class Logging {
 
-	/**
-	 *
-	 */
-	public static Logger rootLogger = Logger.getRootLogger();
+	private static Logger rootLogger = Logger.getRootLogger();
 
 	// TODO: Load the conversion pattern and the logging target from a configuration file (e.g. jWebSocket.xml)
 
 	/**
 	 * Initializes the Apache log4j system to produce the desired logging
 	 * output.
-	 * @param aLogLevel
+	 * @param aLogLevel one of the values TRACE, DEBUG, INFO, WARN, ERROR or FATAL.
+	 *
 	 */
 	public static void initLogs(String aLogLevel) {
 		PatternLayout layout = new PatternLayout();

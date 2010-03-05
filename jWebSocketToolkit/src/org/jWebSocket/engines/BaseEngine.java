@@ -38,9 +38,6 @@ public class BaseEngine implements WebSocketEngine {
 	private final List<WebSocketConnector> connectors = new FastList<WebSocketConnector>();
 	private int sessionTimeout = Config.DEFAULT_TIMEOUT;
 
-	/**
-	 *
-	 */
 	public BaseEngine() {
 	}
 
@@ -90,6 +87,8 @@ public class BaseEngine implements WebSocketEngine {
 		for (WebSocketServer lServer : servers) {
 			lServer.connectorStopped(aConnector);
 		}
+		// once a connector stopped remove it from the list of connectors
+		getConnectors().remove(aConnector);
 	}
 
 	public boolean isAlive() {
@@ -97,6 +96,10 @@ public class BaseEngine implements WebSocketEngine {
 	}
 
 	public void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+		List<WebSocketServer> lServers = getServers();
+		for (WebSocketServer lServer : lServers) {
+			lServer.processPacket(this, aConnector, aDataPacket);
+		}
 	}
 
 	public void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
@@ -113,42 +116,35 @@ public class BaseEngine implements WebSocketEngine {
 		connectors.remove(aConnector);
 	}
 
-	/**
-	 * @return the sessionTimeout
-	 */
 	public int getSessionTimeout() {
 		return sessionTimeout;
 	}
 
-	/**
-	 * @param aSessionTimeout
-	 */
 	public void setSessionTimeout(int aSessionTimeout) {
 		this.sessionTimeout = aSessionTimeout;
 	}
 
-	/**
-	 * @return the connectors
-	 */
 	public List<WebSocketConnector> getConnectors() {
 		return connectors;
 	}
 
-	/**
-	 * @return the server
-	 */
+	public WebSocketConnector getConnectorByRemotePort(int aRemotePort) {
+		for (WebSocketConnector lConnector : getConnectors()) {
+			if (lConnector.getRemotePort() == aRemotePort) {
+				return lConnector;
+			}
+		}
+		return null;
+	}
+
 	public List<WebSocketServer> getServers() {
 		return Collections.unmodifiableList(servers);
 	}
 
-	/**
-	 */
 	public void addServer(WebSocketServer aServer) {
 		this.servers.add(aServer);
 	}
 
-	/**
-	 */
 	public void removeServer(WebSocketServer aServer) {
 		this.servers.remove(aServer);
 	}

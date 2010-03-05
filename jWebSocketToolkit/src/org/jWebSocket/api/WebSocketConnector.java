@@ -44,6 +44,12 @@ public interface WebSocketConnector {
 	void stopConnector();
 
 	/**
+	 * Returns the engine the connector is bound to.
+	 * @return WebSocketEngine Engine the connector is bound to
+	 */
+	WebSocketEngine getEngine();
+
+	/**
 	 * Processes an incoming datapacket from a WebSocket client. Usually the
 	 * data packet is not processed in any way but only passed up to the
 	 * {@code processPacket} method of the overlying engine.

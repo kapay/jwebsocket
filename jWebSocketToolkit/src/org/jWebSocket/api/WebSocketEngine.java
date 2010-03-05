@@ -85,6 +85,14 @@ public interface WebSocketEngine {
 	List<WebSocketConnector> getConnectors();
 
 	/**
+	 * Returns the TCP connector identified by its remote port number or
+	 * {@code null} if there's no client connector to the port passed.
+	 * @param aRemotePort the remote TCP port searched for.
+	 * @return WebSocketConnector that matches the given remote port or {@code null} if no connector matches the remote port.
+	 */
+	WebSocketConnector getConnectorByRemotePort(int aRemotePort);
+
+	/**
 	 * Returns {@code true} if the engine is running or {@code false} otherwise.
 	 * The alive status usually represents the state of the main engine listener
 	 * thread.
@@ -129,7 +137,7 @@ public interface WebSocketEngine {
 	 * manipulated by the application.
 	 * @return List of servers bound to the engine.
 	 */
-	public List<WebSocketServer> getServers();
+	List<WebSocketServer> getServers();
 
 	/**
 	 * Registers a server at the engine so that the engine is able to notify
@@ -138,7 +146,7 @@ public interface WebSocketEngine {
 	 * application.
 	 * @param aServer
 	 */
-	public void addServer(WebSocketServer aServer);
+	void addServer(WebSocketServer aServer);
 
 	/**
 	 * Unregisters a server from the engine so that the engine won't notify
@@ -147,9 +155,23 @@ public interface WebSocketEngine {
 	 * application.
 	 * @param aServer
 	 */
-	public void removeServer(WebSocketServer aServer);
+	void removeServer(WebSocketServer aServer);
 
+	/**
+	 * Returns the default session timeout for this engine. The session timeout
+	 * is applied if no specific session timeout per connector is passed.
+	 * Basically each connector can optionally use his own session timeout.
+	 * @return int The default session timeout in milliseconds.
+	 */
+	int getSessionTimeout();
 
+	/**
+	 * Sets the default session timeout for this engine. The session timeout
+	 * is applied if no specific session timeout per connector is passed.
+	 * Basically each connector can optionally use his own session timeout.
+	 * @param aSessionTimeout The default session timeout in milliseconds.
+	 */
+	void setSessionTimeout(int aSessionTimeout);
 }
 
 

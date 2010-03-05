@@ -31,6 +31,9 @@ import org.jWebSocket.kit.RequestHeader;
  */
 public class BaseConnector implements WebSocketConnector {
 
+	public final static String VAR_USERNAME = "$username";
+	public final static String VAR_SESSIONID = "$sessionId";
+
 	private WebSocketEngine engine = null;
 	private RequestHeader header = null;
 	private HashMap<String, Object> customVars = new HashMap<String, Object>();
@@ -58,16 +61,10 @@ public class BaseConnector implements WebSocketConnector {
 	public void sendPacket(WebSocketPaket aDataPacket) {
 	}
 
-	/**
-	 * @return the engine
-	 */
 	public WebSocketEngine getEngine() {
 		return engine;
 	}
 
-	/**
-	 * @return the header
-	 */
 	public RequestHeader getHeader() {
 		return header;
 	}
