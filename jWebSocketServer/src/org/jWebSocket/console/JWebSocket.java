@@ -102,6 +102,7 @@ public class JWebSocket {
         WebSocketEngine engine = null;
         try {
             engine = new TCPEngine(port, sessionTimeout);
+			engine.startEngine();
         } catch (Exception ex) {
             System.out.println("Error instantating engine: " + ex.getMessage());
             return;
