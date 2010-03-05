@@ -56,13 +56,18 @@ public class BaseServer implements WebSocketServer {
 
 	public void startServer()
 		throws WebSocketException {
+/*
 		for (WebSocketEngine lEngine : engines) {
-			lEngine.startEngine();
+			if( !lEngine.isAlive() ) {
+				lEngine.startEngine();
+			}
 		}
+ */
 	}
 
 	public boolean isAlive() {
-		boolean lIsAlive = true;
+/*
+		boolean lIsAlive = false;
 		for (WebSocketEngine lEngine : engines) {
 			if (!lEngine.isAlive()) {
 				lIsAlive = false;
@@ -70,25 +75,47 @@ public class BaseServer implements WebSocketServer {
 			}
 		}
 		return lIsAlive;
+ */
+		return false;
 	}
 
 	public void stopServer()
 		throws WebSocketException {
+/*
 		for (WebSocketEngine lEngine : engines) {
-			lEngine.stopEngine();
+			if( lEngine.isAlive() ) {
+				lEngine.stopEngine();
+			}
 		}
+ */
 	}
 
 	public void engineStarted(WebSocketEngine aEngine) {
+		// here nothing has to be done.
+		// descendand classes may override this method
+		// e.g. to notify the overlying appplications or plug-ins
+		// about the engineStarted event
 	}
 
 	public void engineStopped(WebSocketEngine aEngine) {
+		// here nothing has to be done.
+		// descendand classes may override this method
+		// e.g. to notify the overlying appplications or plug-ins
+		// about the engineStopped event
 	}
 
 	public void connectorStarted(WebSocketConnector aConnector) {
+		// here nothing has to be done.
+		// descendand classes may override this method
+		// e.g. to notify the overlying appplications or plug-ins
+		// about the connectorStarted event
 	}
 
 	public void connectorStopped(WebSocketConnector aConnector) {
+		// here nothing has to be done.
+		// descendand classes may override this method
+		// e.g. to notify the overlying appplications or plug-ins
+		// about the connectorStopped event
 	}
 
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
