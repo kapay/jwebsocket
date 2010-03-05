@@ -19,6 +19,7 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.config.Config;
+import org.jWebSocket.kit.WebSocketException;
 import org.jWebSocket.plugins.PlugIn;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
@@ -40,6 +41,7 @@ public class TokenServer extends BaseServer {
 	// specify shared connector variables
 	private static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
 	private TokenPlugInChain plugInChain = null;
+	private boolean isAlive = false;
 
 	/**
 	 *
@@ -47,6 +49,27 @@ public class TokenServer extends BaseServer {
 	public TokenServer() {
 		super();
 		plugInChain = new TokenPlugInChain(this);
+	}
+
+	@Override
+	public void startServer()
+		throws WebSocketException {
+		isAlive = true;
+		log.info("Token server started.");
+	}
+
+	@Override
+	public boolean isAlive() {
+		// nothing special to do here.
+		// Token server does not contain any thread or similar.
+		return isAlive;
+	}
+
+	@Override
+	public void stopServer()
+		throws WebSocketException {
+		isAlive = false;
+		log.info("Token server stopped.");
 	}
 
 	/**
@@ -72,9 +95,10 @@ public class TokenServer extends BaseServer {
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(null);
-		if (lSubProt.equals(Config.SUB_PROT_JSON)
+		if ((lSubProt != null)
+			&& (lSubProt.equals(Config.SUB_PROT_JSON)
 			|| lSubProt.equals(Config.SUB_PROT_CSV)
-			|| lSubProt.equals(Config.SUB_PROT_XML)) {
+			|| lSubProt.equals(Config.SUB_PROT_XML))) {
 
 			aConnector.setBoolean(VAR_IS_TOKENSERVER, true);
 
@@ -169,7 +193,7 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 */
 	public void broadcastToken(Token aToken) {
-		log.debug("Broadcasting token '" + aToken + " to all connectors...");
+		log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		HashMap lFilter = new HashMap();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		for (WebSocketConnector lConnector : selectConnectors(lFilter)) {
