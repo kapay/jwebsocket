@@ -26,6 +26,7 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.config.Config;
+import org.jWebSocket.connectors.BaseConnector;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
 import org.jWebSocket.server.TokenServer;
@@ -40,9 +41,13 @@ public class RPCPlugIn extends TokenPlugIn {
 	private static Logger log = Logger.getLogger(RPCPlugIn.class);
 	private HashMap<String, Object> grantedProcs = new HashMap<String, Object>();
 	private DemoRPCServer rpcServer = null;
-
 	// if namespace changed update client plug-in accordingly!
 	private String NS_RPC_DEFAULT = Config.NS_BASE + ".plugins.rpc";
+
+	// TODO: RRPC calls do not yet allow quotes in arguments
+	// TODO: We need simple unique IDs to address a certain target, session id not suitable here.
+	// TODO: Show target(able) clients in a drop down box
+	// TODO: RPC demo does not show other clients logging in
 
 	/**
 	 *
@@ -124,23 +129,27 @@ public class RPCPlugIn extends TokenPlugIn {
 	 */
 	public void rrpc(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
-		// get the remote namespace
-		String lRNS = aToken.getString("rns");
+
+		// get the target
+		String lTarget = aToken.getString("target");
+		// get the remote classname
+		String lClassname = aToken.getString("classname");
 		// get the remote method name
-		String lMethod = aToken.getString("rmethod");
+		String lMethod = aToken.getString("method");
 		// get the remote arguments
-		String lArgs = aToken.getString("rargs");
+		String lArgs = aToken.getString("args");
+
+		WebSocketConnector lTargetConnector = aConnector;
 
 		log.debug("Processing 'rrpc'...");
 
-		Token lRRPCToken = new Token(lRNS, "rrpc");
-		lRRPCToken.put("rns", lRNS);
-		lRRPCToken.put("rmethod", lMethod);
-		lRRPCToken.put("rargs", lArgs);
+		Token lRRPCToken = new Token("rrpc");
+		lRRPCToken.put("classname", lClassname);
+		lRRPCToken.put("method", lMethod);
+		lRRPCToken.put("args", lArgs);
+		lRRPCToken.put("sender", aConnector.getRemotePort());
 
-		// TokenServer lServer = (TokenServer) aConnector.getWebSocketServer();
-
-		lServer.sendToken(aConnector, lRRPCToken);
+		lServer.sendToken(lTargetConnector, lRRPCToken);
 	}
 
 	/**
@@ -237,7 +246,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @throws InvocationTargetException
 	 */
 	public static Object call(Object aInstance, String aName, Object aArgs)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Object lObj = null;
 
 		Class lClass = aInstance.getClass();

@@ -23,6 +23,7 @@ import java.util.Random;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.config.Config;
+import org.jWebSocket.connectors.BaseConnector;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
 import org.jWebSocket.server.TokenServer;
@@ -49,8 +50,6 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String TT_GETCLIENTS = "getClients";
 	private static final String TT_PING = "ping";
 	// specify shared connector variables
-	private static final String VAR_SESSIONID = NS_SYSTEM_DEFAULT + ".sessionId";
-	private static final String VAR_USERNAME = NS_SYSTEM_DEFAULT + ".username";
 	private static final String VAR_GROUP = NS_SYSTEM_DEFAULT + ".group";
 
 	/**
@@ -96,23 +95,23 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	private String getSessionId(WebSocketConnector aConnector) {
-		return aConnector.getString(VAR_SESSIONID);
+		return aConnector.getString(BaseConnector.VAR_SESSIONID);
 	}
 
 	private void setSessionId(WebSocketConnector aConnector, String aSessionId) {
-		aConnector.setString(VAR_SESSIONID, aSessionId);
+		aConnector.setString(BaseConnector.VAR_SESSIONID, aSessionId);
 	}
 
 	private String getUsername(WebSocketConnector aConnector) {
-		return aConnector.getString(VAR_USERNAME);
+		return aConnector.getString(BaseConnector.VAR_USERNAME);
 	}
 
 	private void setUsername(WebSocketConnector aConnector, String aUsername) {
-		aConnector.setString(VAR_USERNAME, aUsername);
+		aConnector.setString(BaseConnector.VAR_USERNAME, aUsername);
 	}
 
 	private void removeUsername(WebSocketConnector aConnector) {
-		aConnector.removeVar(VAR_USERNAME);
+		aConnector.removeVar(BaseConnector.VAR_USERNAME);
 	}
 
 	private String getGroup(WebSocketConnector aConnector) {
@@ -357,7 +356,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			String lGroup = aToken.getString("group");
 			Integer lMode = aToken.getInteger("mode", 0);
 			HashMap lFilter = new HashMap();
-			lFilter.put(VAR_USERNAME, ".*");
+			lFilter.put(BaseConnector.VAR_USERNAME, ".*");
 			List<String> listOut = new ArrayList<String>();
 			for (WebSocketConnector lConnector : lServer.selectConnectors(lFilter)) {
 				listOut.add(getUsername(lConnector) + "@" + lConnector.getRemotePort());
