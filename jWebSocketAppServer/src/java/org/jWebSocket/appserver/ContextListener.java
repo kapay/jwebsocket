@@ -25,8 +25,8 @@ import org.jWebsocket.server.CustomServer;
  */
 public class ContextListener implements ServletContextListener {
 
-	private TokenServer tokenServer = null;
-	private CustomServer customServer = null;
+	TokenServer tokenServer = null;
+	CustomServer customServer = null;
 	private static Logger log = null;
 
 	@Override
@@ -39,13 +39,16 @@ public class ContextListener implements ServletContextListener {
 		// create the low-level engine
 		WebSocketEngine engine = null;
 		try {
+			// TODO: find solutions for hardcoded engine id, refer to RPCPlugIn!
 			engine = new TCPEngine("tcp0", Config.DEFAULT_PORT, Config.DEFAULT_TIMEOUT);
+			engine.startEngine();
 		} catch (Exception ex) {
-			log.error("Instantating engine: " + ex.getMessage());
+			System.out.println("Error instantating engine: " + ex.getMessage());
 			return;
 		}
 
 		// create the token server (based on the TCP engine)
+		tokenServer = null;
 		try {
 			// instantiate the Token server and bind engine to it
 			tokenServer = new TokenServer("ts0");
@@ -60,13 +63,14 @@ public class ContextListener implements ServletContextListener {
 			// add the streaming plug-in (e.g. for the time stream demo)
 			plugInChain.addPlugIn(new StreamingPlugIn());
 
-			log.info("Starting token server...");
+			log.debug("Starting token server...");
 			tokenServer.startServer();
 		} catch (Exception ex) {
-			log.error("Instantiating TokenServer: " + ex.getMessage());
+			System.out.println("Error instantiating TokenServer: " + ex.getMessage());
 		}
 
 		// create the custom server (based on the TCP engine as well)
+		customServer = null;
 		try {
 			// instantiate the custom server and bind engine to it
 			customServer = new CustomServer("cs0");
@@ -76,10 +80,10 @@ public class ContextListener implements ServletContextListener {
 			customServer.addEngine(engine);
 			// add the SystemPlugIn listener (for the jWebSocket default functionality)
 			// customServer.addPlugIn(new SystemPlugIn());
-			log.info("Starting custom server...");
+			log.debug("Starting custom server...");
 			customServer.startServer();
 		} catch (Exception ex) {
-			log.error("Instantating CustomServer: " + ex.getMessage());
+			System.out.println("Error instantating CustomServer: " + ex.getMessage());
 		}
 	}
 
