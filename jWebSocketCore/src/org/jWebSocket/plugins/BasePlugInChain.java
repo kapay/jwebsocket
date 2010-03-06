@@ -24,6 +24,7 @@ import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketServer;
+import org.jWebSocket.kit.CloseReason;
 
 /**
  *
@@ -95,12 +96,12 @@ public class BasePlugInChain implements PlugInChain {
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStopped(WebSocketConnector aConnector) {
-		log.debug("Notifying plug-ins that connector stopped...");
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
+		log.debug("Notifying plug-ins that connector stopped (" + aCloseReason.name() + ")...");
 		for (PlugIn plugIn : getPlugIns()) {
 			try {
 				// log.debug("Notifying plug-in " + plugIn + " that connector stopped...");
-				plugIn.connectorStopped(aConnector);
+				plugIn.connectorStopped(aConnector, aCloseReason);
 			} catch (Exception ex) {
 				log.error("Connector stopped: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			}

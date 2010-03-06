@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.kit.RawPacket;
 
 /**
@@ -28,6 +29,7 @@ public class TCPConnector extends BaseConnector {
 	private PrintStream os = null;
 	private Socket clientSocket = null;
 	private boolean isRunning = false;
+	private CloseReason closeReason = CloseReason.TIMEOUT;
 
 	/**
 	 * Usually connectors are instantiated by their engine only, not by the
@@ -56,12 +58,13 @@ public class TCPConnector extends BaseConnector {
 	}
 
 	@Override
-	public void stopConnector() {
-		log.debug("Stopping TCP connector...");
+	public void stopConnector(CloseReason aCloseReason) {
+		log.debug("Stopping TCP connector (" + aCloseReason.name() + ")...");
 		int lPort = clientSocket.getPort();
+		closeReason = aCloseReason;
 		isRunning = false;
 		// TODO: Do we need to wait here? At least optionally?
-		log.info("Stopped TCP connector on port " + lPort + ".");
+		log.info("Stopped TCP connector (" + aCloseReason.name() + ") on port " + lPort + ".");
 	}
 
 	@Override
@@ -99,7 +102,6 @@ public class TCPConnector extends BaseConnector {
 		public void run() {
 			String line;
 			WebSocketEngine engine = getEngine();
-
 			try {
 				// start client listener loop
 				isRunning = true;
@@ -112,8 +114,8 @@ public class TCPConnector extends BaseConnector {
 						// this means the connection has been closed
 						// by the client
 						if (line == null) {
-							// stream has been closed
-							// engine.connectorStopped(connector);
+							// stream has been closed (by client)
+							closeReason = CloseReason.CLIENT;
 						} else {
 							// cut off potential starting 0x00 and 0xff characters
 							byte[] ba = line.getBytes();
@@ -127,14 +129,18 @@ public class TCPConnector extends BaseConnector {
 								line = new String(ba, i, ba.length - i, "UTF-8");
 							} else {
 								line = null;
+								// no data means stream has been closed (by client)
+								closeReason = CloseReason.CLIENT;
 							}
 						}
 
 					} catch (SocketTimeoutException ex) {
 						log.error("(timeout) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+						closeReason = CloseReason.TIMEOUT;
 						line = null;
 					} catch (Exception ex) {
 						log.error("(other) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+						closeReason = CloseReason.SERVER;
 						line = null;
 					}
 
@@ -155,7 +161,7 @@ public class TCPConnector extends BaseConnector {
 
 				// call client stopped method of server
 				// (e.g. to release client from streams)
-				engine.connectorStopped(connector);
+				engine.connectorStopped(connector, closeReason);
 
 				br.close();
 				os.close();

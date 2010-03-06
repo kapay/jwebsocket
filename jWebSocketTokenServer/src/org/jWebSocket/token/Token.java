@@ -52,6 +52,16 @@ public class Token {
 
 	/**
 	 *
+	 * @param aKey
+	 * @return
+	 */
+	public Object remove(String aKey) {
+		return items.remove(aKey);
+	}
+
+
+	/**
+	 *
 	 * @return
 	 */
 	public Iterator getKeys() {

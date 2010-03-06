@@ -26,7 +26,6 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.config.Config;
-import org.jWebSocket.connectors.BaseConnector;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
 import org.jWebSocket.server.TokenServer;
@@ -48,7 +47,6 @@ public class RPCPlugIn extends TokenPlugIn {
 	// TODO: We need simple unique IDs to address a certain target, session id not suitable here.
 	// TODO: Show target(able) clients in a drop down box
 	// TODO: RPC demo does not show other clients logging in
-
 	/**
 	 *
 	 */
@@ -129,9 +127,10 @@ public class RPCPlugIn extends TokenPlugIn {
 	 */
 	public void rrpc(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
+		String lNS = aToken.getNS();
 
 		// get the target
-		String lTarget = aToken.getString("target");
+		String lTargetId = aToken.getString("targetId");
 		// get the remote classname
 		String lClassname = aToken.getString("classname");
 		// get the remote method name
@@ -139,17 +138,25 @@ public class RPCPlugIn extends TokenPlugIn {
 		// get the remote arguments
 		String lArgs = aToken.getString("args");
 
-		WebSocketConnector lTargetConnector = aConnector;
+		// TODO: find solutions for hardcoded engine id
+		WebSocketConnector lTargetConnector =
+				lServer.getConnector("tcp0", lTargetId);
 
 		log.debug("Processing 'rrpc'...");
+		if (lTargetConnector != null) {
+			Token lRRPC = new Token(lNS, "rrpc");
+			lRRPC.put("classname", lClassname);
+			lRRPC.put("method", lMethod);
+			lRRPC.put("args", lArgs);
+			lRRPC.put("sourceId", aConnector.getRemotePort());
 
-		Token lRRPCToken = new Token("rrpc");
-		lRRPCToken.put("classname", lClassname);
-		lRRPCToken.put("method", lMethod);
-		lRRPCToken.put("args", lArgs);
-		lRRPCToken.put("sender", aConnector.getRemotePort());
-
-		lServer.sendToken(lTargetConnector, lRRPCToken);
+			lServer.sendToken(lTargetConnector, lRRPC);
+		} else {
+			Token lResponse = lServer.createResponse(aToken);
+			lResponse.put("code", -1);
+			lResponse.put("error", "Target " + lTargetId + " not found.");
+			lServer.sendToken(aConnector, lResponse);
+		}
 	}
 
 	/**
@@ -246,7 +253,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @throws InvocationTargetException
 	 */
 	public static Object call(Object aInstance, String aName, Object aArgs)
-		throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Object lObj = null;
 
 		Class lClass = aInstance.getClass();

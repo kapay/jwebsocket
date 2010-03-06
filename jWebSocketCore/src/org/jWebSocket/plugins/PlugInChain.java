@@ -20,6 +20,7 @@ import java.util.List;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.api.WebSocketPaket;
+import org.jWebSocket.kit.CloseReason;
 
 /**
  *
@@ -61,7 +62,7 @@ public interface PlugInChain {
 	 * i.e. a client has disconnected.
 	 * @param aConnector
 	 */
-	void connectorStopped(WebSocketConnector aConnector);
+	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
 	/**
 	 *

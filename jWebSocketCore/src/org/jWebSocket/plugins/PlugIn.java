@@ -18,6 +18,7 @@ package org.jWebSocket.plugins;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.api.WebSocketPaket;
+import org.jWebSocket.kit.CloseReason;
 
 /**
  *
@@ -55,7 +56,7 @@ public interface PlugIn {
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStopped(WebSocketConnector aConnector);
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
 	/**
 	 *

@@ -18,6 +18,7 @@ package org.jWebSocket.plugins.streaming;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.config.Config;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.plugins.PlugInResponse;
 import org.jWebSocket.plugins.TokenPlugIn;
 import org.jWebSocket.token.Token;
@@ -79,7 +80,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void connectorStopped(WebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// if a connector terminates, unregister it from stream
 		timeStream.unregisterConnector(aConnector);
 	}

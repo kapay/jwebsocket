@@ -20,6 +20,7 @@ import java.util.HashMap;
 import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.kit.RequestHeader;
 
 /**
@@ -33,7 +34,6 @@ public class BaseConnector implements WebSocketConnector {
 
 	public final static String VAR_USERNAME = "$username";
 	public final static String VAR_SESSIONID = "$sessionId";
-
 	private WebSocketEngine engine = null;
 	private RequestHeader header = null;
 	private HashMap<String, Object> customVars = new HashMap<String, Object>();
@@ -50,8 +50,8 @@ public class BaseConnector implements WebSocketConnector {
 		engine.connectorStarted(this);
 	}
 
-	public void stopConnector() {
-		engine.connectorStopped(this);
+	public void stopConnector(CloseReason aCloseReason) {
+		engine.connectorStopped(this, aCloseReason);
 	}
 
 	public void processPacket(WebSocketPaket aDataPacket) {
@@ -128,4 +128,9 @@ public class BaseConnector implements WebSocketConnector {
 	public InetAddress getRemoteHost() {
 		return null;
 	}
+
+	public String getId() {
+		return String.valueOf(getRemotePort());
+	}
+
 }

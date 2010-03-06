@@ -16,6 +16,7 @@
 package org.jWebSocket.api;
 
 import java.util.List;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
@@ -44,9 +45,10 @@ public interface WebSocketEngine {
 	 * Stops the engine. Here usually first all connected clients are stopped
 	 * and afterwards the listener threads for incoming new clients is stopped
 	 * as well.
+	 * @param aCloseReason
 	 * @throws WebSocketException
 	 */
-	void stopEngine() throws WebSocketException;
+	void stopEngine(CloseReason aCloseReason) throws WebSocketException;
 
 	/**
 	 * Is called after the web socket engine has been started sucessfully.
@@ -73,8 +75,9 @@ public interface WebSocketEngine {
 	 * Is called after a new client has disconnected. Here usually the engine
 	 * notifies the server(s) above that a connection has been closed.
 	 * @param aConnector
+	 * @param aCloseReason
 	 */
-	void connectorStopped(WebSocketConnector aConnector);
+	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
 	/**
 	 * Returns the list of clients connected to this engine. Please consider
@@ -120,9 +123,10 @@ public interface WebSocketEngine {
 	 * Broadcasts a data packet to all connectors. Usually the implementation
 	 * simply iterates through the list of connectors and calls their sendPacket
 	 * method.
+	 * @param aSource
 	 * @param aDataPacket
 	 */
-	void broadcastPacket(WebSocketPaket aDataPacket);
+	void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket);
 
 	/**
 	 * Removes a certain connector from the engine. This usually has not to be
@@ -172,6 +176,12 @@ public interface WebSocketEngine {
 	 * @param aSessionTimeout The default session timeout in milliseconds.
 	 */
 	void setSessionTimeout(int aSessionTimeout);
+
+	/**
+	 * Returns the unique id of the engine.
+	 * @return
+	 */
+	String getId();
 }
 
 

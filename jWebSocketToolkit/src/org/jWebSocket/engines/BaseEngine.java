@@ -23,6 +23,7 @@ import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.api.WebSocketServer;
 import org.jWebSocket.config.Config;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
@@ -37,8 +38,10 @@ public class BaseEngine implements WebSocketEngine {
 	private final List<WebSocketServer> servers = new FastList<WebSocketServer>();
 	private final List<WebSocketConnector> connectors = new FastList<WebSocketConnector>();
 	private int sessionTimeout = Config.DEFAULT_TIMEOUT;
+	private String id = "";
 
-	public BaseEngine() {
+	public BaseEngine(String aId) {
+		id = aId;
 	}
 
 	public void startEngine() throws WebSocketException {
@@ -47,11 +50,11 @@ public class BaseEngine implements WebSocketEngine {
 		engineStarted();
 	}
 
-	public void stopEngine() throws WebSocketException {
+	public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
 		try {
 			// stop all connectors
 			for (WebSocketConnector connector : getConnectors()) {
-				connector.stopConnector();
+				connector.stopConnector(aCloseReason);
 			}
 		} catch (Exception ex) {
 			// log.info("Exception on sleep " + ex.getMessage());
@@ -82,10 +85,10 @@ public class BaseEngine implements WebSocketEngine {
 		}
 	}
 
-	public void connectorStopped(WebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// notify servers that a connector has stopped
 		for (WebSocketServer lServer : servers) {
-			lServer.connectorStopped(aConnector);
+			lServer.connectorStopped(aConnector, aCloseReason);
 		}
 		// once a connector stopped remove it from the list of connectors
 		getConnectors().remove(aConnector);
@@ -106,7 +109,7 @@ public class BaseEngine implements WebSocketEngine {
 		aConnector.sendPacket(aDataPacket);
 	}
 
-	public void broadcastPacket(WebSocketPaket aDataPacket) {
+	public void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket) {
 		for (WebSocketConnector connector : connectors) {
 			connector.sendPacket(aDataPacket);
 		}
@@ -147,5 +150,12 @@ public class BaseEngine implements WebSocketEngine {
 
 	public void removeServer(WebSocketServer aServer) {
 		this.servers.remove(aServer);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
 	}
 }

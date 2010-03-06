@@ -8,6 +8,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.log4j.Logger;
 import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.config.Config;
 import org.jWebSocket.engines.TCPEngine;
 import org.jWebSocket.kit.WebSocketException;
 import org.jWebSocket.logging.Logging;
@@ -32,13 +33,13 @@ public class ContextListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 
 		Logging.initLogs("debug");
-	    log = Logger.getLogger(ContextListener.class);
+		log = Logger.getLogger(ContextListener.class);
 		log.debug("Initialising Context...");
 
 		// create the low-level engine
 		WebSocketEngine engine = null;
 		try {
-			engine = new TCPEngine(8787, 120000);
+			engine = new TCPEngine("tcp0", Config.DEFAULT_PORT, Config.DEFAULT_TIMEOUT);
 		} catch (Exception ex) {
 			log.error("Instantating engine: " + ex.getMessage());
 			return;
@@ -47,7 +48,7 @@ public class ContextListener implements ServletContextListener {
 		// create the token server (based on the TCP engine)
 		try {
 			// instantiate the Token server and bind engine to it
-			tokenServer = new TokenServer();
+			tokenServer = new TokenServer("ts0");
 			// the token server already instantiates a plug-in chain
 			TokenPlugInChain plugInChain = tokenServer.getPlugInChain();
 			// let the server support the engine
@@ -68,7 +69,7 @@ public class ContextListener implements ServletContextListener {
 		// create the custom server (based on the TCP engine as well)
 		try {
 			// instantiate the custom server and bind engine to it
-			customServer = new CustomServer();
+			customServer = new CustomServer("cs0");
 			// the custom server already instantiates a plug-in chain
 			// BasePlugInChain plugInChain = customServer.getPlugInChain();
 			// let the server support the engine

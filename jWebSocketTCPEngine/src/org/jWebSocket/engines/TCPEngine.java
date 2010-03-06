@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -31,6 +30,7 @@ import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.config.Config;
 import org.jWebSocket.connectors.TCPConnector;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.kit.RequestHeader;
 import org.jWebSocket.kit.WebSocketException;
 
@@ -55,8 +55,9 @@ public class TCPEngine extends BaseEngine {
 	 * @param aSessionTimeout The default server side session time out.
 	 * @throws WebSocketException
 	 */
-	public TCPEngine(int aPort, int aSessionTimeout)
-		throws WebSocketException {
+	public TCPEngine(String aId, int aPort, int aSessionTimeout)
+			throws WebSocketException {
+		super(aId);
 		listenerPort = aPort;
 		sessionTimeout = aSessionTimeout;
 //		startEngine();
@@ -64,7 +65,7 @@ public class TCPEngine extends BaseEngine {
 
 	@Override
 	public void startEngine()
-		throws WebSocketException {
+			throws WebSocketException {
 		log.debug("Starting TCP engine...");
 		try {
 			serverSocket = new ServerSocket(listenerPort);
@@ -83,11 +84,11 @@ public class TCPEngine extends BaseEngine {
 	}
 
 	@Override
-	public void stopEngine()
-		throws WebSocketException {
+	public void stopEngine(CloseReason aCloseReason)
+			throws WebSocketException {
 		log.debug("Stopping TCP engine...");
 		// inherited method stops all connectors
-		super.stopEngine();
+		super.stopEngine(aCloseReason);
 		isRunning = false;
 		try {
 			// when done, close server socket
@@ -105,13 +106,13 @@ public class TCPEngine extends BaseEngine {
 	}
 
 	@Override
-	public void connectorStopped(WebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		log.debug("Detected stopped connector at port " + aConnector.getRemotePort() + ".");
-		super.connectorStopped(aConnector);
+		super.connectorStopped(aConnector, aCloseReason);
 	}
-	
+
 	private RequestHeader processHandshake(Socket aClientSocket)
-		throws UnsupportedEncodingException, IOException {
+			throws UnsupportedEncodingException, IOException {
 
 		RequestHeader header = new RequestHeader();
 
@@ -179,21 +180,21 @@ public class TCPEngine extends BaseEngine {
 		// create location based on ws:// + host + path
 		location = "ws://" + host + path;
 		log.debug("Parsed header ("
-			+ "host: " + host + ", "
-			+ "origin: " + origin + ", "
-			+ "location: " + location + ", "
-			+ "path: " + path + ", "
-			+ "searchString: " + searchString
-			+ ")");
+				+ "host: " + host + ", "
+				+ "origin: " + origin + ", "
+				+ "location: " + location + ", "
+				+ "path: " + path + ", "
+				+ "searchString: " + searchString
+				+ ")");
 
 		// now that we have parsed the header send handshake...
 		String res =
-			"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
-			+ "Upgrade: WebSocket\r\n"
-			+ "Connection: Upgrade\r\n"
-			+ "WebSocket-Origin: " + origin + "\r\n"
-			+ "WebSocket-Location: " + location + "\r\n"
-			+ "\r\n";
+				"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
+				+ "Upgrade: WebSocket\r\n"
+				+ "Connection: Upgrade\r\n"
+				+ "WebSocket-Origin: " + origin + "\r\n"
+				+ "WebSocket-Location: " + location + "\r\n"
+				+ "\r\n";
 		log.debug("Sent handshake (" + res.replace("\n", "\\n") + ")");
 
 		byte[] ba = res.getBytes("UTF-8");
@@ -201,6 +202,10 @@ public class TCPEngine extends BaseEngine {
 		os.flush();
 		log.debug("Handshake flushed.");
 
+		// set default sub protocol if none passed
+		if (args.get("prot") == null) {
+			args.put("prot", Config.SUB_PROT_DEFAULT);
+		}
 		header.put("args", args);
 		header.put("origin", origin);
 		header.put("location", location);
@@ -292,5 +297,4 @@ public class TCPEngine extends BaseEngine {
 			engineStopped();
 		}
 	}
-
 }

@@ -16,6 +16,7 @@
 package org.jWebSocket.api;
 
 import java.net.InetAddress;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.kit.RequestHeader;
 
 /**
@@ -40,8 +41,10 @@ public interface WebSocketConnector {
 	 * Stops and cleans up the connector. Usually here the listener thread for
 	 * this connection is stopped. Further the {@code connectorStopped} method
 	 * of the overlying engine is called if the connector successfully started.
+	 *
+	 * @param aCloseReason
 	 */
-	void stopConnector();
+	void stopConnector(CloseReason aCloseReason);
 
 	/**
 	 * Returns the engine the connector is bound to.
@@ -176,5 +179,11 @@ public interface WebSocketConnector {
 	 * @return InetAddress object of the given remote host
 	 */
 	InetAddress getRemoteHost();
+
+	/**
+	 * Returns the unique id of the connector.
+	 * @return
+	 */
+	String getId();
 
 }

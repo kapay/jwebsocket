@@ -20,6 +20,7 @@ import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.plugins.PlugIn;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.plugins.BasePlugInChain;
 import org.jWebSocket.server.BaseServer;
 
@@ -35,15 +36,16 @@ public class CustomServer extends BaseServer {
 	/**
 	 *
 	 */
-	public CustomServer() {
-		super();
+	public CustomServer(String aId) {
+		super(aId);
 		plugInChain = new BasePlugInChain(this);
 	}
 
 	@Override
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		log.debug("Processing data packet '" + aDataPacket.getUTF8() + "'...");
-		broadcastPacket(aDataPacket);
+		// TODO: process the packet in a meaningful way - don't just broadcast to all!
+		// broadcastPacket(aDataPacket);
 	}
 
 	/**
@@ -75,11 +77,11 @@ public class CustomServer extends BaseServer {
 	}
 
 	@Override
-	public void connectorStopped(WebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		log.debug("Processing connector stopped...");
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
-		plugInChain.connectorStopped(aConnector);
+		plugInChain.connectorStopped(aConnector, aCloseReason);
 	}
 
 	/**
@@ -88,5 +90,4 @@ public class CustomServer extends BaseServer {
 	public BasePlugInChain getPlugInChain() {
 		return plugInChain;
 	}
-
 }

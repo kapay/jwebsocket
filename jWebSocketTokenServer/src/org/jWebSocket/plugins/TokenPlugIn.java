@@ -18,6 +18,7 @@ package org.jWebSocket.plugins;
 import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.server.TokenServer;
 import org.jWebSocket.token.Token;
 
@@ -60,7 +61,7 @@ public class TokenPlugIn extends BasePlugIn {
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStopped(WebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 	}
 
 	/**
@@ -79,12 +80,10 @@ public class TokenPlugIn extends BasePlugIn {
 
 	public TokenServer getServer() {
 		TokenServer lServer = null;
-		TokenPlugInChain plugInChain = (TokenPlugInChain)getPlugInChain();
-		if( plugInChain != null ) {
-			lServer = (TokenServer)plugInChain.getServer();
+		TokenPlugInChain plugInChain = (TokenPlugInChain) getPlugInChain();
+		if (plugInChain != null) {
+			lServer = (TokenServer) plugInChain.getServer();
 		}
 		return lServer;
 	}
-
-
 }

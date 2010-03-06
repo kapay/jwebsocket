@@ -26,6 +26,8 @@ import org.jWebSocket.api.WebSocketConnector;
 import org.jWebSocket.api.WebSocketEngine;
 import org.jWebSocket.api.WebSocketPaket;
 import org.jWebSocket.api.WebSocketServer;
+import org.jWebSocket.kit.BroadcastOptions;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
@@ -35,11 +37,13 @@ import org.jWebSocket.kit.WebSocketException;
 public class BaseServer implements WebSocketServer {
 
 	private FastList<WebSocketEngine> engines = null;
+	private String id = null;
 
-	/**
+	/**s
 	 *
 	 */
-	public BaseServer() {
+	public BaseServer(String aId) {
+		id = aId;
 		engines = new FastList<WebSocketEngine>();
 	}
 
@@ -55,39 +59,39 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	public void startServer()
-		throws WebSocketException {
-/*
+			throws WebSocketException {
+		/*
 		for (WebSocketEngine lEngine : engines) {
-			if( !lEngine.isAlive() ) {
-				lEngine.startEngine();
-			}
+		if( !lEngine.isAlive() ) {
+		lEngine.startEngine();
 		}
- */
+		}
+		 */
 	}
 
 	public boolean isAlive() {
-/*
+		/*
 		boolean lIsAlive = false;
 		for (WebSocketEngine lEngine : engines) {
-			if (!lEngine.isAlive()) {
-				lIsAlive = false;
-				break;
-			}
+		if (!lEngine.isAlive()) {
+		lIsAlive = false;
+		break;
+		}
 		}
 		return lIsAlive;
- */
+		 */
 		return false;
 	}
 
 	public void stopServer()
-		throws WebSocketException {
-/*
+			throws WebSocketException {
+		/*
 		for (WebSocketEngine lEngine : engines) {
-			if( lEngine.isAlive() ) {
-				lEngine.stopEngine();
-			}
+		if( lEngine.isAlive() ) {
+		lEngine.stopEngine();
 		}
- */
+		}
+		 */
 	}
 
 	public void engineStarted(WebSocketEngine aEngine) {
@@ -111,7 +115,7 @@ public class BaseServer implements WebSocketServer {
 		// about the connectorStarted event
 	}
 
-	public void connectorStopped(WebSocketConnector aConnector) {
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// here nothing has to be done.
 		// descendand classes may override this method
 		// e.g. to notify the overlying appplications or plug-ins
@@ -125,9 +129,12 @@ public class BaseServer implements WebSocketServer {
 		aConnector.sendPacket(aDataPacket);
 	}
 
-	public void broadcastPacket(WebSocketPaket aDataPacket) {
+	public void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket,
+			BroadcastOptions aBroadcastOptions) {
 		for (WebSocketConnector lConnector : getAllConnectors()) {
-			sendPacket(lConnector, aDataPacket);
+			if (!aSource.equals(lConnector) || aBroadcastOptions.isSenderIncluded()) {
+				sendPacket(lConnector, aDataPacket);
+			}
 		}
 	}
 
@@ -193,4 +200,13 @@ public class BaseServer implements WebSocketServer {
 		}
 		return Collections.unmodifiableList(clients);
 	}
+
+	/**
+	 * Returns the unique id of the server.
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
+
 }

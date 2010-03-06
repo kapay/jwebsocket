@@ -15,6 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jWebSocket.api;
 
+import org.jWebSocket.kit.BroadcastOptions;
+import org.jWebSocket.kit.CloseReason;
 import org.jWebSocket.kit.WebSocketException;
 
 /**
@@ -81,7 +83,7 @@ public interface WebSocketServer {
 	 * Notifies the application that a client connector has been stopped.
 	 * @param aConnector
 	 */
-	void connectorStopped(WebSocketConnector aConnector);
+	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
 	/**
 	 * Is called when the underlying engine received a packet from a connector.
@@ -102,6 +104,13 @@ public interface WebSocketServer {
 	 * Broadcasts a datapacket to all connectors.
 	 * @param aDataPacket
 	 */
-	void broadcastPacket(WebSocketPaket aDataPacket);
+	void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket, 
+			BroadcastOptions aBroadcastOptions );
+
+	/**
+	 * Returns the unique id of the connector.
+	 * @return
+	 */
+	String getId();
 
 }
