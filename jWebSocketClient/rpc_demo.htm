@@ -44,7 +44,7 @@
 			var lWSC = null;
 
 			function connect() {
-				var lURL = jws.JWS_SERVER_URL;
+				var lURL = jws.JWS_SERVER_URL; // + "/;prot=json";
 
 				log( "Connecting to " + lURL + " ..." );
 				var lRes = lWSC.connect( lURL, {
@@ -82,9 +82,9 @@
 				log( "Remote calling '" + aMethod + "' with args '" + lArgs + "'..." );
 				
 				// perform the Remote Procedure Call...
-				var lRes = lWSC.rpc( 
-					// pass class, method and argument for server java method:
-					"org.jWebSocket.demo.DemoRPCServer", aMethod, lArgs, {
+				var lRes = lWSC.rpc(
+				// pass class, method and argument for server java method:
+				"org.jWebSocket.demo.DemoRPCServer", aMethod, lArgs, {
 					// new easy-to-use response callback
 					OnResponse: function( aToken ) {
 						if( aToken.error ) {
@@ -114,9 +114,35 @@
 				rpc("getProtected");
 			}
 
+			function rrpcDemo() {
+				var lArgs = eArgs.value;
+				var lMethod = "demo";
+				log( "Reverse remote calling '" + lMethod + "' with args '" + lArgs + "'..." );
+
+				// send a reverse remote procedure call to another client
+				var lRes = lWSC.rrpc(
+					eTarget.value,			// target
+					"jws.RRPCServer",		// classname
+					lMethod,				// method
+					"'" + lArgs + "'",		// arguments as a string
+					{						// options
+					// new easy-to-use response callback
+					OnResponse: function( aToken ) {
+						if( aToken.error ) {
+							log( "RRPC Error: " + aToken.error );
+						} else {
+							log( "Received RRPC result: " + aToken.result );
+						}
+					}
+				});
+
+				log( lWSC.resultToString( lRes ) );
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
 				eArgs = jws.$( "stxfMsg" );
+				eTarget = jws.$( "stxfTarget" );
 
 				if( window.WebSocket ) {
 					lWSC = new jws.jWebSocketJSONClient();
@@ -125,6 +151,7 @@
 					jws.$( "sbtnDisconnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnClear" ).setAttribute( "disabled", "disabled" );
 					jws.$( "stxfMsg" ).setAttribute( "disabled", "disabled" );
+					jws.$( "stxfTarget" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnGranted" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnProtected" ).setAttribute( "disabled", "disabled" );
 					var lMsg = "Unfortunately your browser does not (yet) support WebSockets!\nPlease use a HTML 5 compliant browser!";
@@ -151,7 +178,7 @@
 			}
 		</script>
 		<h1>jWebSocket Remote Procedure Calls (RPC) Demo</h1>
-		<p>This demo shows how to call a Java method on a jWebSocket server from 
+		<p>This demo shows how to call a Java method on a jWebSocket server from
 		a browser client and return the result. This example is based on
 		the class <code>org.jWebSocket.plugins.RPCPlugIn</code>. The <code>getMD5</code> method simply
 		returns the 32 digit MD5 sum of the passed string argument.
@@ -172,6 +199,15 @@
 					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="My Remote Procedure Arguments" style="width:100%"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGranted" type="button" value="Call granted" onclick="rpcGrantedDemo();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnProtected" type="button" value="Call protect." onclick="rpcProtectedDemo();"></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5">Target&nbsp;Id</td>
+					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfTarget" type="text" value="ID" style="width:100%"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRRPC" type="button" value="Call reverse" onclick="rrpcDemo();"></td>
+					<td class="stdDlg" width="5"></td>
 				</tr>
 			</table>
 		</div>

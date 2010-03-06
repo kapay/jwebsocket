@@ -46,13 +46,20 @@ jws.oop.declareClass = function( aNamespace, aClassname, aAncestor, aFields ) {
 			this.create.apply( this, arguments );
 		}
 	};
+	// publish the new class in the given name space
 	lNS[ aClassname ] = lConstructor;
 
+	// move all fields from spec to new class' prototype
 	var lField;
 	for( lField in aFields ) {
 		lConstructor.prototype[ lField ] = aFields[ lField ];
 	}
 	if( aAncestor != null ) {
+		// every class maintains an array of its direct descendants
+		if( !aAncestor.descendants ) {
+			aAncestor.descendants = [];
+		}
+		aAncestor.descendants.push( lConstructor );
 		for( lField in aAncestor.prototype ) {
 			var lAncMthd = aAncestor.prototype[ lField ];
 			if( typeof lAncMthd == "function" ) {
@@ -71,8 +78,27 @@ jws.oop.declareClass = function( aNamespace, aClassname, aAncestor, aFields ) {
 
 // plug-in functionality to allow to add plug-ins into existing classes
 jws.oop.addPlugIn = function( aClass, aPlugIn ) {
+
+	// if the class has no plug-ins yet initialize array
+	if( !aClass.fPlugIns ) {
+		aClass.fPlugIns = [];
+	}
+	// add the plug-in to the class
+	aClass.fPlugIns.push( aPlugIn );
+	// clone all methods of the plug-in to the class
 	for( var lField in aPlugIn ) {
-		aClass.prototype[ lField ] = aPlugIn[ lField ];
+		// don't overwrite existing methods of class with plug.in methods
+		if( !aClass.prototype[ lField ] ) {
+			aClass.prototype[ lField ] = aPlugIn[ lField ];
+		}
+	}
+	// if the class already has descendants recursively
+	// clone the plug-in methods to these as well.
+	// checkDescendants( aClass );
+	if( aClass.descendants ) {
+		for( var lIdx = 0, lCnt = aClass.descendants.length; lIdx < lCnt; lIdx ++ ) {
+			jws.oop.addPlugIn( aClass.descendants[ lIdx ], aPlugIn );
+		}
 	}
 }
 
@@ -86,17 +112,17 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 // declaration for the jws.jWebSocketBaseClient class
 jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 
-	processOpenEvent: function( aEvent ) {
+	processOpened: function( aEvent ) {
 	// can to be overwritten in descendant classes
 	// to easily handle open event in descendants
 	},
 
-	processMessageEvent: function( aEvent ) {
+	processPacket: function( aEvent ) {
 	// can to be overwritten in descendant classes
 	// to easily handle message event in descendants
 	},
 
-	processCloseEvent: function( aEvent ) {
+	processClosed: function( aEvent ) {
 	// can to be overwritten in descendant classes
 	// to easily handle open event in descendants
 	},
@@ -119,7 +145,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				// assign the listeners to local functions (closure) to allow
 				// to handle event before and after the application
 				this.fConn.onopen = function( aEvent ) {
-					lValue = lThis.processOpenEvent( aEvent );
+					lValue = lThis.processOpened( aEvent );
 					// give application change to handle event
 					if( aOptions.OnOpen ) {
 						aOptions.OnOpen( aEvent, lValue, lThis );
@@ -127,7 +153,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				};
 
 				this.fConn.onmessage = function( aEvent ) {
-					lValue = lThis.processMessageEvent( aEvent );
+					lValue = lThis.processPacket( aEvent );
 					// give application change to handle event first
 					if( aOptions.OnMessage ) {
 						aOptions.OnMessage( aEvent, lValue, lThis );
@@ -140,7 +166,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 						clearTimeout( lThis.hDisconnectTimeout );
 						delete lThis.hDisconnectTimeout;
 					}
-					lValue = lThis.processCloseEvent( aEvent );
+					lValue = lThis.processClosed( aEvent );
 					// give application change to handle event
 					if( aOptions.OnClose ) {
 						aOptions.OnClose( aEvent, lValue, lThis );
@@ -171,10 +197,11 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 
 	forceClose: function() {
 		if( this.fConn ) {
-			this.fConn.close();
 			this.fConn.onopen = null;
 			this.fConn.onmessage = null;
 			this.fConn.onclose = null;
+			this.fConn.close();
+			this.processClosed();
 		}
 		this.fConn = null;
 	},
@@ -221,6 +248,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		this.fRequestCallbacks = {};
 	},
 
+	getId: function() {
+		return this.fClientId;
+	},
+
 	checkCallbacks: function( aToken ) {
 		var lField = "utid" + aToken.utid;
 		// console.log("checking result for utid: " + aToken.utid + "...");
@@ -246,6 +277,28 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		};
 	},
 
+	checkConnected: function() {
+		jws.CUR_TOKEN_ID++;
+		var lRes = this.createDefaultResult();
+		if( !this.isConnected() ) {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	checkLoggedIn: function() {
+		jws.CUR_TOKEN_ID++;
+		var lRes = this.createDefaultResult();
+		if( !this.isLoggedIn() ) {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notLoggedIn";
+			lRes.msg = "Not logged in.";
+		}
+		return lRes;
+	},
+
 	resultToString: function( aRes ) {
 		return(
 			aRes.msg
@@ -267,36 +320,126 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		throw new Error( "streamToToken needs to be overwritten in descendant classes" );
 	},
 
-	processMessageEvent: function( aEvent ) {
-		// parse incoming token and process it...
-		var lToken = this.streamToToken( aEvent.data );
-		// check welcome and goodBye tokens to manage the session
-		if( lToken.type == "welcome" && lToken.usid ) {
-			this.fSessionId = lToken.usid;
-		} else if( lToken.type == "goodBye" ) {
-			this.fSessionId = null;
-		// check if we got a response from a previous request
-		} else if( lToken.type == "response" ) {
-			// check login and logout manage the username
-			if( lToken.reqType == "login" ) {
-				this.fUsername = lToken.username;
+	notifyPlugInsOpened: function() {
+		var lToken = {
+			sourceId: this.fClientId
+		};
+		// notify all plug-ins about sconnect event
+		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
+		if( lPlugIns ) {
+			for( var lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
+				var lPlugIn = lPlugIns[ lIdx ];
+				if( lPlugIn.processOpened ) {
+					lPlugIn.processOpened.call( this, lToken );
+				}
 			}
-			if( lToken.reqType == "logout" ) {
-				this.fUsername = null;
-			}
-			// check if some requests need to be answered
-			this.checkCallbacks( lToken );
 		}
-		return lToken;
 	},
 
-	processCloseEvent: function( aEvent ) {
+	notifyPlugInsClosed: function() {
+		var lToken = {
+			sourceId: this.fClientId
+		};
+		// notify all plug-ins about disconnect event
+		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
+		if( lPlugIns ) {
+			for( var lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
+				var lPlugIn = lPlugIns[ lIdx ];
+				if( lPlugIn.processClosed ) {
+					lPlugIn.processClosed.call( this, lToken );
+				}
+			}
+		}
 		// in case of a server side close event...
 		this.fConn = null;
 		// reset the session...
 		this.fSessionId = null;
 		// and the username as well
 		this.fUsername = null;
+	},
+
+	processPacket: function( aEvent ) {
+		// parse incoming token...
+		var lToken = this.streamToToken( aEvent.data );
+		// and process it...
+		this.processToken( lToken );
+		return lToken;
+	},
+
+	processToken: function( aToken ) {
+		// check welcome and goodBye tokens to manage the session
+		if( aToken.type == "welcome" && aToken.usid ) {
+			this.fSessionId = aToken.usid;
+			this.fClientId = aToken.sourceId;
+			this.notifyPlugInsOpened();
+		} else if( aToken.type == "goodBye" ) {
+			this.fSessionId = null;
+		} else if( aToken.type == "close" ) {
+			// if the server closes the connectioon close immediately too.
+			this.disconnect({
+				timeout: 0
+			});
+		// check if we got a response from a previous request
+		} else if( aToken.type == "response" ) {
+			// check login and logout manage the username
+			if( aToken.reqType == "login" ) {
+				this.fUsername = aToken.username;
+			}
+			if( aToken.reqType == "logout" ) {
+				this.fUsername = null;
+			}
+			// check if some requests need to be answered
+			this.checkCallbacks( aToken );
+		} else if( aToken.type == "event" ) {
+			// check login and logout manage the username
+			if( aToken.name == "connect" ) {
+				this.processConnected( aToken );
+			}
+			if( aToken.name == "disconnect" ) {
+				this.processDisconnected( aToken );
+			}
+		}
+		// notify all plug-ins that a token has to be processed
+		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
+		if( lPlugIns ) {
+			for( var lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
+				var lPlugIn = lPlugIns[ lIdx ];
+				if( lPlugIn.processToken ) {
+					lPlugIn.processToken.call( this, aToken );
+				}
+			}
+		}
+	},
+
+	processClosed: function( aEvent ) {
+		this.notifyPlugInsClosed();
+		this.fClientId = null;
+	},
+
+	processConnected: function( aToken ) {
+		// notify all plug-ins that a new client connected
+		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
+		if( lPlugIns ) {
+			for( var lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
+				var lPlugIn = lPlugIns[ lIdx ];
+				if( lPlugIn.processConnected ) {
+					lPlugIn.processConnected.call( this, aToken );
+				}
+			}
+		}
+	},
+
+	processDisconnected: function( aToken ) {
+		// notify all plug-ins that a client disconnected
+		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
+		if( lPlugIns ) {
+			for( var lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
+				var lPlugIn = lPlugIns[ lIdx ];
+				if( lPlugIn.processDisconnected ) {
+					lPlugIn.processDisconnected.call( this, aToken );
+				}
+			}
+		}
 	},
 
 	sendToken: function( aToken, aOptions ) {
@@ -317,50 +460,46 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	sendText: function( aReceiver, aText ) {
-		var lRes = this.createDefaultResult();
-		if( this.isLoggedIn() ) {
+		var lRes = this.checkLoggedIn();
+		if( lRes.code == 0 ) {
 			this.sendToken({
 				type: "send",
-				receiver: aReceiver,
+				targetId: aReceiver,
+				sourceId: this.fClientId,
+				sender: this.fUsername,
 				data: aText
 			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notLoggedIn";
-			lRes.msg = "Not logged in.";
 		}
 		return lRes;
 	},
 
 	broadcastText: function( aPool, aText, aOptions ) {
-		var lRes = this.createDefaultResult();
-		if( this.isLoggedIn() ) {
+		var lRes = this.checkLoggedIn();
+		var lSenderIncluded = false;
+		var lResponseRequested = false;
+		if( lRes.code == 0 ) {
 			this.sendToken({
 				type: "broadcast",
+				sourceId: this.fClientId,
+				sender: this.fUsername,
 				pool: aPool,
-				data: aText
+				data: aText,
+				senderIncluded: lSenderIncluded,
+				responseRequested: lResponseRequested
 			},
 			aOptions
 			);
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notLoggedIn";
-			lRes.msg = "Not logged in.";
 		}
 		return lRes;
 	},
 
 	echo: function( aData ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+		var lRes = this.checkConnected();
+		if( lRes.code == 0 ) {
 			this.sendToken({
 				type: "echo",
 				data: aData
 			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
 		}
 		return lRes;
 	},
@@ -646,11 +785,41 @@ jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StreamingPlugIn );
 //  jWebSocket RPC Client Plug-In
 //	---------------------------------------------------------------------------
 
+// the RRPCServer server provides the methods which are granted to be called
+// from the "outside".
+jws.RRPCServer = {
+
+	demo: function( aArgs ) {
+		return(
+			confirm(
+				"aArgs received: '" + aArgs + "'\n" +
+				"'true' or 'false' will be returned to requester."	
+				)
+			);
+	}
+
+};
+
+
 jws.RPCClientPlugIn = {
 
 	// namespace for RPC plugin
 	// if namespace changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.rpc",
+
+	// granted rrpc's
+	grantedProcs: [
+		"jws.RRPCServer.demo"
+	],
+
+	processToken: function( aToken ) {
+		// console.log( "jws.RPCClientPlugIn: Processing token " + aToken.ns + "/" + aToken.type + "..." );
+		if( aToken.ns == jws.RPCClientPlugIn.NS ) {
+			if( aToken.type == "rrpc" ) {
+				this.onRRPC( aToken );
+			}
+		}
+	},
 
 	rpc: function( aClass, aMthd, aArgs, aOptions ) {
 		var lRes = this.createDefaultResult();
@@ -670,6 +839,57 @@ jws.RPCClientPlugIn = {
 			lRes.msg = "Not connected.";
 		}
 		return lRes;
+	},
+
+	// calls a remote procedure an another client
+	rrpc: function( aTarget, aClass, aMthd, aArgs, aOptions ) {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				ns: jws.RPCClientPlugIn.NS,
+				type: "rrpc",
+				targetId: aTarget,
+				classname: aClass,
+				method: aMthd,
+				args: aArgs
+			},
+			aOptions
+			);
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	// handles a remote procedure call from another client
+	onRRPC: function( aToken ) {
+		var lClassname = aToken.classname;
+		var lMethod = aToken.method;
+		var lArgs = aToken.args;
+		var lPath = lClassname + "." + lMethod;
+		// check if the call is granted on this client
+		if( jws.RPCClientPlugIn.grantedProcs.indexOf( lPath ) >= 0 ) {
+			var lEvalStr = lPath + "(" + lArgs + ")";
+			// console.log( "Reverse RPC request '" + lPath + "(" + lArgs + ")' granted, running '" + lEvalStr + "'...");
+			var lRes;
+			eval( "lRes=" + lEvalStr );
+			// send result back to requester
+
+			this.sendToken({
+				// ns: jws.SystemPlugIn.NS,
+				type: "send",
+				targetId: aToken.sourceId,
+				result: lRes,
+				reqType: "rrpc",
+				code: 0
+			},
+			null // aOptions
+			);
+		} else {
+	// console.log( "Reverse RPC request '" + lPath + "(" + lArgs + ")' not granted!" );
+	}
 	}
 
 }
