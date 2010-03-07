@@ -39,6 +39,20 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<repositories>
+	   <repository>
+          <id>maven-central-repo</id>
+          <name>Maven Central Repository</name>
+	      <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+          <id>java-net-repo</id>
+          <name>Java.net Repository</name>
+	      <url>http://download.java.net/maven/2</url>
+        </repository>
+    </repositories>
+
 
 	<!--
 		define common dependencies used across all the modules of jWebSocket
