@@ -30,7 +30,7 @@ import org.jwebsocket.server.CustomServer;
 /**
  * This class is the main class for the jWebSocket server
  * @author aschulze
- * @version $Id:$
+ * @version $Id$
  */
 public class JWebSocket {
 
@@ -124,7 +124,9 @@ public class JWebSocket {
 			// add the streaming plug-in (e.g. for the time stream demo)
 			plugInChain.addPlugIn(new StreamingPlugIn());
 
-			log.debug("Starting token server...");
+                        if (log.isDebugEnabled()) {
+                         log.debug("Starting token server...");
+                        }
 			tokenServer.startServer();
 		} catch (Exception ex) {
 			System.out.println("Error instantiating TokenServer: " + ex.getMessage());
@@ -141,7 +143,9 @@ public class JWebSocket {
 			customServer.addEngine(engine);
 			// add the SystemPlugIn listener (for the jWebSocket default functionality)
 			// customServer.addPlugIn(new SystemPlugIn());
-			log.debug("Starting custom server...");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Starting custom server...");
+                        }
 			customServer.startServer();
 		} catch (Exception ex) {
 			System.out.println("Error instantating CustomServer: " + ex.getMessage());
@@ -151,7 +155,9 @@ public class JWebSocket {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException ex) {
-				log.debug(ex.getClass().getSimpleName() + " " + ex.getMessage());
+                            if (log.isDebugEnabled()) {
+                               log.debug(ex.getClass().getSimpleName() + " " + ex.getMessage());
+                            }
 			}
 		}
 
