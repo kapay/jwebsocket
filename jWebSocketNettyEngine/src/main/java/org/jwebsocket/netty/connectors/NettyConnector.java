@@ -15,6 +15,10 @@ import org.jwebsocket.connectors.BaseConnector;
  */
 public class NettyConnector extends BaseConnector {
 
+    /**
+     * The default constructor
+     * @param aEngine the websocket engine object
+     */
     public NettyConnector(WebSocketEngine aEngine) {
        super(aEngine);
     }

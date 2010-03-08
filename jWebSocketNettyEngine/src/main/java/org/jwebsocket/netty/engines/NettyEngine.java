@@ -4,11 +4,19 @@
  */
 package org.jwebsocket.netty.engines;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
+import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
+import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.DefaultChannelGroup;
+
 
 /**
  * Netty based implementation of {@code WebSocket} engine.
@@ -21,6 +29,7 @@ public class NettyEngine extends BaseEngine {
     private int listenerPort = 8787;
     private int sessionTimeout = 120000;
     private volatile boolean isRunning = false;
+    private static final ChannelGroup allChannels = new DefaultChannelGroup("time-server");
 
     /**
      * Constructor of the Netty based engine. The port and the default session
@@ -43,9 +52,32 @@ public class NettyEngine extends BaseEngine {
     @Override
     public void startEngine()
             throws WebSocketException {
-        log.debug("Starting TCP engine...");
+        if (log.isDebugEnabled()) {
+            log.debug("Starting TCP engine...");
+        }
+        // Configure the server.
+        //TODO: figure out more on how advanced we can configure
+        ServerBootstrap bootstrap = new ServerBootstrap(
+                new NioServerSocketChannelFactory(Executors.newCachedThreadPool()
+                ,Executors.newCachedThreadPool()));
 
-        log.info("TCP engine started.");
+        //initialize the server handler
+        NettyEngineHandler handler = new NettyEngineHandler(this);
+        //Set up the event pipeline factory.
+        bootstrap.setPipelineFactory(new NettyEnginePipeLineFactory(handler));
+        //Bind and start to accept incoming connections.
+        Channel channel = bootstrap.bind(new InetSocketAddress(listenerPort));
+
+        //fire the engine start event
+        engineStarted();
+
+        allChannels.add(channel);
+
+        isRunning = true;
+
+        if (log.isInfoEnabled()) {
+            log.info("TCP engine started.");
+        }
     }
 
     /**
