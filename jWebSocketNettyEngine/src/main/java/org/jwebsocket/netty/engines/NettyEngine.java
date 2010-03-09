@@ -30,7 +30,10 @@ import org.jwebsocket.logging.Logging;
 
 
 /**
- * Netty based implementation of {@code WebSocket} engine.
+ * Netty based implementation of {@code WebSocket} engine.It uses the low-level 
+ * <tt>ServerBootStrap</tt> to start the server and handles the incoming/outgoing
+ * request/response using {@code NettyEngineHandler} class.
+ * @see NettyEngineHandler,NettyConnector 
  * @author puran
  * @version $Id$
  */

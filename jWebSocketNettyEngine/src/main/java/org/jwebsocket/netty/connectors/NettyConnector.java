@@ -14,22 +14,70 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.netty.connectors;
 
+import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.connectors.BaseConnector;
+import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.logging.Logging;
+import org.jwebsocket.netty.engines.NettyEngineHandler;
 
 /**
- * Netty based implementation of the {@code BaseConnector} 
- *
+ * Netty based implementation of the {@code BaseConnector}. 
  * @author puran
  * @version $Id$
  */
 public class NettyConnector extends BaseConnector {
 
-    /**
-     * The default constructor
-     * @param aEngine the websocket engine object
-     */
-    public NettyConnector(WebSocketEngine aEngine) {
-       super(aEngine);
-    }
+	private static Logger log = Logging.getLogger(NettyConnector.class);
+	
+	private NettyEngineHandler handler = null;
+	/**
+	 * The private constructor, netty connector objects are created using 
+	 * static factory method:
+	 * <tt>getNettyConnector({@code WebSocketEngine}, {@code ChannelHandlerContext})</tt>
+	 * 
+	 * @param theEngine
+	 *            the websocket engine object
+	 * @param theHandlerContext
+	 *            the netty engine handler context
+	 */
+	public NettyConnector(WebSocketEngine theEngine,
+			NettyEngineHandler theHandler) {
+		super(theEngine);
+		this.handler = theHandler;
+	}
+
+	@Override
+	public void startConnector() {
+		if (log.isDebugEnabled()) {
+			log.debug("Starting Netty connector...");
+		}
+		if (log.isInfoEnabled()) {
+			log.info("Started Netty connector on port.");
+		}
+	}
+
+	@Override
+	public void stopConnector(CloseReason aCloseReason) {
+		if (log.isDebugEnabled()) {
+			log.debug("Stopping Netty connector (" + aCloseReason.name()
+					+ ")...");
+		}
+		// TODO: Do we need to wait here? At least optionally?
+		if (log.isInfoEnabled()) {
+			log.info("Stopped Netty connector (" + aCloseReason.name()
+					+ ") on port.");
+		}
+	}
+
+	@Override
+	public void processPacket(WebSocketPaket aDataPacket) {
+		// forward the data packet to the engine
+		getEngine().processPacket(this, aDataPacket);
+	}
+
+	@Override
+	public void sendPacket(WebSocketPaket aDataPacket) {
+	}
 }

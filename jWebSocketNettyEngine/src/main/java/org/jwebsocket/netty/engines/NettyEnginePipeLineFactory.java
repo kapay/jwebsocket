@@ -64,6 +64,9 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
         pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
         pipeline.addLast("encoder", new HttpResponseEncoder());
+        
+        //TODO: figure out if we need to create new handler object 
+        //for each new channel to avoid race condition.
         pipeline.addLast("handler", handler);
         return pipeline;
     }
