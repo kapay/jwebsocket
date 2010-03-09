@@ -32,7 +32,6 @@ public class PlugInResponse {
 	}
 
 	/**
-	 * @param chainAborted the chainAborted to set
 	 */
 	public void abortChain() {
 		this.chainAborted = true;
@@ -40,7 +39,6 @@ public class PlugInResponse {
 	}
 
 	/**
-	 * @param chainAborted the chainAborted to set
 	 */
 	public void breakChain() {
 		this.chainAborted = true;
@@ -48,7 +46,6 @@ public class PlugInResponse {
 	}
 
 	/**
-	 * @param chainAborted the chainAborted to set
 	 */
 	public void continueChain() {
 		this.chainAborted = false;

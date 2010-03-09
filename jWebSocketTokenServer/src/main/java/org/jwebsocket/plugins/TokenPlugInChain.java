@@ -28,10 +28,20 @@ public class TokenPlugInChain extends BasePlugInChain {
 
 	private static Logger log = Logger.getLogger(TokenPlugInChain.class);
 
+	/**
+	 *
+	 * @param aServer
+	 */
 	public TokenPlugInChain(WebSocketServer aServer) {
 		super(aServer);
 	}
 
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 * @return
+	 */
 	public PlugInResponse processToken(WebSocketConnector aConnector, Token aToken) {
 		PlugInResponse lPluginResponse = new PlugInResponse();
 		for (PlugIn plugIn : getPlugIns()) {

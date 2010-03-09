@@ -32,7 +32,13 @@ import org.jwebsocket.kit.RequestHeader;
  */
 public class BaseConnector implements WebSocketConnector {
 
+	/**
+	 *
+	 */
 	public final static String VAR_USERNAME = "$username";
+	/**
+	 *
+	 */
 	public final static String VAR_SESSIONID = "$sessionId";
 	private WebSocketEngine engine = null;
 	private RequestHeader header = null;
@@ -46,25 +52,31 @@ public class BaseConnector implements WebSocketConnector {
 		engine = aEngine;
 	}
 
+	@Override
 	public void startConnector() {
 		engine.connectorStarted(this);
 	}
 
+	@Override
 	public void stopConnector(CloseReason aCloseReason) {
 		engine.connectorStopped(this, aCloseReason);
 	}
 
+	@Override
 	public void processPacket(WebSocketPaket aDataPacket) {
 		engine.processPacket(this, aDataPacket);
 	}
 
+	@Override
 	public void sendPacket(WebSocketPaket aDataPacket) {
 	}
 
+	@Override
 	public WebSocketEngine getEngine() {
 		return engine;
 	}
 
+	@Override
 	public RequestHeader getHeader() {
 		return header;
 	}
@@ -72,63 +84,78 @@ public class BaseConnector implements WebSocketConnector {
 	/**
 	 * @param header the header to set
 	 */
+	@Override
 	public void setHeader(RequestHeader header) {
 		this.header = header;
 	}
 
+	@Override
 	public Object getVar(String aKey) {
 		return customVars.get(aKey);
 	}
 
+	@Override
 	public void setVar(String aKey, Object aValue) {
 		customVars.put(aKey, aValue);
 	}
 
+	@Override
 	public Boolean getBoolean(String aKey) {
 		return (Boolean) getVar(aKey);
 	}
 
+	@Override
 	public boolean getBool(String aKey) {
 		Boolean lBool = getBoolean(aKey);
 		return (lBool != null && lBool);
 	}
 
+	@Override
 	public void setBoolean(String aKey, Boolean aValue) {
 		setVar(aKey, aValue);
 	}
 
+	@Override
 	public String getString(String aKey) {
 		return (String) getVar(aKey);
 	}
 
+	@Override
 	public void setString(String aKey, String aValue) {
 		setVar(aKey, aValue);
 	}
 
+	@Override
 	public Integer getInteger(String aKey) {
 		return (Integer) getVar(aKey);
 	}
 
+	@Override
 	public void setInteger(String aKey, Integer aValue) {
 		setVar(aKey, aValue);
 	}
 
+	@Override
 	public void removeVar(String aKey) {
 		customVars.remove(aKey);
 	}
 
+	@Override
 	public String generateUID() {
 		return null;
 	}
 
+	@Override
 	public int getRemotePort() {
 		return -1;
 	}
 
+	@Override
 	public InetAddress getRemoteHost() {
 		return null;
 	}
 
+	@Override
 	public String getId() {
 		return String.valueOf(getRemotePort());
 	}

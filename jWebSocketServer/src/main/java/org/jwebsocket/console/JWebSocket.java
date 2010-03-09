@@ -18,7 +18,7 @@ package org.jwebsocket.console;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.Config;
-import org.jwebsocket.engines.TCPEngine;
+import org.jwebsocket.tcp.engines.TCPEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugInChain;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;

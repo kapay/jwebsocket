@@ -44,9 +44,11 @@ public class BasePlugInChain implements PlugInChain {
 		server = aServer;
 	}
 
+	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 	}
 
+	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
 	}
 
@@ -54,6 +56,7 @@ public class BasePlugInChain implements PlugInChain {
 	 *
 	 * @param aConnector
 	 */
+	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		log.debug("Notifying plug-ins that connector started...");
 		try {
@@ -75,6 +78,7 @@ public class BasePlugInChain implements PlugInChain {
 	 * @param aConnector
 	 * @return
 	 */
+	@Override
 	public PlugInResponse processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		log.debug("Processing packet for plug-ins...");
 		PlugInResponse lPluginResponse = new PlugInResponse();
@@ -95,7 +99,9 @@ public class BasePlugInChain implements PlugInChain {
 	/**
 	 *
 	 * @param aConnector
+	 * @param aCloseReason
 	 */
+	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		log.debug("Notifying plug-ins that connector stopped (" + aCloseReason.name() + ")...");
 		for (PlugIn plugIn : getPlugIns()) {
@@ -112,6 +118,7 @@ public class BasePlugInChain implements PlugInChain {
 	 *
 	 * @return
 	 */
+	@Override
 	public List<PlugIn> getPlugIns() {
 		return plugins;
 	}
@@ -120,6 +127,7 @@ public class BasePlugInChain implements PlugInChain {
 	 *
 	 * @param aPlugIn
 	 */
+	@Override
 	public void addPlugIn(PlugIn aPlugIn) {
 		plugins.add(aPlugIn);
 		aPlugIn.setPlugInChain(this);
@@ -129,6 +137,7 @@ public class BasePlugInChain implements PlugInChain {
 	 *
 	 * @param aPlugIn
 	 */
+	@Override
 	public void removePlugIn(PlugIn aPlugIn) {
 		plugins.remove(aPlugIn);
 		aPlugIn.setPlugInChain(null);

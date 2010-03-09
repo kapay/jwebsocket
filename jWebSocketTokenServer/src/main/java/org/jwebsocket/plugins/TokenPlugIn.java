@@ -30,9 +30,11 @@ public class TokenPlugIn extends BasePlugIn {
 
 	private String namespace = null;
 
+	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 	}
 
+	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
 	}
 
@@ -40,14 +42,15 @@ public class TokenPlugIn extends BasePlugIn {
 	 *
 	 * @param aConnector
 	 */
+	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 	}
 
 	/**
 	 *
+	 * @param aResponse
 	 * @param aConnector
 	 * @param aToken
-	 * @return
 	 */
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 	}
@@ -61,6 +64,7 @@ public class TokenPlugIn extends BasePlugIn {
 	 *
 	 * @param aConnector
 	 */
+	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 	}
 
@@ -78,6 +82,10 @@ public class TokenPlugIn extends BasePlugIn {
 		this.namespace = namespace;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public TokenServer getServer() {
 		TokenServer lServer = null;
 		TokenPlugInChain plugInChain = (TokenPlugInChain) getPlugInChain();

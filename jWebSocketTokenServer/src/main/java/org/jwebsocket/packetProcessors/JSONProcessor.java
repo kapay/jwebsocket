@@ -33,6 +33,11 @@ public class JSONProcessor {
 
 	private static Logger log = Logger.getLogger(JSONProcessor.class);
 
+	/**
+	 *
+	 * @param aDataPacket
+	 * @return
+	 */
 	public static Token packetToToken(WebSocketPaket aDataPacket) {
 		Token lToken = new Token();
 		try {
@@ -92,6 +97,11 @@ public class JSONProcessor {
 		return lRes;
 	}
 
+	/**
+	 *
+	 * @param aToken
+	 * @return
+	 */
 	public static WebSocketPaket tokenToPacket(Token aToken) {
 		String lData = "{";
 		Iterator lIterator = aToken.getKeys();

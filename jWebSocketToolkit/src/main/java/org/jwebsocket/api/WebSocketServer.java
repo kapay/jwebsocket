@@ -82,6 +82,7 @@ public interface WebSocketServer {
 	/**
 	 * Notifies the application that a client connector has been stopped.
 	 * @param aConnector
+	 * @param aCloseReason
 	 */
 	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
@@ -102,7 +103,9 @@ public interface WebSocketServer {
 
 	/**
 	 * Broadcasts a datapacket to all connectors.
+	 * @param aSource 
 	 * @param aDataPacket
+	 * @param aBroadcastOptions
 	 */
 	void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket, 
 			BroadcastOptions aBroadcastOptions );

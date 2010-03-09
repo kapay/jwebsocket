@@ -32,6 +32,11 @@ public class CSVProcessor  {
 
 	private static Logger log = Logger.getLogger(CSVProcessor.class);
 
+	/**
+	 *
+	 * @param aDataPacket
+	 * @return
+	 */
 	public static Token packetToToken(WebSocketPaket aDataPacket) {
 		Token lToken = new Token();
 		try {
@@ -96,6 +101,11 @@ public class CSVProcessor  {
 		return lRes;
 	}
 
+	/**
+	 *
+	 * @param aToken
+	 * @return
+	 */
 	public static WebSocketPaket tokenToPacket(Token aToken) {
 		String lData = "";
 		Iterator lIterator = aToken.getKeys();

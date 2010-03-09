@@ -28,14 +28,17 @@ public abstract class BasePlugIn implements PlugIn {
 
 	private PlugInChain plugInChain = null;
 
+	@Override
 	public abstract void engineStarted(WebSocketEngine aEngine);
 
+	@Override
 	public abstract void engineStopped(WebSocketEngine aEngine);
 
 	/**
 	 *
 	 * @param aConnector
 	 */
+	@Override
 	public abstract void connectorStarted(WebSocketConnector aConnector);
 
 	/**
@@ -44,18 +47,22 @@ public abstract class BasePlugIn implements PlugIn {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
+	@Override
 	public abstract void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket);
 
 	/**
 	 *
 	 * @param aConnector
+	 * @param aCloseReason
 	 */
+	@Override
 	public abstract void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
 	/**
 	 *
 	 * @param aPlugInChain
 	 */
+	@Override
 	public void setPlugInChain(PlugInChain aPlugInChain) {
 		plugInChain = aPlugInChain;
 	}
@@ -63,6 +70,7 @@ public abstract class BasePlugIn implements PlugIn {
 	/**
 	 * @return the plugInChain
 	 */
+	@Override
 	public PlugInChain getPlugInChain() {
 		return plugInChain;
 	}

@@ -40,16 +40,22 @@ public class BaseEngine implements WebSocketEngine {
 	private int sessionTimeout = Config.DEFAULT_TIMEOUT;
 	private String id = "";
 
+	/**
+	 *
+	 * @param aId
+	 */
 	public BaseEngine(String aId) {
 		id = aId;
 	}
 
+	@Override
 	public void startEngine() throws WebSocketException {
 		// this method will be overridden by engine implementations.
 		// notify server that the engine has started
 		engineStarted();
 	}
 
+	@Override
 	public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
 		try {
 			// stop all connectors
@@ -64,6 +70,7 @@ public class BaseEngine implements WebSocketEngine {
 		engineStopped();
 	}
 
+	@Override
 	public void engineStarted() {
 		// notify servers that the engine has started
 		for (WebSocketServer lServer : servers) {
@@ -71,6 +78,7 @@ public class BaseEngine implements WebSocketEngine {
 		}
 	}
 
+	@Override
 	public void engineStopped() {
 		// notify servers that the engine has stopped
 		for (WebSocketServer lServer : servers) {
@@ -78,6 +86,7 @@ public class BaseEngine implements WebSocketEngine {
 		}
 	}
 
+	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		// notify servers that a connector has started
 		for (WebSocketServer lServer : servers) {
@@ -85,6 +94,7 @@ public class BaseEngine implements WebSocketEngine {
 		}
 	}
 
+	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// notify servers that a connector has stopped
 		for (WebSocketServer lServer : servers) {
@@ -94,10 +104,12 @@ public class BaseEngine implements WebSocketEngine {
 		getConnectors().remove(aConnector);
 	}
 
+	@Override
 	public boolean isAlive() {
 		return false;
 	}
 
+	@Override
 	public void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		List<WebSocketServer> lServers = getServers();
 		for (WebSocketServer lServer : lServers) {
@@ -105,32 +117,39 @@ public class BaseEngine implements WebSocketEngine {
 		}
 	}
 
+	@Override
 	public void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		aConnector.sendPacket(aDataPacket);
 	}
 
+	@Override
 	public void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket) {
 		for (WebSocketConnector connector : connectors) {
 			connector.sendPacket(aDataPacket);
 		}
 	}
 
+	@Override
 	public void removeConnector(WebSocketConnector aConnector) {
 		connectors.remove(aConnector);
 	}
 
+	@Override
 	public int getSessionTimeout() {
 		return sessionTimeout;
 	}
 
+	@Override
 	public void setSessionTimeout(int aSessionTimeout) {
 		this.sessionTimeout = aSessionTimeout;
 	}
 
+	@Override
 	public List<WebSocketConnector> getConnectors() {
 		return connectors;
 	}
 
+	@Override
 	public WebSocketConnector getConnectorByRemotePort(int aRemotePort) {
 		for (WebSocketConnector lConnector : getConnectors()) {
 			if (lConnector.getRemotePort() == aRemotePort) {
@@ -140,14 +159,17 @@ public class BaseEngine implements WebSocketEngine {
 		return null;
 	}
 
+	@Override
 	public List<WebSocketServer> getServers() {
 		return Collections.unmodifiableList(servers);
 	}
 
+	@Override
 	public void addServer(WebSocketServer aServer) {
 		this.servers.add(aServer);
 	}
 
+	@Override
 	public void removeServer(WebSocketServer aServer) {
 		this.servers.remove(aServer);
 	}
@@ -155,6 +177,7 @@ public class BaseEngine implements WebSocketEngine {
 	/**
 	 * @return the id
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}

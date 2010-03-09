@@ -34,18 +34,27 @@ public class TimeStream extends TokenStream {
 
 	/**
 	 *
+	 *
+	 * @param aStreamID
+	 * @param aServer
 	 */
 	public TimeStream(String aStreamID, TokenServer aServer) {
 		super(aStreamID, aServer);
 		startTimerThread();
 	}
 
+	/**
+	 *
+	 */
 	public void startTimerThread() {
 		timer = new TimerThread();
 		Thread queueThread = new Thread(timer);
 		queueThread.start();
 	}
 
+	/**
+	 *
+	 */
 	public void stopTimerThread() {
 		isRunning = false;
 	}
@@ -59,6 +68,9 @@ public class TimeStream extends TokenStream {
 		}
 	}
 
+	/**
+	 *
+	 */
 	public class TimerThread implements Runnable {
 
 		@Override

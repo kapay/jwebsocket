@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jwebsocket.connectors;
+package org.jwebsocket.tcp.connectors;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 

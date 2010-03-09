@@ -13,7 +13,7 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.engines;
+package org.jwebsocket.tcp.engines;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +29,8 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.Config;
-import org.jwebsocket.connectors.TCPConnector;
+import org.jwebsocket.engines.BaseEngine;
+import org.jwebsocket.tcp.connectors.TCPConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketException;
@@ -51,6 +52,7 @@ public class TCPEngine extends BaseEngine {
 	 * Constructor of the TCP engine. The port and the default session timeout
 	 * have to be passed. The session timout passed here is used only when no
 	 * explicit timeout per connection is specified.
+	 * @param aId
 	 * @param aPort TCP port the engine listens on.
 	 * @param aSessionTimeout The default server side session time out.
 	 * @throws WebSocketException

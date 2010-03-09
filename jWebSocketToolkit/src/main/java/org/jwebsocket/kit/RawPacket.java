@@ -58,19 +58,23 @@ public class RawPacket implements WebSocketPaket {
 		setString(aString, aEncoding);
 	}
 
+	@Override
 	public void setByteArray(byte[] aByteArray) {
 		data = aByteArray;
 	}
 
+	@Override
 	public void setString(String aString) {
 		data = aString.getBytes();
 	}
 
+	@Override
 	public void setString(String aString, String aEncoding)
 		throws UnsupportedEncodingException {
 		data = aString.getBytes(aEncoding);
 	}
 
+	@Override
 	public void setUTF8(String aString) {
 		try {
 			data = aString.getBytes("UTF-8");
@@ -79,19 +83,23 @@ public class RawPacket implements WebSocketPaket {
 		}
 	}
 
+	@Override
 	public byte[] getByteArray() {
 		return data;
 	}
 
+	@Override
 	public String getString() {
 		return new String(data);
 	}
 
+	@Override
 	public String getString(String aEncoding)
 		throws UnsupportedEncodingException {
 		return new String(data, aEncoding);
 	}
 
+	@Override
 	public String getUTF8() {
 		try {
 			return new String(data, "UTF-8");

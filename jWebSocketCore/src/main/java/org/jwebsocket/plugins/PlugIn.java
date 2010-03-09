@@ -55,6 +55,7 @@ public interface PlugIn {
 	/**
 	 *
 	 * @param aConnector
+	 * @param aCloseReason
 	 */
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 

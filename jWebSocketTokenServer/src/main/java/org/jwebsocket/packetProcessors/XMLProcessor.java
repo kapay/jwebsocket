@@ -29,6 +29,11 @@ public class XMLProcessor  {
 
 	private static Logger log = Logger.getLogger(XMLProcessor.class);
 
+	/**
+	 *
+	 * @param aDataPacket
+	 * @return
+	 */
 	public static Token packetToToken(WebSocketPaket aDataPacket) {
 		// todo: implement!
 		Token lArgs = new Token();
@@ -53,6 +58,11 @@ public class XMLProcessor  {
 		return lRes;
 	}
 
+	/**
+	 * 
+	 * @param aToken
+	 * @return
+	 */
 	public static WebSocketPaket tokenToPacket(Token aToken) {
 		// todo: implement!
 		return null;

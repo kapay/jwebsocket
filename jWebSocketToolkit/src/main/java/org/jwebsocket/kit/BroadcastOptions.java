@@ -24,6 +24,11 @@ public class BroadcastOptions {
 	private boolean senderIncluded = false;
 	private boolean responseRequested = false;
 
+	/**
+	 *
+	 * @param aSenderIncluded
+	 * @param aResponseRequested
+	 */
 	public BroadcastOptions(boolean aSenderIncluded, boolean aResponseRequested) {
 		senderIncluded = aSenderIncluded;
 		responseRequested = aResponseRequested;
@@ -37,7 +42,7 @@ public class BroadcastOptions {
 	}
 
 	/**
-	 * @param senderIncluded
+	 * @param aSenderIncluded
 	 */
 	public void setSenderIncluded(boolean aSenderIncluded) {
 		this.senderIncluded = aSenderIncluded;

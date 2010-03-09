@@ -41,23 +41,28 @@ public class BaseServer implements WebSocketServer {
 
 	/**s
 	 *
+	 *
+	 * @param aId
 	 */
 	public BaseServer(String aId) {
 		id = aId;
 		engines = new FastList<WebSocketEngine>();
 	}
 
+	@Override
 	public void addEngine(WebSocketEngine aEngine) {
 		engines.add(aEngine);
 		aEngine.addServer(this);
 	}
 
+	@Override
 	public void removeEngine(WebSocketEngine aEngine) {
 		engines.remove(aEngine);
 		aEngine.removeServer(this);
 
 	}
 
+	@Override
 	public void startServer()
 			throws WebSocketException {
 		/*
@@ -69,6 +74,7 @@ public class BaseServer implements WebSocketServer {
 		 */
 	}
 
+	@Override
 	public boolean isAlive() {
 		/*
 		boolean lIsAlive = false;
@@ -83,6 +89,7 @@ public class BaseServer implements WebSocketServer {
 		return false;
 	}
 
+	@Override
 	public void stopServer()
 			throws WebSocketException {
 		/*
@@ -94,6 +101,7 @@ public class BaseServer implements WebSocketServer {
 		 */
 	}
 
+	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 		// here nothing has to be done.
 		// descendand classes may override this method
@@ -101,6 +109,7 @@ public class BaseServer implements WebSocketServer {
 		// about the engineStarted event
 	}
 
+	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
 		// here nothing has to be done.
 		// descendand classes may override this method
@@ -108,6 +117,7 @@ public class BaseServer implements WebSocketServer {
 		// about the engineStopped event
 	}
 
+	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		// here nothing has to be done.
 		// descendand classes may override this method
@@ -115,6 +125,7 @@ public class BaseServer implements WebSocketServer {
 		// about the connectorStarted event
 	}
 
+	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// here nothing has to be done.
 		// descendand classes may override this method
@@ -122,13 +133,16 @@ public class BaseServer implements WebSocketServer {
 		// about the connectorStopped event
 	}
 
+	@Override
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 	}
 
+	@Override
 	public void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		aConnector.sendPacket(aDataPacket);
 	}
 
+	@Override
 	public void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket,
 			BroadcastOptions aBroadcastOptions) {
 		for (WebSocketConnector lConnector : getAllConnectors()) {
@@ -205,6 +219,7 @@ public class BaseServer implements WebSocketServer {
 	 * Returns the unique id of the server.
 	 * @return the id
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}

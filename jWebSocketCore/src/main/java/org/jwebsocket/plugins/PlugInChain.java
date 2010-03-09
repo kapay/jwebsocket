@@ -61,6 +61,7 @@ public interface PlugInChain {
 	 * is called by the server when a connector has been stopped,
 	 * i.e. a client has disconnected.
 	 * @param aConnector
+	 * @param aCloseReason
 	 */
 	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 

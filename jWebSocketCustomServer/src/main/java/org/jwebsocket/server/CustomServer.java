@@ -22,7 +22,6 @@ import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.plugins.BasePlugInChain;
-import org.jwebsocket.server.BaseServer;
 
 /**
  *
@@ -35,6 +34,8 @@ public class CustomServer extends BaseServer {
 
 	/**
 	 *
+	 *
+	 * @param aId
 	 */
 	public CustomServer(String aId) {
 		super(aId);
