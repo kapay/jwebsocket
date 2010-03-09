@@ -44,7 +44,9 @@ public class CustomServer extends BaseServer {
 
 	@Override
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
-		log.debug("Processing data packet '" + aDataPacket.getUTF8() + "'...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing data packet '" + aDataPacket.getUTF8() + "'...");
+		}
 		// TODO: process the packet in a meaningful way - don't just broadcast to all!
 		// broadcastPacket(aDataPacket);
 	}
@@ -59,19 +61,25 @@ public class CustomServer extends BaseServer {
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-		log.debug("Processing engine started...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing engine started...");
+		}
 		plugInChain.engineStarted(aEngine);
 	}
 
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
-		log.debug("Processing engine stopped...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing engine stopped...");
+		}
 		plugInChain.engineStopped(aEngine);
 	}
 
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
-		log.debug("Processing connector started...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing connector started...");
+		}
 		// notify plugins that a connector has started,
 		// i.e. a client was sconnected.
 		plugInChain.connectorStarted(aConnector);
@@ -79,7 +87,9 @@ public class CustomServer extends BaseServer {
 
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-		log.debug("Processing connector stopped...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing connector stopped...");
+		}
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
 		plugInChain.connectorStopped(aConnector, aCloseReason);

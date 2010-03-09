@@ -178,8 +178,10 @@ public interface WebSocketEngine {
 	void setSessionTimeout(int aSessionTimeout);
 
 	/**
-	 * Returns the unique id of the engine.
-	 * @return
+	 * Returns the unique id of the engine. Because the jWebSocket model
+	 * supports multiple engines as a kind of drivers for the servers on top
+	 * of it each engine has its own Id so that it can be addressed properly.
+	 * @return String
 	 */
 	String getId();
 }

@@ -181,8 +181,12 @@ public interface WebSocketConnector {
 	InetAddress getRemoteHost();
 
 	/**
-	 * Returns the unique id of the connector.
-	 * @return
+	 * Returns the unique id of the connector. This ID is not security related,
+	 * but to address a certain client in the WebSocket network work only.
+	 * Because a multiple logins for a user are basically supported, the user-id
+	 * cannot be used to address a client. The descendant classes use the shared
+	 * custom variables of the connectors to store user specific data.
+	 * @return String Unique id of the connector.
 	 */
 	String getId();
 

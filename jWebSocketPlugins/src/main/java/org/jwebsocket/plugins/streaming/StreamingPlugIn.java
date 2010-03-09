@@ -58,19 +58,27 @@ public class StreamingPlugIn extends TokenPlugIn {
 
 		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
 			if (lType.equals("register")) {
-				log.debug("Processing '" + lType + "'...");
+				if (log.isDebugEnabled()) {
+					log.debug("Processing '" + lType + "'...");
+				}
 				lStream = (String) aToken.get("stream");
 				if (!timeStream.isConnectorRegistered(aConnector)) {
-					log.debug("Registering client at stream '" + lStream + "'...");
+					if (log.isDebugEnabled()) {
+						log.debug("Registering client at stream '" + lStream + "'...");
+					}
 					timeStream.registerConnector(aConnector);
 				}
 				// else...
 				// todo: error handling
 			} else if (lType.equals("unregister")) {
-				log.debug("Processing '" + lType + "'...");
+				if (log.isDebugEnabled()) {
+					log.debug("Processing '" + lType + "'...");
+				}
 				lStream = (String) aToken.get("stream");
 				if (timeStream.isConnectorRegistered(aConnector)) {
-					log.debug("Unregistering client from stream '" + lStream + "'...");
+					if (log.isDebugEnabled()) {
+						log.debug("Unregistering client from stream '" + lStream + "'...");
+					}
 					timeStream.unregisterConnector(aConnector);
 				}
 				// else...

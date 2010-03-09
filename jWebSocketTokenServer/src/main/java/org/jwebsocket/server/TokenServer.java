@@ -57,9 +57,11 @@ public class TokenServer extends BaseServer {
 
 	@Override
 	public void startServer()
-			throws WebSocketException {
+		throws WebSocketException {
 		isAlive = true;
-		log.info("Token server started.");
+		if (log.isInfoEnabled()) {
+			log.info("Token server started.");
+		}
 	}
 
 	@Override
@@ -71,9 +73,11 @@ public class TokenServer extends BaseServer {
 
 	@Override
 	public void stopServer()
-			throws WebSocketException {
+		throws WebSocketException {
 		isAlive = false;
-		log.info("Token server stopped.");
+		if (log.isInfoEnabled()) {
+			log.info("Token server stopped.");
+		}
 	}
 
 	/**
@@ -86,13 +90,17 @@ public class TokenServer extends BaseServer {
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-		log.debug("Processing engine started...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing engine started...");
+		}
 		plugInChain.engineStarted(aEngine);
 	}
 
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
-		log.debug("Processing engine stopped...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing engine stopped...");
+		}
 		plugInChain.engineStopped(aEngine);
 	}
 
@@ -100,13 +108,15 @@ public class TokenServer extends BaseServer {
 	public void connectorStarted(WebSocketConnector aConnector) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(null);
 		if ((lSubProt != null)
-				&& (lSubProt.equals(Config.SUB_PROT_JSON)
-				|| lSubProt.equals(Config.SUB_PROT_CSV)
-				|| lSubProt.equals(Config.SUB_PROT_XML))) {
+			&& (lSubProt.equals(Config.SUB_PROT_JSON)
+			|| lSubProt.equals(Config.SUB_PROT_CSV)
+			|| lSubProt.equals(Config.SUB_PROT_XML))) {
 
 			aConnector.setBoolean(VAR_IS_TOKENSERVER, true);
 
-			log.debug("Processing connector started...");
+			if (log.isDebugEnabled()) {
+				log.debug("Processing connector started...");
+			}
 			// notify plugins that a connector has started,
 			// i.e. a client was sconnected.
 			plugInChain.connectorStarted(aConnector);
@@ -118,7 +128,9 @@ public class TokenServer extends BaseServer {
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
-			log.debug("Processing connector stopped...");
+			if (log.isDebugEnabled()) {
+				log.debug("Processing connector stopped...");
+			}
 			plugInChain.connectorStopped(aConnector, aCloseReason);
 		}
 	}
@@ -167,7 +179,9 @@ public class TokenServer extends BaseServer {
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
 			Token lToken = packetToToken(aConnector, aDataPacket);
 			if (lToken != null) {
-				log.debug("Processing token '" + lToken.toString() + " from '" + aConnector + "'...");
+				if (log.isDebugEnabled()) {
+					log.debug("Processing token '" + lToken.toString() + " from '" + aConnector + "'...");
+				}
 				plugInChain.processToken(aConnector, lToken);
 			} else {
 				log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
@@ -182,7 +196,9 @@ public class TokenServer extends BaseServer {
 	 */
 	public void sendToken(WebSocketConnector aTargetConnector, Token aToken) {
 		if (aTargetConnector.getBool(VAR_IS_TOKENSERVER)) {
-			log.debug("Sending token '" + aToken + "' to '" + aTargetConnector + "'...");
+			if (log.isDebugEnabled()) {
+				log.debug("Sending token '" + aToken + "' to '" + aTargetConnector + "'...");
+			}
 			super.sendPacket(aTargetConnector, tokenToPacket(aTargetConnector, aToken));
 		} else {
 			log.warn("Connector not supposed to handle tokens.");
@@ -198,10 +214,12 @@ public class TokenServer extends BaseServer {
 	public void sendToken(String aEngineId, String aConnectorId, Token aToken) {
 		// TODO: return meaningful result here.
 		WebSocketConnector lTargetConnector =
-				getConnector(aEngineId, aConnectorId);
-		if( lTargetConnector != null ) {
+			getConnector(aEngineId, aConnectorId);
+		if (lTargetConnector != null) {
 			if (lTargetConnector.getBool(VAR_IS_TOKENSERVER)) {
-				log.debug("Sending token '" + aToken + "' to '" + lTargetConnector + "'...");
+				if (log.isDebugEnabled()) {
+					log.debug("Sending token '" + aToken + "' to '" + lTargetConnector + "'...");
+				}
 				super.sendPacket(lTargetConnector, tokenToPacket(lTargetConnector, aToken));
 			} else {
 				log.warn("Connector not supposed to handle tokens.");
@@ -221,8 +239,10 @@ public class TokenServer extends BaseServer {
 	 * @param aBroadcastOptions
 	 */
 	public void broadcastToken(WebSocketConnector aSource, Token aToken,
-			BroadcastOptions aBroadcastOptions) {
-		log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		BroadcastOptions aBroadcastOptions) {
+		if (log.isDebugEnabled()) {
+			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		}
 		HashMap lFilter = new HashMap();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		for (WebSocketConnector lConnector : selectConnectors(lFilter)) {
@@ -238,7 +258,9 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 */
 	public void broadcastToken(WebSocketConnector aSource, Token aToken) {
-		log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		if (log.isDebugEnabled()) {
+			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		}
 		HashMap lFilter = new HashMap();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		for (WebSocketConnector lConnector : selectConnectors(lFilter)) {
@@ -253,7 +275,9 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 */
 	public void broadcastToken(Token aToken) {
-		log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		if (log.isDebugEnabled()) {
+			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		}
 		HashMap lFilter = new HashMap();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		for (WebSocketConnector lConnector : selectConnectors(lFilter)) {

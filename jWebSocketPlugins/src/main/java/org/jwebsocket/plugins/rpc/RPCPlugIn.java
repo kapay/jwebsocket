@@ -95,7 +95,9 @@ public class RPCPlugIn extends TokenPlugIn {
 		String lArgs = aToken.getString("args");
 		String lMsg = null;
 
-		log.debug("Processing RPC to class '" + lClassName + "', method '" + lMethod + "', args: '" + lArgs + "'...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing RPC to class '" + lClassName + "', method '" + lMethod + "', args: '" + lArgs + "'...");
+		}
 
 		String lKey = lClassName + "." + lMethod;
 		if (grantedProcs.containsKey(lKey)) {
@@ -140,9 +142,11 @@ public class RPCPlugIn extends TokenPlugIn {
 
 		// TODO: find solutions for hardcoded engine id
 		WebSocketConnector lTargetConnector =
-				lServer.getConnector("tcp0", lTargetId);
+			lServer.getConnector("tcp0", lTargetId);
 
-		log.debug("Processing 'rrpc'...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'rrpc'...");
+		}
 		if (lTargetConnector != null) {
 			Token lRRPC = new Token(lNS, "rrpc");
 			lRRPC.put("classname", lClassname);
@@ -171,11 +175,13 @@ public class RPCPlugIn extends TokenPlugIn {
 			URLClassLoader lUCL = new URLClassLoader(new URL[]{new URL(aURL)});
 			// load class using previously defined class loader
 			lClass = Class.forName(aClassName, true, lUCL);
-			log.debug("Class '" + lClass.getName() + "' loaded!");
+			if (log.isDebugEnabled()) {
+				log.debug("Class '" + lClass.getName() + "' loaded!");
+			}
 		} catch (ClassNotFoundException ex) {
-			log.debug("Class not found exception: " + ex.getMessage());
+			log.error("Class not found exception: " + ex.getMessage());
 		} catch (MalformedURLException ex) {
-			log.debug("MalformesURL exception: " + ex.getMessage());
+			log.error("MalformesURL exception: " + ex.getMessage());
 		}
 		return lClass;
 	}
@@ -205,9 +211,11 @@ public class RPCPlugIn extends TokenPlugIn {
 			}
 			Constructor lConstructor = aClass.getConstructor(lCA);
 			lObj = lConstructor.newInstance(aArgs);
-			log.debug("Object '" + aClass.getName() + "' instantiated!");
+			if (log.isDebugEnabled()) {
+				log.debug("Object '" + aClass.getName() + "' instantiated!");
+			}
 		} catch (Exception ex) {
-			log.debug("Exception instantiating class " + aClass.getName() + ": " + ex.getMessage());
+			log.error("Exception instantiating class " + aClass.getName() + ": " + ex.getMessage());
 		}
 		return lObj;
 	}
@@ -253,7 +261,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @throws InvocationTargetException
 	 */
 	public static Object call(Object aInstance, String aName, Object aArgs)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Object lObj = null;
 
 		Class lClass = aInstance.getClass();

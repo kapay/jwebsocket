@@ -111,8 +111,10 @@ public interface WebSocketServer {
 			BroadcastOptions aBroadcastOptions );
 
 	/**
-	 * Returns the unique id of the connector.
-	 * @return
+	 * Returns the unique ID of the server. Because the jWebSocket model
+	 * supports multiple servers based on one or more engines (drivers)
+	 * each server has its own ID so that it can be addressed properly.
+	 * @return String Unique ID of the Server.
 	 */
 	String getId();
 

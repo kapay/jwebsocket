@@ -58,7 +58,9 @@ public class BasePlugInChain implements PlugInChain {
 	 */
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
-		log.debug("Notifying plug-ins that connector started...");
+		if (log.isDebugEnabled()) {
+			log.debug("Notifying plug-ins that connector started...");
+		}
 		try {
 			for (PlugIn plugIn : getPlugIns()) {
 				try {
@@ -80,11 +82,17 @@ public class BasePlugInChain implements PlugInChain {
 	 */
 	@Override
 	public PlugInResponse processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
-		log.debug("Processing packet for plug-ins...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing packet for plug-ins...");
+		}
 		PlugInResponse lPluginResponse = new PlugInResponse();
 		for (PlugIn plugIn : getPlugIns()) {
 			try {
-				// log.debug("Processing packet for plug-in " + plugIn + "...");
+				/*
+				if (log.isDebugEnabled()) {
+				log.debug("Processing packet for plug-in " + plugIn + "...");
+				}
+				 */
 				plugIn.processPacket(lPluginResponse, aConnector, aDataPacket);
 			} catch (Exception ex) {
 				log.error("Processing packet: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
@@ -103,7 +111,9 @@ public class BasePlugInChain implements PlugInChain {
 	 */
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-		log.debug("Notifying plug-ins that connector stopped (" + aCloseReason.name() + ")...");
+		if (log.isDebugEnabled()) {
+			log.debug("Notifying plug-ins that connector stopped (" + aCloseReason.name() + ")...");
+		}
 		for (PlugIn plugIn : getPlugIns()) {
 			try {
 				// log.debug("Notifying plug-in " + plugIn + " that connector stopped...");

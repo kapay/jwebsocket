@@ -38,7 +38,9 @@ public class ContextListener implements ServletContextListener {
 
 		Logging.initLogs("debug");
 		log = Logger.getLogger(ContextListener.class);
-		log.debug("Initialising Context...");
+		if (log.isDebugEnabled()) {
+			log.debug("Initialising Context...");
+		}
 
 		// create the low-level engine
 		WebSocketEngine engine = null;
@@ -67,7 +69,9 @@ public class ContextListener implements ServletContextListener {
 			// add the streaming plug-in (e.g. for the time stream demo)
 			plugInChain.addPlugIn(new StreamingPlugIn());
 
-			log.debug("Starting token server...");
+			if (log.isDebugEnabled()) {
+				log.debug("Starting token server...");
+			}
 			tokenServer.startServer();
 		} catch (Exception ex) {
 			System.out.println("Error instantiating TokenServer: " + ex.getMessage());
@@ -84,7 +88,9 @@ public class ContextListener implements ServletContextListener {
 			customServer.addEngine(engine);
 			// add the SystemPlugIn listener (for the jWebSocket default functionality)
 			// customServer.addPlugIn(new SystemPlugIn());
-			log.debug("Starting custom server...");
+			if (log.isDebugEnabled()) {
+				log.debug("Starting custom server...");
+			}
 			customServer.startServer();
 		} catch (Exception ex) {
 			System.out.println("Error instantating CustomServer: " + ex.getMessage());

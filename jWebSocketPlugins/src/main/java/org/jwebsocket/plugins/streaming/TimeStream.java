@@ -62,7 +62,7 @@ public class TimeStream extends TokenStream {
 	@Override
 	protected void processConnector(WebSocketConnector aConnector, Object aObject) {
 		try {
-			getServer().sendToken(aConnector, (Token)aObject);
+			getServer().sendToken(aConnector, (Token) aObject);
 		} catch (Exception ex) {
 			log.error("(processConnector) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
@@ -75,24 +75,30 @@ public class TimeStream extends TokenStream {
 
 		@Override
 		public void run() {
-			log.debug("Starting time stream...");
-			isRunning = true;
-			while (isRunning) {
-				try {
-					sleep(1000);
+			if (log.isDebugEnabled()) {
+				log.debug("Starting time stream...");
 
-					Token lEventToken = new Token("event");
-					lEventToken.put("name", "stream");
-					lEventToken.put("msg", new Date().toString());
-					lEventToken.put("streamID", getStreamID());
+				isRunning = true;
+				while (isRunning) {
+					try {
+						sleep(1000);
 
-					// log.debug("Time streamer queues '" + lData + "'...");
-					put(lEventToken);
-				} catch (InterruptedException ex) {
-					log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+						Token lEventToken = new Token("event");
+						lEventToken.put("name", "stream");
+						lEventToken.put("msg", new Date().toString());
+						lEventToken.put("streamID", getStreamID());
+
+						// log.debug("Time streamer queues '" + lData + "'...");
+						put(lEventToken);
+					} catch (InterruptedException ex) {
+						log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+					}
+				}
+				if (log.isDebugEnabled()) {
+					log.debug("Time stream stopped.");
+
 				}
 			}
-			log.debug("Time stream stopped.");
 		}
 	}
 }

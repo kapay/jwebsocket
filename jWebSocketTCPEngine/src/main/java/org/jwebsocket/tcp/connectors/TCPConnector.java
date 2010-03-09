@@ -51,21 +51,29 @@ public class TCPConnector extends BaseConnector {
 
 	@Override
 	public void startConnector() {
-		log.debug("Starting TCP connector...");
+		if (log.isDebugEnabled()) {
+			log.debug("Starting TCP connector...");
+		}
 		ClientProcessor clientProc = new ClientProcessor(this);
 		Thread clientThread = new Thread(clientProc);
 		clientThread.start();
-		log.info("Started TCP connector on port " + clientSocket.getPort() + ".");
+		if (log.isInfoEnabled()) {
+			log.info("Started TCP connector on port " + clientSocket.getPort() + ".");
+		}
 	}
 
 	@Override
 	public void stopConnector(CloseReason aCloseReason) {
-		log.debug("Stopping TCP connector (" + aCloseReason.name() + ")...");
+		if (log.isDebugEnabled()) {
+			log.debug("Stopping TCP connector (" + aCloseReason.name() + ")...");
+		}
 		int lPort = clientSocket.getPort();
 		closeReason = aCloseReason;
 		isRunning = false;
 		// TODO: Do we need to wait here? At least optionally?
-		log.info("Stopped TCP connector (" + aCloseReason.name() + ") on port " + lPort + ".");
+		if (log.isInfoEnabled()) {
+			log.info("Stopped TCP connector (" + aCloseReason.name() + ") on port " + lPort + ".");
+		}
 	}
 
 	@Override

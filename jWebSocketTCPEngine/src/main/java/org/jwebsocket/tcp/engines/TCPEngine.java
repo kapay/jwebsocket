@@ -58,7 +58,7 @@ public class TCPEngine extends BaseEngine {
 	 * @throws WebSocketException
 	 */
 	public TCPEngine(String aId, int aPort, int aSessionTimeout)
-			throws WebSocketException {
+		throws WebSocketException {
 		super(aId);
 		listenerPort = aPort;
 		sessionTimeout = aSessionTimeout;
@@ -67,8 +67,10 @@ public class TCPEngine extends BaseEngine {
 
 	@Override
 	public void startEngine()
-			throws WebSocketException {
-		log.debug("Starting TCP engine...");
+		throws WebSocketException {
+		if (log.isDebugEnabled()) {
+			log.debug("Starting TCP engine...");
+		}
 		try {
 			serverSocket = new ServerSocket(listenerPort);
 			setSessionTimeout(sessionTimeout);
@@ -82,20 +84,26 @@ public class TCPEngine extends BaseEngine {
 		}
 
 		super.startEngine();
-		log.info("TCP engine started.");
+		if (log.isInfoEnabled()) {
+			log.info("TCP engine started.");
+		}
 	}
 
 	@Override
 	public void stopEngine(CloseReason aCloseReason)
-			throws WebSocketException {
-		log.debug("Stopping TCP engine...");
+		throws WebSocketException {
+		if (log.isDebugEnabled()) {
+			log.debug("Stopping TCP engine...");
+		}
 		// inherited method stops all connectors
 		super.stopEngine(aCloseReason);
 		isRunning = false;
 		try {
 			// when done, close server socket
 			serverSocket.close();
-			log.info("TCP engine stopped.");
+			if (log.isInfoEnabled()) {
+				log.info("TCP engine stopped.");
+			}
 		} catch (Exception ex) {
 			log.error("Stopping TCP engine:" + ex.getMessage());
 		}
@@ -103,18 +111,22 @@ public class TCPEngine extends BaseEngine {
 
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
-		log.debug("Detected new connector at port " + aConnector.getRemotePort() + ".");
+		if (log.isDebugEnabled()) {
+			log.debug("Detected new connector at port " + aConnector.getRemotePort() + ".");
+		}
 		super.connectorStarted(aConnector);
 	}
 
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-		log.debug("Detected stopped connector at port " + aConnector.getRemotePort() + ".");
+		if (log.isDebugEnabled()) {
+			log.debug("Detected stopped connector at port " + aConnector.getRemotePort() + ".");
+		}
 		super.connectorStopped(aConnector, aCloseReason);
 	}
 
 	private RequestHeader processHandshake(Socket aClientSocket)
-			throws UnsupportedEncodingException, IOException {
+		throws UnsupportedEncodingException, IOException {
 
 		RequestHeader header = new RequestHeader();
 
@@ -141,7 +153,9 @@ public class TCPEngine extends BaseEngine {
 			req += line + "\n";
 			line = br.readLine();
 		}
-		log.debug("Received Header (" + req.replace("\n", "\\n") + ")");
+		if (log.isDebugEnabled()) {
+			log.debug("Received Header (" + req.replace("\n", "\\n") + ")");
+		}
 
 		// now parse header for correct handshake....
 		// get host....
@@ -173,7 +187,9 @@ public class TCPEngine extends BaseEngine {
 					String[] lKeyValuePair = lArgs[i].split(Config.KEYVAL_SEPARATOR, 2);
 					if (lKeyValuePair.length == 2) {
 						args.put(lKeyValuePair[0], lKeyValuePair[1]);
-						log.debug("arg" + i + ": " + lKeyValuePair[0] + "=" + lKeyValuePair[1]);
+						if (log.isDebugEnabled()) {
+							log.debug("arg" + i + ": " + lKeyValuePair[0] + "=" + lKeyValuePair[1]);
+						}
 					}
 				}
 			}
@@ -181,28 +197,33 @@ public class TCPEngine extends BaseEngine {
 
 		// create location based on ws:// + host + path
 		location = "ws://" + host + path;
-		log.debug("Parsed header ("
+		if (log.isDebugEnabled()) {
+			log.debug("Parsed header ("
 				+ "host: " + host + ", "
 				+ "origin: " + origin + ", "
 				+ "location: " + location + ", "
 				+ "path: " + path + ", "
 				+ "searchString: " + searchString
 				+ ")");
-
+		}
 		// now that we have parsed the header send handshake...
 		String res =
-				"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
-				+ "Upgrade: WebSocket\r\n"
-				+ "Connection: Upgrade\r\n"
-				+ "WebSocket-Origin: " + origin + "\r\n"
-				+ "WebSocket-Location: " + location + "\r\n"
-				+ "\r\n";
-		log.debug("Sent handshake (" + res.replace("\n", "\\n") + ")");
+			"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
+			+ "Upgrade: WebSocket\r\n"
+			+ "Connection: Upgrade\r\n"
+			+ "WebSocket-Origin: " + origin + "\r\n"
+			+ "WebSocket-Location: " + location + "\r\n"
+			+ "\r\n";
+		if (log.isDebugEnabled()) {
+			log.debug("Sent handshake (" + res.replace("\n", "\\n") + ")");
+		}
 
 		byte[] ba = res.getBytes("UTF-8");
 		os.write(ba);
 		os.flush();
-		log.debug("Handshake flushed.");
+		if (log.isDebugEnabled()) {
+			log.debug("Handshake flushed.");
+		}
 
 		// set default sub protocol if none passed
 		if (args.get("prot") == null) {
@@ -275,7 +296,9 @@ public class TCPEngine extends BaseEngine {
 						connector.setHeader(header);
 						// log.debug("Adding connector to engine...");
 						getConnectors().add(connector);
-						log.debug("Starting connector...");
+						if (log.isDebugEnabled()) {
+							log.debug("Starting connector...");
+						}
 						connector.startConnector();
 						// log.debug("Notifying server...");
 

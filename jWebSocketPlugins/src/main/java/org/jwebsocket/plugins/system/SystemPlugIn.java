@@ -151,7 +151,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 */
 	public void broadcastConnectEvent(WebSocketConnector aConnector) {
-		log.debug("Broadcasting connect...");
+		if (log.isDebugEnabled()) {
+			log.debug("Broadcasting connect...");
+		}
 		TokenServer lServer = getServer();
 
 		// broadcast connect event to other clients of the jWebSocket network
@@ -171,7 +173,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 */
 	public void broadcastDisconnectEvent(WebSocketConnector aConnector) {
-		log.debug("Broadcasting disconnect...");
+		if (log.isDebugEnabled()) {
+			log.debug("Broadcasting disconnect...");
+		}
 		TokenServer lServer = getServer();
 
 		// broadcast connect event to other clients of the jWebSocket network
@@ -186,7 +190,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	private void sendWelcome(WebSocketConnector aConnector) {
-		log.debug("Sending welcome...");
+		if (log.isDebugEnabled()) {
+			log.debug("Sending welcome...");
+		}
 		TokenServer lServer = getServer();
 
 		// send "welcome" token to client
@@ -210,7 +216,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	 *
 	 */
 	private void broadcastLoginEvent(WebSocketConnector aConnector) {
-		log.debug("Broadcasting login event...");
+		if (log.isDebugEnabled()) {
+			log.debug("Broadcasting login event...");
+		}
 		TokenServer lServer = getServer();
 
 		// broadcast login event to other clients of the jWebSocket network
@@ -229,7 +237,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	 *
 	 */
 	private void broadcastLogoutEvent(WebSocketConnector aConnector) {
-		log.debug("Broadcasting logout event...");
+		if (log.isDebugEnabled()) {
+			log.debug("Broadcasting logout event...");
+		}
 		TokenServer lServer = getServer();
 
 		// broadcast login event to other clients of the jWebSocket network
@@ -250,7 +260,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aCloseReason
 	 */
 	private void sendGoodBye(WebSocketConnector aConnector, CloseReason aCloseReason) {
-		log.debug("Sending good bye...");
+		if (log.isDebugEnabled()) {
+			log.debug("Sending good bye...");
+		}
 		TokenServer lServer = getServer();
 
 		// send "goodBye" token to client
@@ -275,7 +287,9 @@ public class SystemPlugIn extends TokenPlugIn {
 		String lPassword = aToken.getString("password");
 		String lGroup = aToken.getString("group");
 
-		log.debug("Processing 'login' (username='" + lUsername + "', group='" + lGroup + "') from '" + aConnector + "'...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'login' (username='" + lUsername + "', group='" + lGroup + "') from '" + aConnector + "'...");
+		}
 
 		if (lUsername != null) {
 			lResponse.put("username", lUsername);
@@ -303,7 +317,9 @@ public class SystemPlugIn extends TokenPlugIn {
 		TokenServer lServer = getServer();
 		Token lResponse = lServer.createResponse(aToken);
 
-		log.debug("Processing 'logout' (username='" + getUsername(aConnector) + "') from '" + aConnector + "'...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'logout' (username='" + getUsername(aConnector) + "') from '" + aConnector + "'...");
+		}
 
 		if (getUsername(aConnector) != null) {
 			// send good bye token as response to client
@@ -329,34 +345,38 @@ public class SystemPlugIn extends TokenPlugIn {
 		// get the target
 		String lTargetId = aToken.getString("targetId");
 
-		log.debug("Processing 'send' (username='" + getUsername(aConnector) + "') from '" + aConnector + "' to " + lTargetId + "...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'send' (username='" + getUsername(aConnector) + "') from '" + aConnector + "' to " + lTargetId + "...");
+		}
 
 		// TODO: find solutions for hardcoded engine id
 		WebSocketConnector lTargetConnector =
-				lServer.getConnector("tcp0", lTargetId);
-/*
+			lServer.getConnector("tcp0", lTargetId);
+		/*
 		if (getUsername(aConnector) != null) {
- */
-		if( lTargetConnector != null ) {
+		 */
+		if (lTargetConnector != null) {
 			aToken.put("sourceId", aConnector.getId());
 			lServer.sendToken(lTargetConnector, aToken);
 		} else {
 			log.warn("Target connector '" + lTargetId + "' not found.");
 		}
-/*
+		/*
 		} else {
-			lResponse.put("code", -1);
-			lResponse.put("msg", "not logged in");
-			lServer.sendToken(aConnector, lResponse);
+		lResponse.put("code", -1);
+		lResponse.put("msg", "not logged in");
+		lServer.sendToken(aConnector, lResponse);
 		}
-*/
+		 */
 	}
 
 	private void broadcast(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		Token lResponse = lServer.createResponse(aToken);
 
-		log.debug("Processing 'broadcast' (username='" + getUsername(aConnector) + "') from '" + aConnector + "'...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'broadcast' (username='" + getUsername(aConnector) + "') from '" + aConnector + "'...");
+		}
 		/*
 		if (getUsername(aConnector) != null) {
 		 */
@@ -366,13 +386,13 @@ public class SystemPlugIn extends TokenPlugIn {
 		String lSenderIncluded = aToken.getString("senderIncluded");
 		String lResponseRequested = aToken.getString("responseRequested");
 		boolean bSenderIncluded =
-				lSenderIncluded != null
-				&& lSenderIncluded.equals("true");
+			lSenderIncluded != null
+			&& lSenderIncluded.equals("true");
 		boolean bResponseRequested =
-				lResponseRequested != null
-				&& lResponseRequested.equals("true");
+			lResponseRequested != null
+			&& lResponseRequested.equals("true");
 		lServer.broadcastToken(aConnector, aToken,
-				new BroadcastOptions(bSenderIncluded, bResponseRequested));
+			new BroadcastOptions(bSenderIncluded, bResponseRequested));
 		if (bResponseRequested) {
 			lServer.sendToken(aConnector, lResponse);
 		}
@@ -394,7 +414,9 @@ public class SystemPlugIn extends TokenPlugIn {
 		// reset the username, we're no longer logged in
 		removeUsername(aConnector);
 
-		log.debug("Closing client...");
+		if (log.isDebugEnabled()) {
+			log.debug("Closing client...");
+		}
 
 		// don't send a response here! We're about to close the connection!
 		// broadcasts disconnect event to other clients
@@ -411,7 +433,9 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		String lData = aToken.getString("data");
 		if (lData != null) {
-			log.debug("echo " + lData);
+			if (log.isDebugEnabled()) {
+				log.debug("echo " + lData);
+			}
 		} else {
 			lResponseToken.put("code", -1);
 			lResponseToken.put("msg", "missing 'data' argument for 'echo' command");
@@ -428,7 +452,9 @@ public class SystemPlugIn extends TokenPlugIn {
 		TokenServer lServer = getServer();
 		String lEcho = aToken.getString("echo");
 
-		log.debug("Processing 'Ping' (echo='" + lEcho + "') from '" + aConnector + "'...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'Ping' (echo='" + lEcho + "') from '" + aConnector + "'...");
+		}
 
 		if (lEcho.equalsIgnoreCase("true")) {
 			Token lResponseToken = lServer.createResponse(aToken);
@@ -448,7 +474,9 @@ public class SystemPlugIn extends TokenPlugIn {
 		TokenServer lServer = getServer();
 		Token lResponseToken = lServer.createResponse(aToken);
 
-		log.debug("Processing 'getClients' from '" + aConnector + "'...");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'getClients' from '" + aConnector + "'...");
+		}
 
 		if (getUsername(aConnector) != null) {
 			String lGroup = aToken.getString("group");
