@@ -26,6 +26,7 @@ import org.jwebsocket.config.Config;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.server.TokenServer;
@@ -39,7 +40,7 @@ import org.jwebsocket.util.Tools;
  */
 public class SystemPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logger.getLogger(SystemPlugIn.class);
+	private static Logger log = Logging.getLogger(SystemPlugIn.class);
 	// specify name space for system plug-in
 	private static final String NS_SYSTEM_DEFAULT = Config.NS_BASE + ".plugins.system";
 	// specify token types processed by system plug-in

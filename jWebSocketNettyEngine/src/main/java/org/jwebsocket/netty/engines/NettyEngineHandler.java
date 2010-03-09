@@ -31,6 +31,7 @@ import org.jboss.netty.util.CharsetUtil;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.netty.connectors.NettyConnector;
 
 /**
@@ -49,7 +50,7 @@ import org.jwebsocket.netty.connectors.NettyConnector;
  */
 public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 
-    private static Logger log = Logger.getLogger(NettyEngineHandler.class);
+    private static Logger log = Logging.getLogger(NettyEngineHandler.class);
     private NettyEngine engine = null;
 
     public NettyEngineHandler(NettyEngine aEngine) {

@@ -37,7 +37,7 @@ public class ContextListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 
 		Logging.initLogs("debug");
-		log = Logger.getLogger(ContextListener.class);
+		log = Logging.getLogger(ContextListener.class);
 		if (log.isDebugEnabled()) {
 			log.debug("Initialising Context...");
 		}

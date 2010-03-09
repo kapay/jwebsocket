@@ -23,6 +23,7 @@ import org.apache.commons.lang.text.StrTokenizer;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.kit.RawPacket;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
@@ -31,7 +32,7 @@ import org.jwebsocket.token.Token;
  */
 public class JSONProcessor {
 
-	private static Logger log = Logger.getLogger(JSONProcessor.class);
+	private static Logger log = Logging.getLogger(JSONProcessor.class);
 
 	/**
 	 *

@@ -18,6 +18,7 @@ package org.jwebsocket.plugins;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketServer;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
@@ -26,7 +27,7 @@ import org.jwebsocket.token.Token;
  */
 public class TokenPlugInChain extends BasePlugInChain {
 
-	private static Logger log = Logger.getLogger(TokenPlugInChain.class);
+	private static Logger log = Logging.getLogger(TokenPlugInChain.class);
 
 	/**
 	 *

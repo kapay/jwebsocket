@@ -16,6 +16,7 @@
 package org.jwebsocket.plugins.streaming;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
 
 /**
@@ -24,7 +25,7 @@ import org.jwebsocket.server.TokenServer;
  */
 public class TokenStream extends BaseStream {
 
-	private static Logger log = Logger.getLogger(TokenStream.class);
+	private static Logger log = Logging.getLogger(TokenStream.class);
 	private TokenServer server = null;
 
 	/**

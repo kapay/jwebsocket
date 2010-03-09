@@ -18,6 +18,7 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
+import org.jwebsocket.logging.Logging;
 
 /**
  * Implementation of the jWebSocket TCP socket connector.
@@ -25,7 +26,7 @@ import org.jwebsocket.kit.RawPacket;
  */
 public class TCPConnector extends BaseConnector {
 
-	private static Logger log = Logger.getLogger(TCPConnector.class);
+	private static Logger log = Logging.getLogger(TCPConnector.class);
 	private BufferedReader br = null;
 	private PrintStream os = null;
 	private Socket clientSocket = null;

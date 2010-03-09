@@ -41,7 +41,7 @@ public abstract class Config {
 	/**
 	 * Current version string of the jWebSocket package.
 	 */
-	public static final String VERSION_STR = "0.7.0.0305 beta";
+	public static final String VERSION_STR = "0.7.0.0310 beta";
 	/**
 	 * Namespace base for tokens and plug-ins.
 	 */

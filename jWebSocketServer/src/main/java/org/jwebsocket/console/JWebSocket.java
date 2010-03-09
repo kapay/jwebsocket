@@ -37,7 +37,7 @@ public class JWebSocket {
 	/**
 	 *
 	 */
-	private static Logger log = Logger.getLogger(JWebSocket.class);
+	private static Logger log = null;
 
 	/**
 	 * @param args the command line arguments
@@ -77,6 +77,7 @@ public class JWebSocket {
 		// initialize log4j logging engine
 		// BEFORE instantiating any jWebSocket classes
 		Logging.initLogs(loglevel);
+		log = Logging.getLogger(JWebSocket.class);
 
 		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
 		System.out.println("jWebSocket Ver. " + Config.VERSION_STR);
@@ -85,17 +86,17 @@ public class JWebSocket {
 
 		prot = prot.toLowerCase();
 		if (!(prot.equals("json")
-				|| prot.equals("csv")
-				|| prot.equals("xml")
-				|| prot.equals("custom"))) {
+			|| prot.equals("csv")
+			|| prot.equals("xml")
+			|| prot.equals("custom"))) {
 			System.out.println("Invalid argument.");
 			System.out.println("java -jar jWebSocket.jar prot=[json|csv|xml|custom] port=["
-					+ Config.MIN_IN_PORT + "-" + Config.MAX_IN_PORT + "]");
+				+ Config.MIN_IN_PORT + "-" + Config.MAX_IN_PORT + "]");
 			return;
 		}
 		System.out.println(
-				"Listening on port " + port + ", default (sub)prot " + prot + ", "
-				+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
+			"Listening on port " + port + ", default (sub)prot " + prot + ", "
+			+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
 
 		// create the low-level engine
 		WebSocketEngine engine = null;
@@ -124,9 +125,9 @@ public class JWebSocket {
 			// add the streaming plug-in (e.g. for the time stream demo)
 			plugInChain.addPlugIn(new StreamingPlugIn());
 
-                        if (log.isDebugEnabled()) {
-                         log.debug("Starting token server...");
-                        }
+			if (log.isDebugEnabled()) {
+				log.debug("Starting token server...");
+			}
 			tokenServer.startServer();
 		} catch (Exception ex) {
 			System.out.println("Error instantiating TokenServer: " + ex.getMessage());
@@ -143,9 +144,9 @@ public class JWebSocket {
 			customServer.addEngine(engine);
 			// add the SystemPlugIn listener (for the jWebSocket default functionality)
 			// customServer.addPlugIn(new SystemPlugIn());
-                        if (log.isDebugEnabled()) {
-                            log.debug("Starting custom server...");
-                        }
+			if (log.isDebugEnabled()) {
+				log.debug("Starting custom server...");
+			}
 			customServer.startServer();
 		} catch (Exception ex) {
 			System.out.println("Error instantating CustomServer: " + ex.getMessage());
@@ -155,9 +156,9 @@ public class JWebSocket {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException ex) {
-                            if (log.isDebugEnabled()) {
-                               log.debug(ex.getClass().getSimpleName() + " " + ex.getMessage());
-                            }
+				if (log.isDebugEnabled()) {
+					log.debug(ex.getClass().getSimpleName() + " " + ex.getMessage());
+				}
 			}
 		}
 

@@ -18,6 +18,7 @@ package org.jwebsocket.plugins.sharedobjects;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.Config;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
@@ -28,7 +29,7 @@ import org.jwebsocket.token.Token;
  */
 public class SharedObjectsPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logger.getLogger(SharedObjectsPlugIn.class);
+	private static Logger log = Logging.getLogger(SharedObjectsPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private String NS_SHARED_OBJ = Config.NS_BASE + ".plugins.sharedObjs";
 	private String NS_SHARED_LISTS = Config.NS_BASE + ".plugins.sharedLists";

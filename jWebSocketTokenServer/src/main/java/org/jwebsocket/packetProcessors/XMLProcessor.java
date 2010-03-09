@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
@@ -27,7 +28,7 @@ import org.jwebsocket.token.Token;
  */
 public class XMLProcessor  {
 
-	private static Logger log = Logger.getLogger(XMLProcessor.class);
+	private static Logger log = Logging.getLogger(XMLProcessor.class);
 
 	/**
 	 *

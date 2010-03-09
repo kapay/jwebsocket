@@ -26,6 +26,7 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.Config;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.server.TokenServer;
@@ -37,7 +38,7 @@ import org.jwebsocket.token.Token;
  */
 public class RPCPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logger.getLogger(RPCPlugIn.class);
+	private static Logger log = Logging.getLogger(RPCPlugIn.class);
 	private HashMap<String, Object> grantedProcs = new HashMap<String, Object>();
 	private DemoRPCServer rpcServer = null;
 	// if namespace changed update client plug-in accordingly!

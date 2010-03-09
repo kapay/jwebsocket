@@ -25,6 +25,7 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.logging.Logging;
 
 /**
  *
@@ -32,7 +33,7 @@ import org.jwebsocket.kit.CloseReason;
  */
 public class BasePlugInChain implements PlugInChain {
 
-	private static Logger log = Logger.getLogger(BasePlugInChain.class);
+	private static Logger log = Logging.getLogger(BasePlugInChain.class);
 	private FastList<PlugIn> plugins = new FastList<PlugIn>();
 	private WebSocketServer server = null;
 

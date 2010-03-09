@@ -27,26 +27,40 @@ import org.apache.log4j.PatternLayout;
  */
 public class Logging {
 
-	private static Logger rootLogger = Logger.getRootLogger();
+	private static PatternLayout layout = null;
+	private static ConsoleAppender consoleAppender = null;
 
 	// TODO: Load the conversion pattern and the logging target from a configuration file (e.g. jWebSocket.xml)
-
 	/**
 	 * Initializes the Apache log4j system to produce the desired logging
 	 * output.
 	 * @param aLogLevel one of the values TRACE, DEBUG, INFO, WARN, ERROR or FATAL.
 	 *
 	 */
-	public static void initLogs(String aLogLevel) {
-		PatternLayout layout = new PatternLayout();
-		// layout.setConversionPattern("%d{HH:mm:ss,SSS} %p - %C{1}: %m%n");
-		layout.setConversionPattern("%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n");
-		// delete all potentially already existing appenders
-		rootLogger.removeAllAppenders();
-
-		ConsoleAppender consoleAppender = new ConsoleAppender(layout);
-		rootLogger.addAppender(consoleAppender);
-		rootLogger.setLevel(Level.toLevel(aLogLevel));
+	private static void checkLogAppender() {
+		if (layout == null) {
+			layout = new PatternLayout();
+			layout.setConversionPattern("%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n");
+		}
+		if (consoleAppender == null) {
+			consoleAppender = new ConsoleAppender(layout);
+		}
 	}
 
+	public static void initLogs(String aLogLevel) {
+		checkLogAppender();
+	}
+
+	/**
+	 * @return the appLogger
+	 */
+	public static Logger getLogger(Class aClass) {
+		checkLogAppender();
+		Logger logger = Logger.getLogger(aClass);
+		logger.addAppender(consoleAppender);
+		logger.setAdditivity(false);
+		logger.setLevel(Level.DEBUG);
+		logger.info("Got Logger for " + aClass.getName() + ".");
+		return logger;
+	}
 }

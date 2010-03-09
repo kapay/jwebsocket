@@ -16,6 +16,7 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jwebsocket.logging.Logging;
 
 
 /**
@@ -25,7 +26,7 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
  */
 public class NettyEngine extends BaseEngine {
 
-    private static Logger log = Logger.getLogger(NettyEngine.class);
+    private static Logger log = Logging.getLogger(NettyEngine.class);
     private int listenerPort = 8787;
     private int sessionTimeout = 120000;
     private volatile boolean isRunning = false;

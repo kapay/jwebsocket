@@ -21,6 +21,7 @@ import org.jwebsocket.plugins.PlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.BasePlugInChain;
 
 /**
@@ -29,7 +30,7 @@ import org.jwebsocket.plugins.BasePlugInChain;
  */
 public class CustomServer extends BaseServer {
 
-	private static Logger log = Logger.getLogger(CustomServer.class);
+	private static Logger log = Logging.getLogger(CustomServer.class);
 	private BasePlugInChain plugInChain = null;
 
 	/**

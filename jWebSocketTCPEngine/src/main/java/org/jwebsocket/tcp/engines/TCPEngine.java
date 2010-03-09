@@ -30,6 +30,7 @@ import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.engines.BaseEngine;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.tcp.connectors.TCPConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
@@ -42,7 +43,7 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class TCPEngine extends BaseEngine {
 
-	private static Logger log = Logger.getLogger(TCPEngine.class);
+	private static Logger log = Logging.getLogger(TCPEngine.class);
 	private ServerSocket serverSocket = null;
 	private int listenerPort = 8787;
 	private int sessionTimeout = 120000;

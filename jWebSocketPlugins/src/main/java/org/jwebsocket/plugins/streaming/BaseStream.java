@@ -20,6 +20,7 @@ import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.kit.RawPacket;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.BaseServer;
 
 /**
@@ -28,7 +29,7 @@ import org.jwebsocket.server.BaseServer;
  */
 public class BaseStream extends Thread {
 
-	private static Logger log = Logger.getLogger(BaseStream.class);
+	private static Logger log = Logging.getLogger(BaseStream.class);
 	private FastList<WebSocketConnector> connectors = new FastList<WebSocketConnector>();
 	private boolean isRunning = false;
 	private String streamID = null;

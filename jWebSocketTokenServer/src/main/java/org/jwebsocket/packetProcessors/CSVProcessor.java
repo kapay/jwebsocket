@@ -22,6 +22,7 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.kit.RawPacket;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
@@ -30,7 +31,7 @@ import org.jwebsocket.token.Token;
  */
 public class CSVProcessor  {
 
-	private static Logger log = Logger.getLogger(CSVProcessor.class);
+	private static Logger log = Logging.getLogger(CSVProcessor.class);
 
 	/**
 	 *

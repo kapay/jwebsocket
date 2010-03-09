@@ -19,6 +19,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
@@ -28,7 +29,7 @@ import org.jwebsocket.token.Token;
  */
 public class TimeStream extends TokenStream {
 
-	private static Logger log = Logger.getLogger(TimeStream.class);
+	private static Logger log = Logging.getLogger(TimeStream.class);
 	private Boolean isRunning = false;
 	private TimerThread timer = null;
 

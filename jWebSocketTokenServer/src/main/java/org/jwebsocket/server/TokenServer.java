@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.PlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
@@ -37,7 +38,7 @@ import org.jwebsocket.packetProcessors.XMLProcessor;
  */
 public class TokenServer extends BaseServer {
 
-	private static Logger log = Logger.getLogger(TokenServer.class);
+	private static Logger log = Logging.getLogger(TokenServer.class);
 	// specify name space for token server
 	private static final String NS_TOKENSERVER = Config.NS_BASE + ".tokenserver";
 	// specify shared connector variables
