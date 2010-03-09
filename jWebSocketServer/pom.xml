@@ -11,27 +11,24 @@
 	<name>jWebSocketServer</name>
 	<description>Server project for jWebSocket</description>
 	<packaging>jar</packaging>
-
-
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.2</version>
-                    <configuration>
-                        <finalName>jWebSocketSAServer-${project.version}</finalName>
-                        <outputDirectory>../jWebSocketExecutables</outputDirectory>
-                        <archive>
-                            <manifest>
-                                <addClasspath>true</addClasspath>
-                                <mainClass>org.jwebsocket.console.JWebSocket</mainClass>
-                            </manifest>
-                        </archive>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<finalName>jWebSocketSAServer-${project.version}</finalName>
+					<outputDirectory>../jWebSocketExecutables</outputDirectory>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>org.jwebsocket.console.JWebSocket</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 	<!--  define all the dependencies here -->
 	<dependencies>
