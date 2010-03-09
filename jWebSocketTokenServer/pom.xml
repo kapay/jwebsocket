@@ -16,6 +16,23 @@
         <connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketTokenServer</connection>
         <developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketTokenServer</developerConnection>
     </scm>
+    
+    <build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<outputDirectory>../jWebSocketExecutables</outputDirectory>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 	<!--  define all the dependencies here -->
 	<dependencies>
