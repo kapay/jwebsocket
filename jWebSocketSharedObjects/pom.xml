@@ -11,6 +11,23 @@
 	<name>jWebSocketSharedObjects</name>
 	<description>jWebSocketSharedObjects project for jWebSocket</description>
 	<packaging>jar</packaging>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<outputDirectory>../jWebSocketExecutables</outputDirectory>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 	<!--  define all the dependencies here -->
 	<dependencies>  
