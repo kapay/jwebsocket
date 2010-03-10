@@ -23,7 +23,11 @@ import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.kit.CloseReason;
 
 /**
- *
+ * A plug-in chain maintains a map of plug-ins. A server in the jWebSocket model
+ * usually does not process data packets directly but forwards them to a chain
+ * of plug-ins. The plug-in chain then forwards the data packet to each plug-in
+ * until the first plug-in aborts or breaks the chain by returning the
+ * corresponding PlugInResponse.
  * @author aschulze
  */
 public interface PlugInChain {

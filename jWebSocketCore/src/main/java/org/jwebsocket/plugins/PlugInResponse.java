@@ -16,7 +16,10 @@
 package org.jwebsocket.plugins;
 
 /**
- *
+ * Implements the response class to return results from the plug-in chain to
+ * the server. The server can forward data packets to a chain of plug-ins.
+ * Each plug-in can either process or ignore the packet. If the packet was
+ * successfully processed the plug-in can abort the chain.
  * @author aschulze
  */
 public class PlugInResponse {
@@ -25,6 +28,8 @@ public class PlugInResponse {
 	private boolean tokenProcessed = false;
 
 	/**
+	 * Returns if the plug-in chain has to be aborted after a plug-in has
+	 * finished its work.
 	 * @return the chainAborted
 	 */
 	public Boolean isChainAborted() {
@@ -32,6 +37,8 @@ public class PlugInResponse {
 	}
 
 	/**
+	 * Signals that the plug-in chain has to be be aborted. The token has not
+	 * been processed.
 	 */
 	public void abortChain() {
 		this.chainAborted = true;
@@ -39,6 +46,8 @@ public class PlugInResponse {
 	}
 
 	/**
+	 * Signals that the plug-in chain has to be be aborted. The token has been
+	 * processed.
 	 */
 	public void breakChain() {
 		this.chainAborted = true;
@@ -46,6 +55,7 @@ public class PlugInResponse {
 	}
 
 	/**
+	 * Signals that the plug-in chain has to be be continued.
 	 */
 	public void continueChain() {
 		this.chainAborted = false;

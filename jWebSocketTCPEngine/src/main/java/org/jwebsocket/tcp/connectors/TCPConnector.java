@@ -34,8 +34,9 @@ public class TCPConnector extends BaseConnector {
 	private CloseReason closeReason = CloseReason.TIMEOUT;
 
 	/**
-	 * Usually connectors are instantiated by their engine only, not by the
-	 * application.
+	 * creates a new TCP connector for the passed engine using the passed 
+	 * client socket. Usually connectors are instantiated by their engine
+	 * only, not by the application.
 	 * @param aEngine
 	 * @param aClientSocket
 	 */
@@ -101,7 +102,7 @@ public class TCPConnector extends BaseConnector {
 		private WebSocketConnector connector = null;
 
 		/**
-		 *
+		 * Creates the new socket listener thread for this connector.
 		 * @param aConnector
 		 */
 		public ClientProcessor(WebSocketConnector aConnector) {
@@ -203,6 +204,7 @@ public class TCPConnector extends BaseConnector {
 	@Override
 	public String toString() {
 		String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
+		// TODO: don't hard code. At least use Config field here.
 		String lUsername = getString("org.jWebSocket.plugins.system.username");
 		if (lUsername != null) {
 			lRes += " (" + lUsername + ")";

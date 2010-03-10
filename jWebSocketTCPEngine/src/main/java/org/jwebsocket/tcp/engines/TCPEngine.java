@@ -63,7 +63,6 @@ public class TCPEngine extends BaseEngine {
 		super(aId);
 		listenerPort = aPort;
 		sessionTimeout = aSessionTimeout;
-//		startEngine();
 	}
 
 	@Override
@@ -256,7 +255,8 @@ public class TCPEngine extends BaseEngine {
 		private WebSocketEngine engine = null;
 
 		/**
-		 *
+		 * Creates the server socket listener for new
+		 * incoming socket connections.
 		 * @param aEngine
 		 */
 		public EngineListener(WebSocketEngine aEngine) {

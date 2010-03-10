@@ -214,8 +214,7 @@ public class TokenServer extends BaseServer {
 	 */
 	public void sendToken(String aEngineId, String aConnectorId, Token aToken) {
 		// TODO: return meaningful result here.
-		WebSocketConnector lTargetConnector =
-			getConnector(aEngineId, aConnectorId);
+		WebSocketConnector lTargetConnector = getConnector(aEngineId, aConnectorId);
 		if (lTargetConnector != null) {
 			if (lTargetConnector.getBool(VAR_IS_TOKENSERVER)) {
 				if (log.isDebugEnabled()) {
@@ -272,7 +271,8 @@ public class TokenServer extends BaseServer {
 	}
 
 	/**
-	 * Broadcasts to all connector
+	 * Broadcasts the passed token to all token based connectors of the underlying
+	 * engines.
 	 * @param aToken
 	 */
 	public void broadcastToken(Token aToken) {
@@ -311,24 +311,5 @@ public class TokenServer extends BaseServer {
 	 */
 	public TokenPlugInChain getPlugInChain() {
 		return plugInChain;
-	}
-
-	/**
-	 * 
-	 * @param aEngineId
-	 * @param aConnectorId
-	 * @return
-	 */
-	public WebSocketConnector getConnector(String aEngineId, String aConnectorId) {
-		for (WebSocketEngine lEngine : getEngines().values()) {
-			if (aEngineId == null || aEngineId.equals(lEngine.getId())) {
-				for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
-					if (aConnectorId != null && aConnectorId.equals(lConnector.getId())) {
-						return lConnector;
-					}
-				}
-			}
-		}
-		return null;
 	}
 }
