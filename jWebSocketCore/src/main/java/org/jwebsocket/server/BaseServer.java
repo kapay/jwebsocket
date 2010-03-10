@@ -215,11 +215,63 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
+	 * Returns the connector identified by it's connector-id or <tt>null</tt>
+	 * if no connector with that id could be found. This method iterates
+	 * through all embedded engines.
+	 * @param aId
+	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
+	 */
+	public WebSocketConnector getConnector(String aId) {
+		for (WebSocketEngine lEngine : engines.values()) {
+			WebSocketConnector lConnector = lEngine.getConnectors().get(aId);
+			if (lConnector != null) {
+				return lConnector;
+			}
+		}
+		return null;
+
+	}
+
+	/**
+	 * Returns the connector identified by it's connector-id or <tt>null</tt> if
+	 * no connector with that id could be found. Only the connectors of the
+	 * engine identified by the passed engine are considered. If not engine
+	 * with that id could be found <tt>null</tt> is returned.
+	 * @param aEngine
+	 * @param aId
+	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
+	 */
+	public WebSocketConnector getConnector(String aEngine, String aId) {
+		WebSocketEngine lEngine = engines.get(aEngine);
+		if (lEngine != null) {
+			return lEngine.getConnectors().get(aId);
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the connector identified by it's connector-id or <tt>null</tt> if
+	 * no connector with that id could be found. Only the connectors of the
+	 * passed engine are considered. If no engine is passed <tt>null</tt> is
+	 * returned.
+	 * @param aEngine
+	 * @param aId
+	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
+	 */
+	public WebSocketConnector getConnector(WebSocketEngine aEngine, String aId) {
+		if (aEngine != null) {
+			return aEngine.getConnectors().get(aId);
+		}
+		return null;
+	}
+
+	/**
 	 * Returns the unique id of the server.
-	 * @return the id
+	 * @return Id of this server instance.
 	 */
 	@Override
 	public String getId() {
 		return id;
+
 	}
 }
