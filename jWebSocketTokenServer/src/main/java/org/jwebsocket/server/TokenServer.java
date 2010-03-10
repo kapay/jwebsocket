@@ -246,7 +246,7 @@ public class TokenServer extends BaseServer {
 		}
 		HashMap lFilter = new HashMap();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
-		for (WebSocketConnector lConnector : selectConnectors(lFilter)) {
+		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector) || aBroadcastOptions.isSenderIncluded()) {
 				sendPacket(lConnector, tokenToPacket(lConnector, aToken));
 			}
@@ -264,7 +264,7 @@ public class TokenServer extends BaseServer {
 		}
 		HashMap lFilter = new HashMap();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
-		for (WebSocketConnector lConnector : selectConnectors(lFilter)) {
+		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector)) {
 				sendPacket(lConnector, tokenToPacket(lConnector, aToken));
 			}
@@ -281,7 +281,7 @@ public class TokenServer extends BaseServer {
 		}
 		HashMap lFilter = new HashMap();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
-		for (WebSocketConnector lConnector : selectConnectors(lFilter)) {
+		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			sendPacket(lConnector, tokenToPacket(lConnector, aToken));
 		}
 	}
@@ -320,9 +320,9 @@ public class TokenServer extends BaseServer {
 	 * @return
 	 */
 	public WebSocketConnector getConnector(String aEngineId, String aConnectorId) {
-		for (WebSocketEngine lEngine : getEngines()) {
+		for (WebSocketEngine lEngine : getEngines().values()) {
 			if (aEngineId == null || aEngineId.equals(lEngine.getId())) {
-				for (WebSocketConnector lConnector : lEngine.getConnectors()) {
+				for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
 					if (aConnectorId != null && aConnectorId.equals(lConnector.getId())) {
 						return lConnector;
 					}

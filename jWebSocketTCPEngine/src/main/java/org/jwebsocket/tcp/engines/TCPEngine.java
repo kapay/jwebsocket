@@ -296,7 +296,7 @@ public class TCPEngine extends BaseEngine {
 						// log.debug("Setting header to engine...");
 						connector.setHeader(header);
 						// log.debug("Adding connector to engine...");
-						getConnectors().add(connector);
+						getConnectors().put(connector.getId(), connector);
 						if (log.isDebugEnabled()) {
 							log.debug("Starting connector...");
 						}

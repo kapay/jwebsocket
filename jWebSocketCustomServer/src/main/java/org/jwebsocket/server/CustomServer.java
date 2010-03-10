@@ -17,12 +17,15 @@ package org.jwebsocket.server;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.config.Config;
+import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.plugins.PlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.BasePlugInChain;
+import org.jwebsocket.plugins.PlugInResponse;
 
 /**
  *
@@ -34,7 +37,8 @@ public class CustomServer extends BaseServer {
 	private BasePlugInChain plugInChain = null;
 
 	/**
-	 *
+	 * Creates a new instance of the CustomeServer. The custom server is a
+	 * low-level data packet handler which is provided rather as an example
 	 *
 	 * @param aId
 	 */
@@ -48,8 +52,21 @@ public class CustomServer extends BaseServer {
 		if (log.isDebugEnabled()) {
 			log.debug("Processing data packet '" + aDataPacket.getUTF8() + "'...");
 		}
-		// TODO: process the packet in a meaningful way - don't just broadcast to all!
-		// broadcastPacket(aDataPacket);
+		RequestHeader lHeader = aConnector.getHeader();
+		String lSubProt = (lHeader != null ? lHeader.getSubProtocol(null) : null);
+
+		// the custom server here answers with a simple echo packet.
+		// this section can be used as an example for your own protol handling.
+		if (lSubProt != null && lSubProt.equals(Config.SUB_PROT_CUSTOM)) {
+			// send a modified echo packet back to sender.
+			aDataPacket.setUTF8("[echo from jWebSocket v" + Config.VERSION_STR + "] " + aDataPacket.getUTF8());
+			sendPacket(aConnector, aDataPacket);
+			// you also could broadcast the packet here...
+			// broadcastPacket(aDataPacket);
+			// ...or forward it to your custom specific plug-in chain
+			// PlugInResponse response = new PlugInResponse();
+			// plugInChain.processPacket(response, aConnector, aDataPacket);
+		}
 	}
 
 	/**

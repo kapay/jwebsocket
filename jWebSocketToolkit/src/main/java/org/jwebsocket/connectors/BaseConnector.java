@@ -17,6 +17,7 @@ package org.jwebsocket.connectors;
 
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.Map;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
@@ -33,16 +34,16 @@ import org.jwebsocket.kit.RequestHeader;
 public class BaseConnector implements WebSocketConnector {
 
 	/**
-	 *
+	 * Default name for shared custom variable <tt>username</tt>.
 	 */
 	public final static String VAR_USERNAME = "$username";
 	/**
-	 *
+	 * Default name for shared custom variable <tt>sessionid</tt>.
 	 */
 	public final static String VAR_SESSIONID = "$sessionId";
 	private WebSocketEngine engine = null;
 	private RequestHeader header = null;
-	private HashMap<String, Object> customVars = new HashMap<String, Object>();
+	private Map<String, Object> customVars = new HashMap<String, Object>();
 
 	/**
 	 * 

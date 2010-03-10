@@ -350,7 +350,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 		connector = new NettyConnector(engine, this);
 		connector.setHeader(header);
 
-		engine.getConnectors().add(connector);
+		engine.getConnectors().put(connector.getId(), connector);
 		if (log.isDebugEnabled()) {
 			log.debug("Starting connector...");
 		}

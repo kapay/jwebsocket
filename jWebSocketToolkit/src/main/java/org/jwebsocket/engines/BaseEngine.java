@@ -16,8 +16,8 @@
 package org.jwebsocket.engines;
 
 import java.util.Collections;
-import java.util.List;
-import javolution.util.FastList;
+import java.util.Map;
+import javolution.util.FastMap;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
@@ -35,8 +35,8 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class BaseEngine implements WebSocketEngine {
 
-	private final List<WebSocketServer> servers = new FastList<WebSocketServer>();
-	private final List<WebSocketConnector> connectors = new FastList<WebSocketConnector>();
+	private final Map<String, WebSocketServer> servers = new FastMap<String, WebSocketServer>();
+	private final Map<String, WebSocketConnector> connectors = new FastMap<String, WebSocketConnector>();
 	private int sessionTimeout = Config.DEFAULT_TIMEOUT;
 	private String id = "";
 
@@ -59,7 +59,7 @@ public class BaseEngine implements WebSocketEngine {
 	public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
 		try {
 			// stop all connectors
-			for (WebSocketConnector connector : getConnectors()) {
+			for (WebSocketConnector connector : getConnectors().values()) {
 				connector.stopConnector(aCloseReason);
 			}
 		} catch (Exception ex) {
@@ -73,7 +73,7 @@ public class BaseEngine implements WebSocketEngine {
 	@Override
 	public void engineStarted() {
 		// notify servers that the engine has started
-		for (WebSocketServer lServer : servers) {
+		for (WebSocketServer lServer : servers.values()) {
 			lServer.engineStarted(this);
 		}
 	}
@@ -81,7 +81,7 @@ public class BaseEngine implements WebSocketEngine {
 	@Override
 	public void engineStopped() {
 		// notify servers that the engine has stopped
-		for (WebSocketServer lServer : servers) {
+		for (WebSocketServer lServer : servers.values()) {
 			lServer.engineStopped(this);
 		}
 	}
@@ -89,7 +89,7 @@ public class BaseEngine implements WebSocketEngine {
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		// notify servers that a connector has started
-		for (WebSocketServer lServer : servers) {
+		for (WebSocketServer lServer : servers.values()) {
 			lServer.connectorStarted(aConnector);
 		}
 	}
@@ -97,11 +97,11 @@ public class BaseEngine implements WebSocketEngine {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// notify servers that a connector has stopped
-		for (WebSocketServer lServer : servers) {
+		for (WebSocketServer lServer : servers.values()) {
 			lServer.connectorStopped(aConnector, aCloseReason);
 		}
 		// once a connector stopped remove it from the list of connectors
-		getConnectors().remove(aConnector);
+		getConnectors().remove(aConnector.getId());
 	}
 
 	@Override
@@ -111,8 +111,8 @@ public class BaseEngine implements WebSocketEngine {
 
 	@Override
 	public void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
-		List<WebSocketServer> lServers = getServers();
-		for (WebSocketServer lServer : lServers) {
+		Map<String, WebSocketServer> lServers = getServers();
+		for (WebSocketServer lServer : lServers.values()) {
 			lServer.processPacket(this, aConnector, aDataPacket);
 		}
 	}
@@ -124,14 +124,14 @@ public class BaseEngine implements WebSocketEngine {
 
 	@Override
 	public void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket) {
-		for (WebSocketConnector connector : connectors) {
+		for (WebSocketConnector connector : connectors.values()) {
 			connector.sendPacket(aDataPacket);
 		}
 	}
 
 	@Override
 	public void removeConnector(WebSocketConnector aConnector) {
-		connectors.remove(aConnector);
+		connectors.remove(aConnector.getId());
 	}
 
 	@Override
@@ -145,13 +145,13 @@ public class BaseEngine implements WebSocketEngine {
 	}
 
 	@Override
-	public List<WebSocketConnector> getConnectors() {
+	public Map<String, WebSocketConnector> getConnectors() {
 		return connectors;
 	}
 
 	@Override
 	public WebSocketConnector getConnectorByRemotePort(int aRemotePort) {
-		for (WebSocketConnector lConnector : getConnectors()) {
+		for (WebSocketConnector lConnector : getConnectors().values()) {
 			if (lConnector.getRemotePort() == aRemotePort) {
 				return lConnector;
 			}
@@ -160,18 +160,18 @@ public class BaseEngine implements WebSocketEngine {
 	}
 
 	@Override
-	public List<WebSocketServer> getServers() {
-		return Collections.unmodifiableList(servers);
+	public Map<String, WebSocketServer> getServers() {
+		return Collections.unmodifiableMap(servers);
 	}
 
 	@Override
 	public void addServer(WebSocketServer aServer) {
-		this.servers.add(aServer);
+		this.servers.put(aServer.getId(), aServer);
 	}
 
 	@Override
 	public void removeServer(WebSocketServer aServer) {
-		this.servers.remove(aServer);
+		this.servers.remove(aServer.getId());
 	}
 
 	/**

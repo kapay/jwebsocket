@@ -29,6 +29,7 @@ public class Logging {
 
 	private static PatternLayout layout = null;
 	private static ConsoleAppender consoleAppender = null;
+	private static Level logLevel = Level.DEBUG;
 
 	// TODO: Load the conversion pattern and the logging target from a configuration file (e.g. jWebSocket.xml)
 	/**
@@ -47,20 +48,31 @@ public class Logging {
 		}
 	}
 
+	/**
+	 * Initializes the jWebSocket logging system with the given log level.
+	 * All subsequently instantiated class specific loggers will use this
+	 * setting.
+	 * @param aLogLevel
+	 */
 	public static void initLogs(String aLogLevel) {
+		logLevel = Level.toLevel(aLogLevel);
 		checkLogAppender();
 	}
 
 	/**
-	 * @return the appLogger
+	 * Returns a logger for a certain class by using the jWebSocket settings
+	 * for logging and ignoring inherited log4j settings.
+	 * @param aClass
+	 * @return Logger the new logger for the given class.
 	 */
 	public static Logger getLogger(Class aClass) {
 		checkLogAppender();
 		Logger logger = Logger.getLogger(aClass);
 		logger.addAppender(consoleAppender);
+		// don't inherit global log4j settings, we intend to configure that
+		// in our own jWebSocket.xml config file.
 		logger.setAdditivity(false);
-		logger.setLevel(Level.DEBUG);
-		logger.info("Got Logger for " + aClass.getName() + ".");
+		logger.setLevel(logLevel);
 		return logger;
 	}
 }

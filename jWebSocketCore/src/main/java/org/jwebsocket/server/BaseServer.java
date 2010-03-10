@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javolution.util.FastList;
+import javolution.util.FastMap;
 
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
@@ -36,7 +36,7 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class BaseServer implements WebSocketServer {
 
-	private FastList<WebSocketEngine> engines = null;
+	private FastMap<String, WebSocketEngine> engines = null;
 	private String id = null;
 
 	/**s
@@ -46,25 +46,24 @@ public class BaseServer implements WebSocketServer {
 	 */
 	public BaseServer(String aId) {
 		id = aId;
-		engines = new FastList<WebSocketEngine>();
+		engines = new FastMap<String, WebSocketEngine>();
 	}
 
 	@Override
 	public void addEngine(WebSocketEngine aEngine) {
-		engines.add(aEngine);
+		engines.put(aEngine.getId(), aEngine);
 		aEngine.addServer(this);
 	}
 
 	@Override
 	public void removeEngine(WebSocketEngine aEngine) {
-		engines.remove(aEngine);
+		engines.remove(aEngine.getId());
 		aEngine.removeServer(this);
-
 	}
 
 	@Override
 	public void startServer()
-			throws WebSocketException {
+		throws WebSocketException {
 		/*
 		for (WebSocketEngine lEngine : engines) {
 		if( !lEngine.isAlive() ) {
@@ -91,7 +90,7 @@ public class BaseServer implements WebSocketServer {
 
 	@Override
 	public void stopServer()
-			throws WebSocketException {
+		throws WebSocketException {
 		/*
 		for (WebSocketEngine lEngine : engines) {
 		if( lEngine.isAlive() ) {
@@ -144,8 +143,8 @@ public class BaseServer implements WebSocketServer {
 
 	@Override
 	public void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket,
-			BroadcastOptions aBroadcastOptions) {
-		for (WebSocketConnector lConnector : getAllConnectors()) {
+		BroadcastOptions aBroadcastOptions) {
+		for (WebSocketConnector lConnector : getAllConnectors().values()) {
 			if (!aSource.equals(lConnector) || aBroadcastOptions.isSenderIncluded()) {
 				sendPacket(lConnector, aDataPacket);
 			}
@@ -155,8 +154,8 @@ public class BaseServer implements WebSocketServer {
 	/**
 	 * @return the engines
 	 */
-	public List<WebSocketEngine> getEngines() {
-		return (engines != null ? Collections.unmodifiableList(engines) : null);
+	public Map<String, WebSocketEngine> getEngines() {
+		return (engines != null ? Collections.unmodifiableMap(engines) : null);
 	}
 
 	/**
@@ -164,20 +163,20 @@ public class BaseServer implements WebSocketServer {
 	 * @param aEngine
 	 * @return the engines
 	 */
-	public List<WebSocketConnector> getConnectors(WebSocketEngine aEngine) {
-		return Collections.unmodifiableList(aEngine.getConnectors());
+	public Map<String, WebSocketConnector> getConnectors(WebSocketEngine aEngine) {
+		return Collections.unmodifiableMap(aEngine.getConnectors());
 	}
 
 	/**
 	 * returns all connectors of all engines connected to the server.
 	 * @return the engines
 	 */
-	public List<WebSocketConnector> getAllConnectors() {
-		ArrayList<WebSocketConnector> clients = new ArrayList<WebSocketConnector>();
-		for (WebSocketEngine lEngine : engines) {
-			clients.addAll(lEngine.getConnectors());
+	public Map<String, WebSocketConnector> getAllConnectors() {
+		FastMap<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
+		for (WebSocketEngine lEngine : engines.values()) {
+			lClients.putAll(lEngine.getConnectors());
 		}
-		return Collections.unmodifiableList(clients);
+		return Collections.unmodifiableMap(lClients);
 	}
 
 	/**
@@ -185,10 +184,10 @@ public class BaseServer implements WebSocketServer {
 	 * @param aFilter
 	 * @return
 	 */
-	public List<WebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
-		ArrayList<WebSocketConnector> clients = new ArrayList<WebSocketConnector>();
-		for (WebSocketEngine lEngine : engines) {
-			for (WebSocketConnector lConnector : lEngine.getConnectors()) {
+	public Map<String, WebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
+		Map<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
+		for (WebSocketEngine lEngine : engines.values()) {
+			for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
 				boolean lMatch = true;
 				for (String lKey : aFilter.keySet()) {
 					Object lVarVal = lConnector.getVar(lKey);
@@ -208,11 +207,11 @@ public class BaseServer implements WebSocketServer {
 					}
 				}
 				if (lMatch) {
-					clients.add(lConnector);
+					lClients.put(lConnector.getId(), lConnector);
 				}
 			}
 		}
-		return Collections.unmodifiableList(clients);
+		return Collections.unmodifiableMap(lClients);
 	}
 
 	/**
@@ -223,5 +222,4 @@ public class BaseServer implements WebSocketServer {
 	public String getId() {
 		return id;
 	}
-
 }

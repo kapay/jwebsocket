@@ -74,17 +74,21 @@ public abstract class Config {
 	public static int MAX_TIMEOUT = 3600000;
 
 	/**
-	 * JSON Sub Protocol
+	 * JSON sub protocol
 	 */
 	public final static String SUB_PROT_JSON = "json";
 	/**
-	 * CSV Sub Protocol
+	 * CSV sub protocol
 	 */
 	public final static String SUB_PROT_CSV = "csv";
 	/**
-	 * XML Sub Protocol
+	 * XML sub protocol
 	 */
 	public final static String SUB_PROT_XML = "xml";
+	/**
+	 * Custom specfic sub protocol
+	 */
+	public final static String SUB_PROT_CUSTOM = "custom";
 	/**
 	 * Default sub protocol if not explicitely specified by client (json).
 	 */

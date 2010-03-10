@@ -16,6 +16,7 @@
 package org.jwebsocket.api;
 
 import java.util.List;
+import java.util.Map;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 
@@ -80,12 +81,12 @@ public interface WebSocketEngine {
 	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
 	/**
-	 * Returns the list of clients connected to this engine. Please consider
+	 * Returns the map of clients connected to this engine. Please consider
 	 * that a server can support multiple engines. This method only returns
 	 * the clients of this engine.
 	 * @return the connector clients
 	 */
-	List<WebSocketConnector> getConnectors();
+	Map<String, WebSocketConnector> getConnectors();
 
 	/**
 	 * Returns the TCP connector identified by its remote port number or
@@ -141,7 +142,7 @@ public interface WebSocketEngine {
 	 * manipulated by the application.
 	 * @return List of servers bound to the engine.
 	 */
-	List<WebSocketServer> getServers();
+	Map<String, WebSocketServer> getServers();
 
 	/**
 	 * Registers a server at the engine so that the engine is able to notify
