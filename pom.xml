@@ -8,8 +8,6 @@
     <version>0.7.0</version>
     <description>Parent project for jWebSocket</description>
     <modules>
-        <module>jWebSocketAppServer</module>
-        <module>jWebSocketClient</module>
         <module>jWebSocketCluster</module>
         <module>jWebSocketCore</module>
         <module>jWebSocketServer</module>
@@ -21,6 +19,7 @@
         <module>jWebSocketTCPEngine</module>
         <module>jWebSocketTokenServer</module>
         <module>jWebSocketToolkit</module>
+        <module>jWebSocketAppServer</module>
   </modules>
 
     <build>
