@@ -24,14 +24,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<outputDirectory>../jWebSocketExecutables</outputDirectory>
-<!--
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-						</manifest>
-					</archive>
--->
+					<outputDirectory>${project.build.directory}/../../jWebSocketExecutables</outputDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
