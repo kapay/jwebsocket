@@ -25,6 +25,7 @@ import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jwebsocket.logging.Logging;
 
@@ -41,9 +42,10 @@ public class NettyEngine extends BaseEngine {
 
     private static Logger log = Logging.getLogger(NettyEngine.class);
     private int listenerPort = 8787;
+    //TODO: need to use this timeout!!
     private int sessionTimeout = 120000;
     private volatile boolean isRunning = false;
-    private static final ChannelGroup allChannels = new DefaultChannelGroup("time-server");
+    private static final ChannelGroup allChannels = new DefaultChannelGroup("jWebSocket-NettyEngine");
 
     /**
      * Constructor of the Netty based engine. The port and the default session
@@ -67,7 +69,7 @@ public class NettyEngine extends BaseEngine {
     public void startEngine()
             throws WebSocketException {
         if (log.isDebugEnabled()) {
-            log.debug("Starting TCP engine...");
+            log.debug("Starting Netty engine...");
         }
         // Configure the server.
         //TODO: figure out more on how advanced we can configure
@@ -90,7 +92,14 @@ public class NettyEngine extends BaseEngine {
         isRunning = true;
 
         if (log.isInfoEnabled()) {
-            log.info("TCP engine started.");
+            log.info("Netty engine started.");
+        }
+        //close the engine 
+        if (!isRunning) {
+        	ChannelGroupFuture future = allChannels.close();
+            future.awaitUninterruptibly();
+            channel.getFactory().releaseExternalResources();
+            engineStopped();
         }
     }
 
@@ -100,7 +109,9 @@ public class NettyEngine extends BaseEngine {
     @Override
     public void stopEngine(CloseReason aCloseReason)
             throws WebSocketException {
-        log.debug("Stopping TCP engine...");
+        log.debug("Stopping Netty engine...");
+        isRunning = false;
+        super.stopEngine(aCloseReason);
 
     }
 
@@ -127,7 +138,10 @@ public class NettyEngine extends BaseEngine {
      */
     @Override
     public boolean isAlive() {
-        // TODO: Check isAlive state of TCPEngine
-        return true;
+    	if (isRunning) {
+    		return true;
+    	} else {
+    		return false;
+    	}
     }
 }

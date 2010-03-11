@@ -14,7 +14,11 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.netty.connectors;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+
 import org.apache.log4j.Logger;
+import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.connectors.BaseConnector;
@@ -23,18 +27,20 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.netty.engines.NettyEngineHandler;
 
 /**
- * Netty based implementation of the {@code BaseConnector}. 
+ * Netty based implementation of the {@code BaseConnector}.
+ * 
  * @author puran
  * @version $Id$
  */
 public class NettyConnector extends BaseConnector {
 
 	private static Logger log = Logging.getLogger(NettyConnector.class);
-	
+
 	private NettyEngineHandler handler = null;
+
 	/**
-	 * The private constructor, netty connector objects are created using 
-	 * static factory method:
+	 * The private constructor, netty connector objects are created using static
+	 * factory method:
 	 * <tt>getNettyConnector({@code WebSocketEngine}, {@code ChannelHandlerContext})</tt>
 	 * 
 	 * @param theEngine
@@ -48,16 +54,23 @@ public class NettyConnector extends BaseConnector {
 		this.handler = theHandler;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void startConnector() {
 		if (log.isDebugEnabled()) {
 			log.debug("Starting Netty connector...");
 		}
+		// DO CONNECTOR SPECIFIC INITIALIZATION HERE....
 		if (log.isInfoEnabled()) {
-			log.info("Started Netty connector on port.");
+			log.info("Started Netty connector on port" + getRemotePort() + ".");
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void stopConnector(CloseReason aCloseReason) {
 		if (log.isDebugEnabled()) {
@@ -71,13 +84,41 @@ public class NettyConnector extends BaseConnector {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getRemotePort() {
+		InetSocketAddress address = (InetSocketAddress) handler
+				.getChannelHandlerContext().getChannel().getRemoteAddress();
+		return address.getPort();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public InetAddress getRemoteHost() {
+		InetSocketAddress address = (InetSocketAddress) handler
+				.getChannelHandlerContext().getChannel().getRemoteAddress();
+		return address.getAddress();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void processPacket(WebSocketPaket aDataPacket) {
 		// forward the data packet to the engine
 		getEngine().processPacket(this, aDataPacket);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void sendPacket(WebSocketPaket aDataPacket) {
+		handler.getChannelHandlerContext().getChannel().write(
+				new DefaultWebSocketFrame(aDataPacket.getString()));
 	}
 }

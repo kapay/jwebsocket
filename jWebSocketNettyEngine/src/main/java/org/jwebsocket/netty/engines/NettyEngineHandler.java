@@ -14,6 +14,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.netty.engines;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelEvent;
@@ -40,6 +43,7 @@ import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameEncoder;
 import org.jboss.netty.util.CharsetUtil;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.Config;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.logging.Logging;
@@ -60,7 +64,8 @@ import org.jwebsocket.netty.connectors.NettyConnector;
  * </p>
  * 
  * @author puran
- * @version $Id$
+ * @version $Id: NettyEngineHandler.java 209 2010-03-10 14:17:26Z
+ *          fivefeetfurther $
  */
 public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 
@@ -72,6 +77,8 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 
 	private ChannelHandlerContext context = null;
 
+	private static final String CONTENT_LENGTH = "Content-Length";
+
 	public NettyEngineHandler(NettyEngine aEngine) {
 		this.engine = aEngine;
 	}
@@ -82,6 +89,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelBound(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
+		this.context = ctx;
 		super.channelBound(ctx, e);
 	}
 
@@ -91,6 +99,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
+		this.context = ctx;
 		super.channelClosed(ctx, e);
 	}
 
@@ -100,6 +109,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
+		this.context = ctx;
 		super.channelConnected(ctx, e);
 	}
 
@@ -109,8 +119,9 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelDisconnected(ChannelHandlerContext ctx,
 			ChannelStateEvent e) throws Exception {
+		this.context = ctx;
 		super.channelDisconnected(ctx, e);
-		engine.engineStopped();
+		engine.connectorStopped(connector, CloseReason.CLIENT);
 	}
 
 	/**
@@ -119,6 +130,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelInterestChanged(ChannelHandlerContext ctx,
 			ChannelStateEvent e) throws Exception {
+		this.context = ctx;
 		super.channelInterestChanged(ctx, e);
 	}
 
@@ -128,6 +140,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
+		this.context = ctx;
 		super.channelOpen(ctx, e);
 	}
 
@@ -137,6 +150,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelUnbound(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
+		this.context = ctx;
 		super.channelUnbound(ctx, e);
 	}
 
@@ -146,6 +160,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void childChannelClosed(ChannelHandlerContext ctx,
 			ChildChannelStateEvent e) throws Exception {
+		this.context = ctx;
 		super.childChannelClosed(ctx, e);
 	}
 
@@ -155,6 +170,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void childChannelOpen(ChannelHandlerContext ctx,
 			ChildChannelStateEvent e) throws Exception {
+		this.context = ctx;
 		super.childChannelOpen(ctx, e);
 	}
 
@@ -164,6 +180,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 			throws Exception {
+		this.context = ctx;
 		super.exceptionCaught(ctx, e);
 	}
 
@@ -171,9 +188,10 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void handleUpstream(ChannelHandlerContext arg0, ChannelEvent arg1)
+	public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent arg1)
 			throws Exception {
-		super.handleUpstream(arg0, arg1);
+		this.context = ctx;
+		super.handleUpstream(ctx, arg1);
 	}
 
 	/**
@@ -183,6 +201,9 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
 		this.context = ctx;
+		if (log.isDebugEnabled()) {
+			log.debug("message received in the engine handler");
+		}
 		Object msg = e.getMessage();
 		if (msg instanceof HttpRequest) {
 			handleHttpRequest(ctx, (HttpRequest) msg);
@@ -217,11 +238,34 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 		}
 	}
 
+	/**
+	 * Check if the request header has Keep-Alive
+	 * 
+	 * @param req
+	 *            the http request object
+	 * @return {@code true} if keep-alive is set in the header {@code false}
+	 *         otherwise
+	 */
 	private boolean isKeepAlive(HttpRequest req) {
-		return false;
+		String keepAlive = req.getHeader(HttpHeaders.Values.KEEP_ALIVE);
+		if (keepAlive != null && keepAlive.length() > 0) {
+			return true;
+		} else {
+			// TODO: Keep-Alive value is like 'timeout=15, max=500'
+			return false;
+		}
 	}
 
+	/**
+	 * Set the content length in the response
+	 * 
+	 * @param res
+	 *            the http response object
+	 * @param readableBytes
+	 *            the length of the bytes
+	 */
 	private void setContentLength(HttpResponse res, int readableBytes) {
+		res.setHeader(CONTENT_LENGTH, readableBytes);
 	}
 
 	/**
@@ -279,7 +323,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 			p.replace("encoder", "wsencoder", new WebSocketFrameEncoder());
 
 			// initialize the connector
-			initializeConnector(ctx, req);
+			connector = initializeConnector(ctx, req);
 
 			return;
 		}
@@ -325,17 +369,10 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	 * @param req
 	 *            the http request object
 	 */
-	private void initializeConnector(ChannelHandlerContext ctx, HttpRequest req) {
-		RequestHeader header = new RequestHeader();
-		header.put("args", "");
-		header.put("origin", req.getHeader(HttpHeaders.Names.ORIGIN));
-		header.put("location", getWebSocketLocation(req));
-		header.put("path", req.getUri());
+	private WebSocketConnector initializeConnector(ChannelHandlerContext ctx, HttpRequest req) {
 
-		// TODO: filter search string
-		header.put("searchString", "");
-		header.put("host", req.getHeader(HttpHeaders.Names.HOST));
-
+		RequestHeader header = getRequestHeader(req);
+		
 		// TODO: figure out how to use it with netty.
 		// set socket timeout to given amount of milliseconds
 		// check min and max timeout ranges
@@ -347,19 +384,56 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 		}
 
 		// create connector
-		connector = new NettyConnector(engine, this);
-		connector.setHeader(header);
+		WebSocketConnector theConnector = new NettyConnector(engine, this);
+		theConnector.setHeader(header);
 
-		engine.getConnectors().put(connector.getId(), connector);
-		if (log.isDebugEnabled()) {
-			log.debug("Starting connector...");
-		}
-		connector.startConnector();
-		// log.debug("Notifying server...");
-
+		engine.getConnectors().put(theConnector.getId(), theConnector);
+		theConnector.startConnector();
 		// allow descendant classes to handle connector started event
-		engine.connectorStarted(connector);
+		engine.connectorStarted(theConnector);
+		return theConnector;
 
+	}
+
+	/**
+	 * Construct the request header to save it in the connector
+	 * @param req the http request header
+	 * @return the request header
+	 */
+	private RequestHeader getRequestHeader(HttpRequest req) {
+		RequestHeader header = new RequestHeader();
+		Map<String, String> args = new HashMap<String, String>();
+		String searchString = "";
+		String path = req.getUri();
+
+		// isolate search string
+		int pos = path.indexOf(Config.PATHARG_SEPARATOR);
+		if (pos >= 0) {
+			searchString = path.substring(pos + 1);
+			if (searchString.length() > 0) {
+				String[] lArgs = searchString.split(Config.ARGARG_SEPARATOR);
+				for (int i = 0; i < lArgs.length; i++) {
+					String[] lKeyValuePair = lArgs[i].split(
+							Config.KEYVAL_SEPARATOR, 2);
+					if (lKeyValuePair.length == 2) {
+						args.put(lKeyValuePair[0], lKeyValuePair[1]);
+						if (log.isDebugEnabled()) {
+							log.debug("arg" + i + ": " + lKeyValuePair[0] + "="
+									+ lKeyValuePair[1]);
+						}
+					}
+				}
+			}
+		}
+
+		header.put("args", args);
+		header.put("origin", req.getHeader(HttpHeaders.Names.ORIGIN));
+		header.put("location", getWebSocketLocation(req));
+		header.put("path", req.getUri());
+
+		header.put("searchString", searchString);
+		header.put("host", req.getHeader(HttpHeaders.Names.HOST));
+		return header;
 	}
 
 	/**
@@ -371,9 +445,17 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 		super.writeComplete(ctx, e);
 	}
 
-	// TODO: reimplement this!!
+	/**
+	 * Returns the web socket location URL
+	 * 
+	 * @param req
+	 *            the http request object
+	 * @return the location url string
+	 */
 	private String getWebSocketLocation(HttpRequest req) {
-		return "ws://" + req.getHeader(HttpHeaders.Names.HOST);
+		String location = "ws://" + req.getHeader(HttpHeaders.Names.HOST)
+				+ req.getUri();
+		return location;
 	}
 
 	/**
