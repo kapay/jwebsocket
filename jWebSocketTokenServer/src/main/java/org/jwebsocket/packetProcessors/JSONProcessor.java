@@ -71,7 +71,7 @@ public class JSONProcessor {
 		return ("\"" + aString + "\"");
 	}
 
-	private static String collectionToJSON(Collection aCollection) {
+	private static String collectionToJSON(Collection<Object> aCollection) {
 		String lRes = "";
 		for (Object lItem : aCollection) {
 			String llRes = objectToJSON(lItem);
@@ -91,7 +91,7 @@ public class JSONProcessor {
 		} else if (aObj instanceof String) {
 			lRes = stringToJSON((String) aObj);
 		} else if (aObj instanceof Collection) {
-			lRes = collectionToJSON((Collection) aObj);
+			lRes = collectionToJSON((Collection<Object>) aObj);
 		} else {
 			lRes = "\"" + aObj.toString() + "\"";
 		}
@@ -105,9 +105,9 @@ public class JSONProcessor {
 	 */
 	public static WebSocketPaket tokenToPacket(Token aToken) {
 		String lData = "{";
-		Iterator lIterator = aToken.getKeys();
+		Iterator<String> lIterator = aToken.getKeys();
 		while (lIterator.hasNext()) {
-			String lKey = (String) lIterator.next();
+			String lKey = lIterator.next();
 			Object lVal = aToken.get(lKey);
 			lData +=
 					lKey + ":" + objectToJSON(lVal)

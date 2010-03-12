@@ -29,7 +29,7 @@ import org.jwebsocket.token.Token;
  *
  * @author aschulze
  */
-public class CSVProcessor  {
+public class CSVProcessor {
 
 	private static Logger log = Logging.getLogger(CSVProcessor.class);
 
@@ -74,7 +74,7 @@ public class CSVProcessor  {
 		return ("\"" + aString + "\"");
 	}
 
-	private static String collectionToCSV(Collection aCollection) {
+	private static String collectionToCSV(Collection<Object> aCollection) {
 		String lRes = "";
 		for (Object lItem : aCollection) {
 			String llRes = objectToCSV(lItem);
@@ -87,15 +87,14 @@ public class CSVProcessor  {
 		return lRes;
 	}
 
-
 	private static String objectToCSV(Object aObj) {
 		String lRes;
-		if( aObj == null ) {
+		if (aObj == null) {
 			lRes = "null";
 		} else if (aObj instanceof String) {
 			lRes = stringToCSV((String) aObj);
 		} else if (aObj instanceof Collection) {
-			lRes = collectionToCSV((Collection) aObj);
+			lRes = collectionToCSV((Collection<Object>) aObj);
 		} else {
 			lRes = "\"" + aObj.toString() + "\"";
 		}
@@ -109,9 +108,9 @@ public class CSVProcessor  {
 	 */
 	public static WebSocketPaket tokenToPacket(Token aToken) {
 		String lData = "";
-		Iterator lIterator = aToken.getKeys();
+		Iterator<String> lIterator = aToken.getKeys();
 		while (lIterator.hasNext()) {
-			String lKey = (String) lIterator.next();
+			String lKey = lIterator.next();
 			Object lVal = aToken.get(lKey);
 			lData +=
 				lKey + "=" + objectToCSV(lVal)

@@ -15,7 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.packetProcessors;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
@@ -47,7 +47,7 @@ public class XMLProcessor  {
 		return lRes;
 	}
 
-	private static String listToXML(List aList) {
+	private static String listToXML(Collection<Object> aCollection) {
 		// todo: implement!
 		String lRes = null;
 		return lRes;
