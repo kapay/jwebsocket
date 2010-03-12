@@ -28,7 +28,9 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
 
 /**
- *
+ * Implements the basic chain of plug-ins which is triggered by a server
+ * when data packets are received. Each data packet is pushed through the chain
+ * and can be processed by the plug-ins.
  * @author aschulze
  */
 public class BasePlugInChain implements PlugInChain {
@@ -45,16 +47,21 @@ public class BasePlugInChain implements PlugInChain {
 		server = aServer;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
 	}
 
 	/**
-	 *
 	 * @param aConnector
 	 */
 	@Override
@@ -82,7 +89,7 @@ public class BasePlugInChain implements PlugInChain {
 	 * @return
 	 */
 	@Override
-	public PlugInResponse processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+	public PlugInResponse processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		if (log.isDebugEnabled()) {
 			log.debug("Processing packet for plug-ins...");
 		}
