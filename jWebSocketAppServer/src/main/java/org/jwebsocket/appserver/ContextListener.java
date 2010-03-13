@@ -1,7 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - Context Listener for Web Applications
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//	more details.
+//	You should have received a copy of the GNU General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/>.
+//	---------------------------------------------------------------------------
 package org.jwebsocket.appserver;
 
 import javax.servlet.ServletContextEvent;
@@ -49,7 +60,7 @@ public class ContextListener implements ServletContextListener {
 			engine = new TCPEngine("tcp0", Config.DEFAULT_PORT, Config.DEFAULT_TIMEOUT);
 			engine.startEngine();
 		} catch (Exception ex) {
-			System.out.println("Error instantating engine: " + ex.getMessage());
+			log.error("Error instantating engine: " + ex.getMessage());
 			return;
 		}
 
@@ -74,7 +85,7 @@ public class ContextListener implements ServletContextListener {
 			}
 			tokenServer.startServer();
 		} catch (Exception ex) {
-			System.out.println("Error instantiating TokenServer: " + ex.getMessage());
+			log.error("Error instantiating TokenServer: " + ex.getMessage());
 		}
 
 		// create the custom server (based on the TCP engine as well)
@@ -93,7 +104,7 @@ public class ContextListener implements ServletContextListener {
 			}
 			customServer.startServer();
 		} catch (Exception ex) {
-			System.out.println("Error instantating CustomServer: " + ex.getMessage());
+			log.error("Error instantating CustomServer: " + ex.getMessage());
 		}
 	}
 
