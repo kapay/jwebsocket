@@ -243,7 +243,7 @@ public class TokenServer extends BaseServer {
 		if (log.isDebugEnabled()) {
 			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		}
-		HashMap lFilter = new HashMap();
+		HashMap<String, Object> lFilter = new HashMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector) || aBroadcastOptions.isSenderIncluded()) {
@@ -261,7 +261,7 @@ public class TokenServer extends BaseServer {
 		if (log.isDebugEnabled()) {
 			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		}
-		HashMap lFilter = new HashMap();
+		HashMap<String, Object> lFilter = new HashMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector)) {
@@ -279,7 +279,7 @@ public class TokenServer extends BaseServer {
 		if (log.isDebugEnabled()) {
 			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		}
-		HashMap lFilter = new HashMap();
+		HashMap<String, Object> lFilter = new HashMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			sendPacket(lConnector, tokenToPacket(lConnector, aToken));
