@@ -44,7 +44,7 @@ public class TokenServer extends BaseServer {
 	// specify shared connector variables
 	private static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
 	private TokenPlugInChain plugInChain = null;
-	private boolean isAlive = false;
+	private volatile boolean isAlive = false;
 
 	/**
 	 *
