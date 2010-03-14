@@ -97,7 +97,7 @@
 				}
 
 				// adjust this URL to your jWebSocket server
-				var lURL = jws.JWS_SERVER_URL + "/;prot=json,timeout=300000";
+				var lURL = jws.JWS_SERVER_URL + "/;prot=json,timeout=120000";
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
 				// try to establish connection to jWebSocket server
@@ -183,6 +183,13 @@
 				}
 			}
 
+			function usrKeyDnLsnr( aEvent ) {
+				// on enter in username field try to login
+				if( aEvent.keyCode == 13 ) {
+					connect();
+				}
+			}
+
 			// this is the location of this player
 			var player = {
 				loc_x: 100,
@@ -192,7 +199,7 @@
 
 			function processKeyDown( aEvent ) {
 				// here the "gaming" event is broadcasted to all other clients
-				console.log( "keydown: " + aEvent.keyCode );
+				// console.log( "keydown: " + aEvent.keyCode );
 				switch( aEvent.keyCode ) {
 					case 38: // up
 						player.loc_y -= player.speed;
@@ -224,13 +231,11 @@
 				eKeepAlive = jws.$( "schkKeepAlive" );
 
 				// check if WebSockets are supported by the browser
-				if( window.WebSocket ) {
+				if( jws.browserSupportsWebSockets() ) {
 					// instaniate new TokenClient, either JSON, CSV or XML
 					lWSC = new jws.jWebSocketJSONClient();
-					/*
+					
 					eUsername.addEventListener( "keydown", usrKeyDnLsnr, false );
-					eUsername.addEventListener( "focus", elemFocusLsnr, false );
-					 */
 					eUsername.focus();
 					eUsername.select();
 
@@ -244,7 +249,6 @@
 					eDebug.setAttribute( "disabled", "disabled" );
 					eKeepAlive.setAttribute( "disabled", "disabled" );
 					eUsername.setAttribute( "disabled", "disabled" );
-					eMessage.setAttribute( "disabled", "disabled" );
 
 					var lMsg = "Unfortunately your browser does not (yet) support WebSockets!\nPlease use a HTML 5 compliant browser!";
 					alert( lMsg );
@@ -282,7 +286,7 @@
 		are distributed to all other clients, e.g. to synchronize the location
 		of a certain player on a common playgroud.
 		This demo uses the standard broadcast and event	mechanism only which is
-		already provided by the standard jWebSocket	server.
+		already provided by jWebSocket's SystemPlugIn.
 		Currently only Google's Chrome Browser from Version 4.0.249 support HTML 5 
 		WebSockets, you can 
 		download it
@@ -306,5 +310,7 @@
 		<div id="sdivChat" class="sdivContainer"
 			 style="position:relative; height:300px; overflow:auto;">
 		</div>
+		<p>Please login to start as a green player, if other players are online they are shown in red.<br/>
+		Use the arrow keys to move your player and broadcast your move to other users.</p>
 	</body>
 </html>

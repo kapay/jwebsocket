@@ -1,0 +1,133 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="de">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>jWebSocket Quick Guide Application Server</title>
+<link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
+</head>
+
+<body>
+
+<h2>jWebSocket Server on Application Servers</h2>
+<p>This Chapter describes how to integrate the jWebSocket technology into 
+existing web applications, e.g. in Tomcat-Environments.
+This topic will be interessting for you when you intend to run the jWebSocket 
+server on production systems either embedded within an existing web application 
+or as a separate stand-alone web application.</p>
+
+
+	<h3>Prerequisities on the server</h3>
+	<p>You only need to have Tomcat 6.x running on your system and we recommend 
+	to have Java 1.6 installed.
+	It is possible but not required to use the Apache http server as Tomcat frontend 
+	together with <tt>mod_proxy</tt> or <tt>mod_jk</tt> as bridge.</p>
+	<h3>Prerequisities on the Client</h3>
+	<p>The jWebSocket client is embedded into the web application, so beside an 
+	installed HTML 5 compliant browser there 
+	is no need for certain preparations.
+<h2>Running jWebSocket Server as Stand-Alone Web Application</h2>
+<p>In the <a href="../downloads.htm">download</a> section you will find a ready-to-deploy web application 
+as a .war file which 
+has been tested for Tomcat 6.0. This web application includes the entire 
+jWebSocketServer and all required libraries. Please follow the follwing steps 
+to run it:</p>
+<ul>
+	<li>Download the <tt>jWebSocketAppServer.zip</tt> from the 
+	<a href="../downloads.htm">download</a> area.</li>
+	<li>Unpack the <tt>.zip</tt> archive with the <tt>jWebSocketAppServer.war</tt> 
+	into a temporary 
+	folder on you local harddisk.</li>
+	<li>Start Tomcat, open the Tomcat Manager at <tt>http://localhost:8080</tt> 
+	in your browser 
+	and login with your admin credentials 
+	<br>
+	(adjust host and port according to your environment).</li>
+	<li>Deploy the <tt>jWebSocketAppServer.war </tt> in Tomcat as follows:<br>
+	<br>
+	<img border="0" src="images/tomcat_deploy.jpg" width="784" height="304"><br>
+	<p class="imageFooter">Deploying jWebSocketAppServer Web Application in Tomcat 6.0</p>
+</li>
+	<li>You now can stop and re-start the web application within the Tomcat 
+	Manager as follows:<br>
+	<br>
+	<img border="0" src="images/tomcat_start_stop.jpg" width="783" height="73"><br>
+	<p class="imageFooter">Controlling jWebSocketAppServer Web Application in Tomcat 6.0</p></li>
+	<li>To run the demo website you now can simply type 
+	<tt>http://localhost:8080/jWebSocketAppServer-&lt;version&gt;</tt> in your HTML 5 compliant 
+	browser <br>
+	(please adjust the host and port according to your environment). Your 
+	browser starts the demo site and you can test the various demos.</li>
+</ul>
+<br/>
+<h2>Embedding jWebSocket Server into existing&nbsp; Web Applications</h2>
+
+<p>The jWebSocket server is provided as a single <tt>jWebSocketServer.jar</tt> file in 
+conjunction with a couple of libraries. You can download the 
+<tt>jWebSocketServer.zip</tt> in the <a href="../downloads.htm">download</a> area. 
+Simply include all <tt>.jar</tt> files provided in that <tt>.zip</tt> into your web application. Unlike the stand-alone version the initialization of the 
+embedded jWebSocket server is not done by the jWebSocketServer main class but needs to be done by the 
+existing web application. For Tomcat applications we recommend to use a context 
+listener for that purpose. The context listener method <tt>contextInitialized</tt> is 
+invoked by Tomcat's servlet engine once the web application started. The 
+<tt>contextDestroyed</tt> method is called when the web application terminates, 
+e.g. when it is stopped or undeployed. 
+These are perfect locations to put the instantiation and termination calls 
+to the jWebSocket engine.</p>
+<p>The following code snippet demonstrates how to first instantiate an engine 
+(here the TCP engine) then instantiate the server followed by the plug-in chain 
+and the various plug-ins.</p>
+<blockquote>
+<pre class="listing"><span style="font-family:" Courier New",monospace; color:#000000; white-space: pre;"><span style="color:#0000e6;">public</span> <span style="color:#0000e6;">class</span> ContextListener <span style="color:#0000e6;">implements</span> ServletContextListener {
+
+  TokenServer tokenServer = <span style="color:#0000e6;">null</span>;
+  <span style="color:#0000e6;">private</span> <span style="color:#0000e6;">static</span> Logger log = <span style="color:#0000e6;">null</span>;
+
+  <span style="color:#0000e6;">public</span> <span style="color:#0000e6;">void</span> contextInitialized(ServletContextEvent sce) {
+
+    Logging.initLogs(<span style="color:#ce7b00;">&quot;debug&quot;</span>);
+    log = Logging.getLogger(ContextListener.<span style="color:#0000e6;">class</span>);
+    <span style="color:#0000e6;">if</span> (log.isDebugEnabled()) {
+      log.debug(<span style="color:#ce7b00;">&quot;Initialising Context...&quot;</span>);
+    }
+
+    WebSocketEngine engine = <span style="color:#0000e6;">null</span>;
+    <span style="color:#0000e6;">try</span> {
+      engine = <span style="color:#0000e6;">new</span> TCPEngine(<span style="color:#ce7b00;">&quot;tcp0&quot;</span>, Config.DEFAULT_PORT, Config.DEFAULT_TIMEOUT);
+      engine.startEngine();
+    } <span style="color:#0000e6;">catch</span> (Exception ex) {
+      log.error(<span style="color:#ce7b00;">&quot;Error instantating engine: &quot;</span> + ex.getMessage());
+      <span style="color:#0000e6;">return</span>;
+    }
+
+    tokenServer = <span style="color:#0000e6;">null</span>;
+    <span style="color:#0000e6;">try</span> {
+      tokenServer = <span style="color:#0000e6;">new</span> TokenServer(<span style="color:#ce7b00;">&quot;ts0&quot;</span>);
+      TokenPlugInChain plugInChain = tokenServer.getPlugInChain();
+      tokenServer.addEngine(engine);
+      plugInChain.addPlugIn(<span style="color:#0000e6;">new</span> SystemPlugIn());
+      plugInChain.addPlugIn(<span style="color:#0000e6;">new</span> RPCPlugIn());
+      plugInChain.addPlugIn(<span style="color:#0000e6;">new</span> StreamingPlugIn());
+
+      <span style="color:#0000e6;">if</span> (log.isDebugEnabled()) {
+        log.debug(<span style="color:#ce7b00;">&quot;Starting token server...&quot;</span>);
+      }
+      tokenServer.startServer();
+    } <span style="color:#0000e6;">catch</span> (Exception ex) {
+      </span><span style="font-family:" Courier New",monospace; color:#000000; white-space: pre;">log.error</span><span style="font-family:" Courier New",monospace; color:#000000; white-space: pre;">(<span style="color:#ce7b00;">&quot;Error instantiating TokenServer: &quot;</span> + ex.getMessage());
+    }
+
+  }
+
+  <span style="color:#0000e6;">public</span> <span style="color:#0000e6;">void</span> contextDestroyed(ServletContextEvent sce) {
+    <span style="color:#0000e6;">try</span> {
+      tokenServer.stopServer();
+    } <span style="color:#0000e6;">catch</span> (WebSocketException ex) {
+      log.error(<span style="color:#ce7b00;">&quot;Stopping TokenServer: &quot;</span> + ex.getMessage());
+    }
+  }</span>
+}</pre>
+<p class="imageFooter">Integrating the jWebSocketServer into a Tomcat web application</p>
+</blockquote>
+
+</body></html>

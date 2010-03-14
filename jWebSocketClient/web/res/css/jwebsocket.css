@@ -12,6 +12,17 @@ body {
 	margin: 10px;
 }
 
+ul.noIndent {
+	margin-left: 0pt;
+	margin-bottom: 6pt;
+	padding-left: 12pt;
+	text-indent: 0pt;
+}
+
+.listing {
+	background-color:#f0f0f0;
+}
+
 h1 {
 	font-family: Arial, Helvetica, sans-serif;
 	font-weight: bold;
@@ -81,6 +92,12 @@ p {
 /*	font-size: 11pt; */
 	color: #006bb5;
 	font-weight: bold;
+}
+
+.linkDescription {
+	color: #505050;
+	font-size: 8pt;
+	font-weight: normal;
 }
 
 
@@ -177,6 +194,20 @@ input[type="button"].inpBtnEm {
 p.menulink {
 	padding: 1px;
 }
+p.imageFooter {
+	margin-top: 2px;
+	color: #505050;
+	font-size: 8pt;
+	font-weight: normal;
+}
+
+p.menuDisabled {
+	padding: 1px 10px 1px 20px;
+	background: url(../../images/bullet_grey.png) 0px 2px no-repeat;
+	background-color: white;
+	color: #808080;
+}
+
 a.menulink {
 	padding: 1px 10px 1px 20px;
 	background: url(../../images/bullet_grey.png) 0px 2px no-repeat;
@@ -216,4 +247,20 @@ a.sancBtnTop {
 }
 a.sancBtnTop:hover {
 	background-color: #006bb5;
+}
+
+
+a.emphasized {
+	font-weight: bold;
+	background-color: white;
+	color: #202020;
+}
+a.emphasized:hover {
+	background-color: #f0f0f0;
+}
+a.emphasized:active {
+	background-color: #f0f0f0;
+}
+a.emphasized:focus {
+	background-color: #f0f0f0;
 }

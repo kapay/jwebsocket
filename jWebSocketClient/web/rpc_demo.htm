@@ -144,7 +144,7 @@
 				eArgs = jws.$( "stxfMsg" );
 				eTarget = jws.$( "stxfTarget" );
 
-				if( window.WebSocket ) {
+				if( jws.browserSupportsWebSockets() ) {
 					lWSC = new jws.jWebSocketJSONClient();
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
@@ -154,6 +154,8 @@
 					jws.$( "stxfTarget" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnGranted" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnProtected" ).setAttribute( "disabled", "disabled" );
+					jws.$( "sbtnRRPC" ).setAttribute( "disabled", "disabled" );
+
 					var lMsg = "Unfortunately your browser does not (yet) support WebSockets!\nPlease use a HTML 5 compliant browser!";
 					alert( lMsg );
 					log( lMsg );

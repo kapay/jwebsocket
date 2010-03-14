@@ -1,0 +1,74 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="de">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>jWebSocket Quick Guide Embedded Server</title>
+<link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
+</head>
+
+<body>
+		<script type="text/javascript">
+			var lFrameElem = this.frameElement;
+			if( !lFrameElem ) {
+				location.replace( "index.htm?page=quickguide.htm" );
+			}
+		</script>
+
+		<h2>jWebSocket Stand-Alone Server</h2>
+<blockquote>
+	<h3>Prerequisities on the server</h3>
+	<p>The jWebSocket server is based on pure Java technology. For your server please 
+	ensure that you have at least the Java Runtime Environment (JRE) 1.5 installed. 
+	If not you can get it <a target="_blank" href="http://java.com/de/download/">
+	here <img border="0" src="../images/new_win.png"></a>. We recommend to put 
+	the path to <code>java.exe</code> into your <code>PATH</code> enviroment variable. 
+	If not, you may need to adjust the provided start batch.</p>
+	<h3>Prerequisities on the Client</h3>
+	<p>The jWebSocket client is based on pure JavaScript and does not require 
+	any browser plug-ins. It also runs from a local file system, i.e. you do not 
+	need to install any web server. However, be sure that you allow JavaScript 
+	on your Browser. Up to now (2010-02-24) only Google&#39;s Chrome from 
+	Version 4.0.249 fully supports WebSockets 
+	according to the HTML 5 standards. You can get the latest Google Chrome 4 
+	Browser 
+	<a target="_blank" href="http://www.google.com/chrome/eula.html?extra=betachannel">
+	here</a> <img border="0" src="../images/new_win.png"> or the Chrome 
+	Frame for IE 6/7/8 <a target="_blank" href="http://code.google.com/chrome/chromeframe/">
+		here</a> <img border="0" src="../images/new_win.png".</p>
+</blockquote>
+<blockquote>
+	<h3>Setup the jWebSocket Server</h3>
+	<p>To set up the jWebSocket server on your MS Windows system please....</p>
+	<ol>
+		<li>Create a folder of your choice (e.g. <code>c:\jWebSocket\server</code>).</li>
+		<li>Download the 
+		<code><a href="../downloads/jWebSockeSAtServer.zip">jWebSocketSAServer.zip</a></code> which includes the <code>jWebSocketSAServer.jar</code>, 
+		all required libs and <code>jWebSocketSAServer.bat</code> 
+		from the download section to this folder.</li>
+		<li>Start the batch either from the command shell or the Windows Explorer.<br>
+		If the path to the <code>java.exe</code> is not part of your <code>PATH</code> 
+		environment variable, please adjust the <code>jWebSocketSAServer.bat</code 
+		batch accordingly (see inline documentation 
+		in the batch).</li>
+	</ol>
+	<h3>Setup the jWebSocket Client</h3>
+	<p>To run the jWebSocket client on your MS Windows system please....</p>
+	<ol>
+		<li>Create a folder of your choice (e.g. <code>c:\jWebSocket\client</code>).</li>
+		<li>Download the <a href="../downloads/jWebSocketClient-0.6.7.zip"><code>jWebSocketClient.zip</code></a> from the download section 
+		and unzip it into this folder.</li>
+		<li>Start your browser (currently only Google&#39;s Chrome Browser and 
+		Chrome Frame for IE 6/7/8 from 
+		Version 4.0.249 fully support WebSockets).</li>
+		<li>Type <code>file:///[path/to/client/]index.htm</code> (e.g. <code>file:///c:/jWebSocket/client/index.html</code>) 
+		into the URL input field of the browser.</li>
+		<li>The browser opens the Welcome page of the jWebSocket client. You now 
+		can test the chat, fundamentals, streaming and RPC demos.</li>
+	</ol>
+	<h3>Done!</h3>
+</blockquote>
+
+		</body>
+
+</html>

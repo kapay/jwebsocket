@@ -252,7 +252,7 @@
 				eKeepAlive = jws.$( "schkKeepAlive" );
 					
 				// check if WebSockets are supported by the browser
-				if( window.WebSocket ) {
+				if( jws.browserSupportsWebSockets() ) {
 					// instaniate new TokenClient, either JSON, CSV or XML
 					lWSC = new jws.jWebSocketJSONClient();
 					// lWSC = new jws.jWebSocketCSVClient();

@@ -16,16 +16,21 @@
 
 
 // create name space "jws" for jWebSocket client
-var jws = {};
+var jws = {
 
-jws.NS_BASE = "org.jWebSocket";
+	NS_BASE: "org.jWebSocket",
 
-// some namespace global constants
-jws.CUR_TOKEN_ID = 0;
-jws.JWS_SERVER_URL = "ws://" + ( self.location.hostname ? self.location.hostname : "localhost" ) + ":8787";
+	// some namespace global constants
+	CUR_TOKEN_ID: 0,
+	JWS_SERVER_URL: "ws://" + ( self.location.hostname ? self.location.hostname : "localhost" ) + ":8787",
 
-jws.$ = function( aId ) {
-	return document.getElementById( aId );
+	$: function( aId ) {
+		return document.getElementById( aId );
+	},
+
+	browserSupportsWebSockets: function() {
+		return( window.WebSocket != null );
+	}
 };
 
 
