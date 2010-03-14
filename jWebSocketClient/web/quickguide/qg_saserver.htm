@@ -20,7 +20,7 @@
 This section describes how to use the jWebSocket Stand-Alone Server .jar on the 
 various operating systems including Windows, Unix and Linux. This topic will be 
 interessting for you when you are a developer and intend to develop new client software 
-based upon the jWebSocket Server. The <tt>jWebSocketSAServer.jar</tt>
+based upon the jWebSocket Server or if you are a tester. The <tt>jWebSocketSAServer.jar</tt>
 which includes all required libraries. The benefit is that it easily can 
 be started from the shell or command line window without any installation or special 
 configuration.</p>
@@ -54,6 +54,27 @@ may need to adjust the provided start batch.</p>
 	<br>
 	<img border="0" src="images/sa_server.jpg" width="669" height="338"></li>
 </ol>
+
+<h3>Command line arguments</h3>
+<p>These are the command line arguments interpreted by the main class of the 
+jWebSocketSAServer.jar.</p>
+<ul>
+	<li>port=[port], default 8787</li>
+	<li>prot=[json|csv|xml|custom], default=json</li>
+	<li>loglevel=[all|debug|info|error|warn]</li>
+	<li>sessiontimeout=[timeout in ms], default 120000ms = 2 min</li>
+</ul>
+<h3>jWebSocketServer.bat</h3>
+<p><br>
+For MS-Windows environments the <tt>jWebSocketServer.zip</tt> from the download area 
+includes batch file <tt>jWebSocketServer.bat</tt>.<br>
+<br>
+<code>java -jar jWebSocket.jar %1 %2 %3 %4 %5 %6</code><br>
+<br>
+From the windows command line your can call jWebSocketServer.bat with the above 
+mentioned optional arguments.<br>
+<br>
+&nbsp;</p>
 
 </body>
 
