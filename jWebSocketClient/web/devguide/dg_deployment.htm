@@ -11,15 +11,34 @@
 
 <h2>jWebSocket Deployment Process</h2>
 <p>This section describes how to deploy the jWebSocket application to a stage or 
-production system.</p>
-<p>Please refer to the Prerequisities pages.</p>
+production system. For the required tools please refer to the Prerequisities 
+page.</p>
 <p>&nbsp;</p>
 <p>The Java Docs are auto-created based upon the inline-documentation in the <tt>jWebSocketClient/javadocs</tt> folder.</p>
 <p>The files for the Quick Guide are maintained in the <tt>jWebSocketClient/quickguide</tt> folder.</p>
 <p>The files for the Developer Guide are maintained in the <tt>jWebSocketClient/devguide</tt> folder.</p>
+<h2>Process</h2>
+<p>To create a full deployment please follow the following steps:</p>
+<ol>
+	<li>Open IDE and Clean And Build the jWebSocket-Parent project<br>
+	(this creates all required .jar files of the modules in the 
+	jWebSocketExecutables folder)</li>
+	<li>Run Generate Javadoc for each jWebSocket module within the project<br>
+	(this creates all required Java documentation files in the 
+	jWebSocketClient\web\javadocs folder)</li>
+	<li>Generate the jWebSocket Server Executable by running JSmooth with 
+	jWebSocketServer-&lt;ver&gt;.jsmooth<br>
+	(this creates the jWebSocketSAServer-&lt;ver&gt;.exe in the 
+	jWebSocketDeploymentfolder)</li>
+	<li>Generate the jWebSocket Service Executable by running JSmooth with 
+	jWebSocketService-&lt;ver&gt;.jsmooth<br>
+	(this creates the jWebSocketService-&lt;ver&gt;.exe in the jWebSocketDeployment 
+	folder)</li>
+	<li>Run the CreateDownloadFiles.bat in the jWebSocketDeployment folder<br>
+	(this creates all .zip files for the download area in jWebSocketDeployment)<p>&nbsp;</p>
+	<p>&nbsp;</p></li>
+</ol>
 <p>&nbsp;</p>
-<p>&nbsp;</p>
-<p>Pending...</p>
 <p>&nbsp;</p>
 
 </body>
