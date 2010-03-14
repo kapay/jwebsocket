@@ -1,0 +1,117 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="de">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>jWebSocket Infrastructure since v0.7</title>
+<link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
+</head>
+
+<body>
+
+<h2>jWebSocket Infrastructure from Version 0.7</h2>
+<h4>New multi-engine support</h4>
+<p>With our beta version 0.7 the communication model and infrastructure has been 
+improved for several reasons. In release 1.0 we will support multiple engines 
+like our TCP socket engine as well as our future NIO engine. We further intend 
+to support third party engines like JBoss Netty, Apache Mina and the Jetty 
+server. Netty will be part of release 1.1 targeted end of march 2010. Engines 
+can be added to a server as a kind of &quot;driver&quot;. Each engine is implemented as a 
+.jar so that the final product only needs to be build with the required ones and 
+kept as small as possible. Within a web application now even &quot;normal&quot; http 
+clients can communicate with websocket clients by connecting to the same server 
+by different engines. This allows to combine existing comet or polling 
+approaches by the new websocket technology in a single solution.</p>
+<h4>Modularization and clean APIs</h4>
+<p>From now engines as well as plug-ins can be developed completely independant 
+from the server core. This openes the door for contributors and makes team-work 
+more effective because the API is not subject to changes anymore.</p>
+<h4>CustomVariables</h4>
+<p>Each connector now provides custom variables.</p>
+<p>So plug-in do no need to maintain their own connector specific data.</p>
+<h3>PacketProcessor</h3>
+<p>In the previous release 0.6 we only were able to receive LF-separated strings 
+from a client and parse them either for JSON, CSV or XML. Custom specific 
+requirements called for a more flexible model to allow an application to handle 
+arbitrary text or binary data packets. Hence release 0.7 now provides two-way 
+packet processors which allow to convert an incoming data packet into an 
+internal Java object and vice-versa. This allows </p>
+<p>The new model allow to allows the server depending </p>
+<h3>DataPacket</h3>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h3>Connector</h3>
+<p>Handles the WebSocket handshake and gets the initial request header including 
+URL args and optional header fields.</p>
+<p>Retreives a data packet and passes it to the engine.</p>
+<h3>Engine</h3>
+<p>Maintains connectors.</p>
+<p>Passes data packets from connectors to the server.</p>
+<p>Each engine can be bound to one or multiple servers.</p>
+<p>&nbsp;</p>
+<h3>TCPEngine</h3>
+<p>Supports logging</p>
+<p>&nbsp;</p>
+<h3>BaseServer</h3>
+<p>The server implements the functionality of the application.<br>
+The server gets the data packets from the underlying engine(s) as data packets. 
+For each data packet a reference is added for both the connector and the engine. 
+The server thus can access the original header which is maintained by the 
+connector and detect the selected subprotocol used for the data packet. 
+Depending on the subprotocol used for a certain packet the server has to parse 
+the packet. </p>
+<p>On server can drive multiple engines.</p>
+<p>The server does not manipulate a data packet. The server does not even know 
+anything about the content of it. Thus the server neither converts a data packet 
+before passing it to the plug-in chain nor checks a packet before sending it to 
+a client. All business logik including parsing the packets and generating 
+answers has to be implemented in the descendants of the server class, so done 
+with the TokenServer class described below. Beside the TokenServer you also can 
+implement you own Server descendant if you like to use a different data packet 
+handling.</p>
+<p>The BaseServer does not implement any plug-in support. This is done by the 
+TokenServer. If you want to implement your own packet handling with or w/o 
+plug-in support you can create a CustomServer as described below.</p>
+<h3>TokenServer</h3>
+<p>directly descends from the BaseServer.</p>
+<p>It introduces the plug-in chain</p>
+<p>Token</p>
+<p>Subprotocol Token</p>
+<p>Provides methods to generate result and exception tokens to be send to the 
+token clients.</p>
+<h3>CustomServer</h3>
+<p>If you want to implement the packet handling yourself and don't want to 
+benefit from the already provided token and plug-in support you can easily set 
+up your own CustomServer. Of course, optionally you can use the PlugInChain and 
+PlugIn base classes in your own implementation as well.</p>
+<h2>PlugIns</h2>
+<h3>IPlugIn</h3>
+<p>Just the interface specification.</p>
+<h3>BasePlugIn</h3>
+<p>Method processPacket gets a packet from the underlying connector (client) via 
+the engine, the server and the plug-in chain. A Plug-In is called from the 
+plug-in chain controller only, not from the server directly. The server 
+maintains the plug-in chain.</p>
+<h3>TokenPlugIn</h3>
+<p>Specifies an namespace for the plugin.</p>
+<p>Implements </p>
+<h2>PlugIn-Chain</h2>
+<p>The plug-in chain distributes a data packet from the server to the chain of 
+connected plug-ins.</p>
+<p>&nbsp;</p>
+<h3>IPlugInChain</h3>
+<p>Just the Interface specification.</p>
+<h3>PlugInChain</h3>
+<p>The Plug-In chain has a backward reference to the server.</p>
+<h3>TokenPlugInChain</h3>
+<p>In order to reduce the conversion efforts for the token based plug-ins the 
+token-server converts the data packets into tokens which can be handled easily 
+in Java. Hence unlike the BaseServer the TokenServer instantiates a 
+TokenPlugInChain instead of a &quot;normal&quot; plug-in chain.</p>
+<p>&nbsp;</p>
+<h3>Header</h3>
+<p>Maintains the header data of the initial request including URL arguments.</p>
+
+</body>
+
+</html>

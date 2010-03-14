@@ -1,0 +1,67 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="de">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>jWebSocket PlugIns</title>
+<link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
+</head>
+
+<body>
+
+<h2>Server-Plug-Ins</h2>
+<p>The jWebSocket server itself only provides fundamental communication 
+capabilities. All higher lever functions are implemented in plug-ins. Multiple plug-ins can be ordered in a chain. This concept allows you to easily 
+add custom specific WebSocket services according to your needs based on what 
+already exists. The included jWebSocket <code>SystemPlugIn</code> demonstrates how to 
+implement own plug-ins and it already provides a couple of nice-to-have functions for 
+your WebSocket work. We will extend the System plug-in on 
+demand or provide further plug-ins like the Remote Procedure Call (RPC) plug-in 
+or e.g. for the future clustering options.</p>
+<p>A server plug-in basically has three methods:</p>
+		<table class="stblData"
+			   width="100%" cellpadding="0" cellspacing="0" id="table6">
+			<colgroup>
+				<col width="5%"/>
+				<col width=""/>
+			</colgroup>
+			<tr class="strData">
+				<th class="sthData" valign="top">Method</th>
+				<th class="sthData" valign="top">Description</th>
+			</tr>
+			<tr class="strData">
+				<td class="stdData" valign="top">connectorStarted</td>
+				<td class="stdData" valign="top"><p>Called from the plug-in chain 
+				when a new client connects to the jWebSocket server.<br>
+				If a client for instance should be automatically registered at a 
+				certain data stream this would be the right place to do this.</p></td>
+			</tr>
+			<tr class="strData">
+				<td class="stdData" valign="top">processData</td>
+				<td class="stdData" valign="top"><p>Called from the plug-in chain 
+				every time when a client sends data to the server.<br>
+				The data is passed to method as object. It can be casted 
+				according to whatever the underlying protocol requires.</p></td>
+			</tr>
+			<tr class="strData">
+				<td class="stdData" valign="top">connectorTerminated</td>
+				<td class="stdData" valign="top"><p>Called from the plug-in chain 
+				when a client was disconnected from the jWebSocket server.<br>If 
+				a client for instance is registered at a data stream this is the 
+				right place to unregister its connector from these stream.</p></td>
+			</tr>
+			</table>
+<h2><a name="ClientPlugIns"></a>Client-Plug-Ins</h2>
+<p>Description pending...</p>
+<h3>SystemPlugIn</h3>
+<p>Description pending...</p>
+<h3>SystemPlugIn</h3>
+<p>Description pending...</p>
+<h3>RPCPlugIn</h3>
+<p>Description pending...</p>
+<h3>Custom PlugIns</h3>
+<p>Description pending...</p>
+
+</body>
+
+</html>

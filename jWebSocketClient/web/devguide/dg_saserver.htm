@@ -1,0 +1,41 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="de">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>jWebSocket Stand-Alone Server</title>
+<link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
+</head>
+
+<body>
+
+<h2>jWebSock Server as Stand-Alone Server</h2>
+<p>This Chapter describes how to run the jWebSocket Server as a Stand-Alone 
+Server.<br>
+This topic will be interessting for you when you intend to run the jWebSocket 
+Server on a development or test system.</p>
+<h3>Running jWebSocketServer.jar as stand-alone application</h3>
+<p>The <code>jWebSocketServer.jar</code> together with the libraries in the <code>/lib</code> path contains all required Java classes to run the 
+jWebSocket Server on a stand-alone system.</p>
+<p>You can run multiple instances of the jWebSocket stand-alone server on a 
+single system provided that you use different listener ports.</p>
+
+		<h3>Command line arguments </h3>
+		<p>These are the command line arguments interpreted by the main class of 
+		the <code>jWebSocketServer.jar</code>.</p>
+		<pre>
+  port=[port], default 8787
+  prot=[token|plain], default=token
+  loglevel=[all|debug|info|error|warn]
+  sessiontimeout=[timeout in ms], default 120000ms = 2 min
+<p>&nbsp;</p>
+<h3>jWebSocketServer.bat</h3>
+<p>For MS-Windows environments the <a href="../downloads/jWebSocketServer-0.6.7.zip">jWebSocketServer.zip</a> from 
+the download area includes batch file <code>jWebSocketServer.bat</code>.</p>
+<p><code>java -jar jWebSocket.jar %1 %2 %3 %4 %5 %6</code></p>
+		<p>From the windows command line your can call <code>jWebSocketServer.bat</code> with 
+		the above mentioned optional arguments.</p>
+
+		</body>
+
+</html>

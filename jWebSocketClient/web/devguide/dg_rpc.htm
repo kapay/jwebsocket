@@ -1,0 +1,95 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="de">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>jWebSocket Remote Procedure Calls (RPC)</title>
+<link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
+</head>
+
+<body>
+
+<h2>Remote Procedure Calls (RPC)</h2>
+<p>Remote Procedure Calls allow you to call functions on a on remote system via 
+a network and return the result back. In terms of the jWebSocket Network this 
+means that a JavaScript web client can call Java methods on the server and 
+receive the corresponding result.</p>
+<p>The approach of the jWebSocket model goes even further because it not only 
+allows the client to run server side functions but also vice versa. The server 
+can call functions on the client and process the client's result and optionally 
+distribute the results from one client to others.</p>
+<p>This is the latest feature of the jWebSocket project and will be part of the 
+future release 1.0.</p>
+<p>Up to now is only possible to exchange plain objects (i.e. objects that 
+contain simple data fields only). Due to its tree structures only JSON and XML 
+will support complex objects in a future, this will not be possible with the row 
+structured CSV tokens.</p>
+<p>The RPC module is implemented as a server and client side plug-in as 
+described <a href="dg_plugins.htm">here</a>.</p>
+<h2>Waiting for Results</h2>
+<p>Remote Procedure Calls (RPC's) can be performed in two ways, blocking and 
+non-blocking. Both methodologies are described below.</p>
+<h3>Blocking RPCs</h3>
+<p>Blocking means that whenever the server receives a RPC request from a client 
+it simply invokes the requested method and sends the result back to the client 
+as soon as the method finishes. Of course, this does not block the entire server 
+but only the receive queue of the current connection. The next RPC will be 
+executed once the previous one has finished. This mechanism could also be called 
+sequential RPC. In this scenario it is ensured that the results are sent back to 
+the client in the same order as they were requested.</p>
+<h3>Non-Blocking RPC's</h3>
+<p>Non-Blocking means that when the server receives a RPC request from a client 
+it creates a new thread and calls the requested method within that thread. In 
+this case the receive queue immediately is released when the thread has started. 
+This means that you can run multiple RPC's at a time on the server with the 
+consequence that the results can be returned in a different order than they were 
+requested depending on what is done in the method and how long it takes.</p>
+<p>To allow the client to assign a certain result to a previous request the 
+client assigns a token-id to each request. The server always returns this 
+token-id together with the result so that the client can easily associate a 
+result with te corresponding previous request. The jWebSocket client already 
+does the work for you. For each non-blocking RPC request you simply can provide 
+a temporary local callback method which is called as soon as the result arrives. 
+In this callback then you can process the result from the server according to 
+your needs.</p>
+<p><i>The non-blocking RPC's are not yet implemented in the current beta but 
+will be part of the jWebSocket release 1.0.</i></p>
+<h3>Response Token</h3>
+<p>For a Remote Procedure Call a response Token is returned. The call could 
+either be successful (i.e. the method could be called) or not (i.e. the method 
+was not called at all). A successful call does not necessarily mean that the 
+procedure could do what it was supposed to. In this case the Remote Procedure 
+has to return a result which can be interpreted accordingly by the client.</p>
+		<table class="stblData"
+			   width="100%" cellpadding="0" cellspacing="0">
+			<colgroup>
+				<col width="5%"/>
+				<col width="5%"/>
+				<col width=""/>
+			</colgroup>
+			<tr class="strData">
+				<th class="sthData" valign="top">Token</th>
+				<th class="sthData" valign="top">Datatype</th>
+				<th class="sthData" valign="top">Description</th>
+			</tr>
+			<tr class="strData">
+				<td class="stdData" valign="top">result</td>
+				<td class="stdData" valign="top">String</td>
+				<td class="stdData" valign="top">This field is set if the Remote 
+				Procedure Call could successfully be executed. In this case the 
+				error field is not passed back.</td>
+			</tr>
+			<tr class="strData">
+				<td class="stdData" valign="top">error</td>
+				<td class="stdData" valign="top">String</td>
+				<td class="stdData" valign="top">This field is set if the Remote 
+				Procedure Call could not successfully be executed. In this case 
+				the result field is not passed back.</td>
+			</tr>
+			</table>
+<p>&nbsp;</p>
+<p>Further documentation pending...</p>
+
+</body>
+
+</html>

@@ -1,0 +1,74 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="de">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>jWebSocket Keep Alive and Ping</title>
+<link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
+</head>
+
+<body>
+
+<h2>Keep-Alive Mechanism</h2>
+<p>Usually the jWebSocket server terminates a session after a configurable 
+amount of time of user inactivity. Because the server cannot register a hard 
+shutdown of a client a timeout management for the session can hardly be avoided. 
+This could be the case if the client process simply gets killed w/o giving the 
+client a chance to send its logout message to the server or if the connection 
+gets lost e.g. due to network issues. If there was no timeout management the 
+server would run out of ports and not accept further connections after a certain 
+amount of time. </p>
+<p>For streaming applications the user may not type anything for a longer time 
+but just look what happens. For this case the client can send so called 
+keep-alive pings to the server in certain configurable intervals. Then server 
+then detects that the client is still alive and does not terminate the 
+connection. Optionally the server can even send an acknowledge back to the 
+client, so that also the client knows that the connection is still working 
+properly.</p>
+<p>Both on the server and the client side the keep-alive functionality is 
+implemented as an optional plug-in.</p>
+<h3>Keep-Alive Plug-In on the server</h3>
+<p>For the server the jWebSocket project provides the 
+<code>org.jWebSocket.plugins.KeepAlivePlugIn class</code>. It implements the 
+<code>ping</code> token processor.</p>
+<h4>ping</h4>
+<p>The <code>ping</code> token is send from a client to the server. Optionally 
+the client can request a response (echo) as described below.</p>
+		<table class="stblData"
+			   width="100%" cellpadding="0" cellspacing="0" id="table1">
+			<colgroup>
+				<col width="5%"/>
+				<col width="5%"/>
+				<col width=""/>
+			</colgroup>
+			<tr class="strData">
+				<th class="sthData" valign="top">Token</th>
+				<th class="sthData" valign="top">Datatype</th>
+				<th class="sthData" valign="top">Description</th>
+			</tr>
+			<tr class="strData">
+				<td class="stdData" valign="top">echo</td>
+				<td class="stdData" valign="top">Boolean</td>
+				<td class="stdData" valign="top"><p>Specifies whether the server is 
+				supposed to respond or not. If 'true' (default) the server sends an 
+				empty response including the <code>reqType</code> ('ping') and the unique 
+				token-id <code>utid</code>.
+				For details regarding jWebSocket tokens please refer to the
+				<a href="dg_tokens.htm">token documentation</a>.</p></td>
+			</tr>
+			</table>
+<p>&nbsp;</p>
+<p>The general server side plug-in model is described <a href="dg_plugins.htm">here</a>.</p>
+<h3>Keep-Alive Plug-In on the JavaScript client</h3>
+<p>On the JavaScript client the KeepAlive plug-in provides the two methods 
+<code>startKeepAlive</code> and <code>stopKeepAlive</code>.</p>
+<p>&nbsp;</p>
+<p>The client side plug-in model is described
+<a href="dg_plugins.htm#ClientPlugIns">here</a>.</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>
