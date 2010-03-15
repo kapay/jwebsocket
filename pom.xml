@@ -20,6 +20,7 @@
 		<module>jWebSocketTokenServer</module>
 		<module>jWebSocketToolkit</module>
 		<module>jWebSocketAppServer</module>
+		<module>jWebSocketJavaClient</module>
 	</modules>
 
 	<build>
