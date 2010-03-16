@@ -4,8 +4,13 @@
 	</head>
 	<body bgcolor="white">
 
-		Provides ...
-
+		Provides converters that convert JSON, CSV or XML formatted data packets
+		into Tokens and vice versa. These classes are used by the TokenServer
+		to parse incoming data packets with the various sub protocols into
+		unified tokens and to push tokens back by using the client-specific
+		sub protocol. This mechanism ensures that even clients with different
+		sub protocols can interchange their data packets processed by the token
+		server and its plug-ins.
 <!--
 		<h2>Package Specification</h2>
 
