@@ -26,7 +26,7 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * converts CSV formatted data packets into tokens and vice versa.
  * @author aschulze
  */
 public class CSVProcessor {
@@ -34,7 +34,7 @@ public class CSVProcessor {
 	private static Logger log = Logging.getLogger(CSVProcessor.class);
 
 	/**
-	 *
+	 * converts a CSV formatted data packet into a token.
 	 * @param aDataPacket
 	 * @return
 	 */
@@ -102,7 +102,7 @@ public class CSVProcessor {
 	}
 
 	/**
-	 *
+	 * converts a token into a CSV formatted data packet.
 	 * @param aToken
 	 * @return
 	 */

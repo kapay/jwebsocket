@@ -23,7 +23,7 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * converts XML formatted data packets into tokens and vice versa.
  * @author aschulze
  */
 public class XMLProcessor  {
@@ -31,7 +31,7 @@ public class XMLProcessor  {
 	private static Logger log = Logging.getLogger(XMLProcessor.class);
 
 	/**
-	 *
+	 * converts a XML formatted data packet into a token.
 	 * @param aDataPacket
 	 * @return
 	 */
@@ -60,7 +60,7 @@ public class XMLProcessor  {
 	}
 
 	/**
-	 * 
+	 * converts a token into a XML formatted data packet.
 	 * @param aToken
 	 * @return
 	 */

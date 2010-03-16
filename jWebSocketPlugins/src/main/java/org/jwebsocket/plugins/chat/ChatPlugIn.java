@@ -16,7 +16,7 @@
 package org.jwebsocket.plugins.chat;
 
 /**
- *
+ * This plug-in provides all the chat functionality.
  * @author aschulze
  */
 public class ChatPlugIn {

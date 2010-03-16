@@ -51,13 +51,13 @@ public interface WebSocketServer {
 
 	/**
 	 * Adds a new engine to the server.
-	 * @param aEngine
+	 * @param aEngine to be added to the server.
 	 */
 	void addEngine(WebSocketEngine aEngine);
 
 	/**
 	 * Removes a already bound engine from the server.
-	 * @param aEngine
+	 * @param aEngine to be removed from the server.
 	 */
 	void removeEngine(WebSocketEngine aEngine);
 
@@ -75,7 +75,7 @@ public interface WebSocketServer {
 
 	/**
 	 * Notifies the application that a client connector has been started.
-	 * @param aConnector
+	 * @param aConnector the new connector that has been instantiated.
 	 */
 	void connectorStarted(WebSocketConnector aConnector);
 

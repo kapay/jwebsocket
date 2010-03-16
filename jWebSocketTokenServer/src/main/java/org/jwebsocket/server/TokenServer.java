@@ -33,7 +33,7 @@ import org.jwebsocket.token.Token;
 import org.jwebsocket.packetProcessors.XMLProcessor;
 
 /**
- *
+ * 
  * @author aschulze
  */
 public class TokenServer extends BaseServer {
@@ -105,6 +105,9 @@ public class TokenServer extends BaseServer {
 		plugInChain.engineStopped(aEngine);
 	}
 
+    /**
+     * {@inheritDoc }
+     */
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(null);

@@ -9,6 +9,14 @@ package org.jWebSocket.client;
  *
  * @author aschulze
  */
-public class TokenClient extends BaseClient {
+public class TokenClient extends TCPClient {
+
+	public void sendToken() {
+
+	}
+
+	public void processToken() {
+
+	}
 
 }

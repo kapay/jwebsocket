@@ -51,35 +51,53 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	@Override
+	/**
+	 * {@inheritDoc }
+	 */
 	public void addEngine(WebSocketEngine aEngine) {
 		engines.put(aEngine.getId(), aEngine);
 		aEngine.addServer(this);
 	}
 
 	@Override
+	/**
+	 * {@inheritDoc }
+	 */
 	public void removeEngine(WebSocketEngine aEngine) {
 		engines.remove(aEngine.getId());
 		aEngine.removeServer(this);
 	}
 
+	/**
+	 * {@inheritDoc }
+	 */
 	@Override
 	public void startServer()
 		throws WebSocketException {
 		// this method is supposed to be overwritten by descending classes.
 	}
 
+	/**
+     * {@inheritDoc }
+	 */
 	@Override
 	public boolean isAlive() {
 		// this method is supposed to be overwritten by descending classes.
 		return false;
 	}
 
+	/**
+     * {@inheritDoc }
+	 */
 	@Override
 	public void stopServer()
 		throws WebSocketException {
 		// this method is supposed to be overwritten by descending classes.
 	}
 
+	/**
+     * {@inheritDoc }
+	 */
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 		// this method is supposed to be overwritten by descending classes.
@@ -87,6 +105,9 @@ public class BaseServer implements WebSocketServer {
 		// about the engineStarted event
 	}
 
+	/**
+     * {@inheritDoc }
+	 */
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
 		// this method is supposed to be overwritten by descending classes.
@@ -94,6 +115,9 @@ public class BaseServer implements WebSocketServer {
 		// about the engineStopped event
 	}
 
+	/**
+     * {@inheritDoc }
+	 */
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		// this method is supposed to be overwritten by descending classes.
@@ -101,6 +125,9 @@ public class BaseServer implements WebSocketServer {
 		// about the connectorStarted event
 	}
 
+    /**
+     * {@inheritDoc }
+     */
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// this method is supposed to be overwritten by descending classes.
@@ -108,17 +135,26 @@ public class BaseServer implements WebSocketServer {
 		// about the connectorStopped event
 	}
 
+	/**
+     * {@inheritDoc }
+	 */
 	@Override
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		// this method is supposed to be overwritten by descending classes.
 	}
 
+	/**
+     * {@inheritDoc }
+	 */
 	@Override
 	public void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
 		// send a data packet to the passed connector
 		aConnector.sendPacket(aDataPacket);
 	}
 
+	/**
+     * {@inheritDoc }
+	 */
 	@Override
 	public void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket,
 		BroadcastOptions aBroadcastOptions) {

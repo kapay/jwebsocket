@@ -27,7 +27,7 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * converts JSON formatted data packets into tokens and vice versa.
  * @author aschulze
  */
 public class JSONProcessor {
@@ -35,7 +35,7 @@ public class JSONProcessor {
 	private static Logger log = Logging.getLogger(JSONProcessor.class);
 
 	/**
-	 *
+	 * converts a JSON formatted data packet into a token.
 	 * @param aDataPacket
 	 * @return
 	 */
@@ -99,7 +99,7 @@ public class JSONProcessor {
 	}
 
 	/**
-	 *
+	 * converts a token into a JSON formatted data packet.
 	 * @param aToken
 	 * @return
 	 */

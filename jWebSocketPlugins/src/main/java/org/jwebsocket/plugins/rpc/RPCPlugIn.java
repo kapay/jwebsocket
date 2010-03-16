@@ -33,7 +33,9 @@ import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * This plug-in provides all the functionality for remote procedure calls
+ * (RPC) for client-to-server (C2S) apps, and reverse remote procedure calls
+ * (RRPC) for server-to-client (S2C) or client-to-client apps (C2C).
  * @author aschulze
  */
 public class RPCPlugIn extends TokenPlugIn {
