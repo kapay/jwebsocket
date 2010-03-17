@@ -672,7 +672,9 @@ jws.SystemClientPlugIn = {
 				ns: jws.SystemClientPlugIn.NS,
 				type: "ping",
 				echo: lEcho
-			});
+			},
+			aOptions
+			);
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -814,7 +816,7 @@ jws.RPCClientPlugIn = {
 
 	// granted rrpc's
 	grantedProcs: [
-		"jws.RRPCServer.demo"
+	"jws.RRPCServer.demo"
 	],
 
 	processToken: function( aToken ) {
