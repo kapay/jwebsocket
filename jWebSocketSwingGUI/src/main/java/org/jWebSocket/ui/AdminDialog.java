@@ -4,9 +4,9 @@
  */
 
 /*
- * Admin.java
+ * AdminDialog.java
  *
- * Created on Mar 15, 2010, 2:55:47 PM
+ * Created on Mar 15, 2010, 2:56:00 PM
  */
 
 package org.jWebSocket.ui;
@@ -15,10 +15,10 @@ package org.jWebSocket.ui;
  *
  * @author aschulze
  */
-public class Admin extends javax.swing.JFrame {
+public class AdminDialog extends javax.swing.JFrame {
 
-    /** Creates new form Admin */
-    public Admin() {
+    /** Creates new form AdminDialog */
+    public AdminDialog() {
         initComponents();
     }
 
@@ -36,7 +36,7 @@ public class Admin extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        lblTitle.setText("Admin");
+        lblTitle.setText("Test");
         getContentPane().add(lblTitle, new java.awt.GridBagConstraints());
 
         pack();
@@ -48,7 +48,7 @@ public class Admin extends javax.swing.JFrame {
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Admin().setVisible(true);
+                new AdminDialog().setVisible(true);
             }
         });
     }

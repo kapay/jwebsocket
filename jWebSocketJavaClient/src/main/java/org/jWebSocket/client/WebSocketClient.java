@@ -5,6 +5,8 @@
 
 package org.jWebSocket.client;
 
+import org.jwebsocket.api.WebSocketPaket;
+
 /**
  *
  * @author aschulze
@@ -33,13 +35,17 @@ public interface WebSocketClient {
 	
 	/**
 	 * Allows the application to send a data packet to the server.
+	 *
+	 * @param aDataPacket
 	 */
-	void sendPaket();
+	void sendPacket(WebSocketPaket aDataPacket);
 	
 	/**
 	 * Notifies the application that a data packet has been received from
 	 * the server.
+	 *
+	 * @param aDataPacket
 	 */
-	void processPaket();
+	void processPacket(WebSocketPaket aDataPacket);
 
 }

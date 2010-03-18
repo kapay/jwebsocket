@@ -5,6 +5,8 @@
 
 package org.jWebSocket.client;
 
+import org.jwebsocket.api.WebSocketPaket;
+
 /**
  *
  * @author aschulze
@@ -45,17 +47,21 @@ public class NIOClient implements WebSocketClient {
 
 	/**
 	 *
+	 *
+	 * @param aDataPacket 
 	 */
 	@Override
-	public void sendPaket() {
+	public void sendPacket(WebSocketPaket aDataPacket) {
 
 	}
 
 	/**
 	 *
+	 *
+	 * @param aDataPacket
 	 */
 	@Override
-	public void processPaket() {
+	public void processPacket(WebSocketPaket aDataPacket) {
 
 	}
 

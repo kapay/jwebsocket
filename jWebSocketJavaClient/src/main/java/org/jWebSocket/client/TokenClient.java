@@ -2,8 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.jWebSocket.client;
+
+import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.token.Token;
 
 /**
  *
@@ -11,12 +13,34 @@ package org.jWebSocket.client;
  */
 public class TokenClient extends TCPClient {
 
-	public void sendToken() {
+	/**
+	 *
+	 * @param aHost
+	 * @param aPort
+	 */
+	public TokenClient(String aHost, int aPort) {
+		super(aHost, aPort);
+	}
+
+	/**
+	 *
+	 * @param aToken
+	 */
+	public void sendToken(Token aToken) {
 
 	}
 
-	public void processToken() {
+	/**
+	 *
+	 * @param aToken
+	 */
+	public void processToken(Token aToken) {
 
 	}
 
+	@Override
+	public void processPacket(WebSocketPaket aPacket) {
+
+		
+	}
 }
