@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Document   : jWebSocket.xml
+	Created on : March 18, 2010, 10:24 AM
+	Author     : aschulze
+	Description:
+		Configuration of the jWebSocket server.
+		This includes engines, servers, plug-ins, rights, roles and users as
+		well as logging.
+-->
+
+<!-- jWebSocket server configuration -->
+<jWebSocket>
+
+	<!-- engines to be instantiated for jWebSocket -->
+	<engines>
+		<engine>
+			<name>TCPEngine</name>
+			<id>tcp0</id>
+			<jar>jWebSocketTCPEngine-0.7.0.jar</jar>
+			<port>8788</port>
+			<timeout>120000</timeout>
+		</engine>
+		<engine>
+			<name>NettyEngine</name>
+			<id>netty0</id>
+			<jar>jWebSocketNettyEngine-0.7.0.jar</jar>
+			<port>8787</port>
+			<timeout>120000</timeout>
+		</engine>
+	</engines>
+
+	<!-- server types to be instantiated for jWebSocket -->
+	<servers>
+		<server>
+			<name>TokenServer</name>
+			<id>ts0</id>
+			<jar>jWebSocketTokenServer-0.7.0.jar</jar>
+		</server>
+		<server>
+			<name>CustomServer</name>
+			<id>cs0</id>
+			<jar>jWebSocketCustomServer-0.7.0.jar</jar>
+		</server>
+	</servers>
+
+	<!-- plug-ins to be instantiated for jWebSocket -->
+	<plugins>
+		<plugin>
+			<name>System</name>
+			<ns></ns>
+			<id>system0</id>
+			<jar>jWebSocketPlugins-0.7.0.jar</jar>
+		</plugin>
+		<plugin>
+			<name>Chat</name>
+			<id>chat0</id>
+			<ns>org.jWebSocket.plugins.chat</ns>
+			<jar>jWebSocketPlugins-0.7.0.jar</jar>
+			<!-- configuration of chat plug-in specific rights -->
+			<rights>
+				<!-- list of rights for "User" role (ns + id) -->
+				<right>
+					<id>broadcast</id>
+					<!-- namespaces for id's are inherited here -->
+					<description>Broadcast message to all other clients.</description>
+				</right>
+			</rights>
+		</plugin>
+		<plugin>
+			<name>RPC</name>
+			<id>rpc0</id>
+			<ns>org.jWebSocket.plugins.rpc</ns>
+			<jar>jWebSocketPlugins-0.7.0.jar</jar>
+			<!-- configuration of rpc plug-in specific rights -->
+			<rights>
+				<right>
+					<id>rpc</id>
+					<!-- namespaces for id's are inherited here -->
+					<description>Allow Remote Procedure Calls (RPC) to server</description>
+				</right>
+				<right>
+					<id>rrpc</id>
+					<description>Allow Reverse Remote Procedure Calls (RRPC) to other clients</description>
+				</right>
+			</rights>
+		</plugin>
+	</plugins>
+
+	<!-- jWebSocket logging configuration -->
+	<logging>
+		<log4j>
+			<!-- log4j appender, one of the following options [console|file|rolling] -->
+			<appender>console</appender>
+			<!-- layout, please refer to http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html -->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n</pattern>
+			<!-- log-level, one of the following options: [all|debug|info|warn|error|fatal|off] -->
+			<level>debug</level>
+			<!-- filename, used only when appender != console -->
+			<filename>jWebSocket.log</filename>
+		</log4j>
+	</logging>
+
+	<!-- jWebSocket global rights -->
+	<rights>
+		<right>
+			<id>right0</id>
+			<ns>org.jWebSocket.global</ns>
+			<description>Description for right0</description>
+		</right>
+		<right>
+			<id>right1</id>
+			<ns>org.jWebSocket.global</ns>
+			<description>Description for right1</description>
+		</right>
+	</rights>
+
+	<!-- jWebSocket roles -->
+	<roles>
+		<role>
+			<id>Administrator</id>
+			<description>Administrators</description>
+			<rights>
+				<!-- list of rights for "Administrator" role (ns + id) -->
+				<right>org.jWebSocket.plugins.rpc.rpc</right>
+				<right>org.jWebSocket.plugins.rpc.rrpc</right>
+			</rights>
+		</role>
+		<role>
+			<id>User</id>
+			<rights>
+				<!-- list of rights for "User" role (ns + id) -->
+				<right>org.jWebSocket.plugins.chat.broadcast</right>
+			</rights>
+			<description>Registered and authenticated users.</description>
+		</role>
+		<role>
+			<id>Guest</id>
+			<description>Anonymous users (not registered)</description>
+		</role>
+	</roles>
+
+	<!-- jWebSocket users -->
+	<users>
+		<user>
+			<loginname>aschulze</loginname>
+			<firstname>Alexander</firstname>
+			<lastname>Schulze</lastname>
+			<password>t0p-s3cr3t</password>
+			<description>jWebSocket Founder</description>
+			<!-- 0=blocked 1=allowed ... future states pending -->
+			<status>1</status>
+			<roles>
+				<!-- the rights of all roles are merged -->
+				<role>Administrator</role>
+				<role>User</role>
+				<role>Guest</role>
+			</roles>
+		</user>
+		<user>
+			<loginname>stojadinovicp</loginname>
+			<firstname>Predrag</firstname>
+			<lastname>Stojadinovic</lastname>
+			<password>t0p-s3cr3t</password>
+			<description>jWebSocket Committer</description>
+			<status>1</status>
+			<roles>
+				<role>Administrator</role>
+				<role>User</role>
+				<role>Guest</role>
+			</roles>
+		</user>
+		<user>
+			<loginname>psingh</loginname>
+			<firstname>Puran</firstname>
+			<lastname>Singh</lastname>
+			<password>t0p-s3cr3t</password>
+			<description>jWebSocket Committer</description>
+			<status>1</status>
+			<roles>
+				<role>Administrator</role>
+				<role>User</role>
+				<role>Guest</role>
+			</roles>
+		</user>
+		<user>
+			<loginname>anonymous</loginname>
+			<firstname>Mr./Mrs.</firstname>
+			<lastname>Guest</lastname>
+			<!-- no password means that the user does not need a password -->
+			<password></password>
+			<description>jWebSocket Guest</description>
+			<status>1</status>
+			<roles>
+				<role>Guest</role>
+			</roles>
+		</user>
+	</users>
+
+</jWebSocket>
