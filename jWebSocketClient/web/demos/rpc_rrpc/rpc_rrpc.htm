@@ -83,8 +83,8 @@
 				
 				// perform the Remote Procedure Call...
 				var lRes = lWSC.rpc(
-				// pass class, method and argument for server java method:
-				"org.jWebSocket.demo.DemoRPCServer", aMethod, lArgs, {
+					// pass class, method and argument for server java method:
+					"org.jWebSocket.demo.DemoRPCServer", aMethod, lArgs, {
 					// new easy-to-use response callback
 					OnResponse: function( aToken ) {
 						if( aToken.error ) {

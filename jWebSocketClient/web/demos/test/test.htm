@@ -148,9 +148,12 @@
 			}
 
 
-			function testCSPerformance() {
+			function testCSPerf() {
 				var lLoop = 0;
-				var MAX = 250;
+				var lMax = parseInt( eLoopCount.value );
+				if( isNaN( lMax ) ) {
+					lMax = 250;
+				}
 				var lStarted;
 
 				function doPing() {
@@ -159,11 +162,14 @@
 						OnResponse: function( aToken ) {
 							if( aToken.error ) {
 								log( SYS, OUT, "Ping returned error, aborting loop." );
-							} else if( lLoop < MAX ) {
+							} else if( lLoop < lMax ) {
 								lLoop++;
 								doPing();
 							} else {
-								log( SYS, OUT, "Stopping 'ping' test. Duration: " + (new Date().getTime() - lStarted) + "ms" );
+								var lDuration = (new Date().getTime() - lStarted);
+								var lAverage = lDuration/lMax;
+								lAverage = lAverage.toFixed( 3 );
+								log( SYS, OUT, "'ping' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
 							}
 						}
 					});
@@ -178,6 +184,42 @@
 				}
 			}
 
+			function testRPCPerf() {
+				var lLoop = 0;
+				var lMax = parseInt( eLoopCount.value );
+				if( isNaN( lMax ) ) {
+					lMax = 250;
+				}
+				var lStarted;
+
+				function doRPC() {
+					var lRes = lWSC.rpc(
+						"org.jWebSocket.demo.DemoRPCServer", "getMD5", "This is a test!", {
+						OnResponse: function( aToken ) {
+							if( aToken.error ) {
+								log( SYS, OUT, "RPC returned error, aborting loop." );
+							} else if( lLoop < lMax ) {
+								lLoop++;
+								doRPC();
+							} else {
+								var lDuration = (new Date().getTime() - lStarted);
+								var lAverage = lDuration/lMax;
+								lAverage = lAverage.toFixed( 3 );
+								log( SYS, OUT, "'RPC' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+							}
+						}
+					});
+				}
+
+				if( lWSC.isConnected() ) {
+					log( SYS, OUT, "Starting 'RPC' test..." );
+					lStarted = new Date().getTime();
+					doRPC();
+				} else {
+					log( SYS, OUT, "Not connected." );
+				}
+			}
+
 
 			function initPage() {
 				// get some required HTML elements
@@ -186,6 +228,7 @@
 				ePool = jws.$( "stxfPool" );
 				eReceiver = jws.$( "stxfReceiver" );
 				eMessage = jws.$( "stxfMsg" );
+				eLoopCount = jws.$( "stxfLoopCount" );
 				eDebug = jws.$( "schkDebug" );
 				eKeepAlive = jws.$( "schkKeepAlive" );
 					
@@ -266,11 +309,14 @@
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtn" type="button" value="CS-Performance" onclick="testCSPerformance();"></td>
+					<td class="stdDlg" width="5">Loops</td>
+					<td class="stdDlg" width="40"><input class="stxfDlg" id="stxfLoopCount" type="text" value="250" style="width:100%"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtn" type="button" value="Ping" onclick="testCSPerf();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtn" type="button" value="RPC" onclick="testRPCPerf();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Message</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"></td>
+					<td class="stdDlg" colspan="2" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSend" type="button" value="Send" onclick="broadcast();"></td>
 				</tr>
 			</table>
