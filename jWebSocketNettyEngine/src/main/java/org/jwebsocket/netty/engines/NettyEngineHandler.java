@@ -211,7 +211,6 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
 		this.context = ctx;
-		System.out.println("CONTEXT-ID:"+ctx.getChannel().getId());
 		if (log.isDebugEnabled()) {
 			log.debug("message received in the engine handler");
 		}
