@@ -53,19 +53,17 @@ import org.jwebsocket.netty.connectors.NettyConnector;
  * Handler class for the <tt>NettyEngine</tt> that recieves the events based on
  * event types and notifies the client connectors. This handler also handles the
  * initial handshaking for WebSocket connection with a appropriate hand shake
- * response.
+ * response. This handler is created for each new connection channel.
  * <p>
- * Once the handshaking is successful after sending the handshake {@code
- * HttpResponse} it replaces the {@code HttpRequestDecoder} and {@code
- * HttpResponseEncoder} from the channel pipeline with {@code
- * WebSocketFrameDecoder} as WebSocket frame data decoder and {@code
- * WebSocketFrameEncoder} as WebSocket frame data encoder. Also it starts the
- * <tt>NettyConnector</tt>.
+ * 		Once the handshaking is successful after sending the handshake {@code HttpResponse} 
+ * 		it replaces the {@code HttpRequestDecoder} and {@code HttpResponseEncoder} 
+ * 		from the channel pipeline with {@code WebSocketFrameDecoder} as WebSocket frame
+ * 		data decoder and {@code WebSocketFrameEncoder} as WebSocket frame data encoder.
+ * 		Also it starts the <tt>NettyConnector</tt>.
  * </p>
  * 
  * @author puran
- * @version $Id: NettyEngineHandler.java 209 2010-03-10 14:17:26Z
- *          fivefeetfurther $
+ * @version $Id$
  */
 public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 
@@ -78,13 +76,20 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	private ChannelHandlerContext context = null;
 
 	private static final String CONTENT_LENGTH = "Content-Length";
+	
+	private static final String ARGS = "args";
+	private static final String ORIGIN = "origin";
+	private static final String LOCATION = "location";
+	private static final String PATH = "path";
+	private static final String SEARCH_STRING = "searchString";
+	private static final String HOST = "host";
 
 	public NettyEngineHandler(NettyEngine aEngine) {
 		this.engine = aEngine;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void channelBound(ChannelHandlerContext ctx, ChannelStateEvent e)
@@ -94,7 +99,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e)
@@ -104,7 +109,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e)
@@ -114,18 +119,21 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void channelDisconnected(ChannelHandlerContext ctx,
 			ChannelStateEvent e) throws Exception {
+		if (log.isDebugEnabled()) {
+			log.debug("Channel is disconnected");
+		}
 		this.context = ctx;
 		super.channelDisconnected(ctx, e);
 		engine.connectorStopped(connector, CloseReason.CLIENT);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void channelInterestChanged(ChannelHandlerContext ctx,
@@ -181,7 +189,9 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 			throws Exception {
 		this.context = ctx;
-		super.exceptionCaught(ctx, e);
+		if (log.isDebugEnabled()) {
+			log.debug("Channel is disconnected:"+e.getCause().getLocalizedMessage());
+		}
 	}
 
 	/**
@@ -201,6 +211,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
 		this.context = ctx;
+		System.out.println("CONTEXT-ID:"+ctx.getChannel().getId());
 		if (log.isDebugEnabled()) {
 			log.debug("message received in the engine handler");
 		}
@@ -425,14 +436,14 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 				}
 			}
 		}
+		
+		header.put(ARGS, args);
+		header.put(ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
+		header.put(LOCATION, getWebSocketLocation(req));
+		header.put(PATH, req.getUri());
 
-		header.put("args", args);
-		header.put("origin", req.getHeader(HttpHeaders.Names.ORIGIN));
-		header.put("location", getWebSocketLocation(req));
-		header.put("path", req.getUri());
-
-		header.put("searchString", searchString);
-		header.put("host", req.getHeader(HttpHeaders.Names.HOST));
+		header.put(SEARCH_STRING, searchString);
+		header.put(HOST, req.getHeader(HttpHeaders.Names.HOST));
 		return header;
 	}
 

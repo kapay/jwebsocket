@@ -39,20 +39,20 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
  */
 public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
 
-    private NettyEngineHandler handler;
+    private NettyEngine engine;
 
     /**
-     * default constructor
-     * @param handler the server handler
+     * constructor that takes engine 
+     * @param engine
      */
-    public NettyEnginePipeLineFactory(NettyEngineHandler handler) {
-        this.handler = handler;
+    public NettyEnginePipeLineFactory(NettyEngine engine) {
+    	this.engine = engine;
     }
 
     /**
      * {@inheritDoc}
      *
-     * NOTE: initially when the server is started http encoder/decoder are
+     * NOTE: initially when the server is started <tt>HTTP</tt> encoder/decoder are
      * added in the channel pipeline which is required for the initial handshake
      * request for WebSocket connection. Once the connection is made by sending
      * the appropriate response the encoder/decoder is replaced at runtime by
@@ -66,9 +66,9 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
         pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
         pipeline.addLast("encoder", new HttpResponseEncoder());
         
-        //TODO: figure out if we need to create new handler object 
-        //for each new channel to avoid race condition.
-        pipeline.addLast("handler", handler);
+        //create a new handler instance for each new channel to avoid a 
+        //race condition where a unauthenticated client can get the confidential information:
+        pipeline.addLast("handler", new NettyEngineHandler(engine));
         return pipeline;
     }
 }
