@@ -91,7 +91,6 @@ public class NettyConnector extends BaseConnector {
 	public int getRemotePort() {
 		InetSocketAddress address = (InetSocketAddress) handler
 				.getChannelHandlerContext().getChannel().getRemoteAddress();
-		System.out.println("CONTEXT CHANNEL REMOTE PORT:"+address.getPort());
 		return address.getPort();
 	}
 
