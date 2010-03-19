@@ -19,6 +19,10 @@
 			<id>tcp0</id>
 			<jar>jWebSocketTCPEngine-0.7.0.jar</jar>
 			<port>8788</port>
+			<domains>
+				<domain>jwebsocket.org</domain>
+				<domain>jwebsocket2.org</domain>
+			</domains>
 			<timeout>120000</timeout>
 		</engine>
 		<engine>
@@ -26,6 +30,9 @@
 			<id>netty0</id>
 			<jar>jWebSocketNettyEngine-0.7.0.jar</jar>
 			<port>8787</port>
+			<domains>
+				<domain>jwebsocket2.org</domain>
+			</domains>
 			<timeout>120000</timeout>
 		</engine>
 	</engines>
