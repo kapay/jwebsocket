@@ -303,9 +303,6 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	 *            the request message
 	 */
 	private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest req) {
-		// we assume that headers are already parsed
-		// client.headerParsed();
-
 		// Allow only GET methods.
 		if (req.getMethod() != HttpMethod.GET) {
 			sendHttpResponse(ctx, req, new DefaultHttpResponse(
@@ -435,7 +432,10 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 				}
 			}
 		}
-		
+		// set default sub protocol if none passed
+		if (args.get("prot") == null) {
+			args.put("prot", Config.SUB_PROT_DEFAULT);
+		}
 		header.put(ARGS, args);
 		header.put(ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
 		header.put(LOCATION, getWebSocketLocation(req));
