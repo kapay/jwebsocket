@@ -380,7 +380,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		} else if( aToken.type == "goodBye" ) {
 			this.fSessionId = null;
 		} else if( aToken.type == "close" ) {
-			// if the server closes the connectioon close immediately too.
+			// if the server closes the connection close immediately too.
 			this.disconnect({
 				timeout: 0
 			});
@@ -509,7 +509,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lRes;
 	},
 
-	connect: function( aURL, aOptions ) {
+	open: function( aURL, aOptions ) {
 		var lRes = this.createDefaultResult();
 		try {
 			// call inherited connect, catching potential exception
@@ -523,7 +523,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lRes;
 	},
 
-	disconnect: function( aOptions ) {
+	// deprecated, kept for upward compatibility
+	connect: function( aURL, aOptions ) {
+		return this.open( aURL, aOptions );
+	},
+
+	close: function( aOptions ) {
 		var lTimeout = 0;
 		if( aOptions ) {
 			if( aOptions.timeout ) {
@@ -549,6 +554,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			lRes.msg = "Exception on disconnect: " + ex.message;
 		}
 		return lRes;
+	},
+
+	// deprecated, kept for upward compatibility
+	disconnect: function( aOptions ) {
+		return this.open( aOptions );
 	},
 
 	login: function( aUsername, aPassword, aPool ) {

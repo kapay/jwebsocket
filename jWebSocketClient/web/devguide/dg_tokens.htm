@@ -10,310 +10,742 @@
 <body>
 
 <h2>Tokens</h2>
-<p>A token is an object which contains one or multiple fields and values. In 
-Java the <code>org.jWebSocket.server.Token</code> class includes a <code>HashMap</code> 
-class, which holds multiple fields with their according values. 
-Fieldnames, the keys within the Hashmap, are stored as Strings, the values can be 
-arbitrary objects. Unlike JSON or XML tokens CSV tokens can only have simple fields i.e. they 
-cannot contain complex object structures.</p>
+<p>A token is an object which contains one or multiple fields and values. In Java 
+the <tt>org.jWebSocket.token.Token</tt> class embeds a <tt>HashMap</tt> class, which 
+holds multiple fields with their according values. Fieldnames, the keys within the 
+Hashmap, are stored as Strings, the values can be arbitrary objects. Unlike JSON 
+or XML tokens CSV tokens can only have simple fields i.e. they cannot contain complex 
+object structures.</p>
 <h3>Why use different Token formats?</h3>
-<p>Each of the JSON, CSV and XML formats have their benefits for a particular 
-purpose.</p>
-<h4>JSON</h4>
-<p>can be interpreted very easily by JavaScript clients, but not that easy by 
-Java clients. JSON may hold security risks because it may execute malicous code 
-on the client. So here you need to take care on the server side, that potential 
-executable codes are stripped out of a token. Unlike JSON CSV is not risky 
-because it's data is not inpreted with eval but with as simple string tokenizer.</p>
-<p>
-Example: 
-<code>{field1:value1;field2:&quot;value2&quot;;field3:[arrayitem1,arrayitem2];field4:{objfield1:value1;objfield2:value2}}</code></p>
-<h4>CSV</h4>
+<p>Each of the JSON, CSV and XML formats have their benefits for a particular purpose 
+as described below.</p>
+<h4>JSON...</h4>
+<p>can be interpreted very easily by JavaScript clients, but not that easy by Java 
+clients. JSON may hold security risks because it may execute malicous code on the 
+client. So here you need to take care on the server side that potential executable 
+codes are stripped out of a token. JSON is the best choice if you mostly interact 
+with Browser clients and run a reliable script tag filter on the server. Unlike 
+JSON CSV is not risky because it&#39;s data is not interpreted with <tt>eval</tt> but 
+with as simple string tokenizer.</p>
+<p>Example: <tt>{field1:value1;field2:&quot;value2&quot;;field3:[arrayitem1,arrayitem2];field4:{objfield1:value1;objfield2:value2}}</tt></p>
+<h4>CSV...</h4>
 <p>is the most compact format, however, one drawback is that it does not support 
-complex object structure but only plain rows, i.e. objects that contain simple 
-data types only. CSV is the best choice if you have to exchange a high amount of 
-data with flat structures.</p>
-<p>
-Example: 
-<code>field1=value1,field2=&quot;value2&quot;,field3=value3</code></p>
-<h4>XML</h4>
-<p>is the most flexible format but also the format with the highest overhead. 
-XML can contain arbitrary object structures. Hence XML is the best choice if you 
-do not have to exchange a high amount of data but keep to most flexible in terms 
-of the token content.</p>
+complex object structure but only plain rows, i.e. objects that contain simple data 
+types only. CSV is the best choice if you have to exchange a high amount of data 
+with flat structures.</p>
+<p>Example: <tt>field1=value1,field2=&quot;value2&quot;,field3=value3</tt></p>
+<h4>XML...</h4>
+<p>is the most flexible format but also the format with the highest overhead. XML 
+can contain arbitrary object structures. Hence XML is the best choice if you do 
+not have to exchange a high amount of data but keep to most flexible in terms of 
+the token content.</p>
 <p>Example: Targeted for jWebSocket Release 1.1</p>
+<h3>Token-Types</h3>
+<p>Every token has a certain type stored in its <tt>type</tt> field. The type specifies 
+which further fields within its namespace (see below) .</p>
+<h3>Namespaces</h3>
+<p>In jWebSockets the communication capabilities are implemented in various plug-ins, 
+on the client-side as well as on the server-side. You can extend the existing functionality 
+by creating your own plug-ins. To avoid naming conflicts with token fields jWebSocket 
+provides namespaces for tokens. So before a plug-in starts to evaluate the content 
+of a token it first checks for its name space which should match the name space 
+of the plug-in.</p>
 <h3>Token-IDs</h3>
-<p>Every Token has a session unique token id which is exchanged between sender 
-and receiver. Due to the multithreaded structure of the jWebSocket server it 
-cannot be guaranteed that the results of a client request are returned to the 
-client in the same order as they were requested. Thus if a request is send the 
-jWebSocket client assigns a new session unique token id to the each new token. 
-The response from the server takes over this token-id so that the client is able 
-to assign the response to the correct previous request.</p>
-<p>Anyway, you do not necessarily need to use the token ids. All incoming 
-responses can also be captured in the OnMessage callback handler of the 
-jWebSocket client. But e.g. for <a href="dg_rpc.htm">RPC calls</a> they are 
-essential, because a result from a call to a server method needs to be 
-references to the correct previous request.</p>
+<p>Every Token has a session unique token id which is exchanged between sender and 
+receiver. Due to the multithreaded structure of the jWebSocket server it cannot 
+be guaranteed that the results of a client request are returned to the client in 
+the same order as they were requested. Thus if request is send to the server the 
+jWebSocket client assigns a new session unique token id to each new token. The response 
+from the server takes over this token-id into the response so that the client is 
+able to assign the response correctly to the previous request.</p>
+<p>However, you do not need to consider the token ids in your applications. All 
+incoming responses can also be captured in the <tt>OnMessage</tt> callback handler 
+of the jWebSocket client. Also for <a href="dg_rpc.htm">RPC calls</a> the <tt>jWebSocket.js</tt> 
+library processes the token-ids internally to assign the result of a call to a server 
+method internally, so that you usually do not need to take care of them.</p>
 <h2>Token-Reference</h2>
-<p>Below you find the list of supported tokens in the <code>SystemPlugIn</code> of the 
+<p>Below you find the list of supported tokens in the <tt>SystemPlugIn</tt> of the 
 jWebSocket package. First the Server-to-Client (S2C) tokens are listed followed 
 by the Client-To-Server (C2S)tokens.</p>
 <h2>Server-To-Client Tokens</h2>
 <h3>welcome</h3>
-<p>The <code>welcome</code> token is send to a client, when he successfully connected to 
-one of the Token Connector descendants.</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0">
-			<colgroup>
-				<col width="5%"/>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Token</th>
-				<th class="sthData" valign="top">Datatype</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">vendor</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Name of the vendor who provides 
-				the jWebSocket services. Can be configured in Config.java.</td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">version</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Version string of the 
-				jWebSocket server. </td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">usid</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Unique session id the 
-				jWebSocket assigns to that client.</td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">port</td>
-				<td class="stdData" valign="top">Integer</td>
-				<td class="stdData" valign="top">Server side outgoing TCP port 
-				number the client is connected with.</td>
-			</tr>
-			</table>
+<p>The <tt>welcome</tt> token is send from the server to a client, when the connection 
+has successfully been established. The <tt>welcome</tt> token is the only token 
+that contains the session-id for the client. It will neither be sent again by the 
+server nor can it be requested by the client during the session. In all cases the
+<tt>processOpened</tt> method of the client is executed as soon as the connection 
+was established.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>welcome</tt>&quot;</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">vendor</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Name of the vendor who provides the jWebSocket 
+		services. Can be configured in <tt>Config.java</tt>.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">version</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Version string of the jWebSocket server.
+		</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">usid</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Unique session id the jWebSocket assigns 
+		to that client.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">sourceId</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Unique id for this client. This allows 
+		to address a certain a client in the network irrespective of their user 
+		id.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">timeout</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Session timeout in milliseconds. After 
+		this time of client inactivity the server will automatically close the connection.</td>
+	</tr>
+</table>
 <h3>goodBye</h3>
-<p>The <code>goodbye</code> token is send to a client, when he successfully disconnected to 
-one of the Token Connector descendants.</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0" id="table8">
-			<colgroup>
-				<col width="5%"/>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Token</th>
-				<th class="sthData" valign="top">Datatype</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">vendor</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Name of the vendor who provides 
-				the jWebSocket services. Can be configured in Config.java.</td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">version</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Version string of the 
-				jWebSocket server. </td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">usid</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Unique session id the 
-				jWebSocket assigns to that client.</td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">port</td>
-				<td class="stdData" valign="top">Integer</td>
-				<td class="stdData" valign="top">Server side outgoing TCP port 
-				number the client is connected with.</td>
-			</tr>
-			</table>
+<p>The <tt>goodbye</tt> token is send from the server to a client after as response 
+to a <tt>close</tt> request. The <tt>close</tt> method of the JavaScript client 
+supports an <tt>timeout</tt> option. If <tt>timeout</tt> is &lt;= <tt>0</tt>&nbsp; 
+the client disconnects immediately. If the <tt>timeout</tt> is &gt; <tt>0</tt> the 
+client sends a close token to ther server and waits timeout milliseconds for the
+<tt>goodBye</tt> response. In this case the server disconnects after responding 
+with <tt>goodBye</tt>. If the client does not receive the <tt>goodBye</tt> within 
+the given timeout is disconnects as well. In all cases the <tt>processClosed</tt> 
+method of the client is executed as soon as the connection was terminated.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table8">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>goodBye</tt>&quot;</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">vendor</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Name of the vendor who provides the jWebSocket 
+		services. Can be configured in Config.java.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">version</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Version string of the jWebSocket server.
+		</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">usid</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Unique session id the jWebSocket assigns 
+		to that client.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">port</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Server side outgoing TCP port number the 
+		client is connected with.</td>
+	</tr>
+</table>
 <h3>response</h3>
-<p>The <code>response</code> token is send as a response to a previous request 
-from a client.</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0" id="table1">
-			<colgroup>
-				<col width="5%"/>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Token</th>
-				<th class="sthData" valign="top">Datatype</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">utid</td>
-				<td class="stdData" valign="top">Integer</td>
-				<td class="stdData" valign="top">Unique token id to assign the 
-				response to the previous request on the client side.</td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">reqType</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Type of the token which was 
-				sent for the previous request.</td>
-			</tr>
-			</table>
+<p>The <tt>response</tt> token is send as a response from a target to a previous 
+request from a client. A response can either be send from the server e.g when running 
+remote procedure calls (RPC) or from another client e.g. when running <tt>identify</tt> 
+requests.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table1">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>response</tt>&quot;</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">utid</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Unique token id to assign the response 
+		to the previous request on the client side.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">reqType</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Type of the token which was sent for the 
+		previous request, original request type.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">code</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Should be zero, if the result in Ok or 
+		any other code if an error occured (also see <tt>msg</tt> field).</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">result</td>
+		<td class="stdData" valign="top">Variant</td>
+		<td class="stdData" valign="top">Result of the request, can be of arbitrary 
+		type depending on the request and the method on the target.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">msg</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">An optional error message in case of errors 
+		or exceptions.</td>
+	</tr>
+</table>
 <h3>event</h3>
-<p>The <code>event</code> token is send as a message from the server without a 
-previous request from a client.</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0" id="table2">
-			<colgroup>
-				<col width="5%"/>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Token</th>
-				<th class="sthData" valign="top">Datatype</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">name</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Name of the event, further 
-				fields of this token depend on the event.</td>
-			</tr>
-			</table>
-<h4>timeout event</h4>
-<p>The timeout for the current session exceeded. The client was disconnected by 
-the server.</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0" id="table5">
-			<colgroup>
-				<col width="5%"/>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Token</th>
-				<th class="sthData" valign="top">Datatype</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">username</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Name of user who has logged in.</td>
-			</tr>
-			</table>
+<p>The <tt>event</tt> token is send as a message from the server or another client 
+without a previous request. Events are fired when another client connects or disconnects 
+or when the server side session timeout is exceed and the connection is about to 
+be closed.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table2">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Allways &quot;<tt>event</tt>&quot;.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">name</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Name of the event, further fields of this 
+		token depend on the event. Name can be associated with event type.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">:</td>
+		<td class="stdData" valign="top">:</td>
+		<td class="stdData" valign="top">Further fields depending on name / event 
+		type (see below).</td>
+	</tr>
+</table>
 <h4>connect event</h4>
 <p>A new client has connected to the jWebSocket network. This event is optional 
-and intended for administration purposes only. To manage users on the client 
-side please refer to the login event.</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0" id="table6">
-			<colgroup>
-				<col width="5%"/>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Token</th>
-				<th class="sthData" valign="top">Datatype</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">&nbsp;</td>
-				<td class="stdData" valign="top">&nbsp;</td>
-				<td class="stdData" valign="top">&nbsp;</td>
-			</tr>
-			</table>
+and can be configured to not being sent automatically by the server. Please refer 
+to the <tt>identify</tt> request to learn how to obtain connected users by following 
+individual privacy policies.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table6">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>event</tt>&quot;</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">name</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>connect</tt>&quot;</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">sourceId</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Unique id of the client that just connected 
+		(optional, whether or not broadcasting this field can be configured on the 
+		server).</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">clientCount</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Number of client currently connected the 
+		server (optional, whether or not broadcasting this field can be configured 
+		on the server).</td>
+	</tr>
+</table>
 <h4>disconnect event</h4>
 <p>A client has disconnected from the jWebSocket network. This event is optional 
-and intended for administration purposes only.To manage users on the client side 
-please refer to the login event.</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0" id="table7">
-			<colgroup>
-				<col width="5%"/>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Token</th>
-				<th class="sthData" valign="top">Datatype</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">&nbsp;</td>
-				<td class="stdData" valign="top">&nbsp;</td>
-				<td class="stdData" valign="top">&nbsp;</td>
-			</tr>
-			</table>
+and can be configured to not being sent automatically by the server. If the 
+disconnect event is not sent by the server the client cannot update potential 
+local client lists in real-time. To obtain the connected clients asynchronously 
+please refer to the <tt>getClients</tt> token.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table7">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>event</tt>&quot;</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">name</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>disconnect</tt>&quot;</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">sourceId</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Unique id of the client that just connected 
+		(optional, whether or not broadcasting this field can be configured on the 
+		server).</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">clientCount</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Number of client currently connected the 
+		server including the one who is about to disconnect (optional, whether or 
+		not broadcasting this field can be configured on the server).</td>
+	</tr>
+</table>
 <h4>login event</h4>
-<p>A new client has successfully logged in. This event can be used e.g. to 
-update user lists.</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0" id="table3">
-			<colgroup>
-				<col width="5%"/>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Token</th>
-				<th class="sthData" valign="top">Datatype</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">username</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Name of user who has logged in.</td>
-			</tr>
-			</table>
+<p>A new client has successfully logged in. This event can be used e.g. to update 
+user lists on the client in real-time. This event is optional and can be 
+configured to not being sent automatically by the server. Please refer to the <tt>identify</tt> request to 
+learn how to obtain connected users by following individual privacy policies.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table3">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>event</tt>&quot;</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">name</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>login</tt>&quot;</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">sourceId</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Unique id of the client that just connected 
+		(optional, whether or not broadcasting this field can be configured on the 
+		server).</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">clientCount</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Number of client currently connected the 
+		server including the one who is about to disconnect (optional, whether or 
+		not broadcasting this field can be configured on the server).</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">username</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Name of user who has logged in.</td>
+	</tr>
+</table>
 <h4>logout event</h4>
-<p>A client which previously was logged in has logged out. This event can be 
-used e.g. to update user lists.</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0" id="table4">
-			<colgroup>
-				<col width="5%"/>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Token</th>
-				<th class="sthData" valign="top">Datatype</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">username</td>
-				<td class="stdData" valign="top">String</td>
-				<td class="stdData" valign="top">Name of user who has logged 
-				out.</td>
-			</tr>
-			</table>
+<p>A client which previously was logged in has logged out. This event can be used 
+e.g. to update user lists. This event is optional and can be configured to not 
+being sent automatically by the server. If the logout event is not sent by the 
+server the client cannot update potential local user lists in real-time. To 
+obtain the connected users asynchronously please refer to the <tt>getClients</tt> token.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table4">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>event</tt>&quot;</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">name</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>logout</tt>&quot;</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">sourceId</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Unique id of the client that just connected 
+		(optional, whether or not broadcasting this field can be configured on the 
+		server).</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">clientCount</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Number of client currently connected the 
+		server including the one who is about to logout (optional, whether or not 
+		broadcasting this field can be configured on the server).</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top">username</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Name of user who has logged out.</td>
+	</tr>
+</table>
 <h2>Client-To-Server Tokens</h2>
-<h2>login</h2>
-<p>Pending...</p>
-<h2>logout</h2>
-<p>Pending...</p>
-<h2>close</h2>
-<p>Pending...</p>
-<h2>send</h2>
-<p>Pending...</p>
-<h2>broadcast</h2>
-<p>Pending...</p>
-<h2>echo</h2>
-<p>Pending...</p>
-<h2>getClients</h2>
-
-<p>Pending...</p>
+<p>The following section describes the tokens which are send from the client to 
+the server. These tokens can be associated with &quot;commands&quot; from the client to 
+the server which usually are answered with a <tt>response</tt> token (see above) if not explicitely 
+suppressed for certain reasons. Results are sent back from the server to the client in a <tt>response</tt> token as 
+described above. Usually the fields <tt>result</tt>, <tt>code</tt> and <tt>msg</tt> are filled in the answer. Because JavaScript does not support synchronous 
+calls each command provides an optional <tt>OnResponse</tt> listener which is 
+fired when the <tt>response</tt> token arrives.</p>
+<h3>login</h3>
+<p>Authenticates a client after the connection has been established. The client 
+should wait until the response is received from the server before notifying the 
+user about the login state or a potential error. If a <tt>login</tt> token is sent while 
+another user already is authenticated, the previous user automatically gets logged out.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table9">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>login</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">ns</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Namespace 
+		&quot;<tt>org.jWebSocket.plugins.system</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">username</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Name of user who has logged out.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">password</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Please refer to section security.</td>
+	</tr>
+	</table>
+<h3>logout</h3>
+<p>Logs the current user out but does keeps the connection. Optionally another 
+user can authenticate afterwards based upon the same underlying connection.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table10">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>logout</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">ns</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Namespace 
+		&quot;<tt>org.jWebSocket.plugins.system</tt>&quot;.</td>
+	</tr>
+	</table>
+<h3>close</h3>
+<p>The <tt>close</tt> method of the JavaScript client 
+supports an <tt>timeout</tt> option. If <tt>timeout</tt> is &lt;= <tt>0</tt>&nbsp; 
+the client disconnects immediately. If the <tt>timeout</tt> is &gt; <tt>0</tt> the 
+client sends a <tt>close</tt> token to ther server and waits <tt>timeout</tt> milliseconds for the
+<tt>goodBye</tt> response. In this case the server disconnects after responding 
+with <tt>goodBye</tt>. If the client does not receive the <tt>goodBye</tt> within 
+the given timeout it disconnects as well.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table11">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>close</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">ns</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Namespace 
+		&quot;<tt>org.jWebSocket.plugins.system</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">timeout</td>
+		<td class="stdData" valign="top">Integer</td>
+		<td class="stdData" valign="top">Close timeout in milliseconds.</td>
+	</tr>
+	</table>
+<h3>send</h3>
+<p>The <tt>send</tt> token is forwarded by the server to the client addressed by the given 
+<tt>targetId</tt>. In the <tt>responseRequested</tt> field the sender can specify whether or not 
+to get a response (acknowlegge that the token has been forwarded) or not. I case 
+of errors, e.g. when no client with the given <tt>targetId</tt> could be found, always a 
+response with an error is returned.</p>
+<p>Please consider that a certain client cannot be addressed by it's username 
+but by its client id only, because basically a user can login on multiple 
+stations or browser instances/tabs, of course, only if the application allows 
+that. Furthermore a client does not necessarily need to be authenticated to 
+receive messages from the server.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table12">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>send</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">ns</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Namespace 
+		&quot;<tt>org.jWebSocket.plugins.system</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">data</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">The message to be sent.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">sourceId</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Id of the source client who sent the 
+		message.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">targetId</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Id of the target client as receiver of 
+		the message.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">responseRequested</td>
+		<td class="stdData" valign="top">Boolean</td>
+		<td class="stdData" valign="top">Specifies whether the sender expects an 
+		answer or if it is a one-way token (targetted for v0.8)</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">sender</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Username of client who sent the 
+		message.</td>
+	</tr>
+	</table>
+<h3>broadcast</h3>
+<p>The <tt>broadcast</tt> token is broadcasted by the server to all currently connected clients, 
+optionally including the sender for special purposes. The 
+server optionally sends a response (see field <tt>responseRequested</tt>). It's up to the 
+other clients (targets) to send a response to the sender (source). Among others 
+the broadcast can be used to e.g. for chat systems or to distribute player updates in gaming applications 
+as well as to broadcast <tt>identify</tt> requests for the case that the server is 
+configured to not automatically send <tt>connect</tt>, <tt>disconnect</tt>, <tt>login</tt> and <tt>logout</tt>
+events.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table13">
+	<colgroup>
+		<col width="5%" /><col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>broadcast</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">ns</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Namespace 
+		&quot;<tt>org.jWebSocket.plugins.system</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">data</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">The message to be sent.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top" height="23">sourceId</td>
+		<td class="stdData" valign="top" height="23">String</td>
+		<td class="stdData" valign="top" height="23">Id of the source client who sent the 
+		message.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">senderIncluded</td>
+		<td class="stdData" valign="top">Boolean</td>
+		<td class="stdData" valign="top">Specifies whether the message is also 
+		send to sender (default <tt>false</tt>).</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">responseRequested</td>
+		<td class="stdData" valign="top">Boolean</td>
+		<td class="stdData" valign="top">Specifies whether the sender expects an 
+		answer or if it is a one-way token.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">sender</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Username of the client who sent the 
+		message.</td>
+	</tr>
+	</table>
+<h3>echo</h3>
+<p>The <tt>echo</tt> token sends a message to the server. The client expects a result 
+with the same data. Usually applications will not use ths token, except for 
+connection and performance tests. 
+For keep-alive purposes please refer to the <tt>ping</tt> token.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table15">
+	<colgroup>
+		<col width="5%" />
+		<col width="5%" />
+		<col width="" />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>echo</tt>&quot;</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">ns</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Namespace 
+		&quot;<tt>org.jWebSocket.plugins.system</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">data</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Data to be sent to the server and 
+		echoed back.</td>
+	</tr>
+	</table>
+<h3>ping</h3>
+<p>The <tt>ping</tt> token is a simple and short message from a client to the server to indicate that 
+the client is still alive. If the server does not receive data within its 
+session timeout he automatically closes the connection after the timeout is 
+exceeded.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table17">
+	<colgroup>
+		<col width="5%" />
+		<col width="5%" />
+		<col width="" />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>ping</tt>&quot;</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">ns</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Namespace 
+		&quot;<tt>org.jWebSocket.plugins.system</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">echo</td>
+		<td class="stdData" valign="top">Boolean</td>
+		<td class="stdData" valign="top">Specifies whether the ping expects a 
+		result or not (default <tt>false</tt>). <tt>echo</tt> should be set to <tt>true</tt> only when the 
+		client wants to check if the server is still alive.</td>
+	</tr>
+	</table>
+<h3>getClients</h3>
+<p>The <tt>getClients</tt> token requests the list of clients from the server. With the 
+<tt>mode</tt> option (default = <tt>0</tt>) the client can specify whether to return all, 
+authenticated client only or non-authenticated clients only. The <tt>result</tt> field of 
+the response contains an array with the requested clients in the format 
+<tt>[username|dash if not logged in]@[clientId]</tt>.</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table16">
+	<colgroup>
+		<col width="5%" />
+		<col width="5%" />
+		<col width="" />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Token</th>
+		<th class="sthData" valign="top">Datatype</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">type</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Always &quot;<tt>getClients</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top">ns</td>
+		<td class="stdData" valign="top">String</td>
+		<td class="stdData" valign="top">Namespace 
+		&quot;<tt>org.jWebSocket.plugins.system</tt>&quot;.</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top" height="26">mode</td>
+		<td class="stdData" valign="top" height="26">Integer</td>
+		<td class="stdData" valign="top" height="26">ALL_CLIENTS=0, 
+		AUTHENTICATED=1, NON_AUTHENTICATED=2.</td>
+	</tr>
+	</table>
 
 </body>
 
