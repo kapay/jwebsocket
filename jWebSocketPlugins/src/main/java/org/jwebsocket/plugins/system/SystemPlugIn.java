@@ -203,13 +203,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		// here the session id is MANDATORY! to pass to the client!
 		lWelcome.put("usid", getSessionId(aConnector));
 		lWelcome.put("sourceId", aConnector.getId());
-		/*
-		try {
-		lOutToken.put("timeout", this.getClientSocket().getSoTimeout());
-		} catch (SocketException ex) {
-		lOutToken.put("timeout", -1);
-		}
-		 */
+		lWelcome.put("timeout", aConnector.getEngine().getSessionTimeout());
+
 		lServer.sendToken(aConnector, lWelcome);
 	}
 
@@ -270,12 +265,12 @@ public class SystemPlugIn extends TokenPlugIn {
 		Token lGoodBye = new Token(TT_GOODBYE);
 		lGoodBye.put("vendor", Config.VENDOR);
 		lGoodBye.put("version", Config.VERSION_STR);
-		// lGoodBye.put("usid", getSessionId(aConnector));
 		lGoodBye.put("sourceId", aConnector.getId());
 		if (aCloseReason != null) {
 			lGoodBye.put("reason", aCloseReason.toString().toLowerCase());
 		}
 
+		// don't send session-id on good bye, neither required nor desired
 		lServer.sendToken(aConnector, lGoodBye);
 	}
 

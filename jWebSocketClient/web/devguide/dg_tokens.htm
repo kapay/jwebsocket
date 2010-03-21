@@ -19,8 +19,8 @@ object structures.</p>
 <h3>Why use different Token formats?</h3>
 <p>Each of the JSON, CSV and XML formats have their benefits for a particular purpose 
 as described below.</p>
-<h4>JSON...</h4>
-<p>can be interpreted very easily by JavaScript clients, but not that easy by Java 
+<h4>JSON</h4>
+<p>JSON can be interpreted very easily by JavaScript clients, but not that easy by Java 
 clients. JSON may hold security risks because it may execute malicous code on the 
 client. So here you need to take care on the server side that potential executable 
 codes are stripped out of a token. JSON is the best choice if you mostly interact 
@@ -28,14 +28,14 @@ with Browser clients and run a reliable script tag filter on the server. Unlike
 JSON CSV is not risky because it&#39;s data is not interpreted with <tt>eval</tt> but 
 with as simple string tokenizer.</p>
 <p>Example: <tt>{field1:value1;field2:&quot;value2&quot;;field3:[arrayitem1,arrayitem2];field4:{objfield1:value1;objfield2:value2}}</tt></p>
-<h4>CSV...</h4>
-<p>is the most compact format, however, one drawback is that it does not support 
+<h4>CSV</h4>
+<p>CSV is the most compact format, however, one drawback is that it does not support 
 complex object structure but only plain rows, i.e. objects that contain simple data 
 types only. CSV is the best choice if you have to exchange a high amount of data 
 with flat structures.</p>
 <p>Example: <tt>field1=value1,field2=&quot;value2&quot;,field3=value3</tt></p>
-<h4>XML...</h4>
-<p>is the most flexible format but also the format with the highest overhead. XML 
+<h4>XML</h4>
+<p>XML is the most flexible format but also the format with the highest overhead. XML 
 can contain arbitrary object structures. Hence XML is the best choice if you do 
 not have to exchange a high amount of data but keep to most flexible in terms of 
 the token content.</p>

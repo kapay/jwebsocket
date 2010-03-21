@@ -91,14 +91,12 @@
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
 				// try to establish connection to jWebSocket server
-				lWSC.connect( lURL, {
+				lWSC.open( lURL, {
 
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( SYS, IN, "Connection to " + lJWSID + " established." );
 						login();
-						// start keep alive if user selected that option
-						checkKeepAlive({ immediate: false });
 					},
 
 					// OnMessage callback
@@ -123,7 +121,7 @@
 			function disconnect() {
 				// disconnect automatically logs out!
 				lWSC.stopKeepAlive();
-				var lRes = lWSC.disconnect({
+				var lRes = lWSC.close({
 					// wait a maximum of 3 seconds for server good bye message
 					timeout: 3000
 				});
@@ -238,10 +236,10 @@
 					lWSC = new jws.jWebSocketJSONClient();
 					// lWSC = new jws.jWebSocketCSVClient();
 
-					eUsername.addEventListener( "keydown", usrKeyDnLsnr, false );
-					eMessage.addEventListener( "keydown", msgKeyDnLsnr, false );
-					eUsername.addEventListener( "focus", elemFocusLsnr, false );
-					eMessage.addEventListener( "focus", elemFocusLsnr, false );
+					//eUsername.addEventListener( "keydown", usrKeyDnLsnr, false );
+					// eMessage.addEventListener( "keydown", msgKeyDnLsnr, false );
+					// eUsername.addEventListener( "focus", elemFocusLsnr, false );
+					// eMessage.addEventListener( "focus", elemFocusLsnr, false );
 					
 					eUsername.focus();
 					eUsername.select();
@@ -296,7 +294,6 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogin" type="button" value="Login" onclick="connect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogout" type="button" value="Logout" onclick="disconnect();"></td>
 					<td class="stdDlg" width="" align="right">
-						<input id="schkKeepAlive" type="checkbox" value="off" onclick="checkKeepAlive();">&nbsp;Keep-Alive&nbsp;
 						<input id="schkDebug" type="checkbox" value="off">&nbsp;Debug&nbsp;
 						<input class="sbtnDlg" id="sbtnClearLog" type="button" value="Clear Log" onclick="clearLog();">
 					</td>

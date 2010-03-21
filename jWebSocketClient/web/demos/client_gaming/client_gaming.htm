@@ -101,7 +101,7 @@
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
 				// try to establish connection to jWebSocket server
-				lWSC.connect( lURL, {
+				lWSC.open( lURL, {
 
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
@@ -164,7 +164,7 @@
 			function disconnect() {
 				// disconnect automatically logs out!
 				lWSC.stopKeepAlive();
-				var lRes = lWSC.disconnect({
+				var lRes = lWSC.close({
 					// wait a maximum of 3 seconds for server good bye message
 					timeout: 3000
 				});

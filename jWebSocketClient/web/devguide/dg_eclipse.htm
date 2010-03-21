@@ -3,16 +3,29 @@
 <head>
 <meta http-equiv="Content-Language" content="de">
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>jWebSocket Java Client</title>
+<title>jWebSocket Eclipse Build</title>
 <link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
 </head>
 
 <body>
 
-<h2>Import jWebSocket Project into Eclipse </h2>
-<p>This section describes how to import and compile the Apache Maven based 
-jWebSocket sources into Eclipse.</p>
-<p>Pending...</p>
+<h2>Build jWebSocket with Eclipse </h2>
+<p>This section describes how to import and compile the Apache Maven based jWebSocket 
+sources into Eclipse.</p>
+<p>The Eclipse IDE is available at <a href="http://www.netbeans.org">http://www.eclipse.org</a>.</p>
+<ol class="instructions">
+	<li class="instruction">Download jWebSocket source from
+	<a href="../downloads.htm">download area</a> with Tortoise Subversion Client 
+	and extract or check out into a folder of your choice.</li>
+	<li class="instruction">Change to the root folder (e.g. 
+	<tt>c:\svn\jWebSocket\trunk</tt>)</li>
+	<li class="instruction">Run <tt>mvn clean install</tt> in the command shell</li>
+	<li class="instruction">Run <tt>mvn clean eclipse:m2eclipse</tt> in the command shell,<br/>
+	this will generate the Eclipse 
+	specific files.</li>
+	<li class="instruction">Import the project into Eclipse.</li>
+</ol>
+<p>Details pending...</p>
 <p>&nbsp;</p>
 
 </body>

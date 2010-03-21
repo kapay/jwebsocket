@@ -47,7 +47,7 @@
 				var lURL = jws.JWS_SERVER_URL; // + "/;prot=json";
 
 				log( "Connecting to " + lURL + " ..." );
-				var lRes = lWSC.connect( lURL, {
+				var lRes = lWSC.open( lURL, {
 
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
@@ -72,7 +72,7 @@
 			function disconnect() {
 				if( lWSC ) {
 					log( "Disconnecting..." );
-					var lRes = lWSC.disconnect();
+					var lRes = lWSC.close();
 					log( lWSC.resultToString( lRes ) );
 				}
 			}

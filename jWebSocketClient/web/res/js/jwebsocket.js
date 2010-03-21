@@ -132,7 +132,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	// to easily handle open event in descendants
 	},
 
-	connect: function( aURL, aOptions ) {
+	open: function( aURL, aOptions ) {
 		if( !aOptions ) {
 			aOptions = {};
 		}
@@ -186,6 +186,10 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 	},
 
+	connect: function( aURL, aOptions ) {
+		return this.open(aURL, aOptions );
+	},
+
 	sendStream: function( aData ) {
 		// is client already connected
 		if( this.isConnected() ) {
@@ -211,7 +215,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		this.fConn = null;
 	},
 
-	disconnect: function( aOptions ) {
+	close: function( aOptions ) {
 		// check if timeout option is used
 		var lTimeout = 0;
 		if( aOptions ) {
@@ -237,7 +241,12 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			throw new Error( "Not connected" );
 			this.fConn = null;
 		}
+	},
+
+	disconnect: function( aOptions ) {
+		return this.close( aOptions );
 	}
+
 });
 
 
@@ -381,7 +390,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			this.fSessionId = null;
 		} else if( aToken.type == "close" ) {
 			// if the server closes the connection close immediately too.
-			this.disconnect({
+			this.close({
 				timeout: 0
 			});
 		// check if we got a response from a previous request
@@ -518,7 +527,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.ex";
 			lRes.args = [ ex.message ];
-			lRes.msg = "Exception on connect: " + ex.message;
+			lRes.msg = "Exception on open: " + ex.message;
 		}
 		return lRes;
 	},
@@ -551,14 +560,14 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.ex";
 			lRes.args = [ ex.message ];
-			lRes.msg = "Exception on disconnect: " + ex.message;
+			lRes.msg = "Exception on close: " + ex.message;
 		}
 		return lRes;
 	},
 
 	// deprecated, kept for upward compatibility
 	disconnect: function( aOptions ) {
-		return this.open( aOptions );
+		return this.close( aOptions );
 	},
 
 	login: function( aUsername, aPassword, aPool ) {

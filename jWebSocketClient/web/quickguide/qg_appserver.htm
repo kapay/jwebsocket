@@ -5,6 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <title>jWebSocket Quick Guide Application Server</title>
 <link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
+<script src="../res/js/jwsWebsite.js" type="text/javascript"></script>
 </head>
 
 <body>
@@ -20,7 +21,8 @@ Java 1.6 installed. It is possible but not required to use the Apache http serve
 as Tomcat frontend together with <tt>mod_proxy</tt> or <tt>mod_jk</tt> as bridge.</p>
 <h3>Prerequisities on the Client</h3>
 <p>The jWebSocket client is embedded into the web application, so beside an installed 
-HTML 5 browser with WebSocket support there is no need for certain preparations. </p>
+HTML 5 browser with WebSocket support there is no need for certain preparations.
+</p>
 <h2>Running jWebSocket Server as Stand-Alone Web Application</h2>
 <p>In the <a href="../downloads.htm">download</a> section you will find a ready-to-deploy 
 web application as a .war file which has been tested for Tomcat 6.0. This web application 
@@ -35,15 +37,13 @@ follwing steps to run it:</p>
 	in your browser and login with your admin credentials <br>
 	(adjust host and port according to your environment).</li>
 	<li>Deploy the <tt>jWebSocketAppServer.war </tt>in Tomcat as follows:<br>
-	<br>
-	<img border="0" src="images/tomcat_deploy.jpg" width="784" height="304"><br>
+	<img class="screenshotOff" id="tomcat_deploy" border="0" src="images/tomcat_deploy.jpg" width="784" height="304">
 	<p class="imageFooter">Deploying jWebSocketAppServer Web Application in Tomcat 
 	6.0</p>
 	</li>
 	<li>You now can stop and re-start the web application within the Tomcat Manager 
 	as follows:<br>
-	<br>
-	<img border="0" src="images/tomcat_start_stop.jpg" width="783" height="73"><br>
+	<img class="screenshotOff" id="tomcat_start_stop" border="0" src="images/tomcat_start_stop.jpg" width="783" height="73">
 	<p class="imageFooter">Controlling jWebSocketAppServer Web Application in Tomcat 
 	6.0</p>
 	</li>
@@ -121,6 +121,10 @@ various plug-ins.</p>
 }</pre>
 	<p class="imageFooter">Integrating the jWebSocketServer into a Tomcat web application</p>
 </blockquote>
+<script type="text/javascript">
+			makeImgExp( "tomcat_deploy" );
+			makeImgExp( "tomcat_start_stop" );
+		</script>
 
 </body>
 

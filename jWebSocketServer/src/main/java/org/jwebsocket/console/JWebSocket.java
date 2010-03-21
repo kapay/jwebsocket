@@ -45,7 +45,7 @@ public class JWebSocket {
 	public static void main(String[] args) {
 
 		String prot = "json"; // [json|csv|xml|custom]
-		String loglevel = "debug";
+		String loglevel = "error";
 		int port = Config.DEFAULT_PORT;
 		int sessionTimeout = Config.DEFAULT_TIMEOUT;
 

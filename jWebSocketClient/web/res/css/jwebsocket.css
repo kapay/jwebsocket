@@ -104,6 +104,12 @@ p {
 	font-weight: normal;
 }
 
+ol.instructions {
+	margin-top: 3pt;
+}
+li.instruction {
+	margin-bottom: 3pt;
+}
 
 div.sdivContainer {
 	border: 0px; /*1px solid #444;*/
@@ -200,6 +206,36 @@ input[type="button"].inpBtnEm {
 p.menulink {
 	padding: 1px;
 }
+
+img.diagram {
+	margin: 6pt 0 0 0;
+}
+
+img.screenshot, img.screenshotOn, img.screenshotOff {
+	margin: 6pt 0 0 0;
+}
+img.screenshotOn {
+	display: inline;
+}
+img.screenshotOff {
+	display: none;
+}
+p.screenshotPlus, p.screenshotMinus {
+	margin: 3pt 0 0 0;
+	padding: 0 0 0 20px;
+	text-decoration: underline;
+	cursor: default;
+	font-size: 10pt;
+	color: #505050;
+}
+p.screenshotPlus {
+	background: url(../img/screenshotPlus.png) 0px 0px no-repeat;
+}
+p.screenshotMinus {
+	background: url(../img/screenshotMinus.png) 0px 0px no-repeat;
+}
+
+
 p.imageFooter {
 	margin-top: 2px;
 	color: #505050;
@@ -220,15 +256,7 @@ a.menulink, a.menulink:link, a.menulink:visited {
 	background-color: white;
 	color: #202020;
 }
-a.menulink:focus {
-	background: url(../../images/bullet_blue.png) 0px 2px no-repeat;
-	background-color: #f0f0f0;
-}
-a.menulink:hover {
-	background: url(../../images/bullet_blue.png) 0px 2px no-repeat;
-	background-color: #f0f0f0;
-}
-a.menulink:active {
+a.menulink:focus, a.menulink:hover, a.menulink:active {
 	background: url(../../images/bullet_blue.png) 0px 2px no-repeat;
 	background-color: #f0f0f0;
 }

@@ -27,15 +27,17 @@ public class Token {
 	private HashMap<String, Object> items = new HashMap<String, Object>();
 
 	/**
-	 *
+	 * Creates a new empty instance of a token.
+	 * The token does not contaon any items.
 	 */
 	public Token() {
 	}
 
 	/**
-	 *
-	 * @param aKey
-	 * @param aValue
+	 * puts a new key/value pair into the token, in other words it adds a
+	 * new item to the token.
+	 * @param aKey key of the the token item.
+	 * @param aValue value of the token item.
 	 */
 	public void put(String aKey, Object aValue) {
 		items.put(aKey, aValue);

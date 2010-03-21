@@ -48,7 +48,7 @@
 
 				log( "Connecting to " + lURL + " ..." );
 				try {
-					lWSC.connect( lURL, {
+					lWSC.open( lURL, {
 
 						// OnOpen callback
 						OnOpen: function( aEvent ) {
@@ -75,7 +75,7 @@
 				if( lWSC ) {
 					log( "Disconnecting..." );
 					try {
-						lWSC.disconnect();
+						lWSC.close();
 						log( "Disconnected." );
 					} catch( ex ) {
 						log( "Exception: " + ex.message );
@@ -134,7 +134,7 @@
 		This example is based on the class <code>org.jWebSocket.connectors.UserConnector</code> which simply echos the text/plain request back to the client.
 		Currently only Google's Chrome Browser from Version 4.0.249 support HTML 5 WebSockets, you can download it
 			<a target="_blank" href="http://www.google.com/chrome/eula.html?extra=betachannel">
-		here</a>  <img border="0" src="../../images/new_win.png">.</p>
+		here</a>  <img alt="-" border="0" src="../../images/new_win.png">.</p>
 		<div id="sdivChat" class="sdivContainer"
 			 style="position:relative; height:300px; overflow:auto;">
 		</div>

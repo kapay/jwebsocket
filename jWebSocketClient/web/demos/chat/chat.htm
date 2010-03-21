@@ -96,7 +96,7 @@
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
 				// try to establish connection to jWebSocket server
-				lWSC.connect( lURL, {
+				lWSC.open( lURL, {
 
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
@@ -170,7 +170,7 @@
 			function disconnect() {
 				// disconnect automatically logs out!
 				lWSC.stopKeepAlive();
-				var lRes = lWSC.disconnect({
+				var lRes = lWSC.close({
 					// wait a maximum of 3 seconds for server good bye message
 					timeout: 3000
 				});
@@ -209,7 +209,7 @@
 			function usrKeyDnLsnr( aEvent ) {
 				// on enter in username field try to login
 				if( aEvent.keyCode == 13 ) {
-					connect();
+					open();
 				}
 			}
 
@@ -286,7 +286,7 @@
 				// this allows the server to release the current session
 				// immediately w/o waiting on the timeout.
 				if( lWSC ) {
-					lWSC.disconnect({
+					lWSC.close({
 						// force immediate client side disconnect
 						timeout: 0
 					});

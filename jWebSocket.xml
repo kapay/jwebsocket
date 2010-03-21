@@ -58,9 +58,17 @@
 	<plugins>
 		<plugin>
 			<name>System</name>
-			<ns></ns>
+			<ns>org.jWebSocket.plugins.system</ns>
 			<id>system0</id>
 			<jar>jWebSocketPlugins-0.7.0.jar</jar>
+			<!-- plug-in specific settings -->
+			<settings>
+				<!-- specify whether open,close,login,logout event should be broadcasted -->
+				<setting key="broadcastOpenEvent">true</setting>
+				<setting key="broadcastCloseEvent">true</setting>
+				<setting key="broadcastLoginEvent">true</setting>
+				<setting key="broadcastLogoutEvent">true</setting>
+			</settings>
 		</plugin>
 		<plugin>
 			<name>Chat</name>
