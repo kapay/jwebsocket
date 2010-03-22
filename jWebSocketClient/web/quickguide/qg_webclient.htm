@@ -5,6 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <title>jWebSocket Quick Guide Web Client</title>
 <link rel="stylesheet" type="text/css" href="../res/css/jwebsocket.css">
+<script src="../res/js/jwsWebsite.js" type="text/javascript"></script>
 </head>
 
 <body>
@@ -24,17 +25,20 @@ here</a> <img border="0" src="../images/new_win.png"> or the Chrome Frame for IE
 To run the jWebSocket client on your MS Windows system please....
 <ol>
 	<li>Create a folder of your choice (e.g. <code>c:\jWebSocket\client</code>).</li>
-	<li>Download the <a href="../downloads/jWebSocketClient-0.6.7.zip"><code>jWebSocketClient.zip</code></a> 
+	<li>Download the <a href="../downloads/jWebSocketClient-0.7.0.zip"><code>jWebSocketClient.zip</code></a> 
 	from the download section and unzip it into this folder.</li>
 	<li>Start your browser (currently only Google&#39;s Chrome Browser and Chrome Frame 
 	for IE 6/7/8 from Version 4.0.249 fully support WebSockets).</li>
 	<li>Type <code>file:///[path/to/client/]index.htm</code> (e.g. <code>file:///c:/jWebSocket/client/index.html</code>) 
 	into the URL input field of the browser.</li>
 	<li>The browser opens the Welcome page of the jWebSocket client. You now can 
-	test the chat, fundamentals, streaming, gaming and RPC demos.<br/><br/>
-	<img border="0" src="images/client_demo.jpg">
+	test the chat, fundamentals, streaming, gaming and RPC demos.<br/>
+	<img class="screenshotOff" id="client_demo" border="0" src="images/client_demo.jpg">
 	<p class="imageFooter">Starting the jWebSocket Client demo web site on a local harddisk</p></li>
 </ol>
+	<script type="text/javascript">
+			makeImgExp( "client_demo" );
+	</script>
 
 
 </body>
