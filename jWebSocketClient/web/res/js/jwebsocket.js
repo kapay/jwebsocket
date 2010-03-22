@@ -490,7 +490,15 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	broadcastText: function( aPool, aText, aOptions ) {
 		var lRes = this.checkLoggedIn();
 		var lSenderIncluded = false;
-		var lResponseRequested = false;
+		var lResponseRequested = true;
+		if( aOptions ) {
+			if( aOptions.senderIncluded ) {
+				lSenderIncluded = aOptions.senderIncluded;
+			}
+			if( aOptions.responseRequested ) {
+				lResponseRequested = aOptions.responseRequested;
+			}
+		}
 		if( lRes.code == 0 ) {
 			this.sendToken({
 				type: "broadcast",

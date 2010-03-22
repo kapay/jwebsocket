@@ -224,7 +224,7 @@ p.screenshotPlus, p.screenshotMinus {
 	margin: 3pt 0 0 0;
 	padding: 0 0 0 20px;
 	text-decoration: underline;
-	cursor: default;
+	cursor: pointer;
 	font-size: 10pt;
 	color: #505050;
 }
