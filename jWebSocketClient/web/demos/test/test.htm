@@ -149,7 +149,6 @@
 									if( aToken.error ) {
 										log( SYS, OUT, "Broadcast returned error, aborting loop." );
 									} else if( lLoop < lMax ) {
-										log( SYS, OUT, "Broadcast, continuing loop." );
 										lLoop++;
 										doBroadcast();
 									} else {
@@ -248,6 +247,13 @@
 
 // ----------------------------------------- TEST STREAM
 
+			var INTERVAL_STEP = 1;
+
+			// CAN be used for big message testing:
+			var BIG_MESSAGE = '';
+			for(var i=0; i<5000; i++)	BIG_MESSAGE += 'A';
+
+			var broadcast2IntervalId = 0;
 			function broadcast2() {
 				var lLoop = 0;
 				var lMax = parseInt( eLoopCount.value );
@@ -255,7 +261,10 @@
 					lMax = 250;
 				}
 
+				var lCnt = 1;
 				function doBroadcast() {
+					if( lCnt == 1 )	lStarted = new Date().getTime();
+					lCnt++;
 					var lMsg = eMessage.value;
 					if( lMsg.length > 0 ) {
 						log( USR, OUT, lMsg );
@@ -264,23 +273,24 @@
 							lMsg	// broadcast this message
 						);
 					}
+					if( lCnt > lMax ) {
+						clearInterval ( broadcast2IntervalId );
+						var lDuration = (new Date().getTime() - lStarted);
+						var lAverage = lDuration/lMax;
+					log( SYS, OUT, "'stream broadcast' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+					}
 				}
 
 				if( lWSC.isConnected() ) {
 					log( SYS, OUT, "Starting 'stream broadcast' test..." );
-					var lStarted = new Date().getTime();
-					for(var i=0; i<lMax; i++) {
-						doBroadcast();
-					}
-					var lDuration = (new Date().getTime() - lStarted);
-					var lAverage = lDuration/lMax;
-					log( SYS, OUT, "'stream broadcast' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+					broadcast2IntervalId = setInterval ( doBroadcast, INTERVAL_STEP );
 				} else {
 					log( SYS, OUT, "Not connected." );
 				}
 			}
 
 
+			var CSPerf2IntervalId = 0;
 			function testCSPerf2() {
 				var lLoop = 0;
 				var lMax = parseInt( eLoopCount.value );
@@ -289,26 +299,30 @@
 				}
 				var lStarted;
 
+				var lCnt = 1;
 				function doPing() {
+					if( lCnt == 1 )	lStarted = new Date().getTime();
+					lCnt++;
 					lWSC.ping({
 						echo: true
 					});
+					if( lCnt > lMax ) {
+						clearInterval ( CSPerf2IntervalId );
+						var lDuration = (new Date().getTime() - lStarted);
+						var lAverage = lDuration/lMax;
+						log( SYS, OUT, "'stream ping' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+					}
 				}
 
 				if( lWSC.isConnected() ) {
 					log( SYS, OUT, "Starting 'stream ping' test..." );
-					lStarted = new Date().getTime();
-					for(var i=0; i<lMax; i++) {
-						doPing();
-					}
-					var lDuration = (new Date().getTime() - lStarted);
-					var lAverage = lDuration/lMax;
-					log( SYS, OUT, "'stream ping' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+					CSPerf2IntervalId = setInterval ( doPing, INTERVAL_STEP );
 				} else {
 					log( SYS, OUT, "Not connected." );
 				}
 			}
 
+			var RPCPerf2IntervalId = 0;
 			function testRPCPerf2() {
 				var lLoop = 0;
 				var lMax = parseInt( eLoopCount.value );
@@ -317,19 +331,22 @@
 				}
 				var lStarted;
 
+				var lCnt = 1;
 				function doRPC() {
+					if( lCnt == 1 )	lStarted = new Date().getTime();
+					lCnt++;
 					var lRes = lWSC.rpc("org.jWebSocket.demo.DemoRPCServer", "getMD5", "This is a test!");
+					if( lCnt > lMax ) {
+						clearInterval ( RPCPerf2IntervalId );
+						var lDuration = (new Date().getTime() - lStarted);
+						var lAverage = lDuration/lMax;
+					log( SYS, OUT, "'stream RPC' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+					}
 				}
 
 				if( lWSC.isConnected() ) {
 					log( SYS, OUT, "Starting 'stream RPC' test..." );
-					lStarted = new Date().getTime();
-					for(var i=0; i<lMax; i++) {
-						doRPC();
-					}
-					var lDuration = (new Date().getTime() - lStarted);
-					var lAverage = lDuration/lMax;
-					log( SYS, OUT, "'stream RPC' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+					RPCPerf2IntervalId = setInterval ( doRPC, INTERVAL_STEP );
 				} else {
 					log( SYS, OUT, "Not connected." );
 				}
@@ -413,7 +430,7 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogin" type="button" value="Login" onclick="connect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogout" type="button" value="Logout" onclick="disconnect();"></td>
 					<td class="stdDlg" width="" align="right">
-						<input id="schkDebug" type="checkbox" value="off">&nbsp;Debug&nbsp;
+						<input id="schkDebug" type="checkbox" checked="checked">&nbsp;Debug&nbsp;
 						<input class="sbtnDlg" id="sbtnClearLog" type="button" value="Clear Log" onclick="clearLog();">
 					</td>
 				</tr>
@@ -426,7 +443,7 @@
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5" align="right">Loops:</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfLoopCount" type="text" value="250" style="width:100%"></td>
+					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfLoopCount" type="text" value="50" style="width:100%"></td>
 					<td class="stdDlg" width="5" align="right">Message:</td>
 					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"></td>
 				</tr>
