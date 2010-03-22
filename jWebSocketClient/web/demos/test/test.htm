@@ -128,21 +128,49 @@
 				log( SYS, OUT, "logout: " + lRes.msg );
 			}
 
+// ----------------------------------------- TEST WITH RESPONSE
+
 			function broadcast() {
-				var lMsg = eMessage.value;
-				if( lMsg.length > 0 ) {
-					log( USR, OUT, lMsg );
-					var lRes = lWSC.broadcastText(
-					"",		// broadcast to all clients (not limited to a certain pool)
-					lMsg	// broadcast this message
-				);
-					// log error only, on success don't confuse the user
-					if( lRes.code != 0 ) {
-						log( SYS, OUT, "broadcast: " + lRes.msg );
-					}
-					eMessage.value = "";
+				var lLoop = 0;
+				var lMax = parseInt( eLoopCount.value );
+				if( isNaN( lMax ) ) {
+					lMax = 250;
 				}
-				doFocus( eMessage );
+				var lStarted;
+
+				function doBroadcast() {
+					var lMsg = eMessage.value;
+					if( lMsg.length > 0 ) {
+						log( USR, OUT, lMsg );
+						var lRes = lWSC.broadcastText(
+							"",		// broadcast to all clients (not limited to a certain pool)
+							lMsg, {	// broadcast this message
+								OnResponse: function( aToken ) {
+									if( aToken.error ) {
+										log( SYS, OUT, "Broadcast returned error, aborting loop." );
+									} else if( lLoop < lMax ) {
+										log( SYS, OUT, "Broadcast, continuing loop." );
+										lLoop++;
+										doBroadcast();
+									} else {
+										var lDuration = (new Date().getTime() - lStarted);
+										var lAverage = lDuration/lMax;
+										lAverage = lAverage.toFixed( 3 );
+										log( SYS, OUT, "'broadcast' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+									}
+								}
+							}
+						);
+					}
+				}
+
+				if( lWSC.isConnected() ) {
+					log( SYS, OUT, "Starting 'broadcast' test..." );
+					lStarted = new Date().getTime();
+					doBroadcast();
+				} else {
+					log( SYS, OUT, "Not connected." );
+				}
 			}
 
 
@@ -218,6 +246,96 @@
 				}
 			}
 
+// ----------------------------------------- TEST STREAM
+
+			function broadcast2() {
+				var lLoop = 0;
+				var lMax = parseInt( eLoopCount.value );
+				if( isNaN( lMax ) ) {
+					lMax = 250;
+				}
+
+				function doBroadcast() {
+					var lMsg = eMessage.value;
+					if( lMsg.length > 0 ) {
+						log( USR, OUT, lMsg );
+						var lRes = lWSC.broadcastText(
+							"",		// broadcast to all clients (not limited to a certain pool)
+							lMsg	// broadcast this message
+						);
+					}
+				}
+
+				if( lWSC.isConnected() ) {
+					log( SYS, OUT, "Starting 'stream broadcast' test..." );
+					var lStarted = new Date().getTime();
+					for(var i=0; i<lMax; i++) {
+						doBroadcast();
+					}
+					var lDuration = (new Date().getTime() - lStarted);
+					var lAverage = lDuration/lMax;
+					log( SYS, OUT, "'stream broadcast' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+				} else {
+					log( SYS, OUT, "Not connected." );
+				}
+			}
+
+
+			function testCSPerf2() {
+				var lLoop = 0;
+				var lMax = parseInt( eLoopCount.value );
+				if( isNaN( lMax ) ) {
+					lMax = 250;
+				}
+				var lStarted;
+
+				function doPing() {
+					lWSC.ping({
+						echo: true
+					});
+				}
+
+				if( lWSC.isConnected() ) {
+					log( SYS, OUT, "Starting 'stream ping' test..." );
+					lStarted = new Date().getTime();
+					for(var i=0; i<lMax; i++) {
+						doPing();
+					}
+					var lDuration = (new Date().getTime() - lStarted);
+					var lAverage = lDuration/lMax;
+					log( SYS, OUT, "'stream ping' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+				} else {
+					log( SYS, OUT, "Not connected." );
+				}
+			}
+
+			function testRPCPerf2() {
+				var lLoop = 0;
+				var lMax = parseInt( eLoopCount.value );
+				if( isNaN( lMax ) ) {
+					lMax = 250;
+				}
+				var lStarted;
+
+				function doRPC() {
+					var lRes = lWSC.rpc("org.jWebSocket.demo.DemoRPCServer", "getMD5", "This is a test!");
+				}
+
+				if( lWSC.isConnected() ) {
+					log( SYS, OUT, "Starting 'stream RPC' test..." );
+					lStarted = new Date().getTime();
+					for(var i=0; i<lMax; i++) {
+						doRPC();
+					}
+					var lDuration = (new Date().getTime() - lStarted);
+					var lAverage = lDuration/lMax;
+					log( SYS, OUT, "'stream RPC' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+				} else {
+					log( SYS, OUT, "Not connected." );
+				}
+			}
+
+// ----------------------------------------- INIT
 
 			function initPage() {
 				// get some required HTML elements
@@ -244,7 +362,8 @@
 					eUsername.focus();
 					eUsername.select();
 				} else {
-					jws.$( "sbtnSend" ).setAttribute( "disabled", "disabled" );
+					jws.$( "sbtnBroadcast" ).setAttribute( "disabled", "disabled" );
+					jws.$( "sbtnBroadcast2" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnLogin" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnLogout" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnClearLog" ).setAttribute( "disabled", "disabled" );
@@ -306,15 +425,28 @@
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
-					<td class="stdDlg" width="5">Loops</td>
-					<td class="stdDlg" width="40"><input class="stxfDlg" id="stxfLoopCount" type="text" value="250" style="width:100%"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtn" type="button" value="Ping" onclick="testCSPerf();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtn" type="button" value="RPC" onclick="testRPCPerf();"></td>
+					<td class="stdDlg" width="5" align="right">Loops:</td>
+					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfLoopCount" type="text" value="250" style="width:100%"></td>
+					<td class="stdDlg" width="5" align="right">Message:</td>
+					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"></td>
 				</tr>
 				<tr class="strDlg">
-					<td class="stdDlg" width="5">Message</td>
-					<td class="stdDlg" colspan="2" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSend" type="button" value="Send" onclick="broadcast();"></td>
+				</tr>
+				<tr class="strDlg"><th class="stdDlg" colspan="4" width="5">Test with responses</th></tr>
+				<tr class="strDlg">
+					<td class="stdDlg" colspan="4" align="center">
+						<input class="sbtnDlg" id="sbtnPing" type="button" value="Ping" onclick="testCSPerf();">
+						<input class="sbtnDlg" id="sbtnRPC" type="button" value="RPC" onclick="testRPCPerf();">
+						<input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();">
+					</td>
+				</tr>
+				<tr class="strDlg"><th class="stdDlg" colspan="4" width="5">Test full stream</th></tr>
+				<tr class="strDlg">
+					<td class="stdDlg" colspan="4" align="center">
+						<input class="sbtnDlg" id="sbtnPing2" type="button" value="Ping" onclick="testCSPerf2();">
+						<input class="sbtnDlg" id="sbtnRPC2" type="button" value="RPC" onclick="testRPCPerf2();">
+						<input class="sbtnDlg" id="sbtnBroadcast2" type="button" value="Broadcast" onclick="broadcast2();">
+					</td>
 				</tr>
 			</table>
 		</div>
