@@ -381,12 +381,10 @@ public class SystemPlugIn extends TokenPlugIn {
 		aToken.remove("usid");
 		String lSenderIncluded = aToken.getString("senderIncluded");
 		String lResponseRequested = aToken.getString("responseRequested");
-		boolean bSenderIncluded =
-			lSenderIncluded != null
-			&& lSenderIncluded.equals("true");
-		boolean bResponseRequested =
-			lResponseRequested != null
-			&& lResponseRequested.equals("true");
+		boolean bSenderIncluded = (lSenderIncluded != null
+			&& lSenderIncluded.equals("true"));
+		boolean bResponseRequested = (lResponseRequested != null
+			&& lResponseRequested.equals("true"));
 		lServer.broadcastToken(aConnector, aToken,
 			new BroadcastOptions(bSenderIncluded, bResponseRequested));
 		if (bResponseRequested) {

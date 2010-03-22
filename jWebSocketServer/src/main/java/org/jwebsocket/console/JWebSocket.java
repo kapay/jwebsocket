@@ -18,6 +18,7 @@ package org.jwebsocket.console;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.Config;
+import org.jwebsocket.netty.engines.NettyEngine;
 import org.jwebsocket.tcp.engines.TCPEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugInChain;
@@ -45,7 +46,7 @@ public class JWebSocket {
 	public static void main(String[] args) {
 
 		String prot = "json"; // [json|csv|xml|custom]
-		String loglevel = "error";
+		String loglevel = "debug";
 		int port = Config.DEFAULT_PORT;
 		int sessionTimeout = Config.DEFAULT_TIMEOUT;
 
@@ -59,7 +60,7 @@ public class JWebSocket {
 					try {
 						sessionTimeout = Integer.parseInt(args[i + 1].toLowerCase());
 					} catch (NumberFormatException ex) {
-						// ignore execption here
+						// ignore exception here
 					}
 				} else if (args[i].equalsIgnoreCase("loglevel")) {
 					loglevel = args[i + 1].toLowerCase();
@@ -103,6 +104,7 @@ public class JWebSocket {
 		try {
 			// TODO: find solutions for hardcoded engine id, refer to RPCPlugIn!
 			engine = new TCPEngine("tcp0", port, sessionTimeout);
+			// engine = new NettyEngine("netty0", port, sessionTimeout);
 			engine.startEngine();
 		} catch (Exception ex) {
 			System.out.println("Error instantating engine: " + ex.getMessage());
