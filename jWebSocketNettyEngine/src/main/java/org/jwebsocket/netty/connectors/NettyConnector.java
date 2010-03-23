@@ -121,4 +121,18 @@ public class NettyConnector extends BaseConnector {
 		handler.getChannelHandlerContext().getChannel().write(
 				new DefaultWebSocketFrame(aDataPacket.getString()));
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
+		// TODO: don't hard code. At least use Config field here.
+		String lUsername = getString("org.jWebSocket.plugins.system.username");
+		if (lUsername != null) {
+			lRes += " (" + lUsername + ")";
+		}
+		return lRes;
+	}
 }
