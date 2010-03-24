@@ -118,18 +118,18 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 
 	processOpened: function( aEvent ) {
-	// can to be overwritten in descendant classes
-	// to easily handle open event in descendants
+		// can to be overwritten in descendant classes
+		// to easily handle open event in descendants
 	},
 
 	processPacket: function( aEvent ) {
-	// can to be overwritten in descendant classes
-	// to easily handle message event in descendants
+		// can to be overwritten in descendant classes
+		// to easily handle message event in descendants
 	},
 
 	processClosed: function( aEvent ) {
-	// can to be overwritten in descendant classes
-	// to easily handle open event in descendants
+		// can to be overwritten in descendant classes
+		// to easily handle open event in descendants
 	},
 
 	open: function( aURL, aOptions ) {
@@ -194,7 +194,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		// is client already connected
 		if( this.isConnected() ) {
 			this.fConn.send( aData );
-		// if not raise exception
+			// if not raise exception
 		} else {
 			throw new Error( "Not connected" );
 		}
@@ -230,13 +230,13 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			} else {
 				var lThis = this;
 				this.hDisconnectTimeout = setTimeout(
-					function() {
-						lThis.forceClose.call( lThis );
-					},
-					lTimeout
-					);
+				function() {
+					lThis.forceClose.call( lThis );
+				},
+				lTimeout
+			);
 			}
-		// throw exception if not connected
+			// throw exception if not connected
 		} else {
 			throw new Error( "Not connected" );
 			this.fConn = null;
@@ -277,7 +277,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		// todo: delete timed out requests and optionally fire timeout callbacks
 		for( lField in this.fRequestCallbacks ) {
 			// ..
-			}
+		}
 	},
 
 	createDefaultResult: function() {
@@ -315,9 +315,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 
 	resultToString: function( aRes ) {
 		return(
-			aRes.msg
-			// + " (code: " + aRes.code + ", tid: " + aRes.tid + ")"
-			);
+		aRes.msg
+		// + " (code: " + aRes.code + ", tid: " + aRes.tid + ")"
+	);
 	},
 
 	tokenToStream: function( aToken ) {
@@ -393,7 +393,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			this.close({
 				timeout: 0
 			});
-		// check if we got a response from a previous request
+			// check if we got a response from a previous request
 		} else if( aToken.type == "response" ) {
 			// check login and logout manage the username
 			if( aToken.reqType == "login" ) {
@@ -510,7 +510,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				responseRequested: lResponseRequested
 			},
 			aOptions
-			);
+		);
 		}
 		return lRes;
 	},
@@ -701,7 +701,7 @@ jws.SystemClientPlugIn = {
 				echo: lEcho
 			},
 			aOptions
-			);
+		);
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -742,17 +742,17 @@ jws.SystemClientPlugIn = {
 		// and then initiate interval...
 		var lThis = this;
 		this.hKeepAlive = setInterval(
-			function() {
-				if( lThis.isConnected() ) {
-					lThis.ping({
-						echo: lEcho
-					});
-				} else {
-					lThis.stopKeepAlive();
-				}
-			},
-			lInterval
-			);
+		function() {
+			if( lThis.isConnected() ) {
+				lThis.ping({
+					echo: lEcho
+				});
+			} else {
+				lThis.stopKeepAlive();
+			}
+		},
+		lInterval
+	);
 	},
 
 	stopKeepAlive: function() {
@@ -825,11 +825,11 @@ jws.RRPCServer = {
 
 	demo: function( aArgs ) {
 		return(
-			confirm(
-				"aArgs received: '" + aArgs + "'\n" +
-				"'true' or 'false' will be returned to requester."	
-				)
-			);
+		confirm(
+		"aArgs received: '" + aArgs + "'\n" +
+			"'true' or 'false' will be returned to requester."
+	)
+	);
 	}
 
 };
@@ -843,7 +843,7 @@ jws.RPCClientPlugIn = {
 
 	// granted rrpc's
 	grantedProcs: [
-	"jws.RRPCServer.demo"
+		"jws.RRPCServer.demo"
 	],
 
 	processToken: function( aToken ) {
@@ -866,7 +866,7 @@ jws.RPCClientPlugIn = {
 				args: aArgs
 			},
 			aOptions
-			);
+		);
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -888,7 +888,7 @@ jws.RPCClientPlugIn = {
 				args: aArgs
 			},
 			aOptions
-			);
+		);
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -920,10 +920,10 @@ jws.RPCClientPlugIn = {
 				code: 0
 			},
 			null // aOptions
-			);
+		);
 		} else {
-	// console.log( "Reverse RPC request '" + lPath + "(" + lArgs + ")' not granted!" );
-	}
+			// console.log( "Reverse RPC request '" + lPath + "(" + lArgs + ")' not granted!" );
+		}
 	}
 
 }
@@ -1030,21 +1030,177 @@ jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 
 //	---------------------------------------------------------------------------
 //  jWebSocket XML client
-//	todo: implement jWebSocket JavaScript XML client
-//	jWebSocket target release 1.1
+//	todo: PRELIMINARY! Implement jWebSocket JavaScript XML client
+//	Targetted for jWebSocket release 1.1
 //	---------------------------------------------------------------------------
 
 jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 
 	// this converts a token to a XML stream
 	tokenToStream: function( aToken ) {
-		return "not yet implemented";
+
+		function obj2xml( aKey, aValue ) {
+			var lXML = "";
+			// do we have an array? Caution! Keep this condition on
+			// the top because array is also an object!
+			if ( aValue instanceof Array ) {
+				lXML += "<" + aKey + " type=\"" + "array" + "\">";
+				for( var lIdx = 0, lCnt = aValue.length; lIdx < lCnt; lIdx++ ) {
+					lXML += obj2xml( "item", aValue[ lIdx ] );
+				}
+				lXML += "</" + aKey + ">"
+			}
+			// or do we have an object?
+			else if ( typeof aValue  == "object" ) {
+				lXML += "<" + aKey + " type=\"" + "object" + "\">";
+				for(var lField in aValue ) {
+					lXML += obj2xml( lField, aValue[ lField ] );
+				}
+				lXML += "</" + aKey + ">"
+			}
+			// or do we have a plain field?
+			else {
+				lXML +=
+					"<" + aKey + " type=\"" + typeof aValue + "\">" +
+					aValue.toString() +
+					"</" + aKey + ">";
+			}
+			return lXML;
+		}
+
+		var lEncoding = "windows-1252";
+		var lResXML =
+			"<?xml version=\"1.0\" encoding=\"" + lEncoding + "\"?>" +
+			"<token>";
+		for( var lField in aToken ) {
+			lResXML += obj2xml( lField, aToken[ lField ] );
+		}
+		lResXML += "</token>";
+		return lResXML;
 	},
 
 	// this converts a XML stream into a token
 	streamToToken: function( aStream ) {
-		return {};
+		// first convert the stream into an XML document 
+		// by using the embedded XML parser.
+		// We do not really want to parse the XML in Javascript!
+		// Using the built-in parser should be more performant.
+		var lDoc = null;
+/* Once we have an applet for IEx ;-)
+		if( window.ActiveXObject ) {
+			//:i:de:Internet Explorer
+			lDoc = new ActiveXObject( "Microsoft.XMLDOM" );
+			lDoc.async = "false";
+			lDoc.loadXML( aStream );
+		} else {
+*/
+			// For all other Browsers
+			try{
+				var lParser = new DOMParser();
+				lDoc = lParser.parseFromString( aStream, "text/xml" );
+			} catch( ex ) {
+				// ignore exception here, lDoc will keep being null
+			}
+/*
+		}
+*/
+
+		function node2obj( aNode, aObj ) {
+			var lNode = aNode.firstChild;
+			while( lNode != null ) {
+				// 1 = element node
+				if( lNode.nodeType == 1 ) {
+					var lType = lNode.getAttribute( "type" );
+					var lKey = lNode.nodeName;
+					if( lType ) {
+						var lValue = lNode.firstChild;
+						// 3 = text node
+						if( lValue && lValue.nodeType == 3 ) {
+							lValue = lValue.nodeValue;
+							if( lValue ) {
+								if( lType == "string" ) {
+								} else if( lType == "number" ) {
+								} else if( lType == "boolean" ) {
+								} else if( lType == "date" ) {
+								} else {
+									lValue = undefined;
+								}
+								if( lValue ) {
+									if ( aObj instanceof Array ) {
+										aObj.push( lValue );
+									} else {
+										aObj[ lKey ] = lValue;
+									}
+								}
+							}
+						} else
+						// 1 = element node
+						if( lValue && lValue.nodeType == 1 ) {
+							if( lType == "array" ) {
+								aObj[ lKey ] = [];
+								node2obj( lNode, aObj[ lKey ] );
+							} else if( lType == "object" ) {
+								aObj[ lKey ] = {};
+								node2obj( lNode, aObj[ lKey ] );
+							}
+						}
+					}
+				}
+				lNode = lNode.nextSibling;
+			}
+		}
+
+		var lToken = {};
+		if( lDoc ) {
+			node2obj( lDoc.firstChild, lToken );
+		}
+		return lToken;
 	}
 
 });
 
+/*
+
+(function() {
+	var lObj = {
+		aNumber: 1,
+		aString: "test1",
+		aBoolean: true,
+		aArray: [ 2, "test2", false ],
+		aObject: {
+			bNumber: 3,
+			bString: "test3",
+			bBoolean: true,
+			bArray: [ 3, "test3", true ]
+		}
+	};
+	var lStream = 
+		'<?xml version="1.0" encoding="windows-1252"?>' +
+		'<token>' +
+			'<aNumber type="number">1</aNumber>' +
+			'<aString type="string">test1</aString>' +
+			'<aBoolean type="boolean">true</aBoolean>' +
+			'<aArray type="array">' +
+				'<item type="number">2</item>'+
+				'<item type="string">test2</item>' +
+				'<item type="boolean">false</item>' +
+			'</aArray>' +
+			'<aObject type="object">' +
+				'<bNumber type="number">3</bNumber>'+
+				'<bString type="string">test3</bString>' +
+				'<bBoolean type="boolean">true</bBoolean>' +
+				'<bArray type="array">'+
+					'<item type="number">3</item>' +
+					'<item type="string">test3</item>' +
+					'<item type="boolean">true</item>' +
+				'</bArray>' +
+			'</aObject>' +
+		'</token>';
+
+	var lXMLClient = new jws.jWebSocketXMLClient();
+//	var lStream = lXMLClient.tokenToStream( lObj );
+	var lToken = lXMLClient.streamToToken( lStream );
+	console.log( lStream );
+})();
+
+*/

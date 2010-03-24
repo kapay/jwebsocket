@@ -66,7 +66,7 @@ public class Token {
 	 *
 	 * @return
 	 */
-	public Iterator getKeys() {
+	public Iterator<String> getKeys() {
 		return items.keySet().iterator();
 	}
 
@@ -135,19 +135,23 @@ public class Token {
 	}
 
 	/**
-	 *
-	 * @return
+	 * Returns the name space of the token. If you have the same token type
+	 * interpreted by multiple different plug-ins the namespace allows to
+	 * uniquely address a certain plug-in. Each plug-in has its own namespace.
+	 * @return the namespace.
 	 */
 	public String getNS() {
 		return (String) items.get("ns");
 	}
 
 	/**
-	 *
-	 * @param aType
+	 * Sets the name space of the token. If you have the same token type
+	 * interpreted by multiple different plug-ins the namespace allows to
+	 * uniquely address a certain plug-in. Each plug-in has its own namespace.
+	 * @param aNS the namespace to be set for the token.
 	 */
-	public void setNS(String aType) {
-		items.put("ns", aType);
+	public void setNS(String aNS) {
+		items.put("ns", aNS);
 	}
 
 	@Override
