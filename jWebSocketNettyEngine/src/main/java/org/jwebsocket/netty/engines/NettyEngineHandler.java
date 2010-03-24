@@ -290,7 +290,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	 *            the web socket frame data
 	 */
 	private void handleWebSocketFrame(ChannelHandlerContext ctx,
-			WebSocketFrame msg) {
+			WebSocketFrame msg) throws WebSocketRuntimeException {
 		String textData = "";
 		if (msg.isBinary()) {
 			//TODO: handle binary data

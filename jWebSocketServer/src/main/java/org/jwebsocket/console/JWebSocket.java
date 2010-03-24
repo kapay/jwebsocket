@@ -103,8 +103,8 @@ public class JWebSocket {
 		WebSocketEngine engine = null;
 		try {
 			// TODO: find solutions for hardcoded engine id, refer to RPCPlugIn!
-			engine = new TCPEngine("tcp0", port, sessionTimeout);
-			// engine = new NettyEngine("netty0", port, sessionTimeout);
+			// engine = new TCPEngine("tcp0", port, sessionTimeout);
+			engine = new NettyEngine("netty0", port, sessionTimeout);
 			engine.startEngine();
 		} catch (Exception ex) {
 			System.out.println("Error instantating engine: " + ex.getMessage());
