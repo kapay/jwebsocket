@@ -46,6 +46,8 @@ import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.kit.WebSocketRuntimeException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.netty.connectors.NettyConnector;
 
@@ -289,7 +291,18 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	 */
 	private void handleWebSocketFrame(ChannelHandlerContext ctx,
 			WebSocketFrame msg) {
-		engine.processPacket(connector, new RawPacket(msg.getTextData()));
+		String textData = "";
+		if (msg.isBinary()) {
+			//TODO: handle binary data
+		} else if (msg.isText()) {
+			//Get the content of this frame into a UTF-8 string 
+			String encodedData = msg.getTextData();
+			//remove the new line character "\n" which is a packate separator.
+			textData = encodedData.substring(0, encodedData.length() - 1);
+		} else {
+			throw new WebSocketRuntimeException("Frame Doesn't contain any type of data");
+		}
+		engine.processPacket(connector, new RawPacket(textData));
 	}
 
 	/**
