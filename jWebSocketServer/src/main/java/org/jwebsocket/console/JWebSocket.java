@@ -17,7 +17,7 @@ package org.jwebsocket.console;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.config.Config;
+import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.netty.engines.NettyEngine;
 import org.jwebsocket.tcp.engines.TCPEngine;
 import org.jwebsocket.logging.Logging;
@@ -47,8 +47,8 @@ public class JWebSocket {
 
 		String prot = "json"; // [json|csv|xml|custom]
 		String loglevel = "debug";
-		int port = Config.DEFAULT_PORT;
-		int sessionTimeout = Config.DEFAULT_TIMEOUT;
+		int port = JWebSocketConstants.DEFAULT_PORT;
+		int sessionTimeout = JWebSocketConstants.DEFAULT_TIMEOUT;
 
 		// parse optional command line arguments
 		int i = 0;
@@ -81,9 +81,9 @@ public class JWebSocket {
 		log = Logging.getLogger(JWebSocket.class);
 
 		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
-		System.out.println("jWebSocket Ver. " + Config.VERSION_STR);
-		System.out.println(Config.COPYRIGHT);
-		System.out.println(Config.LICENSE);
+		System.out.println("jWebSocket Ver. " + JWebSocketConstants.VERSION_STR);
+		System.out.println(JWebSocketConstants.COPYRIGHT);
+		System.out.println(JWebSocketConstants.LICENSE);
 
 		prot = prot.toLowerCase();
 		if (!(prot.equals("json")
@@ -92,7 +92,7 @@ public class JWebSocket {
 			|| prot.equals("custom"))) {
 			System.out.println("Invalid argument.");
 			System.out.println("java -jar jWebSocket.jar prot=[json|csv|xml|custom] port=["
-				+ Config.MIN_IN_PORT + "-" + Config.MAX_IN_PORT + "]");
+				+ JWebSocketConstants.MIN_IN_PORT + "-" + JWebSocketConstants.MAX_IN_PORT + "]");
 			return;
 		}
 		System.out.println(
