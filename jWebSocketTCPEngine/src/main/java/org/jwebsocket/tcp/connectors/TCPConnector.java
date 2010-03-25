@@ -204,7 +204,7 @@ public class TCPConnector extends BaseConnector {
 	@Override
 	public String toString() {
 		String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
-		// TODO: don't hard code. At least use Config field here.
+		// TODO: don't hard code. At least use JWebSocketConstants field here.
 		String lUsername = getString("org.jWebSocket.plugins.system.username");
 		if (lUsername != null) {
 			lRes += " (" + lUsername + ")";

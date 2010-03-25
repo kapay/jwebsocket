@@ -28,7 +28,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.config.Config;
+import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.tcp.connectors.TCPConnector;
@@ -178,13 +178,13 @@ public class TCPEngine extends BaseEngine {
 		path = path.substring(0, pos - 1);
 
 		// isolate search string
-		pos = path.indexOf(Config.PATHARG_SEPARATOR);
+		pos = path.indexOf(JWebSocketConstants.PATHARG_SEPARATOR);
 		if (pos >= 0) {
 			searchString = path.substring(pos + 1);
 			if (searchString.length() > 0) {
-				String[] lArgs = searchString.split(Config.ARGARG_SEPARATOR);
+				String[] lArgs = searchString.split(JWebSocketConstants.ARGARG_SEPARATOR);
 				for (int i = 0; i < lArgs.length; i++) {
-					String[] lKeyValuePair = lArgs[i].split(Config.KEYVAL_SEPARATOR, 2);
+					String[] lKeyValuePair = lArgs[i].split(JWebSocketConstants.KEYVAL_SEPARATOR, 2);
 					if (lKeyValuePair.length == 2) {
 						args.put(lKeyValuePair[0], lKeyValuePair[1]);
 						if (log.isDebugEnabled()) {
@@ -227,7 +227,7 @@ public class TCPEngine extends BaseEngine {
 
 		// set default sub protocol if none passed
 		if (args.get("prot") == null) {
-			args.put("prot", Config.SUB_PROT_DEFAULT);
+			args.put("prot", JWebSocketConstants.SUB_PROT_DEFAULT);
 		}
 		header.put("args", args);
 		header.put("origin", origin);
@@ -282,11 +282,11 @@ public class TCPEngine extends BaseEngine {
 
 						// set socket timeout to given amount of milliseconds
 						// check min and max timeout ranges
-						int lSessionTimeout = header.getTimeout(Config.DEFAULT_TIMEOUT);
-						if (lSessionTimeout > Config.MAX_TIMEOUT) {
-							lSessionTimeout = Config.MAX_TIMEOUT;
-						} else if (lSessionTimeout < Config.MIN_TIMEOUT) {
-							lSessionTimeout = Config.MIN_TIMEOUT;
+						int lSessionTimeout = header.getTimeout(JWebSocketConstants.DEFAULT_TIMEOUT);
+						if (lSessionTimeout > JWebSocketConstants.MAX_TIMEOUT) {
+							lSessionTimeout = JWebSocketConstants.MAX_TIMEOUT;
+						} else if (lSessionTimeout < JWebSocketConstants.MIN_TIMEOUT) {
+							lSessionTimeout = JWebSocketConstants.MIN_TIMEOUT;
 						}
 						clientSocket.setSoTimeout(lSessionTimeout);
 
