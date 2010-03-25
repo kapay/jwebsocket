@@ -22,7 +22,7 @@ import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.config.Config;
+import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 
@@ -37,7 +37,7 @@ public class BaseEngine implements WebSocketEngine {
 
 	private final Map<String, WebSocketServer> servers = new FastMap<String, WebSocketServer>();
 	private final Map<String, WebSocketConnector> connectors = new FastMap<String, WebSocketConnector>();
-	private int sessionTimeout = Config.DEFAULT_TIMEOUT;
+	private int sessionTimeout = JWebSocketConstants.DEFAULT_TIMEOUT;
 	private String id = "";
 
 	/**
