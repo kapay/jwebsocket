@@ -17,7 +17,7 @@ package org.jwebsocket.plugins.sharedobjects;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.Config;
+import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
@@ -31,10 +31,10 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(SharedObjectsPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
-	private String NS_SHARED_OBJ = Config.NS_BASE + ".plugins.sharedObjs";
-	private String NS_SHARED_LISTS = Config.NS_BASE + ".plugins.sharedLists";
-	private String NS_SHARED_SETS = Config.NS_BASE + ".plugins.sharedSets";
-	private String NS_SHARED_MAPS = Config.NS_BASE + ".plugins.sharedMaps";
+	private String NS_SHARED_OBJ = JWebSocketConstants.NS_BASE + ".plugins.sharedObjs";
+	private String NS_SHARED_LISTS = JWebSocketConstants.NS_BASE + ".plugins.sharedLists";
+	private String NS_SHARED_SETS = JWebSocketConstants.NS_BASE + ".plugins.sharedSets";
+	private String NS_SHARED_MAPS = JWebSocketConstants.NS_BASE + ".plugins.sharedMaps";
 	private SharedLists sharedLists = new SharedLists();
 	private SharedSets sharedSets = new SharedSets();
 	private SharedMaps sharedMaps = new SharedMaps();
