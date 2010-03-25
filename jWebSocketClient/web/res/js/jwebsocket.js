@@ -470,6 +470,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			}
 		}
 		var lStream = this.tokenToStream( aToken );
+
+		console.log("sending" + lStream + "...");
+
 		this.sendStream( lStream );
 	},
 

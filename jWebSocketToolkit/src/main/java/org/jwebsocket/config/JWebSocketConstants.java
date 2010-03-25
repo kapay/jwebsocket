@@ -19,7 +19,7 @@ package org.jwebsocket.config;
 /**
  * Provides a global shared container for the jWebSocket configuration settings.
  * @author aschulze
- * @version $Id:$
+ * @version $Id$
  */
 public final class JWebSocketConstants {
 
@@ -58,6 +58,10 @@ public final class JWebSocketConstants {
 	 * Maximum allow outgoing TCP Socket port.
 	 */
 	public static int MAX_IN_PORT = 65535;
+	/**
+	 * Default engine for jWebSocket server.
+	 */
+	public static String DEFAULT_ENGINE = "tcp";
 	/**
 	 * Default socket port for jWebSocket clients.
 	 */

@@ -49,12 +49,21 @@ public class JWebSocket {
 		String loglevel = "debug";
 		int port = JWebSocketConstants.DEFAULT_PORT;
 		int sessionTimeout = JWebSocketConstants.DEFAULT_TIMEOUT;
+		String useEngine = JWebSocketConstants.DEFAULT_ENGINE;
+
+		String CMDLINE_SAMPLE =
+			"java -jar jWebSocket.jar "
+			+ "engine=[tcp|netty] "
+			+ "prot=[json|csv|xml|custom] "
+			+ "port=[" + JWebSocketConstants.MIN_IN_PORT + "-" + JWebSocketConstants.MAX_IN_PORT + "]";
 
 		// parse optional command line arguments
 		int i = 0;
 		while (i < args.length) {
 			if (i + 1 < args.length) {
-				if (args[i].equalsIgnoreCase("prot")) {
+				if (args[i].equalsIgnoreCase("engine")) {
+					useEngine = args[i + 1].toLowerCase();
+				} else if (args[i].equalsIgnoreCase("prot")) {
 					prot = args[i + 1].toLowerCase();
 				} else if (args[i].equalsIgnoreCase("sessiontimeout")) {
 					try {
@@ -81,22 +90,42 @@ public class JWebSocket {
 		log = Logging.getLogger(JWebSocket.class);
 
 		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
-		System.out.println("jWebSocket Ver. " + JWebSocketConstants.VERSION_STR);
+		System.out.println("jWebSocket Ver. "
+			+ JWebSocketConstants.VERSION_STR);
 		System.out.println(JWebSocketConstants.COPYRIGHT);
 		System.out.println(JWebSocketConstants.LICENSE);
 
+		// do engine validation
+		useEngine = useEngine.toLowerCase();
+		if (!(useEngine.equals("tcp")
+			|| useEngine.equals("netty"))) {
+			System.out.println("Invalid engine argument.");
+			System.out.println(CMDLINE_SAMPLE);
+			return;
+		}
+
+		// do protocol validation
 		prot = prot.toLowerCase();
 		if (!(prot.equals("json")
 			|| prot.equals("csv")
 			|| prot.equals("xml")
 			|| prot.equals("custom"))) {
-			System.out.println("Invalid argument.");
-			System.out.println("java -jar jWebSocket.jar prot=[json|csv|xml|custom] port=["
-				+ JWebSocketConstants.MIN_IN_PORT + "-" + JWebSocketConstants.MAX_IN_PORT + "]");
+			System.out.println("Invalid protocol argument.");
+			System.out.println(CMDLINE_SAMPLE);
 			return;
 		}
+
+		// do port validation
+		if (port < JWebSocketConstants.MIN_IN_PORT
+			|| port > JWebSocketConstants.MAX_IN_PORT) {
+			System.out.println("Invalid port argument.");
+			System.out.println(CMDLINE_SAMPLE);
+			return;
+		}
+
 		System.out.println(
-			"Listening on port " + port + ", default (sub)prot " + prot + ", "
+			"Listening on port "
+			+ port + ", default (sub)prot " + prot + ", "
 			+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
 
 		// create the low-level engine
@@ -110,7 +139,6 @@ public class JWebSocket {
 			System.out.println("Error instantating engine: " + ex.getMessage());
 			return;
 		}
-
 		// create the token server (based on the TCP engine)
 		TokenServer tokenServer = null;
 		try {
@@ -134,7 +162,6 @@ public class JWebSocket {
 		} catch (Exception ex) {
 			System.out.println("Error instantiating TokenServer: " + ex.getMessage());
 		}
-
 		// create the custom server (based on the TCP engine as well)
 		CustomServer customServer = null;
 		try {
@@ -153,7 +180,6 @@ public class JWebSocket {
 		} catch (Exception ex) {
 			System.out.println("Error instantating CustomServer: " + ex.getMessage());
 		}
-
 		while (tokenServer.isAlive()) {
 			try {
 				Thread.sleep(100);
