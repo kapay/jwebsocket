@@ -77,7 +77,10 @@ public class NettyConnector extends BaseConnector {
 			log.debug("Stopping Netty connector (" + aCloseReason.name()
 					+ ")...");
 		}
-		getEngine().connectorStopped(this, CloseReason.CLIENT);
+
+		getEngine().connectorStopped(this, aCloseReason);
+		handler.getChannelHandlerContext().getChannel().close();
+
 		if (log.isInfoEnabled()) {
 			log.info("Stopped Netty connector (" + aCloseReason.name()
 					+ ") on port "+ getRemotePort());
