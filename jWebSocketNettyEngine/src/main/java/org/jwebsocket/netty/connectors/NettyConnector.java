@@ -77,10 +77,10 @@ public class NettyConnector extends BaseConnector {
 			log.debug("Stopping Netty connector (" + aCloseReason.name()
 					+ ")...");
 		}
-		// TODO: Do we need to wait here? At least optionally?
+		getEngine().connectorStopped(this, CloseReason.CLIENT);
 		if (log.isInfoEnabled()) {
 			log.info("Stopped Netty connector (" + aCloseReason.name()
-					+ ") on port.");
+					+ ") on port "+ getRemotePort());
 		}
 	}
 
@@ -128,7 +128,7 @@ public class NettyConnector extends BaseConnector {
 	@Override
 	public String toString() {
 		String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
-		// TODO: don't hard code. At least use Config field here.
+		// TODO: don't hard code. At least use JWebSocketConstants field here.
 		String lUsername = getString("org.jWebSocket.plugins.system.username");
 		if (lUsername != null) {
 			lRes += " (" + lUsername + ")";
