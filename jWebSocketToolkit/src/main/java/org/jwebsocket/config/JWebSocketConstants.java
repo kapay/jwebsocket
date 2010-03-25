@@ -19,6 +19,7 @@ package org.jwebsocket.config;
 /**
  * Provides a global shared container for the jWebSocket configuration settings.
  * @author aschulze
+ * @version $Id:$
  */
 public final class JWebSocketConstants {
 
