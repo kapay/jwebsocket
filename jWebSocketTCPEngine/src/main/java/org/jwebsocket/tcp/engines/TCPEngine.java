@@ -303,9 +303,6 @@ public class TCPEngine extends BaseEngine {
 						connector.startConnector();
 						// log.debug("Notifying server...");
 
-						// allow descendant classes to handle connector started event
-						connectorStarted(connector);
-
 					} catch (UnsupportedEncodingException ex) {
 						log.error("(encoding) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					} catch (IOException ex) {

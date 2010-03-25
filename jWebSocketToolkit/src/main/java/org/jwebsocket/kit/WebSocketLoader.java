@@ -15,7 +15,6 @@
 package org.jwebsocket.kit;
 
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.kit.WebSocketException;
 
 /**
  * An object that does the process of loading configuration, intialization of the
@@ -28,6 +27,7 @@ public final class WebSocketLoader {
 	/**
 	 * Load all the configurations based on jWebSocket.xml file at the given 
 	 * <tt>configFilePath</tt> location.
+	 * @param configFilePath
 	 * @return the web socket config object with all the configuration
 	 * @throws WebSocketException if there's any while loading configuration
 	 */

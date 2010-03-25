@@ -14,13 +14,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config;
 
-import org.jwebsocket.api.WebSocketConfig;
+/* import org.jwebsocket.api.WebSocketConfig; */
 
 /**
  * @author puran
- * @version $Id:$
+ * @version $Id$
  *
  */
-public class JWebSocketConfig implements WebSocketConfig {
+public class JWebSocketConfig /* implements WebSocketConfig */ {
 
 }

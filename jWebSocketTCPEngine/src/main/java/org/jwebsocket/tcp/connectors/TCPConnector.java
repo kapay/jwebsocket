@@ -113,9 +113,14 @@ public class TCPConnector extends BaseConnector {
 		public void run() {
 			String line;
 			WebSocketEngine engine = getEngine();
+
 			try {
 				// start client listener loop
 				isRunning = true;
+
+				// call connectorStarted method of engine
+				engine.connectorStarted(connector);
+
 				while (isRunning) {
 					// try to read line within timeout
 					try {
@@ -170,7 +175,7 @@ public class TCPConnector extends BaseConnector {
 					}
 				}
 
-				// call client stopped method of server
+				// call client stopped method of engine
 				// (e.g. to release client from streams)
 				engine.connectorStopped(connector, closeReason);
 
