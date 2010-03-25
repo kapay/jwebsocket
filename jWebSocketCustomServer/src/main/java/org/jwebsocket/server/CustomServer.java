@@ -17,7 +17,7 @@ package org.jwebsocket.server;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
-import org.jwebsocket.config.Config;
+import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.plugins.PlugIn;
 import org.jwebsocket.api.WebSocketConnector;
@@ -57,9 +57,9 @@ public class CustomServer extends BaseServer {
 
 		// the custom server here answers with a simple echo packet.
 		// this section can be used as an example for your own protol handling.
-		if (lSubProt != null && lSubProt.equals(Config.SUB_PROT_CUSTOM)) {
+		if (lSubProt != null && lSubProt.equals(JWebSocketConstants.SUB_PROT_CUSTOM)) {
 			// send a modified echo packet back to sender.
-			aDataPacket.setUTF8("[echo from jWebSocket v" + Config.VERSION_STR + "] " + aDataPacket.getUTF8());
+			aDataPacket.setUTF8("[echo from jWebSocket v" + JWebSocketConstants.VERSION_STR + "] " + aDataPacket.getUTF8());
 			sendPacket(aConnector, aDataPacket);
 			// you also could broadcast the packet here...
 			// broadcastPacket(aDataPacket);
