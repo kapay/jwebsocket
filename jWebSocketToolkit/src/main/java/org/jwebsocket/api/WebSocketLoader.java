@@ -14,13 +14,14 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
  * An object that does the process of loading configuration, intialization of the
  * jWebSocket server system.  
  * @author puran
- * @version $Id:$
+ * @version $Id$
  */
 public interface WebSocketLoader {
 	
@@ -30,7 +31,7 @@ public interface WebSocketLoader {
 	 * @return the web socket config object with all the configuration
 	 * @throws WebSocketException if there's any while loading configuration
 	 */
-	WebSocketConfig loadConfiguration(String configFilePath) throws WebSocketException;
+	JWebSocketConfig loadConfiguration(String configFilePath) throws WebSocketException;
 	
 	/**
 	 * Initialize the loaded components of the jWebSocket server system using the  
@@ -40,5 +41,5 @@ public interface WebSocketLoader {
 	 * otherwise.
 	 * @throws WebSocketException if exception occurs during intialization
 	 */
-	boolean initialize(WebSocketConfig configuration) throws WebSocketException;
+	boolean initialize(JWebSocketConfig configuration) throws WebSocketException;
 }
