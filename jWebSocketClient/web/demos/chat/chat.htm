@@ -75,7 +75,7 @@
 				aElement.select();
 			}
 
-			function connect() {
+			function doOpen() {
 
 				function login() {
 					// auto login after connection is established
@@ -110,7 +110,7 @@
 					OnMessage: function( aEvent, aToken ) {
 						// for debug purposes
 						if( eDebug.checked ) {
-							log( SYS, EVT, "<font style='color:#888'>" + 
+							log( SYS, EVT, "<font style='color:#888'>" +
 								( aToken ? aToken.type : "-" ) + ": " +
 								aEvent.data + "</font>");
 						}
@@ -167,7 +167,7 @@
 				log( SYS, OUT, "getClients: " + lRes.msg );
 			}
 
-			function disconnect() {
+			function doClose() {
 				// disconnect automatically logs out!
 				lWSC.stopKeepAlive();
 				var lRes = lWSC.close({
@@ -181,15 +181,10 @@
 				var lMsg = eMessage.value;
 				if( lMsg.length > 0 ) {
 					log( USR, OUT, lMsg );
-					debugger;
 					var lRes = lWSC.broadcastText(
-						"",		// broadcast to all clients (not limited to a certain pool)
-						lMsg,	// broadcast this message
-						{	OnResponse: function( aToken ) {
-								// alert( "Response: " + aToken.msg );
-							}
-						}
-					);
+					"",		// broadcast to all clients (not limited to a certain pool)
+					lMsg	// broadcast this message
+				);
 					// log error only, on success don't confuse the user
 					if( lRes.code != 0 ) {
 						log( SYS, OUT, "broadcast: " + lRes.msg );
@@ -214,7 +209,7 @@
 			function usrKeyDnLsnr( aEvent ) {
 				// on enter in username field try to login
 				if( aEvent.keyCode == 13 ) {
-					connect();
+					open();
 				}
 			}
 
@@ -227,7 +222,7 @@
 
 			function elemFocusLsnr( aEvent ) {
 				// on focus select full text of element (for username and message)
-				aEvent.srcElement.select();
+				aEvent.target.select();
 			}
 
 
@@ -325,8 +320,8 @@
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Username</td>
 					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="anonymous" size="20"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogin" type="button" value="Login" onclick="connect();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogout" type="button" value="Logout" onclick="disconnect();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogin" type="button" value="Login" onclick="doOpen();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogout" type="button" value="Logout" onclick="doClose();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetClients" type="button" value="Clients" onclick="getClients();"></td>
 					<td class="stdDlg" width="" align="right">
 						<input id="schkKeepAlive" type="checkbox" value="off" onclick="checkKeepAlive();">&nbsp;Keep-Alive&nbsp;
