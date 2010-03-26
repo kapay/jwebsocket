@@ -254,7 +254,6 @@ public class BaseServer implements WebSocketServer {
 			}
 		}
 		return null;
-
 	}
 
 	/**

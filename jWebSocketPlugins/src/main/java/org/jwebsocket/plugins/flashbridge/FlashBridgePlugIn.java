@@ -85,22 +85,26 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 						log.debug("client connected...");
 					}
 					try {
-						clientSocket.setSoTimeout(3000);
+						clientSocket.setSoTimeout(2000);
 						InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream(), "UTF-8");
 						PrintStream os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
 
 						char[] ca = new char[1024];
 						String lLine = "";
-						while (isr.ready()) {
-							int lLen = isr.read(ca);
-							String lReq = new String(ca, 0, lLen);
-							log.info("policy request: " + lReq);
-						}
+						int lLen;
+						do {
+							lLen = isr.read(ca);
+							if (lLen > 0) {
+								lLine += new String(ca, 0, lLen);
+							} else {
+								Thread.sleep(10);
+							}
+						} while (lLen >= 0 && lLine.indexOf("<policy-file-request/>") < 0);
+						log.debug("answering on flash policy-file-request (" + lLine + ")...");
 						os.print(
 							"<cross-domain-policy>"
 							+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
-							+ "</cross-domain-policy>"
-						);
+							+ "</cross-domain-policy>\n");
 					} catch (UnsupportedEncodingException ex) {
 						log.error("(encoding) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					} catch (IOException ex) {

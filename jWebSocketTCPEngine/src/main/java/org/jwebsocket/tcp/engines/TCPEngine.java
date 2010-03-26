@@ -157,6 +157,26 @@ public class TCPEngine extends BaseEngine {
 			log.debug("Received Header (" + req.replace("\n", "\\n") + ")");
 		}
 
+		// special handling for flash bridge if trying to access ws:// port
+		if( req.indexOf("<policy-file-request/>") >= 0 ) {
+			log.debug("Answering flash bridge policy-file-request...");
+			os.print(
+				"<cross-domain-policy>"
+				+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
+				+ "</cross-domain-policy>\n"
+			);
+			req = "";
+			while (line != null && line.length() > 0) {
+				req += line + "\n";
+				line = br.readLine();
+			}
+			if (log.isDebugEnabled()) {
+				log.debug("Received Header again (" + req.replace("\n", "\\n") + ")");
+			}
+			// returning no header means immediately disconnect client again.
+			return null;
+		}
+
 		// now parse header for correct handshake....
 		// get host....
 		int pos = req.indexOf("Host:");
@@ -280,29 +300,33 @@ public class TCPEngine extends BaseEngine {
 						// process handshake to parse header data
 						RequestHeader header = processHandshake(clientSocket);
 
-						// set socket timeout to given amount of milliseconds
-						// check min and max timeout ranges
-						int lSessionTimeout = header.getTimeout(JWebSocketConstants.DEFAULT_TIMEOUT);
-						if (lSessionTimeout > JWebSocketConstants.MAX_TIMEOUT) {
-							lSessionTimeout = JWebSocketConstants.MAX_TIMEOUT;
-						} else if (lSessionTimeout < JWebSocketConstants.MIN_TIMEOUT) {
-							lSessionTimeout = JWebSocketConstants.MIN_TIMEOUT;
-						}
-						clientSocket.setSoTimeout(lSessionTimeout);
+						if( header != null ) {
+							// set socket timeout to given amount of milliseconds
+							// check min and max timeout ranges
+							int lSessionTimeout = header.getTimeout(JWebSocketConstants.DEFAULT_TIMEOUT);
+							if (lSessionTimeout > JWebSocketConstants.MAX_TIMEOUT) {
+								lSessionTimeout = JWebSocketConstants.MAX_TIMEOUT;
+							} else if (lSessionTimeout < JWebSocketConstants.MIN_TIMEOUT) {
+								lSessionTimeout = JWebSocketConstants.MIN_TIMEOUT;
+							}
+							clientSocket.setSoTimeout(lSessionTimeout);
 
-						// create connector and pass header
-						// log.debug("Instantiating connector...");
-						WebSocketConnector connector = new TCPConnector(engine, clientSocket);
-						// log.debug("Setting header to engine...");
-						connector.setHeader(header);
-						// log.debug("Adding connector to engine...");
-						getConnectors().put(connector.getId(), connector);
-						if (log.isDebugEnabled()) {
-							log.debug("Starting connector...");
+							// create connector and pass header
+							// log.debug("Instantiating connector...");
+							WebSocketConnector connector = new TCPConnector(engine, clientSocket);
+							// log.debug("Setting header to engine...");
+							connector.setHeader(header);
+							// log.debug("Adding connector to engine...");
+							getConnectors().put(connector.getId(), connector);
+							if (log.isDebugEnabled()) {
+								log.debug("Starting connector...");
+							}
+							connector.startConnector();
+						} else {
+							// if header could not be parsed properly
+							// immediately disconnect the client.
+							clientSocket.close();
 						}
-						connector.startConnector();
-						// log.debug("Notifying server...");
-
 					} catch (UnsupportedEncodingException ex) {
 						log.error("(encoding) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					} catch (IOException ex) {

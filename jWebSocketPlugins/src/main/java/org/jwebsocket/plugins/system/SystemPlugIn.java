@@ -347,7 +347,7 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		// TODO: find solutions for hardcoded engine id
 		WebSocketConnector lTargetConnector =
-			lServer.getConnector("tcp0", lTargetId);
+			lServer.getConnector(lTargetId);
 		/*
 		if (getUsername(aConnector) != null) {
 		 */
