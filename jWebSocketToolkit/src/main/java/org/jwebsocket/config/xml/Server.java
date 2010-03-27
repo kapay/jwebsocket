@@ -1,6 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - WebSocket Exception
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	jWebSocket - Copyright (c) 2010 jwebsocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -13,33 +12,42 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.kit;
+package org.jwebsocket.config.xml;
 
 /**
- * Exception class to represent JWebSocketServer related exception
- * @author Puran Singh
- * @version $Id: WebSocketException.java 148 2010-03-07 05:24:10Z mailtopuran $
- *
+ * @author puran
+ * @version $Id:$
+ * 
  */
-public class WebSocketRuntimeException extends RuntimeException {
+public class Server implements Config {
+	private String id;
+	private String name;
+	private String jar;
 
-	/**
-	 * creates the exception with given message
-	 * @param error the error messae
-	 */
-	public WebSocketRuntimeException(String error) {
-		super(error);
-	}
-	
-	/**
-	 * creates the exception with given message
-	 * @param error the error messae
-	 * @param throwable the cause 
-	 */
-	public WebSocketRuntimeException(String error, Throwable throwable) {
-		super(error, throwable);
+	public Server(String id, String name, String jar) {
+		this.id = id;
+		this.name = name;
+		this.jar = jar;
 	}
 
-	private static final long serialVersionUID = 1L;
-	
+	/**
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @return the jar
+	 */
+	public String getJar() {
+		return jar;
+	}
 }
