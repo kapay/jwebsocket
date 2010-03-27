@@ -14,16 +14,24 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.jwebsocket.config.Config;
 
 /**
+ * Base interface for config handler.
  * @author puran
  * @version $Id$
  *
  */
 public interface ConfigHandler {
 
-	Config processConfig(XMLStreamReader streamReader);
+	/**
+	 * Process the configuration using the give xml stream reader
+	 * @param streamReader the stream reader object
+	 * @return the config object
+	 * @throws XMLStreamException if exception occurs while parsing
+	 */
+	Config processConfig(XMLStreamReader streamReader) throws XMLStreamException;
 }	

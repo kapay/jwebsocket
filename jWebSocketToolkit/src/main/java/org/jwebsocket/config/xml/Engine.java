@@ -16,6 +16,8 @@ package org.jwebsocket.config.xml;
 
 import java.util.List;
 import org.jwebsocket.config.Config;
+import org.jwebsocket.kit.WebSocketRuntimeException;
+
 /**
  * @author puran
  * @version $Id$
@@ -53,6 +55,7 @@ public class Engine implements Config {
 		this.port = port;
 		this.timeout = timeout;
 		this.domains = domains;
+		validate();
 	}
 
 	/**
@@ -95,5 +98,22 @@ public class Engine implements Config {
 	 */
 	public List<String> getDomains() {
 		return domains;
+	}
+
+	/**
+	 * validate the engine configuration
+	 * @throws WebSocketRuntimeException if any of the engine configuration is mising
+	 */
+	public void validate() {
+		if ((id != null && id.length() > 0)
+				&& (name != null && name.length() > 0)
+				&& (jar != null && jar.length() > 0)
+				&& (domains != null && domains.size() > 0)
+				&& port > 1024
+				&& timeout > 0) {
+			return;
+		}
+		throw new WebSocketRuntimeException(
+				"Missing one of the engine configuration, please check your configuration file");
 	}
 }

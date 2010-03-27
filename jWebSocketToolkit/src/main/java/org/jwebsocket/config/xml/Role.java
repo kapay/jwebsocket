@@ -21,5 +21,9 @@ import org.jwebsocket.config.Config;
  *
  */
 public class Role implements Config {
+
+	@Override
+	public void validate() {
+	}
 	
 }

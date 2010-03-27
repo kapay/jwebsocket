@@ -73,6 +73,14 @@ public final class WebSocketLoader {
 		return config;
 	}
 
+	public static void main(String... args) {
+		try {
+			new WebSocketLoader().loadConfiguration("../jWebSocket.xml");
+		} catch (WebSocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 
 	/**

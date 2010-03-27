@@ -15,9 +15,9 @@
 package org.jwebsocket.config.xml;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -26,18 +26,13 @@ import org.jwebsocket.config.JWebSocketConfig;
 
 /**
  * @author puran
- * @version $Id:$
+ * @version $Id$
  * 
  */
 public class JWebSocketConfigHandler implements ConfigHandler {
 
 	private static final String ELEMENT_ENGINES = "engines";
 	private static final String ELEMENT_ENGINE = "engine";
-	private static final String ID = "id";
-	private static final String NAME = "name";
-	private static final String JAR = "jar";
-	private static final String DOMAINS = "domains";
-	private static final String DOMAIN = "domain";
 	private static final String ELEMENT_SERVERS = "servers";
 	private static final String ELEMENT_SERVER = "server";
 	private static final String ELEMENT_PLUGINS = "plugins";
@@ -49,12 +44,12 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_USERS = "users";
 	private static final String ELEMENT_USER = "user";
 	
-	private static Map<String, ConfigHandler> handlerContext = new HashMap<String, ConfigHandler>();
+	private static Map<String, ConfigHandler> handlerContext = new WeakHashMap<String, ConfigHandler>();
 	
 	static {
 		handlerContext.put("engine", new EngineConfigHandler());
 		handlerContext.put("user", new UserConfigHandler());
-		handlerContext.put("engine", new RoleConfigHandler());
+		handlerContext.put("role", new RoleConfigHandler());
 	}
  
 	/**
@@ -93,6 +88,10 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 			}
 		} catch (XMLStreamException e) {
 		}
+		//we are done with the handler context map, release it for garbage collection
+		handlerContext = null;
+		//now return the config object, this is the only one config object that should exists
+		//in the system
 		return configBuilder.buildConfig();
 	}
 

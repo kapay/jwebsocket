@@ -20,5 +20,8 @@ package org.jwebsocket.config;
  *
  */
 public interface Config {
-
+	/**
+	 * Validates the configuration
+	 */
+	public void validate();
 }

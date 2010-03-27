@@ -152,4 +152,10 @@ public final class JWebSocketConfig implements Config {
 		return globalRoles;
 	}
 
+	@Override
+	public void validate() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

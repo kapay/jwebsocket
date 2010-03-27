@@ -20,4 +20,8 @@ import org.jwebsocket.config.Config;
  *
  */
 public class User implements Config {
+
+	@Override
+	public void validate() {
+	}
 }

@@ -21,4 +21,8 @@ import org.jwebsocket.config.Config;
  */
 public class Right implements Config {
 
+	@Override
+	public void validate() {
+	}
+
 }

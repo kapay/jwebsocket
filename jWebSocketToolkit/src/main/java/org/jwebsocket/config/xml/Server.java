@@ -51,4 +51,8 @@ public class Server implements Config {
 	public String getJar() {
 		return jar;
 	}
+
+	@Override
+	public void validate() {
+	}
 }

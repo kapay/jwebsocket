@@ -22,4 +22,9 @@ import org.jwebsocket.config.Config;
  */
 public class Plugin implements Config {
 
+	@Override
+	public void validate() {
+		
+	}
+
 }
