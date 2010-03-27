@@ -54,6 +54,45 @@
 		</server>
 	</servers>
 
+	<!-- jWebSocket global rights -->
+	<rights>
+		<right>
+			<id>right0</id>
+			<ns>org.jWebSocket.global</ns>
+			<description>Description for right0</description>
+		</right>
+		<right>
+			<id>right1</id>
+			<ns>org.jWebSocket.global</ns>
+			<description>Description for right1</description>
+		</right>
+	</rights>
+
+	<!-- jWebSocket roles -->
+	<roles>
+		<role>
+			<id>Administrator</id>
+			<description>Administrators</description>
+			<rights>
+				<!-- list of rights for "Administrator" role (ns + id) -->
+				<right>org.jWebSocket.plugins.rpc.rpc</right>
+				<right>org.jWebSocket.plugins.rpc.rrpc</right>
+			</rights>
+		</role>
+		<role>
+			<id>User</id>
+			<rights>
+				<!-- list of rights for "User" role (ns + id) -->
+				<right>org.jWebSocket.plugins.chat.broadcast</right>
+			</rights>
+			<description>Registered and authenticated users.</description>
+		</role>
+		<role>
+			<id>Guest</id>
+			<description>Anonymous users (not registered)</description>
+		</role>
+	</roles>
+
 	<!-- plug-ins to be instantiated for jWebSocket -->
 	<plugins>
 		<plugin>
@@ -118,45 +157,6 @@
 			<filename>jWebSocket.log</filename>
 		</log4j>
 	</logging>
-
-	<!-- jWebSocket global rights -->
-	<rights>
-		<right>
-			<id>right0</id>
-			<ns>org.jWebSocket.global</ns>
-			<description>Description for right0</description>
-		</right>
-		<right>
-			<id>right1</id>
-			<ns>org.jWebSocket.global</ns>
-			<description>Description for right1</description>
-		</right>
-	</rights>
-
-	<!-- jWebSocket roles -->
-	<roles>
-		<role>
-			<id>Administrator</id>
-			<description>Administrators</description>
-			<rights>
-				<!-- list of rights for "Administrator" role (ns + id) -->
-				<right>org.jWebSocket.plugins.rpc.rpc</right>
-				<right>org.jWebSocket.plugins.rpc.rrpc</right>
-			</rights>
-		</role>
-		<role>
-			<id>User</id>
-			<rights>
-				<!-- list of rights for "User" role (ns + id) -->
-				<right>org.jWebSocket.plugins.chat.broadcast</right>
-			</rights>
-			<description>Registered and authenticated users.</description>
-		</role>
-		<role>
-			<id>Guest</id>
-			<description>Anonymous users (not registered)</description>
-		</role>
-	</roles>
 
 	<!-- jWebSocket users -->
 	<users>

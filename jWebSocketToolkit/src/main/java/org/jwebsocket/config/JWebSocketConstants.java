@@ -31,7 +31,7 @@ public final class JWebSocketConstants {
 	 * jWebSocket copyright string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.
 	 */
-	public static final String COPYRIGHT = "(C) 2010 Innotrade GmbH, Germany, Herzogenrath";
+	public static final String COPYRIGHT = "(C) 2010 jWebSocket.org by Innotrade GmbH, Germany, Herzogenrath";
 	/**
 	 * jWebSocket license string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.
@@ -45,7 +45,7 @@ public final class JWebSocketConstants {
 	/**
 	 * Current version string of the jWebSocket package.
 	 */
-	public static final String VERSION_STR = "0.7.0.0313 beta";
+	public static final String VERSION_STR = "0.8.0.0328 beta";
 	/**
 	 * Namespace base for tokens and plug-ins.
 	 */

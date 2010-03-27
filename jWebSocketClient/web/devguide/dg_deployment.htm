@@ -20,23 +20,42 @@ page.</p>
 <h2>Process</h2>
 <p>To create a full deployment please follow the following steps:</p>
 <ol>
+	<li>Update version number in <tt>JWebSocketConstants.java</tt></li>
+	<li>Update all version numbers in <tt>pom.xml</tt> files to current version</li>
 	<li>Open IDE and Clean And Build the jWebSocket-Parent project<br>
-	(this creates all required .jar files of the modules in the 
-	jWebSocketExecutables folder)</li>
+	(this creates all required .<tt>jar</tt> files of the modules in the 
+	<tt>jWebSocketExecutables</tt> folder)</li>
 	<li>Run Generate Javadoc for each jWebSocket module within the project<br>
 	(this creates all required Java documentation files in the 
 	jWebSocketClient\web\javadocs folder)</li>
 	<li>Generate the jWebSocket Server Executable by running JSmooth with 
-	jWebSocketServer-&lt;ver&gt;.jsmooth<br>
-	(this creates the jWebSocketSAServer-&lt;ver&gt;.exe in the 
+	<tt>jWebSocketServer-&lt;ver&gt;.jsmooth</tt><br>
+	(this creates the <tt>jWebSocketSAServer-&lt;ver&gt;.exe</tt> in the 
 	jWebSocketDeploymentfolder)</li>
 	<li>Generate the jWebSocket Service Executable by running JSmooth with 
-	jWebSocketService-&lt;ver&gt;.jsmooth<br>
-	(this creates the jWebSocketService-&lt;ver&gt;.exe in the jWebSocketDeployment 
+	<tt>jWebSocketService-&lt;ver&gt;.jsmooth</tt><br>
+	(this creates the <tt>jWebSocketService-&lt;ver&gt;.exe</tt> in the jWebSocketDeployment 
 	folder)</li>
-	<li>Run the CreateDownloadFiles.bat in the jWebSocketDeployment folder<br>
-	(this creates all .zip files for the download area in jWebSocketDeployment)<p>&nbsp;</p>
-	<p>&nbsp;</p></li>
+	<li>Update the <tt>CreateDownloadFiles.bat</tt> in the <tt>jWebSocketDeployment</tt> folder 
+	to the new version number and run it.<br>(this creates all .<tt>zip</tt> files for the download area in jWebSocketDeployment)
+	</li>
+	<li>Update <tt>jwsClientToWebsite.bat</tt>
+	to new version number, adjust it to new files if needed and run it.</li>
+</ol>
+<p>Change all version numbers in</p>
+<ol>
+	<li>History page</li>
+	<li>Download page (need to keep old versions for reference, insert new ones 
+	on the top)<br>
+	Check file sizes of download page</li>
+	<li>Header bar</li>
+</ol>
+<p>Copy deployment files to download area</p>
+<p>&nbsp;</p>
+<p>Upload new deployment files to googlecode.</p>
+<ol>
+	<li>Upload new files and mark them as &quot;featured&quot;</li>
+<li>Mark old files as &quot;deprecated&quot;</li>
 </ol>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
