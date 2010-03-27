@@ -16,7 +16,7 @@ package org.jwebsocket.config;
 
 import java.util.List;
 
-import org.jwebsocket.config.xml.Config;
+import org.jwebsocket.config.Config;
 import org.jwebsocket.config.xml.Engine;
 import org.jwebsocket.config.xml.Plugin;
 import org.jwebsocket.config.xml.Right;

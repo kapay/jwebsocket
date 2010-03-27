@@ -13,10 +13,10 @@
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
-
+import org.jwebsocket.config.Config;
 /**
  * @author puran
- * @version $Id:$
+ * @version $Id$
  *
  */
 public class User implements Config {

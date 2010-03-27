@@ -14,9 +14,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import org.jwebsocket.config.Config;
 /**
  * @author puran
- * @version $Id:$
+ * @version $Id$
  *
  */
 public class Plugin implements Config {

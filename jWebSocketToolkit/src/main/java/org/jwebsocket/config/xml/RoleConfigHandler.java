@@ -15,10 +15,10 @@
 package org.jwebsocket.config.xml;
 
 import javax.xml.stream.XMLStreamReader;
-
+import org.jwebsocket.config.Config;
 /**
  * @author puran
- * @version $Id:$
+ * @version $Id$
  *
  */
 public class RoleConfigHandler implements ConfigHandler {

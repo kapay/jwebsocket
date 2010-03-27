@@ -12,11 +12,11 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config.xml;
+package org.jwebsocket.config;
 
 /**
  * @author puran
- * @version $Id:$
+ * @version $Id$
  *
  */
 public interface Config {
