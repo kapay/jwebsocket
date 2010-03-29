@@ -17,12 +17,12 @@ package org.jwebsocket.config;
 import java.util.List;
 
 import org.jwebsocket.config.Config;
-import org.jwebsocket.config.xml.Engine;
-import org.jwebsocket.config.xml.Plugin;
-import org.jwebsocket.config.xml.Right;
-import org.jwebsocket.config.xml.Role;
-import org.jwebsocket.config.xml.Server;
-import org.jwebsocket.config.xml.User;
+import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.config.xml.PluginConfig;
+import org.jwebsocket.config.xml.RightConfig;
+import org.jwebsocket.config.xml.RoleConfig;
+import org.jwebsocket.config.xml.ServerConfig;
+import org.jwebsocket.config.xml.UserConfig;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
@@ -32,13 +32,13 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  */
 public final class JWebSocketConfig implements Config {
 
-	private final List<Engine> engines;
-	private final List<Server> servers;
-	private final List<User> users;
-	private final List<Plugin> plugins;
+	private final List<EngineConfig> engines;
+	private final List<ServerConfig> servers;
+	private final List<UserConfig> users;
+	private final List<PluginConfig> plugins;
 
-	private final List<Right> globalRights;
-	private final List<Role> globalRoles;
+	private final List<RightConfig> globalRights;
+	private final List<RoleConfig> globalRoles;
 
 	private static JWebSocketConfig config = null;
 
@@ -67,37 +67,37 @@ public final class JWebSocketConfig implements Config {
 	 *
 	 */
 	public static class Builder {
-		private List<Engine> engines;
-		private List<Server> servers;
-		private List<User> users;
-		private List<Plugin> plugins;
+		private List<EngineConfig> engines;
+		private List<ServerConfig> servers;
+		private List<UserConfig> users;
+		private List<PluginConfig> plugins;
 
-		private List<Right> globalRights;
-		private List<Role> globalRoles;
+		private List<RightConfig> globalRights;
+		private List<RoleConfig> globalRoles;
 
-		public Builder addEngines(List<Engine> theEngines) {
+		public Builder addEngines(List<EngineConfig> theEngines) {
 			engines = theEngines;
 			return this;
 		}
-		public Builder addServers(List<Server> theServers) {
+		public Builder addServers(List<ServerConfig> theServers) {
 			servers = theServers;
 			return this;
 		}
-		public Builder addPlugins(List<Plugin> thePlugins) {
+		public Builder addPlugins(List<PluginConfig> thePlugins) {
 			plugins = thePlugins;
 			return this;
 		}
-		public Builder addGlobalRights(List<Right> theRights) {
+		public Builder addGlobalRights(List<RightConfig> theRights) {
 			globalRights = theRights;
 			return this;
 		}
 
-		public Builder addGlobalRoles(List<Role> theRoles) {
+		public Builder addGlobalRoles(List<RoleConfig> theRoles) {
 			globalRoles = theRoles;
 			return this;
 		}
 
-		public Builder addUsers(List<User> theUsers) {
+		public Builder addUsers(List<UserConfig> theUsers) {
 			users = theUsers;
 			return this;
 		}
@@ -113,42 +113,42 @@ public final class JWebSocketConfig implements Config {
 	/**
 	 * @return the engines
 	 */
-	public List<Engine> getEngines() {
+	public List<EngineConfig> getEngines() {
 		return engines;
 	}
 
 	/**
 	 * @return the servers
 	 */
-	public List<Server> getServers() {
+	public List<ServerConfig> getServers() {
 		return servers;
 	}
 
 	/**
 	 * @return the users
 	 */
-	public List<User> getUsers() {
+	public List<UserConfig> getUsers() {
 		return users;
 	}
 
 	/**
 	 * @return the plugins
 	 */
-	public List<Plugin> getPlugins() {
+	public List<PluginConfig> getPlugins() {
 		return plugins;
 	}
 
 	/**
 	 * @return the globalRights
 	 */
-	public List<Right> getGlobalRights() {
+	public List<RightConfig> getGlobalRights() {
 		return globalRights;
 	}
 
 	/**
 	 * @return the globalRoles
 	 */
-	public List<Role> getGlobalRoles() {
+	public List<RoleConfig> getGlobalRoles() {
 		return globalRoles;
 	}
 

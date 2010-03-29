@@ -1,5 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Copyright (c) 2010 jwebsocket.org
+//	jWebSocket - Role Class
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -12,17 +13,48 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config.xml;
-import org.jwebsocket.config.Config;
-/**
- * @author puran
- * @version $Id$
- *
- */
-public class Right implements Config {
+package org.jwebsocket.security;
 
-	@Override
-	public void validate() {
+/**
+ *
+ * @author aschulze
+ */
+public class Role {
+
+	private Integer id = null;
+	private String key = null;
+	private String description = null;
+	private String config = null;
+
+	public String getKey() {
+		return key;
 	}
 
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getConfig() {
+		return config;
+	}
+
+	public void setConfig(String config) {
+		this.config = config;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
 }

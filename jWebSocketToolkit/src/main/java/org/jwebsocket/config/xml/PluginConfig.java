@@ -20,10 +20,11 @@ import org.jwebsocket.config.Config;
  * @version $Id$
  *
  */
-public class Role implements Config {
+public class PluginConfig implements Config {
 
 	@Override
 	public void validate() {
+		
 	}
-	
+
 }

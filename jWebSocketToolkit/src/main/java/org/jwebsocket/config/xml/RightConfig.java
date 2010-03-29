@@ -13,18 +13,16 @@
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
-
 import org.jwebsocket.config.Config;
 /**
  * @author puran
  * @version $Id$
  *
  */
-public class Plugin implements Config {
+public class RightConfig implements Config {
 
 	@Override
 	public void validate() {
-		
 	}
 
 }

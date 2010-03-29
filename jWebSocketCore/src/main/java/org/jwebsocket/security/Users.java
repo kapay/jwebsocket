@@ -1,5 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Copyright (c) 2010 jwebsocket.org
+//	jWebSocket - Users Class
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -12,16 +13,22 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config.xml;
-import org.jwebsocket.config.Config;
-/**
- * @author puran
- * @version $Id$
- *
- */
-public class User implements Config {
+package org.jwebsocket.security;
 
-	@Override
-	public void validate() {
+import javolution.util.FastMap;
+import org.apache.log4j.Logger;
+
+/**
+ *
+ * @author aschulze
+ */
+public class Users {
+
+	private static Logger log = Logger.getLogger(Users.class);
+	private FastMap<String, User> users = new FastMap<String, User>();
+
+	public User getUserByLoginName(String aLoginName) {
+		return users.get(aLoginName);
 	}
+
 }

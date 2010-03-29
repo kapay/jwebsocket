@@ -14,6 +14,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.kit;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.xml.stream.XMLInputFactory;
@@ -23,10 +26,11 @@ import javax.xml.stream.XMLStreamReader;
 import org.apache.log4j.Logger;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.JWebSocketConfigHandler;
-import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
-import org.springframework.core.io.Resource;
+
+// the spring framwork blows up the project! Do we need that?
+// import org.springframework.context.support.FileSystemXmlApplicationContext;
+// import org.springframework.core.io.Resource;
 
 /**
  * An object that does the process of loading configuration, intialization of
@@ -38,41 +42,51 @@ import org.springframework.core.io.Resource;
 public final class WebSocketLoader {
 
 	private static Logger log = Logging.getLogger(WebSocketLoader.class);
-	
 	private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
 	/**
 	 * Load all the configurations based on jWebSocket.xml file at the given
 	 * <tt>configFilePath</tt> location.
 	 * 
+	 * @param configFilePath
 	 * @return the web socket config object with all the configuration
 	 * @throws WebSocketException
 	 *             if there's any while loading configuration
 	 */
 	public JWebSocketConfig loadConfiguration(final String configFilePath)
-			throws WebSocketException {
+		throws WebSocketException {
+		JWebSocketConfig config = null;
+		/* do we really need spring here?
 		FileSystemXmlApplicationContext ctx = new FileSystemXmlApplicationContext();
 		Resource resource = ctx.getResource(configFilePath);
-		XMLInputFactory factory = XMLInputFactory.newInstance();
-		XMLStreamReader streamReader = null;
-		JWebSocketConfig config = null;
+		 */
+		File lFile = new File(configFilePath);
 		try {
-			streamReader = factory.createXMLStreamReader(resource
-					.getInputStream());
+			FileInputStream fis = new FileInputStream(lFile);
+			XMLInputFactory factory = XMLInputFactory.newInstance();
+			XMLStreamReader streamReader = null;
+			streamReader = factory.createXMLStreamReader(fis);
 			config = configHandler.processConfig(streamReader);
-
 		} catch (XMLStreamException e) {
 			if (log.isDebugEnabled()) {
 				log.debug("Exception occurred while creating XML stream", e);
 			}
+		} catch (FileNotFoundException e) {
+			if (log.isDebugEnabled()) {
+				log.debug("jWebSocket config not found while creating XML stream", e);
+			}
 		} catch (IOException e) {
 			if (log.isDebugEnabled()) {
-				log.debug("I/O Exception occurred while creating XML stream",e);
+				log.debug("I/O Exception occurred while creating XML stream", e);
 			}
 		}
 		return config;
 	}
 
+	/**
+	 *
+	 * @param args
+	 */
 	public static void main(String... args) {
 		try {
 			new WebSocketLoader().loadConfiguration("../jWebSocket.xml");
@@ -81,7 +95,6 @@ public final class WebSocketLoader {
 			e.printStackTrace();
 		}
 	}
-	
 
 	/**
 	 * Initialize the loaded components of the jWebSocket server system using
@@ -95,7 +108,7 @@ public final class WebSocketLoader {
 	 *             if exception occurs during intialization
 	 */
 	public boolean initialize(final JWebSocketConfig configuration)
-			throws WebSocketException {
+		throws WebSocketException {
 		throw new UnsupportedOperationException();
 	}
 }

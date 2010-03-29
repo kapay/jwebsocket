@@ -43,6 +43,7 @@
 	</build>
 
     <!--  define all the dependencies here -->
+	<!--
     <dependencies>
     	<dependency>
 			<groupId>org.springframework</groupId>
@@ -50,7 +51,7 @@
 			<version>2.5.6</version>
 		</dependency>
     </dependencies>
-
+	-->
     <!--  define repositories -->
     <repositories>
     </repositories>

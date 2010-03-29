@@ -74,7 +74,7 @@ public class EngineConfigHandler implements ConfigHandler {
 				}
 			}
 		}
-		return new Engine(id, name, jar, port, timeout, domains);
+		return new EngineConfig(id, name, jar, port, timeout, domains);
 	}
 
 	/**

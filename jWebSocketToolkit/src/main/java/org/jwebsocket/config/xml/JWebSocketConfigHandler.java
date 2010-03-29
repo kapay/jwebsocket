@@ -64,22 +64,22 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 				if (streamReader.isStartElement()) {
 					String elementName = streamReader.getLocalName();
 					if (elementName.equals(ELEMENT_ENGINES)) {
-						List<Engine> engines = handleEngines(streamReader);
+						List<EngineConfig> engines = handleEngines(streamReader);
 						configBuilder = configBuilder.addEngines(engines);
 					} else if (elementName.equals(ELEMENT_SERVERS)){
-						List<Server> servers = handleServers(streamReader);
+						List<ServerConfig> servers = handleServers(streamReader);
 						configBuilder = configBuilder.addServers(servers);
 					} else if (elementName.equals(ELEMENT_PLUGINS)) {
-						List<Plugin> plugins = handlePlugins(streamReader);
+						List<PluginConfig> plugins = handlePlugins(streamReader);
 						configBuilder = configBuilder.addPlugins(plugins);
 					} else if (elementName.equals(ELEMENT_RIGHTS)) {
-						List<Right> globalRights = handleRights(streamReader);
+						List<RightConfig> globalRights = handleRights(streamReader);
 						configBuilder = configBuilder.addGlobalRights(globalRights);
 					} else if (elementName.equals(ELEMENT_ROLES)) {
-						List<Role> roles = handleRoles(streamReader);
+						List<RoleConfig> roles = handleRoles(streamReader);
 						configBuilder = configBuilder.addGlobalRoles(roles);
 					} else if (elementName.equals(ELEMENT_USERS)) {
-						List<User> users = handleUsers(streamReader);
+						List<UserConfig> users = handleUsers(streamReader);
 						configBuilder = configBuilder.addUsers(users);
 					} else {
 						//ignore
@@ -95,34 +95,34 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		return configBuilder.buildConfig();
 	}
 
-	private List<User> handleUsers(XMLStreamReader streamReader) {
+	private List<UserConfig> handleUsers(XMLStreamReader streamReader) {
 		return null;
 	}
 
-	private List<Role> handleRoles(XMLStreamReader streamReader) {
+	private List<RoleConfig> handleRoles(XMLStreamReader streamReader) {
 		return null;
 	}
 
-	private List<Right> handleRights(XMLStreamReader streamReader) {
+	private List<RightConfig> handleRights(XMLStreamReader streamReader) {
 		return null;
 	}
 
-	private List<Plugin> handlePlugins(XMLStreamReader streamReader) {
+	private List<PluginConfig> handlePlugins(XMLStreamReader streamReader) {
 		return null;
 	}
 
-	private List<Server> handleServers(XMLStreamReader streamReader) {
+	private List<ServerConfig> handleServers(XMLStreamReader streamReader) {
 		return null;
 	}
 
-	private List<Engine> handleEngines(XMLStreamReader streamReader) throws XMLStreamException {
-		List<Engine> engines = new ArrayList<Engine>();
+	private List<EngineConfig> handleEngines(XMLStreamReader streamReader) throws XMLStreamException {
+		List<EngineConfig> engines = new ArrayList<EngineConfig>();
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {
 				String elementName = streamReader.getLocalName();
 				if (elementName.equals(ELEMENT_ENGINE)) {
-					Engine engine = (Engine)handlerContext.get(elementName).processConfig(streamReader);
+					EngineConfig engine = (EngineConfig)handlerContext.get(elementName).processConfig(streamReader);
 					engines.add(engine);
 					break;
 				}

@@ -23,7 +23,7 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  * @version $Id$
  * 
  */
-public class Engine implements Config {
+public class EngineConfig implements Config {
 	private String id;
 	private String name;
 	private String jar;
@@ -47,7 +47,7 @@ public class Engine implements Config {
 	 * @param domains
 	 *            list of domain names
 	 */
-	public Engine(String id, String name, String jar, int port, int timeout,
+	public EngineConfig(String id, String name, String jar, int port, int timeout,
 			List<String> domains) {
 		this.id = id;
 		this.name = name;

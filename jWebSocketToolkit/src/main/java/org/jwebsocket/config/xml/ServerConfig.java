@@ -20,12 +20,12 @@ import org.jwebsocket.config.Config;
  * @version $Id$
  * 
  */
-public class Server implements Config {
+public class ServerConfig implements Config {
 	private String id;
 	private String name;
 	private String jar;
 
-	public Server(String id, String name, String jar) {
+	public ServerConfig(String id, String name, String jar) {
 		this.id = id;
 		this.name = name;
 		this.jar = jar;
