@@ -23,13 +23,14 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.netty.engines.NettyEngine;
 import org.jwebsocket.plugins.TokenPlugInChain;
+import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
 import org.jwebsocket.plugins.system.SystemPlugIn;
 import org.jwebsocket.server.CustomServer;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.tcp.engines.TCPEngine;
 
 /**
  * Web application lifecycle listener.
@@ -58,8 +59,8 @@ public class ContextListener implements ServletContextListener {
 		WebSocketEngine engine = null;
 		try {
 			// TODO: find solutions for hardcoded engine id, refer to RPCPlugIn!
-			//engine = new TCPEngine("tcp0", Config.DEFAULT_PORT, Config.DEFAULT_TIMEOUT);
-			engine = new NettyEngine("tcp0", JWebSocketConstants.DEFAULT_PORT, JWebSocketConstants.DEFAULT_TIMEOUT);
+			engine = new TCPEngine("tcp0", JWebSocketConstants.DEFAULT_PORT, JWebSocketConstants.DEFAULT_TIMEOUT);
+			// engine = new NettyEngine("tcp0", JWebSocketConstants.DEFAULT_PORT, JWebSocketConstants.DEFAULT_TIMEOUT);
 			engine.startEngine();
 		} catch (Exception ex) {
 			log.error("Error instantating engine: " + ex.getMessage());
@@ -81,6 +82,8 @@ public class ContextListener implements ServletContextListener {
 			plugInChain.addPlugIn(new RPCPlugIn());
 			// add the streaming plug-in (e.g. for the time stream demo)
 			plugInChain.addPlugIn(new StreamingPlugIn());
+			// add the flash/bridge plug-in (to drive browser that don't yet support web sockets)
+			plugInChain.addPlugIn(new FlashBridgePlugIn());
 			
 			if (log.isDebugEnabled()) {
 				log.debug("Starting token server...");

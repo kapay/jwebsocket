@@ -15,6 +15,6 @@ function makeImgExp( aId ) {
 				lP.className = "screenshotMinus";
 			}
 		};
-		lImg.parentElement.insertBefore( lP, lImg );
+		lImg.parentNode.insertBefore( lP, lImg );
 	}
 }
