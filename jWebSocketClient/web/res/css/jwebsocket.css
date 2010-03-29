@@ -83,6 +83,18 @@ blockquote {
 	margin-left: 15px;
 }
 
+.newsHeader {
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 11pt;
+	color: #006bb5;
+	/* color: #303030; */
+
+	border: 0px;
+	padding: 0px;
+	margin: 0px;
+}
+
 p {
 	font-size: 10pt;
 	color: #202020;
@@ -121,13 +133,23 @@ div.sdivContainer {
 }
 
 table.stlbDlg {
-	background-color: inherit;
+	font-family: Verdana, Helvetica, sans-serif;
+	font-weight: normal;
+	font-size: 10pt;
+	/* we could use inherited here but IE doesn't get this */
+	background-color: #f0f0f0;
 }
 tr.strDlg {
-	background-color: inherit;
+	/* we could use inherited here but IE doesn't get this */
+	background-color: #f0f0f0;
 }
 td.stdDlg {
-	background-color: inherit;
+	/* we could use inherited here but IE doesn't get this */
+	background-color: #f0f0f0;
+}
+th.sthDlg {
+	/* we could use inherited here but IE doesn't get this */
+	background-color: #f0f0f0;
 }
 
 table.stblData {
@@ -235,7 +257,6 @@ p.screenshotMinus {
 	background: url(../img/screenshotMinus.png) 0px 0px no-repeat;
 }
 
-
 p.imageFooter {
 	margin-top: 2px;
 	color: #505050;
@@ -282,7 +303,6 @@ a.sancBtnTop {
 a.sancBtnTop:hover {
 	background-color: #006bb5;
 }
-
 
 a.emphasized {
 	font-weight: bold;

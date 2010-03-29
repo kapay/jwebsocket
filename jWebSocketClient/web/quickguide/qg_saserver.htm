@@ -17,48 +17,47 @@
 			}
 		</script>
 <h2>jWebSocket Stand-Alone Server</h2>
-<p>
-This section describes how to use the jWebSocket Stand-Alone Server .jar on the 
+<p>This section describes how to use the jWebSocket Stand-Alone Server .jar on the 
 various operating systems including Windows, Unix and Linux. This topic will be 
 interessting for you when you are a developer and intend to develop new client software 
-based upon the jWebSocket Server or if you are a tester. The <tt>jWebSocketSAServer.jar</tt>
-which includes all required libraries. The benefit is that it easily can 
-be started from the shell or command line window without any installation or special 
-configuration.</p>
-<p>
-Like all normal desktop applications the jWebSocket Stand-Alone Server is terminated 
+based upon the jWebSocket Server or if you are a tester. The <tt>jWebSocketSAServer-&lt;version&gt;.jar</tt> 
+which includes all required libraries. The benefit is that it easily can be started 
+from the shell or command line window without any installation or special configuration.</p>
+<p>Like all normal desktop applications the jWebSocket Stand-Alone Server is terminated 
 when you log off the system. Thus for production systems it is recommended to use 
 either the jWebSocket Service (for Windows) or the jWebSocket Web Application (for 
 all operating systems).</p>
 <h3>Prerequisities on the server</h3>
 <p>The jWebSocket server is based on pure Java technology. For your server please 
 ensure that you have at least the Java Runtime Environment (JRE) 1.5 installed. 
-If not you can get it <a target="_blank" href="http://java.com/de/download/">here
-<img border="0" src="../images/new_win.png"></a>. For Windows we recommend to put the path to
-<tt>java.exe</tt> into your <tt>PATH</tt> enviroment variable. If not, you 
+If not you can get it <a target="_blank" href="http://java.com/de/download/">here</a>
+<img border="0" src="../images/new_win.png">. For Windows we recommend to put the 
+path to <tt>java.exe</tt> into your <tt>PATH</tt> enviroment variable. If not, you 
 may need to adjust the provided start batch.</p>
-</p>
-
+<p></p>
 <h3>Download, Install and Run the jWebSocket Server</h3>
 <p>To set up the jWebSocket server on your MS Windows system please....</p>
-<ol>
-	<li>Create a folder of your choice (e.g. <tt>c:\program files\jWebSocket</tt>).</li>
-	<li>Download the <a href="../downloads/jWebSocketSAServer-0.7.0.zip"><tt>jWebSocketSAServer.zip</tt></a>
-	which includes the <tt>jWebSocketSAServer.jar</tt>, all required libs and
-	<tt>jWebSocketSAServer.bat</tt> from the download section to this folder.</li>
-	<li>For Windows environments please start the batch either from the command shell or the Windows Explorer.<br>
-	If the path to the <tt>java.exe</tt> is not part of your <tt>PATH</tt> 
-	environment variable, please adjust the <tt>jWebSocketSAServer.bat</tt> batch accordingly (see inline documentation in the batch).</li>
-	</li>
-	<li>For Unix and Linux environments please type <tt>java -jar jWebSocketSAServer.jar</tt> in the command shell.<br>
-	<img  class="screenshotOff" id="sa_server" border="0" src="images/sa_server.jpg" width="669" height="338">
+<ol class="instructions">
+	<li class="instruction">Create a folder of your choice (e.g. <tt>c:\program 
+	files\jWebSocket</tt>).</li>
+	<li class="instruction">Download the <tt>jWebSocketSAServer-&lt;version&gt;.zip</tt> 
+	from the <a href="../downloads.htm">download</a> area which includes the <tt>
+	jWebSocketSAServer-&lt;version&gt;.jar</tt>, all required libs and <tt>jWebSocketSAServer-&lt;version&gt;.bat</tt> 
+	from the download section to this folder.</li>
+	<li class="instruction">For Windows environments please start the batch either 
+	from the command shell or the Windows Explorer.<br>
+	If the path to the <tt>java.exe</tt> is not part of your <tt>PATH</tt> environment 
+	variable, please adjust the <tt>jWebSocketSAServer.bat</tt> batch accordingly 
+	(see inline documentation in the batch).</li> </li>
+	<li class="instruction">For Unix and Linux environments please type <tt>java 
+	-jar jWebSocketSAServer-&lt;version&gt;.jar</tt> in the command shell.<br>
+	<img class="screenshotOff" id="sa_server" border="0" src="images/sa_server.jpg" width="669" height="338">
 	<p class="imageFooter">Running jWebSocketSAServer.jar in the command shell</p>
-</li>
+	</li>
 </ol>
-
 <h3>Command line arguments</h3>
-<p>These are the command line arguments interpreted by the main class of the 
-jWebSocketSAServer.jar.</p>
+<p>These are the command line arguments interpreted by the main class of the <tt>
+jWebSocketSAServer-&lt;version&gt;.jar</tt>.</p>
 <ul>
 	<li>port=[port], default 8787</li>
 	<li>prot=[json|csv|xml|custom], default=json</li>
@@ -67,8 +66,8 @@ jWebSocketSAServer.jar.</p>
 </ul>
 <h3>jWebSocketServer.bat</h3>
 <p><br>
-For MS-Windows environments the <tt>jWebSocketServer.zip</tt> from the download area 
-includes batch file <tt>jWebSocketServer.bat</tt>.<br>
+For MS-Windows environments the <tt>jWebSocketServer-&lt;version&gt;.zip</tt> from the
+<a href="../downloads.htm">download</a> area includes batch file <tt>jWebSocketServer-&lt;version&gt;.bat</tt>.<br>
 <br>
 <code>java -jar jWebSocket.jar %1 %2 %3 %4 %5 %6</code><br>
 <br>

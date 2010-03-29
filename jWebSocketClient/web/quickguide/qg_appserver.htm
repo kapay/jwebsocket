@@ -16,9 +16,17 @@ web applications, e.g. in Tomcat-Environments. This topic will be interessting f
 you when you intend to run the jWebSocket server on production systems either embedded 
 within an existing web application or as a separate stand-alone web application.</p>
 <h3>Prerequisities on the server</h3>
-<p>You only need to have Tomcat 6.x running on your system and we recommend to have 
-Java 1.6 installed. It is possible but not required to use the Apache http server 
-as Tomcat frontend together with <tt>mod_proxy</tt> or <tt>mod_jk</tt> as bridge.</p>
+<p>You only need to have <a target="_blank" href="http://tomcat.apache.org/">Tomcat</a>
+<img border="0" src="../images/new_win.png"> 6.x running on your system and we recommend to have 
+Java 1.6 installed. It is possible but not required to use the
+<a target="_blank" href="http://httpd.apache.org/">Apache</a>
+<img border="0" src="../images/new_win.png"> http server 
+as <a target="_blank" href="http://tomcat.apache.org/">Tomcat</a>
+<img border="0" src="../images/new_win.png"> frontend together with 
+<a target="_blank" href="http://httpd.apache.org/docs/2.2/mod/mod_proxy.html"><tt>mod_proxy</tt></a>
+<img border="0" src="../images/new_win.png"> or 
+<a target="_blank" href="http://tomcat.apache.org/connectors-doc/"><tt>mod_jk</tt></a>
+<img border="0" src="../images/new_win.png"> as bridge.</p>
 <h3>Prerequisities on the Client</h3>
 <p>The jWebSocket client is embedded into the web application, so beside an installed 
 HTML 5 browser with WebSocket support there is no need for certain preparations.
@@ -29,14 +37,14 @@ web application as a .war file which has been tested for Tomcat 6.0. This web ap
 includes the entire jWebSocketServer and all required libraries. Please follow the 
 follwing steps to run it:</p>
 <ol>
-	<li>Download the <tt>jWebSocketAppServer.zip</tt> from the
+	<li>Download the <tt>jWebSocketAppServer-&lt;version&gt;.zip</tt> from the
 	<a href="../downloads.htm">download</a> area.</li>
-	<li>Unpack the <tt>.zip</tt> archive with the <tt>jWebSocketAppServer.war</tt> 
+	<li>Unpack the <tt>.zip</tt> archive with the <tt>jWebSocketAppServer-&lt;version&gt;.war</tt> 
 	into a temporary folder on you local harddisk.</li>
 	<li>Start Tomcat, open the Tomcat Manager at <tt>http://localhost:8080</tt> 
 	in your browser and login with your admin credentials <br>
 	(adjust host and port according to your environment).</li>
-	<li>Deploy the <tt>jWebSocketAppServer.war </tt>in Tomcat as follows:<br>
+	<li>Deploy the <tt>jWebSocketAppServer-&lt;version&gt;.war </tt>in Tomcat as follows:<br>
 	<img class="screenshotOff" id="tomcat_deploy" border="0" src="images/tomcat_deploy.jpg" width="784" height="304">
 	<p class="imageFooter">Deploying jWebSocketAppServer Web Application in Tomcat 
 	6.0</p>
@@ -52,10 +60,10 @@ follwing steps to run it:</p>
 	(please adjust the host and port according to your environment). Your browser 
 	starts the demo site and you can test the various demos.</li>
 </ol>
-<br />
+<br/>
 <h2>Embedding jWebSocket Server into existing Web Applications</h2>
-<p>The jWebSocket server is provided as a single <tt>jWebSocketServer.jar</tt> file 
-in conjunction with a couple of libraries. You can download the <tt>jWebSocketServer.zip</tt> 
+<p>The jWebSocket server is provided as a single <tt>jWebSocketServer-&lt;version&gt;.jar</tt> file 
+in conjunction with a couple of libraries. You can download the <tt>jWebSocketServer-&lt;version&gt;.zip</tt> 
 in the <a href="../downloads.htm">download</a> area. Simply include all <tt>.jar</tt> 
 files provided in that <tt>.zip</tt> into your web application. Unlike the stand-alone 
 version the initialization of the embedded jWebSocket server is not done by the 
@@ -118,14 +126,11 @@ various plug-ins.</p>
       log.error(<span style="color:#ce7b00;">&quot;Stopping TokenServer: &quot;</span> + ex.getMessage());
     }
   }</span>
-}</pre>
-	<p class="imageFooter">Integrating the jWebSocketServer into a Tomcat web application</p>
-</blockquote>
-<script type="text/javascript">
+}
+<p class="imageFooter">Integrating the jWebSocketServer into a Tomcat web application</p>
+</pre>
+	
+</blockquote><script type="text/javascript">
 			makeImgExp( "tomcat_deploy" );
 			makeImgExp( "tomcat_start_stop" );
-		</script>
-
-</body>
-
-</html>
+		</script></body></html>

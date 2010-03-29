@@ -229,8 +229,8 @@
 
 			function openSubWindow() {
 				window.open(
-				// "http://www.jwebsocket.org/chat.htm"
-				"chat.htm",
+				// "http://www.jwebsocket.org/demos/chat/chat.htm"
+				"demos/chat/chat.htm",
 				"chatWindow" + lNextWindowId,
 				"width=900,height=700,left=" + (50 + lNextWindowId * 30) + ",top=" + (50 + lNextWindowId * 25)
 			);
@@ -302,7 +302,7 @@
 		<script type="text/javascript">
 			var lFrameElem = this.frameElement;
 			if( !lFrameElem ) {
-				location.replace( "index.htm?page=chat.htm" );
+				location.replace( "../../index.htm?page=demos/chat/chat.htm" );
 			}
 		</script>
 		<h1>jWebSocket Chat Demo</h1>

@@ -128,7 +128,7 @@
 				log( SYS, OUT, "logout: " + lRes.msg );
 			}
 
-// ----------------------------------------- TEST WITH RESPONSE
+			// ----------------------------------------- TEST WITH RESPONSE
 
 			function broadcast() {
 				var lLoop = 0;
@@ -143,23 +143,23 @@
 					if( lMsg.length > 0 ) {
 						log( USR, OUT, lMsg );
 						var lRes = lWSC.broadcastText(
-							"",		// broadcast to all clients (not limited to a certain pool)
-							lMsg, {	// broadcast this message
-								OnResponse: function( aToken ) {
-									if( aToken.error ) {
-										log( SYS, OUT, "Broadcast returned error, aborting loop." );
-									} else if( lLoop < lMax ) {
-										lLoop++;
-										doBroadcast();
-									} else {
-										var lDuration = (new Date().getTime() - lStarted);
-										var lAverage = lDuration/lMax;
-										lAverage = lAverage.toFixed( 3 );
-										log( SYS, OUT, "'broadcast' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
-									}
+						"",		// broadcast to all clients (not limited to a certain pool)
+						lMsg, {	// broadcast this message
+							OnResponse: function( aToken ) {
+								if( aToken.error ) {
+									log( SYS, OUT, "Broadcast returned error, aborting loop." );
+								} else if( lLoop < lMax ) {
+									lLoop++;
+									doBroadcast();
+								} else {
+									var lDuration = (new Date().getTime() - lStarted);
+									var lAverage = lDuration/lMax;
+									lAverage = lAverage.toFixed( 3 );
+									log( SYS, OUT, "'broadcast' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
 								}
 							}
-						);
+						}
+					);
 					}
 				}
 
@@ -219,7 +219,7 @@
 
 				function doRPC() {
 					var lRes = lWSC.rpc(
-						"org.jWebSocket.demo.DemoRPCServer", "getMD5", "This is a test!", {
+					"org.jWebSocket.demo.DemoRPCServer", "getMD5", "This is a test!", {
 						OnResponse: function( aToken ) {
 							if( aToken.error ) {
 								log( SYS, OUT, "RPC returned error, aborting loop." );
@@ -245,7 +245,7 @@
 				}
 			}
 
-// ----------------------------------------- TEST STREAM
+			// ----------------------------------------- TEST STREAM
 
 			var INTERVAL_STEP = 1;
 
@@ -269,15 +269,15 @@
 					if( lMsg.length > 0 ) {
 						log( USR, OUT, lMsg );
 						var lRes = lWSC.broadcastText(
-							"",		// broadcast to all clients (not limited to a certain pool)
-							lMsg	// broadcast this message
-						);
+						"",		// broadcast to all clients (not limited to a certain pool)
+						lMsg	// broadcast this message
+					);
 					}
 					if( lCnt > lMax ) {
 						clearInterval ( broadcast2IntervalId );
 						var lDuration = (new Date().getTime() - lStarted);
 						var lAverage = lDuration/lMax;
-					log( SYS, OUT, "'stream broadcast' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+						log( SYS, OUT, "'stream broadcast' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
 					}
 				}
 
@@ -340,7 +340,7 @@
 						clearInterval ( RPCPerf2IntervalId );
 						var lDuration = (new Date().getTime() - lStarted);
 						var lAverage = lDuration/lMax;
-					log( SYS, OUT, "'stream RPC' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
+						log( SYS, OUT, "'stream RPC' test finished, loops: " + lMax + ", total: " + lDuration + "ms, avg: " + lAverage + "ms" );
 					}
 				}
 
@@ -352,7 +352,7 @@
 				}
 			}
 
-// ----------------------------------------- INIT
+			// ----------------------------------------- INIT
 
 			function initPage() {
 				// get some required HTML elements
@@ -417,11 +417,11 @@
 		<script type="text/javascript">
 			var lFrameElem = this.frameElement;
 			if( !lFrameElem ) {
-				location.replace( "index.htm?page=chat.htm" );
+				location.replace( "../../index.htm?page=demos/test/test.htm" );
 			}
 		</script>
 		<h1>jWebSocket Test Suite</h1>
-		<p>This page is intended to be run for local test purposes only. Please avoid to stress our online-server 
+		<p>This page is intended to be run for local test purposes only. Please avoid to stress our online-server
 		too much. If you are not sure whether your favorite browser supports 
 		WebSockets please refer to our <a href="../../jws_for_all.htm">
 		jWebSocket Cross-Browser Compatibility</a> page.</p>
@@ -451,8 +451,8 @@
 					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"></td>
 				</tr>
 				<tr class="strDlg">
+					<th class="sthDlg" colspan="4">Test with responses</th>
 				</tr>
-				<tr class="strDlg"><th class="stdDlg" colspan="4" width="5">Test with responses</th></tr>
 				<tr class="strDlg">
 					<td class="stdDlg" colspan="4" align="center">
 						<input class="sbtnDlg" id="sbtnPing" type="button" value="Ping" onclick="testCSPerf();">
@@ -460,7 +460,9 @@
 						<input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();">
 					</td>
 				</tr>
-				<tr class="strDlg"><th class="stdDlg" colspan="4" width="5">Test full stream</th></tr>
+				<tr class="strDlg">
+					<th class="sthDlg" colspan="4">Test full stream</th>
+				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" colspan="4" align="center">
 						<input class="sbtnDlg" id="sbtnPing2" type="button" value="Ping" onclick="testCSPerf2();">
