@@ -238,12 +238,12 @@
 					// instaniate new TokenClient, either JSON, CSV or XML
 					lWSC = new jws.jWebSocketJSONClient();
 					
-					eUsername.addEventListener( "keydown", usrKeyDnLsnr, false );
+					jws.events.addEventListener( eUsername, "keydown", usrKeyDnLsnr, false );
 					eUsername.focus();
 					eUsername.select();
 
 					// attach event listener for key down event in the docuemnt
-					document.addEventListener( "keydown", processKeyDown, false );
+					jws.events.addEventListener( document, "keydown", processKeyDown, false );
 				} else {
 					jws.$( "sbtnLogin" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnLogout" ).setAttribute( "disabled", "disabled" );

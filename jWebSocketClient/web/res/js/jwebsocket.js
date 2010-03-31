@@ -33,25 +33,44 @@ var jws = {
 		return( 
 			window.WebSocket != null
 		);
-	}
+	},
+
+	isIE: (function() {
+		var lUserAgent = navigator.userAgent;
+		var lIsIE = lUserAgent.indexOf( "MSIE" );
+		return( lIsIE >= 0 );
+	})()
+
+};
+
+// event abstraction for Internet Explorer
+jws.events = {
+
+	addEventListener : (
+		jws.isIE ?
+			function( aElement, aEvent, aListener ) {
+				aElement.attachEvent( "on" + aEvent, aListener);
+			}
+		:
+			function( aElement, aEvent, aListener ) {
+				aElement.addEventListener( aEvent, aListener, false );
+			}
+	),
+
+	getTarget : (
+		jws.isIE ?
+			function( aEvent ) {
+				return aEvent.srcElement;
+			} :
+			function( aEvent ) {
+				return aEvent.target;
+			}
+	)
+
 };
 
 
-// check if browser supports WebSockets and embed flash-bridge if possible
-var lInstFlashBride = !jws.browserSupportsWebSockets();
-if( lInstFlashBride ) {
-	// check if IE and < version 7, this is not (yet) supported
-	var lUserAgent = navigator.userAgent;
-	var lIsIE = lUserAgent.indexOf( "MSIE" );
-	if( lIsIE >= 0 ) {
-		var lVer = parseFloat( lUserAgent.substr( lIsIE + 4 ) );
-		if( isNaN( lVer ) || lVer < 7 ) {
-			lInstFlashBride = false;
-		}
-	}
-}
-
-if( lInstFlashBride ) {
+if( !jws.browserSupportsWebSockets() ) {
 	// --- swfobject.js ---
 	// SWFObject v2.2 <http://code.google.com/p/swfobject/>
 	// is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -75,7 +94,7 @@ if( lInstFlashBride ) {
 	// Copyright: Hiroshi Ichikawa <http://gimite.net/en/>
 	// http://github.com/gimite/web-socket-js
 	// http://www.lightsphere.com/dev/articles/socketpolicy.pl.html
-	// License: New BSD Lincense
+	// License: New BSD License
 	// Full Sources codes provided in web_socket.js
 	eval((function(x){var d="";var p=0;while(p<x.length){if(x.charAt(p)!="`")d+=x.charAt(p++);else{var l=x.charCodeAt(p+3)-28;if(l>4)d+=d.substr(d.length-x.charCodeAt(p+1)*96-x.charCodeAt(p+2)+3104-l,l);else d+="`";p+=4}}return d})("if(!window.WebSocket){` +'console){` \"#={log:function(){},error` &)};}` e%=` 0%url,protoco` $!xyHost` $\"Port,headers){var self=this;self.readyState=` r%.CONNECTING` ?\"bufferedAmount=0;` A&__addTask(`!^'` P!__flash` l'` +#.create`!a3||nul` )#Port||0`!y$` 5\")`!N\"` e$addEventListener(\"open\",`!F%fe){try{if(` T!onopen`!^#` '\"();}}catch(`$(&.`#{!(e.toString());}}` ~=close` vF` J!` Timessag`!3,var data=decodeURIComponent(fe.getData());`!_*` g#` [\"e;if(`';#M` 3\"`!8!){e=document`$x#` 3!(\"` :(\");e.init` )(`!d(alse,false,data,`%E!`%J!`!.\");}else{e={data:data};}`!\\*(e`\"ahstateChan`#@-try`$^\"`(X'`#C\"R` (%(` y#`(R+` A\"B` ()();`!KF});}`):'`(a!type.send`*p&data`+p\"this`\">$||` )!`!l'`*F1){throw\"INVALID_STATE_ERR: Web ` J\" conne`!)! has not been established\";}var result`+v!`#g%send`!`\";if(` <\"<0){return true`%,#` R!`#8+` J\";` F#`%s!;}`\"b2`)!!`\"o&`\"c.`!,$;}if(`\"q+!`\"u'OPEN` B&`\" )`*\"$`#N,`#R'LOSED;` z$`*V#)`\"7\"`*_(`!o1`&m,`\"%&type,l` 0#,useCapture`\"A\"(\"__events\"in this)`!,#` 0$={}`\"S!!` e! ` ?#` 6%` ?,[type]=[];if(\"`!>$\"==typeof` X![\"on\"+` D!` I1.defaultHandler`%R!` I'`#@!` %'`#;&_Fir`+3#this,typ`*L!` p0push(`\"p$`(;4remov` l\"`\"X~`#H.`&#$for(var i`(:$` <\".length;i>-1;--i`!4!`!I$==` ?*`\"Q\"[i`#\\3splice(i,1);break;}`&43dispatch`\"q!`\"d&` i!`\">9row\"UNSPECIFIED_EVENT_TYP`+5!\"`\"e#` T!.`&26` E=`##&0,l`\"U+` s&]`#4%<l;++i`\"f,` ?'[i]`\"7#;if`!Y#cancelBubble){`#)$if(`+e!!==` A\"`$[\"Value&&`'w3`!H2`'u*`!C7` ;+`!b$}};`!'$ `(,0object`(<\"`.+$`0-+var ` i!=new` [&` [!;`!<\"ini` *\"`('\"true,true)` 9#target`\"f#currentT` .\"`!;\";`$F$key in `!4\"` K![key]=data` %!;}` L\"`&R*`\"I\",argum`%^!;};}`\"G.` F\"){}` $*`/y(`$l!able=`0u!` *;`%4\"=`0r\"` 35pr`!Z!D`$<\"`0t+`$m!`!-&`$|#`%g'` w#`);(` q,stopPropagation` v(` t'`!f#`3,\"` S6`$d%`*&+TypeArg,can` d\"` &#`!r#Arg`!'#type`%&\"` L#`2I\"`#P'` I)` 8\"timeStamp`&A!Dat`!W).CONNECTING=0` ,'OPEN=1` <(`3:!=2` ('__tasks=[]` ()initialize`$\"+!` :(swfLoc`#Q!){console.error(\"[` @%] set`&=&` J* to l` $$of` =&Main.swf\");`/Z$var container=doc`'J!.createElement(\"div\");` ?%.id=\"w` n$C` /$\"` 7'style.posi`%[!\"absolute` 2.left=\"-100px` ,.top` 3&var hold`!I=` ?\"`!Y*Flash` u(appendChild(` K\");` n%body` 5)` O%);swf`*l#embedSWF(`#s3,`!/,,\"10\",\"10\",\"9.0.0\",null,{bridgeName:` J&\"}` 8\"` >!`(2&`%o\"e.success`%I:`![- failed\");}});FAB`!5!.addI`&y$`!w!Callback(`!E'`!;&){try{`\"K(flash=` g%` L%.root()`'~)` G!.setCallerUrl(`')$.href)`.v%i=0;i<`(k-`3=$`3<!` --[i]();`.J&`)F(}catch(e`\"y9\"+e.toString()`#$\"`*q(__addTask`* &task`$4!`\"7-){task();}else`!\\..push` Z\"`31)`#9%Log(messag`!k'log(decodeURIComponent` ?%)`1C'` `%E`\"E!` Z-`\"[\"` O:if(window.add`/(!Listener){` \"3(\"load\",`-.2,`1 !`\"m$` [$tta`3Y$\"on` D8);}}"))
 
@@ -646,45 +665,6 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	// deprecated, kept for upward compatibility
 	disconnect: function( aOptions ) {
 		return this.close( aOptions );
-	},
-
-	login: function( aUsername, aPassword, aPool ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
-			this.sendToken({
-				type: "login",
-				username: aUsername,
-				password: aPassword,
-				pool: aPool
-			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
-		}
-		return lRes;
-	},
-
-	logout: function() {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
-			this.sendToken({
-				type: "logout"
-			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notLoggedIn";
-			lRes.msg = "Not logged in.";
-		}
-		return lRes;
-	},
-
-	isLoggedIn: function() {
-		return( this.isConnected() && this.fUsername );
-	},
-
-	getUsername: function() {
-		return( this.isLoggedIn() ? this.fUsername : null );
 	}
 
 });
@@ -703,6 +683,58 @@ jws.SystemClientPlugIn = {
 	ALL_CLIENTS: 0,
 	AUTHENTICATED: 1,
 	NON_AUTHENTICATED: 2,
+
+	login: function( aUsername, aPassword, aOptions ) {
+		var lPool = null;
+		var lAutoConnect = true;
+		if( aOptions ) {
+			if( aOptions.pool !== undefined ) {
+				lPool = aOptions.pool;
+			}
+			if( aOptions.autoConnect !== undefined ) {
+				lAutoConnect = aOptions.autoConnect;
+			}
+		}
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				type: "login",
+				username: aUsername,
+				password: aPassword,
+				pool: lPool
+			});
+		} else {
+			if( lAutoConnect ) {
+			} else {
+				lRes.code = -1;
+				lRes.localeKey = "jws.jsc.res.notConnected";
+				lRes.msg = "Not connected.";
+			}
+		}
+		return lRes;
+	},
+
+	logout: function() {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				type: "logout"
+			});
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not logged in.";
+		}
+		return lRes;
+	},
+
+	isLoggedIn: function() {
+		return( this.isConnected() && this.fUsername );
+	},
+
+	getUsername: function() {
+		return( this.isLoggedIn() ? this.fUsername : null );
+	},
 
 	getClients: function( aOptions ) {
 		var lMode = jws.SystemClientPlugIn.ALL_CLIENTS;

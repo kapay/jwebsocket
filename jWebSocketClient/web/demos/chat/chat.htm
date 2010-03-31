@@ -224,7 +224,7 @@
 
 			function elemFocusLsnr( aEvent ) {
 				// on focus select full text of element (for username and message)
-				aEvent.target.select();
+				jws.events.getTarget( aEvent ).select();
 			}
 
 
@@ -259,11 +259,16 @@
 					lWSC = new jws.jWebSocketJSONClient();
 					// lWSC = new jws.jWebSocketCSVClient();
 
+					jws.events.addEventListener( eUsername, "keydown", usrKeyDnLsnr );
+					jws.events.addEventListener( eMessage, "keydown", msgKeyDnLsnr );
+					jws.events.addEventListener( eUsername, "focus", elemFocusLsnr );
+					jws.events.addEventListener( eMessage, "focus", elemFocusLsnr );
+/*
 					eUsername.addEventListener( "keydown", usrKeyDnLsnr, false );
 					eMessage.addEventListener( "keydown", msgKeyDnLsnr, false );
 					eUsername.addEventListener( "focus", elemFocusLsnr, false );
 					eMessage.addEventListener( "focus", elemFocusLsnr, false );
-					
+*/
 					eUsername.focus();
 					eUsername.select();
 				} else {
