@@ -17,7 +17,6 @@ package org.jwebsocket.kit;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -27,10 +26,6 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.JWebSocketConfigHandler;
 import org.jwebsocket.logging.Logging;
-
-// the spring framwork blows up the project! Do we need that?
-// import org.springframework.context.support.FileSystemXmlApplicationContext;
-// import org.springframework.core.io.Resource;
 
 /**
  * An object that does the process of loading configuration, intialization of
@@ -56,10 +51,6 @@ public final class WebSocketLoader {
 	public JWebSocketConfig loadConfiguration(final String configFilePath)
 		throws WebSocketException {
 		JWebSocketConfig config = null;
-		/* do we really need spring here?
-		FileSystemXmlApplicationContext ctx = new FileSystemXmlApplicationContext();
-		Resource resource = ctx.getResource(configFilePath);
-		 */
 		File lFile = new File(configFilePath);
 		try {
 			FileInputStream fis = new FileInputStream(lFile);
@@ -75,11 +66,7 @@ public final class WebSocketLoader {
 			if (log.isDebugEnabled()) {
 				log.debug("jWebSocket config not found while creating XML stream", e);
 			}
-		} catch (IOException e) {
-			if (log.isDebugEnabled()) {
-				log.debug("I/O Exception occurred while creating XML stream", e);
-			}
-		}
+		} 
 		return config;
 	}
 
