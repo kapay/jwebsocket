@@ -26,7 +26,8 @@ import org.jwebsocket.config.JWebSocketConfig;
 
 /**
  * @author puran
- * @version $Id$
+ * @version $Id: JWebSocketConfigHandler.java 314 2010-03-29 13:02:15Z
+ *          fivefeetfurther $
  * 
  */
 public class JWebSocketConfigHandler implements ConfigHandler {
@@ -43,15 +44,15 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_ROLE = "role";
 	private static final String ELEMENT_USERS = "users";
 	private static final String ELEMENT_USER = "user";
-	
+
 	private static Map<String, ConfigHandler> handlerContext = new WeakHashMap<String, ConfigHandler>();
-	
+
 	static {
 		handlerContext.put("engine", new EngineConfigHandler());
 		handlerContext.put("user", new UserConfigHandler());
 		handlerContext.put("role", new RoleConfigHandler());
 	}
- 
+
 	/**
 	 * 
 	 * @param streamReader
@@ -66,7 +67,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					if (elementName.equals(ELEMENT_ENGINES)) {
 						List<EngineConfig> engines = handleEngines(streamReader);
 						configBuilder = configBuilder.addEngines(engines);
-					} else if (elementName.equals(ELEMENT_SERVERS)){
+					} else if (elementName.equals(ELEMENT_SERVERS)) {
 						List<ServerConfig> servers = handleServers(streamReader);
 						configBuilder = configBuilder.addServers(servers);
 					} else if (elementName.equals(ELEMENT_PLUGINS)) {
@@ -74,7 +75,8 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 						configBuilder = configBuilder.addPlugins(plugins);
 					} else if (elementName.equals(ELEMENT_RIGHTS)) {
 						List<RightConfig> globalRights = handleRights(streamReader);
-						configBuilder = configBuilder.addGlobalRights(globalRights);
+						configBuilder = configBuilder
+								.addGlobalRights(globalRights);
 					} else if (elementName.equals(ELEMENT_ROLES)) {
 						List<RoleConfig> roles = handleRoles(streamReader);
 						configBuilder = configBuilder.addGlobalRoles(roles);
@@ -82,48 +84,176 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 						List<UserConfig> users = handleUsers(streamReader);
 						configBuilder = configBuilder.addUsers(users);
 					} else {
-						//ignore
+						// ignore
 					}
-				} 
+				}
 			}
 		} catch (XMLStreamException e) {
 		}
-		//we are done with the handler context map, release it for garbage collection
+		// we are done with the handler context map, release it for garbage
+		// collection
 		handlerContext = null;
-		//now return the config object, this is the only one config object that should exists
-		//in the system
+		// now return the config object, this is the only one config object that
+		// should exists
+		// in the system
 		return configBuilder.buildConfig();
 	}
 
-	private List<UserConfig> handleUsers(XMLStreamReader streamReader) {
-		return null;
+	private List<UserConfig> handleUsers(XMLStreamReader streamReader)
+			throws XMLStreamException {
+		List<UserConfig> users = new ArrayList<UserConfig>();
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_ROLE)) {
+					UserConfig user = (UserConfig) handlerContext.get(
+							elementName).processConfig(streamReader);
+					users.add(user);
+					break;
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_ROLES)) {
+					break;
+				}
+			}
+		}
+		return users;
 	}
 
-	private List<RoleConfig> handleRoles(XMLStreamReader streamReader) {
-		return null;
+	private List<RoleConfig> handleRoles(XMLStreamReader streamReader)
+			throws XMLStreamException {
+		List<RoleConfig> roles = new ArrayList<RoleConfig>();
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_ROLE)) {
+					RoleConfig role = (RoleConfig) handlerContext.get(
+							elementName).processConfig(streamReader);
+					roles.add(role);
+					break;
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_ROLES)) {
+					break;
+				}
+			}
+		}
+		return roles;
 	}
 
-	private List<RightConfig> handleRights(XMLStreamReader streamReader) {
-		return null;
+	private List<RightConfig> handleRights(XMLStreamReader streamReader)
+			throws XMLStreamException {
+		List<RightConfig> rights = new ArrayList<RightConfig>();
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_RIGHT)) {
+					RightConfig right = (RightConfig) handlerContext.get(
+							elementName).processConfig(streamReader);
+					rights.add(right);
+					break;
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_RIGHTS)) {
+					break;
+				}
+			}
+		}
+		return rights;
 	}
 
-	private List<PluginConfig> handlePlugins(XMLStreamReader streamReader) {
-		return null;
+	/**
+	 * private method that reads the config for plugins
+	 * @param streamReader the stream reader object
+	 * @return the list of plugin configs
+	 * @throws XMLStreamException if exception occurs while reading 
+	 */
+	private List<PluginConfig> handlePlugins(XMLStreamReader streamReader)
+			throws XMLStreamException {
+		List<PluginConfig> plugins = new ArrayList<PluginConfig>();
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_PLUGIN)) {
+					PluginConfig plugin = (PluginConfig) handlerContext.get(
+							elementName).processConfig(streamReader);
+					plugins.add(plugin);
+					break;
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_PLUGINS)) {
+					break;
+				}
+			}
+		}
+		return plugins;
 	}
 
-	private List<ServerConfig> handleServers(XMLStreamReader streamReader) {
-		return null;
+	/**
+	 * private method that reads the list of server configs
+	 * @param streamReader the stream reader object
+	 * @return the list of server configs
+	 * @throws XMLStreamException if exception occurs reading xml
+	 */
+	private List<ServerConfig> handleServers(XMLStreamReader streamReader)
+			throws XMLStreamException {
+		List<ServerConfig> servers = new ArrayList<ServerConfig>();
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_SERVER)) {
+					ServerConfig server = (ServerConfig) handlerContext.get(
+							elementName).processConfig(streamReader);
+					servers.add(server);
+					break;
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_SERVERS)) {
+					break;
+				}
+			}
+		}
+		return servers;
 	}
 
-	private List<EngineConfig> handleEngines(XMLStreamReader streamReader) throws XMLStreamException {
+	/**
+	 * private method that reads the list of engines config from the xml file
+	 * @param streamReader the stream reader object
+	 * @return the list of engine configs
+	 * @throws XMLStreamException if exception occurs while reading
+	 */
+	private List<EngineConfig> handleEngines(XMLStreamReader streamReader)
+			throws XMLStreamException {
 		List<EngineConfig> engines = new ArrayList<EngineConfig>();
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {
 				String elementName = streamReader.getLocalName();
 				if (elementName.equals(ELEMENT_ENGINE)) {
-					EngineConfig engine = (EngineConfig)handlerContext.get(elementName).processConfig(streamReader);
+					EngineConfig engine = (EngineConfig) handlerContext.get(
+							elementName).processConfig(streamReader);
 					engines.add(engine);
+					break;
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_ENGINES)) {
 					break;
 				}
 			}

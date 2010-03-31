@@ -15,20 +15,24 @@
 package org.jwebsocket.config.xml;
 
 import org.jwebsocket.config.Config;
+import org.jwebsocket.kit.WebSocketRuntimeException;
 /**
+ * Represents the server config 
  * @author puran
  * @version $Id$
  * 
  */
-public class ServerConfig implements Config {
-	private String id;
-	private String name;
-	private String jar;
+public final class ServerConfig implements Config {
+	private final String id;
+	private final String name;
+	private final String jar;
 
 	public ServerConfig(String id, String name, String jar) {
 		this.id = id;
 		this.name = name;
 		this.jar = jar;
+		//validate the server configuration
+		validate();
 	}
 
 	/**
@@ -52,7 +56,17 @@ public class ServerConfig implements Config {
 		return jar;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void validate() {
+		if ((id != null && id.length() > 0)
+				&& (name != null && name.length() > 0)
+				&& (jar != null && jar.length() > 0)) {
+			return;
+		}
+		throw new WebSocketRuntimeException(
+				"Missing one of the server configuration, please check your configuration file");
 	}
 }

@@ -19,17 +19,18 @@ import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
+ * Class that represents the engine config
  * @author puran
  * @version $Id$
  * 
  */
-public class EngineConfig implements Config {
-	private String id;
-	private String name;
-	private String jar;
-	private int port;
-	private int timeout;
-	private List<String> domains;
+public final class EngineConfig implements Config {
+	private final String id;
+	private final String name;
+	private final String jar;
+	private final int port;
+	private final int timeout;
+	private final List<String> domains;
 
 	/**
 	 * Constructor for engine
