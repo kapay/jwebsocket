@@ -15,6 +15,7 @@
 package org.jwebsocket.config;
 
 /**
+ * Marker interface that represents the jWebSocket config element
  * @author puran
  * @version $Id$
  *
