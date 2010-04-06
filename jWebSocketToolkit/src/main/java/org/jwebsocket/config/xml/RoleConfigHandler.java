@@ -14,17 +14,68 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.jwebsocket.config.Config;
+
 /**
+ * Handler class to read roles
  * @author puran
  * @version $Id$
- *
+ * 
  */
 public class RoleConfigHandler implements ConfigHandler {
 
+	private static final String ID = "id";
+	private static final String DESCRIPTION = "description";
+	private static final String ELEMENT_RIGHT = "right";
+	private static final String ELEMENT_RIGHTS = "rights";
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public Config processConfig(XMLStreamReader streamReader) {
+	public Config processConfig(XMLStreamReader streamReader)
+			throws XMLStreamException {
+		String id = "", description = "";
+		List<String> rights = new ArrayList<String>();
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ID)) {
+					streamReader.next();
+					id = streamReader.getText();
+				} else if (elementName.equals(DESCRIPTION)) {
+					streamReader.next();
+					description = streamReader.getText();
+				} else if (elementName.equals(ELEMENT_RIGHTS)) {
+					rights = getRights(streamReader);
+				} else {
+					// ignore
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_RIGHT)) {
+					break;
+				}
+			}
+		}
+		return new RoleConfig(id, description, rights);
+	}
+
+	/**
+	 * private method that reads the list of rights from the role configuration 
+	 * @param streamReader the stream reader object
+	 * @return the list of right ids
+	 * @throws XMLStreamException if exception while reading
+	 */
+	private List<String> getRights(XMLStreamReader streamReader)
+			throws XMLStreamException {
 		return null;
 	}
 
