@@ -29,6 +29,7 @@ import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
@@ -90,6 +91,12 @@ public class RPCPlugIn extends TokenPlugIn {
 	 */
 	public void rpc(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
+/*
+		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_RPC_DEFAULT + ".rpc")) {
+			lServer.sendToken(aConnector, lServer.createNotGranted(aToken));
+			return;
+		}
+*/
 		Token lResponseToken = lServer.createResponse(aToken);
 
 		// currently rpcServer is the only supported RPCPlugIn server!
@@ -119,7 +126,8 @@ public class RPCPlugIn extends TokenPlugIn {
 			lMsg = "Call to " + lKey + " is not granted!";
 		}
 		if (lMsg != null) {
-			lResponseToken.put("error", lMsg);
+			lResponseToken.put("code", -1);
+			lResponseToken.put("msg", lMsg);
 		}
 
 		lServer.sendToken(aConnector, lResponseToken);

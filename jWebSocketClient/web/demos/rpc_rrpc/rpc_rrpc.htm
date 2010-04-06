@@ -82,6 +82,10 @@
 
 			function rpc( aMethod ) {
 				var lArgs = eArgs.value;
+
+				// test server behaviour with \n and \r in JSON object
+				// lArgs = "\n" + lArgs + "\r";
+
 				log( "Remote calling '" + aMethod + "' with args '" + lArgs + "'..." );
 				
 				// perform the Remote Procedure Call...
@@ -90,8 +94,8 @@
 					"org.jWebSocket.demo.DemoRPCServer", aMethod, lArgs, {
 					// new easy-to-use response callback
 					OnResponse: function( aToken ) {
-						if( aToken.error ) {
-							log( "RPC Error: " + aToken.error );
+						if( aToken.code != 0 ) {
+							log( "RPC Error: " + aToken.msg );
 						} else {
 							log( "Received RPC result: " + aToken.result );
 						}

@@ -24,7 +24,33 @@ public class Role {
 	private Integer id = null;
 	private String key = null;
 	private String description = null;
-	private String config = null;
+	private Rights rights = new Rights();
+
+	/**
+	 *
+	 */
+	public Role() {
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDescription
+	 */
+	public Role(String aKey, String aDescription) {
+		key = aKey;
+		description = aDescription;
+	}
+
+	public Role(String aKey, String aDescription, Right... aRights) {
+		key = aKey;
+		description = aDescription;
+		if (aRights != null) {
+			for (int i = 0; i < aRights.length; i++) {
+				addRight(aRights[i]);
+			}
+		}
+	}
 
 	public String getKey() {
 		return key;
@@ -42,14 +68,6 @@ public class Role {
 		this.description = description;
 	}
 
-	public String getConfig() {
-		return config;
-	}
-
-	public void setConfig(String config) {
-		this.config = config;
-	}
-
 	public Integer getId() {
 		return id;
 	}
@@ -57,4 +75,17 @@ public class Role {
 	public void setId(Integer id) {
 		this.id = id;
 	}
+
+	public void addRight(Right aRight) {
+		rights.addRight(aRight);
+	}
+
+	public boolean hasRight(Right aRight) {
+		return rights.hasRight(aRight);
+	}
+
+	public boolean hasRight(String aRight) {
+		return rights.hasRight(aRight);
+	}
+
 }

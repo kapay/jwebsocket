@@ -1050,6 +1050,8 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 		for( var lKey in aToken ) {
 			var lVal = aToken[ lKey ];
 			if( typeof lVal == "string" ) {
+				lVal = lVal.replace( /\n/g, "\\x0A" );
+				lVal = lVal.replace( /\r/g, "\\x0D" );
 				lJSON += "," + lKey + ":\"" + lVal + "\"";
 			} else {
 				lJSON += "," + lKey + ":" + lVal;
@@ -1063,6 +1065,9 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 		// parsing a JSON object in JavaScript couldn't be simpler...
 		// but using 'eval', so be aware of security issues!
 		var lObj = null;
+		aStream = aStream.replace( /\\x0A/g, "\n" );
+		aStream = aStream.replace( /\\x0D/g, "\r" );
+		// TODO: this "eval" might lead to security issue, please replace!
 		eval( "lObj=" + aStream );
 		return lObj;
 	}
@@ -1088,6 +1093,7 @@ jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 		for( var lKey in aToken ) {
 			var lVal = aToken[ lKey ];
 			if( lVal === null || lVal === undefined ) {
+				// simply do not generate a value, keep value field empty
 				lCSV += "," + lKey + "=";
 			} else if( typeof lVal == "string" ) {
 				// escape commata and quotes

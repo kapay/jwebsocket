@@ -15,10 +15,74 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.security;
 
+import javolution.util.FastMap;
+import org.apache.log4j.Logger;
+
 /**
  *
  * @author aschulze
  */
 public class Rights {
 
+	private static Logger log = Logger.getLogger(Rights.class);
+	private FastMap<String, Right> rights = new FastMap<String, Right>();
+
+	/**
+	 * Adds a new right to the map of rights.
+	 * @param aRight
+	 */
+	public void addRight(Right aRight) {
+		if (aRight != null) {
+			rights.put(aRight.getKey(), aRight);
+		}
+	}
+
+	/**
+	 * 
+	 * @param aKey
+	 * @return
+	 */
+	public Right get(String aKey) {
+		return rights.get(aKey);
+	}
+
+	/**
+	 * Removes a certain right from the map of rights.
+	 * @param aKey
+	 */
+	public void removeRight(String aKey) {
+		rights.remove(aKey);
+	}
+
+	/**
+	 * Removes a certain right from the map of rights.
+	 * @param aRight
+	 */
+	public void removeRight(Right aRight) {
+		if (aRight != null) {
+			rights.remove(aRight.getKey());
+		}
+	}
+
+	/**
+	 *
+	 * @param aRight
+	 * @return
+	 */
+	public boolean hasRight(Right aRight) {
+		if (aRight != null) {
+			return rights.containsKey(aRight.getKey());
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 *
+	 * @param aRight
+	 * @return
+	 */
+	public boolean hasRight(String aRight) {
+		return rights.containsKey(aRight);
+	}
 }

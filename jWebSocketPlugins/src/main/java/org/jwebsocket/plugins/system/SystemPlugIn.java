@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - The jWebSocket SystemPlugIn Listener
+//	jWebSocket - The jWebSocket System Plug-In
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -29,6 +29,7 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.server.BaseServer;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
@@ -122,18 +123,6 @@ public class SystemPlugIn extends TokenPlugIn {
 		aConnector.setString(BaseConnector.VAR_SESSIONID, aSessionId);
 	}
 
-	private String getUsername(WebSocketConnector aConnector) {
-		return aConnector.getString(BaseConnector.VAR_USERNAME);
-	}
-
-	private void setUsername(WebSocketConnector aConnector, String aUsername) {
-		aConnector.setString(BaseConnector.VAR_USERNAME, aUsername);
-	}
-
-	private void removeUsername(WebSocketConnector aConnector) {
-		aConnector.removeVar(BaseConnector.VAR_USERNAME);
-	}
-
 	private String getGroup(WebSocketConnector aConnector) {
 		return aConnector.getString(VAR_GROUP);
 	}
@@ -220,7 +209,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		// broadcast login event to other clients of the jWebSocket network
 		Token lLogin = new Token(TT_EVENT);
 		lLogin.put("name", "login");
-		lLogin.put("username", getUsername(aConnector));
+		lLogin.put("username", lServer.getUsername(aConnector));
 		lLogin.put("clientCount", lServer.getAllConnectors().size());
 		// lLogin.put("usid", getSessionId(aConnector));
 		lLogin.put("sourceId", aConnector.getId());
@@ -241,7 +230,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		// broadcast login event to other clients of the jWebSocket network
 		Token lLogout = new Token(TT_EVENT);
 		lLogout.put("name", "logout");
-		lLogout.put("username", getUsername(aConnector));
+		lLogout.put("username", lServer.getUsername(aConnector));
 		lLogout.put("clientCount", lServer.getAllConnectors().size());
 		// lLogout.put("usid", getSessionId(aConnector));
 		lLogout.put("sourceId", aConnector.getId());
@@ -292,7 +281,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			// lResponse.put("usid", getSessionId(aConnector));
 			lResponse.put("sourceId", aConnector.getId());
 			// set shared variables
-			setUsername(aConnector, lUsername);
+			lServer.setUsername(aConnector, lUsername);
 			setGroup(aConnector, lGroup);
 		} else {
 			lResponse.put("code", -1);
@@ -314,10 +303,10 @@ public class SystemPlugIn extends TokenPlugIn {
 		Token lResponse = lServer.createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'logout' (username='" + getUsername(aConnector) + "') from '" + aConnector + "'...");
+			log.debug("Processing 'logout' (username='" + lServer.getUsername(aConnector) + "') from '" + aConnector + "'...");
 		}
 
-		if (getUsername(aConnector) != null) {
+		if (lServer.getUsername(aConnector) != null) {
 			// send good bye token as response to client
 			sendGoodBye(aConnector, CloseReason.CLIENT);
 			// and broadcast the logout event
@@ -325,7 +314,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			// resetting the username is the only required signal for logout
 			// lResponse.put("usid", getSessionId(aConnector));
 			lResponse.put("sourceId", aConnector.getId());
-			removeUsername(aConnector);
+			lServer.removeUsername(aConnector);
 			removeGroup(aConnector);
 		} else {
 			lResponse.put("code", -1);
@@ -342,14 +331,14 @@ public class SystemPlugIn extends TokenPlugIn {
 		String lTargetId = aToken.getString("targetId");
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'send' (username='" + getUsername(aConnector) + "') from '" + aConnector + "' to " + lTargetId + "...");
+			log.debug("Processing 'send' (username='" + lServer.getUsername(aConnector) + "') from '" + aConnector + "' to " + lTargetId + "...");
 		}
 
 		// TODO: find solutions for hardcoded engine id
 		WebSocketConnector lTargetConnector =
 			lServer.getConnector(lTargetId);
 		/*
-		if (getUsername(aConnector) != null) {
+		if (lServer.getUsername(aConnector) != null) {
 		 */
 		if (lTargetConnector != null) {
 			aToken.put("sourceId", aConnector.getId());
@@ -371,10 +360,10 @@ public class SystemPlugIn extends TokenPlugIn {
 		Token lResponse = lServer.createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'broadcast' (username='" + getUsername(aConnector) + "') from '" + aConnector + "'...");
+			log.debug("Processing 'broadcast' (username='" + lServer.getUsername(aConnector) + "') from '" + aConnector + "'...");
 		}
 		/*
-		if (getUsername(aConnector) != null) {
+		if (lServer.getUsername(aConnector) != null) {
 		 */
 		aToken.put("sourceId", aConnector.getId());
 		// don't distribute session id here!
@@ -400,13 +389,14 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	private void close(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
 		// if logged in...
-		if (getUsername(aConnector) != null) {
+		if (lServer.getUsername(aConnector) != null) {
 			// broadcast the logout event.
 			broadcastLogoutEvent(aConnector);
 		}
 		// reset the username, we're no longer logged in
-		removeUsername(aConnector);
+		lServer.removeUsername(aConnector);
 
 		if (log.isDebugEnabled()) {
 			log.debug("Closing client...");
@@ -472,14 +462,14 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Processing 'getClients' from '" + aConnector + "'...");
 		}
 
-		if (getUsername(aConnector) != null) {
+		if (lServer.getUsername(aConnector) != null) {
 			String lGroup = aToken.getString("group");
 			Integer lMode = aToken.getInteger("mode", 0);
 			HashMap lFilter = new HashMap();
 			lFilter.put(BaseConnector.VAR_USERNAME, ".*");
 			List<String> listOut = new ArrayList<String>();
 			for (WebSocketConnector lConnector : lServer.selectConnectors(lFilter).values()) {
-				listOut.add(getUsername(lConnector) + "@" + lConnector.getRemotePort());
+				listOut.add(lServer.getUsername(lConnector) + "@" + lConnector.getRemotePort());
 			}
 			lResponseToken.put("clients", listOut);
 			lResponseToken.put("count", listOut.size());

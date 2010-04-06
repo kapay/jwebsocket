@@ -16,7 +16,6 @@
 package org.jwebsocket.security;
 
 import java.util.Properties;
-import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 
 /**
@@ -29,38 +28,32 @@ public class User {
 	private static Logger log = Logger.getLogger(User.class);
 	/**
 	 * The maximum number of login tries until the account gets locked.
-	 * @since 1.0
 	 */
 	public static int MAX_PWD_FAIL_COUNT = 3;
 	/**
 	 * The state of the user is unknown. This state is used only as default
 	 * when instantiating a new user. This value should not be saved.
-	 * @since 1.0
 	 */
 	public static int ST_UNKNOWN = -1;
 	/**
 	 * The user is already registered but not activated.
 	 * A user needs to get activated to get access to the system.
-	 * @since 1.0
 	 */
 	public static int ST_REGISTERED = 0;
 	/**
 	 * The user is activated and has access to the system according to his 
 	 * rights and roles.
-	 * @since 1.0
 	 */
 	public static int ST_ACTIVE = 1;
 	/**
 	 * The user is (temporarily) inactive.
 	 * He needs to get (re-)activated to get access to the system.
-	 * @since 1.0
 	 */
 	public static int ST_INACTIVE = 2;
 	/**
 	 * The user is (temporarily) locked, eg due to too much logins 
 	 * with wrong credentials.
 	 * He needs to gets unlocked again to get access to the system.
-	 * @since 1.0
 	 */
 	public static int ST_LOCKED = 3;
 	/**
@@ -68,9 +61,9 @@ public class User {
 	 * The row is kept in the database for reference purposes only and
 	 * to keep the database consistent (eg for logs, journal or transactions).
 	 * He can be activated again to get access to the system.
-	 * @since 1.0
 	 */
 	public static int ST_DELETED = 4;
+
 	private Integer userId = null;
 	private String loginname = null;
 	private String title = null;
@@ -97,8 +90,25 @@ public class User {
 	private String securityAnswer = null;
 	private int sessionTimeout = 0;
 	private Properties settings = new Properties();
-	private FastMap roles = new FastMap();
-	private FastMap rights = new FastMap();
+	private Roles roles = new Roles();
+	// private Rights rights = new Rights();
+
+
+	/**
+	 *
+	 * @param aLoginName
+	 * @param aFirstname
+	 * @param aLastname
+	 * @param aPassword
+	 * @param aRoles
+	 */
+	public User(String aLoginName, String aFirstname, String aLastname, String aPassword, Roles aRoles) {
+		loginname = aLoginName;
+		firstname = aFirstname;
+		lastname = aLastname;
+		password = aPassword;
+		roles = aRoles;
+	}
 
 	/**
 	 *
@@ -202,10 +212,10 @@ public class User {
 
 	/**
 	 *
-	 * @param password
+	 * @param aPassword
 	 */
-	public void setPassword(String password) {
-		this.password = password;
+	public void setPassword(String aPassword) {
+		this.password = aPassword;
 	}
 
 	@Override
@@ -217,48 +227,22 @@ public class User {
 	 *
 	 * @return
 	 */
-	public FastMap getRoles() {
+	public Roles getRoles() {
 		return roles;
 	}
 
 	/**
 	 *
-	 * @param roles
+	 * @param aRoles
 	 */
-	public void setRoles(FastMap roles) {
-		this.roles = roles;
-	}
-
-	/**
-	 *
-	 * @return
-	 */
-	public FastMap getRights() {
-		return rights;
-	}
-
-	/**
-	 *
-	 * @param aKey
-	 * @return
-	 */
-	public Object getRight(String aKey) {
-		return (aKey == null ? null : rights.get(aKey));
-	}
-
-	/**
-	 *
-	 * @param rights
-	 */
-	public void setRights(FastMap rights) {
-		this.rights = rights;
+	public void setRoles(Roles aRoles) {
+		this.roles = aRoles;
 	}
 
 	/**
 	 * Returns the user's current status (one of the ST_XXX constants) from 
 	 * the internal cache. The value is NOT read from the database.
 	 * @return
-	 * @since 1.0
 	 */
 	public int getStatus() {
 		return status;
@@ -276,7 +260,6 @@ public class User {
 	 * Returns the user's current password fail counter from the internal cache.
 	 * The value is NOT read from the database.
 	 * @return
-	 * @since 1.0
 	 */
 	public Integer getPwdFailCount() {
 		return pwdFailCount;
@@ -593,7 +576,6 @@ public class User {
 	/**
 	 * Sets the user to locked state and save him to the database.
 	 * For this operation the SYS user is used.
-	 * @since 1.0
 	 */
 	public void lock() {
 		this.setStatus(ST_LOCKED);
@@ -602,17 +584,9 @@ public class User {
 	/**
 	 * Releases the user's locked state and saves him to the database.
 	 * For this operation the SYS user is used.
-	 * @since 1.0
 	 */
 	public void unlock() {
 		this.setStatus(ST_ACTIVE);
-	}
-
-	/**
-	 *
-	 */
-	public void initRightsAndRoles() {
-
 	}
 
 	/**
@@ -632,5 +606,8 @@ public class User {
 		}
 	}
 
+	public boolean hasRight(String aRight) {
+		return roles.hasRight(aRight);
+	}
 	
 }

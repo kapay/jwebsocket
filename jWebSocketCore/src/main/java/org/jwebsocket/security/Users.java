@@ -27,8 +27,46 @@ public class Users {
 	private static Logger log = Logger.getLogger(Users.class);
 	private FastMap<String, User> users = new FastMap<String, User>();
 
+	/**
+	 *
+	 * @param aLoginName
+	 * @return
+	 */
 	public User getUserByLoginName(String aLoginName) {
-		return users.get(aLoginName);
+		if (aLoginName != null) {
+			return users.get(aLoginName);
+		} else {
+			return null;
+		}
 	}
 
+	/**
+	 * Adds a new user to the map of users.
+	 * @param aUser
+	 */
+	public void addUser(User aUser) {
+		if (aUser != null) {
+			users.put(aUser.getLoginname(), aUser);
+		}
+	}
+
+	/**
+	 * Removes a certain user from the map of users.
+	 * @param aLoginName
+	 */
+	public void removeUser(String aLoginName) {
+		if (aLoginName != null) {
+			users.remove(aLoginName);
+		}
+	}
+
+	/**
+	 * Removes a certain user from the map of users.
+	 * @param aUser
+	 */
+	public void removeUser(User aUser) {
+		if (aUser != null) {
+			users.remove(aUser.getLoginname());
+		}
+	}
 }

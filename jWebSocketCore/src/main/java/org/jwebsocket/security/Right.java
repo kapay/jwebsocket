@@ -28,6 +28,22 @@ public class Right {
 
 	/**
 	 *
+	 */
+	public Right() {
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDescription
+	 */
+	public Right(String aKey, String aDescription) {
+		key = aKey;
+		description = aDescription;
+	}
+
+	/**
+	 *
 	 * @return
 	 */
 	public String getKey() {

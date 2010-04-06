@@ -105,9 +105,9 @@ public class TokenServer extends BaseServer {
 		plugInChain.engineStopped(aEngine);
 	}
 
-    /**
-     * {@inheritDoc }
-     */
+	/**
+	 * {@inheritDoc }
+	 */
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(null);
@@ -306,6 +306,30 @@ public class TokenServer extends BaseServer {
 		if (lType != null) {
 			lResToken.put("reqType", lType);
 		}
+		return lResToken;
+	}
+
+	/**
+	 * creates a response with the standard "not authenticated" message
+	 * @param aInToken
+	 * @return
+	 */
+	public Token createNotAuthToken(Token aInToken) {
+		Token lResToken = createResponse(aInToken);
+		lResToken.put("code", -1);
+		lResToken.put("msg", "not authenticated");
+		return lResToken;
+	}
+
+	/**
+	 * creates a response with the standard "not granted" message
+	 * @param aInToken
+	 * @return
+	 */
+	public Token createNotGranted(Token aInToken) {
+		Token lResToken = createResponse(aInToken);
+		lResToken.put("code", -1);
+		lResToken.put("msg", "not granted");
 		return lResToken;
 	}
 

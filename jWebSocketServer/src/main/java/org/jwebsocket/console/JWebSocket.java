@@ -26,6 +26,7 @@ import org.jwebsocket.plugins.TokenPlugInChain;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
 import org.jwebsocket.plugins.system.SystemPlugIn;
+import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.server.CustomServer;
 
@@ -143,6 +144,11 @@ public class JWebSocket {
 			System.out.println("Error instantating engine: " + ex.getMessage());
 			return;
 		}
+
+		// initialize the security factory with some demo data
+		// will be replaced be new configuration
+		SecurityFactory.initDemo();
+
 		// create the token server (based on the TCP engine)
 		TokenServer tokenServer = null;
 		try {
