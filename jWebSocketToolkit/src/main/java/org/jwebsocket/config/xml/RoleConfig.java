@@ -14,16 +14,68 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import java.util.List;
+
 import org.jwebsocket.config.Config;
+import org.jwebsocket.kit.WebSocketRuntimeException;
 /**
+ * Immutable class for <tt>role</tt> configuration
  * @author puran
  * @version $Id$
  *
  */
 public class RoleConfig implements Config {
+	
+	private final String id;
+	private final String description;
+	private final List<String> rights;
+	
+	/**
+	 * Default constructor for role config
+	 * @param id the role id
+	 * @param description the role description
+	 * @param rights the list of rights for that role
+	 */
+	public RoleConfig(String id, String description, List<String> rights) {
+		this.id = id;
+		this.description = description;
+		this.rights = rights;
+		validate();
+	}
 
+	/**
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @return the rights
+	 */
+	public List<String> getRights() {
+		return rights;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void validate() {
+		if ((id != null && id.length() > 0)
+				&& (description != null && description.length() > 0)
+				&& rights.size() > 0) {
+			return;
+		}
+		throw new WebSocketRuntimeException(
+				"Missing one of the role configuration, please check your configuration file");
 	}
 	
 }
