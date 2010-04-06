@@ -74,12 +74,12 @@ public class BaseServer implements WebSocketServer {
 	 */
 	@Override
 	public void startServer()
-		throws WebSocketException {
+			throws WebSocketException {
 		// this method is supposed to be overwritten by descending classes.
 	}
 
 	/**
-     * {@inheritDoc }
+	 * {@inheritDoc }
 	 */
 	@Override
 	public boolean isAlive() {
@@ -88,16 +88,16 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-     * {@inheritDoc }
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void stopServer()
-		throws WebSocketException {
+			throws WebSocketException {
 		// this method is supposed to be overwritten by descending classes.
 	}
 
 	/**
-     * {@inheritDoc }
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
@@ -107,7 +107,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-     * {@inheritDoc }
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
@@ -117,7 +117,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-     * {@inheritDoc }
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
@@ -126,9 +126,9 @@ public class BaseServer implements WebSocketServer {
 		// about the connectorStarted event
 	}
 
-    /**
-     * {@inheritDoc }
-     */
+	/**
+	 * {@inheritDoc }
+	 */
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// this method is supposed to be overwritten by descending classes.
@@ -137,7 +137,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-     * {@inheritDoc }
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
@@ -145,7 +145,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-     * {@inheritDoc }
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
@@ -154,11 +154,11 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-     * {@inheritDoc }
+	 * {@inheritDoc }
 	 */
 	@Override
 	public void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket,
-		BroadcastOptions aBroadcastOptions) {
+			BroadcastOptions aBroadcastOptions) {
 		for (WebSocketConnector lConnector : getAllConnectors().values()) {
 			if (!aSource.equals(lConnector) || aBroadcastOptions.isSenderIncluded()) {
 				sendPacket(lConnector, aDataPacket);
@@ -300,32 +300,5 @@ public class BaseServer implements WebSocketServer {
 		return id;
 
 	}
-
-	/**
-	 * 
-	 * @param aConnector
-	 * @return
-	 */
-	public String getUsername(WebSocketConnector aConnector) {
-		return aConnector.getString(BaseConnector.VAR_USERNAME);
-	}
-
-	/**
-	 *
-	 * @param aConnector
-	 * @param aUsername
-	 */
-	public void setUsername(WebSocketConnector aConnector, String aUsername) {
-		aConnector.setString(BaseConnector.VAR_USERNAME, aUsername);
-	}
-
-	/**
-	 * 
-	 * @param aConnector
-	 */
-	public void removeUsername(WebSocketConnector aConnector) {
-		aConnector.removeVar(BaseConnector.VAR_USERNAME);
-	}
-
 
 }

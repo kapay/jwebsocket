@@ -78,32 +78,16 @@
 			}
 
 			function doOpen() {
-
-				function login() {
-					// auto login after connection is established
-					var lUsername = eUsername.value;
-					// log( SYS, OUT, "logging in user '" + lUsername + "'..." );
-					var lRes = lWSC.login( lUsername, "", "" );
-					// log( SYS, IN, "login: " + lWSC.resultToString( lRes ) );
-				}
-
-				// if already connected use existing connection to re-login...
-				if( lWSC.isConnected() ) {
-					login();
-					return;
-				}
-
 				// adjust this URL to your jWebSocket server
 				var lURL = jws.JWS_SERVER_URL + "/;prot=json,timeout=360000";
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
 				// try to establish connection to jWebSocket server
-				lWSC.open( lURL, {
+				lWSC.logon( lURL, eUsername.value, "", {
 
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( SYS, IN, "Connection to " + lJWSID + " established." );
-						login();
 						// start keep alive if user selected that option
 						checkKeepAlive({ immediate: false });
 					},
@@ -318,7 +302,7 @@
 		To run the chat on a single system you can
 			<a href="javascript:openSubWindow();">open multiple windows</a>. If 
 		you are not sure that your favorite browser supports WebSockets please 
-		refer to our <a href="http://jwebsocket.org/jws_for_all.htm">jWebSocket Cross-Browser
+		refer to our <a target="_top" href="http://jwebsocket.org/jws_for_all.htm">jWebSocket Cross-Browser
 		Compatibility</a> page.</p>
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">

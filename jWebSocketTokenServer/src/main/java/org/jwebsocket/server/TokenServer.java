@@ -24,6 +24,7 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.PlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.packetProcessors.CSVProcessor;
@@ -326,10 +327,10 @@ public class TokenServer extends BaseServer {
 	 * @param aInToken
 	 * @return
 	 */
-	public Token createNotGranted(Token aInToken) {
+	public Token createAccessDenied(Token aInToken) {
 		Token lResToken = createResponse(aInToken);
 		lResToken.put("code", -1);
-		lResToken.put("msg", "not granted");
+		lResToken.put("msg", "access denied");
 		return lResToken;
 	}
 
@@ -339,4 +340,31 @@ public class TokenServer extends BaseServer {
 	public TokenPlugInChain getPlugInChain() {
 		return plugInChain;
 	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @return
+	 */
+	public String getUsername(WebSocketConnector aConnector) {
+		return aConnector.getString(BaseConnector.VAR_USERNAME);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aUsername
+	 */
+	public void setUsername(WebSocketConnector aConnector, String aUsername) {
+		aConnector.setString(BaseConnector.VAR_USERNAME, aUsername);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 */
+	public void removeUsername(WebSocketConnector aConnector) {
+		aConnector.removeVar(BaseConnector.VAR_USERNAME);
+	}
+
 }

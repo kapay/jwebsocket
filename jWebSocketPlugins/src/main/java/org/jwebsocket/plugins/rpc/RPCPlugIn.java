@@ -91,12 +91,12 @@ public class RPCPlugIn extends TokenPlugIn {
 	 */
 	public void rpc(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
-/*
+
 		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_RPC_DEFAULT + ".rpc")) {
-			lServer.sendToken(aConnector, lServer.createNotGranted(aToken));
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			return;
 		}
-*/
+
 		Token lResponseToken = lServer.createResponse(aToken);
 
 		// currently rpcServer is the only supported RPCPlugIn server!

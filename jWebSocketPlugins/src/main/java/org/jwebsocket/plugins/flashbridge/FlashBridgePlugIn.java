@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Chat Plug-In
+//	jWebSocket - FlashBridge Plug-In
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -92,6 +92,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 						char[] ca = new char[1024];
 						String lLine = "";
 						int lLen;
+						// TODO: implement timeout if anyone plays on port 843!
 						do {
 							lLen = isr.read(ca);
 							if (lLen > 0) {
