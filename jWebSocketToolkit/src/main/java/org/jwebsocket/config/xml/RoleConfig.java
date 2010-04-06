@@ -24,7 +24,7 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  * @version $Id$
  *
  */
-public class RoleConfig implements Config {
+public final class RoleConfig implements Config {
 	
 	private final String id;
 	private final String description;
