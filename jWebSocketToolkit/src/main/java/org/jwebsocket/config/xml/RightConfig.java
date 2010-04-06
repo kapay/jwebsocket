@@ -14,15 +14,66 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 import org.jwebsocket.config.Config;
+import org.jwebsocket.kit.WebSocketRuntimeException;
 /**
+ * immutable class that represents the <tt>right</tt> configuration 
  * @author puran
  * @version $Id$
  *
  */
-public class RightConfig implements Config {
+public final class RightConfig implements Config {
 
+	private final String id;
+	private final String namespace;
+	private final String description;
+	
+	/**
+	 * default constructor
+	 * @param id the right id
+	 * @param namespace the right namespace
+	 * @param description the description
+	 */
+	public RightConfig(String id, String namespace, String description) {
+		this.id = id;
+		this.namespace = namespace;
+		this.description = description;
+		//validate right config
+		validate();
+	}
+	
+	/**
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * @return the namespace
+	 */
+	public String getNamespace() {
+		return namespace;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void validate() {
+		if ((id != null && id.length() > 0)
+				&& (namespace != null && namespace.length() > 0)
+				&& (description != null && description.length() > 0)) {
+			return;
+		}
+		throw new WebSocketRuntimeException(
+				"Missing one of the right configuration, please check your configuration file");
 	}
 
 }
