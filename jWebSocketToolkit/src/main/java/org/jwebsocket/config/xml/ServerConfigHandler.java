@@ -14,18 +14,53 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.jwebsocket.config.Config;
 /**
+ * Handler class that reads the server configuration
  * @author puran
  * @version $Id$
  *
  */
 public class ServerConfigHandler implements ConfigHandler {
 
+	private static final String ID = "id";
+	private static final String NAME = "name";
+	private static final String JAR = "jar";
+	private static final String ELEMENT_SERVER = "server";
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public Config processConfig(XMLStreamReader streamReader) {
-		return null;
+	public Config processConfig(XMLStreamReader streamReader) throws XMLStreamException {
+		String id = "", name = "", jar = "";
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ID)) {
+					streamReader.next();
+					id = streamReader.getText();
+				} else if (elementName.equals(NAME)) {
+					streamReader.next();
+					name = streamReader.getText();
+				} else if (elementName.equals(JAR)) {
+					streamReader.next();
+					jar = streamReader.getText();
+				} else {
+					//ignore
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_SERVER)) {
+					break;
+				}
+			}
+		}
+		return new ServerConfig(id, name, jar);
 	}
 
 }
