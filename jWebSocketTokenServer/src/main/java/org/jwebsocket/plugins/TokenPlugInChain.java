@@ -22,7 +22,7 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * instantiates the chain of token plug-ins.
  * @author aschulze
  */
 public class TokenPlugInChain extends BasePlugInChain {

@@ -48,6 +48,7 @@ public class TCPEngine extends BaseEngine {
 	private int listenerPort = 8787;
 	private int sessionTimeout = 120000;
 	private boolean isRunning = false;
+	Thread engineThread = null;
 
 	/**
 	 * Constructor of the TCP engine. The port and the default session timeout
@@ -73,10 +74,16 @@ public class TCPEngine extends BaseEngine {
 		}
 		try {
 			serverSocket = new ServerSocket(listenerPort);
+			/*
+			serverSocket = new ServerSocket(listenerPort); // listenerPort
+			serverSocket.setReuseAddress(true);
+			InetSocketAddress lISA = new InetSocketAddress(listenerPort);
+			serverSocket.bind(lISA);
+			 */
 			setSessionTimeout(sessionTimeout);
 
 			EngineListener listener = new EngineListener(this);
-			Thread engineThread = new Thread(listener);
+			engineThread = new Thread(listener);
 			engineThread.start();
 
 		} catch (IOException ex) {
@@ -97,13 +104,17 @@ public class TCPEngine extends BaseEngine {
 		}
 		// inherited method stops all connectors
 		super.stopEngine(aCloseReason);
+		// resetting "isRunning" causes engine listener to terminate
 		isRunning = false;
 		try {
 			// when done, close server socket
+			// closing the server socket should lead to an exeption
+			// at accept in the listener thread which terminates the listener
 			serverSocket.close();
 			if (log.isInfoEnabled()) {
-				log.info("TCP engine stopped.");
+				log.info("TCP engine stopped (closed=" + serverSocket.isClosed() + ").");
 			}
+			serverSocket = null;
 		} catch (Exception ex) {
 			log.error("Stopping TCP engine:" + ex.getMessage());
 		}
@@ -143,9 +154,6 @@ public class TCPEngine extends BaseEngine {
 		br = new BufferedReader(new InputStreamReader(aClientSocket.getInputStream(), "UTF-8"));
 		os = new PrintStream(aClientSocket.getOutputStream(), true, "UTF-8");
 
-		// allow descending classes to handle clientThreadStarted event
-		// clientThreadStarted();
-
 		// read complete header first...
 		String line = br.readLine();
 		String req = "";
@@ -158,13 +166,12 @@ public class TCPEngine extends BaseEngine {
 		}
 
 		// special handling for flash bridge if trying to access ws:// port
-		if( req.indexOf("<policy-file-request/>") >= 0 ) {
+		if (req.indexOf("<policy-file-request/>") >= 0) {
 			log.debug("Answering flash bridge policy-file-request...");
 			os.print(
 				"<cross-domain-policy>"
 				+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
-				+ "</cross-domain-policy>\n"
-			);
+				+ "</cross-domain-policy>\n");
 			req = "";
 			while (line != null && line.length() > 0) {
 				req += line + "\n";
@@ -294,13 +301,18 @@ public class TCPEngine extends BaseEngine {
 				try {
 					// accept is blocking so here is no need
 					// to put any sleeps into this loop
+					// if (log.isDebugEnabled()) {
+					//	log.debug("Waiting for client...");
+					// }
 					Socket clientSocket = serverSocket.accept();
-
+					// if (log.isDebugEnabled()) {
+					//	log.debug("Client accepted...");
+					// }
 					try {
 						// process handshake to parse header data
 						RequestHeader header = processHandshake(clientSocket);
 
-						if( header != null ) {
+						if (header != null) {
 							// set socket timeout to given amount of milliseconds
 							// check min and max timeout ranges
 							int lSessionTimeout = header.getTimeout(JWebSocketConstants.DEFAULT_TIMEOUT);

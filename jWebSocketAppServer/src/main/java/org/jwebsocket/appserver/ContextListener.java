@@ -21,6 +21,7 @@ import javax.servlet.ServletContextListener;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugInChain;
@@ -41,9 +42,10 @@ public class ContextListener implements ServletContextListener {
 	TokenServer tokenServer = null;
 	CustomServer customServer = null;
 	private static Logger log = null;
+	WebSocketEngine engine = null;
 
 	/**
-	 *
+	 * initializes the web application on startup.
 	 * @param sce
 	 */
 	@Override
@@ -56,7 +58,6 @@ public class ContextListener implements ServletContextListener {
 		}
 
 		// create the low-level engine
-		WebSocketEngine engine = null;
 		try {
 			// TODO: find solutions for hardcoded engine id, refer to RPCPlugIn!
 			engine = new TCPEngine("tcp0", JWebSocketConstants.DEFAULT_PORT, JWebSocketConstants.DEFAULT_TIMEOUT);
@@ -84,7 +85,7 @@ public class ContextListener implements ServletContextListener {
 			plugInChain.addPlugIn(new StreamingPlugIn());
 			// add the flash/bridge plug-in (to drive browser that don't yet support web sockets)
 			plugInChain.addPlugIn(new FlashBridgePlugIn());
-			
+
 			if (log.isDebugEnabled()) {
 				log.debug("Starting token server...");
 			}
@@ -111,23 +112,41 @@ public class ContextListener implements ServletContextListener {
 		} catch (Exception ex) {
 			log.error("Error instantating CustomServer: " + ex.getMessage());
 		}
+
 	}
 
 	/**
-	 *
+	 * cleans up the web application on termination.
 	 * @param sce
 	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
 		try {
-			tokenServer.stopServer();
+			// stop engine if previously started successfully
+			if (engine != null) {
+				engine.stopEngine(CloseReason.SHUTDOWN);
+			}
+		} catch (WebSocketException ex) {
+			log.error("Stopping engine: " + ex.getMessage());
+		}
+		try {
+			// stop token server if previously started successfully
+			if (tokenServer != null) {
+				tokenServer.stopServer();
+			}
 		} catch (WebSocketException ex) {
 			log.error("Stopping TokenServer: " + ex.getMessage());
 		}
+
 		try {
-			customServer.stopServer();
+			// stop custom server if previously started successfully
+			if (customServer != null) {
+				customServer.stopServer();
+			}
 		} catch (WebSocketException ex) {
 			log.error("Stopping CustomServer: " + ex.getMessage());
 		}
+
+		Logging.exitLogs();
 	}
 }

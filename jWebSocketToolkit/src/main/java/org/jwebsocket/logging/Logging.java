@@ -15,10 +15,14 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.logging;
 
+import java.io.IOException;
+import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.apache.log4j.RollingFileAppender;
 
 /**
  * Provides the common used jWebSocket logging support based on
@@ -28,8 +32,29 @@ import org.apache.log4j.PatternLayout;
 public class Logging {
 
 	private static PatternLayout layout = null;
-	private static ConsoleAppender consoleAppender = null;
+	private static Appender appender = null;
 	private static Level logLevel = Level.DEBUG;
+	/**
+	 *
+	 */
+	public static int CONSOLE = 0;
+	/**
+	 *
+	 */
+	public static int ROLLING_FILE = 1;
+	/**
+	 *
+	 */
+	public static int SINGLE_FILE = 2;
+	/**
+	 *
+	 */
+	public static String LOG_FILENAME = "jWebSocket.log";
+	/**
+	 *
+	 */
+	public static int BUFFER_SIZE = 2048;
+	private static int logTarget = ROLLING_FILE;
 
 	// TODO: Load the conversion pattern and the logging target from a configuration file (e.g. jWebSocket.xml)
 	/**
@@ -43,8 +68,28 @@ public class Logging {
 			layout = new PatternLayout();
 			layout.setConversionPattern("%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n");
 		}
-		if (consoleAppender == null) {
-			consoleAppender = new ConsoleAppender(layout);
+		if (appender == null) {
+			if (1 == logTarget) {
+				try {
+					appender = new RollingFileAppender(layout, LOG_FILENAME, true);
+					((RollingFileAppender) appender).setBufferedIO(true);
+					((RollingFileAppender) appender).setBufferSize(BUFFER_SIZE);
+					((RollingFileAppender) appender).setEncoding("UTF-8");
+				} catch (IOException ex) {
+					appender = new ConsoleAppender(layout);
+				}
+			} else if (2 == logTarget) {
+				try {
+					appender = new FileAppender(layout, LOG_FILENAME, true);
+					((FileAppender) appender).setBufferedIO(true);
+					((FileAppender) appender).setBufferSize(BUFFER_SIZE);
+					((FileAppender) appender).setEncoding("UTF-8");
+				} catch (IOException ex) {
+					appender = new ConsoleAppender(layout);
+				}
+			} else {
+				appender = new ConsoleAppender(layout);
+			}
 		}
 	}
 
@@ -60,6 +105,17 @@ public class Logging {
 	}
 
 	/**
+	 * closes the log file. Take care that no further lines are appended
+	 * to the logs after it has been closed!
+	 */
+	public static void exitLogs() {
+		if (appender != null) {
+			// properly close log files if such
+			appender.close();
+		}
+	}
+
+	/**
 	 * Returns a logger for a certain class by using the jWebSocket settings
 	 * for logging and ignoring inherited log4j settings.
 	 * @param aClass
@@ -68,7 +124,7 @@ public class Logging {
 	public static Logger getLogger(Class aClass) {
 		checkLogAppender();
 		Logger logger = Logger.getLogger(aClass);
-		logger.addAppender(consoleAppender);
+		logger.addAppender(appender);
 		// don't inherit global log4j settings, we intend to configure that
 		// in our own jWebSocket.xml config file.
 		logger.setAdditivity(false);

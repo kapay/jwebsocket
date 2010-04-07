@@ -52,6 +52,20 @@ public class BasePlugInChain implements PlugInChain {
 	 */
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
+		if (log.isDebugEnabled()) {
+			log.debug("Notifying plug-ins that engine started...");
+		}
+		try {
+			for (PlugIn plugIn : getPlugIns()) {
+				try {
+					plugIn.engineStarted(aEngine);
+				} catch (Exception ex) {
+					log.error("Engine started (1): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				}
+			}
+		} catch (Exception ex) {
+			log.error("Engine started (2): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
 	}
 
 	/**
@@ -59,6 +73,20 @@ public class BasePlugInChain implements PlugInChain {
 	 */
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
+		if (log.isDebugEnabled()) {
+			log.debug("Notifying plug-ins that engine stopped...");
+		}
+		try {
+			for (PlugIn plugIn : getPlugIns()) {
+				try {
+					plugIn.engineStopped(aEngine);
+				} catch (Exception ex) {
+					log.error("Engine stopped (1): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				}
+			}
+		} catch (Exception ex) {
+			log.error("Engine stopped (2): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
 	}
 
 	/**

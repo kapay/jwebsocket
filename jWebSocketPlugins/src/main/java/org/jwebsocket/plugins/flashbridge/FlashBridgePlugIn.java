@@ -22,11 +22,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 
 /**
- * This plug-in provides all the chat functionality.
+ * This plug-in processes the policy-file-request from the browser side
+ * flash plug-in. This makes jWebSocket cross-browser-compatible.
  * @author aschulze
  */
 public class FlashBridgePlugIn extends TokenPlugIn {
@@ -35,6 +37,9 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 	private ServerSocket serverSocket = null;
 	private int listenerPort = 843;
 	private boolean isRunning = false;
+	private int engineInstanceCount = 0;
+	private Thread bridgeThread = null;
+	private int TIMEOUT = 2500;
 
 	/**
 	 *
@@ -47,8 +52,8 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 			serverSocket = new ServerSocket(listenerPort);
 
 			BridgeListener listener = new BridgeListener(this);
-			Thread engineThread = new Thread(listener);
-			engineThread.start();
+			bridgeThread = new Thread(listener);
+			bridgeThread.start();
 		} catch (IOException ex) {
 		}
 		if (log.isInfoEnabled()) {
@@ -57,14 +62,15 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 	}
 
 	private class BridgeListener implements Runnable {
+		private final FlashBridgePlugIn aPlugIn;
 
-		// private FlashBridgePlugIn plugin = null;
 		/**
-		 * Creates the server socket listener for new
+		 * creates the server socket listener for new
 		 * incoming socket connections.
 		 * @param aPlugIn
 		 */
 		public BridgeListener(FlashBridgePlugIn aPlugIn) {
+			this.aPlugIn = aPlugIn;
 			// plugin = aPlugIn;
 		}
 
@@ -76,16 +82,15 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 				try {
 					// accept is blocking so here is no need
 					// to put any sleeps into the loop
-
-					if (log.isDebugEnabled()) {
-						log.debug("waiting on flash policy-file-request...");
-					}
+					//if (log.isDebugEnabled()) {
+					//	log.debug("Waiting on flash policy-file-request...");
+					//}
 					Socket clientSocket = serverSocket.accept();
-					if (log.isDebugEnabled()) {
-						log.debug("client connected...");
-					}
+					//if (log.isDebugEnabled()) {
+					//	log.debug("Client connected...");
+					//}
 					try {
-						clientSocket.setSoTimeout(2000);
+						clientSocket.setSoTimeout(TIMEOUT);
 						InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream(), "UTF-8");
 						PrintStream os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
 
@@ -101,7 +106,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 								Thread.sleep(10);
 							}
 						} while (lLen >= 0 && lLine.indexOf("<policy-file-request/>") < 0);
-						log.debug("answering on flash policy-file-request (" + lLine + ")...");
+						log.debug("Answering on flash policy-file-request (" + lLine + ")...");
 						os.print(
 							"<cross-domain-policy>"
 							+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
@@ -116,14 +121,50 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 
 					clientSocket.close();
 					if (log.isDebugEnabled()) {
-						log.debug("client disconnected...");
+						log.debug("Client disconnected...");
 					}
 				} catch (Exception ex) {
 					isRunning = false;
 					log.error("(accept) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
 			}
+		}
+	}
 
+	@Override
+	public void engineStarted(WebSocketEngine aEngine) {
+		if (log.isDebugEnabled()) {
+			log.debug("Engine (" + aEngine.getId() + ") started.");
+		}
+		// every time an engine starts increment counter
+		engineInstanceCount++;
+	}
+
+	@Override
+	public void engineStopped(WebSocketEngine aEngine) {
+		if (log.isDebugEnabled()) {
+			log.debug("Engine (" + aEngine.getId() + ") stopped.");
+		}
+		// every time an engine starts decrement counter
+		engineInstanceCount--;
+		// when last engine stopped also stop the flash bridge
+		if (engineInstanceCount <= 0) {
+			super.engineStopped(aEngine);
+			try {
+				// when done, close server socket
+				// closing the server socket should lead to an exception
+				// at accept in the listener thread which terminates the listener
+				if (log.isDebugEnabled()) {
+					log.debug("Closing flash bridge server socket...");
+				}
+				isRunning = false;
+				serverSocket.close();
+				if (log.isDebugEnabled()) {
+					log.debug("Closed flash bridge server socket.");
+				}
+			} catch (Exception ex) {
+				log.error("(accept) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			}
 		}
 	}
 }
