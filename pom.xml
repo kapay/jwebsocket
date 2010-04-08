@@ -5,7 +5,7 @@
 	<artifactId>jWebSocket-Parent</artifactId>
 	<packaging>pom</packaging>
 	<name>jWebSocket-Parent</name>
-	<version>0.8.0</version>
+	<version>0.8.5</version>
 	<description>Parent project for jWebSocket</description>
 	<modules>
 		<module>jWebSocketCluster</module>
