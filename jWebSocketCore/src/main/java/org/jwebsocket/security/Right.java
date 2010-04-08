@@ -16,24 +16,16 @@
 package org.jwebsocket.security;
 
 /**
- *
+ * implements a right as part of a map of rights for a certain role.
  * @author aschulze
  */
 public class Right {
 
-	private Integer id = null;
 	private String key = null;
 	private String description = null;
-	private String config = null;
 
 	/**
-	 *
-	 */
-	public Right() {
-	}
-
-	/**
-	 *
+	 * creates a new default right with a key and a description.
 	 * @param aKey
 	 * @param aDescription
 	 */
@@ -43,7 +35,10 @@ public class Right {
 	}
 
 	/**
-	 *
+	 * returns the key of the right. The key is the unique identifier of the
+	 * right and should contain the entire name space 
+	 * e.g. <tt>org.jwebsocket.plugins.chat.broadcast</tt>.
+	 * The key is case-sensitve.
 	 * @return
 	 */
 	public String getKey() {
@@ -51,7 +46,10 @@ public class Right {
 	}
 
 	/**
-	 *
+	 * specifies the key of the right. The key is the unique identifier of the
+	 * right and should contain the entire name space
+	 * e.g. <tt>org.jwebsocket.plugins.chat.broadcast</tt>.
+	 * The key is case-sensitve.
 	 * @param key
 	 */
 	public void setKey(String key) {
@@ -59,7 +57,7 @@ public class Right {
 	}
 
 	/**
-	 *
+	 * returns the description of the right.
 	 * @return
 	 */
 	public String getDescription() {
@@ -67,42 +65,11 @@ public class Right {
 	}
 
 	/**
-	 *
+	 * specifies the description of the right.
 	 * @param description
 	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
-	/**
-	 *
-	 * @return
-	 */
-	public String getConfig() {
-		return config;
-	}
-
-	/**
-	 *
-	 * @param config
-	 */
-	public void setConfig(String config) {
-		this.config = config;
-	}
-
-	/**
-	 *
-	 * @return
-	 */
-	public Integer getId() {
-		return id;
-	}
-
-	/**
-	 *
-	 * @param id
-	 */
-	public void setId(Integer id) {
-		this.id = id;
-	}
 }

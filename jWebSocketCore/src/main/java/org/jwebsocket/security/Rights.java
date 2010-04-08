@@ -19,7 +19,7 @@ import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 
 /**
- *
+ * implements a map of rights to act as a role.
  * @author aschulze
  */
 public class Rights {
@@ -28,34 +28,46 @@ public class Rights {
 	private FastMap<String, Right> rights = new FastMap<String, Right>();
 
 	/**
-	 * Adds a new right to the map of rights.
+	 * adds a new right to the map of rights. If there is already a right with
+	 * the given stored in the map it will be overwritten. If null is passed or
+	 * if the right has no valid key no operation is performed.
 	 * @param aRight
 	 */
 	public void addRight(Right aRight) {
-		if (aRight != null) {
+		if (aRight != null && aRight.getKey() != null) {
 			rights.put(aRight.getKey(), aRight);
 		}
 	}
 
 	/**
-	 * 
+	 * returns a right identified by its key or <tt>null</tt> if the right
+	 * cannot be found in the map or the key passed is <tt>null</tt>.
 	 * @param aKey
 	 * @return
 	 */
 	public Right get(String aKey) {
-		return rights.get(aKey);
+		if (aKey != null) {
+			return rights.get(aKey);
+		} else {
+			return null;
+		}
 	}
 
 	/**
-	 * Removes a certain right from the map of rights.
+	 * removes a certain right indentified by its key from the map of rights.
+	 * If the key is <tt>null</tt> or right could not be found in the map no
+	 * operation is performed.
 	 * @param aKey
 	 */
 	public void removeRight(String aKey) {
-		rights.remove(aKey);
+		if (aKey != null) {
+			rights.remove(aKey);
+		}
 	}
 
 	/**
-	 * Removes a certain right from the map of rights.
+	 * removes a certain right from the map of rights.
+	 * If the right could not be found in the map no operation is performed.
 	 * @param aRight
 	 */
 	public void removeRight(Right aRight) {
@@ -65,12 +77,13 @@ public class Rights {
 	}
 
 	/**
-	 *
+	 * checks if the map of rights contains a certain right. The key of the
+	 * right passed must not be null.
 	 * @param aRight
 	 * @return
 	 */
 	public boolean hasRight(Right aRight) {
-		if (aRight != null) {
+		if (aRight != null && aRight.getKey() != null) {
 			return rights.containsKey(aRight.getKey());
 		} else {
 			return false;
@@ -78,11 +91,16 @@ public class Rights {
 	}
 
 	/**
-	 *
-	 * @param aRight
+	 * checks if the map of rights contains a certain right identified by its
+	 * key. The key must not be null.
+	 * @param aKey
 	 * @return
 	 */
-	public boolean hasRight(String aRight) {
-		return rights.containsKey(aRight);
+	public boolean hasRight(String aKey) {
+		if (aKey != null) {
+			return rights.containsKey(aKey);
+		} else {
+			return false;
+		}
 	}
 }
