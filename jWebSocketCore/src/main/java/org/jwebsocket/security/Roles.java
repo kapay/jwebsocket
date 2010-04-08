@@ -73,6 +73,11 @@ public class Roles {
 		}
 	}
 
+	/**
+	 *
+	 * @param aRight
+	 * @return
+	 */
 	public boolean hasRight(String aRight) {
 		for(Role lRole : roles.values() ) {
 			if( lRole.hasRight(aRight))

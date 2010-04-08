@@ -42,6 +42,12 @@ public class Role {
 		description = aDescription;
 	}
 
+	/**
+	 *
+	 * @param aKey
+	 * @param aDescription
+	 * @param aRights
+	 */
 	public Role(String aKey, String aDescription, Right... aRights) {
 		key = aKey;
 		description = aDescription;
@@ -52,38 +58,76 @@ public class Role {
 		}
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public String getKey() {
 		return key;
 	}
 
+	/**
+	 *
+	 * @param key
+	 */
 	public void setKey(String key) {
 		this.key = key;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 *
+	 * @param description
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public Integer getId() {
 		return id;
 	}
 
+	/**
+	 *
+	 * @param id
+	 */
 	public void setId(Integer id) {
 		this.id = id;
 	}
 
+	/**
+	 *
+	 * @param aRight
+	 */
 	public void addRight(Right aRight) {
 		rights.addRight(aRight);
 	}
 
+	/**
+	 *
+	 * @param aRight
+	 * @return
+	 */
 	public boolean hasRight(Right aRight) {
 		return rights.hasRight(aRight);
 	}
 
+	/**
+	 *
+	 * @param aRight
+	 * @return
+	 */
 	public boolean hasRight(String aRight) {
 		return rights.hasRight(aRight);
 	}
