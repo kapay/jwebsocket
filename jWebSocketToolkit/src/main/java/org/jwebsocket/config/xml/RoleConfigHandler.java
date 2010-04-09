@@ -33,6 +33,7 @@ public class RoleConfigHandler implements ConfigHandler {
 	private static final String DESCRIPTION = "description";
 	private static final String ELEMENT_RIGHT = "right";
 	private static final String ELEMENT_RIGHTS = "rights";
+	private static final String ELEMENT_ROLE = "role";
 
 	/**
 	 * {@inheritDoc}
@@ -60,7 +61,7 @@ public class RoleConfigHandler implements ConfigHandler {
 			}
 			if (streamReader.isEndElement()) {
 				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ELEMENT_RIGHT)) {
+				if (elementName.equals(ELEMENT_ROLE)) {
 					break;
 				}
 			}
@@ -76,7 +77,25 @@ public class RoleConfigHandler implements ConfigHandler {
 	 */
 	private List<String> getRights(XMLStreamReader streamReader)
 			throws XMLStreamException {
-		return null;
+		List<String> rights = new ArrayList<String>();
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_RIGHT)) {
+					streamReader.next();
+					String right = streamReader.getText();
+					rights.add(right);
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_RIGHTS)) {
+					break;
+				}
+			}
+		}
+		return rights;
 	}
 
 }
