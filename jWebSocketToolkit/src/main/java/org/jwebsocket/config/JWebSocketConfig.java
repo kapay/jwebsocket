@@ -16,16 +16,16 @@ package org.jwebsocket.config;
 
 import java.util.List;
 
-import org.jwebsocket.config.Config;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.RightConfig;
 import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.config.xml.UserConfig;
-import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
+ * Represents the jWebSocket configuration. This class is immutable and should not be 
+ * overridden.
  * @author puran
  * @version $Id$
  * 
@@ -49,8 +49,9 @@ public final class JWebSocketConfig implements Config {
 		if (builder.engines == null || builder.servers == null
 				|| builder.users == null || builder.globalRights == null
 				|| builder.globalRoles == null) {
-			throw new WebSocketRuntimeException(
-					"Configuration is not loaded completely.");
+			//TODO: enable this exception after all the configuration read is complete
+			//throw new WebSocketRuntimeException(
+			//		"Configuration is not loaded completely.");
 		}
 		engines = builder.engines;
 		servers = builder.servers;
