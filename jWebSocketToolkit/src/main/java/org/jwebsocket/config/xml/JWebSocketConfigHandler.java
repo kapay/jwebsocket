@@ -25,9 +25,12 @@ import javax.xml.stream.XMLStreamReader;
 import org.jwebsocket.config.JWebSocketConfig;
 
 /**
+ * Handler class that handles the <tt>jWebSocket.xml</tt> configuration. This
+ * class starts from the root and delegates the handler to specific config
+ * handler, to read the whole config file.
+ * 
  * @author puran
- * @version $Id: JWebSocketConfigHandler.java 314 2010-03-29 13:02:15Z
- *          fivefeetfurther $
+ * @version $Id$
  * 
  */
 public class JWebSocketConfigHandler implements ConfigHandler {
@@ -47,15 +50,18 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
 	private static Map<String, ConfigHandler> handlerContext = new WeakHashMap<String, ConfigHandler>();
 
+	// initialize the different config handler implementations
 	static {
 		handlerContext.put("engine", new EngineConfigHandler());
+		handlerContext.put("plugin", new PluginConfigHandler());
+		handlerContext.put("server", new ServerConfigHandler());
 		handlerContext.put("user", new UserConfigHandler());
 		handlerContext.put("role", new RoleConfigHandler());
+		handlerContext.put("right", new RightConfigHandler());
 	}
 
 	/**
-	 * 
-	 * @param streamReader
+	 * {@inheritDoc}
 	 */
 	public JWebSocketConfig processConfig(XMLStreamReader streamReader) {
 		JWebSocketConfig.Builder configBuilder = new JWebSocketConfig.Builder();
@@ -99,6 +105,12 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		return configBuilder.buildConfig();
 	}
 
+	/**
+	 * private method to handle the user config.
+	 * @param streamReader the stream reader object
+	 * @return the list of user config
+	 * @throws XMLStreamException if there's any exception reading configuration
+	 */
 	private List<UserConfig> handleUsers(XMLStreamReader streamReader)
 			throws XMLStreamException {
 		List<UserConfig> users = new ArrayList<UserConfig>();
@@ -106,7 +118,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 			streamReader.next();
 			if (streamReader.isStartElement()) {
 				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ELEMENT_ROLE)) {
+				if (elementName.equals(ELEMENT_USER)) {
 					UserConfig user = (UserConfig) handlerContext.get(
 							elementName).processConfig(streamReader);
 					users.add(user);
@@ -115,7 +127,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 			}
 			if (streamReader.isEndElement()) {
 				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ELEMENT_ROLES)) {
+				if (elementName.equals(ELEMENT_USERS)) {
 					break;
 				}
 			}
@@ -123,6 +135,12 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		return users;
 	}
 
+	/**
+	 * method that reads the roles configuration
+	 * @param streamReader the stream reader object
+	 * @return the list of roles config
+	 * @throws XMLStreamException if there's any exception reading configuration
+	 */
 	private List<RoleConfig> handleRoles(XMLStreamReader streamReader)
 			throws XMLStreamException {
 		List<RoleConfig> roles = new ArrayList<RoleConfig>();
@@ -146,7 +164,12 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		}
 		return roles;
 	}
-
+	/**
+	 * private method to read the list of rights configuration
+	 * @param streamReader the stream reader object
+	 * @return the list of rights configuration
+	 * @throws XMLStreamException if there's any exception reading configuration
+	 */
 	private List<RightConfig> handleRights(XMLStreamReader streamReader)
 			throws XMLStreamException {
 		List<RightConfig> rights = new ArrayList<RightConfig>();
@@ -173,9 +196,12 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
 	/**
 	 * private method that reads the config for plugins
-	 * @param streamReader the stream reader object
+	 * 
+	 * @param streamReader
+	 *            the stream reader object
 	 * @return the list of plugin configs
-	 * @throws XMLStreamException if exception occurs while reading 
+	 * @throws XMLStreamException
+	 *             if exception occurs while reading
 	 */
 	private List<PluginConfig> handlePlugins(XMLStreamReader streamReader)
 			throws XMLStreamException {
@@ -203,9 +229,12 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
 	/**
 	 * private method that reads the list of server configs
-	 * @param streamReader the stream reader object
+	 * 
+	 * @param streamReader
+	 *            the stream reader object
 	 * @return the list of server configs
-	 * @throws XMLStreamException if exception occurs reading xml
+	 * @throws XMLStreamException
+	 *             if exception occurs reading xml
 	 */
 	private List<ServerConfig> handleServers(XMLStreamReader streamReader)
 			throws XMLStreamException {
@@ -233,9 +262,12 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
 	/**
 	 * private method that reads the list of engines config from the xml file
-	 * @param streamReader the stream reader object
+	 * 
+	 * @param streamReader
+	 *            the stream reader object
 	 * @return the list of engine configs
-	 * @throws XMLStreamException if exception occurs while reading
+	 * @throws XMLStreamException
+	 *             if exception occurs while reading
 	 */
 	private List<EngineConfig> handleEngines(XMLStreamReader streamReader)
 			throws XMLStreamException {
