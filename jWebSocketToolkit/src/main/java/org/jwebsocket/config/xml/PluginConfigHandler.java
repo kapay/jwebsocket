@@ -73,8 +73,7 @@ public class PluginConfigHandler implements ConfigHandler {
 			}
 		}
 
-		// new PluginConfig(id, name, jar, namespace, settings);
-		return new PluginConfig();
+		return new PluginConfig(id, name, jar, namespace, settings);
 	}
 
 	/**
