@@ -13,15 +13,101 @@
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
+
 import org.jwebsocket.config.Config;
+import org.jwebsocket.kit.WebSocketRuntimeException;
+
 /**
  * @author puran
  * @version $Id$
- *
+ * 
  */
-public class UserConfig implements Config {
+public final class UserConfig implements Config {
 
+	private final String loginname;
+	private final String firstname;
+	private final String lastname;
+	private final String password;
+	private final String description;
+	private final int status;
+
+	/**
+	 * Default user config constructor
+	 * @param loginname the login name
+	 * @param firstname the first name 
+	 * @param lastname the last name
+	 * @param password the password
+	 * @param description the descritpion 
+	 * @param status the user status
+	 */
+	public UserConfig(String loginname, String firstname, String lastname,
+			String password, String description, int status) {
+		this.loginname = loginname;
+		this.firstname = firstname;
+		this.lastname = lastname;
+		this.password = password;
+		this.description = description;
+		this.status = status;
+		//validate user config
+		validate();
+	}
+
+	/**
+	 * @return the loginname
+	 */
+	public String getLoginname() {
+		return loginname;
+	}
+
+	/**
+	 * @return the firstname
+	 */
+	public String getFirstname() {
+		return firstname;
+	}
+
+	/**
+	 * @return the lastname
+	 */
+	public String getLastname() {
+		return lastname;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public int getStatus() {
+		return status;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void validate() {
+		if ((loginname != null && loginname.length() > 0)
+				&& (firstname != null && firstname.length() > 0)
+				&& (lastname != null && lastname.length() > 0)
+				&& (password != null && password.length() > 0)
+				&& (description != null && description.length() > 0)
+				&& (status > 0)) {
+			return;
+		}
+		throw new WebSocketRuntimeException(
+				"Missing one of the user configuration, please check your configuration file");
 	}
 }
