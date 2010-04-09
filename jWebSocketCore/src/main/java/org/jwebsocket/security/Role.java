@@ -16,12 +16,11 @@
 package org.jwebsocket.security;
 
 /**
- *
+ * implements a role which contains a set of rights.
  * @author aschulze
  */
 public class Role {
 
-	private Integer id = null;
 	private String key = null;
 	private String description = null;
 	private Rights rights = new Rights();
@@ -88,22 +87,6 @@ public class Role {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	/**
-	 *
-	 * @return
-	 */
-	public Integer getId() {
-		return id;
-	}
-
-	/**
-	 *
-	 * @param id
-	 */
-	public void setId(Integer id) {
-		this.id = id;
 	}
 
 	/**

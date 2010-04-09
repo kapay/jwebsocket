@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<docroot>
+<class ancestor="-" descr="Implements the basic &amp;quot;jws&amp;quot; name space for the jWebSocket client&#10;including various utility methods.&#10;" fullpath="jws" name="jws">
+<const descr="Base namespace&#10;" fullpath="jws.NS_BASE" name="NS_BASE" type="String" value="org.jWebSocket"/>
+<const descr="Current token id, incremented per token exchange to assign results.&#10;" fullpath="jws.CUR_TOKEN_ID" name="CUR_TOKEN_ID" type="Integer" value="0"/>
+<const descr="Current token id, incremented per token exchange to assign results.&#10;" fullpath="jws.JWS_SERVER_URL" name="JWS_SERVER_URL" type="String" value="ws"/>
+<method descr="Convenience replacement for [tt]document.getElementById()[/tt]. Returns the first [b]HTML[/b] element with the given id or [tt]null[/tt] if the element could not be found.&#10;" fullpath="jws.$" name="$">
+<arg descr="id of the HTML element to be returned." field="aId" object="" type="String"/>
+<result descr="-" field="" object="" type="void"/>
+</method>
+</class>
+<class ancestor="-" descr="Implementation for the [tt]jws.jWebSocketBaseClient[/tt] class.&#10;" fullpath="jws.jWebSocketBaseClient" name="jWebSocketBaseClient">
+<method descr="Description pending...&#10;" fullpath="jws.jWebSocketBaseClient.processOpened" name="processOpened">
+<arg descr="Pending..." field="aEvent" object="" type="Object"/>
+<result descr="-" field="" object="" type="void"/>
+</method>
+<method descr="Description pending...&#10;" fullpath="jws.jWebSocketBaseClient.processPacket" name="processPacket">
+<arg descr="Pending..." field="aEvent" object="" type="Object"/>
+<result descr="-" field="" object="" type="void"/>
+</method>
+<method descr="Description pending...&#10;" fullpath="jws.jWebSocketBaseClient.processClosed" name="processClosed">
+<arg descr="Pending..." field="aEvent" object="" type="Object"/>
+<result descr="-" field="" object="" type="void"/>
+</method>
+<method descr="Tries to open the web socket connection.&#10;" fullpath="jws.jWebSocketBaseClient.open" name="open">
+<arg descr="URL to the jWebSocket Server" field="aURL" object="" type="String"/>
+<arg descr="Optional arguments, see below..." field="aOptions" object="" type="Object"/>
+<arg descr="Callback when connection was successfully established." field="OnOpen" object="aOptions" type="function"/>
+<result descr="-" field="" object="" type="void"/>
+</method>
+</class>
+<class ancestor="jws.jWebSocketBaseClient" descr="Implementation for the [tt]jWebSocketTokenClient[/tt] class&#10;" fullpath="jws.jWebSocketTokenClient" name="jWebSocketTokenClient">
+<method descr="Returns the unique id of this client assigned by the jWebSocket server.&#10;" fullpath="jws.jWebSocketTokenClient.getId" name="getId">
+<arg descr="(no arguments required)" field="-" object="" type=""/>
+<result descr="Unique id of this client." field="String" object="" type=""/>
+</method>
+</class>
+<class ancestor="-" descr="Implementation for the [tt]jws.SystemClientPlugIn[/tt] class.&#10;" fullpath="jws.SystemClientPlugIn" name="SystemClientPlugIn"/>
+<class ancestor="-" descr="Implementation for the [tt]jws.StreamingPlugIn[/tt] class.&#10;" fullpath="jws.StreamingPlugIn" name="StreamingPlugIn"/>
+<class ancestor="-" descr="Implementation for the [tt]jws.RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn" name="RPCClientPlugIn"/>
+<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketJSONClient[/tt] class.&#10;" fullpath="jws.jWebSocketJSONClient" name="jWebSocketJSONClient"/>
+<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketCSVClient[/tt] class.&#10;" fullpath="jws.jWebSocketCSVClient" name="jWebSocketCSVClient"/>
+<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketXMLClient[/tt] class.&#10;" fullpath="jws.jWebSocketXMLClient" name="jWebSocketXMLClient"/>
+</docroot>
