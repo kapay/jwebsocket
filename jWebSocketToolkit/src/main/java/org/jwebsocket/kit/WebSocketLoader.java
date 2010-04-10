@@ -76,7 +76,8 @@ public final class WebSocketLoader {
 	 */
 	public static void main(String... args) {
 		try {
-			new WebSocketLoader().loadConfiguration("../jWebSocket.xml");
+			JWebSocketConfig config = new WebSocketLoader().loadConfiguration("../jWebSocket.xml");
+			assert config != null;
 		} catch (WebSocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

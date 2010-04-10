@@ -60,7 +60,11 @@ public class UserConfigHandler implements ConfigHandler {
 					lastname = streamReader.getText();
 				} else if (elementName.equals(PASSWORD)) {
 					streamReader.next();
-					password = streamReader.getText();
+					//TODO: temporary fix to handle error because of blank password value
+					//better figure out something cleaner.
+					if (streamReader.getEventType() != 2) {
+						password = streamReader.getText();
+					}
 				} else if (elementName.equals(DESCRIPTION)) {
 					streamReader.next();
 					description = streamReader.getText();

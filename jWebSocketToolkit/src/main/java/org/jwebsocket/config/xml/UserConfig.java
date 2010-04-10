@@ -115,7 +115,6 @@ public final class UserConfig implements Config {
 		if ((loginname != null && loginname.length() > 0)
 				&& (firstname != null && firstname.length() > 0)
 				&& (lastname != null && lastname.length() > 0)
-				&& (password != null && password.length() > 0)
 				&& (description != null && description.length() > 0)
 				&& (status > 0)) {
 			return;

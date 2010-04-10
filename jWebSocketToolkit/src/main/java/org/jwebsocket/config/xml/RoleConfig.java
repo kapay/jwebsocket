@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.jwebsocket.config.Config;
@@ -61,7 +62,7 @@ public final class RoleConfig implements Config {
 	 * @return the rights
 	 */
 	public List<String> getRights() {
-		return rights;
+		return Collections.unmodifiableList(rights);
 	}
 
 	/**
@@ -70,8 +71,7 @@ public final class RoleConfig implements Config {
 	@Override
 	public void validate() {
 		if ((id != null && id.length() > 0)
-				&& (description != null && description.length() > 0)
-				&& rights.size() > 0) {
+				&& (description != null && description.length() > 0)) {
 			return;
 		}
 		throw new WebSocketRuntimeException(

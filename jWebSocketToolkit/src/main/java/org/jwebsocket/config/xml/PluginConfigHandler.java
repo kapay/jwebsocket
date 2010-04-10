@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,10 +91,8 @@ public class PluginConfigHandler implements ConfigHandler {
 	 */
 	private Map<String, String> getSettings(XMLStreamReader streamReader)
 			throws XMLStreamException {
-		Map<String, String> settings = new HashMap<String, String>();
-		while (streamReader.hasNext()) {
-		}
-		return null;
+		//TODO: implement this
+		return Collections.emptyMap();
 	}
 
 }

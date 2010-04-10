@@ -22,7 +22,10 @@ import java.util.WeakHashMap;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.apache.log4j.Logger;
 import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.kit.WebSocketLoader;
+import org.jwebsocket.logging.Logging;
 
 /**
  * Handler class that handles the <tt>jWebSocket.xml</tt> configuration. This
@@ -34,6 +37,8 @@ import org.jwebsocket.config.JWebSocketConfig;
  * 
  */
 public class JWebSocketConfigHandler implements ConfigHandler {
+	
+	private static Logger log = Logging.getLogger(JWebSocketConfigHandler.class);
 
 	private static final String ELEMENT_ENGINES = "engines";
 	private static final String ELEMENT_ENGINE = "engine";
@@ -47,6 +52,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_ROLE = "role";
 	private static final String ELEMENT_USERS = "users";
 	private static final String ELEMENT_USER = "user";
+	private static final String JWEBSOCKET = "jWebSocket";
 
 	private static Map<String, ConfigHandler> handlerContext = new WeakHashMap<String, ConfigHandler>();
 
@@ -71,26 +77,52 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 				if (streamReader.isStartElement()) {
 					String elementName = streamReader.getLocalName();
 					if (elementName.equals(ELEMENT_ENGINES)) {
+						if (log.isInfoEnabled()) {
+							log.info("Reading Engines Cofiguration");
+						}
 						List<EngineConfig> engines = handleEngines(streamReader);
 						configBuilder = configBuilder.addEngines(engines);
 					} else if (elementName.equals(ELEMENT_SERVERS)) {
+						if (log.isInfoEnabled()) {
+							log.info("Reading Servers Cofiguration");
+						}
 						List<ServerConfig> servers = handleServers(streamReader);
 						configBuilder = configBuilder.addServers(servers);
 					} else if (elementName.equals(ELEMENT_PLUGINS)) {
+						if (log.isInfoEnabled()) {
+							log.info("Reading Plugins Cofiguration");
+						}
 						List<PluginConfig> plugins = handlePlugins(streamReader);
 						configBuilder = configBuilder.addPlugins(plugins);
 					} else if (elementName.equals(ELEMENT_RIGHTS)) {
+						if (log.isInfoEnabled()) {
+							log.info("Reading Rights Cofiguration");
+						}
 						List<RightConfig> globalRights = handleRights(streamReader);
-						configBuilder = configBuilder
-								.addGlobalRights(globalRights);
+						configBuilder = configBuilder.addGlobalRights(globalRights);
 					} else if (elementName.equals(ELEMENT_ROLES)) {
+						if (log.isInfoEnabled()) {
+							log.info("Reading Roles Cofiguration");
+						}
 						List<RoleConfig> roles = handleRoles(streamReader);
 						configBuilder = configBuilder.addGlobalRoles(roles);
 					} else if (elementName.equals(ELEMENT_USERS)) {
+						if (log.isInfoEnabled()) {
+							log.info("Reading Users Cofiguration");
+						}
 						List<UserConfig> users = handleUsers(streamReader);
 						configBuilder = configBuilder.addUsers(users);
 					} else {
 						// ignore
+					}
+				}
+				if (streamReader.isEndElement()) {
+					String elementName = streamReader.getLocalName();
+					if (elementName.equals(JWEBSOCKET)) {
+						if (log.isInfoEnabled()) {
+							log.info("Completed Reading jWebSocket Cofiguration");
+						}
+						break;
 					}
 				}
 			}
@@ -122,7 +154,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					UserConfig user = (UserConfig) handlerContext.get(
 							elementName).processConfig(streamReader);
 					users.add(user);
-					break;
 				}
 			}
 			if (streamReader.isEndElement()) {
@@ -152,7 +183,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					RoleConfig role = (RoleConfig) handlerContext.get(
 							elementName).processConfig(streamReader);
 					roles.add(role);
-					break;
 				}
 			}
 			if (streamReader.isEndElement()) {
@@ -181,7 +211,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					RightConfig right = (RightConfig) handlerContext.get(
 							elementName).processConfig(streamReader);
 					rights.add(right);
-					break;
 				}
 			}
 			if (streamReader.isEndElement()) {
@@ -214,7 +243,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					PluginConfig plugin = (PluginConfig) handlerContext.get(
 							elementName).processConfig(streamReader);
 					plugins.add(plugin);
-					break;
 				}
 			}
 			if (streamReader.isEndElement()) {
@@ -247,7 +275,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					ServerConfig server = (ServerConfig) handlerContext.get(
 							elementName).processConfig(streamReader);
 					servers.add(server);
-					break;
 				}
 			}
 			if (streamReader.isEndElement()) {
@@ -280,7 +307,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					EngineConfig engine = (EngineConfig) handlerContext.get(
 							elementName).processConfig(streamReader);
 					engines.add(engine);
-					break;
 				}
 			}
 			if (streamReader.isEndElement()) {
