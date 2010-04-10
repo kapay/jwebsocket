@@ -22,9 +22,9 @@ import javax.xml.stream.XMLStreamReader;
 import org.jwebsocket.config.Config;
 
 /**
+ * Handles the engine configuration
  * @author puran
  * @version $Id$
- * 
  */
 public class EngineConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_ENGINE = "engine";
@@ -36,6 +36,9 @@ public class EngineConfigHandler implements ConfigHandler {
 	private static final String DOMAINS = "domains";
 	private static final String DOMAIN = "domain";
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Config processConfig(XMLStreamReader streamReader)
 			throws XMLStreamException {

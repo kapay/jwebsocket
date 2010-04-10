@@ -22,13 +22,13 @@ import org.jwebsocket.config.Config;
 /**
  * Handler class that reads the <tt>right</tt> configuration
  * @author puran
- * @version $Id:$
+ * @version $Id$
  * 
  */
 public class RightConfigHandler implements ConfigHandler {
 
 	private static final String ID = "id";
-	private static final String NAME = "name";
+	private static final String NAMESPACE = "ns";
 	private static final String DESCRIPTION = "description";
 	private static final String ELEMENT_RIGHT = "right";
 	
@@ -45,7 +45,7 @@ public class RightConfigHandler implements ConfigHandler {
 				if (elementName.equals(ID)) {
 					streamReader.next();
 					id = streamReader.getText();
-				} else if (elementName.equals(NAME)) {
+				} else if (elementName.equals(NAMESPACE)) {
 					streamReader.next();
 					namespace = streamReader.getText();
 				} else if (elementName.equals(DESCRIPTION)) {

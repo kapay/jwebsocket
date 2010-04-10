@@ -54,6 +54,7 @@ public class RoleConfigHandler implements ConfigHandler {
 					streamReader.next();
 					description = streamReader.getText();
 				} else if (elementName.equals(ELEMENT_RIGHTS)) {
+					streamReader.next();
 					rights = getRights(streamReader);
 				} else {
 					// ignore

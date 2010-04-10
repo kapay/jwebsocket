@@ -38,6 +38,9 @@ public class PluginConfigHandler implements ConfigHandler {
 	private static final String SETTINGS = "settings";
 	private static final String SETTING = "setting";
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Config processConfig(XMLStreamReader streamReader)
 			throws XMLStreamException {

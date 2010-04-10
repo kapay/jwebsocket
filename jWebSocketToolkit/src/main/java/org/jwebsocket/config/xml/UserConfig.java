@@ -14,6 +14,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
@@ -30,6 +33,7 @@ public final class UserConfig implements Config {
 	private final String password;
 	private final String description;
 	private final int status;
+	private final List<String> roles;
 
 	/**
 	 * Default user config constructor
@@ -39,15 +43,17 @@ public final class UserConfig implements Config {
 	 * @param password the password
 	 * @param description the descritpion 
 	 * @param status the user status
+	 * @param roles the user roles
 	 */
 	public UserConfig(String loginname, String firstname, String lastname,
-			String password, String description, int status) {
+			String password, String description, int status, List<String> roles) {
 		this.loginname = loginname;
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.password = password;
 		this.description = description;
 		this.status = status;
+		this.roles = roles;
 		//validate user config
 		validate();
 	}
@@ -92,6 +98,13 @@ public final class UserConfig implements Config {
 	 */
 	public int getStatus() {
 		return status;
+	}
+	
+	/**
+	 * @return the list of roles
+	 */
+	public List<String> getRoles() {
+		return Collections.unmodifiableList(roles);
 	}
 
 	/**

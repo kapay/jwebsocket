@@ -14,6 +14,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.jwebsocket.config.Config;
@@ -31,6 +34,8 @@ public class UserConfigHandler implements ConfigHandler {
 	private final static String DESCRIPTION= "description";
 	private final static String STATUS = "status";
 	private final static String ELEMENT_USER = "user";
+	private final static String ELEMENT_ROLES = "roles";
+	private final static String ELEMENT_ROLE = "role";
 
 	/**
 	 * {@inheritDoc}
@@ -39,6 +44,7 @@ public class UserConfigHandler implements ConfigHandler {
 	public Config processConfig(XMLStreamReader streamReader) throws XMLStreamException {
 		String loginname = "", firstname = "", lastname = "", password = "", description = "";
 		int status = 0;
+		List<String> roles = null;
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {
@@ -61,8 +67,10 @@ public class UserConfigHandler implements ConfigHandler {
 				} else if (elementName.equals(STATUS)) {
 					streamReader.next();
 					status  = Integer.parseInt(streamReader.getText());
-				}
-				else {
+				} else if (elementName.equals(ELEMENT_ROLES)) {
+					streamReader.next();
+					roles = getRoles(streamReader);
+				} else {
 					//ignore
 				}
 			}
@@ -73,7 +81,34 @@ public class UserConfigHandler implements ConfigHandler {
 				}
 			}
 		}
-		return new UserConfig(loginname, firstname, lastname, password, description, status);
+		return new UserConfig(loginname, firstname, lastname, password, description, status, roles);
+	}
+
+	/**
+	 * private method that reads the roles 
+	 * @param streamReader the stream reader object
+	 * @return the list of user roles
+	 */
+	private List<String> getRoles(XMLStreamReader streamReader) throws XMLStreamException {
+		List<String> roles = new ArrayList<String>();
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_ROLE)) {
+					streamReader.next();
+					String role = streamReader.getText();
+					roles.add(role);
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_ROLES)) {
+					break;
+				}
+			}
+		}
+		return roles;
 	}
 
 }
