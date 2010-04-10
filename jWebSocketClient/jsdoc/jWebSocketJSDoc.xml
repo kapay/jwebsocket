@@ -4,9 +4,19 @@
 <const descr="Base namespace&#10;" fullpath="jws.NS_BASE" name="NS_BASE" type="String" value="org.jWebSocket"/>
 <const descr="Current token id, incremented per token exchange to assign results.&#10;" fullpath="jws.CUR_TOKEN_ID" name="CUR_TOKEN_ID" type="Integer" value="0"/>
 <const descr="Current token id, incremented per token exchange to assign results.&#10;" fullpath="jws.JWS_SERVER_URL" name="JWS_SERVER_URL" type="String" value="ws"/>
-<method descr="Convenience replacement for [tt]document.getElementById()[/tt]. Returns the first [b]HTML[/b] element with the given id or [tt]null[/tt] if the element could not be found.&#10;" fullpath="jws.$" name="$">
+<method descr="Convenience replacement for [tt]document.getElementById()[/tt]. Returns the first HTML element with the given id or [tt]null[/tt] if the element could not be found.&#10;" fullpath="jws.$" name="$">
 <arg descr="id of the HTML element to be returned." field="aId" object="" type="String"/>
 <result descr="-" field="" object="" type="void"/>
+</method>
+</class>
+<class ancestor="-" descr="Implements event abstraction for Internet Explorer.&#10;" fullpath="jws.events" name="events">
+<method descr="description pending...&#10;" fullpath="jws.events.addEventListener" name="addEventListener">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.events.getTarget" name="getTarget">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
 </method>
 </class>
 <class ancestor="-" descr="Implementation for the [tt]jws.jWebSocketBaseClient[/tt] class.&#10;" fullpath="jws.jWebSocketBaseClient" name="jWebSocketBaseClient">
@@ -28,17 +38,242 @@
 <arg descr="Callback when connection was successfully established." field="OnOpen" object="aOptions" type="function"/>
 <result descr="-" field="" object="" type="void"/>
 </method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketBaseClient.connect" name="connect">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketBaseClient.sendStream" name="sendStream">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketBaseClient.isConnected" name="isConnected">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketBaseClient.forceClose" name="forceClose">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketBaseClient.close" name="close">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketBaseClient.disconnect" name="disconnect">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
 </class>
 <class ancestor="jws.jWebSocketBaseClient" descr="Implementation for the [tt]jWebSocketTokenClient[/tt] class&#10;" fullpath="jws.jWebSocketTokenClient" name="jWebSocketTokenClient">
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.create" name="create">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
 <method descr="Returns the unique id of this client assigned by the jWebSocket server.&#10;" fullpath="jws.jWebSocketTokenClient.getId" name="getId">
 <arg descr="(no arguments required)" field="-" object="" type=""/>
 <result descr="Unique id of this client." field="String" object="" type=""/>
 </method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.checkCallbacks" name="checkCallbacks">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.createDefaultResult" name="createDefaultResult">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.checkConnected" name="checkConnected">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.checkLoggedIn" name="checkLoggedIn">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.resultToString" name="resultToString">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.tokenToStream" name="tokenToStream">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.streamToToken" name="streamToToken">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.notifyPlugInsOpened" name="notifyPlugInsOpened">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.notifyPlugInsClosed" name="notifyPlugInsClosed">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.processPacket" name="processPacket">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.processToken" name="processToken">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.processClosed" name="processClosed">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.processConnected" name="processConnected">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.processDisconnected" name="processDisconnected">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.sendToken" name="sendToken">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.sendText" name="sendText">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.broadcastText" name="broadcastText">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.echo" name="echo">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.open" name="open">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.connect" name="connect">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.close" name="close">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.jWebSocketTokenClient.disconnect" name="disconnect">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
 </class>
-<class ancestor="-" descr="Implementation for the [tt]jws.SystemClientPlugIn[/tt] class.&#10;" fullpath="jws.SystemClientPlugIn" name="SystemClientPlugIn"/>
-<class ancestor="-" descr="Implementation for the [tt]jws.StreamingPlugIn[/tt] class.&#10;" fullpath="jws.StreamingPlugIn" name="StreamingPlugIn"/>
-<class ancestor="-" descr="Implementation for the [tt]jws.RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn" name="RPCClientPlugIn"/>
-<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketJSONClient[/tt] class.&#10;" fullpath="jws.jWebSocketJSONClient" name="jWebSocketJSONClient"/>
-<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketCSVClient[/tt] class.&#10;" fullpath="jws.jWebSocketCSVClient" name="jWebSocketCSVClient"/>
-<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketXMLClient[/tt] class.&#10;" fullpath="jws.jWebSocketXMLClient" name="jWebSocketXMLClient"/>
+<class ancestor="-" descr="Implementation for the [tt]jws.SystemClientPlugIn[/tt] class.&#10;" fullpath="jws.SystemClientPlugIn" name="SystemClientPlugIn">
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.login" name="login">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.logon" name="logon">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.logout" name="logout">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.isLoggedIn" name="isLoggedIn">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.getUsername" name="getUsername">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.getClients" name="getClients">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.getNonAuthClients" name="getNonAuthClients">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.getAuthClients" name="getAuthClients">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.getAllClients" name="getAllClients">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.ping" name="ping">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.startKeepAlive" name="startKeepAlive">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.SystemClientPlugIn.stopKeepAlive" name="stopKeepAlive">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+</class>
+<class ancestor="-" descr="Implementation for the [tt]jws.StreamingPlugIn[/tt] class.&#10;" fullpath="jws.StreamingPlugIn" name="StreamingPlugIn">
+<method descr="description pending...&#10;" fullpath="jws.StreamingPlugIn.registerStream" name="registerStream">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.StreamingPlugIn.unregisterStream" name="unregisterStream">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.StreamingPlugIn.demo" name="demo">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+</class>
+<class ancestor="-" descr="Implementation for the [tt]jws.RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn" name="RPCClientPlugIn">
+<method descr="description pending...&#10;" fullpath="jws.RPCClientPlugIn.processToken" name="processToken">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.RPCClientPlugIn.rpc" name="rpc">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.RPCClientPlugIn.rrpc" name="rrpc">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+<method descr="description pending...&#10;" fullpath="jws.RPCClientPlugIn.onRRPC" name="onRRPC">
+<arg descr="..." field="name" object="" type="type"/>
+<result descr="..." field="" object="" type="type"/>
+</method>
+</class>
+<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketJSONClient[/tt] class.&#10;" fullpath="jws.jWebSocketJSONClient" name="jWebSocketJSONClient">
+<method descr="converts a token to a JSON stream.&#10;" fullpath="jws.jWebSocketJSONClient.tokenToStream" name="tokenToStream">
+<arg descr="The token (an JavaScript Object) to be converted into an JSON stream." field="aToken" object="" type="Token"/>
+<result descr="The resulting JSON stream." field="" object="" type="String"/>
+</method>
+<method descr="converts a JSON stream into a token.&#10;" fullpath="jws.jWebSocketJSONClient.streamToToken" name="streamToToken">
+<arg descr="The data stream received from the server to be parsed as JSON." field="aStream" object="" type="String"/>
+<result descr="The Token object of stream could be parsed successfully." field="Token" object="" type="Object"/>
+<result descr="Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers." field="[i]field[/i]" object="Token" type="[i]type[/i]"/>
+</method>
+</class>
+<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketCSVClient[/tt] class.&#10;" fullpath="jws.jWebSocketCSVClient" name="jWebSocketCSVClient">
+<method descr="converts a token to a CSV stream.&#10;" fullpath="jws.jWebSocketCSVClient.tokenToStream" name="tokenToStream">
+<arg descr="The token (an JavaScript Object) to be converted into an CSV stream." field="aToken" object="" type="Token"/>
+<result descr="The resulting CSV stream." field="" object="" type="String"/>
+</method>
+<method descr="converts a CSV stream into a token.&#10;" fullpath="jws.jWebSocketCSVClient.streamToToken" name="streamToToken">
+<arg descr="The data stream received from the server to be parsed as CSV." field="aStream" object="" type="String"/>
+<result descr="The Token object of stream could be parsed successfully." field="Token" object="" type="Object"/>
+<result descr="Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers." field="[i]field[/i]" object="Token" type="[i]type[/i]"/>
+</method>
+</class>
+<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketXMLClient[/tt] class.&#10;" fullpath="jws.jWebSocketXMLClient" name="jWebSocketXMLClient">
+<method descr="converts a token to a XML stream.&#10;" fullpath="jws.jWebSocketXMLClient.tokenToStream" name="tokenToStream">
+<arg descr="The token (an JavaScript Object) to be converted into an XML stream." field="aToken" object="" type="Token"/>
+<result descr="The resulting XML stream." field="" object="" type="String"/>
+</method>
+<method descr="converts a XML stream into a token.&#10;" fullpath="jws.jWebSocketXMLClient.streamToToken" name="streamToToken">
+<arg descr="The data stream received from the server to be parsed as XML." field="aStream" object="" type="String"/>
+<result descr="The Token object of stream could be parsed successfully." field="Token" object="" type="Object"/>
+<result descr="Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers." field="[i]field[/i]" object="Token" type="[i]type[/i]"/>
+</method>
+</class>
 </docroot>

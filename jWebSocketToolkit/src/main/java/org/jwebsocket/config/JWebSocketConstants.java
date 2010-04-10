@@ -117,5 +117,4 @@ public final class JWebSocketConstants {
 	 */
 	public static String KEYVAL_SEPARATOR = "=";
 
-
 }

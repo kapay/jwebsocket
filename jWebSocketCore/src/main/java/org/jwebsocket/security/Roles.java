@@ -56,6 +56,15 @@ public class Roles {
 	}
 
 	/**
+	 * Returns a certain role from the map of roles identified by its key or
+	 * <tt>null</tt> if no role with the given exists in the map of roles.
+	 * @param aKey
+	 */
+	public Role getRole(String aKey) {
+		return roles.get(aKey);
+	}
+
+	/**
 	 * Removes a certain role from the map of roles.
 	 * @param aKey
 	 */

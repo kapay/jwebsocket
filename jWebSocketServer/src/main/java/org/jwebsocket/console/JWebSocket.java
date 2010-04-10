@@ -17,7 +17,10 @@ package org.jwebsocket.console;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.kit.WebSocketLoader;
 import org.jwebsocket.netty.engines.NettyEngine;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.tcp.engines.TCPEngine;
@@ -54,10 +57,10 @@ public class JWebSocket {
 		String useEngine = JWebSocketConstants.DEFAULT_ENGINE;
 
 		String CMDLINE_SAMPLE =
-			"java -jar jWebSocket.jar "
-			+ "engine=[tcp|netty] "
-			+ "prot=[json|csv|xml|custom] "
-			+ "port=[" + JWebSocketConstants.MIN_IN_PORT + "-" + JWebSocketConstants.MAX_IN_PORT + "]";
+				"java -jar jWebSocket.jar "
+				+ "engine=[tcp|netty] "
+				+ "prot=[json|csv|xml|custom] "
+				+ "port=[" + JWebSocketConstants.MIN_IN_PORT + "-" + JWebSocketConstants.MAX_IN_PORT + "]";
 
 		// parse optional command line arguments
 		int i = 0;
@@ -93,14 +96,14 @@ public class JWebSocket {
 
 		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
 		System.out.println("jWebSocket Ver. "
-			+ JWebSocketConstants.VERSION_STR);
+				+ JWebSocketConstants.VERSION_STR);
 		System.out.println(JWebSocketConstants.COPYRIGHT);
 		System.out.println(JWebSocketConstants.LICENSE);
 
 		// do engine validation
 		useEngine = useEngine.toLowerCase();
 		if (!(useEngine.equals("tcp")
-			|| useEngine.equals("netty"))) {
+				|| useEngine.equals("netty"))) {
 			System.out.println("Invalid engine argument.");
 			System.out.println(CMDLINE_SAMPLE);
 			return;
@@ -109,9 +112,9 @@ public class JWebSocket {
 		// do protocol validation
 		prot = prot.toLowerCase();
 		if (!(prot.equals("json")
-			|| prot.equals("csv")
-			|| prot.equals("xml")
-			|| prot.equals("custom"))) {
+				|| prot.equals("csv")
+				|| prot.equals("xml")
+				|| prot.equals("custom"))) {
 			System.out.println("Invalid protocol argument.");
 			System.out.println(CMDLINE_SAMPLE);
 			return;
@@ -119,16 +122,52 @@ public class JWebSocket {
 
 		// do port validation
 		if (port < JWebSocketConstants.MIN_IN_PORT
-			|| port > JWebSocketConstants.MAX_IN_PORT) {
+				|| port > JWebSocketConstants.MAX_IN_PORT) {
 			System.out.println("Invalid port argument.");
 			System.out.println(CMDLINE_SAMPLE);
 			return;
 		}
 
+		// try to obtain JWEBSOCKET_HOME environment variable
+		String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
+		String lFileSep = System.getProperty("file.separator");
+		String lWebSocketXML = null;
+		if (lWebSocketHome != null) {
+			// append trailing slash if needed
+			if (!lWebSocketHome.endsWith(lFileSep)) {
+				lWebSocketHome += lFileSep;
+			}
+			// jWebSocket.xml has to be located in %JWEBSOCKET_HOME%/conf
+			lWebSocketXML = lWebSocketHome + "conf" + lFileSep + "jWebSocket.xml";
+			System.out.println(
+					"Trying to load config from " + lWebSocketXML + "...");
+			// try to load the config file
+			WebSocketLoader lWSL = new WebSocketLoader();
+			try {
+				JWebSocketConfig lConfig = lWSL.loadConfiguration(lWebSocketXML);
+				SecurityFactory.initFromConfig(lConfig);
+			} catch (WebSocketException ex) {
+				System.out.println("Configuration " + lWebSocketXML + " file invalid or not found.");
+				System.out.println("Using default configuration.");
+				// initialize the security factory with some default demo data
+				// to show at least something even with no config
+				// TODO: only temporary, will be removed in the final release!
+				SecurityFactory.initDefault();
+			}
+		} else {
+			System.out.println(
+					"JWEBSOCKET_HOME variable not set, using default configuration...");
+			// initialize the security factory with some default demo data
+			// to show at least something even with no config
+			// TODO: only temporary, will be removed in the final release!
+			SecurityFactory.initDefault();
+		}
+
 		System.out.println(
-			"Engine " + useEngine + " listening on port "
-			+ port + ", default (sub)prot " + prot + ", "
-			+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
+				"Engine " + useEngine + " listening on port "
+				+ port + ", default (sub)prot " + prot + ", "
+				+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
+
 
 		// create the low-level engine
 		WebSocketEngine engine = null;
@@ -144,10 +183,6 @@ public class JWebSocket {
 			System.out.println("Error instantating engine: " + ex.getMessage());
 			return;
 		}
-
-		// initialize the security factory with some demo data
-		// will be replaced be new configuration
-		SecurityFactory.initDemo();
 
 		// create the token server (based on the TCP engine)
 		TokenServer tokenServer = null;

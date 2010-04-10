@@ -49,24 +49,29 @@ public final class WebSocketLoader {
 	 *             if there's any while loading configuration
 	 */
 	public JWebSocketConfig loadConfiguration(final String configFilePath)
-		throws WebSocketException {
+			throws WebSocketException {
 		JWebSocketConfig config = null;
 		File lFile = new File(configFilePath);
+		String lMsg;
 		try {
 			FileInputStream fis = new FileInputStream(lFile);
 			XMLInputFactory factory = XMLInputFactory.newInstance();
 			XMLStreamReader streamReader = null;
 			streamReader = factory.createXMLStreamReader(fis);
 			config = configHandler.processConfig(streamReader);
-		} catch (XMLStreamException e) {
+		} catch (XMLStreamException ex) {
+			lMsg = "Exception occurred while creating XML stream";
 			if (log.isDebugEnabled()) {
-				log.debug("Exception occurred while creating XML stream", e);
+				log.debug(lMsg);
 			}
-		} catch (FileNotFoundException e) {
+			throw new WebSocketException(lMsg);
+		} catch (FileNotFoundException ex) {
+			lMsg = "jWebSocket config not found while creating XML stream";
 			if (log.isDebugEnabled()) {
-				log.debug("jWebSocket config not found while creating XML stream", e);
+				log.debug(lMsg);
 			}
-		} 
+			throw new WebSocketException(lMsg);
+		}
 		return config;
 	}
 
@@ -96,7 +101,7 @@ public final class WebSocketLoader {
 	 *             if exception occurs during intialization
 	 */
 	public boolean initialize(final JWebSocketConfig configuration)
-		throws WebSocketException {
+			throws WebSocketException {
 		throw new UnsupportedOperationException();
 	}
 }

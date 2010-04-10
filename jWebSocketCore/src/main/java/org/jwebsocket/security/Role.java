@@ -26,13 +26,13 @@ public class Role {
 	private Rights rights = new Rights();
 
 	/**
-	 *
+	 * creates a new empty Role object.
 	 */
 	public Role() {
 	}
 
 	/**
-	 *
+	 * creates a new Role object and initializes its key and description.
 	 * @param aKey
 	 * @param aDescription
 	 */
@@ -42,7 +42,8 @@ public class Role {
 	}
 
 	/**
-	 *
+	 * creates a new Role object and initializes its key, description and
+	 * rights.
 	 * @param aKey
 	 * @param aDescription
 	 * @param aRights
@@ -55,6 +56,19 @@ public class Role {
 				addRight(aRights[i]);
 			}
 		}
+	}
+
+	/**
+	 * creates a new Role object and initializes its key, description and
+	 * rights.
+	 * @param aKey
+	 * @param aDescription
+	 * @param aRights
+	 */
+	public Role(String aKey, String aDescription, Rights aRights) {
+		key = aKey;
+		description = aDescription;
+		rights = aRights;
 	}
 
 	/**
@@ -114,5 +128,4 @@ public class Role {
 	public boolean hasRight(String aRight) {
 		return rights.hasRight(aRight);
 	}
-
 }

@@ -24,7 +24,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.kit.WebSocketLoader;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -69,6 +68,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public JWebSocketConfig processConfig(XMLStreamReader streamReader) {
 		JWebSocketConfig.Builder configBuilder = new JWebSocketConfig.Builder();
 		try {
@@ -77,38 +77,38 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 				if (streamReader.isStartElement()) {
 					String elementName = streamReader.getLocalName();
 					if (elementName.equals(ELEMENT_ENGINES)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading Engines Cofiguration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading engines configuration");
 						}
 						List<EngineConfig> engines = handleEngines(streamReader);
 						configBuilder = configBuilder.addEngines(engines);
 					} else if (elementName.equals(ELEMENT_SERVERS)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading Servers Cofiguration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading servers configuration");
 						}
 						List<ServerConfig> servers = handleServers(streamReader);
 						configBuilder = configBuilder.addServers(servers);
 					} else if (elementName.equals(ELEMENT_PLUGINS)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading Plugins Cofiguration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading plugins configuration");
 						}
 						List<PluginConfig> plugins = handlePlugins(streamReader);
 						configBuilder = configBuilder.addPlugins(plugins);
 					} else if (elementName.equals(ELEMENT_RIGHTS)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading Rights Cofiguration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading rights configuration");
 						}
 						List<RightConfig> globalRights = handleRights(streamReader);
 						configBuilder = configBuilder.addGlobalRights(globalRights);
 					} else if (elementName.equals(ELEMENT_ROLES)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading Roles Cofiguration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading roles configuration");
 						}
 						List<RoleConfig> roles = handleRoles(streamReader);
 						configBuilder = configBuilder.addGlobalRoles(roles);
 					} else if (elementName.equals(ELEMENT_USERS)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading Users Cofiguration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading users configuration");
 						}
 						List<UserConfig> users = handleUsers(streamReader);
 						configBuilder = configBuilder.addUsers(users);
@@ -120,7 +120,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					String elementName = streamReader.getLocalName();
 					if (elementName.equals(JWEBSOCKET)) {
 						if (log.isInfoEnabled()) {
-							log.info("Completed Reading jWebSocket Cofiguration");
+							log.info("jWebSocket configuration successfully processed.");
 						}
 						break;
 					}

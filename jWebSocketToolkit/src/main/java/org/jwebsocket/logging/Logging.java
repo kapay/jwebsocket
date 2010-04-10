@@ -54,7 +54,7 @@ public class Logging {
 	 *
 	 */
 	public static int BUFFER_SIZE = 2048;
-	private static int logTarget = ROLLING_FILE;
+	private static int logTarget = CONSOLE; // ROLLING_FILE;
 
 	// TODO: Load the conversion pattern and the logging target from a configuration file (e.g. jWebSocket.xml)
 	/**

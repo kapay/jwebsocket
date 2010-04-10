@@ -1,3 +1,4 @@
+//  <JasobNoObfs>
 //	---------------------------------------------------------------------------
 //	jWebSocket Client (uses jWebSocket Server)
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
@@ -13,6 +14,7 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
+//  </JasobNoObfs>
 
 //:package:*:jws
 //:class:*:jws
@@ -60,9 +62,17 @@ var jws = {
 
 };
 
-// event abstraction for Internet Explorer
+
+//:package:*:jws.events
+//:class:*:jws.events
+//:ancestor:*:-
+//:d:en:Implements event abstraction for Internet Explorer.
 jws.events = {
 
+	//:m:*:addEventListener
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	addEventListener : (
 		jws.isIE ?
 		function( aElement, aEvent, aListener ) {
@@ -74,6 +84,10 @@ jws.events = {
 		}
 		),
 
+	//:m:*:getTarget
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	getTarget : (
 		jws.isIE ?
 		function( aEvent ) {
@@ -88,6 +102,9 @@ jws.events = {
 
 
 if( !jws.browserSupportsWebSockets() ) {
+
+	//  <JasobNoObfs>
+
 	// --- swfobject.js ---
 	// SWFObject v2.2 <http://code.google.com/p/swfobject/>
 	// is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -105,7 +122,7 @@ if( !jws.browserSupportsWebSockets() ) {
 	// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 	// OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	// Full Sources codes provided in FABridge.js
-	eval((function(x){var d="";var p=0;while(p<x.length){if(x.charAt(p)!="`")d+=x.charAt(p++);else{var l=x.charCodeAt(p+3)-28;if(l>4)d+=d.substr(d.length-x.charCodeAt(p+1)*96-x.charCodeAt(p+2)+3104-l,l);else d+="`";p+=4}}return d})("function FABridge(target,b` )!Name){this.` 2\"=` 9\";` .!remoteTypeCache={}` ,(Instanc` '1F`!0#` .*local` %2`!I\"ID=`!`$.next` %\"ID++` @\"name=`!p&` .#extL` r$ID=0;` [%i`!\\#s[` V%]=this` 8'dMap` 9\"`!<$` <#return ` '!}` G%TYPE_ASINSTANCE=1` a&` 4#FUNCTION=2` ,+J` 1&3` F,NONYMOUS=4`!r(itCallbacks={}` 0&userType` (*addToU` 2%`%3$(){for(var i=0;i<arguments.length;i++){` k.[` @%[i]]={typ`#r!:` ,(,enriched:false};}`!F(rgsToArray`!E&args){var result=[];`!P-`!N*` C\"[i]=args[i];}`$7#` 4\";};`'`%`%,$Factory(objID`']#fb_` 7$_id=` 6!`$z*`(?-__invokeJS`'1$`!v'f`&L\"`!P!0];var throughArgs` 3!.concat();` /'.shift()` M!`&Q\"`'o&extrac`'u#FromID(`!#\")`!d$` M\".`!T\"`'s%`!X!` D\",`!\"')`'3'addInitializa`)@\"`&:\"`$5&`(u&,c` 6#`\"G\"inst`!\\&`(q&` G&];if(inst!=undefined){` ^$.call` :!`\" $;}var ` 8$Li` r*`'r'` t,` F)=null`'5'` A5=` J)[];}` %(.push` q%)`&'(`%B&`*|#`#;$ed`#$'`# \"objects=doc`(?!.getEle`(J!ByTagName(\"` A\"\"`%<\"ol=` P#`'n$var activeO` i#[`\"T!ol>0`),ol`(?\"if(typeof`!<$[i].SetVariable!=\"`$-%\"){` r)[`! )`!?#]`!N$`),!}`$H!embed`!}=` A!`\"6#el=` O\"`\"*.E` g\"`\"5\"e`\".)j=0;j<el;j`\"-*` e\"[j`!x>` w\"`\"2#` '\"`\"/%` ]%`\"/$aol=`\"O0`!g\"e` 5$` Z)` 7!searchStr=\"`%@&=\"+`1Z'if(aol==1&&!ael||` &$ael==1`'/'attach`4A#`$2*0]`4F(;}else if(` ^\"&&!ao`'x(` W/`\"i#` U0`,f\"lash_found=`/F!`!r#>1`$,&k=0;k<aol;k++`'j\"params`#/*[k].childNodes`/T%l=0;l<` K\"`#<$l` [)=` 7\"[l`%M!` (!.nodeType`\"B!` -\"t`&B\".toLowerCase()==\"` 9!\"` >$n` /0`\"A!vars` >%value.indexOf(`$g%)>=0`#uBk`#D*`#<(true;break;}}if(` 1'){` 0$}if(!` /'`%T!`#j(m=0;m<ael;m`#&$` J!Var`#q$`$v#m].attributes.getNamedItem(`\"T\"Vars\")`#O!Valu`$!` 0%`\"1P`!0%`\"W)`\"2%`4?$`\"d!`1=&nex`29#ID=0;`0c.={}` +'dMap` %)refCount` P(`3$/`2+&id`#2\"`/9#D=id>>16`3H$` }*`0M#ID];`!)'`\"Q(` n'`!k#`\"S(`!%!new`\";#` ;#=new`! %` C1`!#%`1h)` X-`+s!`1`$s`2cKs`3'$`3z$`0^*` >%`)X$`0u!` -%[i]`4`\"`!D-);}delete`#A'`!75`#K'blockedMethods={toString:true,get` #\"se` \"#call` %!` Y'prototype={root:`$4%`\">$ this.deser`4Q\"(` ,!targe`1~!Root());},releaseAS`*7#` U4` U#` ?,(` Y'`)7!` 2$` ^&`+k!`2'(` ,!!=\"`3g\"\"` %`._\"`.w&ret=`!)/` z)` x\".fb_`&9$_id)`'_$ret;}},create`!H&class`'4\"`\"l@` Y\"` K');},makeID` j&token` h$` Y\"`(n$<<16)+` <!;},getPropertyFromAS` Z&objRef,prop`!X\"if(`*R->0){throw new Error(\"You are trying to`(K! recursively into the Flash Player which is not allowed. In most cases` P!JavaScript setTimeout `!r$, can be used as a workaround.\"`3n$`!{-++;retVal`${)`\"{#`\"x\"`\"d-` E)handle`\"_\"` 2\"`+K&` }%--`%E'Val;}},s`#|&In`#i7,`'4&`#(~`#(~`#[K`\"#In`#v.,` C!`(G&`#\"\"`#WccallASF`\"-#`$3&funcID,args`#1~`#1~`#_Pinvoke`\"s&`\"l$`$ +`\"~!`#Ai`1l\"`(<)ID,func`%J!`#2~`#2~`#oAargs`#K\"`#_+`$28`#7\"`\"1`#^b`!#\"Local`(8;`3T\"sult;var`\"m!`!6\"l` Q(Cache[` S\"];if` _!!=undefined){` ^\"`\"Z,func.apply(null`&q\"`3M(`&s\");}`!z%`!F!`2s!TypeFromNam`4C'objType`4>.remoteType`!h\"` >'];},`4Q\"Proxy`'&,t` g%var ` Q#`\"%\"`!8+(` B%;instanceFactory.prototype=` Z#`#K!` >$=new` $%` L#`!8\");`!s'I` ;#`!y%ID]=` O$`$$` '%`#!!`!~0`\"e0` g0;},addTypeDataTo` 7!` b&t` 2#){new`\"o!new AS`!.!(this`#6!Data.n`\"p!var accessors=` 4%` *%;for(`\"s!=0;i<` /%.length;i++){`!p!add`4*$ToType(`!=#,` L%[i]);}var m`(k!`!&'` *#`! +` /#`! )`,7(blocked`)X\"s[` H#[i]]=`'_(`!X$` B\"`!O+` K&);}}`&d1` D#.`&$$]=` +#`$y$` '$`$9!`\"X*`$1(`3t%`'2\"c=` ($.charAt(0`$+\"setterNam`&m\"g` %&if(c>=\"a\"&&c<=\"z\"){` 4&=\"get\"+c.toUpperCase()+` |%substr(1);` w&=\"s` -C`.,\"` }-` B$` b.` 1%}ty[` 4&]=`\"i%val`$6#b`$j\"s`(9!`#9!InAS`'-!.fb_`(Y$_id`#;%,val);};ty[`!K&` r'`(e*` z#`,^(` ,(`)Q\"`!4!From` |;));}`%&\"`&&(`$})`&0\"`%&\"ty`&s#`!&X`4Y(`!H1` y&,`(7%argsToArray(argument`/8\"`,%\"`0F$`,$+`0Q\"`&\"`!9\"`.7!;if`!4\"`(:\"`0v1==nul`$n$` ,8`\"['`\"5)` F$`2M$`!l<;}`1B%` t<`\"F*ID`\"C*`+U!`2Z!__`!L\"_id__`+<)` ,/`!0!makeID`\"w\"next`4_%ID++`0I#`4(3` a*`\"r\"`\")%` /.;},`%W%`!v&valu`+N#`4*\"={}`+6!t`.=!of ` =!`$\\!==\"number\"||t==\"string` &#boolean` (\"null` $!`\"W'` x#` i\"`*n! if`!:\"`2>%of `$B!` E%[]`/I+` K!`/I)` D\"[i]`#K\"`'z&` F!`.v#`!'$t==\"`\"T$\"` T$`.y!=`%f%TYPE_JSFUNCTION;` >#` j!` ~\"`%?)`#<#`!w8`3@\"` s8ASINSTANCE`!!*`\"I\"`)b*`.)#` R7NONYMOUS` Y/`%X%` 5\";},`+,'`%M&packedV`%M,`%L*` :'`%4H` L'`%b$` &)`%b.`#p!handleError`!R)`#o&` +'`%gG` K'`%|8`.2(` H'`&-/object\"){` n6newTypes`!$)`!\"!addTypeDataTo`*G!`!\"(` P%`!1\"` y$aRefID in`$'(.newRefs` r#create`&d!(` J\",` :/[` 5\"]);}`#C*`&B\"`&:+PRIMITIVE`#U%` F(`*;+` M<A`))%`%**`0},` \\)`),,` c>`) $` t-` :_`)0$`\"S8`)/-addRef`)1&obj`$L#target.incRef(obj`*Z+);},releas`)o'` N-` ;#` I6`(n'`0'-if(`/{(`*+&&&`,5\"indexOf(\"__FLASHERROR\")==0`+2\"my` t!Messag`,h$split(\"||\");if(`#=%refCount>0){` $---;}throw new `*b\"` p*[1]);`#X#`&R'{` %*}};`.j#`3-!`\"I!`3!\",typeName`#:#` 0\"=` 7\"`4%\"` :$`->!Name`!($this;` q%.proto`%_!{get`.-'rop` |\"` M'`!\"#`+V)` ,(`&w\"pertyFromAS` 8\"`$\\*,` r%);},s`!!0,`$n#` p(s` r&In` [;` Y#;},call` v&func` ;!arg`+g$` x#callASMethod` g1` N*`'|/` b*` 8\"` e!`'i1` @*` 8#` G$};"))
+	function FABridge(target,bridgeName){this.target=target;this.remoteTypeCache={};this.remoteInstanceCache={};this.remoteFunctionCache={};this.localFunctionCache={};this.bridgeID=FABridge.nextBridgeID++;this.name=bridgeName;this.nextLocalFuncID=0;FABridge.instances[this.name]=this;FABridge.idMap[this.bridgeID]=this;return this;};FABridge.TYPE_ASINSTANCE=1;FABridge.TYPE_ASFUNCTION=2;FABridge.TYPE_JSFUNCTION=3;FABridge.TYPE_ANONYMOUS=4;FABridge.initCallbacks={};FABridge.userTypes={};FABridge.addToUserTypes=function(){for(var i=0;i<arguments.length;i++){FABridge.userTypes[arguments[i]]={'typeName':arguments[i],'enriched':false};}};FABridge.argsToArray=function(args){var result=[];for(var i=0;i<args.length;i++){result[i]=args[i];}return result;};function instanceFactory(objID){this.fb_instance_id=objID;return this;};function FABridge__invokeJSFunction(args){var funcID=args[0];var throughArgs=args.concat();throughArgs.shift();var bridge=FABridge.extractBridgeFromID(funcID);return bridge.invokeLocalFunction(funcID,throughArgs);};FABridge.addInitializationCallback=function(bridgeName,callback){var inst=FABridge.instances[bridgeName];if(inst!=undefined){callback.call(inst);return;}var callbackList=FABridge.initCallbacks[bridgeName];if(callbackList==null){FABridge.initCallbacks[bridgeName]=callbackList=[];}callbackList.push(callback);};function FABridge__bridgeInitialized(bridgeName){var objects=document.getElementsByTagName("object");var ol=objects.length;var activeObjects=[];if(ol>0){for(var i=0;i<ol;i++){if(typeof objects[i].SetVariable!="undefined"){activeObjects[activeObjects.length]=objects[i];}}}var embeds=document.getElementsByTagName("embed");var el=embeds.length;var activeEmbeds=[];if(el>0){for(var j=0;j<el;j++){if(typeof embeds[j].SetVariable!="undefined"){activeEmbeds[activeEmbeds.length]=embeds[j];}}}var aol=activeObjects.length;var ael=activeEmbeds.length;var searchStr="bridgeName="+bridgeName;if((aol==1&& !ael)||(aol==1&&ael==1)){FABridge.attachBridge(activeObjects[0],bridgeName);}else if(ael==1&& !aol){FABridge.attachBridge(activeEmbeds[0],bridgeName);}else{var flash_found=false;if(aol>1){for(var k=0;k<aol;k++){var params=activeObjects[k].childNodes;for(var l=0;l<params.length;l++){var param=params[l];if(param.nodeType==1&&param.tagName.toLowerCase()=="param"&&param["name"].toLowerCase()=="flashvars"&&param["value"].indexOf(searchStr)>=0){FABridge.attachBridge(activeObjects[k],bridgeName);flash_found=true;break;}}if(flash_found){break;}}}if(!flash_found&&ael>1){for(var m=0;m<ael;m++){var flashVars=activeEmbeds[m].attributes.getNamedItem("flashVars").nodeValue;if(flashVars.indexOf(searchStr)>=0){FABridge.attachBridge(activeEmbeds[m],bridgeName);break;}}}}return true;};FABridge.nextBridgeID=0;FABridge.instances={};FABridge.idMap={};FABridge.refCount=0;FABridge.extractBridgeFromID=function(id){var bridgeID=(id>>16);return FABridge.idMap[bridgeID];};FABridge.attachBridge=function(instance,bridgeName){var newBridgeInstance=new FABridge(instance,bridgeName);FABridge[bridgeName]=newBridgeInstance;var callbacks=FABridge.initCallbacks[bridgeName];if(callbacks==null){return;}for(var i=0;i<callbacks.length;i++){callbacks[i].call(newBridgeInstance);}delete FABridge.initCallbacks[bridgeName]};FABridge.blockedMethods={toString:true,get:true,set:true,call:true};FABridge.prototype={root:function(){return this.deserialize(this.target.getRoot());},releaseASObjects:function(){return this.target.releaseASObjects();},releaseNamedASObject:function(value){if(typeof(value)!="object"){return false;}else{var ret=this.target.releaseNamedASObject(value.fb_instance_id);return ret;}},create:function(className){return this.deserialize(this.target.create(className));},makeID:function(token){return(this.bridgeID<<16)+token;},getPropertyFromAS:function(objRef,propName){if(FABridge.refCount>0){throw new Error("You are trying to call recursively into the Flash Player which is not allowed. In most cases the JavaScript setTimeout function, can be used as a workaround.");}else{FABridge.refCount++;retVal=this.target.getPropFromAS(objRef,propName);retVal=this.handleError(retVal);FABridge.refCount--;return retVal;}},setPropertyInAS:function(objRef,propName,value){if(FABridge.refCount>0){throw new Error("You are trying to call recursively into the Flash Player which is not allowed. In most cases the JavaScript setTimeout function, can be used as a workaround.");}else{FABridge.refCount++;retVal=this.target.setPropInAS(objRef,propName,this.serialize(value));retVal=this.handleError(retVal);FABridge.refCount--;return retVal;}},callASFunction:function(funcID,args){if(FABridge.refCount>0){throw new Error("You are trying to call recursively into the Flash Player which is not allowed. In most cases the JavaScript setTimeout function, can be used as a workaround.");}else{FABridge.refCount++;retVal=this.target.invokeASFunction(funcID,this.serialize(args));retVal=this.handleError(retVal);FABridge.refCount--;return retVal;}},callASMethod:function(objID,funcName,args){if(FABridge.refCount>0){throw new Error("You are trying to call recursively into the Flash Player which is not allowed. In most cases the JavaScript setTimeout function, can be used as a workaround.");}else{FABridge.refCount++;args=this.serialize(args);retVal=this.target.invokeASMethod(objID,funcName,args);retVal=this.handleError(retVal);FABridge.refCount--;return retVal;}},invokeLocalFunction:function(funcID,args){var result;var func=this.localFunctionCache[funcID];if(func!=undefined){result=this.serialize(func.apply(null,this.deserialize(args)));}return result;},getTypeFromName:function(objTypeName){return this.remoteTypeCache[objTypeName];},createProxy:function(objID,typeName){var objType=this.getTypeFromName(typeName);instanceFactory.prototype=objType;var instance=new instanceFactory(objID);this.remoteInstanceCache[objID]=instance;return instance;},getProxy:function(objID){return this.remoteInstanceCache[objID];},addTypeDataToCache:function(typeData){newType=new ASProxy(this,typeData.name);var accessors=typeData.accessors;for(var i=0;i<accessors.length;i++){this.addPropertyToType(newType,accessors[i]);}var methods=typeData.methods;for(var i=0;i<methods.length;i++){if(FABridge.blockedMethods[methods[i]]==undefined){this.addMethodToType(newType,methods[i]);}}this.remoteTypeCache[newType.typeName]=newType;return newType;},addPropertyToType:function(ty,propName){var c=propName.charAt(0);var setterName;var getterName;if(c>="a"&&c<="z"){getterName="get"+c.toUpperCase()+propName.substr(1);setterName="set"+c.toUpperCase()+propName.substr(1);}else{getterName="get"+propName;setterName="set"+propName;}ty[setterName]=function(val){this.bridge.setPropertyInAS(this.fb_instance_id,propName,val);};ty[getterName]=function(){return this.bridge.deserialize(this.bridge.getPropertyFromAS(this.fb_instance_id,propName));}},addMethodToType:function(ty,methodName){ty[methodName]=function(){return this.bridge.deserialize(this.bridge.callASMethod(this.fb_instance_id,methodName,FABridge.argsToArray(arguments)));}},getFunctionProxy:function(funcID){var bridge=this;if(this.remoteFunctionCache[funcID]==null){this.remoteFunctionCache[funcID]=function(){bridge.callASFunction(funcID,FABridge.argsToArray(arguments));}}return this.remoteFunctionCache[funcID];},getFunctionID:function(func){if(func.__bridge_id__==undefined){func.__bridge_id__=this.makeID(this.nextLocalFuncID++);this.localFunctionCache[func.__bridge_id__]=func;}return func.__bridge_id__;},serialize:function(value){var result={};var t=typeof(value);if(t=="number"||t=="string"||t=="boolean"||t==null||t==undefined){result=value;}else if(value instanceof Array){result=[];for(var i=0;i<value.length;i++){result[i]=this.serialize(value[i]);}}else if(t=="function"){result.type=FABridge.TYPE_JSFUNCTION;result.value=this.getFunctionID(value);}else if(value instanceof ASProxy){result.type=FABridge.TYPE_ASINSTANCE;result.value=value.fb_instance_id;}else{result.type=FABridge.TYPE_ANONYMOUS;result.value=value;}return result;},deserialize:function(packedValue){var result;var t=typeof(packedValue);if(t=="number"||t=="string"||t=="boolean"||packedValue==null||packedValue==undefined){result=this.handleError(packedValue);}else if(packedValue instanceof Array){result=[];for(var i=0;i<packedValue.length;i++){result[i]=this.deserialize(packedValue[i]);}}else if(t=="object"){for(var i=0;i<packedValue.newTypes.length;i++){this.addTypeDataToCache(packedValue.newTypes[i]);}for(var aRefID in packedValue.newRefs){this.createProxy(aRefID,packedValue.newRefs[aRefID]);}if(packedValue.type==FABridge.TYPE_PRIMITIVE){result=packedValue.value;}else if(packedValue.type==FABridge.TYPE_ASFUNCTION){result=this.getFunctionProxy(packedValue.value);}else if(packedValue.type==FABridge.TYPE_ASINSTANCE){result=this.getProxy(packedValue.value);}else if(packedValue.type==FABridge.TYPE_ANONYMOUS){result=packedValue.value;}}return result;},addRef:function(obj){this.target.incRef(obj.fb_instance_id);},release:function(obj){this.target.releaseRef(obj.fb_instance_id);},handleError:function(value){if(typeof(value)=="string"&&value.indexOf("__FLASHERROR")==0){var myErrorMessage=value.split("||");if(FABridge.refCount>0){FABridge.refCount--;}throw new Error(myErrorMessage[1]);return value;}else{return value;}}};ASProxy=function(bridge,typeName){this.bridge=bridge;this.typeName=typeName;return this;};ASProxy.prototype={get:function(propName){return this.bridge.deserialize(this.bridge.getPropertyFromAS(this.fb_instance_id,propName));},set:function(propName,value){this.bridge.setPropertyInAS(this.fb_instance_id,propName,value);},call:function(funcName,args){this.bridge.callASMethod(this.fb_instance_id,funcName,args);},addRef:function(){this.bridge.addRef(this);},release:function(){this.bridge.release(this);}};
 
 	// --- web_socket.js ---
 	// Copyright: Hiroshi Ichikawa <http://gimite.net/en/>
@@ -113,22 +130,26 @@ if( !jws.browserSupportsWebSockets() ) {
 	// http://www.lightsphere.com/dev/articles/socketpolicy.pl.html
 	// License: New BSD License
 	// Full Sources codes provided in web_socket.js
-	eval((function(x){var d="";var p=0;while(p<x.length){if(x.charAt(p)!="`")d+=x.charAt(p++);else{var l=x.charCodeAt(p+3)-28;if(l>4)d+=d.substr(d.length-x.charCodeAt(p+1)*96-x.charCodeAt(p+2)+3104-l,l);else d+="`";p+=4}}return d})("if(!window.WebSocket){` +'console){` \"#={log:function(){},error` &)};}` e%=` 0%url,protoco` $!xyHost` $\"Port,headers){var self=this;self.readyState=` r%.CONNECTING` ?\"bufferedAmount=0;` A&__addTask(`!^'` P!__flash` l'` +#.create`!a3||nul` )#Port||0`!y$` 5\")`!N\"` e$addEventListener(\"open\",`!F%fe){try{if(` T!onopen`!^#` '\"();}}catch(`$(&.`#{!(e.toString());}}` ~=close` vF` J!` Timessag`!3,var data=decodeURIComponent(fe.getData());`!_*` g#` [\"e;if(`';#M` 3\"`!8!){e=document`$x#` 3!(\"` :(\");e.init` )(`!d(alse,false,data,`%E!`%J!`!.\");}else{e={data:data};}`!\\*(e`\"ahstateChan`#@-try`$^\"`(X'`#C\"R` (%(` y#`(R+` A\"B` ()();`!KF});}`):'`(a!type.send`*p&data`+p\"this`\">$||` )!`!l'`*F1){throw\"INVALID_STATE_ERR: Web ` J\" conne`!)! has not been established\";}var result`+v!`#g%send`!`\";if(` <\"<0){return true`%,#` R!`#8+` J\";` F#`%s!;}`\"b2`)!!`\"o&`\"c.`!,$;}if(`\"q+!`\"u'OPEN` B&`\" )`*\"$`#N,`#R'LOSED;` z$`*V#)`\"7\"`*_(`!o1`&m,`\"%&type,l` 0#,useCapture`\"A\"(\"__events\"in this)`!,#` 0$={}`\"S!!` e! ` ?#` 6%` ?,[type]=[];if(\"`!>$\"==typeof` X![\"on\"+` D!` I1.defaultHandler`%R!` I'`#@!` %'`#;&_Fir`+3#this,typ`*L!` p0push(`\"p$`(;4remov` l\"`\"X~`#H.`&#$for(var i`(:$` <\".length;i>-1;--i`!4!`!I$==` ?*`\"Q\"[i`#\\3splice(i,1);break;}`&43dispatch`\"q!`\"d&` i!`\">9row\"UNSPECIFIED_EVENT_TYP`+5!\"`\"e#` T!.`&26` E=`##&0,l`\"U+` s&]`#4%<l;++i`\"f,` ?'[i]`\"7#;if`!Y#cancelBubble){`#)$if(`+e!!==` A\"`$[\"Value&&`'w3`!H2`'u*`!C7` ;+`!b$}};`!'$ `(,0object`(<\"`.+$`0-+var ` i!=new` [&` [!;`!<\"ini` *\"`('\"true,true)` 9#target`\"f#currentT` .\"`!;\";`$F$key in `!4\"` K![key]=data` %!;}` L\"`&R*`\"I\",argum`%^!;};}`\"G.` F\"){}` $*`/y(`$l!able=`0u!` *;`%4\"=`0r\"` 35pr`!Z!D`$<\"`0t+`$m!`!-&`$|#`%g'` w#`);(` q,stopPropagation` v(` t'`!f#`3,\"` S6`$d%`*&+TypeArg,can` d\"` &#`!r#Arg`!'#type`%&\"` L#`2I\"`#P'` I)` 8\"timeStamp`&A!Dat`!W).CONNECTING=0` ,'OPEN=1` <(`3:!=2` ('__tasks=[]` ()initialize`$\"+!` :(swfLoc`#Q!){console.error(\"[` @%] set`&=&` J* to l` $$of` =&Main.swf\");`/Z$var container=doc`'J!.createElement(\"div\");` ?%.id=\"w` n$C` /$\"` 7'style.posi`%[!\"absolute` 2.left=\"-100px` ,.top` 3&var hold`!I=` ?\"`!Y*Flash` u(appendChild(` K\");` n%body` 5)` O%);swf`*l#embedSWF(`#s3,`!/,,\"10\",\"10\",\"9.0.0\",null,{bridgeName:` J&\"}` 8\"` >!`(2&`%o\"e.success`%I:`![- failed\");}});FAB`!5!.addI`&y$`!w!Callback(`!E'`!;&){try{`\"K(flash=` g%` L%.root()`'~)` G!.setCallerUrl(`')$.href)`.v%i=0;i<`(k-`3=$`3<!` --[i]();`.J&`)F(}catch(e`\"y9\"+e.toString()`#$\"`*q(__addTask`* &task`$4!`\"7-){task();}else`!\\..push` Z\"`31)`#9%Log(messag`!k'log(decodeURIComponent` ?%)`1C'` `%E`\"E!` Z-`\"[\"` O:if(window.add`/(!Listener){` \"3(\"load\",`-.2,`1 !`\"m$` [$tta`3Y$\"on` D8);}}"))
+	if(!window.WebSocket){if(!window.console)console={log:function(){},error:function(){}};WebSocket=function(url,protocol,proxyHost,proxyPort,headers){var self=this;self.readyState=WebSocket.CONNECTING;self.bufferedAmount=0;WebSocket.__addTask(function(){self.__flash=WebSocket.__flash.create(url,protocol,proxyHost||null,proxyPort||0,headers||null);self.__flash.addEventListener("open",function(fe){try{if(self.onopen)self.onopen();}catch(e){console.error(e.toString());}});self.__flash.addEventListener("close",function(fe){try{if(self.onopen)self.onclose();}catch(e){console.error(e.toString());}});self.__flash.addEventListener("message",function(fe){var data=decodeURIComponent(fe.getData());try{if(self.onmessage){var e;if(window.MessageEvent){e=document.createEvent("MessageEvent");e.initMessageEvent("message",false,false,data,null,null,window);}else{e={data:data};}self.onmessage(e);}}catch(e){console.error(e.toString());}});self.__flash.addEventListener("stateChange",function(fe){try{self.readyState=fe.getReadyState();self.bufferedAmount=fe.getBufferedAmount();}catch(e){console.error(e.toString());}});});};WebSocket.prototype.send=function(data){if(!this.__flash||this.readyState==WebSocket.CONNECTING){throw "INVALID_STATE_ERR: Web Socket connection has not been established";}var result=this.__flash.send(data);if(result<0){return true;}else{this.bufferedAmount=result;return false;}};WebSocket.prototype.close=function(){if(!this.__flash)return;if(this.readyState!=WebSocket.OPEN)return;this.__flash.close();this.readyState=WebSocket.CLOSED;if(this.onclose)this.onclose();};WebSocket.prototype.addEventListener=function(type,listener,useCapture){if(!('__events'in this)){this.__events={};}if(!(type in this.__events)){this.__events[type]=[];if('function'==typeof this['on'+type]){this.__events[type].defaultHandler=this['on'+type];this['on'+type]=WebSocket_FireEvent(this,type);}}this.__events[type].push(listener);};WebSocket.prototype.removeEventListener=function(type,listener,useCapture){if(!('__events'in this)){this.__events={};}if(!(type in this.__events))return;for(var i=this.__events.length;i> -1;--i){if(listener===this.__events[type][i]){this.__events[type].splice(i,1);break;}}};WebSocket.prototype.dispatchEvent=function(event){if(!('__events'in this))throw 'UNSPECIFIED_EVENT_TYPE_ERR';if(!(event.type in this.__events))throw 'UNSPECIFIED_EVENT_TYPE_ERR';for(var i=0,l=this.__events[event.type].length;i<l;++i){this.__events[event.type][i](event);if(event.cancelBubble)break;}if(false!==event.returnValue&&'function'==typeof this.__events[event.type].defaultHandler){this.__events[event.type].defaultHandler(event);}};function WebSocket_FireEvent(object,type){return function(data){var event=new WebSocketEvent();event.initEvent(type,true,true);event.target=event.currentTarget=object;for(var key in data){event[key]=data[key];}object.dispatchEvent(event,arguments);};};function WebSocketEvent(){};WebSocketEvent.prototype.cancelable=true;WebSocketEvent.prototype.cancelBubble=false;WebSocketEvent.prototype.preventDefault=function(){if(this.cancelable){this.returnValue=false;}};WebSocketEvent.prototype.stopPropagation=function(){this.cancelBubble=true;};WebSocketEvent.prototype.initEvent=function(eventTypeArg,canBubbleArg,cancelableArg){this.type=eventTypeArg;this.cancelable=cancelableArg;this.timeStamp=new Date();};WebSocket.CONNECTING=0;WebSocket.OPEN=1;WebSocket.CLOSED=2;WebSocket.__tasks=[];WebSocket.__initialize=function(){if(!WebSocket.__swfLocation){console.error("[WebSocket] set WebSocket.__swfLocation to location of WebSocketMain.swf");return;}var container=document.createElement("div");container.id="webSocketContainer";container.style.position="absolute";container.style.left="-100px";container.style.top="-100px";var holder=document.createElement("div");holder.id="webSocketFlash";container.appendChild(holder);document.body.appendChild(container);swfobject.embedSWF(WebSocket.__swfLocation,"webSocketFlash","10","10","9.0.0",null,{bridgeName:"webSocket"},null,null,function(e){if(!e.success)console.error("[WebSocket] swfobject.embedSWF failed");});FABridge.addInitializationCallback("webSocket",function(){try{WebSocket.__flash=FABridge.webSocket.root();WebSocket.__flash.setCallerUrl(location.href);for(var i=0;i<WebSocket.__tasks.length;++i){WebSocket.__tasks[i]();}WebSocket.__tasks=[];}catch(e){console.error("[WebSocket] "+e.toString());}});};WebSocket.__addTask=function(task){if(WebSocket.__flash){task();}else{WebSocket.__tasks.push(task);}};function webSocketLog(message){console.log(decodeURIComponent(message));};function webSocketError(message){console.error(decodeURIComponent(message));};if(window.addEventListener){window.addEventListener("load",WebSocket.__initialize,false);}else{window.attachEvent("onload",WebSocket.__initialize);}}
+
+	//  </JasobNoObfs>
 
 	// init flash bridge
 	// get all scripts on the page to find jWebSocket.js path
+	(function() {
 	var lScripts = document.getElementsByTagName( "script" );
 	for( var lIdx = 0, lCnt = lScripts.length; lIdx < lCnt; lIdx++ ) {
 		var lScript = lScripts[ lIdx ];
 		var lPath = lScript.getAttribute( "src" );
 		if( lPath ) {
-			var lPos = lPath.indexOf( "jwebsocket.js" );
+			var lPos = lPath.lastIndexOf( "jwebsocket" );
 			if( lPos > 0 ) {
 				jws.JWS_FLASHBRIDGE = lPath.substr( 0, lPos ) + "flash-bridge/WebSocketMain.swf";
 				break;
 			}
 		}
 	}
+	})();
 
 	if( jws.JWS_FLASHBRIDGE != null ) {
 		WebSocket.__swfLocation = jws.JWS_FLASHBRIDGE;
@@ -182,7 +203,7 @@ jws.oop.declareClass = function( aNamespace, aClassname, aAncestor, aFields ) {
 			}
 		}
 	}
-}
+};
 
 // plug-in functionality to allow to add plug-ins into existing classes
 jws.oop.addPlugIn = function( aClass, aPlugIn ) {
@@ -208,7 +229,7 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 			jws.oop.addPlugIn( aClass.descendants[ lIdx ], aPlugIn );
 		}
 	}
-}
+};
 
 
 //	---------------------------------------------------------------------------
@@ -302,7 +323,8 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 						aOptions.OnClose( aEvent, lValue, lThis );
 					}
 					lThis.fConn = null;
-				}
+				};
+
 			} else {
 				throw new Error( "Already connected" );
 			}
@@ -311,10 +333,18 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 	},
 
+	//:m:*:connect
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	connect: function( aURL, aOptions ) {
 		return this.open(aURL, aOptions );
 	},
 
+	//:m:*:sendStream
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	sendStream: function( aData ) {
 		// is client already connected
 		if( this.isConnected() ) {
@@ -325,21 +355,36 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 	},
 
+	//:m:*:isConnected
+	//:d:en:Returns [tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
+	//:a:en::-::
+	//:r:*:::boolean:[tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
 	isConnected: function() {
 		return( this.fConn && this.fConn.readyState == 1 );
 	},
 
+	//:m:*:forceClose
+	//:d:en:Forces an immediate client side disconnect.
+	//:a:en::-::
+	//:r:*:::void:
 	forceClose: function() {
 		if( this.fConn ) {
+			if( window.console ) { console.log( "forcing close...." ); }
 			this.fConn.onopen = null;
 			this.fConn.onmessage = null;
 			this.fConn.onclose = null;
-			this.fConn.close();
+			if( this.fConn.readyState == WebSocket.OPEN ) {
+				this.fConn.close();
+			}
 			this.processClosed();
 		}
 		this.fConn = null;
 	},
 
+	//:m:*:close
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	close: function( aOptions ) {
 		// check if timeout option is used
 		var lTimeout = 0;
@@ -356,18 +401,22 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				var lThis = this;
 				this.hDisconnectTimeout = setTimeout(
 					function() {
-						lThis.forceClose.call( lThis );
+						lThis.forceClose();
 					},
 					lTimeout
-					);
+				);
 			}
 		// throw exception if not connected
 		} else {
-			throw new Error( "Not connected" );
 			this.fConn = null;
+			throw new Error( "Not connected" );
 		}
 	},
 
+	//:m:*:disconnect
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	disconnect: function( aOptions ) {
 		return this.close( aOptions );
 	}
@@ -387,6 +436,10 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, {
 
 	// this method is called by the contructor of this class
+	//:m:*:create
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	create: function() {
 		this.fRequestCallbacks = {};
 	},
@@ -399,6 +452,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return this.fClientId;
 	},
 
+	//:m:*:checkCallbacks
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	checkCallbacks: function( aToken ) {
 		var lField = "utid" + aToken.utid;
 		// console.log("checking result for utid: " + aToken.utid + "...");
@@ -413,6 +470,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			}
 	},
 
+	//:m:*:createDefaultResult
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	createDefaultResult: function() {
 		jws.CUR_TOKEN_ID++;
 		return{
@@ -424,6 +485,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		};
 	},
 
+	//:m:*:checkConnected
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	checkConnected: function() {
 		jws.CUR_TOKEN_ID++;
 		var lRes = this.createDefaultResult();
@@ -435,6 +500,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lRes;
 	},
 
+	//:m:*:checkLoggedIn
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	checkLoggedIn: function() {
 		jws.CUR_TOKEN_ID++;
 		var lRes = this.createDefaultResult();
@@ -446,6 +515,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lRes;
 	},
 
+	//:m:*:resultToString
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	resultToString: function( aRes ) {
 		return(
 			aRes.msg
@@ -453,6 +526,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			);
 	},
 
+	//:m:*:tokenToStream
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	tokenToStream: function( aToken ) {
 		// this is supposed to convert a token into a string stream which is
 		// send to the server, not implemented in base class.
@@ -460,6 +537,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		throw new Error( "tokenToStream needs to be overwritten in descendant classes" );
 	},
 
+	//:m:*:streamToToken
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	streamToToken: function( aStream ) {
 		// this is supposed to convert a string stream from the server into 
 		// a token (object), not implemented in base class.
@@ -467,6 +548,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		throw new Error( "streamToToken needs to be overwritten in descendant classes" );
 	},
 
+	//:m:*:notifyPlugInsOpened
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	notifyPlugInsOpened: function() {
 		var lToken = {
 			sourceId: this.fClientId
@@ -483,6 +568,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		}
 	},
 
+	//:m:*:notifyPlugInsClosed
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	notifyPlugInsClosed: function() {
 		var lToken = {
 			sourceId: this.fClientId
@@ -505,6 +594,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		this.fUsername = null;
 	},
 
+	//:m:*:processPacket
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	processPacket: function( aEvent ) {
 		// parse incoming token...
 		var lToken = this.streamToToken( aEvent.data );
@@ -513,6 +606,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lToken;
 	},
 
+	//:m:*:processToken
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	processToken: function( aToken ) {
 		// check welcome and goodBye tokens to manage the session
 		if( aToken.type == "welcome" && aToken.usid ) {
@@ -558,11 +655,19 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		}
 	},
 
+	//:m:*:processClosed
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	processClosed: function( aEvent ) {
 		this.notifyPlugInsClosed();
 		this.fClientId = null;
 	},
 
+	//:m:*:processConnected
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	processConnected: function( aToken ) {
 		// notify all plug-ins that a new client connected
 		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
@@ -576,6 +681,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		}
 	},
 
+	//:m:*:processDisconnected
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	processDisconnected: function( aToken ) {
 		// notify all plug-ins that a client disconnected
 		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
@@ -589,6 +698,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		}
 	},
 
+	//:m:*:sendToken
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	sendToken: function( aToken, aOptions ) {
 		var lOnResponse = null;
 		if( aOptions ) {
@@ -608,6 +721,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		this.sendStream( lStream );
 	},
 
+	//:m:*:sendText
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	sendText: function( aReceiver, aText ) {
 		var lRes = this.checkLoggedIn();
 		if( lRes.code == 0 ) {
@@ -622,6 +739,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lRes;
 	},
 
+	//:m:*:broadcastText
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	broadcastText: function( aPool, aText, aOptions ) {
 		var lRes = this.checkLoggedIn();
 		var lSenderIncluded = false;
@@ -650,6 +771,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lRes;
 	},
 
+	//:m:*:echo
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	echo: function( aData ) {
 		var lRes = this.checkConnected();
 		if( lRes.code == 0 ) {
@@ -661,6 +786,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lRes;
 	},
 
+	//:m:*:open
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	open: function( aURL, aOptions ) {
 		var lRes = this.createDefaultResult();
 		try {
@@ -676,10 +805,18 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	// deprecated, kept for upward compatibility
+	//:m:*:connect
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	connect: function( aURL, aOptions ) {
 		return this.open( aURL, aOptions );
 	},
 
+	//:m:*:close
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	close: function( aOptions ) {
 		var lTimeout = 0;
 		if( aOptions ) {
@@ -709,6 +846,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	// deprecated, kept for upward compatibility
+	//:m:*:disconnect
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	disconnect: function( aOptions ) {
 		return this.close( aOptions );
 	}
@@ -734,6 +875,10 @@ jws.SystemClientPlugIn = {
 	AUTHENTICATED: 1,
 	NON_AUTHENTICATED: 2,
 
+	//:m:*:login
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	login: function( aUsername, aPassword, aOptions ) {
 		var lPool = null;
 		var lAutoConnect = true;
@@ -764,6 +909,10 @@ jws.SystemClientPlugIn = {
 		return lRes;
 	},
 
+	//:m:*:logon
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	logon: function( aURL, aUsername, aPassword, aOptions ) {
 		// initialize options if not passed
 		if( !aOptions ) {
@@ -787,6 +936,10 @@ jws.SystemClientPlugIn = {
 		}
 	},
 
+	//:m:*:logout
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	logout: function() {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
@@ -801,14 +954,26 @@ jws.SystemClientPlugIn = {
 		return lRes;
 	},
 
+	//:m:*:isLoggedIn
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	isLoggedIn: function() {
 		return( this.isConnected() && this.fUsername );
 	},
 
+	//:m:*:getUsername
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	getUsername: function() {
 		return( this.isLoggedIn() ? this.fUsername : null );
 	},
 
+	//:m:*:getClients
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	getClients: function( aOptions ) {
 		var lMode = jws.SystemClientPlugIn.ALL_CLIENTS;
 		var lPool = null;
@@ -837,6 +1002,10 @@ jws.SystemClientPlugIn = {
 		return lRes;
 	},
 
+	//:m:*:getNonAuthClients
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	getNonAuthClients: function( aOptions ) {
 		if( !aOptions ) {
 			aOptions = {};
@@ -845,6 +1014,10 @@ jws.SystemClientPlugIn = {
 		return this.getClients( aOptions );
 	},
 
+	//:m:*:getAuthClients
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	getAuthClients: function( aOptions ) {
 		if( !aOptions ) {
 			aOptions = {};
@@ -853,6 +1026,10 @@ jws.SystemClientPlugIn = {
 		return this.getClients( aOptions );
 	},
 
+	//:m:*:getAllClients
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	getAllClients: function( aOptions ) {
 		if( !aOptions ) {
 			aOptions = {};
@@ -861,6 +1038,10 @@ jws.SystemClientPlugIn = {
 		return this.getClients( aOptions );
 	},
 
+	//:m:*:ping
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	ping: function( aOptions ) {
 		var lEcho = false;
 		if( aOptions ) {
@@ -885,6 +1066,10 @@ jws.SystemClientPlugIn = {
 		return lRes;
 	},
 
+	//:m:*:startKeepAlive
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	startKeepAlive: function( aOptions ) {
 		// if we have a keep alive running already stop it
 		if( this.hKeepAlive ) {
@@ -930,13 +1115,17 @@ jws.SystemClientPlugIn = {
 			);
 	},
 
+	//:m:*:stopKeepAlive
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	stopKeepAlive: function() {
 		if( this.hKeepAlive ) {
 			clearInterval( this.hKeepAlive );
 			this.hKeepAlive = null;
 		}
 	}
-}
+};
 
 // add the JWebSocket SystemClient PlugIn into the BaseClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.SystemClientPlugIn );
@@ -956,6 +1145,10 @@ jws.StreamingPlugIn = {
 	// if namespace changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.streaming",
 
+	//:m:*:registerStream
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	registerStream: function( aStream ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
@@ -972,6 +1165,10 @@ jws.StreamingPlugIn = {
 		return lRes;
 	},
 
+	//:m:*:unregisterStream
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	unregisterStream: function( aStream ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
@@ -987,8 +1184,7 @@ jws.StreamingPlugIn = {
 		}
 		return lRes;
 	}
-
-}
+};
 
 // add the JWebSocket SystemClient PlugIn into the BaseClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StreamingPlugIn );
@@ -1002,10 +1198,14 @@ jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StreamingPlugIn );
 // from the "outside".
 jws.RRPCServer = {
 
+	//:m:*:demo
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	demo: function( aArgs ) {
 		return(
 			confirm(
-				"aArgs received: '" + aArgs + "'\n" +
+				"Arguments received: '" + aArgs + "'\n" +
 				"'true' or 'false' will be returned to requester."
 				)
 			);
@@ -1026,9 +1226,13 @@ jws.RPCClientPlugIn = {
 
 	// granted rrpc's
 	grantedProcs: [
-	"jws.RRPCServer.demo"
+		"jws.RRPCServer.demo"
 	],
 
+	//:m:*:processToken
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	processToken: function( aToken ) {
 		// console.log( "jws.RPCClientPlugIn: Processing token " + aToken.ns + "/" + aToken.type + "..." );
 		if( aToken.ns == jws.RPCClientPlugIn.NS ) {
@@ -1038,6 +1242,10 @@ jws.RPCClientPlugIn = {
 		}
 	},
 
+	//:m:*:rpc
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	rpc: function( aClass, aMthd, aArgs, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
@@ -1059,6 +1267,10 @@ jws.RPCClientPlugIn = {
 	},
 
 	// calls a remote procedure an another client
+	//:m:*:rrpc
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	rrpc: function( aTarget, aClass, aMthd, aArgs, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
@@ -1081,6 +1293,10 @@ jws.RPCClientPlugIn = {
 	},
 
 	// handles a remote procedure call from another client
+	//:m:*:onRRPC
+	//:d:en:description pending...
+	//:a:en::name:type:...
+	//:r:*:::type:...
 	onRRPC: function( aToken ) {
 		var lClassname = aToken.classname;
 		var lMethod = aToken.method;
@@ -1105,8 +1321,8 @@ jws.RPCClientPlugIn = {
 			null // aOptions
 			);
 		} else {
-	// console.log( "Reverse RPC request '" + lPath + "(" + lArgs + ")' not granted!" );
-	}
+			// console.log( "Reverse RPC request '" + lPath + "(" + lArgs + ")' not granted!" );
+		}
 	}
 
 }
@@ -1126,7 +1342,10 @@ jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.RPCClientPlugIn );
 //:d:en:Implementation for the [tt]jws.jWebSocketJSONClient[/tt] class.
 jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, {
 
-	// this converts a token to a JSON stream
+	//:m:*:tokenToStream
+	//:d:en:converts a token to a JSON stream.
+	//:a:en::aToken:Token:The token (an JavaScript Object) to be converted into an JSON stream.
+	//:r:*:::String:The resulting JSON stream.
 	tokenToStream: function( aToken ) {
 		var lJSON = "{utid:" + jws.CUR_TOKEN_ID;
 		if( this.fSessionId ) {
@@ -1146,6 +1365,11 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 		return lJSON;
 	},
 
+	//:m:*:streamToToken
+	//:d:en:converts a JSON stream into a token.
+	//:a:en::aStream:String:The data stream received from the server to be parsed as JSON.
+	//:r:*::Token:Object:The Token object of stream could be parsed successfully.
+	//:r:*:Token:[i]field[/i]:[i]type[/i]:Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers.
 	streamToToken: function( aStream ) {
 		// parsing a JSON object in JavaScript couldn't be simpler...
 		// but using 'eval', so be aware of security issues!
@@ -1172,8 +1396,11 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 //:d:en:Implementation for the [tt]jws.jWebSocketCSVClient[/tt] class.
 jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 
-	// this converts a token to a CSV stream
 	// todo: implement escaping of command separators and equal signs
+	//:m:*:tokenToStream
+	//:d:en:converts a token to a CSV stream.
+	//:a:en::aToken:Token:The token (an JavaScript Object) to be converted into an CSV stream.
+	//:r:*:::String:The resulting CSV stream.
 	tokenToStream: function( aToken ) {
 		var lCSV = "utid=" + jws.CUR_TOKEN_ID;
 		if( this.fSessionId ) {
@@ -1197,8 +1424,12 @@ jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 		return lCSV;
 	},
 
-	// this converts a CSV stream into a token
 	// todo: implement escaping of command separators and equal signs
+	//:m:*:streamToToken
+	//:d:en:converts a CSV stream into a token.
+	//:a:en::aStream:String:The data stream received from the server to be parsed as CSV.
+	//:r:*::Token:Object:The Token object of stream could be parsed successfully.
+	//:r:*:Token:[i]field[/i]:[i]type[/i]:Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers.
 	streamToToken: function( aStream ) {
 		var lToken = {};
 		var lItems = aStream.split(",");
@@ -1237,7 +1468,10 @@ jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 //:d:en:Implementation for the [tt]jws.jWebSocketXMLClient[/tt] class.
 jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 
-	// this converts a token to a XML stream
+	//:m:*:tokenToStream
+	//:d:en:converts a token to a XML stream.
+	//:a:en::aToken:Token:The token (an JavaScript Object) to be converted into an XML stream.
+	//:r:*:::String:The resulting XML stream.
 	tokenToStream: function( aToken ) {
 
 		function obj2xml( aKey, aValue ) {
@@ -1249,7 +1483,7 @@ jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 				for( var lIdx = 0, lCnt = aValue.length; lIdx < lCnt; lIdx++ ) {
 					lXML += obj2xml( "item", aValue[ lIdx ] );
 				}
-				lXML += "</" + aKey + ">"
+				lXML += "</" + aKey + ">";
 			}
 			// or do we have an object?
 			else if ( typeof aValue  == "object" ) {
@@ -1257,7 +1491,7 @@ jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 				for(var lField in aValue ) {
 					lXML += obj2xml( lField, aValue[ lField ] );
 				}
-				lXML += "</" + aKey + ">"
+				lXML += "</" + aKey + ">";
 			}
 			// or do we have a plain field?
 			else {
@@ -1280,7 +1514,11 @@ jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 		return lResXML;
 	},
 
-	// this converts a XML stream into a token
+	//:m:*:streamToToken
+	//:d:en:converts a XML stream into a token.
+	//:a:en::aStream:String:The data stream received from the server to be parsed as XML.
+	//:r:*::Token:Object:The Token object of stream could be parsed successfully.
+	//:r:*:Token:[i]field[/i]:[i]type[/i]:Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers.
 	streamToToken: function( aStream ) {
 		// first convert the stream into an XML document 
 		// by using the embedded XML parser.
@@ -1405,4 +1643,3 @@ jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 })();
 
 */
-

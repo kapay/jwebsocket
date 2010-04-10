@@ -15,7 +15,12 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.security;
 
+import java.util.List;
 import org.apache.log4j.Logger;
+import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.config.xml.RightConfig;
+import org.jwebsocket.config.xml.RoleConfig;
+import org.jwebsocket.config.xml.UserConfig;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -32,15 +37,19 @@ public class SecurityFactory {
 	public static String USER_ANONYMOUS = "guest";
 
 	/**
-	 *
+	 * initializes the security system with some default settings to allow to
+	 * startup without a config file, this will be removed in the final release!
 	 */
-	public static void initDemo() {
+	public static void initDefault() {
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing demo rights, roles and users...");
 		}
+		Rights rights = new Rights();
 		// specify rights
 		Right lRPC = new Right("org.jWebSocket.plugins.rpc.rpc", "Allow Remote Procedure Calls (RPC) to server");
 		Right lRRPC = new Right("org.jWebSocket.plugins.rpc.rrpc", "Allow Reverse Remote Procedure Calls (RRPC) to other clients");
+		rights.addRight(lRPC);
+		rights.addRight(lRRPC);
 
 		// specify roles and assign rights to roles
 		Role lGuestRole = new Role("guest", "Guests", lRPC);
@@ -60,7 +69,65 @@ public class SecurityFactory {
 		users.addUser(lRegUser);
 		users.addUser(lAdminUser);
 
-		log.info("Demo rights, roles and users initialized.");
+		log.info("Default rights, roles and users initialized.");
+	}
+
+	/**
+	 * initializes the security system with the settings from the
+	 * jWebSocket.xml.
+	 * @param aConfig
+	 */
+	public static void initFromConfig(JWebSocketConfig aConfig) {
+
+		// build list of rights
+		List<RightConfig> globalRights = aConfig.getGlobalRights();
+		Rights rights = new Rights();
+		for (RightConfig lRightConfig : globalRights) {
+			Right lRight = new Right(
+					lRightConfig.getNamespace() + "." + lRightConfig.getId(),
+					lRightConfig.getDescription());
+			rights.addRight(lRight);
+		}
+
+		// build list of roles
+		List<RoleConfig> globalRoles = aConfig.getGlobalRoles();
+		Roles roles = new Roles();
+		for (RoleConfig lRoleConfig : globalRoles) {
+			Rights lRights = new Rights();
+			for (String lRightId : lRoleConfig.getRights()) {
+				Right lRight = rights.get(lRightId);
+				if( lRight != null ) {
+					lRights.addRight(lRight);
+				}
+			}
+			Role lRole = new Role(
+					lRoleConfig.getId(),
+					lRoleConfig.getDescription(),
+					lRights);
+			roles.addRole(lRole);
+		}
+
+		// build list of users
+		List<UserConfig> globalUsers = aConfig.getUsers();
+		for (UserConfig lUserConfig : globalUsers) {
+			Roles lRoles = new Roles();
+			for (String lRoleId : lUserConfig.getRoles()) {
+				Role lRole = roles.getRole(lRoleId);
+				if( lRole != null ) {
+					lRoles.addRole(lRole);
+				}
+			}
+			User lUser = new User(
+					lUserConfig.getLoginname(),
+					lUserConfig.getFirstname(),
+					lUserConfig.getLastname(),
+					lUserConfig.getPassword(),
+					lRoles);
+
+			users.addUser(lUser);
+		}
+
+		log.info("Rights, roles and users successfully initialized.");
 	}
 
 	/**

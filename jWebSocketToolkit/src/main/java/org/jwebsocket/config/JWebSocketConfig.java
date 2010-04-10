@@ -24,8 +24,8 @@ import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.config.xml.UserConfig;
 
 /**
- * Represents the jWebSocket configuration. This class is immutable and should not be 
- * overridden.
+ * Represents the jWebSocket configuration. This class is immutable and
+ * should not be overridden.
  * @author puran
  * @version $Id$
  * 
