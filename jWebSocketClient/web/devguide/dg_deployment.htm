@@ -13,7 +13,6 @@
 <p>This section describes how to deploy the jWebSocket application to a stage or 
 production system. For the required tools please refer to the Prerequisities 
 page.</p>
-<p>&nbsp;</p>
 <p>The Java Docs are auto-created based upon the inline-documentation in the <tt>jWebSocketClient/javadocs</tt> folder.</p>
 <p>The files for the Quick Guide are maintained in the <tt>jWebSocketClient/quickguide</tt> folder.</p>
 <p>The files for the Developer Guide are maintained in the <tt>jWebSocketClient/devguide</tt> folder.</p>
@@ -22,6 +21,7 @@ page.</p>
 <ol>
 	<li>Update version number in <tt>JWebSocketConstants.java</tt></li>
 	<li>Update all version numbers in <tt>pom.xml</tt> files to current version</li>
+	<li>Update version number in context.xml for web app</li>
 	<li>Open IDE and &quot;Clean And Build&quot; the <tt>jWebSocket-Parent</tt> project<br>
 	(this creates all required .<tt>jar</tt> files of the modules in the 
 	<tt>jWebSocketExecutables</tt> folder)</li>
@@ -39,10 +39,15 @@ page.</p>
 	<li>Update Version numbers in all batches the <tt>jWebSocketDeployment</tt> 
 	folder.</li>
 	<li>Update the <tt>CreateDownloadFiles.bat</tt> in the <tt>jWebSocketDeployment</tt> folder 
-	to the new version number and run it.<br>(this creates all .<tt>zip</tt> files for the download area in jWebSocketDeployment)
+	to the new version number and run it.<br>(this creates all .<tt>zip</tt> files for the download area in jWebSocketDeployment)</li>
+	<li>Check correct file sizes on download page (compare with last recently 
+	created files)
 	</li>
 	<li>Update <tt>jwsClientToWebsite.bat</tt>
 	to new version number, adjust it to new files if needed and run it.</li>
+	<li>Run <tt>CreateJWebSocketWeb.bat</tt> to create jWebSocket online web.</li>
+	<li>Create announcement in blog</li>
+	<li>Create announcement in twitter</li>
 </ol>
 <p>Change all version numbers in</p>
 <ol>
@@ -58,14 +63,11 @@ page.</p>
 	IE.</li>
 </ol>
 <p>Copy deployment files to download area</p>
-<p>&nbsp;</p>
 <p>Upload new deployment files to googlecode.</p>
 <ol>
 	<li>Upload new files and mark them as &quot;featured&quot;</li>
 <li>Mark old files as &quot;deprecated&quot;</li>
 </ol>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
 
 </body>
 

@@ -27,7 +27,9 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugInChain;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
+import org.jwebsocket.plugins.streaming.MonitorStream;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
+import org.jwebsocket.plugins.streaming.TimeStream;
 import org.jwebsocket.plugins.system.SystemPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.CustomServer;
@@ -72,6 +74,8 @@ public class ContextListener implements ServletContextListener {
 			return;
 		}
 
+		StreamingPlugIn streamingPlugIn = null;
+
 		// create the token server (based on the TCP engine)
 		tokenServer = null;
 		try {
@@ -86,7 +90,7 @@ public class ContextListener implements ServletContextListener {
 			// add the RPCPlugIn plug-in
 			plugInChain.addPlugIn(new RPCPlugIn());
 			// add the streaming plug-in (e.g. for the time stream demo)
-			plugInChain.addPlugIn(new StreamingPlugIn());
+			plugInChain.addPlugIn(streamingPlugIn = new StreamingPlugIn());
 			// add the flash/bridge plug-in (to drive browser that don't yet support web sockets)
 			plugInChain.addPlugIn(new FlashBridgePlugIn());
 
@@ -96,6 +100,16 @@ public class ContextListener implements ServletContextListener {
 			tokenServer.startServer();
 		} catch (Exception ex) {
 			log.error("Error instantiating TokenServer: " + ex.getMessage());
+		}
+
+		// initialize streaming sub system...
+		if (streamingPlugIn != null) {
+			// create the stream for the time stream demo
+			TimeStream lTimeStream = new TimeStream("timeStream", tokenServer);
+			streamingPlugIn.addStream(lTimeStream);
+			// create the stream for the monitor stream demo
+			MonitorStream lMonitorStream = new MonitorStream("monitorStream", tokenServer);
+			streamingPlugIn.addStream(lMonitorStream);
 		}
 
 		// create the custom server (based on the TCP engine as well)
