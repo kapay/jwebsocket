@@ -131,7 +131,9 @@
 								doFocus( eUsername );
 								// is it any token from another client
 							} else if( aToken.type == "broadcast" ) {
-								log( aToken.sender, IN, aToken.data );
+								if( aToken.data ) {
+									log( aToken.sender, IN, aToken.data );
+								}
 							}
 						}
 					},

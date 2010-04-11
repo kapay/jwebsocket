@@ -24,73 +24,84 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.BaseServer;
 
 /**
- *
+ * implements a stream on which connectors can be registered and unregistered.
+ * The fundamental streaming capabilities are provided by the <tt>BaseStream</tt>
+ * class. The <tt>BaseStream</tt> implements an internal queue to which messages
+ * can be posted. The message then are broadcasted to the registered clients.
+ * Therefore the <tt>BaseStream</tt> class maintains a list of clients. A certain
+ * client can register at or unregister from the stream. Basically streams send
+ * their messages only to clients that are registered at a stream.
  * @author aschulze
  */
-public class BaseStream extends Thread {
+public class BaseStream {
 
 	private static Logger log = Logging.getLogger(BaseStream.class);
 	private FastList<WebSocketConnector> connectors = new FastList<WebSocketConnector>();
 	private boolean isRunning = false;
 	private String streamID = null;
-	/**
-	 *
-	 */
-	public final FastList<Object> queue = new FastList<Object>();
+	private final FastList<Object> queue = new FastList<Object>();
+	private Thread queueThread = null;
 
 	/**
-	 *
-	 *
+	 * creates a new stream with a certain id.
 	 * @param aStreamID
 	 */
 	public BaseStream(String aStreamID) {
 		this.streamID = aStreamID;
+		QueueProcessor queueProcessor = new QueueProcessor();
+		queueThread = new Thread(queueProcessor);
+		queueThread.start();
 	}
 
 	/**
-	 *
-	 *
+	 * registers a connector at the stream. After this operation the stream
+	 * will send new messages to this client as well.
 	 * @param aConnector
 	 */
 	public void registerConnector(WebSocketConnector aConnector) {
-		connectors.add(aConnector);
+		if (aConnector != null) {
+			connectors.add(aConnector);
+		}
 	}
 
 	/**
-	 *
-	 *
+	 * checks if a certain connector is registered at the stream.
 	 * @param aConnector
-	 * @return
+	 * @return <tt>true</tt> if the connector is already registered otherwise <tt>false</tt>.
 	 */
 	public boolean isConnectorRegistered(WebSocketConnector aConnector) {
-		return connectors.indexOf(aConnector) >= 0;
+		return (aConnector != null && connectors.indexOf(aConnector) >= 0);
 	}
 
 	/**
-	 *
-	 *
+	 * unregisters a connector from the stream. After this operation the stream
+	 * will no longer new messages to this client.
 	 * @param aConnector
 	 */
 	public void unregisterConnector(WebSocketConnector aConnector) {
-		connectors.remove(aConnector);
+		if (aConnector != null) {
+			connectors.remove(aConnector);
+		}
 	}
 
 	/**
-	 *
-	 *
+	 * registers all connectors of the given server at the stream. After this
+	 * operation the stream will send new messages to all clients on the
+	 * given server.
 	 * @param aServer
 	 */
 	public void registerAllConnectors(BaseServer aServer) {
-		// clients.add(aServer);
+		// TODO: to be implemented!
 	}
 
 	/**
-	 *
-	 *
+	 * unregisters all connectors of the given server from the stream. After
+	 * this operation the stream will no longer send new messages to any
+	 * clients on the given server.
 	 * @param aServer
 	 */
 	public void unregisterAllConnectors(BaseServer aServer) {
-		// clients.remove(aServer);
+		// TODO: to be implemented!
 	}
 
 	/**
@@ -107,7 +118,7 @@ public class BaseStream extends Thread {
 	}
 
 	/**
-	 *
+	 * sends a message from the queue to a certain connector.
 	 * @param aConnector
 	 * @param aObject
 	 */
@@ -115,13 +126,13 @@ public class BaseStream extends Thread {
 		try {
 			aConnector.sendPacket(new RawPacket(aObject.toString()));
 		} catch (Exception ex) {
-			log.error("Exception: " + ex.getMessage());
+			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 	}
 
 	/**
-	 * iterates through all registered connectors and 
-	 * runs processConnector for each.
+	 * iterates through all registered connectors and runs 
+	 * <tt>processConnector</tt> for each.
 	 * @param aObject
 	 */
 	protected void processItem(Object aObject) {
@@ -130,26 +141,31 @@ public class BaseStream extends Thread {
 		}
 	}
 
-	@Override
-	public void run() {
-		isRunning = true;
-		while (isRunning) {
-			synchronized (queue) {
-				if (queue.size() > 0) {
-					Object lObject = queue.remove(0);
-					processItem(lObject);
-				} else {
-					try {
-						queue.wait();
-					} catch (InterruptedException ex) {
-						log.error("Exception:" + ex.getMessage());
+	private class QueueProcessor implements Runnable {
+
+		@Override
+		public void run() {
+			isRunning = true;
+			while (isRunning) {
+				synchronized (queue) {
+					if (queue.size() > 0) {
+						Object lObject = queue.remove(0);
+						processItem(lObject);
+					} else {
+						try {
+							queue.wait();
+						} catch (InterruptedException ex) {
+							log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+						}
 					}
 				}
 			}
+
 		}
 	}
 
 	/**
+	 * returns the id of the stream.
 	 * @return the streamID
 	 */
 	public String getStreamID() {

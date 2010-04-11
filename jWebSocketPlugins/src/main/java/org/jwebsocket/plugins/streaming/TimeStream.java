@@ -18,13 +18,15 @@ package org.jwebsocket.plugins.streaming;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * implements the TimeStream, primarily for demonstration purposes but it can
+ * also be used for client/server time synchronization. It implements an
+ * internal thread which broadcasts the current system time of the server to
+ * the registered clients once per second.
  * @author aschulze
  */
 public class TimeStream extends TokenStream {
@@ -60,19 +62,7 @@ public class TimeStream extends TokenStream {
 		isRunning = false;
 	}
 
-	@Override
-	protected void processConnector(WebSocketConnector aConnector, Object aObject) {
-		try {
-			getServer().sendToken(aConnector, (Token) aObject);
-		} catch (Exception ex) {
-			log.error("(processConnector) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-		}
-	}
-
-	/**
-	 *
-	 */
-	public class TimerThread implements Runnable {
+	private class TimerThread implements Runnable {
 
 		@Override
 		public void run() {
@@ -82,7 +72,7 @@ public class TimeStream extends TokenStream {
 				isRunning = true;
 				while (isRunning) {
 					try {
-						sleep(1000);
+						Thread.sleep(1000);
 
 						Token lEventToken = new Token("event");
 						lEventToken.put("name", "stream");

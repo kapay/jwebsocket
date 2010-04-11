@@ -35,19 +35,19 @@ public class Logging {
 	private static Appender appender = null;
 	private static Level logLevel = Level.DEBUG;
 	/**
-	 *
+	 * Log output is send to the console (stdout).
 	 */
 	public static int CONSOLE = 0;
 	/**
-	 *
+	 * Log output is send to a rolling file.
 	 */
 	public static int ROLLING_FILE = 1;
 	/**
-	 *
+	 * Log output is send to a single file.
 	 */
 	public static int SINGLE_FILE = 2;
 	/**
-	 *
+	 * Name of jWebSocket log file.
 	 */
 	public static String LOG_FILENAME = "jWebSocket.log";
 	/**
@@ -101,6 +101,18 @@ public class Logging {
 	 */
 	public static void initLogs(String aLogLevel) {
 		logLevel = Level.toLevel(aLogLevel);
+		checkLogAppender();
+	}
+
+	/**
+	 * Initializes the jWebSocket logging system with the given log level.
+	 * All subsequently instantiated class specific loggers will use this
+	 * setting.
+	 * @param aLogLevel
+	 */
+	public static void initLogs(String aLogLevel, int aLogTarget) {
+		logLevel = Level.toLevel(aLogLevel);
+		logTarget = aLogTarget;
 		checkLogAppender();
 	}
 

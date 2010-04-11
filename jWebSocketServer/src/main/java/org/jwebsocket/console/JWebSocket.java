@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
 //	jWebSocket - Main Class: Command line IF, Logger Init and Args-Parser
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	Copyright (c) 2010 jWebSocket.org by Innotrade GmbH, Alexander Schulze
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -17,17 +17,16 @@ package org.jwebsocket.console;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketConstants;
-import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.kit.WebSocketLoader;
 import org.jwebsocket.netty.engines.NettyEngine;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.tcp.engines.TCPEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugInChain;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
+import org.jwebsocket.plugins.streaming.MonitorStream;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
+import org.jwebsocket.plugins.streaming.TimeStream;
 import org.jwebsocket.plugins.system.SystemPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.TokenServer;
@@ -40,9 +39,6 @@ import org.jwebsocket.server.CustomServer;
  */
 public class JWebSocket {
 
-	/**
-	 *
-	 */
 	private static Logger log = null;
 
 	/**
@@ -91,7 +87,7 @@ public class JWebSocket {
 
 		// initialize log4j logging engine
 		// BEFORE instantiating any jWebSocket classes
-		Logging.initLogs(loglevel);
+		Logging.initLogs(loglevel, Logging.CONSOLE);
 		log = Logging.getLogger(JWebSocket.class);
 
 		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
@@ -128,46 +124,13 @@ public class JWebSocket {
 			return;
 		}
 
-		// try to obtain JWEBSOCKET_HOME environment variable
-		String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
-		String lFileSep = System.getProperty("file.separator");
-		String lWebSocketXML = null;
-		if (lWebSocketHome != null) {
-			// append trailing slash if needed
-			if (!lWebSocketHome.endsWith(lFileSep)) {
-				lWebSocketHome += lFileSep;
-			}
-			// jWebSocket.xml has to be located in %JWEBSOCKET_HOME%/conf
-			lWebSocketXML = lWebSocketHome + "conf" + lFileSep + "jWebSocket.xml";
-			System.out.println(
-					"Trying to load config from " + lWebSocketXML + "...");
-			// try to load the config file
-			WebSocketLoader lWSL = new WebSocketLoader();
-			try {
-				JWebSocketConfig lConfig = lWSL.loadConfiguration(lWebSocketXML);
-				SecurityFactory.initFromConfig(lConfig);
-			} catch (WebSocketException ex) {
-				System.out.println("Configuration " + lWebSocketXML + " file invalid or not found.");
-				System.out.println("Using default configuration.");
-				// initialize the security factory with some default demo data
-				// to show at least something even with no config
-				// TODO: only temporary, will be removed in the final release!
-				SecurityFactory.initDefault();
-			}
-		} else {
-			System.out.println(
-					"JWEBSOCKET_HOME variable not set, using default configuration...");
-			// initialize the security factory with some default demo data
-			// to show at least something even with no config
-			// TODO: only temporary, will be removed in the final release!
-			SecurityFactory.initDefault();
-		}
+		// init the security settings
+		SecurityFactory.init();
 
 		System.out.println(
 				"Engine " + useEngine + " listening on port "
 				+ port + ", default (sub)prot " + prot + ", "
 				+ "default session timeout: " + sessionTimeout + ", log-level: " + loglevel.toLowerCase());
-
 
 		// create the low-level engine
 		WebSocketEngine engine = null;
@@ -186,6 +149,8 @@ public class JWebSocket {
 
 		// create the token server (based on the TCP engine)
 		TokenServer tokenServer = null;
+		StreamingPlugIn streamingPlugIn = null;
+
 		try {
 			// instantiate the Token server and bind engine to it
 			tokenServer = new TokenServer("ts0");
@@ -198,7 +163,7 @@ public class JWebSocket {
 			// add the RPCPlugIn plug-in
 			plugInChain.addPlugIn(new RPCPlugIn());
 			// add the streaming plug-in (e.g. for the time stream demo)
-			plugInChain.addPlugIn(new StreamingPlugIn());
+			plugInChain.addPlugIn(streamingPlugIn = new StreamingPlugIn());
 			// add the flash/bridge plug-in (to drive browser that don't yet support web sockets)
 			plugInChain.addPlugIn(new FlashBridgePlugIn());
 
@@ -209,6 +174,17 @@ public class JWebSocket {
 		} catch (Exception ex) {
 			System.out.println("Error instantiating TokenServer: " + ex.getMessage());
 		}
+
+		// initialize streaming sub system...
+		if (streamingPlugIn != null) {
+			// create the stream for the time stream demo
+			TimeStream lTimeStream = new TimeStream("timeStream", tokenServer);
+			streamingPlugIn.addStream(lTimeStream);
+			// create the stream for the monitor stream demo
+			MonitorStream lMonitorStream = new MonitorStream("monitorStream", tokenServer);
+			streamingPlugIn.addStream(lMonitorStream);
+		}
+
 		// create the custom server (based on the TCP engine as well)
 		CustomServer customServer = null;
 		try {

@@ -85,14 +85,14 @@
 			}
 
 			function registerStream() {
-				var lStream = "timeStream";
+				var lStream = eStream.value; // "timeStream";
 				log( "Registering at stream '" + lStream + "'..." );
 				var lRes = lWSC.registerStream( lStream );
 				log( lWSC.resultToString( lRes ) );
 			}
 
 			function unregisterStream() {
-				var lStream = "timeStream";
+				var lStream = eStream.value; // "timeStream";
 				log( "Unregistering from stream '" + lStream + "'..." );
 				var lRes = lWSC.unregisterStream( lStream );
 				log( lWSC.resultToString( lRes ) );
@@ -110,6 +110,7 @@
 				eLog = jws.$( "sdivChat" );
 				eMessage = jws.$( "stxfMsg" );
 				eKeepAlive =  jws.$( "schkKeepAlive" );
+				eStream = jws.$( "sselStream" );
 
 				if( window.WebSocket ) {
 					lWSC = new jws.jWebSocketJSONClient();
@@ -163,6 +164,10 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
 					<td class="stdDlg" align="right" width="">
 						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleKeepAlive();">&nbsp;Keep-Alive&nbsp;
+						<select id="sselStream">
+							<option selected="selected" value="monitorStream">Monitor Stream</option>
+							<option value="timeStream">Time Stream</option>
+						</select>
 						<input class="sbtnDlg" id="sbtnReg" type="button" value="Register" onclick="registerStream();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnUnreg" type="button" value="Unregister" onclick="unregisterStream();"></td>
 				</tr>

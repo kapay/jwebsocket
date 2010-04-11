@@ -77,38 +77,38 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 				if (streamReader.isStartElement()) {
 					String elementName = streamReader.getLocalName();
 					if (elementName.equals(ELEMENT_ENGINES)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading engines configuration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading engines configuration");
 						}
 						List<EngineConfig> engines = handleEngines(streamReader);
 						configBuilder = configBuilder.addEngines(engines);
 					} else if (elementName.equals(ELEMENT_SERVERS)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading servers configuration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading servers configuration");
 						}
 						List<ServerConfig> servers = handleServers(streamReader);
 						configBuilder = configBuilder.addServers(servers);
 					} else if (elementName.equals(ELEMENT_PLUGINS)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading plugins configuration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading plugins configuration");
 						}
 						List<PluginConfig> plugins = handlePlugins(streamReader);
 						configBuilder = configBuilder.addPlugins(plugins);
 					} else if (elementName.equals(ELEMENT_RIGHTS)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading rights configuration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading rights configuration");
 						}
 						List<RightConfig> globalRights = handleRights(streamReader);
 						configBuilder = configBuilder.addGlobalRights(globalRights);
 					} else if (elementName.equals(ELEMENT_ROLES)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading roles configuration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading roles configuration");
 						}
 						List<RoleConfig> roles = handleRoles(streamReader);
 						configBuilder = configBuilder.addGlobalRoles(roles);
 					} else if (elementName.equals(ELEMENT_USERS)) {
-						if (log.isInfoEnabled()) {
-							log.info("Reading users configuration");
+						if (log.isDebugEnabled()) {
+							log.debug("Reading users configuration");
 						}
 						List<UserConfig> users = handleUsers(streamReader);
 						configBuilder = configBuilder.addUsers(users);

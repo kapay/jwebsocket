@@ -21,10 +21,12 @@ import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.RightConfig;
 import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.UserConfig;
+import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.kit.WebSocketLoader;
 import org.jwebsocket.logging.Logging;
 
 /**
- *
+ * implements the security capabilities of jWebSocket.
  * @author aschulze
  */
 public class SecurityFactory {
@@ -35,6 +37,8 @@ public class SecurityFactory {
 	 *
 	 */
 	public static String USER_ANONYMOUS = "guest";
+	public static String USER_REG_USER = "user";
+	public static String USER_ADMIN = "admin";
 
 	/**
 	 * initializes the security system with some default settings to allow to
@@ -52,8 +56,9 @@ public class SecurityFactory {
 		rights.addRight(lRRPC);
 
 		// specify roles and assign rights to roles
-		Role lGuestRole = new Role("guest", "Guests", lRPC);
-		Role lRegRole = new Role("regUser", "Registered Users", lRPC);
+		// TODO: needs to be removed in final release!
+		Role lGuestRole = new Role("guest", "Guests", lRPC, lRRPC);
+		Role lRegRole = new Role("regUser", "Registered Users", lRPC, lRRPC);
 		Role lAdminRole = new Role("admin", "Administrators", lRPC, lRRPC);
 
 		// specify role sets for a simpler assignment to the users
@@ -61,9 +66,9 @@ public class SecurityFactory {
 		Roles lRegRoles = new Roles(lGuestRole, lRegRole);
 		Roles lAdminRoles = new Roles(lGuestRole, lRegRole, lAdminRole);
 
-		User lGuestUser = new User("guest", "Guest", "Guest", "guest", lGuestRoles);
-		User lRegUser = new User("user", "User", "User", "user", lRegRoles);
-		User lAdminUser = new User("admin", "Admin", "Admin", "admin", lAdminRoles);
+		User lGuestUser = new User(USER_ANONYMOUS, "Guest", "Guest", "guest", lGuestRoles);
+		User lRegUser = new User(USER_REG_USER, "User", "User", "user", lRegRoles);
+		User lAdminUser = new User(USER_ADMIN, "Admin", "Admin", "admin", lAdminRoles);
 
 		users.addUser(lGuestUser);
 		users.addUser(lRegUser);
@@ -96,7 +101,7 @@ public class SecurityFactory {
 			Rights lRights = new Rights();
 			for (String lRightId : lRoleConfig.getRights()) {
 				Right lRight = rights.get(lRightId);
-				if( lRight != null ) {
+				if (lRight != null) {
 					lRights.addRight(lRight);
 				}
 			}
@@ -113,7 +118,7 @@ public class SecurityFactory {
 			Roles lRoles = new Roles();
 			for (String lRoleId : lUserConfig.getRoles()) {
 				Role lRole = roles.getRole(lRoleId);
-				if( lRole != null ) {
+				if (lRole != null) {
 					lRoles.addRole(lRole);
 				}
 			}
@@ -130,8 +135,45 @@ public class SecurityFactory {
 		log.info("Rights, roles and users successfully initialized.");
 	}
 
+	public static void init() {
+		// try to obtain JWEBSOCKET_HOME environment variable
+		String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
+		String lFileSep = System.getProperty("file.separator");
+		String lWebSocketXML = null;
+		if (lWebSocketHome != null) {
+			// append trailing slash if needed
+			if (!lWebSocketHome.endsWith(lFileSep)) {
+				lWebSocketHome += lFileSep;
+			}
+			// jWebSocket.xml has to be located in %JWEBSOCKET_HOME%/conf
+			lWebSocketXML = lWebSocketHome + "conf" + lFileSep + "jWebSocket.xml";
+			System.out.println(
+					"Trying to load config from " + lWebSocketXML + "...");
+			// try to load the config file
+			WebSocketLoader lWSL = new WebSocketLoader();
+			try {
+				JWebSocketConfig lConfig = lWSL.loadConfiguration(lWebSocketXML);
+				SecurityFactory.initFromConfig(lConfig);
+			} catch (WebSocketException ex) {
+				System.out.println("Configuration " + lWebSocketXML + " file invalid or not found.");
+				System.out.println("Using default configuration.");
+				// initialize the security factory with some default demo data
+				// to show at least something even with no config
+				// TODO: only temporary, will be removed in the final release!
+				SecurityFactory.initDefault();
+			}
+		} else {
+			System.out.println(
+					"JWEBSOCKET_HOME variable not set, using default configuration...");
+			// initialize the security factory with some default demo data
+			// to show at least something even with no config
+			// TODO: only temporary, will be removed in the final release!
+			SecurityFactory.initDefault();
+		}
+	}
+
 	/**
-	 *
+	 * checks if a user identified by it login name has a certain right.
 	 * @param aLoginname
 	 * @param aRight
 	 * @return

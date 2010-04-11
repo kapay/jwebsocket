@@ -29,6 +29,7 @@ import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
 import org.jwebsocket.plugins.system.SystemPlugIn;
+import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.CustomServer;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.tcp.engines.TCPEngine;
@@ -51,11 +52,14 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 
-		Logging.initLogs("debug");
+		Logging.initLogs("debug", Logging.ROLLING_FILE);
 		log = Logging.getLogger(ContextListener.class);
 		if (log.isDebugEnabled()) {
 			log.debug("Initialising Context...");
 		}
+
+		// init the security settings
+		SecurityFactory.init();
 
 		// create the low-level engine
 		try {

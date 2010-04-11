@@ -95,6 +95,7 @@
 			<description>Administrators</description>
 			<rights>
 				<!-- list of rights for "Administrator" role (ns + . + id) -->
+				<right>org.jWebSocket.plugins.chat.broadcast</right>
 				<right>org.jWebSocket.plugins.rpc.rpc</right>
 				<right>org.jWebSocket.plugins.rpc.rrpc</right>
 			</rights>
@@ -104,12 +105,19 @@
 			<rights>
 				<!-- list of rights for "User" role (ns + . + id) -->
 				<right>org.jWebSocket.plugins.chat.broadcast</right>
+				<right>org.jWebSocket.plugins.rpc.rpc</right>
+				<right>org.jWebSocket.plugins.rpc.rrpc</right>
 			</rights>
 			<description>Registered and authenticated users.</description>
 		</role>
 		<role>
 			<id>Guest</id>
 			<description>Anonymous users (not registered)</description>
+			<rights>
+				<!-- list of rights for "User" role (ns + . + id) -->
+				<right>org.jWebSocket.plugins.rpc.rpc</right>
+				<right>org.jWebSocket.plugins.rpc.rrpc</right>
+			</rights>
 		</role>
 	</roles>
 
@@ -201,7 +209,7 @@
 			</roles>
 		</user>
 		<user>
-			<loginname>anonymous</loginname>
+			<loginname>guest</loginname>
 			<firstname>Mr./Mrs.</firstname>
 			<lastname>Guest</lastname>
 			<!-- no password means that the user does not need a password -->
