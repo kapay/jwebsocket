@@ -21,7 +21,7 @@ import org.jwebsocket.kit.WebSocketException;
 
 /**
  * Specifies the API for jWebSocket engines. An engine maintains multiple 
- * connectors. The engine does neither parse nor process but data packets but
+ * connectors. The engine does neither parse nor process the data packets but
  * only passes them from either an underlying connector to the above server(s)
  * or from one of the higher level servers to one or more connectors of a
  * particular engine.
