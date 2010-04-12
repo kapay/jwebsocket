@@ -109,7 +109,8 @@
 					jws.$( "sbtnClear" ).setAttribute( "disabled", "disabled" );
 					jws.$( "stxfMsg" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnSend" ).setAttribute( "disabled", "disabled" );
-					var lMsg = "Unfortunately your browser does not (yet) support WebSockets!\nPlease use a HTML 5 compliant browser!";
+
+					var lMsg = jws.MSG_WS_NOT_SUPPORTED;
 					alert( lMsg );
 					log( lMsg );
 				}
