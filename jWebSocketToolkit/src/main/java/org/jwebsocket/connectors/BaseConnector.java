@@ -55,17 +55,23 @@ public class BaseConnector implements WebSocketConnector {
 
 	@Override
 	public void startConnector() {
-		engine.connectorStarted(this);
+		if (engine != null) {
+			engine.connectorStarted(this);
+		}
 	}
 
 	@Override
 	public void stopConnector(CloseReason aCloseReason) {
-		engine.connectorStopped(this, aCloseReason);
+		if (engine != null) {
+			engine.connectorStopped(this, aCloseReason);
+		}
 	}
 
 	@Override
 	public void processPacket(WebSocketPaket aDataPacket) {
-		engine.processPacket(this, aDataPacket);
+		if (engine != null) {
+			engine.processPacket(this, aDataPacket);
+		}
 	}
 
 	@Override
@@ -160,5 +166,4 @@ public class BaseConnector implements WebSocketConnector {
 	public String getId() {
 		return String.valueOf(getRemotePort());
 	}
-
 }

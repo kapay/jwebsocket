@@ -60,14 +60,15 @@ public class RPCPlugIn extends TokenPlugIn {
 		// specify granted remnote procedure calls
 		// todo: Make configurable
 		grantedProcs.put("org.jWebSocket.demo.DemoRPCServer.getMD5", null);
-	}
 
-	@Override
-	public void connectorStarted(WebSocketConnector aConnector) {
 		// currently this is the only supported RPCPlugIn server
 		rpcServer = new DemoRPCServer();
 	}
-
+/*
+	@Override
+	public void connectorStarted(WebSocketConnector aConnector) {
+	}
+*/
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();

@@ -54,7 +54,7 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 
-		Logging.initLogs("debug", Logging.ROLLING_FILE);
+		Logging.initLogs("debug", Logging.CONSOLE /*ROLLING_FILE*/);
 		log = Logging.getLogger(ContextListener.class);
 		if (log.isDebugEnabled()) {
 			log.debug("Initialising Context...");
@@ -131,6 +131,7 @@ public class ContextListener implements ServletContextListener {
 			log.error("Error instantating CustomServer: " + ex.getMessage());
 		}
 
+		WebSocketComm.setServer(tokenServer);
 	}
 
 	/**

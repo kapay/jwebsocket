@@ -204,7 +204,8 @@ public class TokenServer extends BaseServer {
 			if (log.isDebugEnabled()) {
 				log.debug("Sending token '" + aToken + "' to '" + aTargetConnector + "'...");
 			}
-			super.sendPacket(aTargetConnector, tokenToPacket(aTargetConnector, aToken));
+			WebSocketPaket aPacket = tokenToPacket(aTargetConnector, aToken);
+			super.sendPacket(aTargetConnector, aPacket);
 		} else {
 			log.warn("Connector not supposed to handle tokens.");
 		}

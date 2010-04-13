@@ -22,7 +22,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.token.Token;
 
 /**
  * demonstrates how to communicate between servlets and web sockets.
@@ -49,17 +51,6 @@ public class WebSocketComm extends HttpServlet {
 	}
 
 	/**
-	 *
-	 * @param aParms
-	 * @param aArg
-	 * @return
-	 */
-	public String getParm(Map<String, String[]> aParms, String aArg) {
-		String[] lValues = aParms.get(aArg);
-		return (lValues != null && lValues.length > 0 ? lValues[0] : null);
-	}
-
-	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
 	 * @param request servlet request
 	 * @param response servlet response
@@ -71,11 +62,23 @@ public class WebSocketComm extends HttpServlet {
 		response.setContentType("text/plain;charset=UTF-8");
 		PrintWriter out = response.getWriter();
 
-		Map<String, String[]> lParms = request.getParameterMap();
-		String lType = getParm(lParms, "type");
-
 		try {
-			out.println("type: " + lType);
+			if (server != null) {
+				// convert request arguments to token
+				Map<String, String[]> lParms = request.getParameterMap();
+				Token lToken = new Token();
+				for (String lParm : lParms.keySet()) {
+					String[] lValues = lParms.get(lParm);
+					if (lValues != null && lValues.length > 0) {
+						lToken.put(lParm, lValues[0]);
+					}
+				}
+				ServletConnector lConn = new ServletConnector(request, response);
+				server.getPlugInChain().processToken(lConn, lToken);
+				out.println(lConn.getPlainResponse());
+			} else {
+				out.println("ERROR:\nNo WebSocketServer assigned to Servlet!");
+			}
 		} finally {
 			out.close();
 		}
