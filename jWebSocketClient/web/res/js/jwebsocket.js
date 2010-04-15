@@ -16,6 +16,9 @@
 //	---------------------------------------------------------------------------
 //  </JasobNoObfs>
 
+// ## :#file:*:jwebsocket.js
+// ## :#d:en:Implements the jWebSocket Web Client.
+
 //:package:*:jws
 //:class:*:jws
 //:ancestor:*:-
@@ -54,7 +57,7 @@ var jws = {
 	//:m:*:browserSupportsWebSockets
 	//:d:en:checks if the browser or one of its plug-ins like flash or chrome _
 	//:d:en:do support web sockets to be used by an application.
-	//:a:en::::
+	//:a:en::-:-:
 	//:r:*:::boolean:true if the browser or one of its plug-ins support websockets, otherwise false.
 	browserSupportsWebSockets: function() {
 		return( 
@@ -65,7 +68,7 @@ var jws = {
 	//:m:*:browserSupportsNativeWebSockets
 	//:d:en:checks if the browser natively supports web sockets, no plug-ins
 	//:d:en:are considered. Caution! This is a public field not a function!
-	//:a:en::::
+	//:a:en::-:-:
 	//:r:*:::boolean:true if the browser natively support websockets, otherwise false.
 	browserSupportsNativeWebSockets: (function() {
 		return(
@@ -76,7 +79,7 @@ var jws = {
 	//:m:*:isIE
 	//:d:en:checks if the browser is Internet Explorer. _
 	//:d:en:This is needed to switch to IE specific event model.
-	//:a:en::::
+	//:a:en::-:-:
 	//:r:*:::boolean:true if the browser is IE, otherwise false.
 	isIE: (function() {
 		var lUserAgent = navigator.userAgent;
@@ -189,7 +192,6 @@ if( !jws.browserSupportsNativeWebSockets ) {
 		WebSocket = null;
 	}
 
-
 }
 
 //	---------------------------------------------------------------------------
@@ -275,38 +277,44 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 //:package:*:jws
 //:class:*:jws.jWebSocketBaseClient
 //:ancestor:*:-
-//:d:en:Implementation for the [tt]jws.jWebSocketBaseClient[/tt] class.
+//:d:en:Implementation for the [tt]jws.jWebSocketBaseClient[/tt] class. _
+//:d:en:This class does not handle exceptions or error, it throws exceptions, _
+//:d:en:which are (have to be) handled by the descendant classes.
+
 jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 
 	//:m:*:processOpened
-	//:d:en:Description pending...
+	//:d:en:Called when the WebSocket connection successfully was established. _
+	//:d:en:Can to be overwritten in descendant classes to process _
+	//:d:en:[tt]onopen[/tt] event in descendant classes.
 	//:a:en::aEvent:Object:Pending...
 	//:r:*:::void:-
 	processOpened: function( aEvent ) {
-	// can to be overwritten in descendant classes
-	// to easily handle open event in descendants
+		// method to be overwritten in descendant classes
 	},
 
 	//:m:*:processPacket
-	//:d:en:Description pending...
+	//:d:en:Called when a data packet was received. _
+	//:d:en:Can to be overwritten in descendant classes to process _
+	//:d:en:[tt]onmessage[/tt] event in descendant classes.
 	//:a:en::aEvent:Object:Pending...
 	//:r:*:::void:-
 	processPacket: function( aEvent ) {
-	// can to be overwritten in descendant classes
-	// to easily handle message event in descendants
+		// method to be overwritten in descendant classes
 	},
 
 	//:m:*:processClosed
-	//:d:en:Description pending...
+	//:d:en:Called when the WebSocket connection was closed. _
+	//:d:en:Can to be overwritten in descendant classes to process _
+	//:d:en:[tt]onclose[/tt] event in descendant classes.
 	//:a:en::aEvent:Object:Pending...
 	//:r:*:::void:-
 	processClosed: function( aEvent ) {
-	// can to be overwritten in descendant classes
-	// to easily handle open event in descendants
+		// method to be overwritten in descendant classes
 	},
 
 	//:m:*:open
-	//:d:en:Tries to open the web socket connection.
+	//:d:en:Tries to establish a connection the jWebSocket server.
 	//:a:en::aURL:String:URL to the jWebSocket Server
 	//:a:en::aOptions:Object:Optional arguments, see below...
 	//:a:en:aOptions:OnOpen:function:Callback when connection was successfully established.
@@ -319,6 +327,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		// otherwise flash bridge may have embedded WebSocket class
 		if( self.WebSocket) {
 
+			// TODO: !this.fConn is not enough here! Check for readystate!
 			// if connection not already established...
 			if( !this.fConn ) {
 				var lThis = this;
@@ -368,15 +377,17 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	},
 
 	//:m:*:connect
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Deprecated, kept for upward compatibility only. Do not use anymore!
+	//:a:en::aURL:String:Please refer to [tt]open[/tt] method.
+	//:a:en::aOptions:Object:Please refer to [tt]open[/tt] method.
 	//:r:*:::type:...
 	connect: function( aURL, aOptions ) {
 		return this.open(aURL, aOptions );
 	},
 
 	//:m:*:sendStream
-	//:d:en:description pending...
+	//:d:en:Sends a given string to the jWebSocket Server. The methods checks _
+	//:d:en:if the connection is still up and throws an exception if not.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	sendStream: function( aData ) {
@@ -394,30 +405,38 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:a:en::-::
 	//:r:*:::boolean:[tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
 	isConnected: function() {
-		return( this.fConn && this.fConn.readyState == 1 );
+		return( this.fConn && this.fConn.readyState == WebSocket.OPEN );
 	},
 
 	//:m:*:forceClose
-	//:d:en:Forces an immediate client side disconnect.
+	//:d:en:Forces an immediate client side disconnect. The processClosed
+	//:d:en:method is called if the connection was up otherwise no operation is
+	//:d:en:performed.
 	//:a:en::-::
 	//:r:*:::void:
 	forceClose: function() {
 		if( this.fConn ) {
-			if( window.console ) { console.log( "forcing close...." ); }
+			// if( window.console ) { console.log( "forcing close...." ); }
+			// reset listeners to prevent any kind of potential memory leaks.
 			this.fConn.onopen = null;
 			this.fConn.onmessage = null;
 			this.fConn.onclose = null;
+			// TODO: what about CONNECTING state ?!
 			if( this.fConn.readyState == WebSocket.OPEN ) {
 				this.fConn.close();
 			}
+			// TODO: should be called only if client was really opened before
 			this.processClosed();
 		}
 		this.fConn = null;
 	},
 
 	//:m:*:close
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Closes the connection either immediately or with an optional _
+	//:d:en:timeout. _
+	//:d:en:If the connection is established up an exception s fired.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	//:a:en:aOptions:timeout:Number:The close timeout in milliseconds, default [tt]0[/tt].
 	//:r:*:::type:...
 	close: function( aOptions ) {
 		// check if timeout option is used
@@ -428,6 +447,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			}
 		}
 		// connection established at all?
+		// TODO: Shouldn't we test for ready state here?
 		if( this.fConn ) {
 			if( lTimeout <= 0 ) {
 				this.forceClose();
@@ -448,9 +468,10 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	},
 
 	//:m:*:disconnect
-	//:d:en:description pending...
-	//:a:en::name:type:...
-	//:r:*:::type:...
+	//:d:en:Deprecated, kept for upward compatibility only. Do not use anymore! _
+	//:d:en:Please refer to the [tt]close[/tt] method.
+	//:a:en::aOptions:Object:Please refer to the [tt]close[/tt] method.
+	//:r:*:::(type):Please refer to the [tt]close[/tt] method.
 	disconnect: function( aOptions ) {
 		return this.close( aOptions );
 	}
@@ -466,12 +487,14 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 //:package:*:jws
 //:class:*:jws.jWebSocketTokenClient
 //:ancestor:*:jws.jWebSocketBaseClient
-//:d:en:Implementation for the [tt]jWebSocketTokenClient[/tt] class
+//:d:en:Implementation of the [tt]jWebSocketTokenClient[/tt] class. This is _
+//:d:en:an abstract class as an ancestor for the JSON-, CSV- and XML client. _
+//:d:en:Do not create direct instances of jWebSocketTokenClient.
 jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, {
 
-	// this method is called by the contructor of this class
 	//:m:*:create
-	//:d:en:description pending...
+	//:d:en:This method is called by the contructor of this class _
+	//:d:en:to init the instance.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	create: function() {
@@ -487,8 +510,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:checkCallbacks
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Processes an incoming result token and assigns it to a previous _
+	//:d:en:request. If a request was found it calls it OnResponse method _
+	//:d:en:and removes the reference of the list of pending results.
+	//:d:en:This method is used internally only and should not be called by _
+	//:d:en:the application.
+	//:a:en::aToken:Object:The incoming result token.
 	//:r:*:::type:...
 	checkCallbacks: function( aToken ) {
 		var lField = "utid" + aToken.utid;
@@ -498,14 +525,18 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			lClbkRec.callback.call( this, aToken );
 			delete this.fRequestCallbacks[ lField ];
 		}
-		// todo: delete timed out requests and optionally fire timeout callbacks
+		// TODO: delete timed out requests and optionally fire timeout callbacks
+/*
 		for( lField in this.fRequestCallbacks ) {
 			// ..
-			}
+		}
+*/
 	},
 
 	//:m:*:createDefaultResult
-	//:d:en:description pending...
+	//:d:en:Creates a response token with [tt]code = 0[/tt] and _
+	//:d:en:[tt]msg = "Ok"[/tt]. It automatically increases the TOKEN_ID _
+	//:d:en:to obtain a unique serial id for the next request.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	createDefaultResult: function() {
@@ -520,7 +551,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:checkConnected
-	//:d:en:description pending...
+	//:d:en:Checks if the client is connected and if so returns a default _
+	//:d:en:response token (please refer to [tt]createDefaultResult[/tt] _
+	//:d:en:method. If the client is not connected an error token is returned _
+	//:d:en:with [tt]code = -1[/tt] and [tt]msg = "Not connected"[tt]. _
+	//:d:en:This is a convenience method if a function needs to check if _
+	//:d:en:the client is connected and return an error token if not.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	checkConnected: function() {
@@ -535,7 +571,13 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:checkLoggedIn
-	//:d:en:description pending...
+	//:d:en:Checks if the client is connected and logged in and if so returns _
+	//:d:en:a default response token (please refer to [tt]createDefaultResult[/tt] _
+	//:d:en:method. If the client is not connected or nott logged in an error _
+	//:d:en:token is returned with [tt]code = -1[/tt] and _
+	//:d:en:[tt]msg = "Not logged in"[tt]. _
+	//:d:en:This is a convenience method if a function needs to check if _
+	//:d:en:the client is connected and return an error token if not.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	checkLoggedIn: function() {
@@ -550,18 +592,22 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:resultToString
-	//:d:en:description pending...
-	//:a:en::name:type:...
-	//:r:*:::type:...
-	resultToString: function( aRes ) {
+	//:d:en:Converts a result token to a readable string e.g. to be displayed _
+	//:d:en:in the GUI.
+	//:a:en::aResToken:Object:The result token to be converted into a string.
+	//:r:*:::String:The human readable string output of the result token.
+	resultToString: function( aResToken ) {
 		return(
-			aRes.msg
+			aResToken.msg
 			// + " (code: " + aRes.code + ", tid: " + aRes.tid + ")"
 			);
 	},
 
 	//:m:*:tokenToStream
-	//:d:en:description pending...
+	//:d:en:Converts a token into a string (stream). This method needs to be _
+	//:d:en:overwritten by the descendant classes to implement a certain _
+	//:d:en:sub protocol like JSON, CSV or XML. If you call this method _
+	//:d:en:directly an exception is raised.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	tokenToStream: function( aToken ) {
@@ -572,7 +618,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:streamToToken
-	//:d:en:description pending...
+	//:d:en:Converts a string (stream) into a token. This method needs to be _
+	//:d:en:overwritten by the descendant classes to implement a certain _
+	//:d:en:sub protocol like JSON, CSV or XML. If you call this method _
+	//:d:en:directly an exception is raised.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	streamToToken: function( aStream ) {
@@ -583,7 +632,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:notifyPlugInsOpened
-	//:d:en:description pending...
+	//:d:en:Iterates through the client side plug-in chain and calls the _
+	//:d:en:[tt]processOpened[/tt] method of each plug-in after the client _
+	//:d:en:successfully established the connection to the server.
+	//:d:en:By this mechanism all plug-ins easily can handle a new connection.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	notifyPlugInsOpened: function() {
@@ -603,7 +655,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:notifyPlugInsClosed
-	//:d:en:description pending...
+	//:d:en:Iterates through the client side plug-in chain and calls the _
+	//:d:en:[tt]processClosed[/tt] method of each plug-in after the client _
+	//:d:en:successfully established the connection to the server.
+	//:d:en:By this mechanism all plug-ins easily can handle a terminated connection.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	notifyPlugInsClosed: function() {
@@ -629,7 +684,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:processPacket
-	//:d:en:description pending...
+	//:d:en:Is called when a new raw data packet is received by the client. _
+	//:d:en:This methods calls the [tt]streamToToken[/tt] method of the _
+	//:d:en:its descendant who is responsible to implement the sub protocol _
+	//:d:en:JSON, CSV or XML, here to parse the raw packet in the corresponding _
+	//:d:en:format.
 	//:a:en::name:type:...
 	//:r:*:::type:...
 	processPacket: function( aEvent ) {
@@ -640,9 +699,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lToken;
 	},
 
+	// TODO: move handlers to system plug-in in the same way as on server.
+	// TODO: No change for application!
 	//:m:*:processToken
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Processes an incoming token. The method iterates through all _
+	//:d:en:plug-ins and calls their specific [tt]processToken[/tt] method.
+	//:a:en::aToken:Object:Token to be processed by the plug-ins in the plug-in chain.
 	//:r:*:::type:...
 	processToken: function( aToken ) {
 		// check welcome and goodBye tokens to manage the session
@@ -677,6 +739,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				this.processDisconnected( aToken );
 			}
 		}
+
 		// notify all plug-ins that a token has to be processed
 		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
 		if( lPlugIns ) {
@@ -690,8 +753,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:processClosed
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Iterates through all plug-ins of the plugin-chain and calls their _
+	//:d:en:specific [tt]processClosed[/tt] method.
+	//:a:en::aEvent:Object:...
 	//:r:*:::type:...
 	processClosed: function( aEvent ) {
 		this.notifyPlugInsClosed();
@@ -699,8 +763,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:processConnected
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Called when the client successfully received a connect event token _
+	//:d:en:which means that another client has connected to the network.
+	//:a:en::aToken:Object:...
 	//:r:*:::type:...
 	processConnected: function( aToken ) {
 		// notify all plug-ins that a new client connected
@@ -716,8 +781,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:processDisconnected
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Called when the client successfully received a disconnect event token _
+	//:d:en:which means that another client has disconnected from the network.
+	//:a:en::aToken:Object:...
 	//:r:*:::type:...
 	processDisconnected: function( aToken ) {
 		// notify all plug-ins that a client disconnected
@@ -733,8 +799,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:sendToken
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Sends a token to the jWebSocket server.
+	//:a:en::aToken:Object:Token to be send to the jWebSocket server.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
 	//:r:*:::type:...
 	sendToken: function( aToken, aOptions ) {
 		var lOnResponse = null;
@@ -756,15 +824,19 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:sendText
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Sends a simple text message to a certain target client within the _
+	//:d:en:WebSocket network by creating and sending a [tt]send[/tt] token. _
+	//:d:en:The receiver must be addressed by its client id.
+	//:d:en:This method requires the user to be authenticated.
+	//:a:en::aTarget:String:Client id of the target client for the message.
+	//:a:en::aText:String:Textmessage to be send to the target client.
 	//:r:*:::type:...
-	sendText: function( aReceiver, aText ) {
+	sendText: function( aTarget, aText ) {
 		var lRes = this.checkLoggedIn();
 		if( lRes.code == 0 ) {
 			this.sendToken({
 				type: "send",
-				targetId: aReceiver,
+				targetId: aTarget,
 				sourceId: this.fClientId,
 				sender: this.fUsername,
 				data: aText
@@ -774,8 +846,17 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:broadcastText
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Broadcasts a simple text message to all clients or a limited set _
+	//:d:en:of clients within the WebSocket network by creating and sending _
+	//:d:en:a [tt]broadcast[/tt] token. The caller can decide to wether or not _
+	//:d:en:included in the broadcast and if he requests a response (optional _
+	//:d:en:"one-way" token).
+	//:d:en:This method requires the user to be authenticated.
+	//:a:en::aPool:String:...
+	//:a:en::aText:type:...
+	//:a:en::aOptions:Object:...
+	//:a:en:aOptions:senderIncluded:Boolean:..., default [tt]false[/tt].
+	//:a:en:aOptions:responseRequested:Boolean:..., default [tt]true[/tt].
 	//:r:*:::type:...
 	broadcastText: function( aPool, aText, aOptions ) {
 		var lRes = this.checkLoggedIn();
@@ -806,8 +887,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:echo
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Sends an echo token to the jWebSocket server. The server returns
+	//:d:en:the same message with a prefix.
+	//:a:en::aData:String:An arbitrary string to be returned by the server.
 	//:r:*:::type:...
 	echo: function( aData ) {
 		var lRes = this.checkConnected();
@@ -821,9 +903,14 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	},
 
 	//:m:*:open
-	//:d:en:description pending...
-	//:a:en::name:type:...
-	//:r:*:::type:...
+	//:d:en:Tries to establish a connection to the jWebSocket server. Unlike _
+	//:d:en:the inherited [tt]open[/tt] method no exceptions is fired in case _
+	//:d:en:of an error but a response token is returned.
+	//:a:en::aURL:String:URL to the jWebSocket server.
+	//:a:en::aOptions:Object:Optional arguments, for details please refer to the open method of the [tt]jWebSocketBaseClient[/tt] class.
+	//:r:*:::Object:The response token.
+	//:r:*:Object:code:Number:Response code (0 = ok, otherwise error).
+	//:r:*:Object:msg:String:"Ok" or error message.
 	open: function( aURL, aOptions ) {
 		var lRes = this.createDefaultResult();
 		try {
@@ -838,11 +925,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lRes;
 	},
 
-	// deprecated, kept for upward compatibility
 	//:m:*:connect
-	//:d:en:description pending...
-	//:a:en::name:type:...
-	//:r:*:::type:...
+	//:d:en:Deprecated, kept for upward compatibility only. Do not use anymore!
+	//:d:en:Please refer to the [tt]open[/tt] method.
+	//:a:en:::Deprecated:Please refer to the [tt]open[/tt] method.
+	//:r:*:::Deprecated:Please refer to the [tt]open[/tt] method.
 	connect: function( aURL, aOptions ) {
 		return this.open( aURL, aOptions );
 	},
@@ -879,11 +966,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return lRes;
 	},
 
-	// deprecated, kept for upward compatibility
 	//:m:*:disconnect
-	//:d:en:description pending...
-	//:a:en::name:type:...
-	//:r:*:::type:...
+	//:d:en:Deprecated, kept for upward compatibility only. Do not use anymore!
+	//:d:en:Please refer to the [tt]close[/tt] method.
+	//:a:en:::Deprecated:Please refer to the [tt]close[/tt] method.
+	//:r:*:::Deprecated:Please refer to the [tt]close[/tt] method.
 	disconnect: function( aOptions ) {
 		return this.close( aOptions );
 	}
