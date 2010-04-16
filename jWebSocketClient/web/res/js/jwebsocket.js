@@ -554,7 +554,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:d:en:Checks if the client is connected and if so returns a default _
 	//:d:en:response token (please refer to [tt]createDefaultResult[/tt] _
 	//:d:en:method. If the client is not connected an error token is returned _
-	//:d:en:with [tt]code = -1[/tt] and [tt]msg = "Not connected"[tt]. _
+	//:d:en:with [tt]code = -1[/tt] and [tt]msg = "Not connected"[/tt]. _
 	//:d:en:This is a convenience method if a function needs to check if _
 	//:d:en:the client is connected and return an error token if not.
 	//:a:en::name:type:...
@@ -575,7 +575,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:d:en:a default response token (please refer to [tt]createDefaultResult[/tt] _
 	//:d:en:method. If the client is not connected or nott logged in an error _
 	//:d:en:token is returned with [tt]code = -1[/tt] and _
-	//:d:en:[tt]msg = "Not logged in"[tt]. _
+	//:d:en:[tt]msg = "Not logged in"[/tt]. _
 	//:d:en:This is a convenience method if a function needs to check if _
 	//:d:en:the client is connected and return an error token if not.
 	//:a:en::name:type:...
@@ -988,17 +988,29 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 //:d:en:Implementation for the [tt]jws.SystemClientPlugIn[/tt] class.
 jws.SystemClientPlugIn = {
 
-	// namespace for system plugin
+	//:const:*:NS:String:org.jWebSocket.plugins.system (jws.NS_BASE + ".plugins.system")
+	//:d:en:Namespace for SystemClientPlugIn
 	// if namespace changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.system",
 
+	//:const:*:ALL_CLIENTS:Number:0
+	//:d:en:For [tt]getClients[/tt] method: Returns all currently connected clients irrespective of their authentication state.
 	ALL_CLIENTS: 0,
+	//:const:*:ALL_CLIENTS:Number:1
+	//:d:en:For [tt]getClients[/tt] method: Returns all authenticated clients only.
 	AUTHENTICATED: 1,
+	//:const:*:NON_AUTHENTICATED:Number:2
+	//:d:en:For [tt]getClients[/tt] method: Returns all non-authenticated clients only.
 	NON_AUTHENTICATED: 2,
 
 	//:m:*:login
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Tries to authenticate the client against the jWebSocket Server by _
+	//:d:en:sending a [tt]login[/tt] token.
+	//:a:en::aUsername:String:The login name of the user.
+	//:a:en::aPassword:String:The password of the user.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	//:a:en:aOptions:pool:String:Default pool the user want to register at (default [tt]null[/tt], no pool).
+	//:a:en:aOptions:autoConnect:Boolean:not yet supported (defautl [tt]true[/tt]).
 	//:r:*:::type:...
 	login: function( aUsername, aPassword, aOptions ) {
 		var lPool = null;
@@ -1021,6 +1033,7 @@ jws.SystemClientPlugIn = {
 			});
 		} else {
 			if( lAutoConnect ) {
+				// TODO: Implement auto connect! Update documentation when done.
 			} else {
 				lRes.code = -1;
 				lRes.localeKey = "jws.jsc.res.notConnected";
@@ -1031,11 +1044,22 @@ jws.SystemClientPlugIn = {
 	},
 
 	//:m:*:logon
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Tries to connect and authenticate the client against the _
+	//:d:en:jWebSocket Server in a single call. If the client is already _
+	//:d:en:connected this connection is used and not re-established. _
+	//:d:en:If the client is already authenticated he is logged off first and _
+	//:d:en:re-logged in afterwards by sending a [tt]login[/tt] token.
+	//:d:en:The logoff of the client in case of a re-login is automatically _
+	//:d:en:processed by the jWebSocket server and does not need to be _
+	//:d:en:explicitely triggered by the client.
+	// TODO: check server if it sends logout event in ths case!
+	//:a:en::aURL:String:The URL of the jWebSocket Server.
+	//:a:en::aUsername:String:The login name of the user.
+	//:a:en::aPassword:String:The password of the user.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	// TODO: document options!
 	//:r:*:::type:...
 	logon: function( aURL, aUsername, aPassword, aOptions ) {
-		// initialize options if not passed
 		if( !aOptions ) {
 			aOptions = {};
 		}
@@ -1053,14 +1077,20 @@ jws.SystemClientPlugIn = {
 			this.open(
 				aURL,
 				aOptions
-				);
+			);
 		}
 	},
 
 	//:m:*:logout
-	//:d:en:description pending...
+	//:d:en:Logs the currently authenticated used out. After that the user _
+	//:d:en:is not authenticated anymore against the jWebSocket network. _
+	//:d:en:The client is not automatically disconnected.
+	//:d:en:If you want to logout and disconnect please refere to the _
+	//:d:en:[tt]close[/tt] method. Closing a connection automatically logs off _
+	//:d:en:a potentially authenticated user.
+	// TODO: implement optional auto disconnect!
 	//:a:en::name:type:...
-	//:r:*:::type:...
+	//:r:*:::void:-
 	logout: function() {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
@@ -1076,24 +1106,31 @@ jws.SystemClientPlugIn = {
 	},
 
 	//:m:*:isLoggedIn
-	//:d:en:description pending...
-	//:a:en::name:type:...
-	//:r:*:::type:...
+	//:d:en:Returns [tt]true[/tt] when the client is authenticated, _
+	//:d:en:otherwise [tt]false[/tt].
+	//:a:en::-:-:...
+	//:r:*:::Boolean:[tt]true[/tt] when the client is authenticated, otherwise [tt]false[/tt].
 	isLoggedIn: function() {
 		return( this.isConnected() && this.fUsername );
 	},
 
 	//:m:*:getUsername
+	//:d:en:Returns the login name when the client is authenticated, _
+	//:d:en:otherwise [tt]null[/tt].
 	//:d:en:description pending...
-	//:a:en::name:type:...
-	//:r:*:::type:...
+	//:a:en::-:-:...
+	//:r:*:::String:Login name when the client is authenticated, otherwise [tt]null[/tt].
 	getUsername: function() {
 		return( this.isLoggedIn() ? this.fUsername : null );
 	},
 
 	//:m:*:getClients
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Returns an array of clients that are currently connected to the
+	//:d:en:jWebSocket network by using the [tt]getClients[/tt] token.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	// TODO: support and/or check pool here!
+	//:a:en:aOptions:pool:String:Only consider connections to that certain pool (default=[tt]null[/tt]).
+	//:a:en:aOptions:mode:Number:One of the following constants [tt]AUTHENTICATED[/tt], [tt]NON_AUTHENTICATED[/tt], [tt]ALL_CLIENTS[/tt].
 	//:r:*:::type:...
 	getClients: function( aOptions ) {
 		var lMode = jws.SystemClientPlugIn.ALL_CLIENTS;
@@ -1101,7 +1138,7 @@ jws.SystemClientPlugIn = {
 		if( aOptions ) {
 			if( aOptions.mode == jws.SystemClientPlugIn.AUTHENTICATED ||
 				aOptions.mode == jws.SystemClientPlugIn.NON_AUTHENTICATED ) {
-				lMode = aOptions.mode
+				lMode = aOptions.mode;
 			}
 			if( aOptions.pool ) {
 				lPool = aOptions.pool;
@@ -1124,8 +1161,9 @@ jws.SystemClientPlugIn = {
 	},
 
 	//:m:*:getNonAuthClients
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Returns an array of all clients that are currently connected to _
+	//:d:en:the jWebSocket network but not authenticated.
+	//:a:en::aOptions:Object:Please refer to the [tt]getClients[/tt] method.
 	//:r:*:::type:...
 	getNonAuthClients: function( aOptions ) {
 		if( !aOptions ) {
@@ -1136,8 +1174,9 @@ jws.SystemClientPlugIn = {
 	},
 
 	//:m:*:getAuthClients
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Returns an array of all clients that are currently connected to _
+	//:d:en:the jWebSocket network and that are authenticated.
+	//:a:en::aOptions:Object:Please refer to the [tt]getClients[/tt] method.
 	//:r:*:::type:...
 	getAuthClients: function( aOptions ) {
 		if( !aOptions ) {
@@ -1148,8 +1187,9 @@ jws.SystemClientPlugIn = {
 	},
 
 	//:m:*:getAllClients
-	//:d:en:description pending...
-	//:a:en::name:type:...
+	//:d:en:Returns an array of all clients that are currently connected to _
+	//:d:en:the jWebSocket network irrespective of their authentication status.
+	//:a:en::aOptions:Object:Please refer to the [tt]getClients[/tt] method.
 	//:r:*:::type:...
 	getAllClients: function( aOptions ) {
 		if( !aOptions ) {
