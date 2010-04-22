@@ -61,7 +61,7 @@ var jws = {
 	//:r:*:::boolean:true if the browser or one of its plug-ins support websockets, otherwise false.
 	browserSupportsWebSockets: function() {
 		return( 
-			window.WebSocket != null
+			window.WebSocket !== null && window.WebSocket !== undefined
 		);
 	},
 
@@ -72,7 +72,28 @@ var jws = {
 	//:r:*:::boolean:true if the browser natively support websockets, otherwise false.
 	browserSupportsNativeWebSockets: (function() {
 		return(
-			window.WebSocket != null
+			window.WebSocket !== null && window.WebSocket !== undefined
+		);
+	})(),
+
+	//:m:*:browserSupportsJSON
+	//:d:en:checks if the browser natively or by JSON lib does support JSON.
+	//:a:en::::none
+	//:r:*:::boolean:true if the browser or one of its plug-ins support JSON, otherwise false.
+	browserSupportsJSON: function() {
+		return(
+			window.JSON !== null && window.JSON !== undefined
+		);
+	},
+
+	//:m:*:browserSupportsNativeJSON
+	//:d:en:checks if the browser natively supports JSON, no plug-ins
+	//:d:en:are considered. Caution! This is a public field not a function!
+	//:a:en::::none
+	//:r:*:::boolean:true if the browser natively support websockets, otherwise false.
+	browserSupportsNativeJSON: (function() {
+		return(
+			window.JSON !== null && window.JSON !== undefined
 		);
 	})(),
 
@@ -199,6 +220,11 @@ if( !jws.browserSupportsNativeWebSockets ) {
 		WebSocket = null;
 	}
 
+}
+
+debugger;
+if( !jws.browserSupportsNativeJSON ) {
+	if(!this.JSON){this.JSON={};}(function(){function f(n){return n<10?'0'+n:n;}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null;};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf();};}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4);})+'"':'"'+string+'"';}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key);}if(typeof rep==='function'){value=rep.call(holder,key,value);}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null';}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null';}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v;}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v);}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v);}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v;}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,replacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' ';}}else if(typeof space==='string'){indent=space;}rep=replacer;if(replacer&&typeof replacer!=='function'&&(typeof replacer!=='object'||typeof replacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value});};}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v;}else{delete value[k];}}}}return reviver.call(holder,key,value);}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4);});}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j;}throw new SyntaxError('JSON.parse');};}}());
 }
 
 //	---------------------------------------------------------------------------
@@ -1566,6 +1592,7 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 	//:a:en::aToken:Token:The token (an JavaScript Object) to be converted into an JSON stream.
 	//:r:*:::String:The resulting JSON stream.
 	tokenToStream: function( aToken ) {
+/*
 		var lJSON = "{utid:" + jws.CUR_TOKEN_ID;
 		if( this.fSessionId ) {
 			lJSON += ",usid:\"" + this.fSessionId + "\"";
@@ -1582,6 +1609,15 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 		}
 		lJSON += "}\n";
 		return lJSON;
+*/
+		aToken.utid = jws.CUR_TOKEN_ID;
+ 		if( this.fSessionId ) {
+			aToken.usid = this.fSessionId;
+ 		}
+		var lJSON = JSON.stringify(aToken);
+		lJSON = lJSON.replace( /\n/g, "\\x0A" );
+		lJSON = lJSON.replace( /\r/g, "\\x0D" );
+ 		return( lJSON + "\n" );
 	},
 
 	//:m:*:streamToToken
@@ -1592,11 +1628,16 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 	streamToToken: function( aStream ) {
 		// parsing a JSON object in JavaScript couldn't be simpler...
 		// but using 'eval', so be aware of security issues!
+/*
 		var lObj = null;
 		aStream = aStream.replace( /\\x0A/g, "\n" );
 		aStream = aStream.replace( /\\x0D/g, "\r" );
 		// TODO: this "eval" might lead to security issue, please replace!
 		eval( "lObj=" + aStream );
+ */
+		aStream = aStream.replace( /\\x0A/g, "\n" );
+		aStream = aStream.replace( /\\x0D/g, "\r" );
+		var lObj = JSON.parse(aStream);
 		return lObj;
 	}
 

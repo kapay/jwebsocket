@@ -297,7 +297,7 @@ public class TokenServer extends BaseServer {
 	 * @return
 	 */
 	public Token createResponse(Token aInToken) {
-		String lTokenId = aInToken.getString("utid");
+		Integer lTokenId = aInToken.getInteger("utid", -1);
 		String lType = aInToken.getString("type");
 		Token lResToken = new Token("response");
 		lResToken.put("code", 0);

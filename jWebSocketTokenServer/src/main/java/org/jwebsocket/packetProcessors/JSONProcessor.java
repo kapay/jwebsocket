@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
 //	jWebSocket - JSON Token Processor
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -18,9 +18,11 @@ package org.jwebsocket.packetProcessors;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Iterator;
-
-import org.apache.commons.lang.text.StrTokenizer;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
+import org.json.JSONTokener;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.logging.Logging;
@@ -43,83 +45,51 @@ public class JSONProcessor {
 		Token lToken = new Token();
 		try {
 			String lStr = aDataPacket.getString("UTF-8");
-			// cut starting and trailing curly braces
-			lStr = lStr.trim().substring(1, lStr.length() - 1);
-			// String[] lItems = aData.split(",");
-			StrTokenizer lTokens = new StrTokenizer(lStr, ',', '\"');
-			String[] lItems = lTokens.getTokenArray();
-			for (int i = 0; i < lItems.length; i++) {
-				// String[] lKeyVal = lItems[i].split(":", 2);
-				lTokens = new StrTokenizer(lItems[i], ':', '\"');
-				String[] lKeyVal = lTokens.getTokenArray();
-				if (lKeyVal.length == 2) {
-					String lVal = lKeyVal[1];
-					if (lVal.startsWith("\"") && lVal.endsWith("\"")) {
-						lToken.put(lKeyVal[0], lVal.substring(1, lVal.length() - 1));
-					} else {
-						lToken.put(lKeyVal[0], lVal);
-					}
-				}
+			JSONTokener jsonTokener = new JSONTokener(lStr);
+			JSONObject jsonObject = new JSONObject(jsonTokener);
+			for (Iterator lIterator = jsonObject.keys(); lIterator.hasNext();) {
+				String lKey = (String) lIterator.next();
+				lToken.put(lKey, jsonObject.get(lKey));
 			}
 		} catch (UnsupportedEncodingException ex) {
+			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (JSONException ex) {
 			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 		return lToken;
 	}
 
-	private static String stringToJSON(String aString) {
-		return ("\"" + aString + "\"");
-	}
-
-	private static String collectionToJSON(Collection<Object> aCollection) {
-		String lRes = "";
-		for (Object lItem : aCollection) {
-			String llRes = objectToJSON(lItem);
-			lRes += llRes + ",";
-		}
-		if (lRes.length() > 1) {
-			lRes = lRes.substring(0, lRes.length() - 1);
-		}
-		lRes = "[" + lRes + "]";
-		return lRes;
-	}
-
-	private static String objectToJSON(Object aObj) {
-		String lRes;
-		if( aObj == null ) {
-			lRes = "null";
-		} else if (aObj instanceof String) {
-			lRes = stringToJSON((String) aObj);
-		} else if (aObj instanceof Collection) {
-			lRes = collectionToJSON((Collection<Object>) aObj);
-		} else {
-			lRes = "\"" + aObj.toString() + "\"";
-		}
-		return lRes;
-	}
-
-	/**
-	 * converts a token into a JSON formatted data packet.
-	 * @param aToken
-	 * @return
-	 */
 	public static WebSocketPaket tokenToPacket(Token aToken) {
-		String lData = "{";
-		Iterator<String> lIterator = aToken.getKeys();
-		while (lIterator.hasNext()) {
-			String lKey = lIterator.next();
-			Object lVal = aToken.get(lKey);
-			lData +=
-					lKey + ":" + objectToJSON(lVal)
-					+ (lIterator.hasNext() ? "," : "");
-		}
-		lData += "}";
 		WebSocketPaket lPacket = null;
 		try {
+			JSONStringer jsonStringer = new JSONStringer();
+			// start main object
+			jsonStringer.object();
+			// iterate through all items (fields) of the token
+			Iterator<String> lIterator = aToken.getKeys();
+			while (lIterator.hasNext()) {
+				String lKey = lIterator.next();
+				Object lVal = aToken.get(lKey);
+				if (lVal instanceof Collection) {
+					jsonStringer.key(lKey).array();
+					for (Object item : (Collection) lVal) {
+						jsonStringer.value(item);
+					}
+					jsonStringer.endArray();
+				} else {
+					jsonStringer.key(lKey).value(lVal);
+				}
+			}
+			// end main object
+			jsonStringer.endObject();
+			String lData = jsonStringer.toString();
 			lPacket = new RawPacket(lData, "UTF-8");
+		} catch (JSONException ex) {
+			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		} catch (UnsupportedEncodingException ex) {
 			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 		return lPacket;
 	}
+
 }

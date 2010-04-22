@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * A token is 
+ * A token is ...
  * @author aschulze
  */
 public class Token {

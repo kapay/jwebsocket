@@ -29,7 +29,6 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
-import org.jwebsocket.server.BaseServer;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
