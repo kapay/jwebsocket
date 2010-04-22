@@ -22,12 +22,14 @@ import org.jwebsocket.config.xml.RightConfig;
 import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.config.xml.UserConfig;
+import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
- * Represents the jWebSocket configuration. This class is immutable and
- * should not be overridden.
+ * Represents the jWebSocket configuration. This class is immutable and should
+ * not be overridden.
+ * 
  * @author puran
- * @version $Id$
+ * @version $Id: JWebSocketConfig.java 345 2010-04-10 20:03:48Z fivefeetfurther$
  * 
  */
 public final class JWebSocketConfig implements Config {
@@ -49,9 +51,8 @@ public final class JWebSocketConfig implements Config {
 		if (builder.engines == null || builder.servers == null
 				|| builder.users == null || builder.globalRights == null
 				|| builder.globalRoles == null) {
-			//TODO: enable this exception after all the configuration read is complete
-			//throw new WebSocketRuntimeException(
-			//		"Configuration is not loaded completely.");
+			throw new WebSocketRuntimeException(
+					"Configuration is not loaded completely.");
 		}
 		engines = builder.engines;
 		servers = builder.servers;
@@ -59,13 +60,17 @@ public final class JWebSocketConfig implements Config {
 		plugins = builder.plugins;
 		globalRights = builder.globalRights;
 		globalRoles = builder.globalRoles;
+		// validate the config
+		validate();
 	}
 
 	/**
 	 * Config builder class.
+	 * 
 	 * @author puran
-	 * @version $Id$
-	 *
+	 * @version $Id: JWebSocketConfig.java 345 2010-04-10 20:03:48Z
+	 *          fivefeetfurther $
+	 * 
 	 */
 	public static class Builder {
 		private List<EngineConfig> engines;
@@ -80,14 +85,17 @@ public final class JWebSocketConfig implements Config {
 			engines = theEngines;
 			return this;
 		}
+
 		public Builder addServers(List<ServerConfig> theServers) {
 			servers = theServers;
 			return this;
 		}
+
 		public Builder addPlugins(List<PluginConfig> thePlugins) {
 			plugins = thePlugins;
 			return this;
 		}
+
 		public Builder addGlobalRights(List<RightConfig> theRights) {
 			globalRights = theRights;
 			return this;
@@ -153,10 +161,21 @@ public final class JWebSocketConfig implements Config {
 		return globalRoles;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void validate() {
-		// TODO Auto-generated method stub
-		
+		if ((engines == null || engines.isEmpty())
+				|| (servers == null || servers.isEmpty())
+				|| (users == null || users.isEmpty())
+				|| (plugins == null || plugins.isEmpty())
+				|| (globalRights == null || globalRights.isEmpty())
+				|| (globalRoles == null || globalRoles.isEmpty())) {
+			return;
+		}
+		throw new WebSocketRuntimeException(
+				"Missing one of the server configuration, please check your configuration file");
 	}
 
 }
