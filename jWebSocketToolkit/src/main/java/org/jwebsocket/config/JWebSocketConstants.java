@@ -23,10 +23,6 @@ package org.jwebsocket.config;
  */
 public final class JWebSocketConstants {
 
-	// TODO: Provide a configuration file (e.g. jWebSocket.xml) and loader class to load individual configuration settings.
-	//I think we should use this class to just hold constants and move all configuration related stuffs to WebSocketConfig 
-	//implementation.
-
 	/**
 	 * jWebSocket copyright string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.
