@@ -22,8 +22,9 @@ import org.jwebsocket.config.xml.RightConfig;
 import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.UserConfig;
 import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.kit.WebSocketLoader;
 import org.jwebsocket.logging.Logging;
+
+import com.jwebsocket.initialize.JWebSocketLoader;
 
 /**
  * implements the security capabilities of jWebSocket.
@@ -150,7 +151,7 @@ public class SecurityFactory {
 			System.out.println(
 					"Trying to load config from " + lWebSocketXML + "...");
 			// try to load the config file
-			WebSocketLoader lWSL = new WebSocketLoader();
+			JWebSocketLoader lWSL = new JWebSocketLoader();
 			try {
 				JWebSocketConfig lConfig = lWSL.loadConfiguration(lWebSocketXML);
 				SecurityFactory.initFromConfig(lConfig);
