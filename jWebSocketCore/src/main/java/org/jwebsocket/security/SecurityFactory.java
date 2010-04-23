@@ -21,10 +21,10 @@ import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.RightConfig;
 import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.UserConfig;
+import org.jwebsocket.initialize.JWebSocketLoader;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
 
-import com.jwebsocket.initialize.JWebSocketLoader;
 
 /**
  * implements the security capabilities of jWebSocket.
