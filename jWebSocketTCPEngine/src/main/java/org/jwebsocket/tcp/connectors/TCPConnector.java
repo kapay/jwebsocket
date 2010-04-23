@@ -208,6 +208,7 @@ public class TCPConnector extends BaseConnector {
 
 	@Override
 	public String toString() {
+		// TODO: weird results like... '0:0:0:0:0:0:0:1:61130'... on JDK 1.6u19 Windows 7 64bit
 		String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
 		// TODO: don't hard code. At least use JWebSocketConstants field here.
 		String lUsername = getString("org.jWebSocket.plugins.system.username");

@@ -61,7 +61,6 @@ public class Token {
 		return items.remove(aKey);
 	}
 
-
 	/**
 	 *
 	 * @return
@@ -94,7 +93,8 @@ public class Token {
 	 * @return
 	 */
 	public String getString(String aArg) {
-		return (String) items.get(aArg);
+		Object lObj = items.get(aArg);
+		return (lObj == null ? null : lObj.toString());
 	}
 
 	/**

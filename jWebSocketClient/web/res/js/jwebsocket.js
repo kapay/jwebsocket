@@ -1586,56 +1586,35 @@ jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.RPCClientPlugIn );
 jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, {
 
 	//:m:*:tokenToStream
-	//:d:en:converts a token to a JSON stream.
+	//:d:en:converts a token to a JSON stream. If the browser provides a _
+	//:d:en:native JSON class this is used, otherwise it use the automatically _
+	//:d:en:embedded JSON library from json.org.
 	//:a:en::aToken:Token:The token (an JavaScript Object) to be converted into an JSON stream.
 	//:r:*:::String:The resulting JSON stream.
 	tokenToStream: function( aToken ) {
-/*
-		var lJSON = "{utid:" + jws.CUR_TOKEN_ID;
-		if( this.fSessionId ) {
-			lJSON += ",usid:\"" + this.fSessionId + "\"";
-		}
-		for( var lKey in aToken ) {
-			var lVal = aToken[ lKey ];
-			if( typeof lVal == "string" ) {
-				lVal = lVal.replace( /\n/g, "\\x0A" );
-				lVal = lVal.replace( /\r/g, "\\x0D" );
-				lJSON += "," + lKey + ":\"" + lVal + "\"";
-			} else {
-				lJSON += "," + lKey + ":" + lVal;
-			}
-		}
-		lJSON += "}\n";
-		return lJSON;
-*/
 		aToken.utid = jws.CUR_TOKEN_ID;
  		if( this.fSessionId ) {
 			aToken.usid = this.fSessionId;
  		}
-		var lJSON = JSON.stringify(aToken);
-		lJSON = lJSON.replace( /\n/g, "\\x0A" );
-		lJSON = lJSON.replace( /\r/g, "\\x0D" );
+		var lJSON = JSON.stringify( aToken );
+		// lJSON = lJSON.replace( /\n/g, "\\x0A" );
+		// lJSON = lJSON.replace( /\r/g, "\\x0D" );
  		return( lJSON + "\n" );
 	},
 
 	//:m:*:streamToToken
-	//:d:en:converts a JSON stream into a token.
+	//:d:en:converts a JSON stream into a token. If the browser provides a _
+	//:d:en:native JSON class this is used, otherwise it use the automatically _
+	//:d:en:embedded JSON library from json.org. For security reasons the _
+	//:d:en:use of JavaScript's eval explicitely was avoided.
 	//:a:en::aStream:String:The data stream received from the server to be parsed as JSON.
 	//:r:*::Token:Object:The Token object of stream could be parsed successfully.
 	//:r:*:Token:[i]field[/i]:[i]type[/i]:Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers.
 	streamToToken: function( aStream ) {
 		// parsing a JSON object in JavaScript couldn't be simpler...
-		// but using 'eval', so be aware of security issues!
-/*
-		var lObj = null;
-		aStream = aStream.replace( /\\x0A/g, "\n" );
-		aStream = aStream.replace( /\\x0D/g, "\r" );
-		// TODO: this "eval" might lead to security issue, please replace!
-		eval( "lObj=" + aStream );
- */
-		aStream = aStream.replace( /\\x0A/g, "\n" );
-		aStream = aStream.replace( /\\x0D/g, "\r" );
-		var lObj = JSON.parse(aStream);
+		// aStream = aStream.replace( /\\x0A/g, "\n" );
+		// aStream = aStream.replace( /\\x0D/g, "\r" );
+		var lObj = JSON.parse( aStream );
 		return lObj;
 	}
 

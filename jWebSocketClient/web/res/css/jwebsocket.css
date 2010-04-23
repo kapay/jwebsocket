@@ -225,6 +225,12 @@ input[type="button"].inpBtnEm {
 	height:22px;
 }
 
+textarea.stxaDlg {
+	font-family: inherit;
+	border: 1px solid #444;
+	background-color: white;
+}
+
 p.menulink {
 	padding: 1px;
 }

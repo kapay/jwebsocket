@@ -15,12 +15,10 @@
 package org.jwebsocket.initialize;
 
 import java.util.List;
-
+import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.plugins.PlugIn;
-
-import com.sun.xml.internal.ws.api.pipe.Engine;
 
 /**
  * Class that performs initialization
@@ -51,7 +49,7 @@ public final class JWebSocketInitializer {
 	 * Initialize the engine to be started based on configuration.
 	 * @return the initialized engine ready to start
 	 */
-	public Engine intializeEngine() {
+	public WebSocketEngine intializeEngine() {
 		throw new UnsupportedOperationException("Not supported yet");
 	}
 	
@@ -64,7 +62,7 @@ public final class JWebSocketInitializer {
 	}
 	
 	/**
-	 * Initialize the list of plugins defined in via jWebSocket configuratin
+	 * Initialize the list of plugins defined in via jWebSocket configuration
 	 * @return the list of plugins
 	 */
 	public List<PlugIn> initializePlugins() {
