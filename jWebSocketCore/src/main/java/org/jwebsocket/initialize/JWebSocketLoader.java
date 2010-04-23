@@ -38,6 +38,8 @@ import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
  * @author puran
  * @version $Id: JWebSocketLoader.java 345 2010-04-10 20:03:48Z fivefeetfurther$
  */
+//TODO: REMOVE THIS CLASS, USE the same class from jWebSocketServer loader module
+@Deprecated
 public final class JWebSocketLoader {
 
 	private static Logger log = Logging.getLogger(JWebSocketLoader.class);
