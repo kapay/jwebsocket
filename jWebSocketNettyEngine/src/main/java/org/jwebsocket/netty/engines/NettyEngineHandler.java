@@ -46,7 +46,6 @@ import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
-import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.netty.connectors.NettyConnector;
