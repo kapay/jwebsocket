@@ -51,6 +51,10 @@ public final class JWebSocketConstants {
 	 */
 	public static final String NS_BASE = "org.jWebSocket";
 	/**
+	 * Constant for JWEBSOCKET_HOME
+	 */
+	public static final String JWEBSOCKET_HOME = "JWEBSOCKET_HOME";
+	/**
 	 * Minimum allow outgoing TCP Socket port.
 	 */
 	public static int MIN_IN_PORT = 1024;
