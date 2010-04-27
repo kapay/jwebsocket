@@ -631,7 +631,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		return(
 			aResToken.msg
 			// + " (code: " + aRes.code + ", tid: " + aRes.tid + ")"
-			);
+		);
 	},
 
 	//:m:*:tokenToStream
@@ -1092,6 +1092,7 @@ jws.SystemClientPlugIn = {
 	// TODO: document options!
 	//:r:*:::void:none
 	logon: function( aURL, aUsername, aPassword, aOptions ) {
+		var lRes = this.createDefaultResult();
 		if( !aOptions ) {
 			aOptions = {};
 		}
@@ -1111,6 +1112,7 @@ jws.SystemClientPlugIn = {
 				aOptions
 			);
 		}
+		return lRes;
 	},
 
 	//:m:*:logout
