@@ -295,6 +295,12 @@ textarea.stxaDlg {
 	border: 1px solid #444;
 	background-color: white;
 }
+select.sselDlg {
+	font-family: inherit;
+	border: 1px solid #444;
+	background-color: white;
+}
+
 p.menulink {
 	padding: 1px;
 }

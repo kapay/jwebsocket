@@ -18,7 +18,7 @@ import java.util.List;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.plugins.PlugIn;
+import org.jwebsocket.api.PlugIn;
 
 /**
  * Class that performs initialization

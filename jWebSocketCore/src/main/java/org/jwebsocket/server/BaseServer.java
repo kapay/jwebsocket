@@ -25,7 +25,9 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.kit.BroadcastOptions;
-import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.api.PlugInChain;
+import org.jwebsocket.api.WebSocketFilterChain;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -300,6 +302,16 @@ public class BaseServer implements WebSocketServer {
 	public String getId() {
 		return id;
 
+	}
+
+	@Override
+	public PlugInChain getPlugInChain() {
+		return null;
+	}
+
+	@Override
+	public WebSocketFilterChain getFilterChain() {
+		return null;
 	}
 
 }

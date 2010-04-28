@@ -22,7 +22,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 

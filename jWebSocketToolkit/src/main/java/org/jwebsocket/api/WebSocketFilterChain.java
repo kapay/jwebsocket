@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Enumeration with flags why a connection was closed
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	jWebSocket - FilterChain API
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -13,29 +13,15 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.kit;
+package org.jwebsocket.api;
 
 /**
- * Enumeration to handle reasons for connection close.
+ *
  * @author aschulze
  */
-public enum CloseReason {
+public interface WebSocketFilterChain {
 
-	/**
-	 * The session timeout exceeded.
-	 */
-	TIMEOUT,
-	/**
-	 * The server closed the connection.
-	 */
-	SERVER,
-	/**
-	 * The client closed the connection.
-	 */
-	CLIENT,
-	/**
-	 * The server was shut down.
-	 */
-	SHUTDOWN
+	public void addFilter(WebSocketFilter aFilter);
+	public void removeFilter(WebSocketFilter aFilter);
 
 }

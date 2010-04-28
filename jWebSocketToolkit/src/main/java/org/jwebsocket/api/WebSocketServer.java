@@ -16,7 +16,6 @@
 package org.jwebsocket.api;
 
 import org.jwebsocket.kit.BroadcastOptions;
-import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -117,5 +116,16 @@ public interface WebSocketServer {
 	 * @return String Unique ID of the Server.
 	 */
 	String getId();
+
+
+	/**
+	 * @return the plugInChain
+	 */
+	public PlugInChain getPlugInChain();
+
+	/**
+	 * @return the filterChain
+	 */
+	public WebSocketFilterChain getFilterChain();
 
 }

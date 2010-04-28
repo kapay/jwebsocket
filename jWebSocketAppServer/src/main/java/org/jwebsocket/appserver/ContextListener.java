@@ -21,10 +21,10 @@ import javax.servlet.ServletContextListener;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
-import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.api.PlugInChain;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.plugins.TokenPlugInChain;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
 import org.jwebsocket.plugins.streaming.MonitorStream;
@@ -82,7 +82,7 @@ public class ContextListener implements ServletContextListener {
 			// instantiate the Token server and bind engine to it
 			tokenServer = new TokenServer("ts0");
 			// the token server already instantiates a plug-in chain
-			TokenPlugInChain plugInChain = tokenServer.getPlugInChain();
+			PlugInChain plugInChain = tokenServer.getPlugInChain();
 			// let the server support the engine
 			tokenServer.addEngine(engine);
 			// add the SystemPlugIn listener (for the jWebSocket default functionality)

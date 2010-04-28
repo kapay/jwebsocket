@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
 //	jWebSocket - Engine API
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -16,7 +16,6 @@
 package org.jwebsocket.api;
 
 import java.util.Map;
-import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 
 /**

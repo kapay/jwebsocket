@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket Client (uses jWebSocket Server)
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
+//	jWebSocket Shared Objects PlugIn (uses jWebSocket Client and Server)
+//	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -21,52 +21,105 @@
 
 jws.SharedObjectsPlugIn = {
 
-	// namespace for RPC plugin
-	// if namespace changed update server plug-in accordingly!
-	NS_OBJ: jws.NS_BASE + ".plugins.sharedObj",
-	NS_LISTS: jws.NS_BASE + ".plugins.sharedLists",
-	NS_SETS: jws.NS_BASE + ".plugins.sharedSets",
-	NS_MAPS: jws.NS_BASE + ".plugins.sharedMaps",
+	// namespace for shared objects plugin
+	// if namespace is changed update server plug-in accordingly!
+	NS: jws.NS_BASE + ".plugins.sharedObjs",
+	// if data types are changed update server plug-in accordingly!
+	DATA_TYPES: [ "number", "string", "boolean", "object", "set", "list", "map", "table" ],
 
-	fLists: {},
-	fSets: {},
-	fMaps: {},
+	fObjects: {},
 
 	processToken: function( aToken ) {
 		console.log( "jws.SharedObjectsPlugIn: Processing token " + aToken.ns + "/" + aToken.type + "..." );
-		if( aToken.ns == jws.SharedObjectsPlugIn.NS_LISTS ) {
+		if( aToken.ns == jws.SharedObjectsPlugIn.NS ) {
 			if( aToken.type == "create" ) {
-
+				// create a new object on the client
 			} else if( aToken.type == "destroy" ) {
-
-			} else if( aToken.type == "add" ) {
-				
-			} else if( aToken.type == "remove" ) {
-
+				// destroy an existing object on the client
 			} else if( aToken.type == "update" ) {
-
+				// update an existing object on the client
+			} else if( aToken.type == "init" ) {
+				// init all shared object on the client
 			}
 		}
 	},
 
-	lists: {
-		create: function( aId ) {
-			var lRes = this.createDefaultResult();
-			if( this.isConnected() ) {
-				this.sendToken({
-					ns: NS_LISTS,
-					type: "create",
-					id: aId
+	createSharedObject: function( aId, aDataType, aValue, aOptions ) {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				ns: jws.SharedObjectsPlugIn.NS,
+				type: "create",
+				id: aId,
+				datatype: aDataType,
+				value: aValue
 				},
 				aOptions
-				);
-			} else {
-				lRes.code = -1;
-				lRes.localeKey = "jws.jsc.res.notConnected";
-				lRes.msg = "Not connected.";
-			}
-			return lRes;
+			);
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
 		}
+		return lRes;
+	},
+
+	destroySharedObject: function( aId, aDataType, aOptions ) {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				ns: jws.SharedObjectsPlugIn.NS,
+				type: "destroy",
+				id: aId,
+				datatype: aDataType
+				},
+				aOptions
+			);
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	getSharedObject: function( aId, aDataType, aOptions ) {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				ns: jws.SharedObjectsPlugIn.NS,
+				type: "get",
+				id: aId,
+				datatype: aDataType
+				},
+				aOptions
+			);
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	updateSharedObject: function( aId, aDataType, aValue, aOptions ) {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				ns: jws.SharedObjectsPlugIn.NS,
+				type: "put",
+				id: aId,
+				datatype: aDataType,
+				value: aValue
+				},
+				aOptions
+			);
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
+		}
+		return lRes;
 	}
 
 }

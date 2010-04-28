@@ -21,12 +21,13 @@ import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.plugins.PlugIn;
+import org.jwebsocket.api.PlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.BroadcastOptions;
-import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.api.WebSocketFilterChain;
 import org.jwebsocket.packetProcessors.CSVProcessor;
 import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.plugins.TokenPlugInChain;
@@ -45,10 +46,10 @@ public class TokenServer extends BaseServer {
 	// specify shared connector variables
 	private static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
 	private TokenPlugInChain plugInChain = null;
+	private WebSocketFilterChain filterChain = null;
 	private volatile boolean isAlive = false;
 
 	/**
-	 *
 	 *
 	 * @param aId
 	 */
@@ -338,6 +339,7 @@ public class TokenServer extends BaseServer {
 	/**
 	 * @return the plugInChain
 	 */
+	@Override
 	public TokenPlugInChain getPlugInChain() {
 		return plugInChain;
 	}

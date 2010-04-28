@@ -16,14 +16,15 @@
 package org.jwebsocket.console;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.PlugInChain;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.netty.engines.NettyEngine;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.tcp.engines.TCPEngine;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.plugins.TokenPlugInChain;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
+import org.jwebsocket.plugins.sharedobjects.SharedObjectsPlugIn;
 import org.jwebsocket.plugins.streaming.MonitorStream;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
 import org.jwebsocket.plugins.streaming.TimeStream;
@@ -155,7 +156,7 @@ public class JWebSocket {
 			// instantiate the Token server and bind engine to it
 			tokenServer = new TokenServer("ts0");
 			// the token server already instantiates a plug-in chain
-			TokenPlugInChain plugInChain = tokenServer.getPlugInChain();
+			PlugInChain plugInChain = tokenServer.getPlugInChain();
 			// let the server support the engine
 			tokenServer.addEngine(engine);
 			// add the SystemPlugIn listener (for the jWebSocket default functionality)
@@ -164,6 +165,8 @@ public class JWebSocket {
 			plugInChain.addPlugIn(new RPCPlugIn());
 			// add the streaming plug-in (e.g. for the time stream demo)
 			plugInChain.addPlugIn(streamingPlugIn = new StreamingPlugIn());
+			// add the flash/bridge plug-in (to drive browser that don't yet support web sockets)
+			plugInChain.addPlugIn(new SharedObjectsPlugIn());
 			// add the flash/bridge plug-in (to drive browser that don't yet support web sockets)
 			plugInChain.addPlugIn(new FlashBridgePlugIn());
 

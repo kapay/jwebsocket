@@ -15,11 +15,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.sharedobjects;
 
+import java.util.Arrays;
+import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.plugins.PlugInResponse;
+import org.jwebsocket.api.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
 
@@ -30,21 +32,20 @@ import org.jwebsocket.token.Token;
 public class SharedObjectsPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(SharedObjectsPlugIn.class);
-	// if namespace changed update client plug-in accordingly!
-	private String NS_SHARED_OBJ = JWebSocketConstants.NS_BASE + ".plugins.sharedObjs";
-	private String NS_SHARED_LISTS = JWebSocketConstants.NS_BASE + ".plugins.sharedLists";
-	private String NS_SHARED_SETS = JWebSocketConstants.NS_BASE + ".plugins.sharedSets";
-	private String NS_SHARED_MAPS = JWebSocketConstants.NS_BASE + ".plugins.sharedMaps";
-	private SharedLists sharedLists = new SharedLists();
-	private SharedSets sharedSets = new SharedSets();
-	private SharedMaps sharedMaps = new SharedMaps();
+	// if namespace is changed update client plug-in accordingly!
+	private String NS_SHARED_OBJECTS = JWebSocketConstants.NS_BASE + ".plugins.sharedObjs";
+	private SharedObjects sharedObjects = new SharedObjects();
+	// if data types are changed update client plug-in accordingly!
+	private FastList DATA_TYPES = new FastList(Arrays.asList(new String[]{
+				"number", "string", "boolean", "object",
+				"set", "list", "map", "table"}));
 
 	/**
 	 *
 	 */
 	public SharedObjectsPlugIn() {
 		// specify default name space
-		this.setNamespace(NS_SHARED_OBJ);
+		this.setNamespace(NS_SHARED_OBJECTS);
 	}
 
 	@Override
@@ -52,29 +53,46 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 		String lID = aToken.getString("id");
+		String lDataType = aToken.getString("datatype");
+		String lValue = aToken.getString("value");
 
 		Token lResponse = getServer().createResponse(aToken);
 		boolean doRespond = true;
 
-		if (lType != null && (lNS == null || lNS.equals(NS_SHARED_LISTS))) {
+		if (lDataType == null || !DATA_TYPES.contains(lDataType)) {
+			lResponse.put("code", -1);
+			lResponse.put("msg", "invalid datatype '" + lDataType + "'");
+			getServer().sendToken(aConnector, lResponse);
+			return;
+		}
+
+		if (lType != null && (lNS == null || lNS.equals(NS_SHARED_OBJECTS))) {
 			if (lType.equals("create")) {
-				sharedLists.create(lResponse, lID);
-			} else if (lType.equals("clear")) {
-				sharedLists.clear(lResponse, lID);
-			} else if (lType.equals("get")) {
-				sharedLists.get(lResponse, lID, aToken.getInteger("index", -1));
-			} else if (lType.equals("add")) {
-				sharedLists.add(lResponse, lID, aToken.getString("data"));
-			} else if (lType.equals("remove")) {
-				sharedLists.remove(lResponse, lID, aToken.getInteger("index", -1));
+				sharedObjects.put(lID, lValue);
 			} else if (lType.equals("destroy")) {
-				sharedLists.destroy(lResponse, lID);
-			} else {
-				doRespond = false;
+				sharedObjects.remove(lID);
+			} else if (lType.equals("get")) {
+				sharedObjects.get(lID);
+			} else if (lType.equals("put")) {
+				sharedObjects.put(lID, lValue);
+			} /*
+			else if (lType.equals("clear")) {
+			sharedObjects.clear(lResponse, lID);
+			} else if (lType.equals("get")) {
+			sharedObjects.get(lResponse, lID, aToken.getInteger("index", -1));
+			} else if (lType.equals("add")) {
+			sharedObjects.add(lResponse, lID, aToken.getString("data"));
+			} else if (lType.equals("remove")) {
+			sharedObjects.remove(lResponse, lID, aToken.getInteger("index", -1));
+			 */ 
+			else {
+				lResponse.put("code", -1);
+				lResponse.put("msg", "invalid type '" + lType + "'");
 			}
 		} else {
 			doRespond = false;
 		}
+
 		if (doRespond) {
 			getServer().sendToken(aConnector, lResponse);
 		}

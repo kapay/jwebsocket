@@ -43,7 +43,7 @@ import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameEncoder;
 import org.jboss.netty.util.CharsetUtil;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketConstants;
-import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.api.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketRuntimeException;
