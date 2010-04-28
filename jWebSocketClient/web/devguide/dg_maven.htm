@@ -20,16 +20,13 @@ or Eclipse.</p>
 <ol class="instructions">
 	<li class="instruction">Download Apache Maven from
 	<a target="_blank" href="http://maven.apache.org/download.html">http://maven.apache.org/download.html</a>
-	<img border="0" src="../images/new_win.png"> and follow the installation instructions.</li>
-	<li class="instruction">After the installation you will find a <tt>.m2</tt> 
-	folder in your <tt>Documents and Settings</tt> folder, <br>
-	Example: <tt>c:\Documents and Settings\aschulze\.m2\repository</tt>.</li>
-	<li class="instruction">This is your local Maven repository filled with all 
-	required libraries.<br>
-	If you look at it the first time the folder probably is empty, it will be filled 
-	during the first <tt>mvn clean install</tt> operation (see below).</li>
+	<img border="0" src="../images/new_win.png"> and follow the installation instructions.<br>
+		You usually obtain it as zip and unpack it to <tt>c:\Program Files\Apache 
+	Software Foundation\Maven-2.2</tt>.</li>
 	<li class="instruction">Be sure that you have the <tt>M2_HOME</tt> system environment 
-	variable set referering to your Maven home directory.<br>
+	variable set referering to your Maven home directory,<br>
+	e.g. <tt>c:\Program Files\Apache 
+	Software Foundation\Maven-2.2</tt>.<br>
 	For previous Maven 2.0.x versions please check the <tt>MAVEN_HOME</tt> variable 
 	instead.</li>
 	<li class="instruction">Be sure that you have the path to the Maven <tt>/bin</tt> 
@@ -39,6 +36,14 @@ or Eclipse.</p>
 	<img class="screenshotOff" border="0" id="maven_version" src="images/maven_version.jpg"><p class="imageFooter">
 	Detecting if maven is properly installed</p>
 	</li>
+	<li class="instruction">After the installation you will find a <tt>.m2</tt> 
+	folder in your <tt>Documents and Settings</tt> folder or <tt>Users/&lt;your 
+	username&gt;</tt> folder (Windows 7), <br>
+	Examples: <tt>c:\Documents and Settings\aschulze\.m2\repository or c:\Users\aschulze\.m2\repository</tt>.</li>
+	<li class="instruction">This is your local Maven repository filled with all 
+	required libraries.<br>
+	If you look at it the first time the folder probably is empty, it will be filled 
+	during the first <tt>mvn clean install</tt> operation (see below).</li>
 	<li class="instruction">Download the jWebSocket sources from the
 	<a href="../downloads.htm">download area</a> or directly from our subversion 
 	repository<br>
