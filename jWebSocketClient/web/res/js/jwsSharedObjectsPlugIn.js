@@ -30,39 +30,28 @@ jws.SharedObjectsPlugIn = {
 	fObjects: {},
 
 	processToken: function( aToken ) {
-		console.log( "jws.SharedObjectsPlugIn: Processing token " + aToken.ns + "/" + aToken.type + "..." );
+		// console.log( "jws.SharedObjectsPlugIn: Processing token " + aToken.ns + "/" + aToken.type + "..." );
 		if( aToken.ns == jws.SharedObjectsPlugIn.NS ) {
 			if( aToken.name == "created" ) {
 				// create a new object on the client
-				if( window.console ) {
-					console.log( "new object '" + aToken.id + "' to be created on client with value '" + aToken.value + "'." );
-				}
 				if( this.OnSharedObjectCreated ) {
-					this.OnSharedObjectCreated();
+					this.OnSharedObjectCreated( aToken );
 				}
 			} else if( aToken.name == "destroyed" ) {
 				// destroy an existing object on the client
-				if( window.console ) {
-					console.log( "object '" + aToken.id + "' to be destroyed on client." );
-				}
 				if( this.OnSharedObjectDestroyed ) {
-					this.OnSharedObjectDestroyed();
+					this.OnSharedObjectDestroyed( aToken );
 				}
 			} else if( aToken.name == "updated" ) {
 				// update an existing object on the client
-				if( window.console ) {
-					console.log( "object '" + aToken.id + "' to be updated on client with value '" + aToken.value + "'." );
-				}
 				if( this.OnSharedObjectUpdated ) {
-					this.OnSharedObjectUpdated();
+					this.OnSharedObjectUpdated( aToken );
 				}
 			} else if( aToken.name == "init" ) {
 				// init all shared object on the client
-				if( window.console ) {
-					console.log( "all objects to be initialized on client." );
-				}
 				if( this.OnSharedObjectsInit ) {
-					this.OnSharedObjectsInit();
+					var lObj = JSON.parse( aToken.value );
+					this.OnSharedObjectsInit( aToken, lObj );
 				}
 			}
 		}
@@ -71,15 +60,17 @@ jws.SharedObjectsPlugIn = {
 	createSharedObject: function( aId, aDataType, aValue, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
-			this.sendToken({
+			var lToken = {
 				ns: jws.SharedObjectsPlugIn.NS,
 				type: "create",
 				id: aId,
 				datatype: aDataType,
 				value: aValue
-				},
-				aOptions
-			);
+			};
+			this.sendToken( lToken,	aOptions );
+			if( this.OnSharedObjectCreated ) {
+				this.OnSharedObjectCreated( lToken );
+			}
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -91,14 +82,16 @@ jws.SharedObjectsPlugIn = {
 	destroySharedObject: function( aId, aDataType, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
-			this.sendToken({
+			var lToken = {
 				ns: jws.SharedObjectsPlugIn.NS,
 				type: "destroy",
 				id: aId,
 				datatype: aDataType
-				},
-				aOptions
-			);
+			};
+			this.sendToken( lToken, aOptions );
+			if( this.OnSharedObjectDestroyed ) {
+				this.OnSharedObjectDestroyed( lToken );
+			}
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -110,14 +103,13 @@ jws.SharedObjectsPlugIn = {
 	getSharedObject: function( aId, aDataType, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
-			this.sendToken({
+			var lToken = {
 				ns: jws.SharedObjectsPlugIn.NS,
 				type: "get",
 				id: aId,
 				datatype: aDataType
-				},
-				aOptions
-			);
+			};
+			this.sendToken( lToken,	aOptions );
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -129,15 +121,17 @@ jws.SharedObjectsPlugIn = {
 	updateSharedObject: function( aId, aDataType, aValue, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
-			this.sendToken({
+			var lToken = {
 				ns: jws.SharedObjectsPlugIn.NS,
 				type: "update",
 				id: aId,
 				datatype: aDataType,
 				value: aValue
-				},
-				aOptions
-			);
+			};
+			this.sendToken( lToken,	aOptions );
+			if( this.OnSharedObjectUpdated ) {
+				this.OnSharedObjectUpdated( lToken );
+			}
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -146,7 +140,7 @@ jws.SharedObjectsPlugIn = {
 		return lRes;
 	},
 
-	setCallbacks: function( aListeners ) {
+	setSharedObjectsCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
 		}
@@ -162,6 +156,22 @@ jws.SharedObjectsPlugIn = {
 		if( aListeners.OnSharedObjectsInit !== undefined ) {
 			this.OnSharedObjectsInit = aListeners.OnSharedObjectsInit;
 		}
+	},
+
+	initSharedObjects: function( aOptions ) {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			var lToken = {
+				ns: jws.SharedObjectsPlugIn.NS,
+				type: "init"
+			};
+			this.sendToken( lToken,	aOptions );
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
+		}
+		return lRes;
 	}
 
 }

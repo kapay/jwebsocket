@@ -174,8 +174,8 @@ public final class JWebSocketConfig implements Config {
 				|| (globalRoles == null || globalRoles.isEmpty())) {
 			return;
 		}
-		throw new WebSocketRuntimeException(
-				"Missing one of the server configuration, please check your configuration file");
+		//throw new WebSocketRuntimeException(
+		//		"Missing one of the server configuration, please check your configuration file");
 	}
 
 }

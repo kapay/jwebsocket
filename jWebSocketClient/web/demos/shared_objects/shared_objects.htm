@@ -62,6 +62,7 @@
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection established.</font>" );
+						jWebSocketClient.initSharedObjects();
 					},
 					// OnMessage callback
 					OnMessage: function( aEvent, aToken ) {
@@ -85,62 +86,50 @@
 			}
 
 			function broadcast() {
-				var lMsg = eValue.value;
-				if( lMsg.length > 0 ) {
-					log( "Broadcasting '" + lMsg + "'..." );
-					var lRes = jWebSocketClient.broadcastText(
-					"",		// broadcast to all clients (not limited to a certain pool)
-					lMsg	// broadcast this message
-				);
-					// log error only, on success don't confuse the user
-					if( lRes.code != 0 ) {
-						log( jWebSocketClient.resultToString( lRes ) );
-					}
-					eValue.value = "";
-				}
 			}
 
 			function create() {
 				var lRes = jWebSocketClient.createSharedObject(
-				"id",		//
-				"string",	//
-				"test",
-				{
-				}
-			);
+					eId.value,		// object-id
+					"string",		//
+					eValue.value,	//
+					{
+					}
+				);
 				log( jWebSocketClient.resultToString( lRes ) );
 			}
 
 			function destroy() {
 				var lRes = jWebSocketClient.destroySharedObject(
-				"id",		//
-				{
-				}
-			);
+					eId.value,	// object-id
+					{
+					}
+				);
 				log( jWebSocketClient.resultToString( lRes ) );
 			}
 
 			function init() {
-
+				var lRes = jWebSocketClient.initSharedObjects();
+				log( jWebSocketClient.resultToString( lRes ) );
 			}
 
 			function get() {
 				var lRes = jWebSocketClient.getSharedObject(
-				"id",		//
-				{
-				}
-			);
+					eId.value,	// object-id
+					{
+					}
+				);
 				log( jWebSocketClient.resultToString( lRes ) );
 			}
 
 			function update() {
 				var lRes = jWebSocketClient.updateSharedObject(
-				"id",		//
-				"string",	//
-				"test2",	//
-				{
-				}
-			);
+					eId.value,		//
+					"string",		//
+					eValue.value,	//
+					{
+					}
+				);
 				log( jWebSocketClient.resultToString( lRes ) );
 			}
 
@@ -148,17 +137,102 @@
 
 			}
 
+			function objectSelected() {
+				if( eObjects.selectedIndex >= 0 ) {
+					eId.value = eObjects.value;
+					var lValue = eObjects.options[ eObjects.selectedIndex ].text;
+					var lCutPos = lValue.indexOf(" = ");
+					if( lCutPos > 0 ) {
+						lValue = lValue.substr( lCutPos + 3 );
+					}
+					eValue.value = lValue;
+				}
+			}
+
+			function findOption( aId ) {
+				for( var lIdx = 0, lCnt = eObjects.options.length; lIdx < lCnt; lIdx++ ) {
+					var lOption = eObjects.options[ lIdx ];
+					if( lOption.value == aId ) {
+						return lOption;
+					}
+				}
+				return null;
+			}
+
+			function sharedObjectCreated( aToken ) {
+				log( "sharedObjectCreated" );
+				var lNewOption = document.createElement( "option" );
+				lNewOption.text = aToken.id + " = " + aToken.value;
+				lNewOption.value = aToken.id;
+				var lOldOption = findOption( aToken.id );
+				if( lOldOption ) {
+					log( "ERROR: object created already exists on client, updating..." );
+					eObjects.replaceChild( lNewOption, lOldOption );
+				} else {
+					eObjects.appendChild( lNewOption );
+				}
+			}
+
+			function sharedObjectDestroyed( aToken ) {
+				log( "sharedObjectDestroyed" );
+				var lOption = findOption( aToken.id );
+				if( lOption ) {
+					eObject.removeChild( lOption );
+				} else {
+					log( "ERROR: object destroyed does not exist on client." );
+				}
+			}
+
+			function sharedObjectUpdated( aToken ) {
+				log( "sharedObjectUpdated" );
+				var lOldOption = findOption( aToken.id );
+				if( lOldOption ) {
+					var lNewOption = document.createElement( "option" );
+					lNewOption.text = aToken.id + " = " + aToken.value;
+					lNewOption.value = aToken.id;
+					var lSelIdx = eObjects.selectedIndex;
+					eObjects.replaceChild( lNewOption, lOldOption );
+					eObjects.selectedIndex = lSelIdx;
+				} else {
+					log( "ERROR: object updated does not exist on client, appending..." );
+					eObjects.appendChild( lNewOption );
+				}
+			}
+
+			function sharedObjectsInit( aToken, aObjects ) {
+				log( "sharedObjectsInit" );
+				eObjects.options.length = 0;
+				for( var lField in aObjects ) {
+					var lNewOption = document.createElement( "option" );
+					lNewOption.text = lField + " = " + aObjects[ lField ];
+					lNewOption.value = lField;
+					eObjects.appendChild( lNewOption );
+				}
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
 				eValue = jws.$( "stxfValue" );
 				eUsername = jws.$( "stxfUsername" );
 				ePassword = jws.$( "spwfPassword" );
+				eId = jws.$( "stxfId" );
 				eDatatype = jws.$( "sselDatatype" );
+				eObjects = jws.$( "sselObjs" );
+				eObjects.options.length = 0;
 
 				// jws.browserSupportsWebSockets checks web if sockets are available
 				// either natively, by the Flash Bridge or by the Chrome Frame.
 				if( jws.browserSupportsWebSockets() ) {
 					jWebSocketClient = new jws.jWebSocketJSONClient();
+
+					// set callbacks for shared objects plug-in
+					jWebSocketClient.setSharedObjectsCallbacks({
+						OnSharedObjectCreated	: sharedObjectCreated,
+						OnSharedObjectDestroyed	: sharedObjectDestroyed,
+						OnSharedObjectUpdated	: sharedObjectUpdated,
+						OnSharedObjectsInit		: sharedObjectsInit
+					});
+
 					eUsername.focus();
 				} else {
 					jws.$( "sbtnLogon" ).setAttribute( "disabled", "disabled" );
@@ -168,6 +242,7 @@
 					jws.$( "stxfValue" ).setAttribute( "disabled", "disabled" );
 					jws.$( "stxfUsername" ).setAttribute( "disabled", "disabled" );
 					jws.$( "spwfPassword" ).setAttribute( "disabled", "disabled" );
+					jws.$( "stxfId" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sselDatatype" ).setAttribute( "disabled", "disabled" );
 
 					var lMsg = jws.MSG_WS_NOT_SUPPORTED;
@@ -204,23 +279,13 @@
 
 			<div id="sdivLog" class="sdivContainer" style="position: absolute; left:80%; width:20%; height:300px; overflow: hidden;">
 				<span>Objects</span>
-				<select class="sselDlg" id="sselObjs" size="20" style="width:95%; height:270px">
-					<option value="1">1=Value1</option>
-					<option value="2">2=Value2</option>
+				<select class="sselDlg" id="sselObjs" size="20" 
+						style="width:95%; height:270px" onchange="objectSelected();">
+					<option value="0"></option>
 				</select>
 			</div>
 
 		</div>
-<!--
-		<table width="100%" border="1" cellpadding="0" cellspacing="0">
-			<tr>
-				<td valign="top" width="">
-				</td>
-				<td valign="top" width="200px">
-				</td>
-			</tr>
-		</table>
--->
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
@@ -254,7 +319,7 @@
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Value</td>
-					<td class="stdDlg" width="" colspan="9"><input class="stxfDlg" id="stxfValue" type="text" value="" style="width:99%"></td>
+					<td class="stdDlg" width="" colspan="9"><input class="stxfDlg" id="stxfValue" type="text" value="YourValue" style="width:99%"></td>
 				</tr>
 			</table>
 		</div>

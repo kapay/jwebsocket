@@ -16,8 +16,12 @@
 package org.jwebsocket.plugins.sharedobjects;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONStringer;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.logging.Logging;
@@ -162,6 +166,40 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 				lBCT.put("datatype", lDataType);
 				lBCT.put("value", lValue);
 				getServer().broadcastToken(aConnector, lBCT);
+
+				// init
+			} else if (lType.equals("init")) {
+				Token lBCT = new Token(lNS, "event");
+				lBCT.put("name", "init");
+
+				String lData = null;
+				try {
+					JSONStringer jsonStringer = new JSONStringer();
+					// start main object
+					jsonStringer.object();
+					// iterate through all items (fields) of the token
+					Iterator<String> lIterator = sharedObjects.getKeys().iterator();
+					while (lIterator.hasNext()) {
+						String lKey = lIterator.next();
+						Object lVal = sharedObjects.get(lKey);
+						if (lVal instanceof Collection) {
+							jsonStringer.key(lKey).array();
+							for (Object item : (Collection) lVal) {
+								jsonStringer.value(item);
+							}
+							jsonStringer.endArray();
+						} else {
+							jsonStringer.key(lKey).value(lVal);
+						}
+					}
+					// end main object
+					jsonStringer.endObject();
+					lData = jsonStringer.toString();
+				} catch (JSONException ex) {
+					log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				}
+				lBCT.put("value", lData);
+				getServer().sendToken(aConnector, lBCT);
 
 			} else {
 				lResponse.put("code", -1);
