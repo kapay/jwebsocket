@@ -4,23 +4,23 @@
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<!-- If Google's chrome frame installed, use it! -->
 		<!-- Comment needs to be BELOW this meta tag! -->
-<!--
-//	****************************************************************************
-//	jWebSocket Hello World (uses jWebSocket Client and Server)
-//	(C) 2010 Alexander Schulze, jWebSocket.org, Innotrade GmbH, Herzogenrath
-//	****************************************************************************
-//	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU General Public License as published by the
-//	Free Software Foundation; either version 3 of the License, or (at your
-//	option) any later version.
-//	This program is distributed in the hope that it will be useful, but WITHOUT
-//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-//	more details.
-//	You should have received a copy of the GNU General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/>.
-//	****************************************************************************
--->
+		<!--
+		//	****************************************************************************
+		//	jWebSocket Hello World (uses jWebSocket Client and Server)
+		//	(C) 2010 Alexander Schulze, jWebSocket.org, Innotrade GmbH, Herzogenrath
+		//	****************************************************************************
+		//	This program is free software; you can redistribute it and/or modify it
+		//	under the terms of the GNU General Public License as published by the
+		//	Free Software Foundation; either version 3 of the License, or (at your
+		//	option) any later version.
+		//	This program is distributed in the hope that it will be useful, but WITHOUT
+		//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+		//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+		//	more details.
+		//	You should have received a copy of the GNU General Public License along
+		//	with this program; if not, see <http://www.gnu.org/licenses/>.
+		//	****************************************************************************
+		-->
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket Shared Objects</title>
@@ -79,7 +79,7 @@
 			function logoff() {
 				if( jWebSocketClient ) {
 					log( "Logging off " + ( gUsername != null ? "'" + gUsername + "'" : "" ) + " and disconnecting..." );
-					var lRes = jWebSocketClient.close();
+					var lRes = jWebSocketClient.close({timeout: 3000});
 					log( jWebSocketClient.resultToString( lRes ) );
 				}
 			}
@@ -89,9 +89,9 @@
 				if( lMsg.length > 0 ) {
 					log( "Broadcasting '" + lMsg + "'..." );
 					var lRes = jWebSocketClient.broadcastText(
-						"",		// broadcast to all clients (not limited to a certain pool)
-						lMsg	// broadcast this message
-					);
+					"",		// broadcast to all clients (not limited to a certain pool)
+					lMsg	// broadcast this message
+				);
 					// log error only, on success don't confuse the user
 					if( lRes.code != 0 ) {
 						log( jWebSocketClient.resultToString( lRes ) );
@@ -102,21 +102,21 @@
 
 			function create() {
 				var lRes = jWebSocketClient.createSharedObject(
-					"id",		// broadcast to all clients (not limited to a certain pool)
-					"string",	// broadcast this message
-					"test",
-					{
-					}
-				);
+				"id",		//
+				"string",	//
+				"test",
+				{
+				}
+			);
 				log( jWebSocketClient.resultToString( lRes ) );
 			}
 
 			function destroy() {
 				var lRes = jWebSocketClient.destroySharedObject(
-					"id",		// broadcast to all clients (not limited to a certain pool)
-					{
-					}
-				);
+				"id",		//
+				{
+				}
+			);
 				log( jWebSocketClient.resultToString( lRes ) );
 			}
 
@@ -125,11 +125,23 @@
 			}
 
 			function get() {
-
+				var lRes = jWebSocketClient.getSharedObject(
+				"id",		//
+				{
+				}
+			);
+				log( jWebSocketClient.resultToString( lRes ) );
 			}
 
 			function update() {
-
+				var lRes = jWebSocketClient.updateSharedObject(
+				"id",		//
+				"string",	//
+				"test2",	//
+				{
+				}
+			);
+				log( jWebSocketClient.resultToString( lRes ) );
 			}
 
 			function xxx() {
@@ -184,9 +196,31 @@
 		<h1>jWebSocket Shared Objects</h1>
 		<p>This ...
 		</p>
-		<div id="sdivLog" class="sdivContainer"
-			 style="position:relative; height:300px; overflow:auto;">
+
+		<div style="position:relative; height: 320px; overflow: hidden">
+
+			<div id="sdivLog" class="sdivContainer" style="position: absolute; width:76%; height:300px; word-wrap: break-word; overflow:auto;">
+			</div>
+
+			<div id="sdivLog" class="sdivContainer" style="position: absolute; left:80%; width:20%; height:300px; overflow: hidden;">
+				<span>Objects</span>
+				<select class="sselDlg" id="sselObjs" size="20" style="width:95%; height:270px">
+					<option value="1">1=Value1</option>
+					<option value="2">2=Value2</option>
+				</select>
+			</div>
+
 		</div>
+<!--
+		<table width="100%" border="1" cellpadding="0" cellspacing="0">
+			<tr>
+				<td valign="top" width="">
+				</td>
+				<td valign="top" width="200px">
+				</td>
+			</tr>
+		</table>
+-->
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">

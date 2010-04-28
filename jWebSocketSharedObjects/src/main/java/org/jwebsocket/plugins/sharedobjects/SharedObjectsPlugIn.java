@@ -48,6 +48,59 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 		this.setNamespace(NS_SHARED_OBJECTS);
 	}
 
+	private boolean isDataTypeValid(String aDataType, WebSocketConnector aConnector, Token aResponse) {
+		boolean isValid = ((aDataType != null && DATA_TYPES.contains(aDataType)));
+		if (!isValid) {
+			aResponse.put("code", -1);
+			aResponse.put("msg", "invalid datatype '" + aDataType + "'");
+			getServer().sendToken(aConnector, aResponse);
+		}
+		return isValid;
+	}
+
+	private boolean doesContain(String aID, WebSocketConnector aConnector, Token aResponse) {
+		boolean isValid = ((aID != null && sharedObjects.contains(aID)));
+		if (!isValid) {
+			aResponse.put("code", -1);
+			aResponse.put("msg", "object '" + aID + "' not found");
+			getServer().sendToken(aConnector, aResponse);
+		}
+		return isValid;
+	}
+
+	private boolean alreadyExists(String aID, WebSocketConnector aConnector, Token aResponse) {
+		boolean isValid = ((aID != null && sharedObjects.contains(aID)));
+		if (isValid) {
+			aResponse.put("code", -1);
+			aResponse.put("msg", "object '" + aID + "' already exists");
+			getServer().sendToken(aConnector, aResponse);
+		}
+		return isValid;
+	}
+
+	private Object string2Object(String aDataType, String aValue) {
+		Object lRes = null;
+
+		// number
+		if (aDataType.equals("number")) {
+			try {
+				lRes = Double.parseDouble(aValue);
+			} catch (NumberFormatException ex) {
+			}
+
+			// string
+		} else if (aDataType.equals("string")) {
+			lRes = aValue;
+		}
+
+		return lRes;
+	}
+
+	private String object2String(String aDataType, Object aObject) {
+		// all supported objects should provide the toString() method
+		return aObject.toString();
+	}
+
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
@@ -57,44 +110,66 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 		String lValue = aToken.getString("value");
 
 		Token lResponse = getServer().createResponse(aToken);
-		boolean doRespond = true;
-
-		if (lDataType == null || !DATA_TYPES.contains(lDataType)) {
-			lResponse.put("code", -1);
-			lResponse.put("msg", "invalid datatype '" + lDataType + "'");
-			getServer().sendToken(aConnector, lResponse);
-			return;
-		}
 
 		if (lType != null && (lNS == null || lNS.equals(NS_SHARED_OBJECTS))) {
+
+			// create
 			if (lType.equals("create")) {
-				sharedObjects.put(lID, lValue);
+				if (!isDataTypeValid(lDataType, aConnector, lResponse)) {
+					return;
+				}
+				if (alreadyExists(lID, aConnector, lResponse)) {
+					return;
+				}
+				sharedObjects.put(lID, string2Object(lDataType, lValue));
+
+				Token lBCT = new Token(lNS, "event");
+				lBCT.put("name", "created");
+				lBCT.put("id", lID);
+				lBCT.put("datatype", lDataType);
+				lBCT.put("value", lValue);
+				getServer().broadcastToken(aConnector, lBCT);
+
+				// destroy
 			} else if (lType.equals("destroy")) {
+				if (!doesContain(lID, aConnector, lResponse)) {
+					return;
+				}
 				sharedObjects.remove(lID);
+
+				Token lBCT = new Token(lNS, "event");
+				lBCT.put("name", "destroyed");
+				lBCT.put("id", lID);
+				getServer().broadcastToken(aConnector, lBCT);
+
+				// get
 			} else if (lType.equals("get")) {
-				sharedObjects.get(lID);
-			} else if (lType.equals("put")) {
-				sharedObjects.put(lID, lValue);
-			} /*
-			else if (lType.equals("clear")) {
-			sharedObjects.clear(lResponse, lID);
-			} else if (lType.equals("get")) {
-			sharedObjects.get(lResponse, lID, aToken.getInteger("index", -1));
-			} else if (lType.equals("add")) {
-			sharedObjects.add(lResponse, lID, aToken.getString("data"));
-			} else if (lType.equals("remove")) {
-			sharedObjects.remove(lResponse, lID, aToken.getInteger("index", -1));
-			 */ 
-			else {
+				if (!doesContain(lID, aConnector, lResponse)) {
+					return;
+				}
+				Object lObj = sharedObjects.get(lID);
+				lResponse.put("result", lObj.toString());
+
+				// put
+			} else if (lType.equals("update")) {
+				if (!isDataTypeValid(lDataType, aConnector, lResponse)) {
+					return;
+				}
+				sharedObjects.put(lID, string2Object(lDataType, lValue));
+				Token lBCT = new Token(lNS, "event");
+				lBCT.put("name", "updated");
+				lBCT.put("id", lID);
+				lBCT.put("datatype", lDataType);
+				lBCT.put("value", lValue);
+				getServer().broadcastToken(aConnector, lBCT);
+
+			} else {
 				lResponse.put("code", -1);
 				lResponse.put("msg", "invalid type '" + lType + "'");
 			}
-		} else {
-			doRespond = false;
-		}
 
-		if (doRespond) {
 			getServer().sendToken(aConnector, lResponse);
 		}
+
 	}
 }

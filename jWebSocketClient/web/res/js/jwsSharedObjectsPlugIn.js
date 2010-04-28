@@ -32,14 +32,38 @@ jws.SharedObjectsPlugIn = {
 	processToken: function( aToken ) {
 		console.log( "jws.SharedObjectsPlugIn: Processing token " + aToken.ns + "/" + aToken.type + "..." );
 		if( aToken.ns == jws.SharedObjectsPlugIn.NS ) {
-			if( aToken.type == "create" ) {
+			if( aToken.name == "created" ) {
 				// create a new object on the client
-			} else if( aToken.type == "destroy" ) {
+				if( window.console ) {
+					console.log( "new object '" + aToken.id + "' to be created on client with value '" + aToken.value + "'." );
+				}
+				if( this.OnSharedObjectCreated ) {
+					this.OnSharedObjectCreated();
+				}
+			} else if( aToken.name == "destroyed" ) {
 				// destroy an existing object on the client
-			} else if( aToken.type == "update" ) {
+				if( window.console ) {
+					console.log( "object '" + aToken.id + "' to be destroyed on client." );
+				}
+				if( this.OnSharedObjectDestroyed ) {
+					this.OnSharedObjectDestroyed();
+				}
+			} else if( aToken.name == "updated" ) {
 				// update an existing object on the client
-			} else if( aToken.type == "init" ) {
+				if( window.console ) {
+					console.log( "object '" + aToken.id + "' to be updated on client with value '" + aToken.value + "'." );
+				}
+				if( this.OnSharedObjectUpdated ) {
+					this.OnSharedObjectUpdated();
+				}
+			} else if( aToken.name == "init" ) {
 				// init all shared object on the client
+				if( window.console ) {
+					console.log( "all objects to be initialized on client." );
+				}
+				if( this.OnSharedObjectsInit ) {
+					this.OnSharedObjectsInit();
+				}
 			}
 		}
 	},
@@ -107,7 +131,7 @@ jws.SharedObjectsPlugIn = {
 		if( this.isConnected() ) {
 			this.sendToken({
 				ns: jws.SharedObjectsPlugIn.NS,
-				type: "put",
+				type: "update",
 				id: aId,
 				datatype: aDataType,
 				value: aValue
@@ -120,6 +144,24 @@ jws.SharedObjectsPlugIn = {
 			lRes.msg = "Not connected.";
 		}
 		return lRes;
+	},
+
+	setCallbacks: function( aListeners ) {
+		if( !aListeners ) {
+			aListeners = {};
+		}
+		if( aListeners.OnSharedObjectCreated !== undefined ) {
+			this.OnSharedObjectCreated = aListeners.OnSharedObjectCreated;
+		}
+		if( aListeners.OnSharedObjectDestroyed !== undefined ) {
+			this.OnSharedObjectDestroyed = aListeners.OnSharedObjectDestroyed;
+		}
+		if( aListeners.OnSharedObjectUpdated !== undefined ) {
+			this.OnSharedObjectUpdated = aListeners.OnSharedObjectUpdated;
+		}
+		if( aListeners.OnSharedObjectsInit !== undefined ) {
+			this.OnSharedObjectsInit = aListeners.OnSharedObjectsInit;
+		}
 	}
 
 }

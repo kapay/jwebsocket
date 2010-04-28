@@ -28,4 +28,9 @@ public class SharedObjects {
 	public Object get(String aKey) {
 		return objects.get(aKey);
 	}
+
+	public boolean contains(String aKey) {
+		return objects.containsKey(aKey);
+	}
+
 }
