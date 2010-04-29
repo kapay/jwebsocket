@@ -28,6 +28,7 @@ import org.jwebsocket.kit.WebSocketException;
  * For applications it is recommended to implement them in plug-ins based on
  * the token server.
  * @author aschulze
+ * @version $Id:$
  */
 public interface WebSocketServer {
 
@@ -120,11 +121,13 @@ public interface WebSocketServer {
 
 
 	/**
+	 * Returns the plugin chain for the server 
 	 * @return the plugInChain
 	 */
 	public WebSocketPlugInChain getPlugInChain();
 
 	/**
+	 * Returns the filter chain
 	 * @return the filterChain
 	 */
 	public WebSocketFilterChain getFilterChain();
