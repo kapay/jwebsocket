@@ -14,6 +14,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.jwebsocket.config.Config;
@@ -29,7 +31,9 @@ public final class PluginConfig implements Config {
 	private final String id;
 	private final String name;
 	private final String jar;
+	private final String packageName;
 	private final String namespace;
+	private final List<String> servers;
 	private final Map<String, String> settings;
 
 	/**
@@ -40,12 +44,14 @@ public final class PluginConfig implements Config {
 	 * @param namespace the namespace 
 	 * @param settings map of settings key and value
 	 */
-	public PluginConfig(String id, String name, String jar, String namespace,
-			Map<String, String> settings) {
+	public PluginConfig(String id, String name, String packageName, String jar, String namespace,
+		 List<String> servers, Map<String, String> settings) {
 		this.id = id;
 		this.name = name;
+		this.packageName = packageName;
 		this.jar = jar;
 		this.namespace = namespace;
+		this.servers = servers;
 		this.settings = settings;
 		validate();
 	}
@@ -63,6 +69,12 @@ public final class PluginConfig implements Config {
 	public String getName() {
 		return name;
 	}
+	/**
+	 * @return the package 
+	 */
+	public String getPackage() {
+		return packageName;
+	}
 
 	/**
 	 * @return the jar
@@ -77,11 +89,18 @@ public final class PluginConfig implements Config {
 	public String getNamespace() {
 		return namespace;
 	}
+	
+	/**
+	 * @return the list of servers
+	 */
+	public List<String> getServers() {
+		return Collections.unmodifiableList(servers);
+	}
 	/**
 	 * @return the settings
 	 */
 	public Map<String, String> getSettings() {
-		return settings;
+		return Collections.unmodifiableMap(settings);
 	}
 
 	/**
