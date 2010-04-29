@@ -16,7 +16,7 @@ import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.connectors.BaseConnector;
-import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.logging.Logging;
 

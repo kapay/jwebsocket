@@ -32,7 +32,7 @@ import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.tcp.connectors.TCPConnector;
-import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketException;
 

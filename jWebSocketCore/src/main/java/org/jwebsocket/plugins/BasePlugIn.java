@@ -15,13 +15,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins;
 
-import org.jwebsocket.api.PlugInResponse;
+import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPaket;
-import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.kit.CloseReason;
 
 /**
  *

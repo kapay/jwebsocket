@@ -15,6 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import org.jwebsocket.kit.FilterResponse;
+
 /**
  *
  * @author aschulze

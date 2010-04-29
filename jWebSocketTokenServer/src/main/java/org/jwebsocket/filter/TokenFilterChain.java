@@ -15,10 +15,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.filter;
 
-import org.jwebsocket.api.FilterResponse;
+import org.apache.log4j.Logger;
+import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketServer;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
@@ -26,6 +29,16 @@ import org.jwebsocket.token.Token;
  * @author aschulze
  */
 public class TokenFilterChain extends BaseFilterChain {
+
+	private static Logger log = Logging.getLogger(TokenFilterChain.class);
+
+	/**
+	 *
+	 * @param aServer
+	 */
+	public TokenFilterChain(WebSocketServer aServer) {
+		super(aServer);
+	}
 
 	@Override
 	public void addFilter(WebSocketFilter aFilter) {
@@ -41,15 +54,32 @@ public class TokenFilterChain extends BaseFilterChain {
 	}
 
 	@Override
-	public FilterResponse processPacketOut(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+	public FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aDataPacket) {
 		return null;
 	}
 
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 * @return
+	 */
 	public FilterResponse processTokenIn(WebSocketConnector aConnector, Token aToken) {
-		return null;
+		FilterResponse lFilterResponse = new FilterResponse();
+		for (WebSocketFilter filter : getFilters()) {
+			try {
+				((TokenFilter) filter).processTokenIn(lFilterResponse, aConnector, aToken);
+			} catch (Exception ex) {
+				log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			}
+			if (lFilterResponse.isChainAborted()) {
+				break;
+			}
+		}
+		return lFilterResponse;
 	}
 
-	public FilterResponse processTokenOut(WebSocketConnector aConnector, Token aToken) {
+	public FilterResponse processTokenOut(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
 		return null;
 	}
 }

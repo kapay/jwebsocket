@@ -25,7 +25,7 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.kit.BroadcastOptions;
-import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketFilterChain;
 import org.jwebsocket.kit.WebSocketException;
@@ -42,6 +42,8 @@ public class BaseServer implements WebSocketServer {
 
 	private FastMap<String, WebSocketEngine> engines = null;
 	private String id = null;
+	protected WebSocketPlugInChain plugInChain = null;
+	protected WebSocketFilterChain filterChain = null;
 
 	/**
 	 * Create a new instance of the Base Server. Each BaseServer maintains a

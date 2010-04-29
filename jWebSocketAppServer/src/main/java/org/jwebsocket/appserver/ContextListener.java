@@ -21,7 +21,7 @@ import javax.servlet.ServletContextListener;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
-import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;

@@ -22,7 +22,7 @@ import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.connectors.BaseConnector;
-import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.netty.engines.NettyEngineHandler;
 

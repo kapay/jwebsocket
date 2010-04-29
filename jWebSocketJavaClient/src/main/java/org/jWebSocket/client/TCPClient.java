@@ -12,7 +12,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import org.jwebsocket.api.WebSocketPaket;
-import org.jwebsocket.api.CloseReason;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 
 /**

@@ -15,9 +15,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.filter;
 
+import java.util.List;
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.FilterResponse;
+import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketFilterChain;
@@ -32,8 +33,23 @@ import org.jwebsocket.logging.Logging;
 public class BaseFilterChain implements WebSocketFilterChain {
 
 	private static Logger log = Logging.getLogger(BaseFilterChain.class);
-	private FastList<WebSocketFilter> filter = new FastList<WebSocketFilter>();
+	private FastList<WebSocketFilter> filters = new FastList<WebSocketFilter>();
 	private WebSocketServer server = null;
+
+	/**
+	 *
+	 * @param aServer
+	 */
+	public BaseFilterChain(WebSocketServer aServer) {
+		server = aServer;
+	}
+
+	/**
+	 * @return the server
+	 */
+	public WebSocketServer getServer() {
+		return server;
+	}
 
 	@Override
 	public void addFilter(WebSocketFilter aFilter) {
@@ -43,13 +59,22 @@ public class BaseFilterChain implements WebSocketFilterChain {
 	public void removeFilter(WebSocketFilter aFilter) {
 	}
 
+	/**
+	 *
+	 * @return
+	 */
+	@Override
+	public List<WebSocketFilter> getFilters() {
+		return filters;
+	}
+
 	@Override
 	public FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPaket aPacket) {
 		return null;
 	}
 
 	@Override
-	public FilterResponse processPacketOut(WebSocketConnector aConnector, WebSocketPaket aPacket) {
+	public FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket) {
 		return null;
 	}
 }

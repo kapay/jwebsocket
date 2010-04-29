@@ -15,6 +15,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import java.util.List;
+import org.jwebsocket.kit.FilterResponse;
+
 /**
  *
  * @author aschulze
@@ -23,8 +26,9 @@ public interface WebSocketFilterChain {
 
 	void addFilter(WebSocketFilter aFilter);
 	void removeFilter(WebSocketFilter aFilter);
+	List<WebSocketFilter> getFilters();
 
-	FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPaket aPacket);
-	FilterResponse processPacketOut(WebSocketConnector aConnector, WebSocketPaket aPacket);
+	FilterResponse processPacketIn(WebSocketConnector aSource, WebSocketPaket aPacket);
+	FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket);
 
 }

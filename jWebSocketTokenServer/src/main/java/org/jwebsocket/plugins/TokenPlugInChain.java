@@ -15,7 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins;
 
-import org.jwebsocket.api.PlugInResponse;
+import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;

@@ -15,7 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.filter;
 
-import org.jwebsocket.api.FilterResponse;
+import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPaket;

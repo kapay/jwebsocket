@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.WebSocketException;
 

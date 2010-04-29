@@ -15,9 +15,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.filter;
 
-import org.jwebsocket.api.FilterResponse;
+import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.token.Token;
 
 /**
  *
@@ -33,4 +34,9 @@ public class TokenFilter extends BaseFilter {
 	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket) {
 	}
 
+	public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+	}
+
+	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+	}
 }

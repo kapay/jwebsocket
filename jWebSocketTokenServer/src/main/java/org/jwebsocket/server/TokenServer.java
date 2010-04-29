@@ -25,9 +25,10 @@ import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.connectors.BaseConnector;
+import org.jwebsocket.filter.TokenFilterChain;
 import org.jwebsocket.kit.BroadcastOptions;
-import org.jwebsocket.api.CloseReason;
-import org.jwebsocket.api.WebSocketFilterChain;
+import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.packetProcessors.CSVProcessor;
 import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.plugins.TokenPlugInChain;
@@ -45,8 +46,6 @@ public class TokenServer extends BaseServer {
 	private static final String NS_TOKENSERVER = JWebSocketConstants.NS_BASE + ".tokenserver";
 	// specify shared connector variables
 	private static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
-	private TokenPlugInChain plugInChain = null;
-	private WebSocketFilterChain filterChain = null;
 	private volatile boolean isAlive = false;
 
 	/**
@@ -56,11 +55,12 @@ public class TokenServer extends BaseServer {
 	public TokenServer(String aId) {
 		super(aId);
 		plugInChain = new TokenPlugInChain(this);
+		filterChain = new TokenFilterChain(this);
 	}
 
 	@Override
 	public void startServer()
-		throws WebSocketException {
+			throws WebSocketException {
 		isAlive = true;
 		if (log.isInfoEnabled()) {
 			log.info("Token server started.");
@@ -76,7 +76,7 @@ public class TokenServer extends BaseServer {
 
 	@Override
 	public void stopServer()
-		throws WebSocketException {
+			throws WebSocketException {
 		isAlive = false;
 		if (log.isInfoEnabled()) {
 			log.info("Token server stopped.");
@@ -114,9 +114,9 @@ public class TokenServer extends BaseServer {
 	public void connectorStarted(WebSocketConnector aConnector) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(null);
 		if ((lSubProt != null)
-			&& (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)
-			|| lSubProt.equals(JWebSocketConstants.SUB_PROT_CSV)
-			|| lSubProt.equals(JWebSocketConstants.SUB_PROT_XML))) {
+				&& (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)
+				|| lSubProt.equals(JWebSocketConstants.SUB_PROT_CSV)
+				|| lSubProt.equals(JWebSocketConstants.SUB_PROT_XML))) {
 
 			aConnector.setBoolean(VAR_IS_TOKENSERVER, true);
 
@@ -188,7 +188,11 @@ public class TokenServer extends BaseServer {
 				if (log.isDebugEnabled()) {
 					log.debug("Processing token '" + lToken.toString() + " from '" + aConnector + "'...");
 				}
-				plugInChain.processToken(aConnector, lToken);
+
+				// before forwarding the token to the plug-ins push it through filter chain
+				FilterResponse filterResponse = getFilterChain().processTokenIn(aConnector, lToken);
+
+				getPlugInChain().processToken(aConnector, lToken);
 			} else {
 				log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
 			}
@@ -197,19 +201,31 @@ public class TokenServer extends BaseServer {
 
 	/**
 	 *
-	 * @param aTargetConnector
+	 * @param aTarget
 	 * @param aToken
 	 */
-	public void sendToken(WebSocketConnector aTargetConnector, Token aToken) {
-		if (aTargetConnector.getBool(VAR_IS_TOKENSERVER)) {
+	public void sendToken(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+		if (aTarget.getBool(VAR_IS_TOKENSERVER)) {
+			// before sending the token push it through filter chain
+			FilterResponse filterResponse = getFilterChain().processTokenOut(aSource, aTarget, aToken);
+
 			if (log.isDebugEnabled()) {
-				log.debug("Sending token '" + aToken + "' to '" + aTargetConnector + "'...");
+				log.debug("Sending token '" + aToken + "' to '" + aTarget + "'...");
 			}
-			WebSocketPaket aPacket = tokenToPacket(aTargetConnector, aToken);
-			super.sendPacket(aTargetConnector, aPacket);
+			WebSocketPaket aPacket = tokenToPacket(aTarget, aToken);
+			super.sendPacket(aTarget, aPacket);
 		} else {
 			log.warn("Connector not supposed to handle tokens.");
 		}
+	}
+
+	/**
+	 *
+	 * @param aTarget
+	 * @param aToken
+	 */
+	public void sendToken(WebSocketConnector aTarget, Token aToken) {
+		sendToken(null, aTarget, aToken);
 	}
 
 	/**
@@ -223,6 +239,9 @@ public class TokenServer extends BaseServer {
 		WebSocketConnector lTargetConnector = getConnector(aEngineId, aConnectorId);
 		if (lTargetConnector != null) {
 			if (lTargetConnector.getBool(VAR_IS_TOKENSERVER)) {
+				// before sending the token push it through filter chain
+				FilterResponse filterResponse = getFilterChain().processTokenOut(null, lTargetConnector, aToken);
+
 				if (log.isDebugEnabled()) {
 					log.debug("Sending token '" + aToken + "' to '" + lTargetConnector + "'...");
 				}
@@ -245,21 +264,27 @@ public class TokenServer extends BaseServer {
 	 * @param aBroadcastOptions
 	 */
 	public void broadcastToken(WebSocketConnector aSource, Token aToken,
-		BroadcastOptions aBroadcastOptions) {
+			BroadcastOptions aBroadcastOptions) {
 		if (log.isDebugEnabled()) {
 			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		}
+
+		// before sending the token push it through filter chain
+		FilterResponse filterResponse = getFilterChain().processTokenOut(aSource, null, aToken);
+
 		HashMap<String, Object> lFilter = new HashMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
+		// TODO: converting the token within the loop is not that efficient!
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector) || aBroadcastOptions.isSenderIncluded()) {
+				// every connector could have it's own sub protocol
 				sendPacket(lConnector, tokenToPacket(lConnector, aToken));
 			}
 		}
 	}
 
 	/**
-	 * Broadcasts to all connector, except the sender (aSource)
+	 * Broadcasts to all connector, except the sender (aSource).
 	 * @param aSource
 	 * @param aToken
 	 */
@@ -267,8 +292,13 @@ public class TokenServer extends BaseServer {
 		if (log.isDebugEnabled()) {
 			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		}
+
+		// before sending the token push it through filter chain
+		FilterResponse filterResponse = getFilterChain().processTokenOut(aSource, null, aToken);
+
 		HashMap<String, Object> lFilter = new HashMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
+		// TODO: converting the token within the loop is not that efficient!
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector)) {
 				sendPacket(lConnector, tokenToPacket(lConnector, aToken));
@@ -285,8 +315,13 @@ public class TokenServer extends BaseServer {
 		if (log.isDebugEnabled()) {
 			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		}
+
+		// before sending the token push it through filter chain
+		FilterResponse filterResponse = getFilterChain().processTokenOut(null, null, aToken);
+
 		HashMap<String, Object> lFilter = new HashMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
+		// TODO: converting the token within the loop is not that efficient!
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			sendPacket(lConnector, tokenToPacket(lConnector, aToken));
 		}
@@ -341,7 +376,15 @@ public class TokenServer extends BaseServer {
 	 */
 	@Override
 	public TokenPlugInChain getPlugInChain() {
-		return plugInChain;
+		return (TokenPlugInChain) plugInChain;
+	}
+
+	/**
+	 * @return the filterChain
+	 */
+	@Override
+	public TokenFilterChain getFilterChain() {
+		return (TokenFilterChain) filterChain;
 	}
 
 	/**
@@ -369,5 +412,4 @@ public class TokenServer extends BaseServer {
 	public void removeUsername(WebSocketConnector aConnector) {
 		aConnector.removeVar(BaseConnector.VAR_USERNAME);
 	}
-
 }

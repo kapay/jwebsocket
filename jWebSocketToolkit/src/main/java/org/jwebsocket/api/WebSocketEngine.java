@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import org.jwebsocket.kit.CloseReason;
 import java.util.Map;
 import org.jwebsocket.kit.WebSocketException;
 
