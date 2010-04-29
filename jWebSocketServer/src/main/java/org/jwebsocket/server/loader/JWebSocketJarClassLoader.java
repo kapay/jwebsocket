@@ -23,7 +23,7 @@ import java.net.URLClassLoader;
  * all configured via jWebSocket.xml file is loaded using this class.
  * 
  * @author puran
- * @version $Id:$
+ * @version $Id$
  */
 public class JWebSocketJarClassLoader extends URLClassLoader {
 	
@@ -31,8 +31,8 @@ public class JWebSocketJarClassLoader extends URLClassLoader {
 	 * constructor
 	 * @param urls the urls of the jar
 	 */
-	public JWebSocketJarClassLoader(URL[] urls) {
-		super(urls);
+	public JWebSocketJarClassLoader() {
+		super(new URL[] {});
 	}
 	/**
 	 * {@inheritDoc}
@@ -40,28 +40,5 @@ public class JWebSocketJarClassLoader extends URLClassLoader {
 	public void addFile(String path) throws MalformedURLException {
 		String urlPath = "jar:file://" + path + "!/";
 		addURL(new URL(urlPath));
-	}
-
-	public static void main(String args[]) {
-		try {
-			System.out.println("First attempt...");
-			Class.forName("org.gjt.mm.mysql.Driver");
-		} catch (Exception ex) {
-			System.out.println("Failed.");
-		}
-
-		try {
-			URL urls[] = {};
-
-			JWebSocketJarClassLoader cl = new JWebSocketJarClassLoader(urls);
-			cl
-					.addFile("/opt/mysql-connector-java-5.0.4/mysql-connector-java-5.0.4-bin.jar");
-			System.out.println("Second attempt...");
-			cl.loadClass("org.gjt.mm.mysql.Driver");
-			System.out.println("Success!");
-		} catch (Exception ex) {
-			System.out.println("Failed.");
-			ex.printStackTrace();
-		}
 	}
 }
