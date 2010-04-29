@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - FilterChain API
-//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
+//	jWebSocket - BaseFilter Implementation
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU General Public License as published by the
@@ -13,18 +13,24 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.api;
+package org.jwebsocket.filter;
+
+import org.jwebsocket.api.FilterResponse;
+import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketFilter;
+import org.jwebsocket.api.WebSocketPaket;
 
 /**
  *
  * @author aschulze
  */
-public interface WebSocketFilterChain {
+public class BaseFilter implements WebSocketFilter {
 
-	void addFilter(WebSocketFilter aFilter);
-	void removeFilter(WebSocketFilter aFilter);
+	@Override
+	public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket) {
+	}
 
-	FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPaket aPacket);
-	FilterResponse processPacketOut(WebSocketConnector aConnector, WebSocketPaket aPacket);
-
+	@Override
+	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket) {
+	}
 }

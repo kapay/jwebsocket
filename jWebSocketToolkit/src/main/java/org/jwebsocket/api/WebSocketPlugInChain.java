@@ -26,7 +26,7 @@ import java.util.List;
  * corresponding PlugInResponse.
  * @author aschulze
  */
-public interface PlugInChain {
+public interface WebSocketPlugInChain {
 
 	/**
 	 * is called by the server when the engine has been started. Usually the
@@ -82,19 +82,19 @@ public interface PlugInChain {
 	 * returns the list of the plug-ins within this plug-in chain.
 	 * @return List of plug-ins.
 	 */
-	List<PlugIn> getPlugIns();
+	List<WebSocketPlugIn> getPlugIns();
 
 	/**
 	 * appends a plug-in to the plug-in chain. All subsequent incoming data packet
 	 * will be forwarded to that plug-in too.
 	 * @param aPlugIn Plug-in to be added from the plug-in chain.
 	 */
-	void addPlugIn(PlugIn aPlugIn);
+	void addPlugIn(WebSocketPlugIn aPlugIn);
 
 	/**
 	 * removes a plug-in from the plug-in chain. All subsequent incoming data
 	 * packet will not be forwarded to that plug-in any more.
 	 * @param aPlugIn Plug-in to be removed from the plug-in chain.
 	 */
-	void removePlugIn(PlugIn aPlugIn);
+	void removePlugIn(WebSocketPlugIn aPlugIn);
 }

@@ -16,8 +16,8 @@
 package org.jwebsocket.plugins;
 
 import org.jwebsocket.api.PlugInResponse;
-import org.jwebsocket.api.PlugIn;
-import org.jwebsocket.api.PlugInChain;
+import org.jwebsocket.api.WebSocketPlugIn;
+import org.jwebsocket.api.WebSocketPlugInChain;
 import java.util.List;
 
 import javolution.util.FastList;
@@ -36,10 +36,10 @@ import org.jwebsocket.logging.Logging;
  * and can be processed by the plug-ins.
  * @author aschulze
  */
-public class BasePlugInChain implements PlugInChain {
+public class BasePlugInChain implements WebSocketPlugInChain {
 
 	private static Logger log = Logging.getLogger(BasePlugInChain.class);
-	private FastList<PlugIn> plugins = new FastList<PlugIn>();
+	private FastList<WebSocketPlugIn> plugins = new FastList<WebSocketPlugIn>();
 	private WebSocketServer server = null;
 
 	/**
@@ -59,7 +59,7 @@ public class BasePlugInChain implements PlugInChain {
 			log.debug("Notifying plug-ins that engine started...");
 		}
 		try {
-			for (PlugIn plugIn : getPlugIns()) {
+			for (WebSocketPlugIn plugIn : getPlugIns()) {
 				try {
 					plugIn.engineStarted(aEngine);
 				} catch (Exception ex) {
@@ -80,7 +80,7 @@ public class BasePlugInChain implements PlugInChain {
 			log.debug("Notifying plug-ins that engine stopped...");
 		}
 		try {
-			for (PlugIn plugIn : getPlugIns()) {
+			for (WebSocketPlugIn plugIn : getPlugIns()) {
 				try {
 					plugIn.engineStopped(aEngine);
 				} catch (Exception ex) {
@@ -101,7 +101,7 @@ public class BasePlugInChain implements PlugInChain {
 			log.debug("Notifying plug-ins that connector started...");
 		}
 		try {
-			for (PlugIn plugIn : getPlugIns()) {
+			for (WebSocketPlugIn plugIn : getPlugIns()) {
 				try {
 					// log.debug("Notifying plug-in " + plugIn + " that connector started...");
 					plugIn.connectorStarted(aConnector);
@@ -125,7 +125,7 @@ public class BasePlugInChain implements PlugInChain {
 			log.debug("Processing packet for plug-ins...");
 		}
 		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (PlugIn plugIn : getPlugIns()) {
+		for (WebSocketPlugIn plugIn : getPlugIns()) {
 			try {
 				/*
 				if (log.isDebugEnabled()) {
@@ -153,7 +153,7 @@ public class BasePlugInChain implements PlugInChain {
 		if (log.isDebugEnabled()) {
 			log.debug("Notifying plug-ins that connector stopped (" + aCloseReason.name() + ")...");
 		}
-		for (PlugIn plugIn : getPlugIns()) {
+		for (WebSocketPlugIn plugIn : getPlugIns()) {
 			try {
 				// log.debug("Notifying plug-in " + plugIn + " that connector stopped...");
 				plugIn.connectorStopped(aConnector, aCloseReason);
@@ -168,7 +168,7 @@ public class BasePlugInChain implements PlugInChain {
 	 * @return
 	 */
 	@Override
-	public List<PlugIn> getPlugIns() {
+	public List<WebSocketPlugIn> getPlugIns() {
 		return plugins;
 	}
 
@@ -177,7 +177,7 @@ public class BasePlugInChain implements PlugInChain {
 	 * @param aPlugIn
 	 */
 	@Override
-	public void addPlugIn(PlugIn aPlugIn) {
+	public void addPlugIn(WebSocketPlugIn aPlugIn) {
 		plugins.add(aPlugIn);
 		aPlugIn.setPlugInChain(this);
 	}
@@ -187,7 +187,7 @@ public class BasePlugInChain implements PlugInChain {
 	 * @param aPlugIn
 	 */
 	@Override
-	public void removePlugIn(PlugIn aPlugIn) {
+	public void removePlugIn(WebSocketPlugIn aPlugIn) {
 		plugins.remove(aPlugIn);
 		aPlugIn.setPlugInChain(null);
 	}

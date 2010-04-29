@@ -18,7 +18,7 @@ import java.util.List;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.api.PlugIn;
+import org.jwebsocket.api.WebSocketPlugIn;
 
 /**
  * Class that performs initialization
@@ -65,7 +65,7 @@ public final class JWebSocketInitializer {
 	 * Initialize the list of plugins defined in via jWebSocket configuration
 	 * @return the list of plugins
 	 */
-	public List<PlugIn> initializePlugins() {
+	public List<WebSocketPlugIn> initializePlugins() {
 		throw new UnsupportedOperationException("Not supported yet");
 	}
 }

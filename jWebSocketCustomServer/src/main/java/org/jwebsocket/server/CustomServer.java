@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.RequestHeader;
-import org.jwebsocket.api.PlugIn;
+import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.CloseReason;
@@ -72,7 +72,7 @@ public class CustomServer extends BaseServer {
 	 * removes a plugin from the plugin chain of the server.
 	 * @param aPlugIn
 	 */
-	public void removePlugIn(PlugIn aPlugIn) {
+	public void removePlugIn(WebSocketPlugIn aPlugIn) {
 		plugInChain.removePlugIn(aPlugIn);
 	}
 

@@ -16,7 +16,7 @@
 package org.jwebsocket.console;
 
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.PlugInChain;
+import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.netty.engines.NettyEngine;
@@ -156,7 +156,7 @@ public class JWebSocket {
 			// instantiate the Token server and bind engine to it
 			tokenServer = new TokenServer("ts0");
 			// the token server already instantiates a plug-in chain
-			PlugInChain plugInChain = tokenServer.getPlugInChain();
+			WebSocketPlugInChain plugInChain = tokenServer.getPlugInChain();
 			// let the server support the engine
 			tokenServer.addEngine(engine);
 			// add the SystemPlugIn listener (for the jWebSocket default functionality)

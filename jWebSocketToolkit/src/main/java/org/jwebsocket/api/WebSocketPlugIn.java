@@ -19,7 +19,7 @@ package org.jwebsocket.api;
  *
  * @author aschulze
  */
-public interface PlugIn {
+public interface WebSocketPlugIn {
 
 	/**
 	 * is called by the server when the engine has been started.
@@ -58,11 +58,11 @@ public interface PlugIn {
 	 *
 	 * @param aPlugInChain
 	 */
-	public void setPlugInChain(PlugInChain aPlugInChain);
+	public void setPlugInChain(WebSocketPlugInChain aPlugInChain);
 
 	/**
 	 * @return the plugInChain
 	 */
-	public PlugInChain getPlugInChain();
+	public WebSocketPlugInChain getPlugInChain();
 
 }

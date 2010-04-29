@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Chain of Token Plug-Ins
+//	jWebSocket - BaseFilterChain Implementation
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,50 +13,43 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.plugins;
+package org.jwebsocket.filter;
 
-import org.jwebsocket.api.PlugInResponse;
-import org.jwebsocket.api.WebSocketPlugIn;
+import javolution.util.FastList;
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketFilter;
+import org.jwebsocket.api.WebSocketFilterChain;
+import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.token.Token;
 
 /**
- * instantiates the chain of token plug-ins.
+ *
  * @author aschulze
  */
-public class TokenPlugInChain extends BasePlugInChain {
+public class BaseFilterChain implements WebSocketFilterChain {
 
-	private static Logger log = Logging.getLogger(TokenPlugInChain.class);
+	private static Logger log = Logging.getLogger(BaseFilterChain.class);
+	private FastList<WebSocketFilter> filter = new FastList<WebSocketFilter>();
+	private WebSocketServer server = null;
 
-	/**
-	 *
-	 * @param aServer
-	 */
-	public TokenPlugInChain(WebSocketServer aServer) {
-		super(aServer);
+	@Override
+	public void addFilter(WebSocketFilter aFilter) {
 	}
 
-	/**
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 * @return
-	 */
-	public PlugInResponse processToken(WebSocketConnector aConnector, Token aToken) {
-		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (WebSocketPlugIn plugIn : getPlugIns()) {
-			try {
-				((TokenPlugIn) plugIn).processToken(lPluginResponse, aConnector, aToken);
-			} catch (Exception ex) {
-				log.error("(plugin '" + ((TokenPlugIn) plugIn).getNamespace() + "')" + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-			}
-			if (lPluginResponse.isChainAborted()) {
-				break;
-			}
-		}
-		return lPluginResponse;
+	@Override
+	public void removeFilter(WebSocketFilter aFilter) {
+	}
+
+	@Override
+	public FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPaket aPacket) {
+		return null;
+	}
+
+	@Override
+	public FilterResponse processPacketOut(WebSocketConnector aConnector, WebSocketPaket aPacket) {
+		return null;
 	}
 }

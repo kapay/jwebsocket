@@ -16,8 +16,8 @@
 package org.jwebsocket.plugins;
 
 import org.jwebsocket.api.PlugInResponse;
-import org.jwebsocket.api.PlugIn;
-import org.jwebsocket.api.PlugInChain;
+import org.jwebsocket.api.WebSocketPlugIn;
+import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPaket;
@@ -27,9 +27,9 @@ import org.jwebsocket.api.CloseReason;
  *
  * @author aschulze
  */
-public abstract class BasePlugIn implements PlugIn {
+public abstract class BasePlugIn implements WebSocketPlugIn {
 
-	private PlugInChain plugInChain = null;
+	private WebSocketPlugInChain plugInChain = null;
 
 	@Override
 	public abstract void engineStarted(WebSocketEngine aEngine);
@@ -66,7 +66,7 @@ public abstract class BasePlugIn implements PlugIn {
 	 * @param aPlugInChain
 	 */
 	@Override
-	public void setPlugInChain(PlugInChain aPlugInChain) {
+	public void setPlugInChain(WebSocketPlugInChain aPlugInChain) {
 		plugInChain = aPlugInChain;
 	}
 
@@ -74,7 +74,7 @@ public abstract class BasePlugIn implements PlugIn {
 	 * @return the plugInChain
 	 */
 	@Override
-	public PlugInChain getPlugInChain() {
+	public WebSocketPlugInChain getPlugInChain() {
 		return plugInChain;
 	}
 }

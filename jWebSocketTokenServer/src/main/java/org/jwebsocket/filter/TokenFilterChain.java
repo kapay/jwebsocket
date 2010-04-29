@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Filter API
+//	jWebSocket - TokenFilterChain Implementation
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,15 +13,43 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.api;
+package org.jwebsocket.filter;
+
+import org.jwebsocket.api.FilterResponse;
+import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketFilter;
+import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.token.Token;
 
 /**
  *
  * @author aschulze
  */
-public interface WebSocketFilter {
+public class TokenFilterChain extends BaseFilterChain {
 
-	void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket);
-	void processPacketOut(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket);
+	@Override
+	public void addFilter(WebSocketFilter aFilter) {
+	}
 
+	@Override
+	public void removeFilter(WebSocketFilter aFilter) {
+	}
+
+	@Override
+	public FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+		return null;
+	}
+
+	@Override
+	public FilterResponse processPacketOut(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+		return null;
+	}
+
+	public FilterResponse processTokenIn(WebSocketConnector aConnector, Token aToken) {
+		return null;
+	}
+
+	public FilterResponse processTokenOut(WebSocketConnector aConnector, Token aToken) {
+		return null;
+	}
 }

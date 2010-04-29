@@ -26,7 +26,7 @@ import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.api.CloseReason;
-import org.jwebsocket.api.PlugInChain;
+import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketFilterChain;
 import org.jwebsocket.kit.WebSocketException;
 
@@ -305,7 +305,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	@Override
-	public PlugInChain getPlugInChain() {
+	public WebSocketPlugInChain getPlugInChain() {
 		return null;
 	}
 

@@ -121,7 +121,7 @@ public interface WebSocketServer {
 	/**
 	 * @return the plugInChain
 	 */
-	public PlugInChain getPlugInChain();
+	public WebSocketPlugInChain getPlugInChain();
 
 	/**
 	 * @return the filterChain
