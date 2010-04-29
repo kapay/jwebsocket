@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.jwebsocket.config.xml.EngineConfig;
@@ -123,42 +124,42 @@ public final class JWebSocketConfig implements Config {
 	 * @return the engines
 	 */
 	public List<EngineConfig> getEngines() {
-		return engines;
+		return Collections.unmodifiableList(engines);
 	}
 
 	/**
 	 * @return the servers
 	 */
 	public List<ServerConfig> getServers() {
-		return servers;
+		return Collections.unmodifiableList(servers);
 	}
 
 	/**
 	 * @return the users
 	 */
 	public List<UserConfig> getUsers() {
-		return users;
+		return Collections.unmodifiableList(users);
 	}
 
 	/**
 	 * @return the plugins
 	 */
 	public List<PluginConfig> getPlugins() {
-		return plugins;
+		return Collections.unmodifiableList(plugins);
 	}
 
 	/**
 	 * @return the globalRights
 	 */
 	public List<RightConfig> getGlobalRights() {
-		return globalRights;
+		return Collections.unmodifiableList(globalRights);
 	}
 
 	/**
 	 * @return the globalRoles
 	 */
 	public List<RoleConfig> getGlobalRoles() {
-		return globalRoles;
+		return Collections.unmodifiableList(globalRoles);
 	}
 
 	/**
@@ -172,10 +173,8 @@ public final class JWebSocketConfig implements Config {
 				|| (plugins == null || plugins.isEmpty())
 				|| (globalRights == null || globalRights.isEmpty())
 				|| (globalRoles == null || globalRoles.isEmpty())) {
-			return;
+			throw new WebSocketRuntimeException(
+					"Missing one of the server configuration, please check your configuration file");
 		}
-		//throw new WebSocketRuntimeException(
-		//		"Missing one of the server configuration, please check your configuration file");
 	}
-
 }
