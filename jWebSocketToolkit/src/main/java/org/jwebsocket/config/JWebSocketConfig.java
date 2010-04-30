@@ -14,6 +14,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config;
 
+import static org.jwebsocket.config.JWebSocketConstants.DEFAULT_INSTALLATION;
+import static org.jwebsocket.config.JWebSocketConstants.DEFAULT_PROTOCOL;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -24,9 +27,6 @@ import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.config.xml.UserConfig;
 import org.jwebsocket.kit.WebSocketRuntimeException;
-import static org.jwebsocket.config.JWebSocketConstants.DEFAULT_INSTALLATION;
-import static org.jwebsocket.config.JWebSocketConstants.DEFAULT_PORT;
-import static org.jwebsocket.config.JWebSocketConstants.DEFAULT_PROTOCOL;
 
 /**
  * Represents the jWebSocket configuration. This class is immutable and should
@@ -42,6 +42,7 @@ public final class JWebSocketConfig implements Config {
 	private final String protocol;
 	private final String jWebSocketHome;
 	private final String libraryFolder;
+	private final String initializer;
 	
 	/**
 	 * @return the installation
@@ -75,6 +76,12 @@ public final class JWebSocketConfig implements Config {
 	public String getLibraryFolder() {
 		return libraryFolder;
 	}
+	/**
+	 * @return the initializer
+	 */
+	public String getInitializer() {
+		return initializer;
+	}
 
 	/**
 	 * @return the config
@@ -107,6 +114,7 @@ public final class JWebSocketConfig implements Config {
 		protocol = builder.protocol;
 		jWebSocketHome = builder.jWebSocketHome;
 		libraryFolder = builder.libraryFolder;
+		initializer = builder.initializer;
 		engines = builder.engines;
 		servers = builder.servers;
 		users = builder.users;
@@ -129,6 +137,7 @@ public final class JWebSocketConfig implements Config {
 		private  String protocol;
 		private  String jWebSocketHome;
 		private  String libraryFolder;
+		private  String initializer;
 		
 		private List<EngineConfig> engines;
 		private List<ServerConfig> servers;
@@ -150,6 +159,11 @@ public final class JWebSocketConfig implements Config {
 		
 		public Builder addJWebSocketHome(String theJWebSocketHome) {
 			jWebSocketHome = theJWebSocketHome;
+			return this;
+		}
+		
+		public Builder addInitializer(String theInitializer) {
+			initializer = theInitializer;
 			return this;
 		}
 		
