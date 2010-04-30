@@ -40,7 +40,6 @@ public final class JWebSocketConfig implements Config {
 
 	private final String installation;
 	private final String protocol;
-	private final int port;
 	private final String jWebSocketHome;
 	private final String libraryFolder;
 	
@@ -63,17 +62,6 @@ public final class JWebSocketConfig implements Config {
 		}
 		return protocol;
 	}
-
-	/**
-	 * @return the port
-	 */
-	public int getPort() {
-		if (port == 0) {
-			return DEFAULT_PORT;
-		}
-		return port;
-	}
-
 	/**
 	 * @return the jWebSocketHome
 	 */
@@ -117,7 +105,6 @@ public final class JWebSocketConfig implements Config {
 		}
 		installation = builder.installation;
 		protocol = builder.protocol;
-		port = builder.port;
 		jWebSocketHome = builder.jWebSocketHome;
 		libraryFolder = builder.libraryFolder;
 		engines = builder.engines;
@@ -140,7 +127,6 @@ public final class JWebSocketConfig implements Config {
 	public static class Builder {
 		private  String installation;
 		private  String protocol;
-		private  int port;
 		private  String jWebSocketHome;
 		private  String libraryFolder;
 		
@@ -159,11 +145,6 @@ public final class JWebSocketConfig implements Config {
 		
 		public Builder addProtocol(String theProtocol) {
 			protocol = theProtocol;
-			return this;
-		}
-		
-		public Builder addPort(int thePort) {
-			port = thePort;
 			return this;
 		}
 		
