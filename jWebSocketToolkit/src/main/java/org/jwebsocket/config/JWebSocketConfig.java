@@ -24,6 +24,9 @@ import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.config.xml.UserConfig;
 import org.jwebsocket.kit.WebSocketRuntimeException;
+import static org.jwebsocket.config.JWebSocketConstants.DEFAULT_INSTALLATION;
+import static org.jwebsocket.config.JWebSocketConstants.DEFAULT_PORT;
+import static org.jwebsocket.config.JWebSocketConstants.DEFAULT_PROTOCOL;
 
 /**
  * Represents the jWebSocket configuration. This class is immutable and should
@@ -34,6 +37,63 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  * 
  */
 public final class JWebSocketConfig implements Config {
+
+	private final String installation;
+	private final String protocol;
+	private final int port;
+	private final String jWebSocketHome;
+	private final String libraryFolder;
+	
+	/**
+	 * @return the installation
+	 */
+	public String getInstallation() {
+		if (installation == null || installation.length() == 0) {
+			return DEFAULT_INSTALLATION;
+		}
+		return installation;
+	}
+
+	/**
+	 * @return the protocol
+	 */
+	public String getProtocol() {
+		if (protocol == null || protocol.length() == 0) {
+			return DEFAULT_PROTOCOL;
+		}
+		return protocol;
+	}
+
+	/**
+	 * @return the port
+	 */
+	public int getPort() {
+		if (port == 0) {
+			return DEFAULT_PORT;
+		}
+		return port;
+	}
+
+	/**
+	 * @return the jWebSocketHome
+	 */
+	public String getjWebSocketHome() {
+		return jWebSocketHome;
+	}
+
+	/**
+	 * @return the libraryFolder
+	 */
+	public String getLibraryFolder() {
+		return libraryFolder;
+	}
+
+	/**
+	 * @return the config
+	 */
+	public static JWebSocketConfig getConfig() {
+		return config;
+	}
 
 	private final List<EngineConfig> engines;
 	private final List<ServerConfig> servers;
@@ -55,6 +115,11 @@ public final class JWebSocketConfig implements Config {
 			throw new WebSocketRuntimeException(
 					"Configuration is not loaded completely.");
 		}
+		installation = builder.installation;
+		protocol = builder.protocol;
+		port = builder.port;
+		jWebSocketHome = builder.jWebSocketHome;
+		libraryFolder = builder.libraryFolder;
 		engines = builder.engines;
 		servers = builder.servers;
 		users = builder.users;
@@ -69,11 +134,16 @@ public final class JWebSocketConfig implements Config {
 	 * Config builder class.
 	 * 
 	 * @author puran
-	 * @version $Id: JWebSocketConfig.java 345 2010-04-10 20:03:48Z
-	 *          fivefeetfurther $
+	 * @version $Id$
 	 * 
 	 */
 	public static class Builder {
+		private  String installation;
+		private  String protocol;
+		private  int port;
+		private  String jWebSocketHome;
+		private  String libraryFolder;
+		
 		private List<EngineConfig> engines;
 		private List<ServerConfig> servers;
 		private List<UserConfig> users;
@@ -81,6 +151,31 @@ public final class JWebSocketConfig implements Config {
 
 		private List<RightConfig> globalRights;
 		private List<RoleConfig> globalRoles;
+		
+		public Builder addInstallation(String theInstallation) {
+			installation = theInstallation;
+			return this;
+		}
+		
+		public Builder addProtocol(String theProtocol) {
+			protocol = theProtocol;
+			return this;
+		}
+		
+		public Builder addPort(int thePort) {
+			port = thePort;
+			return this;
+		}
+		
+		public Builder addJWebSocketHome(String theJWebSocketHome) {
+			jWebSocketHome = theJWebSocketHome;
+			return this;
+		}
+		
+		public Builder addLibraryFolder(String theLibraryFolder) {
+			libraryFolder = theLibraryFolder;
+			return this;
+		}
 
 		public Builder addEngines(List<EngineConfig> theEngines) {
 			engines = theEngines;
