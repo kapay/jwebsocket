@@ -33,7 +33,7 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
 /**
  * Intialize the engine, servers and plugins based on jWebSocket.xml configuration
  * @author puran
- * @version $Id:$
+ * @version $Id$
  * 
  */
 public final class JWebSocketXmlConfigInitializer implements WebSocketInitializer {
@@ -131,7 +131,7 @@ public final class JWebSocketXmlConfigInitializer implements WebSocketInitialize
 			}
 			// jars has to be located in %JWEBSOCKET_HOME%/libs (or some other
 			// folder defined in config file)
-			lWebSocketXML = lWebSocketHome + config.getLibraryFolder()
+			lWebSocketXML = lWebSocketHome + "libs"
 					+ lFileSep + fileName;
 		} else {
 			throw new WebSocketRuntimeException(
