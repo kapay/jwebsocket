@@ -27,17 +27,10 @@
 	<protocol>json</protocol>
 
 	<!-- 
-	     Path to JWEBSOCKET_HOME, This value will override if environmental variable 
-	     JWEBSOCKET_HOME is defined  
+	     This value will override the environmental variable 
+	     JWEBSOCKET_HOME.  
 	-->
 	<jWebSocketHome>/Users/puran/projects/jwebsockets/jWebSocket/trunk</jWebSocketHome>
-	
-	<!-- 
-		folder where all the jar files are located to load engine, servers, plugins if installation is 
-		'prod' mode. This folder should exists inside jWebSocketHome folder otherwise the server will 
-		throw runtime exception
-	 -->
-	<libraryFolder>libs</libraryFolder>
 	
 	<!-- 
 		initializer class required only in 'dev' mode so that client application can register custom servers, 
