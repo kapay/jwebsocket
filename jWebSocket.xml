@@ -2,7 +2,7 @@
 <!--
 	Document   : jWebSocket.xml
 	Created on : March 18, 2010, 10:24 AM
-	Author     : aschulze
+	Author     : aschulze,puran
 	Description:
 		Configuration of the jWebSocket server.
 		This includes engines, servers, plug-ins, rights, roles and users as
@@ -12,10 +12,35 @@
 <!-- jWebSocket server configuration -->
 <jWebSocket>
 
-	<!-- engines to be instantiated for jWebSocket -->
+	<!--  installation can be prod or dev. 
+		  'prod'- installation means all the classes will be loaded from the jars defined in 
+		   this configuration file
+		  'dev' - installation means running directly from the source, all the jar files given are 
+		   ignored.
+		   Default value if not specified would be 'dev'
+	 -->
+	<installation>dev</installation>
+	
+	<!--  define the protocol, default protocol if not specified is 'json' -->
+	<protocol>json</protocol>
+	<!--  port number, default port number if not specified is '8787' -->
+	<port>8787</port>
+	<!-- base folder path, This value will override if environmental variable JWEBSOCKET_HOME is defined  -->
+	<jWebSocketHome>/Users/puran/projects/jwebsockets/jWebSocket/trunk</jWebSocketHome>
+	
+	<!-- 
+		folder where all the jar files are located to load engine, servers, plugins if installation is 
+		'prod' mode. This folder should exists inside jWebSocketHome folder otherwise the server will 
+		throw runtime exception
+	 -->
+	<libraryFolder>libs</libraryFolder>
+	
+	<!-- engines to be instantiated for jWebSocket, Only one engine will be initialized 
+	 	 and run. The topmost engine configured will be picked and run by the system.
+	 -->
 	<engines>
 		<engine>
-			<name>TCPEngine</name>
+			<name>org.jwebsocket.tcp.engines.TCPEngine</name>
 			<id>tcp0</id>
 			<jar>jWebSocketTCPEngine-0.8.5.jar</jar>
 			<port>8788</port>
@@ -27,7 +52,7 @@
 			<timeout>120000</timeout>
 		</engine>
 		<engine>
-			<name>NettyEngine</name>
+			<name>org.jwebsocket.netty.engines.NettyEngine</name>
 			<id>netty0</id>
 			<jar>jWebSocketNettyEngine-0.8.5.jar</jar>
 			<port>8787</port>
@@ -136,18 +161,27 @@
 				<setting key="broadcastLoginEvent">true</setting>
 				<setting key="broadcastLogoutEvent">true</setting>
 			</settings>
+			<servers>
+				<server>ts0</server>
+			</servers>
 		</plugin>
 		<plugin>
 			<name>Chat</name>
 			<id>chat0</id>
 			<ns>org.jWebSocket.plugins.chat</ns>
 			<jar>jWebSocketPlugins-0.8.5.jar</jar>
+			<servers>
+				<server>ts0</server>
+			</servers>
 		</plugin>
 		<plugin>
 			<name>RPC</name>
 			<id>rpc0</id>
 			<ns>org.jWebSocket.plugins.rpc</ns>
 			<jar>jWebSocketPlugins-0.8.5.jar</jar>
+			<servers>
+				<server>ts0</server>
+			</servers>
 		</plugin>
 	</plugins>
 
