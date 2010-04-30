@@ -3,10 +3,9 @@
 	Document   : jWebSocket.xml
 	Created on : March 18, 2010, 10:24 AM
 	Author     : aschulze,puran
-	Description:
-		Configuration of the jWebSocket server.
-		This includes engines, servers, plug-ins, rights, roles and users as
-		well as logging.
+	Description: Configuration of the jWebSocket server.
+	This includes engines, servers, plug-ins, rights, roles and users as
+	well as logging.
 -->
 
 <!-- jWebSocket server configuration -->
@@ -21,10 +20,16 @@
 	 -->
 	<installation>dev</installation>
 	
-	<!--  define the protocol, default protocol if not specified is 'json' -->
+	<!--  
+	    define the protocol, default protocol if not specified is 'json'
+	    possible values are json,xml,csv
+	 -->
 	<protocol>json</protocol>
 
-	<!-- Path to JWEBSOCKET_HOME, This value will override if environmental variable JWEBSOCKET_HOME is defined  -->
+	<!-- 
+	     Path to JWEBSOCKET_HOME, This value will override if environmental variable 
+	     JWEBSOCKET_HOME is defined  
+	-->
 	<jWebSocketHome>/Users/puran/projects/jwebsockets/jWebSocket/trunk</jWebSocketHome>
 	
 	<!-- 
@@ -34,7 +39,15 @@
 	 -->
 	<libraryFolder>libs</libraryFolder>
 	
-	<!-- engines to be instantiated for jWebSocket, Only one engine will be initialized 
+	<!-- 
+		initializer class required only in 'dev' mode so that client application can register custom servers, 
+		plugins at compile time for debugging capability to test custom plugins and servers without a need for
+		jar files
+	-->
+	<initializerClass>org.jwebsocket.server.loader.JWebSocketInitializer</initializerClass>
+	
+	<!-- 
+	     engines to be instantiated for jWebSocket, Only one engine will be initialized 
 	 	 and run. The topmost engine configured will be picked and run by the system.
 	 -->
 	<engines>
