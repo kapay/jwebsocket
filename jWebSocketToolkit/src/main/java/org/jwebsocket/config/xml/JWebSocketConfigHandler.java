@@ -15,9 +15,9 @@
 package org.jwebsocket.config.xml;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -39,6 +39,11 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	
 	private static Logger log = Logging.getLogger(JWebSocketConfigHandler.class);
 
+	private static final String ELEMENT_INSTALLATION = "installation";
+	private static final String ELEMENT_PROTOCOL = "protocol";
+	private static final String ELEMENT_PORT = "port";
+	private static final String ELEMENT_JWEBSOCKET_HOME = "jWebSocketHome";
+	private static final String ELEMENT_LIBRARY_FOLDER = "libraryFolder";
 	private static final String ELEMENT_ENGINES = "engines";
 	private static final String ELEMENT_ENGINE = "engine";
 	private static final String ELEMENT_SERVERS = "servers";
@@ -53,7 +58,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_USER = "user";
 	private static final String JWEBSOCKET = "jWebSocket";
 
-	private static Map<String, ConfigHandler> handlerContext = new WeakHashMap<String, ConfigHandler>();
+	private static Map<String, ConfigHandler> handlerContext = new HashMap<String, ConfigHandler>();
 
 	// initialize the different config handler implementations
 	static {
@@ -76,7 +81,25 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 				streamReader.next();
 				if (streamReader.isStartElement()) {
 					String elementName = streamReader.getLocalName();
-					if (elementName.equals(ELEMENT_ENGINES)) {
+					
+					if (elementName.equals(ELEMENT_INSTALLATION)) {
+						streamReader.next();
+						configBuilder.addInstallation(streamReader.getText());
+					} else if (elementName.equals(ELEMENT_PROTOCOL)) {
+						streamReader.next();
+						configBuilder.addProtocol(streamReader.getText());
+					} else if (elementName.equals(ELEMENT_PORT)) {
+						streamReader.next();
+						String portStr = streamReader.getText();
+						int port = Integer.parseInt(portStr);
+						configBuilder.addPort(port);
+					} else if (elementName.equals(ELEMENT_JWEBSOCKET_HOME)) {
+						streamReader.next();
+						configBuilder.addJWebSocketHome(streamReader.getText());
+					} else if (elementName.equals(ELEMENT_LIBRARY_FOLDER)) {
+						streamReader.next();
+						configBuilder.addLibraryFolder(streamReader.getText());
+					} else if (elementName.equals(ELEMENT_ENGINES)) {
 						if (log.isDebugEnabled()) {
 							log.debug("Reading engines configuration");
 						}
