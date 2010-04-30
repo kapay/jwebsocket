@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>jWebSocket-Parent</artifactId>
 		<groupId>org.jwebsocket</groupId>
-		<version>0.8.5</version>
+		<version>0.9.0</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
@@ -100,6 +100,11 @@
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketCustomServer</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketToolkit</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
