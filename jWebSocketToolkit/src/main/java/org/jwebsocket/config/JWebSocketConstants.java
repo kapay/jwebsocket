@@ -47,6 +47,10 @@ public final class JWebSocketConstants {
 	 */
 	public static final String NS_BASE = "org.jWebSocket";
 	/**
+	 * constant for default installation
+	 */
+	public static final String DEFAULT_INSTALLATION = "dev";
+	/**
 	 * Constant for JWEBSOCKET_HOME
 	 */
 	public static final String JWEBSOCKET_HOME = "JWEBSOCKET_HOME";
@@ -62,6 +66,10 @@ public final class JWebSocketConstants {
 	 * Default engine for jWebSocket server.
 	 */
 	public static String DEFAULT_ENGINE = "tcp";
+	/**
+	 * Default protocol
+	 */
+	public static String DEFAULT_PROTOCOL = "json";
 	/**
 	 * Default socket port for jWebSocket clients.
 	 */
