@@ -99,6 +99,9 @@ public final class JWebSocketLoader {
 		//initialize security
 		SecurityFactory.initFromConfig(config);
 		
+		JWebSocketInitializer initializer = JWebSocketInitializer.getInitializer(config);
+		initializer.intializeEngine();
+		
 		return true;
 	}
 
