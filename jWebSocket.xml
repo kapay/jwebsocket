@@ -23,8 +23,7 @@
 	
 	<!--  define the protocol, default protocol if not specified is 'json' -->
 	<protocol>json</protocol>
-	<!--  port number, default port number if not specified is '8787' and '443' for SSL-->
-	<port>8787</port>
+
 	<!-- Path to JWEBSOCKET_HOME, This value will override if environmental variable JWEBSOCKET_HOME is defined  -->
 	<jWebSocketHome>/Users/puran/projects/jwebsockets/jWebSocket/trunk</jWebSocketHome>
 	
