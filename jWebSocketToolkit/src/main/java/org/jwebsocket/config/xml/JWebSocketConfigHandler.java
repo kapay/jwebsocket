@@ -88,11 +88,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					} else if (elementName.equals(ELEMENT_PROTOCOL)) {
 						streamReader.next();
 						configBuilder.addProtocol(streamReader.getText());
-					} else if (elementName.equals(ELEMENT_PORT)) {
-						streamReader.next();
-						String portStr = streamReader.getText();
-						int port = Integer.parseInt(portStr);
-						configBuilder.addPort(port);
 					} else if (elementName.equals(ELEMENT_JWEBSOCKET_HOME)) {
 						streamReader.next();
 						configBuilder.addJWebSocketHome(streamReader.getText());
