@@ -22,7 +22,7 @@ import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 
 /**
- * Class that performs initialization
+ * Class that performs the default servers and plugins initialization
  * 
  * @author puran
  * @version $Id: JWebSocketInitializer.java 399 2010-04-30 01:00:57Z mailtopuran$
