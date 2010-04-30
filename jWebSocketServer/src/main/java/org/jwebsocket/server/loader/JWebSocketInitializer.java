@@ -21,14 +21,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.kit.WebSocketRuntimeException;
-import org.jwebsocket.logging.Logging;
-import org.jwebsocket.api.WebSocketPlugIn;
+import org.jwebsocket.netty.engines.NettyEngine;
+import org.jwebsocket.tcp.engines.TCPEngine;
 
 /**
  * Class that performs initialization
@@ -41,8 +41,6 @@ public final class JWebSocketInitializer {
 	private JWebSocketConfig config;
 
 	private final JWebSocketJarClassLoader classLoader = new JWebSocketJarClassLoader();
-
-	private static Logger log = Logging.getLogger(JWebSocketInitializer.class);
 
 	/**
 	 * private constructor
@@ -70,31 +68,43 @@ public final class JWebSocketInitializer {
 	public WebSocketEngine intializeEngine() {
 		WebSocketEngine newEngine = null;
 		EngineConfig engine = config.getEngines().get(0);
-		try {
-			String jarFilePath = getLibraryFilePath(engine.getJar());
-			classLoader.addFile(jarFilePath);
-			Class<WebSocketEngine> engineClass = (Class<WebSocketEngine>)classLoader.loadClass(
-					engine.getName());
-			Constructor<WebSocketEngine> ctor = engineClass.getDeclaredConstructor(String.class, 
-					Integer.class, Integer.class);
-			ctor.setAccessible(true);
-			newEngine = ctor.newInstance(new Object[]{engine.getId(), engine.getPort(), engine.getTimeout()});
-		} catch (MalformedURLException e) {
-			throw new WebSocketRuntimeException(
-					"Couldn't Load the Jar file for engine, Make sure jar file exists or name is correct", e);
-		} catch (ClassNotFoundException e) {
-			throw new WebSocketRuntimeException(
-					"Engine class not found", e);
-		} catch (InstantiationException e) {
-			throw new WebSocketRuntimeException(
-					"Engine class could not be instantiated", e);
-		} catch (IllegalAccessException e) {
-			throw new WebSocketRuntimeException("Illegal Access Exception while intializing engine", e);
-		} catch (NoSuchMethodException e) {
-			throw new WebSocketRuntimeException("No Constructor found with given 3 arguments", e);
-	    } catch (InvocationTargetException e) {
-			throw new WebSocketRuntimeException("Exception invoking engine object", e);
-	    }
+		if ("dev".equals(config.getInstallation())) {
+		   try{
+			   //newEngine = new NettyEngine(engine.getId(), engine.getPort(), engine.getTimeout());
+			   newEngine = new TCPEngine(engine.getId(), engine.getPort(), engine.getTimeout());
+		   } catch (Exception e) {
+			   System.out.println("Error instantating engine: " + e.getMessage());
+			   System.exit(0);
+		   }
+		} else if ("prod".equalsIgnoreCase(config.getInstallation())) {
+			try {
+				String jarFilePath = getLibraryFolderPath(engine.getJar());
+				classLoader.addFile(jarFilePath);
+				Class<WebSocketEngine> engineClass = (Class<WebSocketEngine>)classLoader.loadClass(
+						engine.getName());
+				Constructor<WebSocketEngine> ctor = engineClass.getDeclaredConstructor(String.class, 
+						Integer.class, Integer.class);
+				ctor.setAccessible(true);
+				newEngine = ctor.newInstance(new Object[]{engine.getId(), engine.getPort(), engine.getTimeout()});
+			} catch (MalformedURLException e) {
+				throw new WebSocketRuntimeException(
+						"Couldn't Load the Jar file for engine, Make sure jar file exists or name is correct", e);
+			} catch (ClassNotFoundException e) {
+				throw new WebSocketRuntimeException(
+						"Engine class not found", e);
+			} catch (InstantiationException e) {
+				throw new WebSocketRuntimeException(
+						"Engine class could not be instantiated", e);
+			} catch (IllegalAccessException e) {
+				throw new WebSocketRuntimeException("Illegal Access Exception while intializing engine", e);
+			} catch (NoSuchMethodException e) {
+				throw new WebSocketRuntimeException("No Constructor found with given 3 arguments", e);
+		    } catch (InvocationTargetException e) {
+				throw new WebSocketRuntimeException("Exception invoking engine object", e);
+		    }
+		} else {
+			//ignore, installation has to be either 'dev' or 'prod'
+		}
 		return newEngine;
 	}
 
@@ -121,9 +131,13 @@ public final class JWebSocketInitializer {
 	 * 
 	 * @return the path to jWebSocket.xml
 	 */
-	private String getLibraryFilePath(String fileName) {
+	private String getLibraryFolderPath(String fileName) {
 		// try to obtain JWEBSOCKET_HOME environment variable
 		String lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
+		String jWebSocketHomeFromConfig = config.getjWebSocketHome();
+		if (jWebSocketHomeFromConfig != null) {
+			lWebSocketHome = jWebSocketHomeFromConfig;
+		}
 		String lFileSep = System.getProperty("file.separator");
 		String lWebSocketXML = "";
 		if (lWebSocketHome != null) {
@@ -131,8 +145,8 @@ public final class JWebSocketInitializer {
 			if (!lWebSocketHome.endsWith(lFileSep)) {
 				lWebSocketHome += lFileSep;
 			}
-			// jWebSocket.xml has to be located in %JWEBSOCKET_HOME%/conf
-			lWebSocketXML = lWebSocketHome + "libs" + lFileSep + fileName;
+			// jars has to be located in %JWEBSOCKET_HOME%/libs (or some other folder defined in config file)
+			lWebSocketXML = lWebSocketHome + config.getLibraryFolder() + lFileSep + fileName;
 		} else {
 			throw new WebSocketRuntimeException(
 					"JWEBSOCKET_HOME variable not set");
