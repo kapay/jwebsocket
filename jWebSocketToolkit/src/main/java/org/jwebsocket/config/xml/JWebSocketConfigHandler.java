@@ -41,7 +41,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
 	private static final String ELEMENT_INSTALLATION = "installation";
 	private static final String ELEMENT_PROTOCOL = "protocol";
-	private static final String ELEMENT_PORT = "port";
+	private static final String ELEMENT_INITIALIZER_CLASS = "initializerClass";
 	private static final String ELEMENT_JWEBSOCKET_HOME = "jWebSocketHome";
 	private static final String ELEMENT_LIBRARY_FOLDER = "libraryFolder";
 	private static final String ELEMENT_ENGINES = "engines";
@@ -85,6 +85,9 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					if (elementName.equals(ELEMENT_INSTALLATION)) {
 						streamReader.next();
 						configBuilder.addInstallation(streamReader.getText());
+					} else if (elementName.equals(ELEMENT_INITIALIZER_CLASS)) {
+						streamReader.next();
+						configBuilder.addInitializer(streamReader.getText());
 					} else if (elementName.equals(ELEMENT_PROTOCOL)) {
 						streamReader.next();
 						configBuilder.addProtocol(streamReader.getText());
