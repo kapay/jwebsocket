@@ -14,7 +14,12 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.console;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketInitializer;
+import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
@@ -22,7 +27,7 @@ import org.jwebsocket.server.loader.JWebSocketLoader;
 
 /**
  * @author puran
- * @version $Id:$
+ * @version $Id$
  *
  */
 public class StartJWebSocket {
@@ -49,7 +54,12 @@ public class StartJWebSocket {
 		JWebSocketLoader loader = new JWebSocketLoader();
 		
 		try {
-			loader.initialize();
+			WebSocketInitializer initializer = loader.initialize();
+			WebSocketEngine engine = loader.loadEngine(initializer);
+			List<WebSocketServer> servers = loader.loadServers(initializer, engine);
+			
+			//perform any clean up task for servers or any status related 
+			
 		} catch (WebSocketException e) {
 			System.out.println("ERROR during JWebSocketServer startup");
 			System.exit(0);
