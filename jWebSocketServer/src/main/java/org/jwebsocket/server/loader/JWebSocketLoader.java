@@ -52,15 +52,11 @@ public final class JWebSocketLoader {
 	private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
 	/**
-	 * Initialize the loaded components of the jWebSocket server system using
-	 * the configuration
-	 * 
-	 * @return {@code true} if intialization was completely successful,{@code
-	 *         false} otherwise.
-	 * @throws WebSocketException
-	 *             if exception occurs during intialization
+	 * Initialize the JWebSocket server system 
+	 * @return the initializer object
+	 * @throws WebSocketException if there's an exception while initialization
 	 */
-	public final boolean initialize() throws WebSocketException {
+	public final WebSocketInitializer initialize() throws WebSocketException {
 		String configPath = getConfigurationPath();
 		// load configuration
 		JWebSocketConfig config = loadConfiguration(configPath);
@@ -68,7 +64,17 @@ public final class JWebSocketLoader {
 		SecurityFactory.initFromConfig(config);
 
 		WebSocketInitializer initializer = getInitializer(config);
+		return initializer;
+	}
 
+	/**
+	 * Load the engine for the JWebSocket server system.
+	 * @param initializer the initalizer object
+	 * @return the loaded engine
+	 * @throws WebSocketException if exception while loading engine
+	 */
+	public final WebSocketEngine loadEngine(WebSocketInitializer initializer)
+			throws WebSocketException {
 		// initialize and start the engine
 		if (log.isInfoEnabled()) {
 			log.info("Initializing Engine..");
@@ -78,7 +84,18 @@ public final class JWebSocketLoader {
 		if (log.isInfoEnabled()) {
 			log.info("Started Initialized Engine");
 		}
+		return engine;
+	}
 
+	/**
+	 * Load the different servers on top of loaded engine
+	 * @param initializer the initializer object
+	 * @param engine the loaded engine on which to run servers
+	 * @return the list of loaded and running servers 
+	 * @throws WebSocketException if there's any exception
+	 */
+	public final List<WebSocketServer> loadServers(WebSocketInitializer initializer, 
+			WebSocketEngine engine) throws WebSocketException {
 		// initialize and start the server
 		if (log.isInfoEnabled()) {
 			log.info("Initializing Servers..");
@@ -101,7 +118,7 @@ public final class JWebSocketLoader {
 		if (log.isInfoEnabled()) {
 			log.info("Started Initialized Servers");
 		}
-		return true;
+		return servers;
 	}
 
 	/**
