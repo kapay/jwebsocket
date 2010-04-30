@@ -14,6 +14,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server.loader;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,23 +23,21 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
+import org.jwebsocket.plugins.rpc.RPCPlugIn;
+import org.jwebsocket.plugins.sharedobjects.SharedObjectsPlugIn;
+import org.jwebsocket.plugins.streaming.StreamingPlugIn;
+import org.jwebsocket.plugins.system.SystemPlugIn;
+import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.tcp.engines.TCPEngine;
 
 /**
+ * Abstract initializer class
  * @author puran
  * @version $Id:$
- *
  */
 public abstract class AbstractJWebSocketInitializer implements WebSocketInitializer {
-
-	private JWebSocketConfig config;
-
-	public AbstractJWebSocketInitializer(JWebSocketConfig theConfig) {
-		this.config = theConfig;
-	}
-
 	/**
 	 * Initialize the engine to be started based on configuration.
 	 * 
@@ -45,12 +45,8 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	 */
 	public WebSocketEngine intializeEngine() {
 		WebSocketEngine newEngine = null;
-		EngineConfig engine = config.getEngines().get(0);
 		try {
-			// newEngine = new NettyEngine(engine.getId(), engine.getPort(),
-			// engine.getTimeout());
-			newEngine = new TCPEngine(engine.getId(), engine.getPort(), engine
-					.getTimeout());
+			newEngine = new TCPEngine("tcp0", JWebSocketConstants.DEFAULT_PORT, JWebSocketConstants.DEFAULT_TIMEOUT);
 		} catch (Exception e) {
 			System.out.println("Error instantating engine: " + e.getMessage());
 			System.exit(0);
@@ -60,22 +56,42 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 
 	/**
 	 * Initializes all the servers configured via jWebSocket configuration
-	 * 
 	 * @return the list of initialized servers
 	 */
 	public List<WebSocketServer> initializeServers() {
+		List<WebSocketServer> servers = new ArrayList<WebSocketServer>();
+		// instantiate the Token server by default
+		TokenServer tokenServer = new TokenServer("ts0");
+		servers.add(tokenServer);
+		
 		List<WebSocketServer> customServers = initializeCustomServers();
-		throw new UnsupportedOperationException("Not supported yet");
+		if (customServers != null) {
+			servers.addAll(customServers);
+		}
+		return servers;
 	}
-
-	/**
-	 * Initialize the list of plugins defined in via jWebSocket configuration
-	 * 
-	 * @return the map of server id and the list of plugins for each server
-	 */
+	
+	 /**
+	  * intialize the plugins as per the serverss
+	  * @return the map of server id to list of plugins
+	  */
 	public Map<String, List<WebSocketPlugIn>> initializePlugins() {
-		Map<String, List<WebSocketPlugIn>> customPlugins = initializeCustomPlugins();
-		throw new UnsupportedOperationException("Not supported yet");
+		
+		Map<String, List<WebSocketPlugIn>> pluginMap = new HashMap<String, List<WebSocketPlugIn>>();
+		
+		List<WebSocketPlugIn> defaultPlugins = new ArrayList<WebSocketPlugIn>();
+		defaultPlugins.add(new SystemPlugIn());
+		defaultPlugins.add(new RPCPlugIn());
+		defaultPlugins.add(new StreamingPlugIn());
+		defaultPlugins.add(new SharedObjectsPlugIn());
+		defaultPlugins.add(new FlashBridgePlugIn());
+		
+		pluginMap.put("ts0", defaultPlugins);
+		
+		Map<String, List<WebSocketPlugIn>> customPluginMap = initializeCustomPlugins();
+		pluginMap.putAll(customPluginMap);
+		
+		return pluginMap;
 	}
 	
     /**
