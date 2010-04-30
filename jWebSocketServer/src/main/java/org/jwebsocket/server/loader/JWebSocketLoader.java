@@ -14,22 +14,29 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server.loader;
 
+import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketInitializer;
+import org.jwebsocket.api.WebSocketPlugIn;
+import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.JWebSocketConfigHandler;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.security.SecurityFactory;
-import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
 
 /**
  * An object that does the process of loading configuration, intialization of
@@ -45,15 +52,113 @@ public final class JWebSocketLoader {
 	private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
 	/**
+	 * Initialize the loaded components of the jWebSocket server system using
+	 * the configuration
+	 * 
+	 * @return {@code true} if intialization was completely successful,{@code
+	 *         false} otherwise.
+	 * @throws WebSocketException
+	 *             if exception occurs during intialization
+	 */
+	public final boolean initialize() throws WebSocketException {
+		String configPath = getConfigurationPath();
+		// load configuration
+		JWebSocketConfig config = loadConfiguration(configPath);
+		// initialize security
+		SecurityFactory.initFromConfig(config);
+
+		WebSocketInitializer initializer = getInitializer(config);
+
+		// initialize and start the engine
+		if (log.isInfoEnabled()) {
+			log.info("Initializing Engine..");
+		}
+		WebSocketEngine engine = initializer.intializeEngine();
+		engine.startEngine();
+		if (log.isInfoEnabled()) {
+			log.info("Started Initialized Engine");
+		}
+
+		// initialize and start the server
+		if (log.isInfoEnabled()) {
+			log.info("Initializing Servers..");
+		}
+		List<WebSocketServer> servers = initializer.initializeServers();
+		Map<String, List<WebSocketPlugIn>> pluginMap = initializer
+				.initializePlugins();
+		for (WebSocketServer server : servers) {
+			server.addEngine(engine);
+			List<WebSocketPlugIn> plugins = pluginMap.get(server.getId());
+			if (log.isInfoEnabled()) {
+				log.info("Initializing Server Plugins..");
+			}
+			for (WebSocketPlugIn plugin : plugins) {
+				server.getPlugInChain().addPlugIn(plugin);
+			}
+			// now start the server
+			server.startServer();
+		}
+		if (log.isInfoEnabled()) {
+			log.info("Started Initialized Servers");
+		}
+		return true;
+	}
+
+	/**
+	 * Returns the appropriate {@code WebSocketInitializer} implementation
+	 * 
+	 * @param config
+	 *            the config object
+	 * @return the {@code WebSocketInitializer} object
+	 */
+	private WebSocketInitializer getInitializer(JWebSocketConfig config) {
+		WebSocketInitializer initializer = null;
+		if ("dev".equals(config.getInstallation())) {
+			initializer = instantiateInitializer(config.getInitializer());
+		} else if ("prod".equals(config.getInstallation())) {
+			initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
+		} else {
+			// ignore
+		}
+		return initializer;
+	}
+
+	/**
+	 * 
+	 * @param initializerClass
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private WebSocketInitializer instantiateInitializer(String initializerClass) {
+		WebSocketInitializer initializer = null;
+		try {
+			Class<WebSocketInitializer> clz = (Class<WebSocketInitializer>) Class
+					.forName(initializerClass);
+			initializer = clz.newInstance();
+		} catch (ClassNotFoundException e) {
+			log.error("Error instantiating initializer", e);
+		} catch (InstantiationException e) {
+			log.error("Error instantiating initializer", e);
+		} catch (IllegalAccessException e) {
+			log.error("Error instantiating initializer", e);
+		}
+		if (initializer == null) {
+			initializer = new JWebSocketInitializer();
+		}
+		return initializer;
+	}
+
+	/**
 	 * Load all the configurations based on jWebSocket.xml file at the given
 	 * <tt>configFilePath</tt> location.
 	 * 
-	 * @param configFilePath the path to jWebSocket.xml file
+	 * @param configFilePath
+	 *            the path to jWebSocket.xml file
 	 * @return the web socket config object with all the configuration
 	 * @throws WebSocketException
 	 *             if there's any while loading configuration
 	 */
-	public JWebSocketConfig loadConfiguration(final String configFilePath)
+	private JWebSocketConfig loadConfiguration(final String configFilePath)
 			throws WebSocketException {
 		JWebSocketConfig config = null;
 		File lFile = new File(configFilePath);
@@ -81,32 +186,8 @@ public final class JWebSocketLoader {
 	}
 
 	/**
-	 * Initialize the loaded components of the jWebSocket server system using
-	 * the configuration
-	 * 
-	 * @param configuration
-	 *            the jWebSocket configuration
-	 * @return {@code true} if intialization was completely successful,{@code
-	 *         false} otherwise.
-	 * @throws WebSocketException
-	 *             if exception occurs during intialization
-	 */
-	public boolean initialize(final JWebSocketConfig configuration)
-			throws WebSocketException {
-		String configPath = getConfigurationPath();
-		//load configuration
-		JWebSocketConfig config = loadConfiguration(configPath);
-		//initialize security
-		SecurityFactory.initFromConfig(config);
-		
-		JWebSocketInitializer initializer = JWebSocketInitializer.getInitializer(config);
-		initializer.intializeEngine();
-		
-		return true;
-	}
-
-	/**
 	 * private method that checks the path of the jWebSocket.xml file
+	 * 
 	 * @return the path to jWebSocket.xml
 	 */
 	private String getConfigurationPath() {
