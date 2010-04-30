@@ -118,10 +118,6 @@ public final class JWebSocketXmlConfigInitializer implements WebSocketInitialize
 	private String getLibraryFolderPath(String fileName) {
 		// try to obtain JWEBSOCKET_HOME environment variable
 		String lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
-		String jWebSocketHomeFromConfig = config.getjWebSocketHome();
-		if (jWebSocketHomeFromConfig != null) {
-			lWebSocketHome = jWebSocketHomeFromConfig;
-		}
 		String lFileSep = System.getProperty("file.separator");
 		String lWebSocketXML = "";
 		if (lWebSocketHome != null) {
