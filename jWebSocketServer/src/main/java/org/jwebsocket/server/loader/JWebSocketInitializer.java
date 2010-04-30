@@ -14,143 +14,35 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server.loader;
 
-import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.config.xml.EngineConfig;
-import org.jwebsocket.kit.WebSocketRuntimeException;
-import org.jwebsocket.netty.engines.NettyEngine;
-import org.jwebsocket.tcp.engines.TCPEngine;
 
 /**
  * Class that performs initialization
  * 
  * @author puran
- * @version $Id$
+ * @version $Id: JWebSocketInitializer.java 399 2010-04-30 01:00:57Z mailtopuran$
  */
-public final class JWebSocketInitializer {
-
-	private JWebSocketConfig config;
-
-	private final JWebSocketJarClassLoader classLoader = new JWebSocketJarClassLoader();
+public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
 
 	/**
-	 * private constructor
+	 * {@inheritDoc}
 	 */
-	private JWebSocketInitializer(JWebSocketConfig theConfig) {
-		this.config = theConfig;
+	@Override
+	public Map<String, List<WebSocketPlugIn>> initializeCustomPlugins() {
+		return Collections.emptyMap();
 	}
 
 	/**
-	 * Returns the initializer object
-	 * 
-	 * @param config
-	 *            the jWebSocket config
-	 * @return the initializer object
+	 * {@inheritDoc}
 	 */
-	public static JWebSocketInitializer getInitializer(JWebSocketConfig config) {
-		return new JWebSocketInitializer(config);
+	@Override
+	public List<WebSocketServer> initializeCustomServers() {
+		return Collections.emptyList();
 	}
 
-	/**
-	 * Initialize the engine to be started based on configuration.
-	 * @return the initialized engine ready to start
-	 */
-	@SuppressWarnings("unchecked")
-	public WebSocketEngine intializeEngine() {
-		WebSocketEngine newEngine = null;
-		EngineConfig engine = config.getEngines().get(0);
-		if ("dev".equals(config.getInstallation())) {
-		   try{
-			   //newEngine = new NettyEngine(engine.getId(), engine.getPort(), engine.getTimeout());
-			   newEngine = new TCPEngine(engine.getId(), engine.getPort(), engine.getTimeout());
-		   } catch (Exception e) {
-			   System.out.println("Error instantating engine: " + e.getMessage());
-			   System.exit(0);
-		   }
-		} else if ("prod".equalsIgnoreCase(config.getInstallation())) {
-			try {
-				String jarFilePath = getLibraryFolderPath(engine.getJar());
-				classLoader.addFile(jarFilePath);
-				Class<WebSocketEngine> engineClass = (Class<WebSocketEngine>)classLoader.loadClass(
-						engine.getName());
-				Constructor<WebSocketEngine> ctor = engineClass.getDeclaredConstructor(String.class, 
-						Integer.class, Integer.class);
-				ctor.setAccessible(true);
-				newEngine = ctor.newInstance(new Object[]{engine.getId(), engine.getPort(), engine.getTimeout()});
-			} catch (MalformedURLException e) {
-				throw new WebSocketRuntimeException(
-						"Couldn't Load the Jar file for engine, Make sure jar file exists or name is correct", e);
-			} catch (ClassNotFoundException e) {
-				throw new WebSocketRuntimeException(
-						"Engine class not found", e);
-			} catch (InstantiationException e) {
-				throw new WebSocketRuntimeException(
-						"Engine class could not be instantiated", e);
-			} catch (IllegalAccessException e) {
-				throw new WebSocketRuntimeException("Illegal Access Exception while intializing engine", e);
-			} catch (NoSuchMethodException e) {
-				throw new WebSocketRuntimeException("No Constructor found with given 3 arguments", e);
-		    } catch (InvocationTargetException e) {
-				throw new WebSocketRuntimeException("Exception invoking engine object", e);
-		    }
-		} else {
-			//ignore, installation has to be either 'dev' or 'prod'
-		}
-		return newEngine;
-	}
-
-	/**
-	 * Initializes all the servers configured via jWebSocket configuration
-	 * 
-	 * @return the list of initialized servers
-	 */
-	public List<WebSocketServer> initializeServers() {
-		throw new UnsupportedOperationException("Not supported yet");
-	}
-
-	/**
-	 * Initialize the list of plugins defined in via jWebSocket configuration
-	 * 
-	 * @return the list of plugins
-	 */
-	public List<WebSocketPlugIn> initializePlugins() {
-		throw new UnsupportedOperationException("Not supported yet");
-	}
-
-	/**
-	 * private method that checks the path of the jWebSocket.xml file
-	 * 
-	 * @return the path to jWebSocket.xml
-	 */
-	private String getLibraryFolderPath(String fileName) {
-		// try to obtain JWEBSOCKET_HOME environment variable
-		String lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
-		String jWebSocketHomeFromConfig = config.getjWebSocketHome();
-		if (jWebSocketHomeFromConfig != null) {
-			lWebSocketHome = jWebSocketHomeFromConfig;
-		}
-		String lFileSep = System.getProperty("file.separator");
-		String lWebSocketXML = "";
-		if (lWebSocketHome != null) {
-			// append trailing slash if needed
-			if (!lWebSocketHome.endsWith(lFileSep)) {
-				lWebSocketHome += lFileSep;
-			}
-			// jars has to be located in %JWEBSOCKET_HOME%/libs (or some other folder defined in config file)
-			lWebSocketXML = lWebSocketHome + config.getLibraryFolder() + lFileSep + fileName;
-		} else {
-			throw new WebSocketRuntimeException(
-					"JWEBSOCKET_HOME variable not set");
-		}
-		return lWebSocketXML;
-	}
 }
