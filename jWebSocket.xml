@@ -27,12 +27,6 @@
 	<protocol>json</protocol>
 
 	<!-- 
-	     This value will override the environmental variable 
-	     JWEBSOCKET_HOME.  
-	-->
-	<jWebSocketHome>/Users/puran/projects/jwebsockets/jWebSocket/trunk</jWebSocketHome>
-	
-	<!-- 
 		initializer class required only in 'dev' mode so that client application can register custom servers, 
 		plugins at compile time for debugging capability to test custom plugins and servers without a need for
 		jar files
