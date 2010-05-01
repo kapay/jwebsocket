@@ -39,8 +39,7 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  * configuration
  * 
  * @author puran
- * @version $Id: JWebSocketXmlConfigInitializer.java 421 2010-05-01 18:49:47Z
- *          mailtopuran $
+ * @version $Id$
  * 
  */
 public final class JWebSocketXmlConfigInitializer implements
