@@ -141,9 +141,11 @@ public final class JWebSocketLoader {
 	}
 
 	/**
-	 * 
-	 * @param initializerClass
-	 * @return
+	 * Instantiate the initializer custom initializer class if there's any configured 
+	 * via xml configuration, otherwise return the default {@code JWebSocketInitializer} class
+	 * that initialize all the default engine, plugins and servers.
+	 * @param initializerClass the class name to instantiate
+	 * @return the instantiated initializer object
 	 */
 	@SuppressWarnings("unchecked")
 	private WebSocketInitializer instantiateInitializer(String initializerClass) {
