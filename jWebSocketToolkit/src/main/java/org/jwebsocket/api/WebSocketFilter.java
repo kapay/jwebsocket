@@ -24,6 +24,6 @@ import org.jwebsocket.kit.FilterResponse;
 public interface WebSocketFilter {
 
 	void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket);
-	void processPacketOut(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket);
+	void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket);
 
 }

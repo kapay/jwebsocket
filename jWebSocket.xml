@@ -41,7 +41,7 @@
 		<engine>
 			<name>org.jwebsocket.tcp.engines.TCPEngine</name>
 			<id>tcp0</id>
-			<jar>jWebSocketTCPEngine-0.8.5.jar</jar>
+			<jar>jWebSocketTCPEngine-0.9.0.jar</jar>
 			<port>8788</port>
 			<!-- these domains are accepted by the engine listening on the above mentioned port -->
 			<domains>
@@ -53,7 +53,7 @@
 		<engine>
 			<name>org.jwebsocket.netty.engines.NettyEngine</name>
 			<id>netty0</id>
-			<jar>jWebSocketNettyEngine-0.8.5.jar</jar>
+			<jar>jWebSocketNettyEngine-0.9.0.jar</jar>
 			<port>8787</port>
 			<!-- these domains are accepted by the engine listening on the above mentioned port -->
 			<domains>
@@ -69,12 +69,12 @@
 		<server>
 			<name>TokenServer</name>
 			<id>ts0</id>
-			<jar>jWebSocketTokenServer-0.8.5.jar</jar>
+			<jar>jWebSocketTokenServer-0.9.0.jar</jar>
 		</server>
 		<server>
 			<name>CustomServer</name>
 			<id>cs0</id>
-			<jar>jWebSocketCustomServer-0.8.5.jar</jar>
+			<jar>jWebSocketCustomServer-0.9.0.jar</jar>
 		</server>
 	</servers>
 
@@ -151,7 +151,7 @@
 			<name>System</name>
 			<ns>org.jWebSocket.plugins.system</ns>
 			<id>system0</id>
-			<jar>jWebSocketPlugins-0.8.5.jar</jar>
+			<jar>jWebSocketPlugins-0.9.0.jar</jar>
 			<!-- plug-in specific settings -->
 			<settings>
 				<!-- specify whether open,close,login,logout event should be broadcasted -->
@@ -168,7 +168,7 @@
 			<name>Chat</name>
 			<id>chat0</id>
 			<ns>org.jWebSocket.plugins.chat</ns>
-			<jar>jWebSocketPlugins-0.8.5.jar</jar>
+			<jar>jWebSocketPlugins-0.9.0.jar</jar>
 			<servers>
 				<server>ts0</server>
 			</servers>
@@ -177,12 +177,39 @@
 			<name>RPC</name>
 			<id>rpc0</id>
 			<ns>org.jWebSocket.plugins.rpc</ns>
-			<jar>jWebSocketPlugins-0.8.5.jar</jar>
+			<jar>jWebSocketPlugins-0.9.0.jar</jar>
 			<servers>
 				<server>ts0</server>
 			</servers>
 		</plugin>
 	</plugins>
+
+	<!-- filters to be instantiated for jWebSocket -->
+	<filters>
+		<filter>
+			<name>System</name>
+			<ns>org.jWebSocket.filters.system</ns>
+			<id>system0</id>
+			<jar>jWebSocketPlugins-0.9.0.jar</jar>
+			<!-- plug-in specific settings -->
+			<settings>
+				<!-- specify whether open,close,login,logout event should be broadcasted -->
+				<setting key="key">value</setting>
+			</settings>
+			<servers>
+				<server>ts0</server>
+			</servers>
+		</plugin>
+		<plugin>
+			<name>UserFilter</name>
+			<id>user0</id>
+			<ns>org.jWebSocket.filters.custom</ns>
+			<jar>jWebSocketPlugins-0.9.0.jar</jar>
+			<servers>
+				<server>ts0</server>
+			</servers>
+		</plugin>
+	</filters>
 
 	<!-- jWebSocket logging configuration -->
 	<logging>

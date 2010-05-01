@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Filter Plug-In
+//	jWebSocket - System Filter for security
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,42 +13,26 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.plugins.filter;
+package org.jwebsocket.filters.system;
 
-import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketConstants;
-import org.jwebsocket.logging.Logging;
-import org.jwebsocket.kit.PlugInResponse;
-import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.filter.TokenFilter;
+import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.token.Token;
 
 /**
- * Provides mechanisms to filter or manipulate packets before they are passed
- * to the plug-ins.
+ *
  * @author aschulze
  */
-public class FilterPlugIn extends TokenPlugIn {
+public class SystemFilter extends TokenFilter {
 
-	private static Logger log = Logging.getLogger(FilterPlugIn.class);
-	private String NS_FILTER = JWebSocketConstants.NS_BASE + ".plugins.filter";
-
-	/**
-	 *
-	 */
-	public FilterPlugIn() {
-		// specify default name space
-		this.setNamespace(NS_FILTER);
+	@Override
+	public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 	}
 
 	@Override
-	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-		String lType = aToken.getType();
-		String lNS = aToken.getNS();
-
-		// TODO: implement reasonable conditions here!
-		if (false) {
-			aResponse.abortChain();
-		}
+	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource,
+			WebSocketConnector aTarget, Token aToken) {
 	}
+
 }

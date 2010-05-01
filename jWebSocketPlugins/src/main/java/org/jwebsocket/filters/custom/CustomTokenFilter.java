@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - BaseFilter Implementation
+//	jWebSocket - Custom Token Filter for demonstration purposes
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,24 +13,26 @@
 //	You should have received a copy of the GNU General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.filter;
+package org.jwebsocket.filters.custom;
 
-import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.api.WebSocketFilter;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.filter.TokenFilter;
+import org.jwebsocket.kit.FilterResponse;
+import org.jwebsocket.token.Token;
 
 /**
  *
  * @author aschulze
  */
-public class BaseFilter implements WebSocketFilter {
+public class CustomTokenFilter extends TokenFilter {
 
 	@Override
-	public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket) {
+	public void processTokenIn(FilterResponse aResponse,
+			WebSocketConnector aConnector, Token aToken) {
 	}
 
 	@Override
-	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket) {
+	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource,
+			WebSocketConnector aTarget, Token aToken) {
 	}
 }

@@ -27,16 +27,20 @@ import org.jwebsocket.token.Token;
 public class TokenFilter extends BaseFilter {
 
 	@Override
-	public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket) {
+	public void processPacketIn(FilterResponse aResponse,
+			WebSocketConnector aConnector, WebSocketPaket aPacket) {
 	}
 
 	@Override
-	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket) {
+	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource,
+			WebSocketConnector aTarget, WebSocketPaket aPacket) {
 	}
 
-	public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+	public void processTokenIn(FilterResponse aResponse,
+			WebSocketConnector aConnector, Token aToken) {
 	}
 
-	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource,
+			WebSocketConnector aTarget, Token aToken) {
 	}
 }

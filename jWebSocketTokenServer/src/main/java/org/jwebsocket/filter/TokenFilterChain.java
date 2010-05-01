@@ -80,6 +80,17 @@ public class TokenFilterChain extends BaseFilterChain {
 	}
 
 	public FilterResponse processTokenOut(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
-		return null;
+		FilterResponse lFilterResponse = new FilterResponse();
+		for (WebSocketFilter filter : getFilters()) {
+			try {
+				((TokenFilter) filter).processTokenOut(lFilterResponse, aSource, aTarget, aToken);
+			} catch (Exception ex) {
+				log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			}
+			if (lFilterResponse.isChainAborted()) {
+				break;
+			}
+		}
+		return lFilterResponse;
 	}
 }

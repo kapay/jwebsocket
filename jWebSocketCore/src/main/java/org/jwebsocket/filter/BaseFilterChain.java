@@ -53,10 +53,12 @@ public class BaseFilterChain implements WebSocketFilterChain {
 
 	@Override
 	public void addFilter(WebSocketFilter aFilter) {
+		filters.add(aFilter);
 	}
 
 	@Override
 	public void removeFilter(WebSocketFilter aFilter) {
+		filters.remove(aFilter);
 	}
 
 	/**
@@ -70,11 +72,25 @@ public class BaseFilterChain implements WebSocketFilterChain {
 
 	@Override
 	public FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPaket aPacket) {
-		return null;
+		FilterResponse lResponse = new FilterResponse();
+		for (WebSocketFilter lFilter : filters) {
+			lFilter.processPacketIn(lResponse, aConnector, aPacket);
+			if (lResponse.isChainAborted()) {
+				break;
+			}
+		}
+		return lResponse;
 	}
 
 	@Override
 	public FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket) {
-		return null;
+		FilterResponse lResponse = new FilterResponse();
+		for (WebSocketFilter lFilter : filters) {
+			lFilter.processPacketOut(lResponse, aSource, aTarget, aPacket);
+			if (lResponse.isChainAborted()) {
+				break;
+			}
+		}
+		return lResponse;
 	}
 }
