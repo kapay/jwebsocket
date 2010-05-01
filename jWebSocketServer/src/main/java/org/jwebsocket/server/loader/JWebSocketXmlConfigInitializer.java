@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,16 +30,21 @@ import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
- * Intialize the engine, servers and plugins based on jWebSocket.xml configuration
+ * Intialize the engine, servers and plugins based on jWebSocket.xml
+ * configuration
+ * 
  * @author puran
- * @version $Id$
+ * @version $Id: JWebSocketXmlConfigInitializer.java 421 2010-05-01 18:49:47Z
+ *          mailtopuran $
  * 
  */
-public final class JWebSocketXmlConfigInitializer implements WebSocketInitializer {
+public final class JWebSocketXmlConfigInitializer implements
+		WebSocketInitializer {
 
 	private final JWebSocketJarClassLoader classLoader = new JWebSocketJarClassLoader();
 
@@ -66,9 +72,44 @@ public final class JWebSocketXmlConfigInitializer implements WebSocketInitialize
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, List<WebSocketPlugIn>> initializePlugins() {
-		return null;
+		Map<String, List<WebSocketPlugIn>> pluginMap = new HashMap<String, List<WebSocketPlugIn>>();
+		
+		//populate the plugin map with server id and empty list
+		for (ServerConfig serverConfig : config.getServers()) {
+			pluginMap.put(serverConfig.getId(), new ArrayList<WebSocketPlugIn>());
+		}
+		//now initialize the pluin
+		for (PluginConfig pluginConfig : config.getPlugins()) {
+			try {
+				String jarFilePath = getLibraryFolderPath(pluginConfig.getJar());
+				classLoader.addFile(jarFilePath);
+				Class<WebSocketPlugIn> pluginClass = (Class<WebSocketPlugIn>) classLoader
+						.loadClass(pluginConfig.getName());
+				WebSocketPlugIn plugin = pluginClass.newInstance();
+				
+				//now add the plugin to plugin map based on server ids
+				for (String serverId : pluginConfig.getServers()) {
+					pluginMap.get(serverId).add(plugin);
+				}
+				
+			} catch (MalformedURLException e) {
+				throw new WebSocketRuntimeException(
+						"Couldn't Load the Jar file for server, Make sure jar file exists or name is correct",
+						e);
+			} catch (ClassNotFoundException e) {
+				throw new WebSocketRuntimeException("Server class not found", e);
+			} catch (InstantiationException e) {
+				throw new WebSocketRuntimeException(
+						"Server class could not be instantiated", e);
+			} catch (IllegalAccessException e) {
+				throw new WebSocketRuntimeException(
+						"Illegal Access Exception while intializing server", e);
+			} 
+		}
+		return pluginMap;
 	}
 
 	/**
@@ -89,8 +130,9 @@ public final class JWebSocketXmlConfigInitializer implements WebSocketInitialize
 				Constructor<WebSocketServer> ctor = serverClass
 						.getDeclaredConstructor(String.class);
 				ctor.setAccessible(true);
-				server = ctor.newInstance(new Object[] { serverConfig.getId() });
-				//add the initialize server to the list
+				server = ctor
+						.newInstance(new Object[] { serverConfig.getId() });
+				// add the initialize server to the list
 				servers.add(server);
 			} catch (MalformedURLException e) {
 				throw new WebSocketRuntimeException(
@@ -171,8 +213,7 @@ public final class JWebSocketXmlConfigInitializer implements WebSocketInitialize
 			}
 			// jars has to be located in %JWEBSOCKET_HOME%/libs (or some other
 			// folder defined in config file)
-			lWebSocketXML = lWebSocketHome + "libs"
-					+ lFileSep + fileName;
+			lWebSocketXML = lWebSocketHome + "libs" + lFileSep + fileName;
 		} else {
 			throw new WebSocketRuntimeException(
 					"JWEBSOCKET_HOME variable not set");
