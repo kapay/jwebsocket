@@ -87,6 +87,7 @@ public final class JWebSocketXmlConfigInitializer implements
 				classLoader.addFile(jarFilePath);
 				Class<WebSocketPlugIn> pluginClass = (Class<WebSocketPlugIn>) classLoader
 						.loadClass(pluginConfig.getName());
+				
 				WebSocketPlugIn plugin = pluginClass.newInstance();
 				
 				//now add the plugin to plugin map based on server ids
@@ -96,16 +97,16 @@ public final class JWebSocketXmlConfigInitializer implements
 				
 			} catch (MalformedURLException e) {
 				throw new WebSocketRuntimeException(
-						"Couldn't Load the Jar file for server, Make sure jar file exists or name is correct",
+						"Couldn't Load the Jar file for plugin, Make sure jar file exists or name is correct",
 						e);
 			} catch (ClassNotFoundException e) {
-				throw new WebSocketRuntimeException("Server class not found", e);
+				throw new WebSocketRuntimeException("Plugin class not found", e);
 			} catch (InstantiationException e) {
 				throw new WebSocketRuntimeException(
-						"Server class could not be instantiated", e);
+						"Plugin class could not be instantiated", e);
 			} catch (IllegalAccessException e) {
 				throw new WebSocketRuntimeException(
-						"Illegal Access Exception while intializing server", e);
+						"Illegal Access Exception while intializing plugin", e);
 			} 
 		}
 		return pluginMap;
