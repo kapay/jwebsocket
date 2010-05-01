@@ -19,6 +19,7 @@ import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
@@ -61,14 +63,56 @@ public final class JWebSocketXmlConfigInitializer implements WebSocketInitialize
 		return new JWebSocketXmlConfigInitializer(config);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Map<String, List<WebSocketPlugIn>> initializePlugins() {
 		return null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<WebSocketServer> initializeServers() {
-		return null;
+		List<WebSocketServer> servers = new ArrayList<WebSocketServer>();
+		List<ServerConfig> serverConfigs = config.getServers();
+		for (ServerConfig serverConfig : serverConfigs) {
+			WebSocketServer server = null;
+			try {
+				String jarFilePath = getLibraryFolderPath(serverConfig.getJar());
+				classLoader.addFile(jarFilePath);
+				Class<WebSocketServer> serverClass = (Class<WebSocketServer>) classLoader
+						.loadClass(serverConfig.getName());
+				Constructor<WebSocketServer> ctor = serverClass
+						.getDeclaredConstructor(String.class);
+				ctor.setAccessible(true);
+				server = ctor.newInstance(new Object[] { serverConfig.getId() });
+				//add the initialize server to the list
+				servers.add(server);
+			} catch (MalformedURLException e) {
+				throw new WebSocketRuntimeException(
+						"Couldn't Load the Jar file for server, Make sure jar file exists or name is correct",
+						e);
+			} catch (ClassNotFoundException e) {
+				throw new WebSocketRuntimeException("Server class not found", e);
+			} catch (InstantiationException e) {
+				throw new WebSocketRuntimeException(
+						"Server class could not be instantiated", e);
+			} catch (IllegalAccessException e) {
+				throw new WebSocketRuntimeException(
+						"Illegal Access Exception while intializing server", e);
+			} catch (NoSuchMethodException e) {
+				throw new WebSocketRuntimeException(
+						"No Constructor found with given 1 arguments", e);
+			} catch (InvocationTargetException e) {
+				throw new WebSocketRuntimeException(
+						"Exception invoking server object", e);
+			}
+		}
+		return servers;
 	}
 
 	@SuppressWarnings("unchecked")
