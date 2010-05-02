@@ -55,6 +55,9 @@ public class RPCPlugIn extends TokenPlugIn {
 	 *
 	 */
 	public RPCPlugIn() {
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating rpc plug-in...");
+		}
 		// specify default name space
 		this.setNamespace(NS_RPC_DEFAULT);
 		// specify granted remnote procedure calls

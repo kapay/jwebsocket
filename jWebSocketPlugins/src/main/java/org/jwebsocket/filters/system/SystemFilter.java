@@ -15,9 +15,11 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.filters.system;
 
+import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.filter.TokenFilter;
 import org.jwebsocket.kit.FilterResponse;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
@@ -25,6 +27,14 @@ import org.jwebsocket.token.Token;
  * @author aschulze
  */
 public class SystemFilter extends TokenFilter {
+
+	private static Logger log = Logging.getLogger(SystemFilter.class);
+
+	public SystemFilter() {
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating system filter...");
+		}
+	}
 
 	@Override
 	public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {

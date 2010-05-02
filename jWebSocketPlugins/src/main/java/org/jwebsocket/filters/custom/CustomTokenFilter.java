@@ -15,9 +15,12 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.filters.custom;
 
+import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.filter.TokenFilter;
 import org.jwebsocket.kit.FilterResponse;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
@@ -25,6 +28,14 @@ import org.jwebsocket.token.Token;
  * @author aschulze
  */
 public class CustomTokenFilter extends TokenFilter {
+
+	private static Logger log = Logging.getLogger(CustomTokenFilter.class);
+
+	public CustomTokenFilter() {
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating custom token filter...");
+		}
+	}
 
 	@Override
 	public void processTokenIn(FilterResponse aResponse,

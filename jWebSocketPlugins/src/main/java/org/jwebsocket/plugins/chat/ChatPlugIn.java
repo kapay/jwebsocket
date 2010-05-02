@@ -15,10 +15,20 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.chat;
 
+import org.apache.log4j.Logger;
+import org.jwebsocket.logging.Logging;
+
 /**
  * This plug-in provides all the chat functionality.
  * @author aschulze
  */
 public class ChatPlugIn {
 
+	private static Logger log = Logging.getLogger(ChatPlugIn.class);
+
+	public ChatPlugIn() {
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating chat plug-in...");
+		}
+	}
 }

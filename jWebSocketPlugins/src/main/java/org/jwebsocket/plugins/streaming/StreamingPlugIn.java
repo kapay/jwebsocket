@@ -43,6 +43,9 @@ public class StreamingPlugIn extends TokenPlugIn {
 	 * namespace for the plug-in.
 	 */
 	public StreamingPlugIn() {
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating streaming plug-in...");
+		}
 		// specify default name space for streaming plugin
 		this.setNamespace(NS_STREAMING_DEFAULT);
 	}

@@ -12,10 +12,10 @@
 <jWebSocket>
 
 	<!--  installation can be prod or dev. 
-		  'prod'- installation means all the classes will be loaded from the jars defined in 
-		   this configuration file
-		  'dev' - installation means running directly from the source, all the jar files given are 
-		   ignored.
+		  'prod'- installation means all the classes will be loaded
+		   from the jars defined in this configuration file
+		  'dev' - installation means running directly from the source,
+		   all the jar files given are ignored.
 		   Default value if not specified would be 'dev'
 	 -->
 	<installation>dev</installation>
@@ -148,9 +148,9 @@
 	<!-- plug-ins to be instantiated for jWebSocket -->
 	<plugins>
 		<plugin>
-			<name>System</name>
+			<name>SystemPlugIn</name>
 			<ns>org.jWebSocket.plugins.system</ns>
-			<id>system0</id>
+			<id>jws.system</id>
 			<jar>jWebSocketPlugins-0.9.0.jar</jar>
 			<!-- plug-in specific settings -->
 			<settings>
@@ -165,8 +165,8 @@
 			</servers>
 		</plugin>
 		<plugin>
-			<name>Chat</name>
-			<id>chat0</id>
+			<name>ChatPlugIn</name>
+			<id>jws.chat</id>
 			<ns>org.jWebSocket.plugins.chat</ns>
 			<jar>jWebSocketPlugins-0.9.0.jar</jar>
 			<servers>
@@ -174,14 +174,43 @@
 			</servers>
 		</plugin>
 		<plugin>
-			<name>RPC</name>
-			<id>rpc0</id>
+			<name>StreamingPlugIn</name>
+			<id>jws.streaming</id>
+			<ns>org.jWebSocket.plugins.streaming</ns>
+			<jar>jWebSocketPlugins-0.9.0.jar</jar>
+			<servers>
+				<server>ts0</server>
+			</servers>
+		</plugin>
+		<plugin>
+			<name>RPCPlugIn</name>
+			<id>jws.rpc</id>
 			<ns>org.jWebSocket.plugins.rpc</ns>
 			<jar>jWebSocketPlugins-0.9.0.jar</jar>
 			<servers>
 				<server>ts0</server>
 			</servers>
 		</plugin>
+		<plugin>
+			<name>FlashBridgePlugIn</name>
+			<id>jws.flashbridge</id>
+			<ns>org.jWebSocket.plugins.flashbridge</ns>
+			<jar>jWebSocketPlugins-0.9.0.jar</jar>
+			<servers>
+				<server>ts0</server>
+			</servers>
+		</plugin>
+<!--
+		<plugin>
+			<name>SharedObjectsPlugIn</name>
+			<id>jws.sharedObjects</id>
+			<ns>org.jWebSocket.plugins.sharedobjects</ns>
+			<jar>jWebSocketSharedObjects-0.9.0.jar</jar>
+			<servers>
+				<server>ts0</server>
+			</servers>
+		</plugin>
+-->
 	</plugins>
 
 	<!-- filters to be instantiated for jWebSocket -->
@@ -189,7 +218,7 @@
 		<filter>
 			<name>System</name>
 			<ns>org.jWebSocket.filters.system</ns>
-			<id>system0</id>
+			<id>systemFilter</id>
 			<jar>jWebSocketPlugins-0.9.0.jar</jar>
 			<!-- plug-in specific settings -->
 			<settings>
@@ -202,7 +231,7 @@
 		</plugin>
 		<plugin>
 			<name>UserFilter</name>
-			<id>user0</id>
+			<id>userFilter</id>
 			<ns>org.jWebSocket.filters.custom</ns>
 			<jar>jWebSocketPlugins-0.9.0.jar</jar>
 			<servers>

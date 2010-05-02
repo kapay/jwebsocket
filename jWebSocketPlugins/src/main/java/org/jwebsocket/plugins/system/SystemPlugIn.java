@@ -61,6 +61,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	 *
 	 */
 	public SystemPlugIn() {
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating system plug-in...");
+		}
 		// specify default name space for system plugin
 		this.setNamespace(NS_SYSTEM_DEFAULT);
 	}
