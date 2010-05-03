@@ -32,6 +32,7 @@ import org.jwebsocket.server.loader.JWebSocketLoader;
  */
 public class StartJWebSocket {
 	private static Logger log = null;
+	private static Logger logger = Logging.getLogger(StartJWebSocket.class);
 
 	/**
 	 * @param args the command line arguments
@@ -58,9 +59,29 @@ public class StartJWebSocket {
 			WebSocketEngine engine = loader.loadEngine(initializer);
 			List<WebSocketServer> servers = loader.loadServers(initializer, engine);
 			
+			//start the engine
+			if (log.isInfoEnabled()) {
+				log.info("Starting Engine...");
+			}
+			engine.startEngine();
+			
+			//now start the servers
+			if (log.isInfoEnabled()) {
+				log.info("Starting Servers...");
+			}
+			for (WebSocketServer server : servers) {
+				server.startServer();
+			}
+			
 			//perform any clean up task for servers or any status related 
 			
 		} catch (WebSocketException e) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Exception during startup", e);
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("jWebSocketServer failed to start");
+			}
 			System.out.println("ERROR during JWebSocketServer startup");
 			System.exit(0);
 		}
