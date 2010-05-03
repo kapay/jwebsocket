@@ -65,6 +65,6 @@ public class StartJWebSocket {
 			System.exit(0);
 		}
 		
-		log.info("Server(s) successfully terminated.");
+		// log.info("Server(s) successfully terminated.");
 	}
 }
