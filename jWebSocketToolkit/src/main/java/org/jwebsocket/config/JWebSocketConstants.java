@@ -49,7 +49,7 @@ public final class JWebSocketConstants {
 	/**
 	 * constant for default installation
 	 */
-	public static final String DEFAULT_INSTALLATION = "dev";
+	public static final String DEFAULT_INSTALLATION = "prod";
 	/**
 	 * Constant for JWEBSOCKET_HOME
 	 */
