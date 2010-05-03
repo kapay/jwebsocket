@@ -15,9 +15,12 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.filter;
 
+import org.apache.log4j.Logger;
 import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.logging.Logging;
+import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
@@ -25,6 +28,12 @@ import org.jwebsocket.token.Token;
  * @author aschulze
  */
 public class TokenFilter extends BaseFilter {
+
+	private static Logger log = Logging.getLogger(TokenFilter.class);
+
+	public TokenFilter(String aId) {
+		super(aId);
+	}
 
 	@Override
 	public void processPacketIn(FilterResponse aResponse,
@@ -42,5 +51,18 @@ public class TokenFilter extends BaseFilter {
 
 	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource,
 			WebSocketConnector aTarget, Token aToken) {
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public TokenServer getServer() {
+		TokenServer lServer = null;
+		TokenFilterChain filterChain = (TokenFilterChain) getFilterChain();
+		if (filterChain != null) {
+			lServer = (TokenServer) filterChain.getServer();
+		}
+		return lServer;
 	}
 }

@@ -54,11 +54,13 @@ public class BaseFilterChain implements WebSocketFilterChain {
 	@Override
 	public void addFilter(WebSocketFilter aFilter) {
 		filters.add(aFilter);
+		aFilter.setFilterChain(this);
 	}
 
 	@Override
 	public void removeFilter(WebSocketFilter aFilter) {
 		filters.remove(aFilter);
+		aFilter.setFilterChain(null);
 	}
 
 	/**

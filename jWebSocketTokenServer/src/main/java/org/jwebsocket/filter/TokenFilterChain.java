@@ -22,6 +22,7 @@ import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.logging.Logging;
+import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
@@ -40,21 +41,45 @@ public class TokenFilterChain extends BaseFilterChain {
 		super(aServer);
 	}
 
+	/**
+	 * @return the server
+	 */
+	@Override
+	public TokenServer getServer() {
+		return (TokenServer)super.getServer();
+	}
+
 	@Override
 	public void addFilter(WebSocketFilter aFilter) {
+		if (aFilter != null) {
+			if (log.isDebugEnabled()) {
+				log.debug("Adding token filter " + aFilter + "...");
+			}
+			super.addFilter(aFilter);
+		}
 	}
 
 	@Override
 	public void removeFilter(WebSocketFilter aFilter) {
+		if (aFilter != null) {
+			if (log.isDebugEnabled()) {
+				log.debug("Removing token filter " + aFilter + "...");
+			}
+			super.removeFilter(aFilter);
+		}
 	}
 
 	@Override
 	public FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+		// FilterResponse lFilterResponse = new FilterResponse();
+		// return lFilterResponse;
 		return null;
 	}
 
 	@Override
 	public FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aDataPacket) {
+		// FilterResponse lFilterResponse = new FilterResponse();
+		// return lFilterResponse;
 		return null;
 	}
 

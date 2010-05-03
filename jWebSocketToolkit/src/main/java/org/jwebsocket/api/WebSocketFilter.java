@@ -23,7 +23,31 @@ import org.jwebsocket.kit.FilterResponse;
  */
 public interface WebSocketFilter {
 
+	/**
+	 *
+	 * @param aResponse
+	 * @param aConnector
+	 * @param aPacket
+	 */
 	void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket);
+
+	/**
+	 *
+	 * @param aResponse
+	 * @param aSource
+	 * @param aTarget
+	 * @param aPacket
+	 */
 	void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket);
 
+	/**
+	 *
+	 * @param aFilterChain
+	 */
+	public void setFilterChain(WebSocketFilterChain aFilterChain);
+
+	/**
+	 * @return the filterChain
+	 */
+	public WebSocketFilterChain getFilterChain();
 }

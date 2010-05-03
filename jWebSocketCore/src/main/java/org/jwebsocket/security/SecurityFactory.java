@@ -21,7 +21,6 @@ import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.RightConfig;
 import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.UserConfig;
-import org.jwebsocket.initialize.JWebSocketLoader;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
 
@@ -40,6 +39,7 @@ public class SecurityFactory {
 	public static String USER_ANONYMOUS = "guest";
 	public static String USER_REG_USER = "user";
 	public static String USER_ADMIN = "admin";
+	public static String USER_LOCKED = "locked";
 
 	/**
 	 * initializes the security system with some default settings to allow to
@@ -70,10 +70,14 @@ public class SecurityFactory {
 		User lGuestUser = new User(USER_ANONYMOUS, "Guest", "Guest", "guest", lGuestRoles);
 		User lRegUser = new User(USER_REG_USER, "User", "User", "user", lRegRoles);
 		User lAdminUser = new User(USER_ADMIN, "Admin", "Admin", "admin", lAdminRoles);
+		// add a locked user for test purposes, e.g. to reject token in system filter
+		User lLockedUser = new User(USER_LOCKED, "Locked", "Locked", "locked", lGuestRoles);
+		lLockedUser.setStatus(User.ST_LOCKED);
 
 		users.addUser(lGuestUser);
 		users.addUser(lRegUser);
 		users.addUser(lAdminUser);
+		users.addUser(lLockedUser);
 
 		log.info("Default rights, roles and users initialized.");
 	}
@@ -137,6 +141,7 @@ public class SecurityFactory {
 	}
 
 	public static void init() {
+/*
 		// try to obtain JWEBSOCKET_HOME environment variable
 		String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
 		String lFileSep = System.getProperty("file.separator");
@@ -164,14 +169,16 @@ public class SecurityFactory {
 				SecurityFactory.initDefault();
 			}
 		} else {
-			System.out.println(
+*/			System.out.println(
 					"JWEBSOCKET_HOME variable not set, using default configuration...");
 			// initialize the security factory with some default demo data
 			// to show at least something even with no config
 			// TODO: only temporary, will be removed in the final release!
 			SecurityFactory.initDefault();
+/*
 		}
-	}
+ */
+ 	}
 
 	/**
 	 * checks if a user identified by it login name has a certain right.

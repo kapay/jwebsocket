@@ -192,7 +192,11 @@ public class TokenServer extends BaseServer {
 				// before forwarding the token to the plug-ins push it through filter chain
 				FilterResponse filterResponse = getFilterChain().processTokenIn(aConnector, lToken);
 
-				getPlugInChain().processToken(aConnector, lToken);
+				// only forward the token to the plug-in chain
+				// if filter chain does not response "aborted"
+				if( !filterResponse.isChainAborted()) {
+					getPlugInChain().processToken(aConnector, lToken);
+				}
 			} else {
 				log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
 			}

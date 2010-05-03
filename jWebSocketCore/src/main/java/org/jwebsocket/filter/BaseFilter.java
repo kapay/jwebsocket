@@ -18,6 +18,7 @@ package org.jwebsocket.filter;
 import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketFilter;
+import org.jwebsocket.api.WebSocketFilterChain;
 import org.jwebsocket.api.WebSocketPaket;
 
 /**
@@ -26,6 +27,19 @@ import org.jwebsocket.api.WebSocketPaket;
  */
 public class BaseFilter implements WebSocketFilter {
 
+	private String id = null;
+	// every filter has a backward reference to its filter chain
+	private WebSocketFilterChain filterChain = null;
+
+	public BaseFilter(String aId) {
+		id = aId;
+	}
+
+	@Override
+	public String toString() {
+		return id;
+	}
+
 	@Override
 	public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket) {
 	}
@@ -33,4 +47,22 @@ public class BaseFilter implements WebSocketFilter {
 	@Override
 	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket) {
 	}
+
+	/**
+	 *
+	 * @param aFilterChain
+	 */
+	@Override
+	public void setFilterChain(WebSocketFilterChain aFilterChain) {
+		filterChain = aFilterChain;
+	}
+
+	/**
+	 * @return the filterChain
+	 */
+	@Override
+	public WebSocketFilterChain getFilterChain() {
+		return filterChain;
+	}
+
 }

@@ -18,7 +18,9 @@ package org.jwebsocket.console;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketFilterChain;
 import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.filters.system.SystemFilter;
 import org.jwebsocket.netty.engines.NettyEngine;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.tcp.engines.TCPEngine;
@@ -155,6 +157,14 @@ public class JWebSocket {
 		try {
 			// instantiate the Token server and bind engine to it
 			tokenServer = new TokenServer("ts0");
+
+			// the token server already instantiates a filter chain
+			WebSocketFilterChain filterChain = tokenServer.getFilterChain();
+			// create the system filter
+			SystemFilter systemFilter = new SystemFilter("systemFilter");
+			// add the system filter to the filter chain
+			filterChain.addFilter(systemFilter);
+
 			// the token server already instantiates a plug-in chain
 			WebSocketPlugInChain plugInChain = tokenServer.getPlugInChain();
 			// let the server support the engine
