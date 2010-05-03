@@ -52,9 +52,11 @@ public final class JWebSocketLoader {
 	private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
 	/**
-	 * Initialize the JWebSocket server system 
+	 * Initialize the JWebSocket server system
+	 * 
 	 * @return the initializer object
-	 * @throws WebSocketException if there's an exception while initialization
+	 * @throws WebSocketException
+	 *             if there's an exception while initialization
 	 */
 	public final WebSocketInitializer initialize() throws WebSocketException {
 		String configPath = getConfigurationPath();
@@ -64,14 +66,20 @@ public final class JWebSocketLoader {
 		SecurityFactory.initFromConfig(config);
 
 		WebSocketInitializer initializer = getInitializer(config);
+		if (initializer == null) {
+			initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
+		}
 		return initializer;
 	}
 
 	/**
 	 * Load the engine for the JWebSocket server system.
-	 * @param initializer the initalizer object
+	 * 
+	 * @param initializer
+	 *            the initalizer object
 	 * @return the loaded engine
-	 * @throws WebSocketException if exception while loading engine
+	 * @throws WebSocketException
+	 *             if exception while loading engine
 	 */
 	public final WebSocketEngine loadEngine(WebSocketInitializer initializer)
 			throws WebSocketException {
@@ -89,13 +97,18 @@ public final class JWebSocketLoader {
 
 	/**
 	 * Load the different servers on top of loaded engine
-	 * @param initializer the initializer object
-	 * @param engine the loaded engine on which to run servers
-	 * @return the list of loaded and running servers 
-	 * @throws WebSocketException if there's any exception
+	 * 
+	 * @param initializer
+	 *            the initializer object
+	 * @param engine
+	 *            the loaded engine on which to run servers
+	 * @return the list of loaded and running servers
+	 * @throws WebSocketException
+	 *             if there's any exception
 	 */
-	public final List<WebSocketServer> loadServers(WebSocketInitializer initializer, 
-			WebSocketEngine engine) throws WebSocketException {
+	public final List<WebSocketServer> loadServers(
+			WebSocketInitializer initializer, WebSocketEngine engine)
+			throws WebSocketException {
 		// initialize and start the server
 		if (log.isInfoEnabled()) {
 			log.info("Initializing Servers..");
@@ -141,10 +154,13 @@ public final class JWebSocketLoader {
 	}
 
 	/**
-	 * Instantiate the initializer custom initializer class if there's any configured 
-	 * via xml configuration, otherwise return the default {@code JWebSocketInitializer} class
-	 * that initialize all the default engine, plugins and servers.
-	 * @param initializerClass the class name to instantiate
+	 * Instantiate the initializer custom initializer class if there's any
+	 * configured via xml configuration, otherwise return the default {@code
+	 * JWebSocketInitializer} class that initialize all the default engine,
+	 * plugins and servers.
+	 * 
+	 * @param initializerClass
+	 *            the class name to instantiate
 	 * @return the instantiated initializer object
 	 */
 	@SuppressWarnings("unchecked")
@@ -160,9 +176,6 @@ public final class JWebSocketLoader {
 			log.error("Error instantiating initializer", e);
 		} catch (IllegalAccessException e) {
 			log.error("Error instantiating initializer", e);
-		}
-		if (initializer == null) {
-			initializer = new JWebSocketInitializer();
 		}
 		return initializer;
 	}
@@ -210,10 +223,16 @@ public final class JWebSocketLoader {
 	 * @return the path to jWebSocket.xml
 	 */
 	private String getConfigurationPath() {
+
+		// first try to get the xml file from the classpath
+		String lWebSocketXML = Thread.currentThread().getContextClassLoader()
+				.getResource("jWebSocket.xml").getFile();
+		if (lWebSocketXML != null) {
+			return lWebSocketXML;
+		}
 		// try to obtain JWEBSOCKET_HOME environment variable
 		String lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
 		String lFileSep = System.getProperty("file.separator");
-		String lWebSocketXML = "";
 		if (lWebSocketHome != null) {
 			// append trailing slash if needed
 			if (!lWebSocketHome.endsWith(lFileSep)) {
