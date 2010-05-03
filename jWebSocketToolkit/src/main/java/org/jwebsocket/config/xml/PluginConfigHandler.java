@@ -38,8 +38,8 @@ public class PluginConfigHandler implements ConfigHandler {
 	private static final String PACKAGE = "package";
 	private static final String JAR = "jar";
 	private static final String NAMESPACE = "ns";
-	private static final String SERVERS = "servers";
-	private static final String SERVER = "server";
+	private static final String SERVERS = "server-assignments";
+	private static final String SERVER = "server-assignment";
 	private static final String SETTINGS = "settings";
 	private static final String SETTING = "setting";
 
