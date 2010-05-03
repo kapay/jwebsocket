@@ -88,9 +88,8 @@ public final class JWebSocketLoader {
 			log.info("Initializing Engine..");
 		}
 		WebSocketEngine engine = initializer.intializeEngine();
-		engine.startEngine();
 		if (log.isInfoEnabled()) {
-			log.info("Started Initialized Engine");
+			log.info("Engine Initialized");
 		}
 		return engine;
 	}
@@ -125,11 +124,9 @@ public final class JWebSocketLoader {
 			for (WebSocketPlugIn plugin : plugins) {
 				server.getPlugInChain().addPlugIn(plugin);
 			}
-			// now start the server
-			server.startServer();
 		}
 		if (log.isInfoEnabled()) {
-			log.info("Started Initialized Servers");
+			log.info("Servers Initialized with plugins");
 		}
 		return servers;
 	}
@@ -176,6 +173,9 @@ public final class JWebSocketLoader {
 			log.error("Error instantiating initializer", e);
 		} catch (IllegalAccessException e) {
 			log.error("Error instantiating initializer", e);
+		}
+		if (log.isInfoEnabled()) {
+			log.info("Initializer Found:" + initializer);
 		}
 		return initializer;
 	}
