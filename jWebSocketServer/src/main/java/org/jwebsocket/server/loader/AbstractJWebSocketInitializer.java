@@ -26,7 +26,6 @@ import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
-import org.jwebsocket.plugins.sharedobjects.SharedObjectsPlugIn;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
 import org.jwebsocket.plugins.system.SystemPlugIn;
 import org.jwebsocket.server.TokenServer;
@@ -86,14 +85,16 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 		defaultPlugins.add(new SystemPlugIn());
 		defaultPlugins.add(new RPCPlugIn());
 		defaultPlugins.add(new StreamingPlugIn());
-		defaultPlugins.add(new SharedObjectsPlugIn());
 		defaultPlugins.add(new FlashBridgePlugIn());
 		
 		pluginMap.put("ts0", defaultPlugins);
 		
 		Map<String, List<WebSocketPlugIn>> customPluginMap = initializeCustomPlugins();
-		pluginMap.putAll(customPluginMap);
 		
+		for (Map.Entry<String, List<WebSocketPlugIn>> entry : customPluginMap.entrySet()) {
+			String id = entry.getKey();
+			pluginMap.get(id).addAll(entry.getValue());
+		}
 		return pluginMap;
 	}
 	
