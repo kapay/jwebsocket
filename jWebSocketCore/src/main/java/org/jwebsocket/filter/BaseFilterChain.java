@@ -77,7 +77,7 @@ public class BaseFilterChain implements WebSocketFilterChain {
 		FilterResponse lResponse = new FilterResponse();
 		for (WebSocketFilter lFilter : filters) {
 			lFilter.processPacketIn(lResponse, aConnector, aPacket);
-			if (lResponse.isChainAborted()) {
+			if (lResponse.isRejected()) {
 				break;
 			}
 		}
@@ -89,7 +89,7 @@ public class BaseFilterChain implements WebSocketFilterChain {
 		FilterResponse lResponse = new FilterResponse();
 		for (WebSocketFilter lFilter : filters) {
 			lFilter.processPacketOut(lResponse, aSource, aTarget, aPacket);
-			if (lResponse.isChainAborted()) {
+			if (lResponse.isRejected()) {
 				break;
 			}
 		}

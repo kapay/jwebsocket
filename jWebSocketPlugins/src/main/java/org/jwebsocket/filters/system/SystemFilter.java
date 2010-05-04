@@ -62,7 +62,7 @@ public class SystemFilter extends TokenFilter {
 		if( "locked".equals(lUsername) ) {
 			Token lToken = lServer.createAccessDenied(aToken);
 			lServer.sendToken(aConnector, lToken);
-			aResponse.abortChain();
+			aResponse.rejectMessage();
 			return;
 		}
 	}

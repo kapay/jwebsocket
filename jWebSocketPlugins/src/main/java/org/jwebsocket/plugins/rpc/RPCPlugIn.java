@@ -58,8 +58,10 @@ public class RPCPlugIn extends TokenPlugIn {
 		if (log.isDebugEnabled()) {
 			log.debug("Instantiating rpc plug-in...");
 		}
+
 		// specify default name space
 		this.setNamespace(NS_RPC_DEFAULT);
+
 		// specify granted remnote procedure calls
 		// todo: Make configurable
 		grantedProcs.put("org.jWebSocket.demo.DemoRPCServer.getMD5", null);
@@ -67,11 +69,13 @@ public class RPCPlugIn extends TokenPlugIn {
 		// currently this is the only supported RPCPlugIn server
 		rpcServer = new DemoRPCServer();
 	}
-/*
+
+	/*
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 	}
-*/
+	 */
+
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
@@ -89,13 +93,14 @@ public class RPCPlugIn extends TokenPlugIn {
 	}
 
 	/**
-	 * remote procedure call
+	 * remote procedure call (RPC)
 	 * @param aConnector 
 	 * @param aToken
 	 */
 	public void rpc(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
+		// check if user is allowed to run 'rpc' command
 		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_RPC_DEFAULT + ".rpc")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			return;
@@ -138,12 +143,19 @@ public class RPCPlugIn extends TokenPlugIn {
 	}
 
 	/**
-	 * reverse remote procedure call
+	 * reverse remote procedure call (RRPC)
 	 * @param aConnector
 	 * @param aToken
 	 */
 	public void rrpc(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
+
+		// check if user is allowed to run 'rrpc' command
+		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_RPC_DEFAULT + ".rrpc")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
 		String lNS = aToken.getNS();
 
 		// get the target
@@ -157,7 +169,7 @@ public class RPCPlugIn extends TokenPlugIn {
 
 		// TODO: find solutions for hardcoded engine id
 		WebSocketConnector lTargetConnector =
-			lServer.getConnector("tcp0", lTargetId);
+				lServer.getConnector("tcp0", lTargetId);
 
 		if (log.isDebugEnabled()) {
 			log.debug("Processing 'rrpc'...");
@@ -276,7 +288,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @throws InvocationTargetException
 	 */
 	public static Object call(Object aInstance, String aName, Object aArgs)
-		throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Object lObj = null;
 
 		Class lClass = aInstance.getClass();

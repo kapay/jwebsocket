@@ -194,7 +194,7 @@ public class TokenServer extends BaseServer {
 
 				// only forward the token to the plug-in chain
 				// if filter chain does not response "aborted"
-				if( !filterResponse.isChainAborted()) {
+				if( !filterResponse.isRejected()) {
 					getPlugInChain().processToken(aConnector, lToken);
 				}
 			} else {
@@ -213,11 +213,19 @@ public class TokenServer extends BaseServer {
 			// before sending the token push it through filter chain
 			FilterResponse filterResponse = getFilterChain().processTokenOut(aSource, aTarget, aToken);
 
-			if (log.isDebugEnabled()) {
-				log.debug("Sending token '" + aToken + "' to '" + aTarget + "'...");
+			// only forward the token to the plug-in chain
+			// if filter chain does not response "aborted"
+			if( !filterResponse.isRejected()) {
+				if (log.isDebugEnabled()) {
+					log.debug("Sending token '" + aToken + "' to '" + aTarget + "'...");
+				}
+				WebSocketPaket aPacket = tokenToPacket(aTarget, aToken);
+				super.sendPacket(aTarget, aPacket);
+			} else {
+				if (log.isDebugEnabled()) {
+					log.debug("");
+				}
 			}
-			WebSocketPaket aPacket = tokenToPacket(aTarget, aToken);
-			super.sendPacket(aTarget, aPacket);
 		} else {
 			log.warn("Connector not supposed to handle tokens.");
 		}

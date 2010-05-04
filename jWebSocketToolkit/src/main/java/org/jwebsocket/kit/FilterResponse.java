@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Result from a PlugIn in the PlugInChain
+//	jWebSocket - Result from a filter in the filter chain
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -16,49 +16,37 @@
 package org.jwebsocket.kit;
 
 /**
- * Implements the response class to return results from the plug-in chain to
- * the server. The server can forward data packets to a chain of plug-ins.
- * Each plug-in can either process or ignore the packet. If the packet was
- * successfully processed the plug-in can abort the chain.
+ * Implements the response class to return results from the filter chain to
+ * the server.
  * @author aschulze
  */
 public class FilterResponse {
 
-	private boolean chainAborted = false;
-	private boolean tokenProcessed = false;
+	private boolean isRejected = false;
 
 	/**
-	 * Returns if the plug-in chain has to be aborted after a plug-in has
-	 * finished its work.
+	 * Returns if a filter in the filter chain has rejected a message.
 	 * @return the chainAborted
 	 */
-	public Boolean isChainAborted() {
-		return chainAborted;
+	public Boolean isRejected() {
+		return isRejected;
 	}
 
 	/**
-	 * Signals that the plug-in chain has to be be aborted. The token has not
-	 * been processed.
+	 * Signals that a message has to be rejected and that the filter chain
+	 * was aborted.
 	 */
-	public void abortChain() {
-		this.chainAborted = true;
-		this.tokenProcessed = false;
+	public void rejectMessage() {
+		this.isRejected = true;
 	}
 
 	/**
-	 * Signals that the plug-in chain has to be be aborted. The token has been
-	 * processed.
+	 * Signals that a message may be relayed to further filters, the server or
+	 * clients, depending on its direction.
 	 */
-	public void breakChain() {
-		this.chainAborted = true;
-		this.tokenProcessed = true;
+	public void relayMessage() {
+		this.isRejected = false;
 	}
 
-	/**
-	 * Signals that the plug-in chain has to be be continued.
-	 */
-	public void continueChain() {
-		this.chainAborted = false;
-	}
 
 }

@@ -29,6 +29,7 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
@@ -54,6 +55,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String TT_CLOSE = "close";
 	private static final String TT_GETCLIENTS = "getClients";
 	private static final String TT_PING = "ping";
+	private static final String TT_ALLOC_CHANNEL = "alloc";
+	private static final String TT_DEALLOC_CHANNEL = "dealloc";
 	// specify shared connector variables
 	private static final String VAR_GROUP = NS_SYSTEM_DEFAULT + ".group";
 
@@ -94,6 +97,10 @@ public class SystemPlugIn extends TokenPlugIn {
 				aResponse.abortChain();
 			} else if (lType.equals(TT_PING)) {
 				ping(aConnector, aToken);
+			} else if (lType.equals(TT_ALLOC_CHANNEL)) {
+				allocChannel(aConnector, aToken);
+			} else if (lType.equals(TT_DEALLOC_CHANNEL)) {
+				deallocChannel(aConnector, aToken);
 			}
 		}
 	}
@@ -327,18 +334,27 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	private void send(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
+
+		// check if user is allowed to run 'send' command
+		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_SYSTEM_DEFAULT + ".send")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
 		Token lResponse = lServer.createResponse(aToken);
 
 		// get the target
 		String lTargetId = aToken.getString("targetId");
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'send' (username='" + lServer.getUsername(aConnector) + "') from '" + aConnector + "' to " + lTargetId + "...");
+			log.debug("Processing 'send' (username='"
+					+ lServer.getUsername(aConnector) + "') from '"
+					+ aConnector + "' to " + lTargetId + "...");
 		}
 
 		// TODO: find solutions for hardcoded engine id
 		WebSocketConnector lTargetConnector =
-			lServer.getConnector(lTargetId);
+				lServer.getConnector(lTargetId);
 		/*
 		if (lServer.getUsername(aConnector) != null) {
 		 */
@@ -359,10 +375,19 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	private void broadcast(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
+
+		// check if user is allowed to run 'broadcast' command
+		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_SYSTEM_DEFAULT + ".broadcast")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
 		Token lResponse = lServer.createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'broadcast' (username='" + lServer.getUsername(aConnector) + "') from '" + aConnector + "'...");
+			log.debug("Processing 'broadcast' (username='"
+					+ lServer.getUsername(aConnector) + "') from '"
+					+ aConnector + "'...");
 		}
 		/*
 		if (lServer.getUsername(aConnector) != null) {
@@ -373,11 +398,11 @@ public class SystemPlugIn extends TokenPlugIn {
 		String lSenderIncluded = aToken.getString("senderIncluded");
 		String lResponseRequested = aToken.getString("responseRequested");
 		boolean bSenderIncluded = (lSenderIncluded != null
-			&& lSenderIncluded.equals("true"));
+				&& lSenderIncluded.equals("true"));
 		boolean bResponseRequested = (lResponseRequested != null
-			&& lResponseRequested.equals("true"));
+				&& lResponseRequested.equals("true"));
 		lServer.broadcastToken(aConnector, aToken,
-			new BroadcastOptions(bSenderIncluded, bResponseRequested));
+				new BroadcastOptions(bSenderIncluded, bResponseRequested));
 		if (bResponseRequested) {
 			lServer.sendToken(aConnector, lResponse);
 		}
@@ -439,7 +464,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		String lEcho = aToken.getString("echo");
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'Ping' (echo='" + lEcho + "') from '" + aConnector + "'...");
+			log.debug("Processing 'Ping' (echo='" + lEcho + "') from '"
+					+ aConnector + "'...");
 		}
 
 		if (lEcho.equalsIgnoreCase("true")) {
@@ -461,7 +487,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		Token lResponseToken = lServer.createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'getClients' from '" + aConnector + "'...");
+			log.debug("Processing 'getClients' from '"
+					+ aConnector + "'...");
 		}
 
 		if (lServer.getUsername(aConnector) != null) {
@@ -471,7 +498,8 @@ public class SystemPlugIn extends TokenPlugIn {
 			lFilter.put(BaseConnector.VAR_USERNAME, ".*");
 			List<String> listOut = new ArrayList<String>();
 			for (WebSocketConnector lConnector : lServer.selectConnectors(lFilter).values()) {
-				listOut.add(lServer.getUsername(lConnector) + "@" + lConnector.getRemotePort());
+				listOut.add(lServer.getUsername(lConnector) + "@"
+						+ lConnector.getRemotePort());
 			}
 			lResponseToken.put("clients", listOut);
 			lResponseToken.put("count", listOut.size());
@@ -481,5 +509,35 @@ public class SystemPlugIn extends TokenPlugIn {
 		}
 
 		lServer.sendToken(aConnector, lResponseToken);
+	}
+
+	/**
+	 * allocates a "non-interruptable" communication channel between two clients.
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void allocChannel(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		Token lResponseToken = lServer.createResponse(aToken);
+
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'allocChannel' from '"
+					+ aConnector + "'...");
+		}
+	}
+
+	/**
+	 * deallocates a "non-interruptable" communication channel between two clients.
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void deallocChannel(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		Token lResponseToken = lServer.createResponse(aToken);
+
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'deallocChannel' from '"
+					+ aConnector + "'...");
+		}
 	}
 }

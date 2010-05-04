@@ -97,7 +97,7 @@ public class TokenFilterChain extends BaseFilterChain {
 			} catch (Exception ex) {
 				log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			}
-			if (lFilterResponse.isChainAborted()) {
+			if (lFilterResponse.isRejected()) {
 				break;
 			}
 		}
@@ -112,7 +112,7 @@ public class TokenFilterChain extends BaseFilterChain {
 			} catch (Exception ex) {
 				log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			}
-			if (lFilterResponse.isChainAborted()) {
+			if (lFilterResponse.isRejected()) {
 				break;
 			}
 		}
