@@ -94,7 +94,7 @@ public class TokenServer extends BaseServer {
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 		if (log.isDebugEnabled()) {
-			log.debug("Processing engine started...");
+			log.debug("Processing engine (" + aEngine.getId() + ") started...");
 		}
 		plugInChain.engineStarted(aEngine);
 	}
@@ -102,7 +102,7 @@ public class TokenServer extends BaseServer {
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
 		if (log.isDebugEnabled()) {
-			log.debug("Processing engine stopped...");
+			log.debug("Processing engine (" + aEngine.getId() + ") stopped...");
 		}
 		plugInChain.engineStopped(aEngine);
 	}
@@ -121,7 +121,7 @@ public class TokenServer extends BaseServer {
 			aConnector.setBoolean(VAR_IS_TOKENSERVER, true);
 
 			if (log.isDebugEnabled()) {
-				log.debug("Processing connector started...");
+				log.debug("Processing connector (" + aConnector.getId() + ") started...");
 			}
 			// notify plugins that a connector has started,
 			// i.e. a client was sconnected.
@@ -135,7 +135,7 @@ public class TokenServer extends BaseServer {
 		// i.e. a client was disconnected.
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
 			if (log.isDebugEnabled()) {
-				log.debug("Processing connector stopped...");
+				log.debug("Processing connector (" + aConnector.getId() + ") stopped...");
 			}
 			plugInChain.connectorStopped(aConnector, aCloseReason);
 		}

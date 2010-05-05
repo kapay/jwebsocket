@@ -44,7 +44,7 @@ public class StartJWebSocket {
 		// initialize log4j logging engine
 		// BEFORE instantiating any jWebSocket classes
 		Logging.initLogs(loglevel, Logging.CONSOLE);
-		log = Logging.getLogger(JWebSocket.class);
+		log = Logging.getLogger(StartJWebSocket.class);
 
 		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
 		System.out.println("jWebSocket Ver. "
@@ -61,13 +61,13 @@ public class StartJWebSocket {
 			
 			//start the engine
 			if (log.isInfoEnabled()) {
-				log.info("Starting Engine...");
+				log.debug("Starting Engine...");
 			}
 			engine.startEngine();
 			
 			//now start the servers
 			if (log.isInfoEnabled()) {
-				log.info("Starting Servers...");
+				log.debug("Starting Servers...");
 			}
 			for (WebSocketServer server : servers) {
 				server.startServer();

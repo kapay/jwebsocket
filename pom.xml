@@ -11,6 +11,7 @@
 		<module>jWebSocketCluster</module>
 		<module>jWebSocketCore</module>
 		<module>jWebSocketServer</module>
+		<module>jWebSocketServerBasic</module>
 		<module>jWebSocketCustomServer</module>
 		<module>jWebSocketNettyEngine</module>
 		<module>jWebSocketPlugins</module>
