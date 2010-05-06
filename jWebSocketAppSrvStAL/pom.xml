@@ -25,16 +25,12 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<outputDirectory>${project.build.directory}/../../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
-<!--					
 					<webResources>
             			<resource>
--->					
               				<!-- this is relative to the pom.xml directory -->
-<!--					
-              				<directory>../jWebSocketClient/web</directory>
+              				<directory>../jWebSocketClient/web/web_app</directory>
             			</resource>
           			</webResources>
--->					
 				</configuration>
 			</plugin>
 			<plugin>
