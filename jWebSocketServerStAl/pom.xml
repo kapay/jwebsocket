@@ -7,9 +7,9 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
-	<artifactId>jWebSocketServer</artifactId>
-	<name>jWebSocketServer</name>
-	<description>Server project for jWebSocket</description>
+	<artifactId>jWebSocketServerStAl</artifactId>
+	<name>jWebSocketServerStAl</name>
+	<description>jWebSocket Stand-Alone Server Project</description>
 	<packaging>jar</packaging>
 	<build>
 		<plugins>
@@ -102,6 +102,11 @@
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketCustomServer</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketConfig</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

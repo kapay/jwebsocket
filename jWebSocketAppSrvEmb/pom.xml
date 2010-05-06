@@ -7,9 +7,9 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
-	<artifactId>jWebSocketAppServer</artifactId>
-	<name>jWebSocketAppServer</name>
-	<description>App Server project for jWebSocket</description>
+	<artifactId>jWebSocketAppSrvEmb</artifactId>
+	<name>jWebSocketAppSrvEmb</name>
+	<description>jWebSocket Embedded Application Server project</description>
 	<version>0.9.0</version>
 	<packaging>war</packaging>
 

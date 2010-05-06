@@ -8,20 +8,22 @@
 	<version>0.9.0</version>
 	<description>Parent project for jWebSocket</description>
 	<modules>
-		<module>jWebSocketCluster</module>
-		<module>jWebSocketCore</module>
-		<module>jWebSocketServer</module>
-		<module>jWebSocketServerBasic</module>
-		<module>jWebSocketCustomServer</module>
+		<module>jWebSocketToolkit</module>
+		<module>jWebSocketTCPEngine</module>
 		<module>jWebSocketNettyEngine</module>
+		<module>jWebSocketCore</module>
+		<module>jWebSocketCustomServer</module>
+		<module>jWebSocketTokenServer</module>
 		<module>jWebSocketPlugins</module>
 		<module>jWebSocketSharedObjects</module>
+		<module>jWebSocketCluster</module>
 		<module>jWebSocketAdmin</module>
-		<module>jWebSocketTCPEngine</module>
-		<module>jWebSocketTokenServer</module>
-		<module>jWebSocketToolkit</module>
-		<module>jWebSocketAppServer</module>
+		<module>jWebSocketConfig</module>
 		<module>jWebSocketJavaClient</module>
+		<module>jWebSocketServerEmb</module>
+		<module>jWebSocketServerStAl</module>
+		<module>jWebSocketAppSrvEmb</module>
+		<module>jWebSocketAppSrvStAl</module>
 	</modules>
 
 	<build>
