@@ -16,6 +16,14 @@
 <arg descr="none" field="" object="" type=""/>
 <result descr="true if the browser natively support websockets, otherwise false." field="" object="" type="boolean"/>
 </method>
+<method descr="checks if the browser natively or by JSON lib does support JSON.&#10;" fullpath="jws.browserSupportsJSON" name="browserSupportsJSON">
+<arg descr="none" field="" object="" type=""/>
+<result descr="true if the browser or one of its plug-ins support JSON, otherwise false." field="" object="" type="boolean"/>
+</method>
+<method descr="checks if the browser natively supports JSON, no plug-ins&#10;are considered. Caution! This is a public field not a function!&#10;" fullpath="jws.browserSupportsNativeJSON" name="browserSupportsNativeJSON">
+<arg descr="none" field="" object="" type=""/>
+<result descr="true if the browser natively support websockets, otherwise false." field="" object="" type="boolean"/>
+</method>
 <method descr="checks if the browser is Internet Explorer. This is needed to switch to IE specific event model.&#10;" fullpath="jws.isIE" name="isIE">
 <arg descr="none" field="" object="" type=""/>
 <result descr="true if the browser is IE, otherwise false." field="" object="" type="boolean"/>
@@ -298,11 +306,11 @@
 </method>
 </class>
 <class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketJSONClient[/tt] class.&#10;" fullpath="jws.jWebSocketJSONClient" name="jWebSocketJSONClient">
-<method descr="converts a token to a JSON stream.&#10;" fullpath="jws.jWebSocketJSONClient.tokenToStream" name="tokenToStream">
+<method descr="converts a token to a JSON stream. If the browser provides a native JSON class this is used, otherwise it use the automatically embedded JSON library from json.org.&#10;" fullpath="jws.jWebSocketJSONClient.tokenToStream" name="tokenToStream">
 <arg descr="The token (an JavaScript Object) to be converted into an JSON stream." field="aToken" object="" type="Token"/>
 <result descr="The resulting JSON stream." field="" object="" type="String"/>
 </method>
-<method descr="converts a JSON stream into a token.&#10;" fullpath="jws.jWebSocketJSONClient.streamToToken" name="streamToToken">
+<method descr="converts a JSON stream into a token. If the browser provides a native JSON class this is used, otherwise it use the automatically embedded JSON library from json.org. For security reasons the use of JavaScript&amp;apos;s eval explicitely was avoided.&#10;" fullpath="jws.jWebSocketJSONClient.streamToToken" name="streamToToken">
 <arg descr="The data stream received from the server to be parsed as JSON." field="aStream" object="" type="String"/>
 <result descr="The Token object of stream could be parsed successfully." field="Token" object="" type="Object"/>
 <result descr="Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers." field="[i]field[/i]" object="Token" type="[i]type[/i]"/>
