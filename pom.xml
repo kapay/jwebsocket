@@ -24,6 +24,7 @@
 		<module>jWebSocketServerStAl</module>
 		<module>jWebSocketAppSrvEmb</module>
 		<module>jWebSocketAppSrvStAl</module>
+		<module>jWebSocketAppSrvDemo</module>
 	</modules>
 
 	<build>

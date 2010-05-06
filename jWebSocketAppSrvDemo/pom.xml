@@ -7,9 +7,9 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
-	<artifactId>jWebSocketAppSrvStAl</artifactId>
-	<name>jWebSocketAppSrvStAl</name>
-	<description>jWebSocket Stand-Alone Application Server project</description>
+	<artifactId>jWebSocketAppSrvDemo</artifactId>
+	<name>jWebSocketAppSrvDemo</name>
+	<description>jWebSocket Demo Application Server project including WebClient</description>
 	<version>0.9.0</version>
 	<packaging>war</packaging>
 
@@ -25,16 +25,12 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<outputDirectory>${project.build.directory}/../../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
-<!--					
 					<webResources>
             			<resource>
--->					
               				<!-- this is relative to the pom.xml directory -->
-<!--					
               				<directory>../jWebSocketClient/web</directory>
             			</resource>
           			</webResources>
--->					
 				</configuration>
 			</plugin>
 			<plugin>
