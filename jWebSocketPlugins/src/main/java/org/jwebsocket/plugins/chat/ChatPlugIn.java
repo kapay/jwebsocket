@@ -17,12 +17,13 @@ package org.jwebsocket.plugins.chat;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
+import org.jwebsocket.plugins.TokenPlugIn;
 
 /**
  * This plug-in provides all the chat functionality.
  * @author aschulze
  */
-public class ChatPlugIn {
+public class ChatPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(ChatPlugIn.class);
 

@@ -60,7 +60,7 @@ public class NettyEngine extends BaseEngine {
 	 * @throws WebSocketException
 	 *             if exception creating <tt>NettyEngine</tt>
 	 */
-	public NettyEngine(String aId, int aPort, int aSessionTimeout)
+	public NettyEngine(String aId, Integer aPort, Integer aSessionTimeout)
 			throws WebSocketException {
 		super(aId);
 		listenerPort = aPort;
@@ -73,7 +73,7 @@ public class NettyEngine extends BaseEngine {
 	@Override
 	public void startEngine() throws WebSocketException {
 		if (log.isDebugEnabled()) {
-			log.debug("Starting Netty engine...");
+			log.debug("Starting Netty engine (" + getId() + ")...");
 		}
 		// Configure the server.
 		// TODO: figure out more on how advanced we can configure
@@ -94,7 +94,7 @@ public class NettyEngine extends BaseEngine {
 		isRunning = true;
 
 		if (log.isInfoEnabled()) {
-			log.info("Netty engine started.");
+			log.info("Netty engine (" + getId() + ") started.");
 		}
 		// close the engine
 		if (!isRunning) {
@@ -110,10 +110,9 @@ public class NettyEngine extends BaseEngine {
 	 */
 	@Override
 	public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
-		log.debug("Stopping Netty engine...");
+		log.debug("Stopping Netty engine (" + getId() + ")...");
 		isRunning = false;
 		super.stopEngine(aCloseReason);
-
 	}
 
 	/**

@@ -59,7 +59,7 @@ public class TCPEngine extends BaseEngine {
 	 * @param aSessionTimeout The default server side session time out.
 	 * @throws WebSocketException
 	 */
-	public TCPEngine(String aId, int aPort, int aSessionTimeout)
+	public TCPEngine(String aId, Integer aPort, Integer aSessionTimeout)
 		throws WebSocketException {
 		super(aId);
 		listenerPort = aPort;
@@ -70,7 +70,7 @@ public class TCPEngine extends BaseEngine {
 	public void startEngine()
 		throws WebSocketException {
 		if (log.isDebugEnabled()) {
-			log.debug("Starting TCP engine...");
+			log.debug("Starting TCP engine (" + getId() + ")...");
 		}
 		try {
 			serverSocket = new ServerSocket(listenerPort);
@@ -92,7 +92,7 @@ public class TCPEngine extends BaseEngine {
 
 		super.startEngine();
 		if (log.isInfoEnabled()) {
-			log.info("TCP engine started.");
+			log.info("TCP engine (" + getId() + ") started.");
 		}
 	}
 
@@ -100,7 +100,7 @@ public class TCPEngine extends BaseEngine {
 	public void stopEngine(CloseReason aCloseReason)
 		throws WebSocketException {
 		if (log.isDebugEnabled()) {
-			log.debug("Stopping TCP engine...");
+			log.debug("Stopping TCP engine (" + getId() + ")...");
 		}
 		// inherited method stops all connectors
 		super.stopEngine(aCloseReason);
@@ -112,11 +112,11 @@ public class TCPEngine extends BaseEngine {
 			// at accept in the listener thread which terminates the listener
 			serverSocket.close();
 			if (log.isInfoEnabled()) {
-				log.info("TCP engine stopped (closed=" + serverSocket.isClosed() + ").");
+				log.info("TCP engine (" + getId() + ") stopped (closed=" + serverSocket.isClosed() + ").");
 			}
 			serverSocket = null;
 		} catch (Exception ex) {
-			log.error("Stopping TCP engine:" + ex.getMessage());
+			log.error("Stopping TCP (" + getId() + ") engine:" + ex.getMessage());
 		}
 	}
 

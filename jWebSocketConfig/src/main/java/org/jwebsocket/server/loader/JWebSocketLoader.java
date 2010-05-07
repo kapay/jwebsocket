@@ -29,6 +29,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
@@ -113,20 +114,37 @@ public final class JWebSocketLoader {
 			log.info("Initializing Servers..");
 		}
 		List<WebSocketServer> servers = initializer.initializeServers();
+
 		Map<String, List<WebSocketPlugIn>> pluginMap = initializer.initializePlugins();
+		if (log.isInfoEnabled()) {
+			log.info("Initializing Plugins...");
+		}
 		for (WebSocketServer server : servers) {
 			server.addEngine(engine);
 			List<WebSocketPlugIn> plugins = pluginMap.get(server.getId());
-			if (log.isInfoEnabled()) {
-				log.info("Initializing Server Plugins..");
-			}
 			for (WebSocketPlugIn plugin : plugins) {
 				server.getPlugInChain().addPlugIn(plugin);
 			}
 		}
 		if (log.isInfoEnabled()) {
-			log.info("Servers Initialized with plugins");
+			log.info("Plugins initialized.");
 		}
+
+		Map<String, List<WebSocketFilter>> filterMap = initializer.initializeFilters();
+		if (log.isInfoEnabled()) {
+			log.info("Initializing Filters...");
+		}
+		for (WebSocketServer server : servers) {
+			server.addEngine(engine);
+			List<WebSocketFilter> filters = filterMap.get(server.getId());
+			for (WebSocketFilter filter : filters) {
+				server.getFilterChain().addFilter(filter);
+			}
+		}
+		if (log.isInfoEnabled()) {
+			log.info("Filters initialized.");
+		}
+
 		return servers;
 	}
 
