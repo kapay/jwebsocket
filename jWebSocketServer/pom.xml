@@ -151,7 +151,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketConfig</artifactId>
+			<artifactId>jWebSocketLoader</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
