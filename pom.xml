@@ -20,11 +20,12 @@
 		<module>jWebSocketAdmin</module>
 		<module>jWebSocketConfig</module>
 		<module>jWebSocketJavaClient</module>
-		<module>jWebSocketServerEmb</module>
-		<module>jWebSocketServerStAl</module>
+		<module>jWebSocketServer</module>
+<!--
 		<module>jWebSocketAppSrvEmb</module>
 		<module>jWebSocketAppSrvStAl</module>
 		<module>jWebSocketAppSrvDemo</module>
+-->		
 	</modules>
 
 	<build>
@@ -57,7 +58,6 @@
 			<url>http://download.java.net/maven/2</url>
 		</repository>
 	</repositories>
-
 
 	<!--
 				define common dependencies used across all the modules of jWebSocket
