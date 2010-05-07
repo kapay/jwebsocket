@@ -18,7 +18,7 @@
 		<module>jWebSocketSharedObjects</module>
 		<module>jWebSocketCluster</module>
 		<module>jWebSocketAdmin</module>
-		<module>jWebSocketConfig</module>
+		<module>jWebSocketLoader</module>
 		<module>jWebSocketWebAppSupport</module>
 		<module>jWebSocketJavaClient</module>
 		<module>jWebSocketServer</module>
