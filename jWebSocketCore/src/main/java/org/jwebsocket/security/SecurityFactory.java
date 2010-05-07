@@ -16,12 +16,12 @@
 package org.jwebsocket.security;
 
 import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.RightConfig;
 import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.UserConfig;
-import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
 
 
