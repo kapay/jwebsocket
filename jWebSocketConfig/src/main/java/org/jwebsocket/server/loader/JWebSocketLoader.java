@@ -19,6 +19,7 @@ import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,6 @@ import org.jwebsocket.security.SecurityFactory;
 public final class JWebSocketLoader {
 
 	private static Logger log = Logging.getLogger(JWebSocketLoader.class);
-
 	private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
 	/**
@@ -113,8 +113,7 @@ public final class JWebSocketLoader {
 			log.info("Initializing Servers..");
 		}
 		List<WebSocketServer> servers = initializer.initializeServers();
-		Map<String, List<WebSocketPlugIn>> pluginMap = initializer
-				.initializePlugins();
+		Map<String, List<WebSocketPlugIn>> pluginMap = initializer.initializePlugins();
 		for (WebSocketServer server : servers) {
 			server.addEngine(engine);
 			List<WebSocketPlugIn> plugins = pluginMap.get(server.getId());
@@ -164,8 +163,7 @@ public final class JWebSocketLoader {
 	private WebSocketInitializer instantiateInitializer(String initializerClass) {
 		WebSocketInitializer initializer = null;
 		try {
-			Class<WebSocketInitializer> clz = (Class<WebSocketInitializer>) Class
-					.forName(initializerClass);
+			Class<WebSocketInitializer> clz = (Class<WebSocketInitializer>) Class.forName(initializerClass);
 			initializer = clz.newInstance();
 		} catch (ClassNotFoundException e) {
 			log.error("Error instantiating initializer", e);
@@ -225,11 +223,15 @@ public final class JWebSocketLoader {
 	private String getConfigurationPath() {
 
 		// first try to get the xml file from the classpath
-		String lWebSocketXML = Thread.currentThread().getContextClassLoader()
-				.getResource("jWebSocket.xml").getFile();
-		if (lWebSocketXML != null) {
-			return lWebSocketXML;
+		String lWebSocketXML = null;
+		URL lURL = Thread.currentThread().getContextClassLoader().getResource("jWebSocket.xml");
+		if (lURL != null) {
+			lWebSocketXML = lURL.getFile();
+			if (lWebSocketXML != null) {
+				return lWebSocketXML;
+			}
 		}
+
 		// try to obtain JWEBSOCKET_HOME environment variable
 		String lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
 		String lFileSep = System.getProperty("file.separator");
