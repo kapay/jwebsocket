@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.config.xml.FilterConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.RightConfig;
 import org.jwebsocket.config.xml.RoleConfig;
@@ -94,7 +95,7 @@ public final class JWebSocketConfig implements Config {
 	private final List<ServerConfig> servers;
 	private final List<UserConfig> users;
 	private final List<PluginConfig> plugins;
-
+	private final List<FilterConfig> filters;
 	private final List<RightConfig> globalRights;
 	private final List<RoleConfig> globalRoles;
 
@@ -106,7 +107,7 @@ public final class JWebSocketConfig implements Config {
 	private JWebSocketConfig(Builder builder) {
 		if (builder.engines == null || builder.servers == null
 				|| builder.users == null || builder.globalRights == null
-				|| builder.globalRoles == null) {
+				|| builder.globalRoles == null || builder.filters == null) {
 			throw new WebSocketRuntimeException(
 					"Configuration is not loaded completely.");
 		}
@@ -119,6 +120,7 @@ public final class JWebSocketConfig implements Config {
 		servers = builder.servers;
 		users = builder.users;
 		plugins = builder.plugins;
+		filters = builder.filters;
 		globalRights = builder.globalRights;
 		globalRoles = builder.globalRoles;
 		// validate the config
@@ -143,6 +145,7 @@ public final class JWebSocketConfig implements Config {
 		private List<ServerConfig> servers;
 		private List<UserConfig> users;
 		private List<PluginConfig> plugins;
+		private List<FilterConfig> filters;
 
 		private List<RightConfig> globalRights;
 		private List<RoleConfig> globalRoles;
@@ -184,6 +187,11 @@ public final class JWebSocketConfig implements Config {
 
 		public Builder addPlugins(List<PluginConfig> thePlugins) {
 			plugins = thePlugins;
+			return this;
+		}
+		
+		public Builder addFilters(List<FilterConfig> theFilters) {
+			filters = theFilters;
 			return this;
 		}
 
@@ -236,6 +244,13 @@ public final class JWebSocketConfig implements Config {
 	 */
 	public List<PluginConfig> getPlugins() {
 		return Collections.unmodifiableList(plugins);
+	}
+	
+	/**
+	 * @return the filters
+	 */
+	public List<FilterConfig> getFilters() {
+		return Collections.unmodifiableList(filters);
 	}
 
 	/**
