@@ -29,7 +29,7 @@ import java.util.Map;
  * time thus helping debugging their engine, servers and plugin logic.
  * 
  * @author puran
- * @version $Id:$
+ * @version $Id$
  *
  */
 public interface WebSocketInitializer {
@@ -50,4 +50,11 @@ public interface WebSocketInitializer {
 	 * associated with it.
 	 */
 	Map<String, List<WebSocketPlugIn>> initializePlugins();
+	
+	/**
+	 * Initialize the filters specific to the server ids
+	 * @return the map of server id to the list of filters associated
+	 * with it.
+	 */
+	Map<String, List<WebSocketFilter>> initializeFilters();
 }
