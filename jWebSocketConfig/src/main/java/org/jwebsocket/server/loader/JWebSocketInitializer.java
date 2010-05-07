@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 
@@ -43,6 +44,14 @@ public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
 	@Override
 	public List<WebSocketServer> initializeCustomServers() {
 		return Collections.emptyList();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Map<String, List<WebSocketFilter>> initializeCustomFilters() {
+		return Collections.emptyMap();
 	}
 
 }

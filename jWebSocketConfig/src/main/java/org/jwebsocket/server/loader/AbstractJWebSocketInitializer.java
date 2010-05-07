@@ -20,10 +20,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.filters.custom.CustomTokenFilter;
+import org.jwebsocket.filters.system.SystemFilter;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
@@ -98,9 +101,31 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 		return pluginMap;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Map<String, List<WebSocketFilter>> initializeFilters() {
+		Map<String, List<WebSocketFilter>> filterMap = new HashMap<String, List<WebSocketFilter>>();
+		
+		List<WebSocketFilter> defaultFilters = new ArrayList<WebSocketFilter>();
+		defaultFilters.add(new SystemFilter("systemFilter"));
+		defaultFilters.add(new CustomTokenFilter("userFilter"));
+		
+		filterMap.put("ts0", defaultFilters);
+		
+		Map<String, List<WebSocketFilter>> customFilterMap = initializeCustomFilters();
+		
+		for (Map.Entry<String, List<WebSocketFilter>> entry : customFilterMap.entrySet()) {
+			String id = entry.getKey();
+			filterMap.get(id).addAll(entry.getValue());
+		}
+		return filterMap;
+	}
+	
     /**
      * Allow subclass of this class to initialize custom plugins.
-     * @return
+     * @return the map of custom plugins to server id.
      */
 	public abstract Map<String, List<WebSocketPlugIn>> initializeCustomPlugins();
 
@@ -109,5 +134,11 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	 * @return the list of custom servers
 	 */
 	public abstract List<WebSocketServer> initializeCustomServers();
+	
+	/**
+	 * Allow the subclass of this class to initialize custom filters
+	 * @return the list of custom filters to server id
+	 */
+	public abstract Map<String, List<WebSocketFilter>> initializeCustomFilters();
 
 }

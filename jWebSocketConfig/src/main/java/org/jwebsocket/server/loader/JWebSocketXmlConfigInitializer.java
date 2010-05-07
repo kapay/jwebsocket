@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
@@ -157,6 +158,9 @@ public final class JWebSocketXmlConfigInitializer implements
 		return servers;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public WebSocketEngine intializeEngine() {
@@ -195,6 +199,50 @@ public final class JWebSocketXmlConfigInitializer implements
 
 		return newEngine;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, List<WebSocketFilter>> initializeFilters() {
+		Map<String, List<WebSocketFilter>> filterMap = new HashMap<String, List<WebSocketFilter>>();
+		
+		//populate the plugin map with server id and empty list
+		for (ServerConfig serverConfig : config.getServers()) {
+			filterMap.put(serverConfig.getId(), new ArrayList<WebSocketFilter>());
+		}
+		//now initialize the pluin
+		for (PluginConfig pluginConfig : config.getPlugins()) {
+			try {
+				String jarFilePath = getLibraryFolderPath(pluginConfig.getJar());
+				classLoader.addFile(jarFilePath);
+				Class<WebSocketFilter> filterClass = (Class<WebSocketFilter>) classLoader
+						.loadClass(pluginConfig.getName());
+				
+				WebSocketFilter filter = filterClass.newInstance();
+				
+				//now add the plugin to plugin map based on server ids
+				for (String serverId : pluginConfig.getServers()) {
+					filterMap.get(serverId).add(filter);
+				}
+				
+			} catch (MalformedURLException e) {
+				throw new WebSocketRuntimeException(
+						"Couldn't Load the Jar file for filter, Make sure jar file exists or name is correct",
+						e);
+			} catch (ClassNotFoundException e) {
+				throw new WebSocketRuntimeException("Filter class not found", e);
+			} catch (InstantiationException e) {
+				throw new WebSocketRuntimeException(
+						"Filter class could not be instantiated", e);
+			} catch (IllegalAccessException e) {
+				throw new WebSocketRuntimeException(
+						"Illegal Access Exception while intializing filter", e);
+			} 
+		}
+		return filterMap;
+	}
 
 	/**
 	 * private method that checks the path of the jWebSocket.xml file
@@ -220,5 +268,4 @@ public final class JWebSocketXmlConfigInitializer implements
 		}
 		return lWebSocketXML;
 	}
-
 }
