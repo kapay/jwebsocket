@@ -2,10 +2,12 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <display-name>jWebSocket Web Application Demo</display-name>
     <context-param>
-        <description>Valid options of jWebSocket_Mode:
-stand-alone: configuration by jWebSocket.xml
-embedded: programmatic configuration
-default: embedded</description>
+        <description>
+        			 Valid options of jWebSocket_Mode:
+					 stand-alone: configuration by jWebSocket.xml
+					 embedded: programmatic configuration
+					 default: embedded
+		</description>
         <param-name>jWebSocket_Mode</param-name>
         <param-value>embedded</param-value>
     </context-param>
