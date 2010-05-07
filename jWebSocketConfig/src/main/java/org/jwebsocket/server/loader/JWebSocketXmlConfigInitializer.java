@@ -31,6 +31,7 @@ import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.config.xml.FilterConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.kit.WebSocketRuntimeException;
@@ -40,7 +41,8 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  * configuration
  * 
  * @author puran
- * @version $Id: JWebSocketXmlConfigInitializer.java 424 2010-05-01 19:11:04Z mailtopuran $
+ * @version $Id: JWebSocketXmlConfigInitializer.java 424 2010-05-01 19:11:04Z
+ *          mailtopuran $
  * 
  */
 public final class JWebSocketXmlConfigInitializer implements
@@ -76,26 +78,27 @@ public final class JWebSocketXmlConfigInitializer implements
 	@Override
 	public Map<String, List<WebSocketPlugIn>> initializePlugins() {
 		Map<String, List<WebSocketPlugIn>> pluginMap = new HashMap<String, List<WebSocketPlugIn>>();
-		
-		//populate the plugin map with server id and empty list
+
+		// populate the plugin map with server id and empty list
 		for (ServerConfig serverConfig : config.getServers()) {
-			pluginMap.put(serverConfig.getId(), new ArrayList<WebSocketPlugIn>());
+			pluginMap.put(serverConfig.getId(),
+					new ArrayList<WebSocketPlugIn>());
 		}
-		//now initialize the pluin
+		// now initialize the pluin
 		for (PluginConfig pluginConfig : config.getPlugins()) {
 			try {
 				String jarFilePath = getLibraryFolderPath(pluginConfig.getJar());
 				classLoader.addFile(jarFilePath);
 				Class<WebSocketPlugIn> pluginClass = (Class<WebSocketPlugIn>) classLoader
 						.loadClass(pluginConfig.getName());
-				
+
 				WebSocketPlugIn plugin = pluginClass.newInstance();
-				
-				//now add the plugin to plugin map based on server ids
+
+				// now add the plugin to plugin map based on server ids
 				for (String serverId : pluginConfig.getServers()) {
 					pluginMap.get(serverId).add(plugin);
 				}
-				
+
 			} catch (MalformedURLException e) {
 				throw new WebSocketRuntimeException(
 						"Couldn't Load the Jar file for plugin, Make sure jar file exists or name is correct",
@@ -108,7 +111,7 @@ public final class JWebSocketXmlConfigInitializer implements
 			} catch (IllegalAccessException e) {
 				throw new WebSocketRuntimeException(
 						"Illegal Access Exception while intializing plugin", e);
-			} 
+			}
 		}
 		return pluginMap;
 	}
@@ -199,7 +202,7 @@ public final class JWebSocketXmlConfigInitializer implements
 
 		return newEngine;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -207,26 +210,29 @@ public final class JWebSocketXmlConfigInitializer implements
 	@Override
 	public Map<String, List<WebSocketFilter>> initializeFilters() {
 		Map<String, List<WebSocketFilter>> filterMap = new HashMap<String, List<WebSocketFilter>>();
-		
-		//populate the plugin map with server id and empty list
+
+		// populate the filter map with server id and empty list
 		for (ServerConfig serverConfig : config.getServers()) {
-			filterMap.put(serverConfig.getId(), new ArrayList<WebSocketFilter>());
+			filterMap.put(serverConfig.getId(),
+					new ArrayList<WebSocketFilter>());
 		}
-		//now initialize the pluin
-		for (PluginConfig pluginConfig : config.getPlugins()) {
+		// now initialize the filter
+		for (FilterConfig filterConfig : config.getFilters()) {
 			try {
-				String jarFilePath = getLibraryFolderPath(pluginConfig.getJar());
+				String jarFilePath = getLibraryFolderPath(filterConfig.getJar());
 				classLoader.addFile(jarFilePath);
 				Class<WebSocketFilter> filterClass = (Class<WebSocketFilter>) classLoader
-						.loadClass(pluginConfig.getName());
-				
-				WebSocketFilter filter = filterClass.newInstance();
-				
-				//now add the plugin to plugin map based on server ids
-				for (String serverId : pluginConfig.getServers()) {
+						.loadClass(filterConfig.getName());
+				Constructor<WebSocketFilter> ctor = filterClass
+						.getDeclaredConstructor(String.class);
+				ctor.setAccessible(true);
+				WebSocketFilter filter = ctor.newInstance(new Object[] { filterConfig.getId() });
+
+				// now add the filter to filter map based on server ids
+				for (String serverId : filterConfig.getServers()) {
 					filterMap.get(serverId).add(filter);
 				}
-				
+
 			} catch (MalformedURLException e) {
 				throw new WebSocketRuntimeException(
 						"Couldn't Load the Jar file for filter, Make sure jar file exists or name is correct",
@@ -239,7 +245,14 @@ public final class JWebSocketXmlConfigInitializer implements
 			} catch (IllegalAccessException e) {
 				throw new WebSocketRuntimeException(
 						"Illegal Access Exception while intializing filter", e);
-			} 
+			} catch (NoSuchMethodException e) {
+				throw new WebSocketRuntimeException(
+						"No Constructor found with given 3 arguments", e);
+			} catch (InvocationTargetException e) {
+				throw new WebSocketRuntimeException(
+						"Exception invoking filter object", e);
+			}
+
 		}
 		return filterMap;
 	}
