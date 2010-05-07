@@ -79,6 +79,9 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	@Override
 	public JWebSocketConfig processConfig(XMLStreamReader streamReader) {
 		JWebSocketConfig.Builder configBuilder = new JWebSocketConfig.Builder();
+		if (log.isInfoEnabled()) {
+			log.info("Reading jWebSocket Configuration");
+		}
 		try {
 			while (streamReader.hasNext()) {
 				streamReader.next();
