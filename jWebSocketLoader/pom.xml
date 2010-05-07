@@ -7,7 +7,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
-	<artifactId>jWebSocketConfig</artifactId>
+	<artifactId>jWebSocketLoader</artifactId>
 	<name>jWebSocketConfig</name>
 	<description>Configuration Project for jWebSocket</description>
 	<packaging>jar</packaging>
