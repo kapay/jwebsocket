@@ -50,6 +50,8 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_SERVER = "server";
 	private static final String ELEMENT_PLUGINS = "plugins";
 	private static final String ELEMENT_PLUGIN = "plugin";
+	private static final String ELEMENT_FILTERS = "filters";
+	private static final String ELEMENT_FILTER = "filter";
 	private static final String ELEMENT_RIGHTS = "rights";
 	private static final String ELEMENT_RIGHT = "right";
 	private static final String ELEMENT_ROLES = "roles";
@@ -68,6 +70,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		handlerContext.put("user", new UserConfigHandler());
 		handlerContext.put("role", new RoleConfigHandler());
 		handlerContext.put("right", new RightConfigHandler());
+		handlerContext.put("filter", new FilterConfigHandler());
 	}
 
 	/**
@@ -98,39 +101,24 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 						streamReader.next();
 						configBuilder.addLibraryFolder(streamReader.getText());
 					} else if (elementName.equals(ELEMENT_ENGINES)) {
-						if (log.isDebugEnabled()) {
-							log.debug("Reading engines configuration");
-						}
 						List<EngineConfig> engines = handleEngines(streamReader);
 						configBuilder = configBuilder.addEngines(engines);
 					} else if (elementName.equals(ELEMENT_SERVERS)) {
-						if (log.isDebugEnabled()) {
-							log.debug("Reading servers configuration");
-						}
 						List<ServerConfig> servers = handleServers(streamReader);
 						configBuilder = configBuilder.addServers(servers);
 					} else if (elementName.equals(ELEMENT_PLUGINS)) {
-						if (log.isDebugEnabled()) {
-							log.debug("Reading plugins configuration");
-						}
 						List<PluginConfig> plugins = handlePlugins(streamReader);
 						configBuilder = configBuilder.addPlugins(plugins);
+					} else if (elementName.equals(ELEMENT_FILTERS)) {
+						List<FilterConfig> filters = handleFilters(streamReader);
+						configBuilder = configBuilder.addFilters(filters);
 					} else if (elementName.equals(ELEMENT_RIGHTS)) {
-						if (log.isDebugEnabled()) {
-							log.debug("Reading rights configuration");
-						}
 						List<RightConfig> globalRights = handleRights(streamReader);
 						configBuilder = configBuilder.addGlobalRights(globalRights);
 					} else if (elementName.equals(ELEMENT_ROLES)) {
-						if (log.isDebugEnabled()) {
-							log.debug("Reading roles configuration");
-						}
 						List<RoleConfig> roles = handleRoles(streamReader);
 						configBuilder = configBuilder.addGlobalRoles(roles);
 					} else if (elementName.equals(ELEMENT_USERS)) {
-						if (log.isDebugEnabled()) {
-							log.debug("Reading users configuration");
-						}
 						List<UserConfig> users = handleUsers(streamReader);
 						configBuilder = configBuilder.addUsers(users);
 					} else {
@@ -274,6 +262,38 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 			}
 		}
 		return plugins;
+	}
+	
+	/**
+	 * private method that reads the config for filters
+	 * 
+	 * @param streamReader
+	 *            the stream reader object
+	 * @return the list of filter configs
+	 * @throws XMLStreamException
+	 *             if exception occurs while reading
+	 */
+	private List<FilterConfig> handleFilters(XMLStreamReader streamReader)
+			throws XMLStreamException {
+		List<FilterConfig> filters = new ArrayList<FilterConfig>();
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_FILTER)) {
+					FilterConfig filter = (FilterConfig) handlerContext.get(
+							elementName).processConfig(streamReader);
+					filters.add(filter);
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_FILTERS)) {
+					break;
+				}
+			}
+		}
+		return filters;
 	}
 
 	/**
