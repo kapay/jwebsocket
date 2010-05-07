@@ -19,13 +19,10 @@
 		<module>jWebSocketCluster</module>
 		<module>jWebSocketAdmin</module>
 		<module>jWebSocketConfig</module>
+		<module>jWebSocketWebAppSupport</module>
 		<module>jWebSocketJavaClient</module>
 		<module>jWebSocketServer</module>
-<!--
-		<module>jWebSocketAppSrvEmb</module>
-		<module>jWebSocketAppSrvStAl</module>
-		<module>jWebSocketAppSrvDemo</module>
--->		
+		<module>jWebSocketAppServer</module>
 	</modules>
 
 	<build>
