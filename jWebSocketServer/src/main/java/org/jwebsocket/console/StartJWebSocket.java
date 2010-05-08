@@ -61,18 +61,18 @@ public class StartJWebSocket {
 			
 			//start the engine
 			if (log.isInfoEnabled()) {
-				log.debug("Starting Engine...");
+				log.info("Starting Engine...");
 			}
 			engine.startEngine();
 			
 			//now start the servers
 			if (log.isInfoEnabled()) {
-				log.debug("Starting Servers...");
+				log.info("Starting Servers...");
 			}
 			for (WebSocketServer server : servers) {
 				server.startServer();
 			}
-			
+			System.out.println("jWebSocket server startup complete");
 			//perform any clean up task for servers or any status related 
 			
 		} catch (WebSocketException e) {
