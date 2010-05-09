@@ -292,6 +292,7 @@ input[type="button"].inpBtnEm {
 
 textarea.stxaDlg {
 	font-family: inherit;
+	font-size: 10pt;
 	border: 1px solid #444;
 	background-color: white;
 }
