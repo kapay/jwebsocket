@@ -19,33 +19,32 @@ page.</p>
 <h2>Process</h2>
 <p>To create a full deployment please follow the following steps:</p>
 <ol>
+	<li>Minify/Obfuscate JavaScript and CSS files with Jasob Obfuscator.</li>
 	<li>Update version number in <tt>JWebSocketConstants.java</tt></li>
 	<li>Update all version numbers in <tt>pom.xml</tt> files to current version</li>
-	<li>Update version number in context.xml for web app</li>
+	<li>Update version number in context.xml for web app (we currently simply 
+	use NotePad++ for file search and replace)</li>
+	<li>Run &quot;Generate Javadoc&quot; for each jWebSocket module within the project<br>
+	we have a <tt>createJavaDocs.bat</tt> now in the deployment folder<br>
+	(this creates all required Java documentation files in the 
+	<tt>jWebSocketClient\web\javadocs</tt> folder)</li>
 	<li>Open IDE and &quot;Clean And Build&quot; the <tt>jWebSocket-Parent</tt> project<br>
 	(this creates all required .<tt>jar</tt> files of the modules in the 
 	<tt>jWebSocketExecutables</tt> folder)</li>
-	<li>Run &quot;Generate Javadoc&quot; for each jWebSocket module within the project<br>
-	(this creates all required Java documentation files in the 
-	jWebSocketClient\web\javadocs folder)</li>
-	<li>Generate the jWebSocket Server Executable by running JSmooth with 
-	<tt>jWebSocketServer-&lt;ver&gt;.jsmooth</tt><br>
-	(this creates the <tt>jWebSocketSAServer-&lt;ver&gt;.exe</tt> in the 
-	jWebSocketDeploymentfolder)</li>
-	<li>Generate the jWebSocket Service Executable by running JSmooth with 
-	<tt>jWebSocketService-&lt;ver&gt;.jsmooth</tt><br>
-	(this creates the <tt>jWebSocketService-&lt;ver&gt;.exe</tt> in the jWebSocketDeployment 
+	<li>Generate the jWebSocket Server Executables by running Exe4J with 
+	<tt>createRuntimeFiles.bat</tt>.<br>
+	(this creates the <tt>jWebSocketServer&lt;32|64&gt;-&lt;ver&gt;.exe</tt> and <tt>jWebSocketService&lt;32|64&gt;-&lt;ver&gt;.exe </tt> in the <tt>jWebSocketRTE/bin</tt> 
 	folder)</li>
-	<li>Update Version numbers in all batches the <tt>jWebSocketDeployment</tt> 
+	<li>Update Version numbers in all batches the <tt>jWebSocketRTE/bin</tt> 
 	folder.</li>
-	<li>Update the <tt>CreateDownloadFiles.bat</tt> in the <tt>jWebSocketDeployment</tt> folder 
+	<li>Update the <tt>createDownloadFiles.bat</tt> in the <tt>jWebSocketDeployment</tt> folder 
 	to the new version number and run it.<br>(this creates all .<tt>zip</tt> files for the download area in jWebSocketDeployment)</li>
 	<li>Check correct file sizes on download page (compare with last recently 
 	created files)
 	</li>
 	<li>Update <tt>jwsClientToWebsite.bat</tt>
 	to new version number, adjust it to new files if needed and run it.</li>
-	<li>Run <tt>CreateJWebSocketWeb.bat</tt> to create jWebSocket online web.</li>
+	<li>Run <tt>createJWebSocketWeb.bat</tt> to create jWebSocket online web.</li>
 	<li>Create announcement in blog</li>
 	<li>Create announcement in twitter</li>
 </ol>
