@@ -31,8 +31,9 @@ import org.jwebsocket.server.loader.JWebSocketLoader;
  *
  */
 public class StartJWebSocket {
+
 	private static Logger log = null;
-	private static Logger logger = Logging.getLogger(StartJWebSocket.class);
+	private static Logger logger = null; // don't instantiate logger here! first read args!
 
 	/**
 	 * @param args the command line arguments
@@ -40,31 +41,54 @@ public class StartJWebSocket {
 	public static void main(String[] args) {
 		//TODO: get this from xml file
 		String loglevel = "debug";
+		int logTarget = Logging.ROLLING_FILE;
+
+		// parse optional command line arguments
+		int i = 0;
+		while (i < args.length) {
+			if (i + 1 < args.length) {
+				if (args[i].equalsIgnoreCase("logtarget")) {
+					String lLogTarget = args[i + 1].toLowerCase();
+					if ("console".equals(lLogTarget)) {
+						logTarget = Logging.CONSOLE;
+					} else if ("rollingfile".equals(lLogTarget)) {
+						logTarget = Logging.ROLLING_FILE;
+					}
+					if ("singlefile".equals(lLogTarget)) {
+						logTarget = Logging.SINGLE_FILE;
+					}
+				} else if (args[i].equalsIgnoreCase("loglevel")) {
+					loglevel = args[i + 1].toLowerCase();
+				}
+			}
+			i += 2;
+		}
 
 		// initialize log4j logging engine
 		// BEFORE instantiating any jWebSocket classes
-		Logging.initLogs(loglevel, Logging.CONSOLE);
+		Logging.initLogs(loglevel, logTarget);
 		log = Logging.getLogger(StartJWebSocket.class);
 
 		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
 		System.out.println("jWebSocket Ver. "
-				+ JWebSocketConstants.VERSION_STR);
+				+ JWebSocketConstants.VERSION_STR
+				+ " (" + System.getProperty("sun.arch.data.model") + "bit)");
 		System.out.println(JWebSocketConstants.COPYRIGHT);
 		System.out.println(JWebSocketConstants.LICENSE);
 
 		JWebSocketLoader loader = new JWebSocketLoader();
-		
+
 		try {
 			WebSocketInitializer initializer = loader.initialize();
 			WebSocketEngine engine = loader.loadEngine(initializer);
 			List<WebSocketServer> servers = loader.loadServers(initializer, engine);
-			
+
 			//start the engine
 			if (log.isInfoEnabled()) {
 				log.info("Starting Engine...");
 			}
 			engine.startEngine();
-			
+
 			//now start the servers
 			if (log.isInfoEnabled()) {
 				log.info("Starting Servers...");
@@ -74,7 +98,7 @@ public class StartJWebSocket {
 			}
 			System.out.println("jWebSocket server startup complete");
 			//perform any clean up task for servers or any status related 
-			
+
 		} catch (WebSocketException e) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Exception during startup", e);
@@ -85,7 +109,7 @@ public class StartJWebSocket {
 			System.out.println("ERROR during JWebSocketServer startup");
 			System.exit(0);
 		}
-		
+
 		// log.info("Server(s) successfully terminated.");
 	}
 }

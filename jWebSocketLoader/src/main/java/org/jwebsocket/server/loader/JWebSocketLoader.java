@@ -14,6 +14,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server.loader;
 
+import java.io.IOException;
+import java.util.logging.Level;
 import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
 
 import java.io.File;
