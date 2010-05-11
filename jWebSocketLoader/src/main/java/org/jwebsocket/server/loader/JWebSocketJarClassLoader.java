@@ -29,13 +29,15 @@ public class JWebSocketJarClassLoader extends URLClassLoader {
 	
 	/**
 	 * constructor
-	 * @param urls the urls of the jar
 	 */
 	public JWebSocketJarClassLoader() {
 		super(new URL[] {});
 	}
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param path
+	 * @throws MalformedURLException
 	 */
 	public void addFile(String path) throws MalformedURLException {
 		String urlPath = "jar:file://" + path + "!/";
