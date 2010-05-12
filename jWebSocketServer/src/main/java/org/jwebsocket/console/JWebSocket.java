@@ -152,7 +152,7 @@ public class JWebSocket {
 
 		// create the token server (based on the TCP engine)
 		TokenServer tokenServer = null;
-		StreamingPlugIn streamingPlugIn = null;
+		// StreamingPlugIn streamingPlugIn = null;
 
 		try {
 			// instantiate the Token server and bind engine to it
@@ -174,7 +174,7 @@ public class JWebSocket {
 			// add the RPCPlugIn plug-in
 			plugInChain.addPlugIn(new RPCPlugIn());
 			// add the streaming plug-in (e.g. for the time stream demo)
-			plugInChain.addPlugIn(streamingPlugIn = new StreamingPlugIn());
+			plugInChain.addPlugIn(/*streamingPlugIn = */new StreamingPlugIn());
 			// add the flash/bridge plug-in (to drive browser that don't yet support web sockets)
 			plugInChain.addPlugIn(new SharedObjectsPlugIn());
 			// add the flash/bridge plug-in (to drive browser that don't yet support web sockets)
@@ -186,16 +186,6 @@ public class JWebSocket {
 			tokenServer.startServer();
 		} catch (Exception ex) {
 			System.out.println("Error instantiating TokenServer: " + ex.getMessage());
-		}
-
-		// initialize streaming sub system...
-		if (streamingPlugIn != null) {
-			// create the stream for the time stream demo
-			TimeStream lTimeStream = new TimeStream("timeStream", tokenServer);
-			streamingPlugIn.addStream(lTimeStream);
-			// create the stream for the monitor stream demo
-			MonitorStream lMonitorStream = new MonitorStream("monitorStream", tokenServer);
-			streamingPlugIn.addStream(lMonitorStream);
 		}
 
 		// create the custom server (based on the TCP engine as well)

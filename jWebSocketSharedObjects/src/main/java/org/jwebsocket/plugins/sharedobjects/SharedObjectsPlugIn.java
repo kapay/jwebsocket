@@ -113,12 +113,15 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 		String lDataType = aToken.getString("datatype");
 		String lValue = aToken.getString("value");
 
-		Token lResponse = getServer().createResponse(aToken);
+	if (lType != null && (lNS == null || lNS.equals(NS_SHARED_OBJECTS))) {
 
-		if (lType != null && (lNS == null || lNS.equals(NS_SHARED_OBJECTS))) {
+			Token lResponse = getServer().createResponse(aToken);
 
 			// create
 			if (lType.equals("create")) {
+				if (log.isDebugEnabled()) {
+					log.debug("Processing 'create'...");
+				}
 				if (!isDataTypeValid(lDataType, aConnector, lResponse)) {
 					return;
 				}
@@ -136,6 +139,9 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 
 				// destroy
 			} else if (lType.equals("destroy")) {
+				if (log.isDebugEnabled()) {
+					log.debug("Processing 'destroy'...");
+				}
 				if (!doesContain(lID, aConnector, lResponse)) {
 					return;
 				}
@@ -148,14 +154,21 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 
 				// get
 			} else if (lType.equals("get")) {
+				if (log.isDebugEnabled()) {
+					log.debug("Processing 'get'...");
+				}
 				if (!doesContain(lID, aConnector, lResponse)) {
 					return;
 				}
 				Object lObj = sharedObjects.get(lID);
+				lResponse.put("id", lID);
 				lResponse.put("result", lObj.toString());
 
 				// put
 			} else if (lType.equals("update")) {
+				if (log.isDebugEnabled()) {
+					log.debug("Processing 'update'...");
+				}
 				if (!isDataTypeValid(lDataType, aConnector, lResponse)) {
 					return;
 				}
@@ -169,6 +182,9 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 
 				// init
 			} else if (lType.equals("init")) {
+				if (log.isDebugEnabled()) {
+					log.debug("Processing 'init'...");
+				}
 				Token lBCT = new Token(lNS, "event");
 				lBCT.put("name", "init");
 
@@ -202,6 +218,7 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 				getServer().sendToken(aConnector, lBCT);
 
 			} else {
+				log.warn("Invalid command " + lType + " received...");
 				lResponse.put("code", -1);
 				lResponse.put("msg", "invalid type '" + lType + "'");
 			}

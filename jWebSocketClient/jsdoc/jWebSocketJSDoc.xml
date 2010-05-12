@@ -40,7 +40,7 @@
 <result descr="Element that originally fired the event." field="" object="" type="Node"/>
 </method>
 </class>
-<class ancestor="-" descr="Implementation for the [tt]jws.jWebSocketBaseClient[/tt] class. This class does not handle exceptions or error, it throws exceptions, which are (have to be) handled by the descendant classes.&#10;" fullpath="jws.jWebSocketBaseClient" name="jWebSocketBaseClient">
+<class ancestor="-" descr="Implementation of the [tt]jws.jWebSocketBaseClient[/tt] class. This class does not handle exceptions or error, it throws exceptions, which are (have to be) handled by the descendant classes.&#10;" fullpath="jws.jWebSocketBaseClient" name="jWebSocketBaseClient">
 <method descr="Called when the WebSocket connection successfully was established. Can to be overwritten in descendant classes to process [tt]onopen[/tt] event in descendant classes.&#10;" fullpath="jws.jWebSocketBaseClient.processOpened" name="processOpened">
 <arg descr="Pending..." field="aEvent" object="" type="Object"/>
 <result descr="none" field="" object="" type="void"/>
@@ -195,10 +195,10 @@
 <result descr="Please refer to the [tt]close[/tt] method." field="" object="" type="Deprecated"/>
 </method>
 </class>
-<class ancestor="-" descr="Implementation for the [tt]jws.SystemClientPlugIn[/tt] class.&#10;" fullpath="jws.SystemClientPlugIn" name="SystemClientPlugIn">
+<class ancestor="-" descr="Implementation of the [tt]jws.SystemClientPlugIn[/tt] class.&#10;" fullpath="jws.SystemClientPlugIn" name="SystemClientPlugIn">
 <const descr="Namespace for SystemClientPlugIn&#10;" fullpath="jws.SystemClientPlugIn.NS" name="NS" type="String" value="org.jWebSocket.plugins.system (jws.NS_BASE + &quot;.plugins.system&quot;)"/>
 <const descr="For [tt]getClients[/tt] method&#10;: Returns all currently connected clients irrespective of their authentication state." fullpath="jws.SystemClientPlugIn.ALL_CLIENTS" name="ALL_CLIENTS" type="Number" value="0"/>
-<const descr="For [tt]getClients[/tt] method&#10;: Returns all authenticated clients only." fullpath="jws.SystemClientPlugIn.ALL_CLIENTS" name="ALL_CLIENTS" type="Number" value="1"/>
+<const descr="For [tt]getClients[/tt] method&#10;: Returns all authenticated clients only." fullpath="jws.SystemClientPlugIn.AUTHENTICATED" name="AUTHENTICATED" type="Number" value="1"/>
 <const descr="For [tt]getClients[/tt] method&#10;: Returns all non-authenticated clients only." fullpath="jws.SystemClientPlugIn.NON_AUTHENTICATED" name="NON_AUTHENTICATED" type="Number" value="2"/>
 <method descr="Tries to authenticate the client against the jWebSocket Server by sending a [tt]login[/tt] token.&#10;" fullpath="jws.SystemClientPlugIn.login" name="login">
 <arg descr="The login name of the user." field="aUsername" object="" type="String"/>
@@ -262,7 +262,7 @@
 <result descr="none" field="" object="" type="void"/>
 </method>
 </class>
-<class ancestor="-" descr="Implementation for the [tt]jws.StreamingPlugIn[/tt] class. This plug-in provides the methods to register and unregister at certain stream sn the server.&#10;" fullpath="jws.StreamingPlugIn" name="StreamingPlugIn">
+<class ancestor="-" descr="Implementation of the [tt]jws.StreamingPlugIn[/tt] class. This plug-in provides the methods to register and unregister at certain stream sn the server.&#10;" fullpath="jws.StreamingPlugIn" name="StreamingPlugIn">
 <const descr="Namespace for the [tt]StreamingPlugIn[/tt] class.&#10;" fullpath="jws.StreamingPlugIn.NS" name="NS" type="String" value="org.jWebSocket.plugins.streaming (jws.NS_BASE + &quot;.plugins.streaming&quot;)"/>
 <method descr="Registers the client at the given stream on the server. After this operation the client obtains all messages in this stream. Basically a client can register at multiple streams.&#10;If no stream with the given ID exists on the server an error token is returned. Depending on the type of the stream it may take more or less time until you get the first token from the stream.&#10;" fullpath="jws.StreamingPlugIn.registerStream" name="registerStream">
 <arg descr="The id of the server side data stream." field="aStream" object="" type="String"/>
@@ -279,7 +279,7 @@
 <result descr="none" field="" object="" type="void"/>
 </method>
 </class>
-<class ancestor="-" descr="Implementation for the [tt]jws.RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn" name="RPCClientPlugIn">
+<class ancestor="-" descr="Implementation of the [tt]jws.RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn" name="RPCClientPlugIn">
 <const descr="Namespace for the [tt]RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn.NS" name="NS" type="String" value="org.jWebSocket.plugins.rpc (jws.NS_BASE + &quot;.plugins.rpc&quot;)"/>
 <method descr="Processes an incoming token from the server or a remote client. Here the token is checked for type [tt]rrpc[/tt]. If such is detected it gets processed by the [tt]onRRPC[/tt] method of this class.&#10;" fullpath="jws.RPCClientPlugIn.processToken" name="processToken">
 <arg descr="Token received from the server or a remote client." field="aToken" object="" type="Object"/>
@@ -305,7 +305,7 @@
 <result descr="none" field="" object="" type="void"/>
 </method>
 </class>
-<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketJSONClient[/tt] class.&#10;" fullpath="jws.jWebSocketJSONClient" name="jWebSocketJSONClient">
+<class ancestor="jws.jWebSocketTokenClient" descr="Implementation of the [tt]jws.jWebSocketJSONClient[/tt] class.&#10;" fullpath="jws.jWebSocketJSONClient" name="jWebSocketJSONClient">
 <method descr="converts a token to a JSON stream. If the browser provides a native JSON class this is used, otherwise it use the automatically embedded JSON library from json.org.&#10;" fullpath="jws.jWebSocketJSONClient.tokenToStream" name="tokenToStream">
 <arg descr="The token (an JavaScript Object) to be converted into an JSON stream." field="aToken" object="" type="Token"/>
 <result descr="The resulting JSON stream." field="" object="" type="String"/>
@@ -316,7 +316,7 @@
 <result descr="Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers." field="[i]field[/i]" object="Token" type="[i]type[/i]"/>
 </method>
 </class>
-<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketCSVClient[/tt] class.&#10;" fullpath="jws.jWebSocketCSVClient" name="jWebSocketCSVClient">
+<class ancestor="jws.jWebSocketTokenClient" descr="Implementation of the [tt]jws.jWebSocketCSVClient[/tt] class.&#10;" fullpath="jws.jWebSocketCSVClient" name="jWebSocketCSVClient">
 <method descr="converts a token to a CSV stream.&#10;" fullpath="jws.jWebSocketCSVClient.tokenToStream" name="tokenToStream">
 <arg descr="The token (an JavaScript Object) to be converted into an CSV stream." field="aToken" object="" type="Token"/>
 <result descr="The resulting CSV stream." field="" object="" type="String"/>
@@ -327,7 +327,7 @@
 <result descr="Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers." field="[i]field[/i]" object="Token" type="[i]type[/i]"/>
 </method>
 </class>
-<class ancestor="jws.jWebSocketTokenClient" descr="Implementation for the [tt]jws.jWebSocketXMLClient[/tt] class.&#10;" fullpath="jws.jWebSocketXMLClient" name="jWebSocketXMLClient">
+<class ancestor="jws.jWebSocketTokenClient" descr="Implementation of the [tt]jws.jWebSocketXMLClient[/tt] class.&#10;" fullpath="jws.jWebSocketXMLClient" name="jWebSocketXMLClient">
 <method descr="converts a token to a XML stream.&#10;" fullpath="jws.jWebSocketXMLClient.tokenToStream" name="tokenToStream">
 <arg descr="The token (an JavaScript Object) to be converted into an XML stream." field="aToken" object="" type="Token"/>
 <result descr="The resulting XML stream." field="" object="" type="String"/>

@@ -23,6 +23,7 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
@@ -37,6 +38,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 	private static Logger log = Logging.getLogger(StreamingPlugIn.class);
 	private String NS_STREAMING_DEFAULT = JWebSocketConstants.NS_BASE + ".plugins.streaming";
 	private FastMap<String, BaseStream> streams = new FastMap<String, BaseStream>();
+	private boolean streamsInitialized = false;
 
 	/**
 	 * create a new instance of the streaming plug-in and set the default
@@ -48,6 +50,22 @@ public class StreamingPlugIn extends TokenPlugIn {
 		}
 		// specify default name space for streaming plugin
 		this.setNamespace(NS_STREAMING_DEFAULT);
+
+	}
+
+	private void initStreams() {
+		if (!streamsInitialized) {
+			TokenServer lTokenServer = getServer();
+			if (lTokenServer != null) {
+				// create the stream for the time stream demo
+				TimeStream lTimeStream = new TimeStream("timeStream", lTokenServer);
+				addStream(lTimeStream);
+				// create the stream for the monitor stream demo
+				MonitorStream lMonitorStream = new MonitorStream("monitorStream", lTokenServer);
+				addStream(lMonitorStream);
+				streamsInitialized = true;
+			}
+		}
 	}
 
 	/**
@@ -133,6 +151,11 @@ public class StreamingPlugIn extends TokenPlugIn {
 		}
 		// else...
 		// todo: error handling
+	}
+
+	@Override
+	public void connectorStarted(WebSocketConnector aConnector) {
+		initStreams();
 	}
 
 	@Override

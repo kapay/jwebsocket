@@ -107,7 +107,9 @@ public class Token {
 		Object lObj = items.get(aArg);
 		Integer lResult = aDefault;
 		if (lObj != null) {
-			if (lObj instanceof String) {
+			if (lObj instanceof Integer) {
+				lResult = (Integer)lObj;
+			} else if (lObj instanceof String) {
 				try {
 					lResult = Integer.parseInt((String) lObj);
 				} catch (NumberFormatException ex) {

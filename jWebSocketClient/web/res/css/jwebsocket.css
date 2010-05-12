@@ -22,20 +22,24 @@ i {
 	color: #202020;
 }
 
+ul {
+	/* padding: 0; */
+	margin-top: 0;
+	margin-bottom: 12pt;
+	border: 0;
+	background: #fff;
+	font-family: Verdana, Helvetica, sans-serif;
+	font-size: 10pt;
+	color: #202020;
+}
 li {
 	border:none;
 	background: #fff;
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 10pt;
 	color: #202020;
-}
-
-ul {
-	border:none;
-	background: #fff;
-	font-family: Verdana, Helvetica, sans-serif;
-	font-size: 10pt;
-	color: #202020;
+	margin-top: 0;
+	margin-bottom: 3pt;
 }
 
 a {
@@ -47,6 +51,8 @@ a {
 }
 
 p {
+	padding: 0 0 6pt 0;
+	margin: 0px;
 	border:none;
 	background: #fff;
 	font-family: Verdana, Helvetica, sans-serif;
@@ -60,9 +66,6 @@ body {
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 10pt;
 	color: #202020;
-}
-
-body {
 	padding: 0px;
 	border: 0px;
 	margin: 10px;
@@ -82,6 +85,12 @@ pre {
 .listing {
 	background-color:#f0f0f0;
 	font-family: Courier, "Courier New", monospace;
+}
+
+.description {
+	font-family: Verdana, Helvetica, sans-serif;
+	font-size: 8pt;
+	color: #202020;
 }
 
 h1 {
@@ -130,7 +139,7 @@ h4 {
 
 	border: 0px;
 	padding: 0px;
-	margin: 12px 0px 3px 0px;
+	margin: 12px 0px 0px 0px;
 }
 
 
@@ -153,14 +162,6 @@ blockquote {
 
 	border: 0px;
 	padding: 0px;
-	margin: 0px;
-}
-
-p {
-	font-size: 10pt;
-	color: #202020;
-	border: 0px;
-	padding: 0 0 6pt 0;
 	margin: 0px;
 }
 
@@ -296,6 +297,7 @@ textarea.stxaDlg {
 	border: 1px solid #444;
 	background-color: white;
 }
+
 select.sselDlg {
 	font-family: inherit;
 	border: 1px solid #444;

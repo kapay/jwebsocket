@@ -308,7 +308,7 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 //:package:*:jws
 //:class:*:jws.jWebSocketBaseClient
 //:ancestor:*:-
-//:d:en:Implementation for the [tt]jws.jWebSocketBaseClient[/tt] class. _
+//:d:en:Implementation of the [tt]jws.jWebSocketBaseClient[/tt] class. _
 //:d:en:This class does not handle exceptions or error, it throws exceptions, _
 //:d:en:which are (have to be) handled by the descendant classes.
 
@@ -1017,7 +1017,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 //:package:*:jws
 //:class:*:jws.SystemClientPlugIn
 //:ancestor:*:-
-//:d:en:Implementation for the [tt]jws.SystemClientPlugIn[/tt] class.
+//:d:en:Implementation of the [tt]jws.SystemClientPlugIn[/tt] class.
 jws.SystemClientPlugIn = {
 
 	//:const:*:NS:String:org.jWebSocket.plugins.system (jws.NS_BASE + ".plugins.system")
@@ -1028,7 +1028,7 @@ jws.SystemClientPlugIn = {
 	//:const:*:ALL_CLIENTS:Number:0
 	//:d:en:For [tt]getClients[/tt] method: Returns all currently connected clients irrespective of their authentication state.
 	ALL_CLIENTS: 0,
-	//:const:*:ALL_CLIENTS:Number:1
+	//:const:*:AUTHENTICATED:Number:1
 	//:d:en:For [tt]getClients[/tt] method: Returns all authenticated clients only.
 	AUTHENTICATED: 1,
 	//:const:*:NON_AUTHENTICATED:Number:2
@@ -1356,7 +1356,7 @@ jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.SystemClientPlugIn );
 //:package:*:jws
 //:class:*:jws.StreamingPlugIn
 //:ancestor:*:-
-//:d:en:Implementation for the [tt]jws.StreamingPlugIn[/tt] class. This _
+//:d:en:Implementation of the [tt]jws.StreamingPlugIn[/tt] class. This _
 //:d:en:plug-in provides the methods to register and unregister at certain _
 //:d:en:stream sn the server.
 jws.StreamingPlugIn = {
@@ -1449,7 +1449,7 @@ jws.RRPCServer = {
 //:package:*:jws
 //:class:*:jws.RPCClientPlugIn
 //:ancestor:*:-
-//:d:en:Implementation for the [tt]jws.RPCClientPlugIn[/tt] class.
+//:d:en:Implementation of the [tt]jws.RPCClientPlugIn[/tt] class.
 jws.RPCClientPlugIn = {
 
 	//:const:*:NS:String:org.jWebSocket.plugins.rpc (jws.NS_BASE + ".plugins.rpc")
@@ -1584,7 +1584,7 @@ jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.RPCClientPlugIn );
 //:package:*:jws
 //:class:*:jws.jWebSocketJSONClient
 //:ancestor:*:jws.jWebSocketTokenClient
-//:d:en:Implementation for the [tt]jws.jWebSocketJSONClient[/tt] class.
+//:d:en:Implementation of the [tt]jws.jWebSocketJSONClient[/tt] class.
 jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, {
 
 	//:m:*:tokenToStream
@@ -1632,7 +1632,7 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 //:package:*:jws
 //:class:*:jws.jWebSocketCSVClient
 //:ancestor:*:jws.jWebSocketTokenClient
-//:d:en:Implementation for the [tt]jws.jWebSocketCSVClient[/tt] class.
+//:d:en:Implementation of the [tt]jws.jWebSocketCSVClient[/tt] class.
 jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 
 	// todo: implement escaping of command separators and equal signs
@@ -1704,7 +1704,7 @@ jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 //:package:*:jws
 //:class:*:jws.jWebSocketXMLClient
 //:ancestor:*:jws.jWebSocketTokenClient
-//:d:en:Implementation for the [tt]jws.jWebSocketXMLClient[/tt] class.
+//:d:en:Implementation of the [tt]jws.jWebSocketXMLClient[/tt] class.
 jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 
 	//:m:*:tokenToStream

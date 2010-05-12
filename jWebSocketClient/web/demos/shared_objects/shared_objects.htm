@@ -115,8 +115,12 @@
 
 			function get() {
 				var lRes = jWebSocketClient.getSharedObject(
-					eId.value,	// object-id
-					{
+					eId.value,		// object-id
+					null,			// data-type
+					{	OnResponse: function( aToken ) {
+							log( "getSharedObject (" + aToken.id + "=" + aToken.result + ")" );
+							eValue.value = aToken.result;
+						}
 					}
 				);
 				log( jWebSocketClient.resultToString( lRes ) );
@@ -124,17 +128,13 @@
 
 			function update() {
 				var lRes = jWebSocketClient.updateSharedObject(
-					eId.value,		//
-					"string",		//
-					eValue.value,	//
+					eId.value,		// object-id
+					"string",		// data-type
+					eValue.value,	// new value
 					{
 					}
 				);
 				log( jWebSocketClient.resultToString( lRes ) );
-			}
-
-			function xxx() {
-
 			}
 
 			function objectSelected() {
@@ -160,13 +160,13 @@
 			}
 
 			function sharedObjectCreated( aToken ) {
-				log( "sharedObjectCreated" );
+				log( "sharedObjectCreated (" + aToken.id + ")" );
 				var lNewOption = document.createElement( "option" );
 				lNewOption.text = aToken.id + " = " + aToken.value;
 				lNewOption.value = aToken.id;
 				var lOldOption = findOption( aToken.id );
 				if( lOldOption ) {
-					log( "ERROR: object created already exists on client, updating..." );
+					log( "ERROR on object created: object with id " + aToken.id + " already exists on client, updating..." );
 					eObjects.replaceChild( lNewOption, lOldOption );
 				} else {
 					eObjects.appendChild( lNewOption );
@@ -174,17 +174,17 @@
 			}
 
 			function sharedObjectDestroyed( aToken ) {
-				log( "sharedObjectDestroyed" );
+				log( "sharedObjectDestroyed (" + aToken.id + ")" );
 				var lOption = findOption( aToken.id );
 				if( lOption ) {
-					eObject.removeChild( lOption );
+					eObjects.removeChild( lOption );
 				} else {
-					log( "ERROR: object destroyed does not exist on client." );
+					log( "ERROR on objectDestroyed, object with id " + aToken.id + " does not exist on client." );
 				}
 			}
 
 			function sharedObjectUpdated( aToken ) {
-				log( "sharedObjectUpdated" );
+				log( "sharedObjectUpdated (" + aToken.id + ")" );
 				var lOldOption = findOption( aToken.id );
 				if( lOldOption ) {
 					var lNewOption = document.createElement( "option" );
@@ -194,7 +194,7 @@
 					eObjects.replaceChild( lNewOption, lOldOption );
 					eObjects.selectedIndex = lSelIdx;
 				} else {
-					log( "ERROR: object updated does not exist on client, appending..." );
+					log( "ERROR on objectUpdated, object with id " + aToken.id + " does not exist on client, appending..." );
 					eObjects.appendChild( lNewOption );
 				}
 			}
@@ -306,16 +306,16 @@
 					<td class="stdDlg" width="5">Password</td>
 					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" disabled="disabled" id="sbtnBroadcast" type="button" value="-" onclick="broadcast();"></td>
 					<td class="stdDlg" width="5">Datatype</td>
 					<td class="stdDlg" width="5">
-						<select class="sselDlg" id="sselDatatype">
+						<select class="sselDlg" id="sselDatatype" style="width:100px">
 							<option>number</option>
 							<option>string</option>
 						</select>
 					</td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDestroy" type="button" value="Destroy" onclick="destroy();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnXXX" type="button" value="?" onclick="xxx();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" disabled="disabled" id="sbtnNA" type="button" value="-" onclick=""></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnUpdate" type="button" value="Update" onclick="update();"></td>
 					<td class="stdDlg" width="">&nbsp;</td>
 				</tr>

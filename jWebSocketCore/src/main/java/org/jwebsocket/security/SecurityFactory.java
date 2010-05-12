@@ -24,7 +24,6 @@ import org.jwebsocket.config.xml.RoleConfig;
 import org.jwebsocket.config.xml.UserConfig;
 import org.jwebsocket.logging.Logging;
 
-
 /**
  * implements the security capabilities of jWebSocket.
  * @author aschulze
@@ -141,44 +140,13 @@ public class SecurityFactory {
 	}
 
 	public static void init() {
-/*
-		// try to obtain JWEBSOCKET_HOME environment variable
-		String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
-		String lFileSep = System.getProperty("file.separator");
-		String lWebSocketXML = null;
-		if (lWebSocketHome != null) {
-			// append trailing slash if needed
-			if (!lWebSocketHome.endsWith(lFileSep)) {
-				lWebSocketHome += lFileSep;
-			}
-			// jWebSocket.xml has to be located in %JWEBSOCKET_HOME%/conf
-			lWebSocketXML = lWebSocketHome + "conf" + lFileSep + "jWebSocket.xml";
-			System.out.println(
-					"Trying to load config from " + lWebSocketXML + "...");
-			// try to load the config file
-			JWebSocketLoader lWSL = new JWebSocketLoader();
-			try {
-				JWebSocketConfig lConfig = lWSL.loadConfiguration(lWebSocketXML);
-				SecurityFactory.initFromConfig(lConfig);
-			} catch (WebSocketException ex) {
-				System.out.println("Configuration " + lWebSocketXML + " file invalid or not found.");
-				System.out.println("Using default configuration.");
-				// initialize the security factory with some default demo data
-				// to show at least something even with no config
-				// TODO: only temporary, will be removed in the final release!
-				SecurityFactory.initDefault();
-			}
-		} else {
-*/			System.out.println(
-					"JWEBSOCKET_HOME variable not set, using default configuration...");
-			// initialize the security factory with some default demo data
-			// to show at least something even with no config
-			// TODO: only temporary, will be removed in the final release!
-			SecurityFactory.initDefault();
-/*
-		}
- */
- 	}
+		System.out.println(
+				"JWEBSOCKET_HOME variable not set, using default configuration...");
+		// initialize the security factory with some default demo data
+		// to show at least something even with no config
+		// TODO: only temporary, will be removed in the final release!
+		SecurityFactory.initDefault();
+	}
 
 	/**
 	 * checks if a user identified by it login name has a certain right.
@@ -188,11 +156,17 @@ public class SecurityFactory {
 	 */
 	public static boolean checkRight(String aLoginname, String aRight) {
 		boolean lHasRight = false;
-		// if user is not logged in use configured default rights
+		// if user is not logged in use configured "anonymous" account
 		if (aLoginname == null) {
 			aLoginname = SecurityFactory.USER_ANONYMOUS;
 		}
 		User lUser = users.getUserByLoginName(aLoginname);
+		// if the user is not found use the "anonymous" account
+		// TODO: this process needs to be changed in the final release!
+		if (lUser == null && !SecurityFactory.USER_ANONYMOUS.equals(aLoginname)) {
+			aLoginname = SecurityFactory.USER_ANONYMOUS;
+			lUser = users.getUserByLoginName(aLoginname);
+		}
 		if (lUser != null) {
 			return lUser.hasRight(aRight);
 		}
