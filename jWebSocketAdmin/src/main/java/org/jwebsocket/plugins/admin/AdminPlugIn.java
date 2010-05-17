@@ -16,9 +16,14 @@
 package org.jwebsocket.plugins.admin;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.security.SecurityFactory;
+import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.token.Token;
 
 /**
  *
@@ -30,5 +35,40 @@ public class AdminPlugIn extends TokenPlugIn {
 	// if namespace changed update client plug-in accordingly!
 	private String NS_ADMIN = JWebSocketConstants.NS_BASE + ".plugins.admin";
 
+	@Override
+	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+		String lType = aToken.getType();
+		String lNS = aToken.getNS();
 
+		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+			// remote shut down server
+			if (lType.equals("shutdown")) {
+				shutdown(aConnector, aToken);
+			}
+		}
+	}
+
+	/**
+	 * shutdown server
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void shutdown(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'shutdown'...");
+		}
+
+		// check if user is allowed to run 'shutdown' command
+		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_ADMIN + ".shutdown")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
+		Token lResponseToken = lServer.createResponse(aToken);
+		lResponseToken.put("msg", "Shutdown in progress...");
+
+		lServer.sendToken(aConnector, lResponseToken);
+	}
 }

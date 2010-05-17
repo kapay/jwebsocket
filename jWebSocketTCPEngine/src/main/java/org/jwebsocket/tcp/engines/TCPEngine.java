@@ -90,7 +90,8 @@ public class TCPEngine extends BaseEngine {
 			throw new WebSocketException(ex.getMessage());
 		}
 
-		super.startEngine();
+		// TODO: results in firing started event twice! make more clean!
+		// super.startEngine();
 		if (log.isInfoEnabled()) {
 			log.info("TCP engine (" + getId() + ") started.");
 		}
@@ -102,8 +103,10 @@ public class TCPEngine extends BaseEngine {
 		if (log.isDebugEnabled()) {
 			log.debug("Stopping TCP engine (" + getId() + ")...");
 		}
+
 		// inherited method stops all connectors
 		super.stopEngine(aCloseReason);
+
 		// resetting "isRunning" causes engine listener to terminate
 		isRunning = false;
 		try {
@@ -353,6 +356,7 @@ public class TCPEngine extends BaseEngine {
 			}
 
 			// notify server that engine has stopped
+			// this closes all connections
 			engineStopped();
 		}
 	}

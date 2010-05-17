@@ -21,12 +21,27 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketNettyEngine</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketCustomServer</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketTokenServer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketPlugIns</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketSharedObjects</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

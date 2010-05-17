@@ -17,6 +17,7 @@ package org.jwebsocket.server.loader;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.apache.log4j.Logger;
 
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPlugIn;
@@ -29,6 +30,8 @@ import org.jwebsocket.api.WebSocketServer;
  * @version $Id: JWebSocketInitializer.java 399 2010-04-30 01:00:57Z mailtopuran$
  */
 public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
+
+	private static Logger log = null;
 
 	/**
 	 * {@inheritDoc}

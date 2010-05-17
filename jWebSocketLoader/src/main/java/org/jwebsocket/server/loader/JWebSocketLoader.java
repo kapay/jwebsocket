@@ -85,12 +85,12 @@ public final class JWebSocketLoader {
 	public final WebSocketEngine loadEngine(WebSocketInitializer initializer)
 			throws WebSocketException {
 		// initialize and start the engine
-		if (log.isInfoEnabled()) {
-			log.info("Initializing Engine..");
+		if (log.isDebugEnabled()) {
+			log.debug("Initializing Engine...");
 		}
 		WebSocketEngine engine = initializer.intializeEngine();
 		if (log.isInfoEnabled()) {
-			log.info("Engine Initialized");
+			log.info("Engine Initialized.");
 		}
 		return engine;
 	}
@@ -110,14 +110,14 @@ public final class JWebSocketLoader {
 			WebSocketInitializer initializer, WebSocketEngine engine)
 			throws WebSocketException {
 		// initialize and start the server
-		if (log.isInfoEnabled()) {
-			log.info("Initializing Servers..");
+		if (log.isDebugEnabled()) {
+			log.debug("Initializing Servers..");
 		}
 		List<WebSocketServer> servers = initializer.initializeServers();
 
 		Map<String, List<WebSocketPlugIn>> pluginMap = initializer.initializePlugins();
-		if (log.isInfoEnabled()) {
-			log.info("Initializing Plugins...");
+		if (log.isDebugEnabled()) {
+			log.debug("Initializing Plugins...");
 		}
 		for (WebSocketServer server : servers) {
 			server.addEngine(engine);
@@ -131,8 +131,8 @@ public final class JWebSocketLoader {
 		}
 
 		Map<String, List<WebSocketFilter>> filterMap = initializer.initializeFilters();
-		if (log.isInfoEnabled()) {
-			log.info("Initializing Filters...");
+		if (log.isDebugEnabled()) {
+			log.debug("Initializing Filters...");
 		}
 		for (WebSocketServer server : servers) {
 			server.addEngine(engine);
