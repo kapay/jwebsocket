@@ -19,21 +19,23 @@ import org.jwebsocket.logging.Logging;
  */
 public class JWebSocketFactory {
 
-	private static Logger log = null;
-	// private static Logger logger = null; // don't instantiate logger here! first read args!
-
+	private static Logger log = null; // don't instantiate logger here! first read args!
 	private static WebSocketEngine engine = null;
+
+	// TODO: makes servers a map for faster access!
 	private static List<WebSocketServer> servers = null;
 
 	public static void start(String aLogLevel, int aLogTarget) {
-
 		// initialize log4j logging engine
 		// BEFORE instantiating any jWebSocket classes
 		Logging.initLogs(aLogLevel, aLogTarget);
 		log = Logging.getLogger(JWebSocketFactory.class);
 
-		JWebSocketLoader loader = new JWebSocketLoader();
+		if (log.isDebugEnabled()) {
+			log.debug("Starting jWebSocket sub system...");
+		}
 
+		JWebSocketLoader loader = new JWebSocketLoader();
 		try {
 			WebSocketInitializer initializer = loader.initialize();
 			engine = loader.loadEngine(initializer);
@@ -73,15 +75,26 @@ public class JWebSocketFactory {
 	}
 
 	public static void stop() {
+		if (log.isDebugEnabled()) {
+			log.debug("Stopping jWebSocket sub system...");
+		}
+
+		// stop the engine
+		if (log.isDebugEnabled()) {
+			log.debug("Stopping engine...");
+		}
 		try {
 			// stop engine if previously started successfully
 			if (engine != null) {
 				engine.stopEngine(CloseReason.SHUTDOWN);
 			}
+			if (log.isInfoEnabled()) {
+				log.info("jWebSocket engine '" + engine.getId() + "' stopped");
+			}
 		} catch (WebSocketException ex) {
 			log.error("Stopping engine: " + ex.getMessage());
 		}
-		
+
 		// now stop the servers
 		if (log.isDebugEnabled()) {
 			log.debug("Stopping servers...");
@@ -89,11 +102,11 @@ public class JWebSocketFactory {
 		for (WebSocketServer server : servers) {
 			try {
 				server.stopServer();
+				if (log.isInfoEnabled()) {
+					log.info("jWebSocket server '" + server.getId() + "' stopped");
+				}
 			} catch (WebSocketException ex) {
 			}
-		}
-		if (log.isInfoEnabled()) {
-			log.info("jWebSocket servers stopped");
 		}
 
 		Logging.exitLogs();
@@ -107,4 +120,20 @@ public class JWebSocketFactory {
 		return servers;
 	}
 
+	/**
+	 * Returns the server identified by it's id or <tt>null</tt> if no server
+	 * with that id could be found in the factory.
+	 * @param aId id of the server to be returned.
+	 * @return WebSocketServer with the given id or <tt>null</tt> if not found.
+	 */
+	public static WebSocketServer getServer(String aId) {
+		if (aId != null) {
+			for (WebSocketServer lServer : servers) {
+				if (lServer != null && aId.equals(lServer.getId())) {
+					return lServer;
+				}
+			}
+		}
+		return null;
+	}
 }

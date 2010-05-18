@@ -19,6 +19,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.logging.Logging;
+import org.jwebsocket.plugins.sample.SamplePlugIn;
+import org.jwebsocket.server.TokenServer;
 
 /**
  * Web application lifecycle listener.
@@ -34,10 +36,14 @@ public class ContextListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 		// start the jWebSocket server sub system
 		JWebSocketFactory.start(
-			"info",
+			"debug",
 			Logging.CONSOLE
 		);
 
+		TokenServer lTS = (TokenServer)JWebSocketFactory.getServer("ts0");
+		SamplePlugIn lSP = new SamplePlugIn();
+		lTS.getPlugInChain().addPlugIn(lSP);
+		
 		// WebSocketComm.setServer(tokenServer);
 	}
 

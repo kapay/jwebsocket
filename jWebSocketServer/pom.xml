@@ -31,46 +31,12 @@
 							<archive>
 								<manifest>
 									<addClasspath>true</addClasspath>
-									<mainClass>org.jwebsocket.console.StartJWebSocket</mainClass>
+									<mainClass>org.jwebsocket.console.JWebSocketServer</mainClass>
 								</manifest>
 							</archive>
 						</configuration>
 					</execution>
 
-					<!-- create embedded version unpackaged -->
-<!--
-					<execution>
-						<id>Embedded</id>
-						<goals><goal>jar</goal></goals>
-						<configuration>
-							<finalName>jWebSocketServer-Embedded-${project.version}</finalName>
-							<outputDirectory>../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
-							<archive>
-								<manifest>
-									<addClasspath>true</addClasspath>
-									<mainClass>org.jwebsocket.console.JWebSocket</mainClass>
-								</manifest>
-							</archive>
-						</configuration>
-					</execution>
--->
-					<!-- create stand-alone version unpackaged -->
-<!--
-					<execution>
-						<id>StandAlone</id>
-						<goals><goal>jar</goal></goals>
-						<configuration>
-							<finalName>jWebSocketServer-StandAlone-${project.version}</finalName>
-							<outputDirectory>../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
-							<archive>
-								<manifest>
-									<addClasspath>true</addClasspath>
-									<mainClass>org.jwebsocket.console.StartJWebSocket</mainClass>
-								</manifest>
-							</archive>
-						</configuration>
-					</execution>
--->
 				</executions>
 			</plugin>
 
@@ -100,7 +66,7 @@
 							<outputDirectory>../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
 							<archive>
 								<manifest>
-									<mainClass>org.jwebsocket.console.StartJWebSocket</mainClass>
+									<mainClass>org.jwebsocket.console.JWebSocketServer</mainClass>
 								</manifest>
 							</archive>
 							<descriptors>
@@ -110,27 +76,6 @@
 						<phase>package</phase>
 						<goals><goal>attached</goal></goals>
 					</execution>
-
-<!--
-					<execution>
-						<id>Embedded</id>
-						<configuration>
-							<classifier>Embedded</classifier>
-							<finalName>jWebSocketServerPkg-Embedded</finalName>
-							<outputDirectory>../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
-							<archive>
-								<manifest>
-									<mainClass>org.jwebsocket.console.JWebSocket</mainClass>
-								</manifest>
-							</archive>
-							<descriptors>
-								<descriptor>src/assembly/one-jar.xml</descriptor>
-							</descriptors>
-						</configuration>
-						<phase>package</phase>
-						<goals><goal>attached</goal></goals>
-					</execution>
--->
 				</executions>
 			</plugin>
 		</plugins>
@@ -138,41 +83,6 @@
 
 	<!--  define all the dependencies here -->
 	<dependencies>
-<!--
-		<dependency>
-			<groupId>javolution</groupId>
-			<artifactId>javolution</artifactId>
-			<version>5.4.2</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.5</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.15</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.mail</groupId>
-					<artifactId>mail</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.jms</groupId>
-					<artifactId>jms</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.jdmk</groupId>
-					<artifactId>jmxtools</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.jmx</groupId>
-					<artifactId>jmxri</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
--->
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketToolkit</artifactId>

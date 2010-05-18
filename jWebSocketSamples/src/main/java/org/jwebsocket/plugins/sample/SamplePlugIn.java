@@ -24,7 +24,6 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
-import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
@@ -38,6 +37,17 @@ public class SamplePlugIn extends TokenPlugIn {
 	// if namespace changed update client plug-in accordingly!
 	private static String NS_SAMPLE = JWebSocketConstants.NS_BASE + ".plugins.sample";
 	private static String SAMPLE_VAR = NS_SAMPLE + ".started";
+
+	/**
+	 *
+	 */
+	public SamplePlugIn() {
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating sample plug-in...");
+		}
+		// specify default name space for sample plugin
+		this.setNamespace(NS_SAMPLE);
+	}
 
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
@@ -66,51 +76,34 @@ public class SamplePlugIn extends TokenPlugIn {
 
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+
 		// get the type of the token
 		// the type can be associated with a "command"
 		String lType = aToken.getType();
+
 		// get the namespace of the token
 		// each plug-in should have its own unique namespace
 		String lNS = aToken.getNS();
+
 		// check if token has a type and a matching namespace
 		if (lType != null && lNS != null && lNS.equals(getNamespace())) {
+
+			TokenServer lServer = getServer();
+
 			// get the server time
 			if (lType.equals("getTime")) {
-				getTime(aConnector, aToken);
+				// create the response token
+				// this includes the unique token-id
+				Token lResponse = lServer.createResponse(aToken);
+
+				// add the "time" and "started" field
+				lResponse.put("time", new Date().toString());
+				lResponse.put("started", aConnector.getVar(SAMPLE_VAR));
+
+				// send the response token back to the client
+				lServer.sendToken(aConnector, lResponse);
 			}
 		}
 	}
 
-	/**
-	 * return the server time
-	 * @param aConnector
-	 * @param aToken
-	 */
-	public void getTime(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'getTime'...");
-		}
-
-		// check if user is allowed to run 'getTime' command
-		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_SAMPLE + ".getTime")) {
-			// if user is not granted to run this command 
-			// return an access denied token to the client
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			return;
-		}
-
-		// create the response token
-		// this includes the unique token-id
-		Token lResponse = lServer.createResponse(aToken);
-
-		// add the time field
-		lResponse.put("time", new Date().toString());
-		// add the
-		lResponse.put("started", aConnector.getVar(SAMPLE_VAR));
-
-		// send the response token back to the client
-		lServer.sendToken(aConnector, lResponse);
-	}
 }

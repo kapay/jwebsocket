@@ -91,7 +91,6 @@ public final class JWebSocketXmlConfigInitializer implements
 				classLoader.addFile(jarFilePath);
 				Class<WebSocketPlugIn> pluginClass = (Class<WebSocketPlugIn>) classLoader
 						.loadClass(pluginConfig.getName());
-
 				WebSocketPlugIn plugin = pluginClass.newInstance();
 
 				// now add the plugin to plugin map based on server ids
@@ -169,8 +168,9 @@ public final class JWebSocketXmlConfigInitializer implements
 	public WebSocketEngine intializeEngine() {
 		WebSocketEngine newEngine = null;
 		EngineConfig engine = config.getEngines().get(0);
+		String jarFilePath = "-";
 		try {
-			String jarFilePath = getLibraryFolderPath(engine.getJar());
+			jarFilePath = getLibraryFolderPath(engine.getJar());
 			classLoader.addFile(jarFilePath);
 			Class<WebSocketEngine> engineClass = (Class<WebSocketEngine>) classLoader
 					.loadClass(engine.getName());
@@ -182,10 +182,10 @@ public final class JWebSocketXmlConfigInitializer implements
 					engine.getPort(), engine.getTimeout() });
 		} catch (MalformedURLException e) {
 			throw new WebSocketRuntimeException(
-					"Couldn't Load the Jar file for engine, Make sure jar file exists or name is correct",
+					"Couldn't Load the Jar file for engine, make sure jar file exists or name is correct",
 					e);
 		} catch (ClassNotFoundException e) {
-			throw new WebSocketRuntimeException("Engine class not found", e);
+			throw new WebSocketRuntimeException("Engine class '" + engine.getName() + "'@'" + jarFilePath + "' not found", e);
 		} catch (InstantiationException e) {
 			throw new WebSocketRuntimeException(
 					"Engine class could not be instantiated", e);

@@ -14,9 +14,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.console;
 
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.factory.JWebSocketFactory;
@@ -33,7 +30,7 @@ public class JWebSocketServer {
 	 */
 	public static void main(String[] args) {
 		// TODO: get this from xml file
-		String loglevel = "info";
+		String loglevel = "debug";
 		int logTarget = Logging.CONSOLE;
 
 		// parse optional command line arguments
@@ -65,18 +62,16 @@ public class JWebSocketServer {
 		System.out.println(JWebSocketConstants.LICENSE);
 
 		JWebSocketFactory.start(
-			loglevel,
-			logTarget
-		);
+				loglevel,
+				logTarget);
 
-		while( JWebSocketFactory.getEngine().isAlive() ) {
+		while (JWebSocketFactory.getEngine().isAlive()) {
 			try {
 				Thread.sleep(250);
 			} catch (InterruptedException ex) {
 			}
 		}
 
-		JWebSocketFactory.stop(
-		);
+		JWebSocketFactory.stop();
 	}
 }
