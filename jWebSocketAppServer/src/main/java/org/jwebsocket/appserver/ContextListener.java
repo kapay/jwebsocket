@@ -17,8 +17,8 @@ package org.jwebsocket.appserver;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.server.loader.JWebSocketStartUp;
 
 /**
  * Web application lifecycle listener.
@@ -32,8 +32,8 @@ public class ContextListener implements ServletContextListener {
 	 */
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-
-		JWebSocketStartUp.start(
+		// start the jWebSocket server sub system
+		JWebSocketFactory.start(
 			"info",
 			Logging.CONSOLE
 		);
@@ -47,10 +47,9 @@ public class ContextListener implements ServletContextListener {
 	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-
-		JWebSocketStartUp.stop(
+		// stop the jWebSocket server sub system
+		JWebSocketFactory.stop(
 		);
-
 	}
 
 }

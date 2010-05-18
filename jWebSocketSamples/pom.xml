@@ -7,14 +7,14 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
-	<artifactId>jWebSocketAdmin</artifactId>
-	<name>jWebSocketAdmin</name>
-	<description>jWebSocket Admin PlugIn</description>
+	<artifactId>jWebSocketSamples</artifactId>
+	<name>jWebSocketSamples</name>
+	<description>jWebSocket Samples PlugIn</description>
 	<packaging>jar</packaging>
 
 	<scm>
-		<connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketAdmin</connection>
-		<developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketAdmin</developerConnection>
+		<connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketSamples</connection>
+		<developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketSamples</developerConnection>
 	</scm>
 
 	<build>
@@ -35,7 +35,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketAdmin</reportOutputDirectory>
+					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketSamples</reportOutputDirectory>
 					<stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css</stylesheetfile>
 				</configuration>
 			</plugin>

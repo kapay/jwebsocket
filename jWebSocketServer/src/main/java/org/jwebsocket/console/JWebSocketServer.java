@@ -15,27 +15,25 @@
 package org.jwebsocket.console;
 
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.server.loader.JWebSocketStartUp;
+import org.jwebsocket.factory.JWebSocketFactory;
 
 /**
  * @author puran
- * @version $Id: StartJWebSocket.java 443 2010-05-06 12:03:08Z fivefeetfurther $
+ * @version $Id: JWebSocketServer.java 443 2010-05-06 12:03:08Z fivefeetfurther $
  *
  */
-public class StartJWebSocket {
-
-	private static Logger log = null;
-	private static Logger logger = null; // don't instantiate logger here! first read args!
+public class JWebSocketServer {
 
 	/**
 	 * @param args the command line arguments
 	 */
 	public static void main(String[] args) {
-		//TODO: get this from xml file
-		String loglevel = "debug";
+		// TODO: get this from xml file
+		String loglevel = "info";
 		int logTarget = Logging.CONSOLE;
 
 		// parse optional command line arguments
@@ -66,9 +64,19 @@ public class StartJWebSocket {
 		System.out.println(JWebSocketConstants.COPYRIGHT);
 		System.out.println(JWebSocketConstants.LICENSE);
 
-		JWebSocketStartUp.start(
+		JWebSocketFactory.start(
 			loglevel,
 			logTarget
+		);
+
+		while( JWebSocketFactory.getEngine().isAlive() ) {
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException ex) {
+			}
+		}
+
+		JWebSocketFactory.stop(
 		);
 	}
 }

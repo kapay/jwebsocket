@@ -18,7 +18,8 @@
 		<module>jWebSocketSharedObjects</module>
 		<module>jWebSocketCluster</module>
 		<module>jWebSocketAdmin</module>
-		<module>jWebSocketLoader</module>
+		<module>jWebSocketSamples</module>
+		<module>jWebSocketFactory</module>
 		<module>jWebSocketWebAppSupport</module>
 		<module>jWebSocketJavaClient</module>
 		<module>jWebSocketServer</module>
@@ -62,7 +63,6 @@
 				server
 		-->
 	<dependencies>
-<!--
 		<dependency>
 			<groupId>javolution</groupId>
 			<artifactId>javolution</artifactId>
@@ -96,6 +96,5 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
--->
 	</dependencies>
 </project>
