@@ -16,7 +16,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketServer</artifactId>
+			<artifactId>jWebSocketTokenServer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

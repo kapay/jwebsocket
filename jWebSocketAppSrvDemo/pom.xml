@@ -67,6 +67,7 @@
 
 	<!--  define all the dependencies here -->
 	<dependencies>
+<!--
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketServer</artifactId>
@@ -97,6 +98,7 @@
 			<artifactId>servlet-api-2.5</artifactId>
 			<version>6.1.14</version>
 		</dependency>
+-->
 	</dependencies>
 
 	<!--  define repositories -->

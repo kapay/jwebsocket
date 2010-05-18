@@ -17,8 +17,6 @@ package org.jwebsocket.appserver;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-
-import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.loader.JWebSocketStartUp;
 
