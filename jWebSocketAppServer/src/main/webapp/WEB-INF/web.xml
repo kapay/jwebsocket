@@ -6,12 +6,12 @@
         <listener-class>org.jwebsocket.appserver.ContextListener</listener-class>
     </listener>
     <servlet>
-        <servlet-name>WebSocketComm</servlet-name>
-        <servlet-class>org.jwebsocket.appserver.WebSocketComm</servlet-class>
+        <servlet-name>ServletBridge</servlet-name>
+        <servlet-class>org.jwebsocket.appserver.ServletBridge</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>WebSocketComm</servlet-name>
-        <url-pattern>/WebSocketComm</url-pattern>
+        <servlet-name>ServletBridge</servlet-name>
+        <url-pattern>/ServletBridge</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

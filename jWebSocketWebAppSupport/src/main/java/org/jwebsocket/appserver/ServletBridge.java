@@ -29,7 +29,7 @@ import org.jwebsocket.token.Token;
  * demonstrates how to communicate between servlets and web sockets.
  * @author aschulze
  */
-public class WebSocketComm extends HttpServlet {
+public class ServletBridge extends HttpServlet {
 
 	// reference to the token server
 	private static TokenServer server = null;

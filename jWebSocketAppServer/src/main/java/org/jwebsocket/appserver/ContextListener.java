@@ -44,7 +44,7 @@ public class ContextListener implements ServletContextListener {
 		SamplePlugIn lSP = new SamplePlugIn();
 		lTS.getPlugInChain().addPlugIn(lSP);
 		
-		// WebSocketComm.setServer(tokenServer);
+		ServletBridge.setServer(lTS);
 	}
 
 	/**
