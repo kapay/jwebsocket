@@ -40,11 +40,13 @@ public class ContextListener implements ServletContextListener {
 			Logging.CONSOLE
 		);
 
+/*
 		TokenServer lTS = (TokenServer)JWebSocketFactory.getServer("ts0");
 		SamplePlugIn lSP = new SamplePlugIn();
 		lTS.getPlugInChain().addPlugIn(lSP);
 		
 		// WebSocketComm.setServer(tokenServer);
+ */
 	}
 
 	/**
@@ -53,9 +55,11 @@ public class ContextListener implements ServletContextListener {
 	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
+
 		// stop the jWebSocket server sub system
 		JWebSocketFactory.stop(
 		);
+
 	}
 
 }

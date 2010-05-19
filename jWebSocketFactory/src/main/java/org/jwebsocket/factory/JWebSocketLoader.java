@@ -20,19 +20,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketInitializer;
-import org.jwebsocket.api.WebSocketPlugIn;
-import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.JWebSocketConfigHandler;
 import org.jwebsocket.kit.WebSocketException;
@@ -53,7 +47,7 @@ public final class JWebSocketLoader {
 	private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
 	/**
-	 * Initialize the JWebSocket server system
+	 * Initialize the jWebSocket Server system
 	 * 
 	 * @return the initializer object
 	 * @throws WebSocketException
@@ -61,9 +55,11 @@ public final class JWebSocketLoader {
 	 */
 	public final WebSocketInitializer initialize() throws WebSocketException {
 		String configPath = getConfigurationPath();
-		// load configuration
+
+		// load the entire settings from the configuration xml file
 		JWebSocketConfig config = loadConfiguration(configPath);
-		// initialize security
+
+		// initialize security by using config settings
 		SecurityFactory.initFromConfig(config);
 
 		WebSocketInitializer initializer = getInitializer(config);
@@ -74,96 +70,18 @@ public final class JWebSocketLoader {
 	}
 
 	/**
-	 * Load the engine for the JWebSocket server system.
-	 * 
-	 * @param initializer
-	 *            the initalizer object
-	 * @return the loaded engine
-	 * @throws WebSocketException
-	 *             if exception while loading engine
-	 */
-	public final WebSocketEngine loadEngine(WebSocketInitializer initializer)
-			throws WebSocketException {
-		// initialize and start the engine
-		if (log.isDebugEnabled()) {
-			log.debug("Initializing engine...");
-		}
-		WebSocketEngine engine = null;
-		try {
-			engine = initializer.intializeEngine();
-		} catch (Exception ex) {
-			log.error("Initializing engine: " + ex.getMessage());
-		}
-		if (log.isInfoEnabled()) {
-			log.info("Engine initialized.");
-		}
-		return engine;
-	}
-
-	/**
-	 * Load the different servers on top of loaded engine
-	 * 
-	 * @param initializer
-	 *            the initializer object
-	 * @param engine
-	 *            the loaded engine on which to run servers
-	 * @return the list of loaded and running servers
-	 * @throws WebSocketException
-	 *             if there's any exception
-	 */
-	public final List<WebSocketServer> loadServers(
-			WebSocketInitializer initializer, WebSocketEngine engine)
-			throws WebSocketException {
-		// initialize and start the server
-		if (log.isDebugEnabled()) {
-			log.debug("Initializing servers..");
-		}
-		List<WebSocketServer> servers = initializer.initializeServers();
-
-		Map<String, List<WebSocketPlugIn>> pluginMap = initializer.initializePlugins();
-		if (log.isDebugEnabled()) {
-			log.debug("Initializing plugins...");
-		}
-		for (WebSocketServer server : servers) {
-			server.addEngine(engine);
-			List<WebSocketPlugIn> plugins = pluginMap.get(server.getId());
-			for (WebSocketPlugIn plugin : plugins) {
-				server.getPlugInChain().addPlugIn(plugin);
-			}
-		}
-		if (log.isInfoEnabled()) {
-			log.info("Plugins initialized.");
-		}
-
-		Map<String, List<WebSocketFilter>> filterMap = initializer.initializeFilters();
-		if (log.isDebugEnabled()) {
-			log.debug("Initializing filters...");
-		}
-		for (WebSocketServer server : servers) {
-			server.addEngine(engine);
-			List<WebSocketFilter> filters = filterMap.get(server.getId());
-			for (WebSocketFilter filter : filters) {
-				server.getFilterChain().addFilter(filter);
-			}
-		}
-		if (log.isInfoEnabled()) {
-			log.info("Filters initialized.");
-		}
-
-		return servers;
-	}
-
-	/**
 	 * Returns the appropriate {@code WebSocketInitializer} implementation
-	 * 
+	 *
 	 * @param config
 	 *            the config object
 	 * @return the {@code WebSocketInitializer} object
 	 */
 	private WebSocketInitializer getInitializer(JWebSocketConfig config) {
 		WebSocketInitializer initializer = null;
+		// if we are in development mode load the initializer class
 		if ("dev".equals(config.getInstallation())) {
 			initializer = instantiateInitializer(config.getInitializer());
+			// if we are in production mode use the JWebSocketXmlConfigInitializer class
 		} else if ("prod".equals(config.getInstallation())) {
 			initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
 		} else {
@@ -223,13 +141,13 @@ public final class JWebSocketLoader {
 			streamReader = factory.createXMLStreamReader(fis);
 			config = configHandler.processConfig(streamReader);
 		} catch (XMLStreamException ex) {
-			lMsg = "Exception occurred while creating XML stream";
+			lMsg = "Exception occurred while creating XML stream.";
 			if (log.isDebugEnabled()) {
 				log.debug(lMsg);
 			}
 			throw new WebSocketException(lMsg);
 		} catch (FileNotFoundException ex) {
-			lMsg = "jWebSocket config not found while creating XML stream";
+			lMsg = "jWebSocket config not found while creating XML stream.";
 			if (log.isDebugEnabled()) {
 				log.debug(lMsg);
 			}
@@ -264,7 +182,8 @@ public final class JWebSocketLoader {
 				lWebSocketHome += lFileSep;
 			}
 			// jWebSocket.xml has to be located in %JWEBSOCKET_HOME%/conf
-			lWebSocketXML = lWebSocketHome + "conf" + lFileSep
+			lWebSocketXML = lWebSocketHome
+					+ "conf" + lFileSep
 					+ "jWebSocket.xml";
 		} else {
 			throw new WebSocketRuntimeException(

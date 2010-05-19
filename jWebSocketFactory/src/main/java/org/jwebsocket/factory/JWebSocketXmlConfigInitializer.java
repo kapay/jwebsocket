@@ -14,6 +14,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
+import org.apache.log4j.Logger;
+import org.jwebsocket.logging.Logging;
 import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
 
 import java.lang.reflect.Constructor;
@@ -48,15 +50,15 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
 public final class JWebSocketXmlConfigInitializer implements
 		WebSocketInitializer {
 
+	private static Logger log = Logging.getLogger(JWebSocketXmlConfigInitializer.class);
 	private final JWebSocketJarClassLoader classLoader = new JWebSocketJarClassLoader();
-
 	private JWebSocketConfig config;
 
 	/**
 	 * private constructor
 	 */
-	private JWebSocketXmlConfigInitializer(JWebSocketConfig theConfig) {
-		this.config = theConfig;
+	private JWebSocketXmlConfigInitializer(JWebSocketConfig aConfig) {
+		this.config = aConfig;
 	}
 
 	/**
@@ -69,6 +71,129 @@ public final class JWebSocketXmlConfigInitializer implements
 	public static JWebSocketXmlConfigInitializer getInitializer(
 			JWebSocketConfig config) {
 		return new JWebSocketXmlConfigInitializer(config);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public WebSocketEngine intializeEngine() {
+		WebSocketEngine newEngine = null;
+		EngineConfig engine = config.getEngines().get(0);
+		String jarFilePath = "-";
+		try {
+			jarFilePath = getLibraryFolderPath(engine.getJar());
+			classLoader.addFile(jarFilePath);
+
+			if (log.isDebugEnabled()) {
+				log.debug("Loading engine '" + engine.getName() + "' from '" + jarFilePath + "'...");
+			}
+			Class engineClass = null;
+			try {
+				engineClass = Class.forName(engine.getName());
+			} catch (Exception ex) {
+				if (log.isDebugEnabled()) {
+					log.debug(ex.getClass().getSimpleName()
+							+ ": Engine not yet in classpath, hence trying to load from file...");
+				}
+			}
+			if (engineClass == null) {
+				engineClass = (Class<WebSocketEngine>) classLoader.loadClass(engine.getName());
+			}
+			Constructor<WebSocketEngine> ctor =
+					engineClass.getDeclaredConstructor(String.class, Integer.class,
+					Integer.class);
+			ctor.setAccessible(true);
+			newEngine = ctor.newInstance(new Object[]{engine.getId(),
+						engine.getPort(), engine.getTimeout()});
+			if (log.isDebugEnabled()) {
+				log.debug("Engine successfully instantiated.");
+			}
+		} catch (MalformedURLException e) {
+			log.error(
+					"Couldn't Load the Jar file for engine, make sure jar file exists or name is correct",
+					e);
+		} catch (ClassNotFoundException e) {
+			log.error(
+					"Engine class '" + engine.getName() + "'@'" + jarFilePath + "' not found", e);
+		} catch (InstantiationException e) {
+			log.error(
+					"Engine class could not be instantiated", e);
+		} catch (IllegalAccessException e) {
+			log.error(
+					"Illegal Access Exception while intializing engine", e);
+		} catch (NoSuchMethodException e) {
+			log.error(
+					"No Constructor found with given 3 arguments", e);
+		} catch (InvocationTargetException e) {
+			log.error(
+					"Exception invoking engine object", e);
+		}
+
+		return newEngine;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<WebSocketServer> initializeServers() {
+		List<WebSocketServer> servers = new ArrayList<WebSocketServer>();
+		List<ServerConfig> serverConfigs = config.getServers();
+		for (ServerConfig serverConfig : serverConfigs) {
+			WebSocketServer server = null;
+			String jarFilePath = "-";
+			try {
+				jarFilePath = getLibraryFolderPath(serverConfig.getJar());
+				classLoader.addFile(jarFilePath);
+
+				if (log.isDebugEnabled()) {
+					log.debug("Loading server '" + serverConfig.getName() + "' from '" + jarFilePath + "'...");
+				}
+				Class serverClass = null;
+				try {
+					serverClass = Class.forName(serverConfig.getName());
+				} catch (Exception ex) {
+					if (log.isDebugEnabled()) {
+						log.debug(ex.getClass().getSimpleName()
+								+ ": Server not yet in classpath, hence trying to load from file...");
+					}
+				}
+				if (serverClass == null) {
+					serverClass = (Class<WebSocketServer>) classLoader.loadClass(serverConfig.getName());
+				}
+				Constructor<WebSocketServer> ctor = serverClass.getDeclaredConstructor(String.class);
+				ctor.setAccessible(true);
+				server = ctor.newInstance(new Object[]{serverConfig.getId()});
+				if (log.isDebugEnabled()) {
+					log.debug("Server successfully instantiated.");
+				}
+				// add the initialized server to the list
+				servers.add(server);
+			} catch (MalformedURLException e) {
+				log.error(
+						"Couldn't Load the Jar file for server, make sure jar file '" + jarFilePath + "' exists and name is correct.",
+						e);
+			} catch (ClassNotFoundException e) {
+				log.error(
+						"Server class '" + serverConfig.getName() + "'@'" + jarFilePath + "' not found.", e);
+			} catch (InstantiationException e) {
+				log.error(
+						"Server class '" + serverConfig.getName() + "' could not be instantiated.", e);
+			} catch (IllegalAccessException e) {
+				log.error(
+						"Illegal Access Exception while intializing server '" + serverConfig.getName() + "'.", e);
+			} catch (NoSuchMethodException e) {
+				log.error(
+						"No constructor found with given 1 arguments", e);
+			} catch (InvocationTargetException e) {
+				log.error(
+						"Exception invoking server object.", e);
+			}
+		}
+		return servers;
 	}
 
 	/**
@@ -89,9 +214,26 @@ public final class JWebSocketXmlConfigInitializer implements
 			try {
 				String jarFilePath = getLibraryFolderPath(pluginConfig.getJar());
 				classLoader.addFile(jarFilePath);
-				Class<WebSocketPlugIn> pluginClass = (Class<WebSocketPlugIn>) classLoader
-						.loadClass(pluginConfig.getName());
-				WebSocketPlugIn plugin = pluginClass.newInstance();
+
+				if (log.isDebugEnabled()) {
+					log.debug("Loading plug-in '" + pluginConfig.getName() + "' from '" + jarFilePath + "'...");
+				}
+				Class pluginClass = null;
+				try {
+					pluginClass = Class.forName(pluginConfig.getName());
+				} catch (Exception ex) {
+					if (log.isDebugEnabled()) {
+						log.debug(ex.getClass().getSimpleName()
+								+ ": Plug-in not yet in classpath, hence trying to load from file...");
+					}
+				}
+				if (pluginClass == null) {
+					pluginClass = (Class<WebSocketPlugIn>) classLoader.loadClass(pluginConfig.getName());
+				}
+				WebSocketPlugIn plugin = (WebSocketPlugIn) pluginClass.newInstance();
+				if (log.isDebugEnabled()) {
+					log.debug("Plug-in successfully instantiated.");
+				}
 
 				// now add the plugin to plugin map based on server ids
 				for (String serverId : pluginConfig.getServers()) {
@@ -99,108 +241,20 @@ public final class JWebSocketXmlConfigInitializer implements
 				}
 
 			} catch (MalformedURLException e) {
-				throw new WebSocketRuntimeException(
-						"Couldn't Load the Jar file for plugin, Make sure jar file exists or name is correct",
-						e);
+				log.error(
+						"Couldn't load the jar file for plugin, make sure the jar file exists and the name is correct.", e);
 			} catch (ClassNotFoundException e) {
-				throw new WebSocketRuntimeException("Plugin class not found", e);
+				log.error(
+						"Plugin class '" + pluginConfig.getName() + "' not found.", e);
 			} catch (InstantiationException e) {
-				throw new WebSocketRuntimeException(
-						"Plugin class could not be instantiated", e);
+				log.error(
+						"Plugin class '" + pluginConfig.getName() + "' could not be instantiated.", e);
 			} catch (IllegalAccessException e) {
-				throw new WebSocketRuntimeException(
-						"Illegal Access Exception while intializing plugin", e);
+				log.error(
+						"Illegal Access Exception while intializing plugin.", e);
 			}
 		}
 		return pluginMap;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<WebSocketServer> initializeServers() {
-		List<WebSocketServer> servers = new ArrayList<WebSocketServer>();
-		List<ServerConfig> serverConfigs = config.getServers();
-		for (ServerConfig serverConfig : serverConfigs) {
-			WebSocketServer server = null;
-			try {
-				String jarFilePath = getLibraryFolderPath(serverConfig.getJar());
-				classLoader.addFile(jarFilePath);
-				Class<WebSocketServer> serverClass = (Class<WebSocketServer>) classLoader
-						.loadClass(serverConfig.getName());
-				Constructor<WebSocketServer> ctor = serverClass
-						.getDeclaredConstructor(String.class);
-				ctor.setAccessible(true);
-				server = ctor
-						.newInstance(new Object[] { serverConfig.getId() });
-				// add the initialize server to the list
-				servers.add(server);
-			} catch (MalformedURLException e) {
-				throw new WebSocketRuntimeException(
-						"Couldn't Load the Jar file for server, Make sure jar file exists or name is correct",
-						e);
-			} catch (ClassNotFoundException e) {
-				throw new WebSocketRuntimeException("Server class not found", e);
-			} catch (InstantiationException e) {
-				throw new WebSocketRuntimeException(
-						"Server class could not be instantiated", e);
-			} catch (IllegalAccessException e) {
-				throw new WebSocketRuntimeException(
-						"Illegal Access Exception while intializing server", e);
-			} catch (NoSuchMethodException e) {
-				throw new WebSocketRuntimeException(
-						"No Constructor found with given 1 arguments", e);
-			} catch (InvocationTargetException e) {
-				throw new WebSocketRuntimeException(
-						"Exception invoking server object", e);
-			}
-		}
-		return servers;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public WebSocketEngine intializeEngine() {
-		WebSocketEngine newEngine = null;
-		EngineConfig engine = config.getEngines().get(0);
-		String jarFilePath = "-";
-		try {
-			jarFilePath = getLibraryFolderPath(engine.getJar());
-			classLoader.addFile(jarFilePath);
-			Class<WebSocketEngine> engineClass = (Class<WebSocketEngine>) classLoader
-					.loadClass(engine.getName());
-			Constructor<WebSocketEngine> ctor = engineClass
-					.getDeclaredConstructor(String.class, Integer.class,
-							Integer.class);
-			ctor.setAccessible(true);
-			newEngine = ctor.newInstance(new Object[] { engine.getId(),
-					engine.getPort(), engine.getTimeout() });
-		} catch (MalformedURLException e) {
-			throw new WebSocketRuntimeException(
-					"Couldn't Load the Jar file for engine, make sure jar file exists or name is correct",
-					e);
-		} catch (ClassNotFoundException e) {
-			throw new WebSocketRuntimeException("Engine class '" + engine.getName() + "'@'" + jarFilePath + "' not found", e);
-		} catch (InstantiationException e) {
-			throw new WebSocketRuntimeException(
-					"Engine class could not be instantiated", e);
-		} catch (IllegalAccessException e) {
-			throw new WebSocketRuntimeException(
-					"Illegal Access Exception while intializing engine", e);
-		} catch (NoSuchMethodException e) {
-			throw new WebSocketRuntimeException(
-					"No Constructor found with given 3 arguments", e);
-		} catch (InvocationTargetException e) {
-			throw new WebSocketRuntimeException(
-					"Exception invoking engine object", e);
-		}
-
-		return newEngine;
 	}
 
 	/**
@@ -221,38 +275,55 @@ public final class JWebSocketXmlConfigInitializer implements
 			try {
 				String jarFilePath = getLibraryFolderPath(filterConfig.getJar());
 				classLoader.addFile(jarFilePath);
-				Class<WebSocketFilter> filterClass = (Class<WebSocketFilter>) classLoader
-						.loadClass(filterConfig.getName());
-				Constructor<WebSocketFilter> ctor = filterClass
-						.getDeclaredConstructor(String.class);
-				ctor.setAccessible(true);
-				WebSocketFilter filter = ctor.newInstance(new Object[] { filterConfig.getId() });
 
+				if (log.isDebugEnabled()) {
+					log.debug("Loading filter '" + filterConfig.getName() + "' from '" + jarFilePath + "'...");
+				}
+				Class filterClass = null;
+				try {
+					filterClass = Class.forName(filterConfig.getName());
+				} catch (Exception ex) {
+					if (log.isDebugEnabled()) {
+						log.debug(ex.getClass().getSimpleName()
+								+ ": Filter not yet in classpath, hence trying to load from file...");
+					}
+				}
+				if (filterClass == null) {
+					filterClass = (Class<WebSocketFilter>) classLoader.loadClass(filterConfig.getName());
+				}
+
+				Constructor<WebSocketFilter> ctor = filterClass.getDeclaredConstructor(String.class);
+				ctor.setAccessible(true);
+				WebSocketFilter filter = ctor.newInstance(new Object[]{filterConfig.getId()});
+
+				if (log.isDebugEnabled()) {
+					log.debug("Filter successfully instantiated.");
+				}
 				// now add the filter to filter map based on server ids
 				for (String serverId : filterConfig.getServers()) {
 					filterMap.get(serverId).add(filter);
 				}
 
 			} catch (MalformedURLException e) {
-				throw new WebSocketRuntimeException(
-						"Couldn't Load the Jar file for filter, Make sure jar file exists or name is correct",
+				log.error(
+						"Couldn't Load the jar file for filter, make sure jar file exists and name is correct.",
 						e);
 			} catch (ClassNotFoundException e) {
-				throw new WebSocketRuntimeException("Filter class not found", e);
+				log.error(
+						"Filter class not found.", e);
 			} catch (InstantiationException e) {
-				throw new WebSocketRuntimeException(
-						"Filter class could not be instantiated", e);
+				log.error(
+						"Filter class could not be instantiated.", e);
 			} catch (IllegalAccessException e) {
-				throw new WebSocketRuntimeException(
-						"Illegal Access Exception while intializing filter", e);
+				log.error(
+						"Illegal Access Exception while intializing filter.", e);
 			} catch (NoSuchMethodException e) {
-				throw new WebSocketRuntimeException(
-						"No Constructor found with given 3 arguments", e);
+				log.error(
+						"No Constructor found with given 3 argument.s", e);
 			} catch (InvocationTargetException e) {
-				throw new WebSocketRuntimeException(
-						"Exception invoking filter object", e);
+				log.error(
+						"Exception invoking filter objec.t", e);
 			}
-
 		}
 		return filterMap;
 	}
