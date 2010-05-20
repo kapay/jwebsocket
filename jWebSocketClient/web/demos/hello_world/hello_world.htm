@@ -25,7 +25,9 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket Hello World</title>
 		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
-		<script type="text/javascript" src="../../res/js/jwebsocket.js"></script>
+		<script type="text/javascript" src="../../res/js/jWebSocket.js"></script>
+		<!-- this one imports the client side sample plug-in -->
+		<script type="text/javascript" src="../../res/js/jwsSamplesPlugIn.js"></script>
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
@@ -96,6 +98,41 @@
 				}
 			}
 
+			// example how to exchange arbitrary complex objects between clients
+			// the processComplexObject method in the server side sample plug-in
+			function exchangeComplexObjects() {
+				if( jWebSocketClient.isConnected() ) {
+					var lToken = {
+						ns: jws.SamplesPlugIn.NS,
+						type: "processComplexObject",
+						object: {
+							field1: "value1",
+							field2: "value2",
+							array1: [ "array1Item1", "array1Item2" ],
+							array2: [ "array2Item1", "array2Item2" ],
+							object1: { obj1field1: "obj1value1", obj1field2: "obj1value2" },
+							object2: { obj2field1: "obj2value1", obj2field2: "obj2value2" }
+						}
+					};
+					jWebSocketClient.sendToken( lToken,	{
+					});
+				} else {
+					lRes.code = -1;
+					lRes.localeKey = "jws.jsc.res.notConnected";
+					lRes.msg = "Not connected.";
+				}
+			}
+
+			// example how to request a result from a server side plugin
+			function sampleGetTime() {
+				log( "Requesting server time via WebSockets..." );
+				// call the getTime method of the client side plug-in
+				var lRes = jWebSocketClient.requestServerTime();
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( jWebSocketClient.resultToString( lRes ) );
+				}
+			}
 
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
@@ -154,14 +191,14 @@
 					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="YourUsername" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
-					<td class="stdDlg" width="">&nbsp;</td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Password</td>
 					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();"></td>
-					<td class="stdDlg" width="">&nbsp;</td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnGetTime" type="button" value="GetTime" onclick="sampleGetTime();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Message</td>

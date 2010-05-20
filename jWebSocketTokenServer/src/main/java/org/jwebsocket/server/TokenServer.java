@@ -194,7 +194,7 @@ public class TokenServer extends BaseServer {
 
 				// only forward the token to the plug-in chain
 				// if filter chain does not response "aborted"
-				if( !filterResponse.isRejected()) {
+				if (!filterResponse.isRejected()) {
 					getPlugInChain().processToken(aConnector, lToken);
 				}
 			} else {
@@ -215,7 +215,7 @@ public class TokenServer extends BaseServer {
 
 			// only forward the token to the plug-in chain
 			// if filter chain does not response "aborted"
-			if( !filterResponse.isRejected()) {
+			if (!filterResponse.isRejected()) {
 				if (log.isDebugEnabled()) {
 					log.debug("Sending token '" + aToken + "' to '" + aTarget + "'...");
 				}
@@ -347,11 +347,15 @@ public class TokenServer extends BaseServer {
 	public Token createResponse(Token aInToken) {
 		Integer lTokenId = aInToken.getInteger("utid", -1);
 		String lType = aInToken.getString("type");
+		String lNS = aInToken.getString("ns");
 		Token lResToken = new Token("response");
 		lResToken.put("code", 0);
 		lResToken.put("msg", "ok");
 		if (lTokenId != null) {
 			lResToken.put("utid", lTokenId);
+		}
+		if (lNS != null) {
+			lResToken.put("ns", lNS);
 		}
 		if (lType != null) {
 			lResToken.put("reqType", lType);

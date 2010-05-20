@@ -16,7 +16,7 @@
 //	---------------------------------------------------------------------------
 //  </JasobNoObfs>
 
-// ## :#file:*:jwebsocket.js
+// ## :#file:*:jWebSocket.js
 // ## :#d:en:Implements the jWebSocket Web Client.
 
 //:package:*:jws
@@ -200,7 +200,7 @@ if( !jws.browserSupportsNativeWebSockets ) {
 			var lScript = lScripts[ lIdx ];
 			var lPath = lScript.getAttribute( "src" );
 			if( lPath ) {
-				var lPos = lPath.lastIndexOf( "jwebsocket" );
+				var lPos = lPath.lastIndexOf( "jWebSocket" );
 				if( lPos > 0 ) {
 					jws.JWS_FLASHBRIDGE = lPath.substr( 0, lPos ) + "flash-bridge/WebSocketMain.swf";
 					break;
@@ -283,9 +283,10 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 	aClass.fPlugIns.push( aPlugIn );
 	// clone all methods of the plug-in to the class
 	for( var lField in aPlugIn ) {
-		// don't overwrite existing methods of class with plug.in methods
+		// don't overwrite existing methods of class with plug-in methods
 		if( !aClass.prototype[ lField ] ) {
 			aClass.prototype[ lField ] = aPlugIn[ lField ];
+			var lObj = aClass.prototype[ lField ];
 		}
 	}
 	// if the class already has descendants recursively

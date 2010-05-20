@@ -35,7 +35,7 @@ public class SamplePlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(SamplePlugIn.class);
 	// if namespace changed update client plug-in accordingly!
-	private static String NS_SAMPLE = JWebSocketConstants.NS_BASE + ".plugins.sample";
+	private static String NS_SAMPLE = JWebSocketConstants.NS_BASE + ".plugins.samples";
 	private static String SAMPLE_VAR = NS_SAMPLE + ".started";
 
 	/**
@@ -91,7 +91,7 @@ public class SamplePlugIn extends TokenPlugIn {
 			TokenServer lServer = getServer();
 
 			// get the server time
-			if (lType.equals("getTime")) {
+			if (lType.equals("requestServerTime")) {
 				// create the response token
 				// this includes the unique token-id
 				Token lResponse = lServer.createResponse(aToken);
@@ -102,8 +102,12 @@ public class SamplePlugIn extends TokenPlugIn {
 
 				// send the response token back to the client
 				lServer.sendToken(aConnector, lResponse);
+
+			} else if (lType.equals("processComplexObject")) {
+				// simply echo the complex object
+				lServer.sendToken(aConnector, aToken);
+
 			}
 		}
 	}
-
 }
