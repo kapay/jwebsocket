@@ -22,6 +22,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,7 +61,7 @@ public class TCPEngine extends BaseEngine {
 	 * @throws WebSocketException
 	 */
 	public TCPEngine(String aId, Integer aPort, Integer aSessionTimeout)
-		throws WebSocketException {
+			throws WebSocketException {
 		super(aId);
 		listenerPort = aPort;
 		sessionTimeout = aSessionTimeout;
@@ -68,7 +69,7 @@ public class TCPEngine extends BaseEngine {
 
 	@Override
 	public void startEngine()
-		throws WebSocketException {
+			throws WebSocketException {
 		if (log.isDebugEnabled()) {
 			log.debug("Starting TCP engine (" + getId() + ")...");
 		}
@@ -99,7 +100,7 @@ public class TCPEngine extends BaseEngine {
 
 	@Override
 	public void stopEngine(CloseReason aCloseReason)
-		throws WebSocketException {
+			throws WebSocketException {
 		if (log.isDebugEnabled()) {
 			log.debug("Stopping TCP engine (" + getId() + ")...");
 		}
@@ -109,9 +110,11 @@ public class TCPEngine extends BaseEngine {
 
 		// resetting "isRunning" causes engine listener to terminate
 		isRunning = false;
+		long lStarted = new Date().getTime();
+
 		try {
 			// when done, close server socket
-			// closing the server socket should lead to an exeption
+			// closing the server socket should lead to an IOExeption
 			// at accept in the listener thread which terminates the listener
 			serverSocket.close();
 			if (log.isInfoEnabled()) {
@@ -119,8 +122,23 @@ public class TCPEngine extends BaseEngine {
 			}
 			serverSocket = null;
 		} catch (Exception ex) {
-			log.error("Stopping TCP (" + getId() + ") engine:" + ex.getMessage());
+			log.error("Stopping TCP engine (" + getId() + "):" + ex.getMessage());
 		}
+
+		try {
+			engineThread.join(10000);
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
+		if (log.isDebugEnabled()) {
+			long lDuration = new Date().getTime() - lStarted;
+			if (engineThread.isAlive()) {
+				log.warn("TCP engine (" + getId() + ") did not stopped after " + lDuration + "ms.");
+			} else {
+				log.debug("TCP engine (" + getId() + ") stopped after " + lDuration + "ms.");
+			}
+		}
+
 	}
 
 	@Override
@@ -140,7 +158,7 @@ public class TCPEngine extends BaseEngine {
 	}
 
 	private RequestHeader processHandshake(Socket aClientSocket)
-		throws UnsupportedEncodingException, IOException {
+			throws UnsupportedEncodingException, IOException {
 
 		RequestHeader header = new RequestHeader();
 
@@ -172,9 +190,9 @@ public class TCPEngine extends BaseEngine {
 		if (req.indexOf("<policy-file-request/>") >= 0) {
 			log.debug("Answering flash bridge policy-file-request...");
 			os.print(
-				"<cross-domain-policy>"
-				+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
-				+ "</cross-domain-policy>\n");
+					"<cross-domain-policy>"
+					+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
+					+ "</cross-domain-policy>\n");
 			req = "";
 			while (line != null && line.length() > 0) {
 				req += line + "\n";
@@ -229,21 +247,21 @@ public class TCPEngine extends BaseEngine {
 		location = "ws://" + host + path;
 		if (log.isDebugEnabled()) {
 			log.debug("Parsed header ("
-				+ "host: " + host + ", "
-				+ "origin: " + origin + ", "
-				+ "location: " + location + ", "
-				+ "path: " + path + ", "
-				+ "searchString: " + searchString
-				+ ")");
+					+ "host: " + host + ", "
+					+ "origin: " + origin + ", "
+					+ "location: " + location + ", "
+					+ "path: " + path + ", "
+					+ "searchString: " + searchString
+					+ ")");
 		}
 		// now that we have parsed the header send handshake...
 		String res =
-			"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
-			+ "Upgrade: WebSocket\r\n"
-			+ "Connection: Upgrade\r\n"
-			+ "WebSocket-Origin: " + origin + "\r\n"
-			+ "WebSocket-Location: " + location + "\r\n"
-			+ "\r\n";
+				"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
+				+ "Upgrade: WebSocket\r\n"
+				+ "Connection: Upgrade\r\n"
+				+ "WebSocket-Origin: " + origin + "\r\n"
+				+ "WebSocket-Location: " + location + "\r\n"
+				+ "\r\n";
 		if (log.isDebugEnabled()) {
 			log.debug("Sent handshake (" + res.replace("\n", "\\n") + ")");
 		}

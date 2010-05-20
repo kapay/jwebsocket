@@ -18,6 +18,7 @@ package org.jwebsocket.plugins.streaming;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
@@ -40,6 +41,9 @@ public class StreamingPlugIn extends TokenPlugIn {
 	private FastMap<String, BaseStream> streams = new FastMap<String, BaseStream>();
 	private boolean streamsInitialized = false;
 
+	private TimeStream lTimeStream = null;
+	private MonitorStream lMonitorStream = null;
+
 	/**
 	 * create a new instance of the streaming plug-in and set the default
 	 * namespace for the plug-in.
@@ -53,20 +57,41 @@ public class StreamingPlugIn extends TokenPlugIn {
 
 	}
 
-	private void initStreams() {
+	private void startStreams() {
 		if (!streamsInitialized) {
 			TokenServer lTokenServer = getServer();
 			if (lTokenServer != null) {
 				// create the stream for the time stream demo
-				TimeStream lTimeStream = new TimeStream("timeStream", lTokenServer);
+				lTimeStream = new TimeStream("timeStream", lTokenServer);
 				addStream(lTimeStream);
 				// create the stream for the monitor stream demo
-				MonitorStream lMonitorStream = new MonitorStream("monitorStream", lTokenServer);
+				lMonitorStream = new MonitorStream("monitorStream", lTokenServer);
 				addStream(lMonitorStream);
 				streamsInitialized = true;
 			}
 		}
 	}
+
+	private void stopStreams() {
+		if (streamsInitialized) {
+			TokenServer lTokenServer = getServer();
+			if (lTokenServer != null) {
+				// create the stream for the time stream demo
+				if( lTimeStream != null ) {
+					lTimeStream.stopStream(3000);
+				}
+				// create the stream for the monitor stream demo
+				// create the stream for the time stream demo
+				if( lMonitorStream != null ) {
+					lMonitorStream.stopStream(3000);
+				}
+				lTimeStream = null;
+				lMonitorStream = null;
+				streamsInitialized = false;
+			}
+		}
+	}
+
 
 	/**
 	 * adds a new stream to the mapo of streams. The stream must not be null
@@ -154,11 +179,6 @@ public class StreamingPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void connectorStarted(WebSocketConnector aConnector) {
-		initStreams();
-	}
-
-	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// if a connector terminates, unregister it from all streams.
 		for (BaseStream lStream : streams.values()) {
@@ -169,4 +189,21 @@ public class StreamingPlugIn extends TokenPlugIn {
 			}
 		}
 	}
+
+	@Override
+	public void engineStarted(WebSocketEngine aEngine) {
+		if (log.isDebugEnabled()) {
+			log.debug("Starting registered streams...");
+		}
+		startStreams();
+	}
+
+	@Override
+	public void engineStopped(WebSocketEngine aEngine) {
+		if (log.isDebugEnabled()) {
+			log.debug("Stopping registered streams...");
+		}
+		stopStreams();
+	}
+
 }

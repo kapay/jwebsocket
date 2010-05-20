@@ -21,6 +21,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.logging.Logging;
@@ -46,7 +47,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 	 */
 	public FlashBridgePlugIn() {
 		if (log.isDebugEnabled()) {
-			log.debug("Starting flash bridge...");
+			log.debug("Starting FlashBridge...");
 		}
 		try {
 			serverSocket = new ServerSocket(listenerPort);
@@ -57,7 +58,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 		} catch (IOException ex) {
 		}
 		if (log.isInfoEnabled()) {
-			log.info("flash bridge started.");
+			log.info("FlashBridge started.");
 		}
 	}
 
@@ -147,24 +148,43 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 		}
 		// every time an engine starts decrement counter
 		engineInstanceCount--;
-		// when last engine stopped also stop the flash bridge
+		// when last engine stopped also stop the FlashBridge
 		if (engineInstanceCount <= 0) {
 			super.engineStopped(aEngine);
+
+			isRunning = false;
+			long lStarted = new Date().getTime();
+
 			try {
 				// when done, close server socket
 				// closing the server socket should lead to an exception
 				// at accept in the listener thread which terminates the listener
 				if (log.isDebugEnabled()) {
-					log.debug("Closing flash bridge server socket...");
+					log.debug("Closing FlashBridge server socket...");
 				}
-				isRunning = false;
 				serverSocket.close();
 				if (log.isDebugEnabled()) {
-					log.debug("Closed flash bridge server socket.");
+					log.debug("Closed FlashBridge server socket.");
 				}
 			} catch (Exception ex) {
 				log.error("(accept) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			}
+
+			try {
+				bridgeThread.join(10000);
+			} catch (Exception ex) {
+				log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			}
+			if (log.isDebugEnabled()) {
+				long lDuration = new Date().getTime() - lStarted;
+				if (bridgeThread.isAlive()) {
+					log.warn("FlashBridge did not stopped after " + lDuration + "ms.");
+				} else {
+					log.debug("FlashBridge stopped after " + lDuration + "ms.");
+				}
+			}
+
+
 		}
 	}
 }

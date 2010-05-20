@@ -45,7 +45,7 @@
 						**/jWebSocketServer*.jar,
 						**/jWebSocketFactory*.jar,
 						**/log4j-1.2.15.jar,
-						**/javolution-5.4.2.jar,
+						**/javolution-5.5.1.jar,
 						**/commons-lang-2.5.jar,
 						**/servlet-api-2.5-6.1.14.jar,
 						**/json-2-RELEASE65.jar,

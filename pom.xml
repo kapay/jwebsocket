@@ -24,7 +24,7 @@
 		<module>jWebSocketJavaClient</module>
 		<module>jWebSocketServer</module>
 		<module>jWebSocketAppServer</module>
-		<module>jWebSocketAppSrvDemo</module>
+		<!--<module>jWebSocketAppSrvDemo</module> -->
 	</modules>
 
 	<build>
@@ -66,7 +66,7 @@
 		<dependency>
 			<groupId>javolution</groupId>
 			<artifactId>javolution</artifactId>
-			<version>5.4.2</version>
+			<version>5.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>

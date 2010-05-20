@@ -15,10 +15,12 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.streaming;
 
+import java.util.Date;
 import javolution.util.FastList;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketStream;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.BaseServer;
@@ -33,7 +35,7 @@ import org.jwebsocket.server.BaseServer;
  * their messages only to clients that are registered at a stream.
  * @author aschulze
  */
-public class BaseStream {
+public class BaseStream implements WebSocketStream {
 
 	private static Logger log = Logging.getLogger(BaseStream.class);
 	private FastList<WebSocketConnector> connectors = new FastList<WebSocketConnector>();
@@ -48,9 +50,42 @@ public class BaseStream {
 	 */
 	public BaseStream(String aStreamID) {
 		this.streamID = aStreamID;
+	}
+
+	@Override
+	public void startStream(long aTimeout) {
+		if (log.isDebugEnabled()) {
+			log.debug("Starting base stream...");
+		}
 		QueueProcessor queueProcessor = new QueueProcessor();
 		queueThread = new Thread(queueProcessor);
 		queueThread.start();
+	}
+
+	@Override
+	public void stopStream(long aTimeout) {
+		if (log.isDebugEnabled()) {
+			log.debug("Stopping base stream...");
+		}
+		long lStarted = new Date().getTime();
+		isRunning = false;
+		synchronized (queue) {
+			// trigger sender thread to terminate
+			queue.notify();
+		}
+		try {
+			queueThread.join(aTimeout);
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
+		if (log.isDebugEnabled()) {
+			long lDuration = new Date().getTime() - lStarted;
+			if (queueThread.isAlive()) {
+				log.warn("Base stream did not stopped after " + lDuration + "ms.");
+			} else {
+				log.debug("Base stream stopped after " + lDuration + "ms.");
+			}
+		}
 	}
 
 	/**

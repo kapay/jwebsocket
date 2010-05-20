@@ -16,6 +16,7 @@
 package org.jwebsocket.plugins.streaming;
 
 import java.io.File;
+import java.util.Date;
 import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
@@ -38,17 +39,21 @@ public class MonitorStream extends TokenStream {
 	 * creates a new instance of the monitor stream.
 	 * @param aStreamID The unique ID of the stream.
 	 * @param aServer The Token Server associated with this stream.
- 	 */
+	 */
 	public MonitorStream(String aStreamID, TokenServer aServer) {
 		super(aStreamID, aServer);
-		startMonitorThread();
+		startStream(-1);
 	}
 
 	/**
 	 * starts the internal monitor thread to check for certain system
 	 * parameters in a predefined interval of 1 second.
 	 */
-	public void startMonitorThread() {
+	@Override
+	public void startStream(long aTimeout) {
+		if (log.isDebugEnabled()) {
+			log.debug("Starting Monitor stream...");
+		}
 		monitorProcess = new MonitorProcess();
 		monitorThread = new Thread(monitorProcess);
 		monitorThread.start();
@@ -57,8 +62,26 @@ public class MonitorStream extends TokenStream {
 	/**
 	 * stops the monitor thread.
 	 */
-	public void stopMonitorThread() {
+	@Override
+	public void stopStream(long aTimeout) {
+		if (log.isDebugEnabled()) {
+			log.debug("Stopping Monitor stream...");
+		}
+		long lStarted = new Date().getTime();
 		isRunning = false;
+		try {
+			monitorThread.join(aTimeout);
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
+		if (log.isDebugEnabled()) {
+			long lDuration = new Date().getTime() - lStarted;
+			if (monitorThread.isAlive()) {
+				log.warn("Monitor stream did not stopped after " + lDuration + "ms.");
+			} else {
+				log.debug("Monitor stream stopped after " + lDuration + "ms.");
+			}
+		}
 	}
 
 	private class MonitorProcess implements Runnable {
@@ -66,41 +89,40 @@ public class MonitorStream extends TokenStream {
 		@Override
 		public void run() {
 			if (log.isDebugEnabled()) {
-				log.debug("Starting monitor stream...");
+				log.debug("Running monitor stream...");
+			}
+			isRunning = true;
+			while (isRunning) {
+				try {
+					Thread.sleep(1000);
 
-				isRunning = true;
-				while (isRunning) {
-					try {
-						Thread.sleep(1000);
+					Token lToken = new Token("event");
+					lToken.put("name", "stream");
+					lToken.put("streamID", getStreamID());
 
-						Token lToken = new Token("event");
-						lToken.put("name", "stream");
-						lToken.put("streamID", getStreamID());
+					// collect some data to monitor
+					Runtime lRT = Runtime.getRuntime();
+					lToken.put("totalMem", lRT.totalMemory());
+					lToken.put("freeMem", lRT.freeMemory());
 
-						// collect some data to monitor
-						Runtime lRT = Runtime.getRuntime();
-						lToken.put("totalMem", lRT.totalMemory());
-						lToken.put("freeMem", lRT.freeMemory());
+					TokenServer lServer = getServer();
+					lToken.put("clientCount", lServer.getAllConnectors().size());
 
-						TokenServer lServer = getServer();
-						lToken.put("clientCount", lServer.getAllConnectors().size());
+					File lFile = new File(".");
+					lToken.put("freeDisk", lFile.getFreeSpace());
+					lToken.put("totalDisk", lFile.getTotalSpace());
+					lToken.put("usableDisk", lFile.getUsableSpace());
 
-						File lFile = new File(".");
-						lToken.put("freeDisk", lFile.getFreeSpace());
-						lToken.put("totalDisk", lFile.getTotalSpace());
-						lToken.put("usableDisk", lFile.getUsableSpace());
+					// : further tags to be continued....
 
-						// : further tags to be continued....
-
-						put(lToken);
-					} catch (InterruptedException ex) {
-						log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-					}
+					put(lToken);
+				} catch (InterruptedException ex) {
+					log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
+			}
 
-				if (log.isDebugEnabled()) {
-					log.debug("Monitor stream stopped.");
-				}
+			if (log.isDebugEnabled()) {
+				log.debug("Monitor stream stopped.");
 			}
 		}
 	}

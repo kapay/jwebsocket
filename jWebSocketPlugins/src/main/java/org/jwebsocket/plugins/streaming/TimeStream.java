@@ -33,7 +33,8 @@ public class TimeStream extends TokenStream {
 
 	private static Logger log = Logging.getLogger(TimeStream.class);
 	private Boolean isRunning = false;
-	private TimerThread timer = null;
+	private TimerProcess timeProcess = null;
+	private Thread timeThread = null;
 
 	/**
 	 *
@@ -43,52 +44,76 @@ public class TimeStream extends TokenStream {
 	 */
 	public TimeStream(String aStreamID, TokenServer aServer) {
 		super(aStreamID, aServer);
-		startTimerThread();
+		startStream(-1);
 	}
 
 	/**
 	 *
 	 */
-	public void startTimerThread() {
-		timer = new TimerThread();
-		Thread queueThread = new Thread(timer);
-		queueThread.start();
+	@Override
+	public void startStream(long aTimeout) {
+		super.startStream(aTimeout);
+
+		if (log.isDebugEnabled()) {
+			log.debug("Starting Time stream...");
+		}
+		timeProcess = new TimerProcess();
+		timeThread = new Thread(timeProcess);
+		timeThread.start();
 	}
 
 	/**
 	 *
 	 */
-	public void stopTimerThread() {
+	@Override
+	public void stopStream(long aTimeout) {
+		if (log.isDebugEnabled()) {
+			log.debug("Stopping Time stream...");
+		}
+		long lStarted = new Date().getTime();
 		isRunning = false;
+		try {
+			timeThread.join(aTimeout);
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
+		if (log.isDebugEnabled()) {
+			long lDuration = new Date().getTime() - lStarted;
+			if (timeThread.isAlive()) {
+				log.warn("Time stream did not stopped after " + lDuration + "ms.");
+			} else {
+				log.debug("Time stream stopped after " + lDuration + "ms.");
+			}
+		}
+
+		super.stopStream(aTimeout);
 	}
 
-	private class TimerThread implements Runnable {
+	private class TimerProcess implements Runnable {
 
 		@Override
 		public void run() {
 			if (log.isDebugEnabled()) {
-				log.debug("Starting time stream...");
+				log.debug("Running time stream...");
+			}
+			isRunning = true;
+			while (isRunning) {
+				try {
+					Thread.sleep(1000);
 
-				isRunning = true;
-				while (isRunning) {
-					try {
-						Thread.sleep(1000);
+					Token lEventToken = new Token("event");
+					lEventToken.put("name", "stream");
+					lEventToken.put("msg", new Date().toString());
+					lEventToken.put("streamID", getStreamID());
 
-						Token lEventToken = new Token("event");
-						lEventToken.put("name", "stream");
-						lEventToken.put("msg", new Date().toString());
-						lEventToken.put("streamID", getStreamID());
-
-						// log.debug("Time streamer queues '" + lData + "'...");
-						put(lEventToken);
-					} catch (InterruptedException ex) {
-						log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-					}
+					// log.debug("Time streamer queues '" + lData + "'...");
+					put(lEventToken);
+				} catch (InterruptedException ex) {
+					log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
-				if (log.isDebugEnabled()) {
-					log.debug("Time stream stopped.");
-
-				}
+			}
+			if (log.isDebugEnabled()) {
+				log.debug("Time stream stopped.");
 			}
 		}
 	}
