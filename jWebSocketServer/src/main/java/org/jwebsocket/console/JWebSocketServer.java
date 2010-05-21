@@ -38,22 +38,24 @@ public class JWebSocketServer {
 		// parse optional command line arguments
 		int i = 0;
 		while (i < args.length) {
-			if (i + 1 < args.length) {
-				if (args[i].equalsIgnoreCase("logtarget")) {
-					String lLogTarget = args[i + 1].toLowerCase();
-					if ("console".equals(lLogTarget)) {
+			String[] keyVal = args[i].split("=", 2);
+			if (keyVal.length == 2) {
+				String key = keyVal[0];
+				String value = keyVal[1];
+				if ("logtarget".equalsIgnoreCase(key)) {
+					if ("console".equals(value)) {
 						logTarget = Logging.CONSOLE;
-					} else if ("rollingfile".equals(lLogTarget)) {
+					} else if ("rollingfile".equals(value)) {
 						logTarget = Logging.ROLLING_FILE;
 					}
-					if ("singlefile".equals(lLogTarget)) {
+					if ("singlefile".equals(value)) {
 						logTarget = Logging.SINGLE_FILE;
 					}
-				} else if (args[i].equalsIgnoreCase("loglevel")) {
-					loglevel = args[i + 1].toLowerCase();
+				} else if ("loglevel".equalsIgnoreCase(key)) {
+					loglevel = value;
 				}
 			}
-			i += 2;
+			i++;
 		}
 
 		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
@@ -62,13 +64,14 @@ public class JWebSocketServer {
 				+ " (" + System.getProperty("sun.arch.data.model") + "bit)");
 		System.out.println(JWebSocketConstants.COPYRIGHT);
 		System.out.println(JWebSocketConstants.LICENSE);
+		// System.out.println("Starting with logLevel=" + loglevel + " and logTarget=" + logTarget + "...");
 
 		JWebSocketFactory.start(
 				loglevel,
 				logTarget);
 
-		TokenServer lTS = (TokenServer)JWebSocketFactory.getServer("ts0");
-		if( lTS != null ) {
+		TokenServer lTS = (TokenServer) JWebSocketFactory.getServer("ts0");
+		if (lTS != null) {
 			SamplePlugIn lSP = new SamplePlugIn();
 			lTS.getPlugInChain().addPlugIn(lSP);
 		}
