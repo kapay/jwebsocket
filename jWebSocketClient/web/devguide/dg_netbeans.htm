@@ -13,32 +13,41 @@
 		<h2>Build jWebSocket with NetBeans </h2>
 		<p>The jWebSocket source code is provided as an Apache Maven project. The benefit
 			here is that you can either compile it with Maven directly or easily import into
-			an IDE like NetBeans or Eclipse. This section describes how to import and compile
+			an IDE like NetBeans, Eclipse or IntelliJ. This section describes how to import and compile
 			the jWebSocket sources in NetBeans. You can download the latest NetBeans version
 			<a target="_blank" href="http://www.netbeans.org">here</a>
 			<img border="0" src="../images/new_win.png">.</p>
 		<h3>Requirements</h3>
 		<p>Please install Apache Maven 2.2 first and follow the instructions on the
-			<a href="dg_maven.htm">Maven page</a> in this developer guide. If you run an older
+			<a href="dg_maven.htm">Maven</a> page in this developer guide. If you run an older
 			NetBeans version we further recommend to update to the latest NetBeans version (&gt;
 			6.7) since from this version the Apache Maven support is already integrated into
 			the IDE w/o the need to install and configure any plug-ins.</p>
 		<h3>Instructions</h3>
 		<p>To compile jWebSocket with NetBeans 6.7+ please follow the following steps.</p>
 		<ol class="instructions">
-			<li class="instruction">First you need to configure the Maven capabilities
+			<li class="instruction">Download the jWebSocket sources from the
+				<a href="../downloads/downloads.htm">download area</a> or directly from our subversion
+	repository and either extract them to a project root folder of your choice or 
+	check them out e.g. with the <a href="dg_svn.htm">Tortiose Subversion Client</a>. In the following instructions 
+	we use&nbsp; <tt>c:/svn/jWebSocket/trunk</tt> as root folder. Please adjust 
+	it accordingly when your are working on a different folder structure.</li>
+			<li class="instruction">Please check that the <tt>M2_HOME</tt> 
+			environment variable is refering to your Maven installation folder as 
+			described <a href="dg_maven.htm">here</a>.</li>
+			<li class="instruction">Before you build jWebSocket you need to configure the Maven capabilities
 	in NetBeans <tt>Tools/Options</tt> dialog.<br>
 	Please type the path to the Maven Home directory as follows:<br>
 				<img class="screenshotOff" id="netbeans_maven_config" border="0" src="images/netbeans_maven_config.jpg">
 				<p class="imageFooter">Configure Maven capabilities in NetBeans</p></li>
-			<li class="instruction">Download the jWebSocket sources from the
-				<a href="../downloads/downloads.htm">download area</a> or directly from our subversion
-	repository and either extract them to a project root folder of your choice or 
-	check them out e.g. with the Tortiose Subversion Client. In the following instructions 
-	we use&nbsp; <tt>c:/svn/jWebSocket/trunk</tt> as root folder. Please adjust 
-	it accordingly when your are working on a different folder structure.</li>
+			<li class="instruction">For the rare case that you don't get this 
+			dialog Maven is probably not yet activated. To activate Maven create 
+			a new project, select category Maven and select &quot;Maven Project with 
+			existing POM&quot;. NetBeans will activate the Maven support then and you 
+			do not need to follow any import procedure - simply open the project 
+			as described below.</li>
 			<li class="instruction">Select <tt>File/Open Project</tt> and select the Maven
-				<tt>jWebSocket-parent</tt> project in <tt>c:/svn/jWebSocket/trunk</tt> <br>
+				<tt>jWebSocket-Parent</tt> project in <tt>c:/svn/jWebSocket/trunk</tt> <br>
 				<img class="screenshotOff" id="netbeans_open_maven" src="images/netbeans_open_maven.jpg"><p class="imageFooter">
 	Opening the Apache Maven project jWebSocket-Parent including all required sub-projects</p>
 			</li>
@@ -50,7 +59,7 @@
 	Now clean and build the entire project by right clicking <tt>jWebSocket-Parent</tt> 
 	and selecting <tt>Clean and Build</tt> in the pop up menu.<br>
 	Maven should now download all required jars now from it&#39;s repository. This may 
-	take some time at the first run.</li>
+	take some time at the first run if not yet done with the Maven installation.</li>
 			<li class="instruction">
 	After the first clean and build process you will be able to compile each of 
 	the jWebSocket modules separately.</li>

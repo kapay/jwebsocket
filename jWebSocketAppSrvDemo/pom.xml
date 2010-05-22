@@ -29,7 +29,15 @@
             			<resource>
               				<!-- this is relative to the pom.xml directory -->
               				<directory>../jWebSocketClient/web</directory>
-            			</resource>
+							<!-- enable filtering -->
+							<filtering>true</filtering>
+							<excludes>
+								<!-- don't include documentation in the .war -->
+								<exclude>**/javadocs/**</exclude>
+								<exclude>**/quickguide/**</exclude>
+								<exclude>**/devguide/**</exclude>
+							</excludes>
+						</resource>
           			</webResources>
 
 					<!-- all packages below are already included in jWebSocketServer-Bundle -->
@@ -47,15 +55,15 @@
 						**/jWebSocketWebAppSupport*.jar,
 						**/jWebSocketServer*.jar,
 						**/jWebSocketFactory*.jar,
-						**/log4j-1.2.15.jar,
-						**/javolution-5.5.1.jar,
-						**/commons-lang-2.5.jar,
-						**/servlet-api-2.5-6.1.14.jar,
-						**/json-2-RELEASE65.jar,
-						**/slf4j-api-1.5.10.jar,
-						**/slf4j-jdk14-1.5.10.jar,
-						**/netty-3.2.0.ALPHA4.jar,
-						**/servlet-api-2.5.jar
+						**/log4j*.jar,
+						**/javolution*.jar,
+						**/commons-lang*.jar,
+						**/servlet-api*.jar,
+						**/json-2*.jar,
+						**/slf4j-api*.jar,
+						**/slf4j-jdk14*.jar,
+						**/netty*.jar,
+						**/servlet-api*.jar
 					</packagingExcludes>
 				</configuration>
 			</plugin>
@@ -80,11 +88,6 @@
 
 	<!--  define all the dependencies here -->
 	<dependencies>
-		<dependency>
-			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketFactory</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketFactory</artifactId>

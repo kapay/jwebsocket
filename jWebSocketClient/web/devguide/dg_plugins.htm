@@ -10,105 +10,108 @@
 <body>
 
 <h2>Server side Plug-Ins</h2>
-<p>This section describes how server side plug-ins work and how you can create 
-your own jWebSocket Server extensions by creating your own plug-ins.</p>
-<p>In jWebSocket almost all higher level functionality is implemented in 
-plug-ins. Therefor the jWebSocket Server provides the required managing capabilities. 
-One of these capabilities is the plug-in chain. In this chain multiple plug-ins 
-are arranged in a certain order. The order of the plug-ins can be arbitraily 
-changed and new plug-ins can easily be appended or inserted. Basically a plug-in 
-can process an almost unlimited number of client commands by interpreting the 
-various dynamic data fields of the <a href="dg_tokens.htm">tokens</a>. A complex 
-plug-in can consist of multiple classes in a separate package which can be 
-embedded as a separate and even distributable <tt>.jar</tt> file.</p>
-<p>This concept allows you to easily 
-implement and distribute new WebSocket services according to your and your 
-customers needs based on what 
-jWebSocket already provides.</p>
+<p>This section describes how server side plug-ins in jWebSocket work in 
+general. How to create your own jWebSocket Server extensions by creating your own plug-ins 
+is described <a href="../howto/ht_1st_plugin.htm">here</a>.</p>
+<p>In jWebSocket almost all higher level functionality is implemented in plug-ins. 
+Therefor the jWebSocket Server provides the required managing capabilities. One 
+of these capabilities is the plug-in chain. In this chain multiple plug-ins are 
+arranged in a certain order. The order of the plug-ins can be arbitraily changed 
+and new plug-ins can easily be appended or inserted. Basically a plug-in can process 
+an almost unlimited number of client commands by interpreting the various dynamic 
+data fields of the <a href="dg_tokens.htm">tokens</a>. A complex plug-in can consist 
+of multiple classes in a separate package which can either be embedded or dynamically 
+linked at run-time as a separate and even distributable <tt>.jar</tt> file.</p>
+<p>This concept allows you to easily implement and distribute new WebSocket services 
+according to your and your customers needs based on what jWebSocket already provides.</p>
 <p><img class="diagram" border="0" src="../images/infra_listenerchain.jpg"></p>
 <p class="imageFooter">The jWebSocket plug-in chain</p>
 <h2>Way of the Tokens</h2>
 <p>On jWebSocket startup the server constructor instantiates the plug-in chain. 
 In case of the <tt>TokenServer</tt> to which we refer to in the following section 
-this is an instance of the <tt>TokenPlugInChain</tt> class 
-(a descendant of the abstract 
-<tt>BasePlugInChain</tt> class which implements the <tt>PlugInChain</tt> interface). The <tt>TokenServer</tt> implements one single 
-plug-in chain only.</p>
-<p>When the client sends a paket or token it first reaches a connector on the 
-server side. The connector forwards the paket or token through his engine to the 
-server as shown in the diagram above. The server then forwards the token to the 
-plug-in chain which iterates through all plug-ins in the chain until the target 
-plug-in finally processes it. Usually the plug-in aborts the chain after it 
-processed a token. It's up to the plug-in to send an answer or result the back 
-to client or not.</p>
+this is an instance of the <tt>TokenPlugInChain</tt> class (a descendant of the 
+abstract <tt>BasePlugInChain</tt> class which implements the <tt>PlugInChain</tt> 
+interface). The <tt>TokenServer</tt> implements one single plug-in chain only.</p>
+<p>When the client sends a paket or token it first reaches a connector on the server 
+side. The connector forwards the paket or token through his engine to the server 
+as shown in the diagram above. The server then forwards the token to the plug-in 
+chain which iterates through all plug-ins in the chain until the target plug-in 
+finally processes it. Usually the plug-in aborts the chain after it processed a 
+token. It&#39;s up to the plug-in to send an answer or result the back to client or 
+not.</p>
 <h2>Processing Tokens</h2>
 <p>Each plug-in comes with a unique namespace. The plug-in usually checks if the 
-incoming token comes with the same namespace and if so checks the <tt>type</tt> field of the 
-token. The <tt>type</tt> here can be associated as a command from the client to 
-the server.</p>
+incoming token comes with the same namespace and if so checks the <tt>type</tt> 
+field of the token. The <tt>type</tt> here can be associated as a command from the 
+client to the server.</p>
 <p>Further documentation pending...</p>
 <p>&nbsp;</p>
-<p>The included jWebSocket <code>SystemPlugIn</code> demonstrates how to 
-implement own plug-ins and it already provides a couple of nice-to-have functions for 
-your WebSocket work. We will extend the System plug-in on 
-demand or provide further plug-ins like the Remote Procedure Call (RPC) plug-in 
-or e.g. for the future clustering options.</p>
-<p>A <tt>TokenPlugIn</tt> usually implements the following methods (beside the 
-specific methods to implement its functionality):</p>
-		<table class="stblData"
-			   width="100%" cellpadding="0" cellspacing="0" id="table6">
-			<colgroup>
-				<col width="5%"/>
-				<col width=""/>
-			</colgroup>
-			<tr class="strData">
-				<th class="sthData" valign="top">Method</th>
-				<th class="sthData" valign="top">Description</th>
-			</tr>
-			<tr>
-				<td class="stdData" valign="top">processToken</td>
-				<td class="stdData" valign="top">Called from the <tt>TokenPlugInChain</tt>
-				every time when a client sends a message to the server.<br>
-				The data is passed to method as object. It can be casted 
-				according to whatever the underlying protocol requires.</td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">processData</td>
-				<td class="stdData" valign="top"><p>Called from the <tt>BasePlugInChain</tt> 
-				every time when a client sends a message to the server.<br>
-				The data is passed to method as object. It can be casted 
-				according to whatever the underlying protocol requires.</p></td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">engineStarted</td>
-				<td class="stdData" valign="top">Called by the server when the 
-				engine has been started.<p>This method is appropriate e.g. to 
-				initialize a plug-in. If you use more than one engine, please 
-				consider to not accidentally initialize a plug-in twice.</td>
-			</tr>
-			<tr class="strData">
-				<td class="stdData" valign="top">engineStopped</td>
-				<td class="stdData" valign="top"><p>Called by the server when the 
-				engine has been stopped.<br>
-				This method is appropriate e.g. to clean-up a plug-in. If you 
-				use more than one engine, please consider to not accidentally 
-				clean-up a plug-in twice.</p></td>
-			</tr>
-			<tr>
-				<td class="stdData" valign="top">connectorStarted</td>
-				<td class="stdData" valign="top"><p>Called from the plug-in chain 
-				when a new client connects to the jWebSocket server.<br>
-				If a client for instance should be automatically registered at a 
-				certain data stream this would be the right place to do this.</p></td>
-			</tr>
-			<tr>
-				<td class="stdData" valign="top">connectorStopped</td>
-				<td class="stdData" valign="top"><p>Called from the plug-in chain 
-				when a client was disconnected from the jWebSocket server.<br>If 
-				a client for instance is registered at a data stream this is the 
-				right place to unregister its connector from these stream.</p></td>
-			</tr>
-			</table>
+<p>The included jWebSocket <code>SystemPlugIn</code> demonstrates how to implement 
+own plug-ins and it already provides a couple of nice-to-have functions for your 
+WebSocket work. We will extend the System plug-in on demand or provide further plug-ins 
+like the Remote Procedure Call (RPC) plug-in or e.g. for the future clustering options.</p>
+<p>A <tt>TokenPlugIn</tt> usually implements the following methods (beside the specific 
+methods to implement its functionality):</p>
+<table class="stblData" width="100%" cellpadding="0" cellspacing="0" id="table6">
+	<colgroup>
+		<col width="5%" /><col width />
+	</colgroup>
+	<tr class="strData">
+		<th class="sthData" valign="top">Method</th>
+		<th class="sthData" valign="top">Description</th>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top"><tt>processToken</tt></td>
+		<td class="stdData" valign="top">Called from the <tt>TokenPlugInChain</tt> 
+		every time when a client sends a message to the server.<br>
+		The data is passed to method as object. It can be casted according to whatever 
+		the underlying protocol requires.</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top"><tt>processPaket</tt></td>
+		<td class="stdData" valign="top">
+		<p>Called from the <tt>BasePlugInChain</tt> every time when a client sends 
+		a message to the server.<br>
+		The data is passed to method as object. It can be casted according to whatever 
+		the underlying protocol requires.</p>
+		</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top"><tt>engineStarted</tt></td>
+		<td class="stdData" valign="top">Called by the server when the engine has 
+		been started.<p>This method is appropriate e.g. to initialize a plug-in.<br>
+		For the rare case that you use more than one engine, please consider to 
+		not accidentally initialize a plug-in twice.</p>
+		</td>
+	</tr>
+	<tr class="strData">
+		<td class="stdData" valign="top"><tt>engineStopped</tt></td>
+		<td class="stdData" valign="top">
+		<p>Called by the server when the engine has been stopped.<br>
+		This method is appropriate e.g. to clean-up a plug-in.<br>
+		For the rare case that you use more than one engine, please consider to 
+		not accidentally clean-up a plug-in twice.</p>
+		</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top"><tt>connectorStarted</tt></td>
+		<td class="stdData" valign="top">
+		<p>Called from the plug-in chain when a new client connects to the jWebSocket 
+		server.<br>
+		If a client for instance should be automatically registered at a certain 
+		data stream this would be the right place to do this.</p>
+		</td>
+	</tr>
+	<tr>
+		<td class="stdData" valign="top"><tt>connectorStopped</tt></td>
+		<td class="stdData" valign="top">
+		<p>Called from the plug-in chain when a client was disconnected from the 
+		jWebSocket server.<br>
+		If a client for instance is registered at a data stream this is the right 
+		place to unregister its connector from these stream.</p>
+		</td>
+	</tr>
+</table>
 
 </body>
 

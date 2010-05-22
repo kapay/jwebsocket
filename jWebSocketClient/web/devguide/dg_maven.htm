@@ -10,7 +10,7 @@
 
 <body>
 
-<h2>Apache Maven</h2>
+<h2>Build jWebSocket with Apache Maven</h2>
 <p>This section describes how to compile jWebSocket from source with Apache Maven 
 2.2. The reason why we choose Maven projects as base for our sources is that you 
 can either compile it with Maven directly or easily import into an IDE like NetBeans 
@@ -36,35 +36,38 @@ or Eclipse.</p>
 	<img class="screenshotOff" border="0" id="maven_version" src="images/maven_version.jpg"><p class="imageFooter">
 	Detecting if maven is properly installed</p>
 	</li>
-	<li class="instruction">After the installation you will find a <tt>.m2</tt> 
+	<li class="instruction">To see all command line options of maven type <tt>mvn</tt> in 
+	the command shell.<br>
+	After that you will find a <tt>.m2</tt> 
 	folder in your <tt>Documents and Settings</tt> folder or <tt>Users/&lt;your 
 	username&gt;</tt> folder (Windows 7), <br>
 	Examples: <tt>c:\Documents and Settings\aschulze\.m2\repository or c:\Users\aschulze\.m2\repository</tt>.</li>
-	<li class="instruction">This is your local Maven repository filled with all 
+	<li class="instruction">This is your local Maven repository which is the 
+	location for all 
 	required libraries.<br>
 	If you look at it the first time the folder probably is empty, it will be filled 
 	during the first <tt>mvn clean install</tt> operation (see below).</li>
 	<li class="instruction">Download the jWebSocket sources from the
 	<a href="../downloads/downloads.htm">download area</a> or directly from our subversion 
-	repository<br>
+	repository <span class="more">[<a class="more" href="dg_svn.htm">more</a>...]</span><br>
 	and either extract them to a project root folder of your choice or check them 
 	out e.g. with the Tortiose Subversion Client.</li>
-	<li class="instruction">Go to your project root folder (e.g. <tt>c:/jWebSocket/sources</tt> 
-	or <tt>c:/svn/jWebSocket[/trunk]</tt>)<br>
+	<li class="instruction">Go to your project root folder (e.g. <tt>c:\svn\jWebSocket\trunk]</tt>)<br>
 	you should see a couple of jWebSocket modules in various folders and a <tt>pom.xml</tt> 
 	in the project&#39;s root folder.<br>
 	The top-level <tt>pom.xml</tt> file maintains all the module dependencies.</li>
-	<li class="instruction">Change to that folder and type: <tt>mvn clean install</tt>.<br>
+	<li class="instruction">Change to that folder and type <tt>mvn clean install</tt>. 
+	Be sure that you are connected to the internet.<br>
 	<img class="screenshotOff" border="0" id="maven_clean_install" src="images/maven_clean_install.jpg" width="669" height="268"><p class="imageFooter">
 	Compiling jWebSocket using Maven</p>
 	</li>
 	<li class="instruction">Maven should now download all required jars now from 
-	it&#39;s repository. This may take some time at the first run.</li>
+	it&#39;s repository. This may take a while at the first run.</li>
 	<li class="instruction">After that Maven states <tt>build successful</tt>:<br>
 	<img class="screenshotOff" border="0" id="maven_build_sucess" src="images/maven_build_sucess.jpg" width="669" height="87"><p class="imageFooter">
 	jWebSocket sources successfully compiled using Maven</p>
 	<p>You will find the executables (<tt>.jar</tt> and <tt>.war</tt> files) in 
-	the <tt>jWebSocketExecutables</tt> folder.</p>
+	the <tt>jWebSocketRTE</tt> folder.</p>
 	</li>
 </ol>
 		<script type="text/javascript">
@@ -72,7 +75,6 @@ or Eclipse.</p>
 			makeImgExp( "maven_clean_install" );
 			makeImgExp( "maven_build_sucess" );
 		</script>
-
 </body>
 
 </html>
