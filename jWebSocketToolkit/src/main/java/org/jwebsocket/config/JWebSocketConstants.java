@@ -55,6 +55,14 @@ public final class JWebSocketConstants {
 	 */
 	public static final String JWEBSOCKET_HOME = "JWEBSOCKET_HOME";
 	/**
+	 * Constant for CATALINA_HOME
+	 */
+	public static final String CATALINA_HOME = "CATALINA_HOME";
+	/**
+	 * Constant for jWebSocket.xml configuration file
+	 */
+	public static final String JWEBSOCKET_XML = "jWebSocket.xml";
+	/**
 	 * Minimum allow outgoing TCP Socket port.
 	 */
 	public static int MIN_IN_PORT = 1024;

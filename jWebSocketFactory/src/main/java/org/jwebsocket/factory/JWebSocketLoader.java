@@ -14,11 +14,15 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
+import java.net.URLDecoder;
 import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
+import static org.jwebsocket.config.JWebSocketConstants.CATALINA_HOME;
+import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_XML;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 
 import javax.xml.stream.XMLInputFactory;
@@ -30,7 +34,6 @@ import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.JWebSocketConfigHandler;
 import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.kit.WebSocketRuntimeException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.security.SecurityFactory;
 
@@ -55,6 +58,9 @@ public final class JWebSocketLoader {
 	 */
 	public final WebSocketInitializer initialize() throws WebSocketException {
 		String configPath = getConfigurationPath();
+		if (configPath == null) {
+			return null;
+		}
 
 		// load the entire settings from the configuration xml file
 		JWebSocketConfig config = loadConfiguration(configPath);
@@ -163,32 +169,83 @@ public final class JWebSocketLoader {
 	 */
 	private String getConfigurationPath() {
 
-		// first try to get the xml file from the classpath
 		String lWebSocketXML = null;
-		URL lURL = Thread.currentThread().getContextClassLoader().getResource("jWebSocket.xml");
+		String lWebSocketHome = null;
+		String lFileSep = System.getProperty("file.separator");
+		File lFile;
+
+		// first try to get the jWebSocket.xml file from the classpath
+		URL lURL = Thread.currentThread().getContextClassLoader().getResource(JWEBSOCKET_XML);
 		if (lURL != null) {
-			lWebSocketXML = lURL.getFile();
+			lWebSocketXML = lURL.getPath();
+			try {
+				lWebSocketXML = URLDecoder.decode(lWebSocketXML, "UTF-8");
+			} catch (UnsupportedEncodingException ex) {
+			}
+			// at least in windows the path is prepended by a forward slash!
+			// TODO: check in unix/linux environments!
+			if (lWebSocketXML != null
+					&& lWebSocketXML.charAt(0) == '/'
+					&& lWebSocketXML.charAt(2) == ':') {
+				lWebSocketXML = lWebSocketXML.substring(1);
+			}
 			if (lWebSocketXML != null) {
+				if (log.isInfoEnabled()) {
+					log.info("Loading " + JWEBSOCKET_XML + " from classpath (" + lWebSocketXML + ")...");
+				}
 				return lWebSocketXML;
+			}
+			if (log.isDebugEnabled()) {
+				log.debug(JWEBSOCKET_XML + " not found at classpath.");
 			}
 		}
 
 		// try to obtain JWEBSOCKET_HOME environment variable
-		String lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
-		String lFileSep = System.getProperty("file.separator");
+		lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
 		if (lWebSocketHome != null) {
 			// append trailing slash if needed
 			if (!lWebSocketHome.endsWith(lFileSep)) {
 				lWebSocketHome += lFileSep;
 			}
-			// jWebSocket.xml has to be located in %JWEBSOCKET_HOME%/conf
+			// jWebSocket.xml can be located in %JWEBSOCKET_HOME%/conf
 			lWebSocketXML = lWebSocketHome
 					+ "conf" + lFileSep
-					+ "jWebSocket.xml";
-		} else {
-			throw new WebSocketRuntimeException(
-					"JWEBSOCKET_HOME variable not set");
+					+ JWEBSOCKET_XML;
+			lFile = new File(lWebSocketXML);
+			if (lFile.exists()) {
+				if (log.isInfoEnabled()) {
+					log.info("Loading " + JWEBSOCKET_XML + " from %" + JWEBSOCKET_HOME + "%/conf...");
+				}
+				return lWebSocketXML;
+			}
+			if (log.isDebugEnabled()) {
+				log.debug(JWEBSOCKET_XML + " not found at %" + JWEBSOCKET_HOME + "%/conf.");
+			}
 		}
-		return lWebSocketXML;
+
+		// try to obtain CATALINA_HOME environment variable
+		lWebSocketHome = System.getenv(CATALINA_HOME);
+		if (lWebSocketHome != null) {
+			// append trailing slash if needed
+			if (!lWebSocketHome.endsWith(lFileSep)) {
+				lWebSocketHome += lFileSep;
+			}
+			// jWebSocket.xml can be located in %CATALINA_HOME%/conf
+			lWebSocketXML = lWebSocketHome
+					+ "conf" + lFileSep
+					+ JWEBSOCKET_XML;
+			lFile = new File(lWebSocketXML);
+			if (lFile.exists()) {
+				if (log.isInfoEnabled()) {
+					log.info("Loading " + JWEBSOCKET_XML + " from %" + CATALINA_HOME + "%/conf...");
+				}
+				return lWebSocketXML;
+			}
+			if (log.isDebugEnabled()) {
+				log.debug(JWEBSOCKET_XML + " not found at %" + CATALINA_HOME + "%/conf.");
+			}
+		}
+
+		return null;
 	}
 }

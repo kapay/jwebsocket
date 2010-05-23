@@ -41,10 +41,12 @@ public class ContextListener implements ServletContextListener {
 		);
 
 		TokenServer lTS = (TokenServer)JWebSocketFactory.getServer("ts0");
-		SamplePlugIn lSP = new SamplePlugIn();
-		lTS.getPlugInChain().addPlugIn(lSP);
-		
-		ServletBridge.setServer(lTS);
+		if( lTS != null ) {
+			SamplePlugIn lSP = new SamplePlugIn();
+			lTS.getPlugInChain().addPlugIn(lSP);
+		}
+
+		// ServletBridge.setServer(lTS);
 	}
 
 	/**

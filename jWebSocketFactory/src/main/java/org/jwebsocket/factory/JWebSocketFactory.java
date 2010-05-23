@@ -35,18 +35,26 @@ public class JWebSocketFactory {
 		Logging.initLogs(aLogLevel, aLogTarget);
 		log = Logging.getLogger(JWebSocketFactory.class);
 		if (log.isDebugEnabled()) {
-			log.debug("Starting jWebSocket sub system...");
+			log.debug("Starting jWebSocket Server sub system...");
 		}
 
 		JWebSocketLoader loader = new JWebSocketLoader();
 		try {
 			WebSocketInitializer initializer = loader.initialize();
+			if( initializer == null ) {
+				log.error("jWebSocket Server sub system could not be initialized.");
+				return;
+			}
 
 			engine = initializer.intializeEngine();
+			if( engine == null ) {
+				// the loader already logs an error!
+				return;
+			}
 
 			// initialize and start the server
 			if (log.isDebugEnabled()) {
-				log.debug("Initializing servers..");
+				log.debug("Initializing servers...");
 			}
 			servers = initializer.initializeServers();
 
@@ -80,36 +88,42 @@ public class JWebSocketFactory {
 				log.info("Filters initialized.");
 			}
 
+			boolean engineStarted = false;
+
 			// first start the engine
 			if (log.isDebugEnabled()) {
 				log.debug("Starting engine (" + engine.getId() + ")...");
 			}
+
 			try{
 				engine.startEngine();
+				engineStarted = true;
 			} catch(Exception ex) {
 				log.error("Starting engine (" + engine.getId() + ") failed ("
 						+ ex.getClass().getSimpleName() + ": "
 						+ ex.getMessage() + ").");
 			}
 
-			// now start the servers
-			if (log.isDebugEnabled()) {
-				log.debug("Starting servers...");
-			}
-			for (WebSocketServer server : servers) {
-				try{
-					server.startServer();
-				} catch(Exception ex) {
-					log.error("Starting server (" + server.getId() + ") failed ("
-							+ ex.getClass().getSimpleName() + ": "
-							+ ex.getMessage() + ").");
+			// do not start any servers if engine could not be started
+			if( engineStarted ) {
+				// now start the servers
+				if (log.isDebugEnabled()) {
+					log.debug("Starting servers...");
+				}
+				for (WebSocketServer server : servers) {
+					try{
+						server.startServer();
+					} catch(Exception ex) {
+						log.error("Starting server (" + server.getId() + ") failed ("
+								+ ex.getClass().getSimpleName() + ": "
+								+ ex.getMessage() + ").");
+					}
+				}
+
+				if (log.isInfoEnabled()) {
+					log.info("jWebSocket server startup complete");
 				}
 			}
-
-			if (log.isInfoEnabled()) {
-				log.info("jWebSocket server startup complete");
-			}
-			// perform any clean up task for servers or any status related
 
 		} catch (WebSocketException e) {
 			if (log.isDebugEnabled()) {
@@ -118,12 +132,12 @@ public class JWebSocketFactory {
 			if (log.isInfoEnabled()) {
 				log.info("jWebSocketServer failed to start");
 			}
-			// System.out.println("ERROR during JWebSocketServer startup");
+
+			// System.out.println("ERROR during jWebSocket Server startup");
 			// TODO: return result here, especially to show in console server
 			// System.exit(0);
 		}
 
-		// log.info("Server(s) successfully terminated.");
 	}
 
 	public static void stop() {
