@@ -1,11 +1,31 @@
 // Copyright: Hiroshi Ichikawa <http://gimite.net/en/>
-// Lincense: New BSD Lincense
+// License: New BSD License
 // Reference: http://dev.w3.org/html5/websockets/
 // Reference: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol
 
-if (!window.WebSocket) {
+(function() {
+  
+  if (window.WebSocket) return;
 
-  if (!window.console) console = {log: function(){ }, error: function(){ }};
+  var console = window.console;
+  if (!console) console = {log: function(){ }, error: function(){ }};
+
+  function hasFlash() {
+    if ('navigator' in window && 'plugins' in navigator && navigator.plugins['Shockwave Flash']) {
+      return !!navigator.plugins['Shockwave Flash'].description;
+    }
+    if ('ActiveXObject' in window) {
+      try {
+        return !!new ActiveXObject('ShockwaveFlash.ShockwaveFlash').GetVariable('$version');
+      } catch (e) {}
+    }
+    return false;
+  }
+  
+  if (!hasFlash()) {
+    console.error("Flash Player is not installed.");
+    return;
+  }
 
   WebSocket = function(url, protocol, proxyHost, proxyPort, headers) {
     var self = this;
@@ -25,7 +45,7 @@ if (!window.WebSocket) {
 
       self.__flash.addEventListener("close", function(fe) {
         try {
-          if (self.onopen) self.onclose();
+          if (self.onclose) self.onclose();
         } catch (e) {
           console.error(e.toString());
         }
@@ -87,13 +107,13 @@ if (!window.WebSocket) {
   };
 
   /**
-* Implementation of {@link <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-registration">DOM 2 EventTarget Interface</a>}
-*
-* @param {string} type
-* @param {function} listener
-* @param {boolean} useCapture !NB Not implemented yet
-* @return void
-*/
+   * Implementation of {@link <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-registration">DOM 2 EventTarget Interface</a>}
+   *
+   * @param {string} type
+   * @param {function} listener
+   * @param {boolean} useCapture !NB Not implemented yet
+   * @return void
+   */
   WebSocket.prototype.addEventListener = function(type, listener, useCapture) {
     if (!('__events' in this)) {
       this.__events = {};
@@ -109,13 +129,13 @@ if (!window.WebSocket) {
   };
 
   /**
-* Implementation of {@link <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-registration">DOM 2 EventTarget Interface</a>}
-*
-* @param {string} type
-* @param {function} listener
-* @param {boolean} useCapture NB! Not implemented yet
-* @return void
-*/
+   * Implementation of {@link <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-registration">DOM 2 EventTarget Interface</a>}
+   *
+   * @param {string} type
+   * @param {function} listener
+   * @param {boolean} useCapture NB! Not implemented yet
+   * @return void
+   */
   WebSocket.prototype.removeEventListener = function(type, listener, useCapture) {
     if (!('__events' in this)) {
       this.__events = {};
@@ -130,11 +150,11 @@ if (!window.WebSocket) {
   };
 
   /**
-* Implementation of {@link <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-registration">DOM 2 EventTarget Interface</a>}
-*
-* @param {WebSocketEvent} event
-* @return void
-*/
+   * Implementation of {@link <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-registration">DOM 2 EventTarget Interface</a>}
+   *
+   * @param {WebSocketEvent} event
+   * @return void
+   */
   WebSocket.prototype.dispatchEvent = function(event) {
     if (!('__events' in this)) throw 'UNSPECIFIED_EVENT_TYPE_ERR';
     if (!(event.type in this.__events)) throw 'UNSPECIFIED_EVENT_TYPE_ERR';
@@ -152,10 +172,10 @@ if (!window.WebSocket) {
   };
 
   /**
-*
-* @param {object} object
-* @param {string} type
-*/
+   *
+   * @param {object} object
+   * @param {string} type
+   */
   function WebSocket_FireEvent(object, type) {
     return function(data) {
       var event = new WebSocketEvent();
@@ -169,29 +189,29 @@ if (!window.WebSocket) {
   }
 
   /**
-* Basic implementation of {@link <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface">DOM 2 EventInterface</a>}
-*
-* @class
-* @constructor
-*/
+   * Basic implementation of {@link <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface">DOM 2 EventInterface</a>}
+   *
+   * @class
+   * @constructor
+   */
   function WebSocketEvent(){}
 
   /**
-*
-* @type boolean
-*/
+   *
+   * @type boolean
+   */
   WebSocketEvent.prototype.cancelable = true;
 
   /**
-*
-* @type boolean
-*/
+   *
+   * @type boolean
+   */
   WebSocketEvent.prototype.cancelBubble = false;
 
   /**
-*
-* @return void
-*/
+   *
+   * @return void
+   */
   WebSocketEvent.prototype.preventDefault = function() {
     if (this.cancelable) {
       this.returnValue = false;
@@ -199,20 +219,20 @@ if (!window.WebSocket) {
   };
 
   /**
-*
-* @return void
-*/
+   *
+   * @return void
+   */
   WebSocketEvent.prototype.stopPropagation = function() {
     this.cancelBubble = true;
   };
 
   /**
-*
-* @param {string} eventTypeArg
-* @param {boolean} canBubbleArg
-* @param {boolean} cancelableArg
-* @return void
-*/
+   *
+   * @param {string} eventTypeArg
+   * @param {boolean} canBubbleArg
+   * @param {boolean} cancelableArg
+   * @return void
+   */
   WebSocketEvent.prototype.initEvent = function(eventTypeArg, canBubbleArg, cancelableArg) {
     this.type = eventTypeArg;
     this.cancelable = cancelableArg;
@@ -243,7 +263,7 @@ if (!window.WebSocket) {
     container.appendChild(holder);
     document.body.appendChild(container);
     swfobject.embedSWF(
-      WebSocket.__swfLocation, "webSocketFlash", "10", "10", "9.0.0",
+      WebSocket.__swfLocation, "webSocketFlash", "8", "8", "9.0.0",
       null, {bridgeName: "webSocket"}, null, null,
       function(e) {
         if (!e.success) console.error("[WebSocket] swfobject.embedSWF failed");
@@ -287,4 +307,5 @@ if (!window.WebSocket) {
   } else {
     window.attachEvent("onload", WebSocket.__initialize);
   }
-}
+  
+})();

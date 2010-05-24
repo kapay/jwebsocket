@@ -55,6 +55,7 @@
 						**/jWebSocketWebAppSupport*.jar,
 						**/jWebSocketServer*.jar,
 						**/jWebSocketFactory*.jar,
+						**/jWebSocketSamples*.jar,
 						**/log4j*.jar,
 						**/javolution*.jar,
 						**/commons-lang*.jar,

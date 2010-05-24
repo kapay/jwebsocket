@@ -71,7 +71,7 @@ public class TCPEngine extends BaseEngine {
 	public void startEngine()
 			throws WebSocketException {
 		if (log.isDebugEnabled()) {
-			log.debug("Starting TCP engine (" + getId() + ")...");
+			log.debug("Starting TCP engine '" + getId() + "' at port " + listenerPort + "...");
 		}
 		try {
 			serverSocket = new ServerSocket(listenerPort);
@@ -94,7 +94,7 @@ public class TCPEngine extends BaseEngine {
 		// TODO: results in firing started event twice! make more clean!
 		// super.startEngine();
 		if (log.isInfoEnabled()) {
-			log.info("TCP engine (" + getId() + ") started.");
+			log.info("TCP engine '" + getId() + "' started' at port " + listenerPort + ".");
 		}
 	}
 
@@ -102,7 +102,7 @@ public class TCPEngine extends BaseEngine {
 	public void stopEngine(CloseReason aCloseReason)
 			throws WebSocketException {
 		if (log.isDebugEnabled()) {
-			log.debug("Stopping TCP engine (" + getId() + ")...");
+			log.debug("Stopping TCP engine '" + getId() + "' at port " + listenerPort + "...");
 		}
 
 		// inherited method stops all connectors
@@ -118,11 +118,11 @@ public class TCPEngine extends BaseEngine {
 			// at accept in the listener thread which terminates the listener
 			serverSocket.close();
 			if (log.isInfoEnabled()) {
-				log.info("TCP engine (" + getId() + ") stopped (closed=" + serverSocket.isClosed() + ").");
+				log.info("TCP engine '" + getId() + "' stopped at port " + listenerPort + " (closed=" + serverSocket.isClosed() + ").");
 			}
 			serverSocket = null;
 		} catch (Exception ex) {
-			log.error("Stopping TCP engine (" + getId() + "):" + ex.getMessage());
+			log.error("Stopping TCP engine '" + getId() + "':" + ex.getMessage());
 		}
 
 		try {
@@ -133,9 +133,9 @@ public class TCPEngine extends BaseEngine {
 		if (log.isDebugEnabled()) {
 			long lDuration = new Date().getTime() - lStarted;
 			if (engineThread.isAlive()) {
-				log.warn("TCP engine (" + getId() + ") did not stopped after " + lDuration + "ms.");
+				log.warn("TCP engine '" + getId() + "' did not stopped after " + lDuration + "ms.");
 			} else {
-				log.debug("TCP engine (" + getId() + ") stopped after " + lDuration + "ms.");
+				log.debug("TCP engine '" + getId() + "' stopped after " + lDuration + "ms.");
 			}
 		}
 
@@ -263,7 +263,7 @@ public class TCPEngine extends BaseEngine {
 				+ "WebSocket-Location: " + location + "\r\n"
 				+ "\r\n";
 		if (log.isDebugEnabled()) {
-			log.debug("Sent handshake (" + res.replace("\n", "\\n") + ")");
+			log.debug("Sent handshake (" + res.replace("\r\n", "\\n") + ")");
 		}
 
 		byte[] ba = res.getBytes("UTF-8");

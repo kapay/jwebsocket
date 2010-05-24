@@ -39,6 +39,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 	private int listenerPort = 843;
 	private boolean isRunning = false;
 	private int engineInstanceCount = 0;
+	private BridgeProcess bridgeProcess = null;
 	private Thread bridgeThread = null;
 	private int TIMEOUT = 2500;
 
@@ -52,44 +53,48 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 		try {
 			serverSocket = new ServerSocket(listenerPort);
 
-			BridgeListener listener = new BridgeListener(this);
-			bridgeThread = new Thread(listener);
+			bridgeProcess = new BridgeProcess(this);
+			bridgeThread = new Thread(bridgeProcess);
 			bridgeThread.start();
+			if (log.isInfoEnabled()) {
+				log.info("FlashBridge started.");
+			}
 		} catch (IOException ex) {
-		}
-		if (log.isInfoEnabled()) {
-			log.info("FlashBridge started.");
+			log.error("FlashBridge could not be started: " + ex.getMessage());
 		}
 	}
 
-	private class BridgeListener implements Runnable {
-		private final FlashBridgePlugIn aPlugIn;
+	private class BridgeProcess implements Runnable {
+
+		private final FlashBridgePlugIn plugIn;
 
 		/**
-		 * creates the server socket listener for new
+		 * creates the server socket bridgeProcess for new
 		 * incoming socket connections.
 		 * @param aPlugIn
 		 */
-		public BridgeListener(FlashBridgePlugIn aPlugIn) {
-			this.aPlugIn = aPlugIn;
-			// plugin = aPlugIn;
+		public BridgeProcess(FlashBridgePlugIn aPlugIn) {
+			this.plugIn = aPlugIn;
 		}
 
 		@Override
 		public void run() {
 
+			if (log.isDebugEnabled()) {
+				log.debug("Starting FlashBridge process...");
+			}
 			isRunning = true;
 			while (isRunning) {
 				try {
 					// accept is blocking so here is no need
 					// to put any sleeps into the loop
-					//if (log.isDebugEnabled()) {
-					//	log.debug("Waiting on flash policy-file-request...");
-					//}
+					if (log.isDebugEnabled()) {
+						log.debug("Waiting on flash policy-file-request on port " + serverSocket.getLocalPort() + "...");
+					}
 					Socket clientSocket = serverSocket.accept();
-					//if (log.isDebugEnabled()) {
-					//	log.debug("Client connected...");
-					//}
+					if (log.isDebugEnabled()) {
+						log.debug("Client connected...");
+					}
 					try {
 						clientSocket.setSoTimeout(TIMEOUT);
 						InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream(), "UTF-8");
@@ -98,7 +103,6 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 						char[] ca = new char[1024];
 						String lLine = "";
 						int lLen;
-						// TODO: implement timeout if anyone plays on port 843!
 						do {
 							lLen = isr.read(ca);
 							if (lLen > 0) {
@@ -106,12 +110,17 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 							} else {
 								Thread.sleep(10);
 							}
+							if (log.isDebugEnabled()) {
+								log.debug("Received " + lLine + "...");
+							}
 						} while (lLen >= 0 && lLine.indexOf("<policy-file-request/>") < 0);
-						log.debug("Answering on flash policy-file-request (" + lLine + ")...");
+						if (log.isDebugEnabled()) {
+							log.debug("Answering on flash policy-file-request (" + lLine + ")...");
+						}
 						os.print(
-							"<cross-domain-policy>"
-							+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
-							+ "</cross-domain-policy>\n");
+								"<cross-domain-policy>"
+								+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
+								+ "</cross-domain-policy>\n");
 					} catch (UnsupportedEncodingException ex) {
 						log.error("(encoding) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					} catch (IOException ex) {
@@ -129,13 +138,16 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 					log.error("(accept) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
 			}
+			if (log.isDebugEnabled()) {
+				log.debug("FlashBridge process stopped.");
+			}
 		}
 	}
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 		if (log.isDebugEnabled()) {
-			log.debug("Engine (" + aEngine.getId() + ") started.");
+			log.debug("Engine '" + aEngine.getId() + "' started.");
 		}
 		// every time an engine starts increment counter
 		engineInstanceCount++;
@@ -144,7 +156,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
 		if (log.isDebugEnabled()) {
-			log.debug("Engine (" + aEngine.getId() + ") stopped.");
+			log.debug("Engine '" + aEngine.getId() + "' stopped.");
 		}
 		// every time an engine starts decrement counter
 		engineInstanceCount--;
@@ -158,7 +170,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 			try {
 				// when done, close server socket
 				// closing the server socket should lead to an exception
-				// at accept in the listener thread which terminates the listener
+				// at accept in the bridgeProcess thread which terminates the bridgeProcess
 				if (log.isDebugEnabled()) {
 					log.debug("Closing FlashBridge server socket...");
 				}
@@ -183,8 +195,6 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 					log.debug("FlashBridge stopped after " + lDuration + "ms.");
 				}
 			}
-
-
 		}
 	}
 }

@@ -16,6 +16,7 @@
 package org.jwebsocket.logging;
 
 import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
+import static org.jwebsocket.config.JWebSocketConstants.CATALINA_HOME;
 
 import java.io.IOException;
 import org.apache.log4j.Appender;
@@ -25,7 +26,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
-import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
  * Provides the common used jWebSocket logging support based on
@@ -60,22 +60,34 @@ public class Logging {
 	private static int logTarget = CONSOLE; // ROLLING_FILE;
 
 	private static String getLogsFolderPath(String fileName) {
+
 		// try to obtain JWEBSOCKET_HOME environment variable
 		String lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
 		String lFileSep = System.getProperty("file.separator");
-		String lWebSocketLogs = "";
+		String lWebSocketLogs = null;
+
 		if (lWebSocketHome != null) {
 			// append trailing slash if needed
 			if (!lWebSocketHome.endsWith(lFileSep)) {
 				lWebSocketHome += lFileSep;
 			}
-			// logs are located in %JWEBSOCKET_HOME%/logs (or some other
-			// folder defined in config file)
+			// logs are located in %JWEBSOCKET_HOME%/logs
 			lWebSocketLogs = lWebSocketHome + "logs" + lFileSep + fileName;
-		} else {
-			throw new WebSocketRuntimeException(
-					"JWEBSOCKET_HOME variable not set");
 		}
+
+		if( lWebSocketLogs == null ) {
+			// try to obtain CATALINA_HOME environment variable
+			lWebSocketHome = System.getenv(CATALINA_HOME);
+			if (lWebSocketHome != null) {
+				// append trailing slash if needed
+				if (!lWebSocketHome.endsWith(lFileSep)) {
+					lWebSocketHome += lFileSep;
+				}
+				// logs are located in %CATALINA_HOME%/logs
+				lWebSocketLogs = lWebSocketHome + "logs" + lFileSep + fileName;
+			}
+		}
+
 		return lWebSocketLogs;
 	}
 
@@ -92,18 +104,19 @@ public class Logging {
 			layout.setConversionPattern("%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n");
 		}
 		if (appender == null) {
-			if (1 == logTarget) {
+			String logsPath = getLogsFolderPath(LOG_FILENAME);
+			if (ROLLING_FILE == logTarget && logsPath != null) {
 				try {
-					appender = new RollingFileAppender(layout, getLogsFolderPath(LOG_FILENAME), true);
+					appender = new RollingFileAppender(layout, logsPath, true);
 					((RollingFileAppender) appender).setBufferedIO(false);
 					((RollingFileAppender) appender).setBufferSize(BUFFER_SIZE);
 					((RollingFileAppender) appender).setEncoding("UTF-8");
 				} catch (IOException ex) {
 					appender = new ConsoleAppender(layout);
 				}
-			} else if (2 == logTarget) {
+			} else if (SINGLE_FILE == logTarget && logsPath != null) {
 				try {
-					appender = new FileAppender(layout, getLogsFolderPath(LOG_FILENAME), true);
+					appender = new FileAppender(layout, logsPath, true);
 					((FileAppender) appender).setBufferedIO(true);
 					((FileAppender) appender).setBufferSize(BUFFER_SIZE);
 					((FileAppender) appender).setEncoding("UTF-8");
@@ -112,6 +125,11 @@ public class Logging {
 				}
 			} else {
 				appender = new ConsoleAppender(layout);
+				if (CONSOLE != logTarget) {
+					System.out.println(JWEBSOCKET_HOME
+							+ " variable not set or invalid configuration,"
+							+ " using console output for log file.");
+				}
 			}
 		}
 	}

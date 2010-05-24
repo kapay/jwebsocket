@@ -221,11 +221,16 @@ public final class JWebSocketLoader {
 			if (log.isDebugEnabled()) {
 				log.debug(JWEBSOCKET_XML + " not found at %" + JWEBSOCKET_HOME + "%/conf.");
 			}
+		} else {
+			log.warn("%" + JWEBSOCKET_HOME +"% variable not set.");
 		}
 
 		// try to obtain CATALINA_HOME environment variable
 		lWebSocketHome = System.getenv(CATALINA_HOME);
 		if (lWebSocketHome != null) {
+			if (log.isDebugEnabled()) {
+				log.debug("Trying to load " + JWEBSOCKET_XML + " from %" + CATALINA_HOME + "%/conf...");
+			}
 			// append trailing slash if needed
 			if (!lWebSocketHome.endsWith(lFileSep)) {
 				lWebSocketHome += lFileSep;
