@@ -197,7 +197,10 @@ if( !jws.browserSupportsNativeWebSockets ) {
 		var lScripts = document.getElementsByTagName( "script" );
 		for( var lIdx = 0, lCnt = lScripts.length; lIdx < lCnt; lIdx++ ) {
 			var lScript = lScripts[ lIdx ];
-			var lPath = lScript.getAttribute( "src" );
+			var lPath = lScript.src;
+			if( !lPath ) {
+				lPath = lScript.getAttribute( "src" );
+			}
 			if( lPath ) {
 				var lPos = lPath.lastIndexOf( "jWebSocket" );
 				if( lPos > 0 ) {
