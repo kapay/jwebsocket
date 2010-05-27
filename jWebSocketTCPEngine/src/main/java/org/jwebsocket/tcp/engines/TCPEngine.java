@@ -71,7 +71,7 @@ public class TCPEngine extends BaseEngine {
 	public void startEngine()
 			throws WebSocketException {
 		if (log.isDebugEnabled()) {
-			log.debug("Starting TCP engine '" + getId() + "' at port " + listenerPort + "...");
+			log.debug("Starting TCP engine '" + getId() + "' at port " + listenerPort + " with default timeout " + sessionTimeout + "ms...");
 		}
 		try {
 			serverSocket = new ServerSocket(listenerPort);
@@ -94,7 +94,7 @@ public class TCPEngine extends BaseEngine {
 		// TODO: results in firing started event twice! make more clean!
 		// super.startEngine();
 		if (log.isInfoEnabled()) {
-			log.info("TCP engine '" + getId() + "' started' at port " + listenerPort + ".");
+			log.info("TCP engine '" + getId() + "' started' at port " + listenerPort + " with default timeout " + sessionTimeout + "ms.");
 		}
 	}
 
@@ -326,21 +326,22 @@ public class TCPEngine extends BaseEngine {
 					//	log.debug("Waiting for client...");
 					// }
 					Socket clientSocket = serverSocket.accept();
-					// if (log.isDebugEnabled()) {
-					//	log.debug("Client accepted...");
-					// }
 					try {
 						// process handshake to parse header data
 						RequestHeader header = processHandshake(clientSocket);
 
 						if (header != null) {
 							// set socket timeout to given amount of milliseconds
-							// check min and max timeout ranges
-							int lSessionTimeout = header.getTimeout(JWebSocketConstants.DEFAULT_TIMEOUT);
+							// use tcp engine's timeout as default and
+							// check system's min and max timeout ranges
+							int lSessionTimeout = header.getTimeout(getSessionTimeout());
 							if (lSessionTimeout > JWebSocketConstants.MAX_TIMEOUT) {
 								lSessionTimeout = JWebSocketConstants.MAX_TIMEOUT;
 							} else if (lSessionTimeout < JWebSocketConstants.MIN_TIMEOUT) {
 								lSessionTimeout = JWebSocketConstants.MIN_TIMEOUT;
+							}
+							if (log.isDebugEnabled()) {
+								log.debug("Client accepted on port " + clientSocket.getPort() + " with timeout " + lSessionTimeout + "ms...");
 							}
 							clientSocket.setSoTimeout(lSessionTimeout);
 

@@ -53,14 +53,21 @@ public class TCPConnector extends BaseConnector {
 
 	@Override
 	public void startConnector() {
+		int lPort = -1;
+		int lTimeout = -1;
+		try {
+			lPort = clientSocket.getPort();
+			lTimeout = clientSocket.getSoTimeout();
+		} catch (Exception ex) {
+		}
 		if (log.isDebugEnabled()) {
-			log.debug("Starting TCP connector...");
+			log.debug("Starting TCP connector on port " + lPort + " with timeout " + lTimeout + " ms....");
 		}
 		ClientProcessor clientProc = new ClientProcessor(this);
 		Thread clientThread = new Thread(clientProc);
 		clientThread.start();
 		if (log.isInfoEnabled()) {
-			log.info("Started TCP connector on port " + clientSocket.getPort() + ".");
+			log.info("Started TCP connector on port " + lPort + " with timeout " + lTimeout + " ms.");
 		}
 	}
 
