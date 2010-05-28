@@ -51,6 +51,8 @@ public class MonitorStream extends TokenStream {
 	 */
 	@Override
 	public void startStream(long aTimeout) {
+		super.startStream(aTimeout);
+
 		if (log.isDebugEnabled()) {
 			log.debug("Starting Monitor stream...");
 		}

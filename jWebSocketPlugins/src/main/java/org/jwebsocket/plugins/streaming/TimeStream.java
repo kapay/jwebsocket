@@ -101,13 +101,13 @@ public class TimeStream extends TokenStream {
 				try {
 					Thread.sleep(1000);
 
-					Token lEventToken = new Token("event");
-					lEventToken.put("name", "stream");
-					lEventToken.put("msg", new Date().toString());
-					lEventToken.put("streamID", getStreamID());
+					Token lToken = new Token("event");
+					lToken.put("name", "stream");
+					lToken.put("msg", new Date().toString());
+					lToken.put("streamID", getStreamID());
 
 					// log.debug("Time streamer queues '" + lData + "'...");
-					put(lEventToken);
+					put(lToken);
 				} catch (InterruptedException ex) {
 					log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
