@@ -14,137 +14,155 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.netty.engines;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.engines.BaseEngine;
-import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.kit.WebSocketException;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.engines.BaseEngine;
+import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
+
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 
 /**
  * Netty based implementation of {@code WebSocketEngine} engine.It uses the
  * low-level <tt>ServerBootStrap</tt> to start the server and handles the
  * incoming/outgoing request/response using {@code NettyEngineHandler} class.
- * 
- * @see NettyEngineHandler,NettyConnector
+ *
  * @author puran
  * @version $Id$
+ * @see NettyEngineHandler
  */
 public class NettyEngine extends BaseEngine {
 
-	private static Logger log = Logging.getLogger(NettyEngine.class);
-	private int listenerPort = 8787;
-	// TODO: need to use this timeout!!
-	private int sessionTimeout = 120000;
-	private volatile boolean isRunning = false;
-	private static final ChannelGroup allChannels = new DefaultChannelGroup(
-			"jWebSocket-NettyEngine");
+    private static Logger log = Logging.getLogger(NettyEngine.class);
+    private int listenerPort = 8787;
+    // TODO: need to use this timeout!!
+    private int sessionTimeout = 120000;
+    private volatile boolean isRunning = false;
+    private static final ChannelGroup allChannels = new DefaultChannelGroup(
+            "jWebSocket-NettyEngine");
+    private EngineConfig engineConfig;
 
-	/**
-	 * Constructor of the Netty based engine. The port and the default session
-	 * timeout have to be passed. The session timout passed here is used only
-	 * when no explicit timeout per connection is specified.
-	 * 
-	 * @param aPort
-	 *            TCP port the engine listens on.
-	 * @param aSessionTimeout
-	 *            The default server side session time out.
-	 * @throws WebSocketException
-	 *             if exception creating <tt>NettyEngine</tt>
-	 */
-	public NettyEngine(String aId, Integer aPort, Integer aSessionTimeout)
-			throws WebSocketException {
-		super(aId);
-		listenerPort = aPort;
-		sessionTimeout = aSessionTimeout;
-	}
+    /**
+     * Constructor of the Netty based engine. The port and the default session
+     * timeout have to be passed. The session timout passed here is used only
+     * when no explicit timeout per connection is specified.
+     *
+     * @param aPort           TCP port the engine listens on.
+     * @param aSessionTimeout The default server side session time out.
+     * @throws WebSocketException if exception creating <tt>NettyEngine</tt>
+     */
+    public NettyEngine(String aId, Integer aPort, Integer aSessionTimeout)
+            throws WebSocketException {
+        super(aId);
+        listenerPort = aPort;
+        sessionTimeout = aSessionTimeout;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void startEngine() throws WebSocketException {
-		if (log.isDebugEnabled()) {
-			log.debug("Starting Netty engine (" + getId() + ")...");
-		}
-		// Configure the server.
-		// TODO: figure out more on how advanced we can configure
-		ServerBootstrap bootstrap = new ServerBootstrap(
-				new NioServerSocketChannelFactory(Executors
-						.newCachedThreadPool(), Executors.newCachedThreadPool()));
+    /**
+     * Construtor that takes the engine config as the argument
+     *
+     * @param theEngineConfig the engine config object
+     */
+    public NettyEngine(EngineConfig theEngineConfig) {
+        super(theEngineConfig.getId());
+        this.engineConfig = theEngineConfig;
+    }
 
-		// Set up the event pipeline factory.
-		bootstrap.setPipelineFactory(new NettyEnginePipeLineFactory(this));
-		// Bind and start to accept incoming connections.
-		Channel channel = bootstrap.bind(new InetSocketAddress(listenerPort));
 
-		// fire the engine start event
-		engineStarted();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void startEngine() throws WebSocketException {
+        if (log.isDebugEnabled()) {
+            log.debug("Starting Netty engine (" + getId() + ")...");
+        }
+        // Configure the server.
+        // TODO: figure out more on how advanced we can configure
+        ServerBootstrap bootstrap = new ServerBootstrap(
+                new NioServerSocketChannelFactory(Executors
+                        .newCachedThreadPool(), Executors.newCachedThreadPool()));
 
-		allChannels.add(channel);
+        // Set up the event pipeline factory.
+        bootstrap.setPipelineFactory(new NettyEnginePipeLineFactory(this));
+        // Bind and start to accept incoming connections.
+        Channel channel = bootstrap.bind(new InetSocketAddress(listenerPort));
 
-		isRunning = true;
+        // fire the engine start event
+        engineStarted();
 
-		if (log.isInfoEnabled()) {
-			log.info("Netty engine (" + getId() + ") started.");
-		}
-		// close the engine
-		if (!isRunning) {
-			ChannelGroupFuture future = allChannels.close();
-			future.awaitUninterruptibly();
-			channel.getFactory().releaseExternalResources();
-			engineStopped();
-		}
-	}
+        allChannels.add(channel);
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
-		log.debug("Stopping Netty engine (" + getId() + ")...");
-		isRunning = false;
-		super.stopEngine(aCloseReason);
-	}
+        isRunning = true;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void connectorStarted(WebSocketConnector aConnector) {
-		log.debug("Detected new connector at port "
-				+ aConnector.getRemotePort() + ".");
-		super.connectorStarted(aConnector);
-	}
+        if (log.isInfoEnabled()) {
+            log.info("Netty engine (" + getId() + ") started.");
+        }
+        // close the engine
+        if (!isRunning) {
+            ChannelGroupFuture future = allChannels.close();
+            future.awaitUninterruptibly();
+            channel.getFactory().releaseExternalResources();
+            engineStopped();
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void connectorStopped(WebSocketConnector aConnector,
-			CloseReason aCloseReason) {
-		log.debug("Detected stopped connector at port "
-				+ aConnector.getRemotePort() + ".");
-		super.connectorStopped(aConnector, aCloseReason);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
+        log.debug("Stopping Netty engine (" + getId() + ")...");
+        isRunning = false;
+        super.stopEngine(aCloseReason);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean isAlive() {
-		if (isRunning) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void connectorStarted(WebSocketConnector aConnector) {
+        log.debug("Detected new connector at port "
+                + aConnector.getRemotePort() + ".");
+        super.connectorStarted(aConnector);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void connectorStopped(WebSocketConnector aConnector,
+                                 CloseReason aCloseReason) {
+        log.debug("Detected stopped connector at port "
+                + aConnector.getRemotePort() + ".");
+        super.connectorStopped(aConnector, aCloseReason);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isAlive() {
+        if (isRunning) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @return the engine config
+     */
+    public EngineConfig getEngineConfig() {
+        return engineConfig;
+    }
 }
