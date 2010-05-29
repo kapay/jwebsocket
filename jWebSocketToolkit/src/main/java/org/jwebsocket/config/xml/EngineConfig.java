@@ -14,107 +14,114 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
-import java.util.List;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
+import java.util.List;
+
 /**
  * Class that represents the engine config
+ *
  * @author puran
  * @version $Id$
- * 
  */
 public final class EngineConfig implements Config {
-	private final String id;
-	private final String name;
-	private final String jar;
-	private final int port;
-	private final int timeout;
-	private final List<String> domains;
+    private final String id;
+    private final String name;
+    private final String jar;
+    private final int port;
+    private final int timeout;
+    private final int maxframesize;
+    private final List<String> domains;
 
-	/**
-	 * Constructor for engine
-	 * 
-	 * @param id
-	 *            the engine id
-	 * @param name
-	 *            the name of the engine
-	 * @param jar
-	 *            the jar file name
-	 * @param port
-	 *            the port number where engine runs
-	 * @param timeout
-	 *            the timeout value
-	 * @param domains
-	 *            list of domain names
-	 */
-	public EngineConfig(String id, String name, String jar, int port, int timeout,
-			List<String> domains) {
-		this.id = id;
-		this.name = name;
-		this.jar = jar;
-		this.port = port;
-		this.timeout = timeout;
-		this.domains = domains;
-		validate();
-	}
+    /**
+     * Constructor for engine
+     *
+     * @param id           the engine id
+     * @param name         the name of the engine
+     * @param jar          the jar file name
+     * @param port         the port number where engine runs
+     * @param timeout      the timeout value
+     * @param maxFrameSize the maximum frame size that engine will
+     *                     receive without closing the connection
+     * @param domains      list of domain names
+     */
+    public EngineConfig(String id, String name, String jar, int port, int timeout,
+                        int maxFrameSize, List<String> domains) {
+        this.id = id;
+        this.name = name;
+        this.jar = jar;
+        this.port = port;
+        this.timeout = timeout;
+        this.maxframesize = maxFrameSize;
+        this.domains = domains;
+        validate();
+    }
 
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @return the jar
-	 */
-	public String getJar() {
-		return jar;
-	}
+    /**
+     * @return the jar
+     */
+    public String getJar() {
+        return jar;
+    }
 
-	/**
-	 * @return the port
-	 */
-	public int getPort() {
-		return port;
-	}
+    /**
+     * @return the port
+     */
+    public int getPort() {
+        return port;
+    }
 
-	/**
-	 * @return the timeout
-	 */
-	public int getTimeout() {
-		return timeout;
-	}
+    /**
+     * @return the timeout
+     */
+    public int getTimeout() {
+        return timeout;
+    }
 
-	/**
-	 * @return the domains
-	 */
-	public List<String> getDomains() {
-		return domains;
-	}
+    /**
+     * @return the max frame size
+     */
+    public int getMaxframesize() {
+        return maxframesize;
+    }
 
-	/**
-	 * validate the engine configuration
-	 * @throws WebSocketRuntimeException if any of the engine configuration is mising
-	 */
-	public void validate() {
-		if ((id != null && id.length() > 0)
-				&& (name != null && name.length() > 0)
-				&& (jar != null && jar.length() > 0)
-				&& (domains != null && domains.size() > 0)
-				&& port > 1024
-				&& timeout > 0) {
-			return;
-		}
-		throw new WebSocketRuntimeException(
-				"Missing one of the engine configuration, please check your configuration file");
-	}
+    /**
+     * @return the domains
+     */
+    public List<String> getDomains() {
+        return domains;
+    }
+
+    /**
+     * validate the engine configuration
+     *
+     * @throws WebSocketRuntimeException if any of the engine configuration is mising
+     */
+    public void validate() {
+        if ((id != null && id.length() > 0)
+                && (name != null && name.length() > 0)
+                && (jar != null && jar.length() > 0)
+                && (domains != null && domains.size() > 0)
+                && port > 1024
+                && timeout > 0) {
+            return;
+        }
+        throw new WebSocketRuntimeException(
+                "Missing one of the engine configuration, please check your configuration file");
+    }
 }
