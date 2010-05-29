@@ -22,6 +22,7 @@ import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.CloseReason;
@@ -165,4 +166,17 @@ public class NettyEngine extends BaseEngine {
     public EngineConfig getEngineConfig() {
         return engineConfig;
     }
+
+    /**
+     * @return the max frame size
+     */
+    @Override
+    public int getMaxFrameSize() {
+        if (engineConfig == null || engineConfig.getMaxframesize() == 0) {
+            return JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE;
+        } else {
+            return engineConfig.getMaxframesize();
+        }
+    }
+
 }

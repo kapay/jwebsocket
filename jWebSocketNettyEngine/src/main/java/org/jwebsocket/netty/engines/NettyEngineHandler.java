@@ -314,8 +314,8 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
             ChannelPipeline p = ctx.getChannel().getPipeline();
             p.remove("aggregator");
             EngineConfig config = engine.getEngineConfig();
-            if (config.getMaxframesize() == 0) {
-                p.replace("decoder", "wsdecoder", new WebSocketFrameDecoder());
+            if (config == null || config.getMaxframesize() == 0) {
+                p.replace("decoder", "wsdecoder", new WebSocketFrameDecoder(JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE));
             } else {
                 p.replace("decoder", "wsdecoder", new WebSocketFrameDecoder(config.getMaxframesize()));
             }
@@ -461,7 +461,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      *
      * @return the channel context
      */
-	public ChannelHandlerContext getChannelHandlerContext() {
-		return context;
+    public ChannelHandlerContext getChannelHandlerContext() {
+        return context;
 	}
 }
