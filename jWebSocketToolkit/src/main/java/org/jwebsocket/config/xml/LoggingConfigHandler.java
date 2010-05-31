@@ -24,7 +24,7 @@ import java.util.List;
  * Handler for the logging configuration
  *
  * @author puran
- * @version $Id:$
+ * @version $Id$
  */
 public class LoggingConfigHandler implements ConfigHandler {
 
@@ -69,7 +69,7 @@ public class LoggingConfigHandler implements ConfigHandler {
                 }
             }
         }
-        return null;
+        return new LoggingConfig(appender, pattern, level, filename);
     }
 
 }
