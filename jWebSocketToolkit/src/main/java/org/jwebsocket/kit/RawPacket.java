@@ -26,7 +26,11 @@ import org.jwebsocket.api.WebSocketPaket;
  */
 public class RawPacket implements WebSocketPaket {
 
+	public static final int FRAMETYPE_UTF8 = 0;
+	public static final int FRAMETYPE_BINARY = 1;
+
 	private byte[] data = null;
+	private int frameType = FRAMETYPE_UTF8;
 
 	/**
 	 * Instantiates a new data packet and initializes its value to the passed
@@ -106,5 +110,21 @@ public class RawPacket implements WebSocketPaket {
 		} catch (UnsupportedEncodingException ex) {
 			return null;
 		}
+	}
+
+	/**
+	 * @return the frameType
+	 */
+	@Override
+	public int getFrameType() {
+		return frameType;
+	}
+
+	/**
+	 * @param frameType the frameType to set
+	 */
+	@Override
+	public void setFrameType(int aFrameType) {
+		this.frameType = aFrameType;
 	}
 }

@@ -23,6 +23,7 @@ import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.BasePlugInChain;
 
@@ -58,8 +59,16 @@ public class CustomServer extends BaseServer {
 		// this section can be used as an example for your own protol handling.
 		if (lSubProt != null && lSubProt.equals(JWebSocketConstants.SUB_PROT_CUSTOM)) {
 			// send a modified echo packet back to sender.
+
 			aDataPacket.setUTF8("[echo from jWebSocket v" + JWebSocketConstants.VERSION_STR + "] " + aDataPacket.getUTF8());
+/*
+			// byte[] lBA = new byte[] { 17, 123, -65, 122, -2, -62, -38, 115, -79 };
+			byte[] lBA = new byte[] { 65, 66, 67, 68, 69, 70, 71 };
+			aDataPacket.setFrameType(RawPacket.FRAMETYPE_BINARY);
+			aDataPacket.setByteArray(lBA);
+*/
 			sendPacket(aConnector, aDataPacket);
+
 			// you also could broadcast the packet here...
 			// broadcastPacket(aDataPacket);
 			// ...or forward it to your custom specific plug-in chain

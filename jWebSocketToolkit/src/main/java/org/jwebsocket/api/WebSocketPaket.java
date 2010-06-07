@@ -83,4 +83,8 @@ public interface WebSocketPaket {
 	 */
 	String getUTF8();
 
+	int getFrameType();
+
+	void setFrameType(int aFrameType);
+
 }

@@ -103,10 +103,20 @@ public class TCPConnector extends BaseConnector {
 	@Override
 	public void sendPacket(WebSocketPaket aDataPacket) {
 		try {
-			// each packet is enclosed in 0x00<data>0xFF
-			os.write(0);
-			os.write(aDataPacket.getByteArray());
-			os.write(255);
+			if (aDataPacket.getFrameType() == RawPacket.FRAMETYPE_BINARY) {
+				// each packet is enclosed in 0xFF<length><data>
+				// TODO: for future use! Not yet released!
+				os.write(0xFF);
+				byte[] lBA = aDataPacket.getByteArray();
+				// TODO: implement multi byte length!
+				os.write(lBA.length);
+				os.write(lBA);
+			} else {
+				// each packet is enclosed in 0x00<data>0xFF
+				os.write(0x00);
+				os.write(aDataPacket.getByteArray());
+				os.write(0xFF);
+			}
 			os.flush();
 		} catch (IOException ex) {
 			log.error(ex.getClass().getSimpleName()
