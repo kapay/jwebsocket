@@ -42,7 +42,7 @@ public final class JWebSocketConstants {
     /**
      * Current version string of the jWebSocket package.
      */
-    public static final String VERSION_STR = "0.9.0.0528 beta";
+    public static final String VERSION_STR = "0.9.0.0607 beta";
     /**
      * Namespace base for tokens and plug-ins.
      */
@@ -95,12 +95,14 @@ public final class JWebSocketConstants {
      * Minimum session Timeout for client connections in milliseconds
      * (1000ms = 1sec).
      */
-    public static int MIN_TIMEOUT = 1000;
+	// min and max ranged removed since 0.9.0.0602, see config documentation
+    // public static int MIN_TIMEOUT = 0;
     /**
      * Maximum session Timeout for client connections in milliseconds
      * (3600000ms = 1h).
      */
-    public static int MAX_TIMEOUT = 3600000;
+	// min and max ranged removed since 0.9.0.0602, see config documentation
+    // public static int MAX_TIMEOUT = 3600000;
 
     /**
      * JSON sub protocol

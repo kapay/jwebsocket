@@ -191,7 +191,8 @@ public final class JWebSocketLoader {
 			}
 			if (lWebSocketXML != null) {
 				if (log.isInfoEnabled()) {
-					log.info("Loading " + JWEBSOCKET_XML + " from classpath (" + lWebSocketXML + ")...");
+					log.info("Loading " + JWEBSOCKET_XML
+							+ " from classpath (" + lWebSocketXML + ")...");
 				}
 				return lWebSocketXML;
 			}
@@ -214,22 +215,25 @@ public final class JWebSocketLoader {
 			lFile = new File(lWebSocketXML);
 			if (lFile.exists()) {
 				if (log.isInfoEnabled()) {
-					log.info("Loading " + JWEBSOCKET_XML + " from %" + JWEBSOCKET_HOME + "%/conf...");
+					log.info("Loading " + JWEBSOCKET_XML
+							+ " from %" + JWEBSOCKET_HOME + "%/conf...");
 				}
 				return lWebSocketXML;
 			}
 			if (log.isDebugEnabled()) {
-				log.debug(JWEBSOCKET_XML + " not found at %" + JWEBSOCKET_HOME + "%/conf.");
+				log.debug(JWEBSOCKET_XML
+						+ " not found at %" + JWEBSOCKET_HOME + "%/conf.");
 			}
 		} else {
-			log.warn("%" + JWEBSOCKET_HOME +"% variable not set.");
+			log.warn("%" + JWEBSOCKET_HOME + "% variable not set.");
 		}
 
 		// try to obtain CATALINA_HOME environment variable
 		lWebSocketHome = System.getenv(CATALINA_HOME);
 		if (lWebSocketHome != null) {
 			if (log.isDebugEnabled()) {
-				log.debug("Trying to load " + JWEBSOCKET_XML + " from %" + CATALINA_HOME + "%/conf...");
+				log.debug("Trying to load " + JWEBSOCKET_XML
+						+ " from %" + CATALINA_HOME + "%/conf...");
 			}
 			// append trailing slash if needed
 			if (!lWebSocketHome.endsWith(lFileSep)) {
@@ -242,12 +246,18 @@ public final class JWebSocketLoader {
 			lFile = new File(lWebSocketXML);
 			if (lFile.exists()) {
 				if (log.isInfoEnabled()) {
-					log.info("Loading " + JWEBSOCKET_XML + " from %" + CATALINA_HOME + "%/conf...");
+					log.info("Loading " + JWEBSOCKET_XML
+							+ " from %" + CATALINA_HOME + "%/conf...");
 				}
 				return lWebSocketXML;
 			}
 			if (log.isDebugEnabled()) {
-				log.debug(JWEBSOCKET_XML + " not found at %" + CATALINA_HOME + "%/conf.");
+				log.debug(JWEBSOCKET_XML
+						+ " not found at %" + CATALINA_HOME + "%/conf.");
+			}
+		} else {
+			if (log.isDebugEnabled()) {
+				log.debug("%" + CATALINA_HOME + "% variable not set.");
 			}
 		}
 

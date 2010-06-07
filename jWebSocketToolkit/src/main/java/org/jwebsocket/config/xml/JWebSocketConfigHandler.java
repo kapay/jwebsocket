@@ -119,6 +119,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
                         configBuilder = configBuilder.addFilters(filters);
                     } else if (elementName.equals(ELEMENT_LOGGING)) {
                         List<LoggingConfig> loggingConfigs = handleLoggingConfigs(streamReader);
+                        configBuilder = configBuilder.addLoggingConfig(loggingConfigs);
                     } else if (elementName.equals(ELEMENT_RIGHTS)) {
                         List<RightConfig> globalRights = handleRights(streamReader);
                         configBuilder = configBuilder.addGlobalRights(globalRights);

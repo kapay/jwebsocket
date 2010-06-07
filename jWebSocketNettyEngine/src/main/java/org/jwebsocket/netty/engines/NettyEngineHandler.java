@@ -372,11 +372,13 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
         // set socket timeout to given amount of milliseconds
         // check min and max timeout ranges
         int lSessionTimeout = header.getTimeout(JWebSocketConstants.DEFAULT_TIMEOUT);
+		/* min and max range removed since 0.9.0.0602, see config documentation
         if (lSessionTimeout > JWebSocketConstants.MAX_TIMEOUT) {
             lSessionTimeout = JWebSocketConstants.MAX_TIMEOUT;
         } else if (lSessionTimeout < JWebSocketConstants.MIN_TIMEOUT) {
             lSessionTimeout = JWebSocketConstants.MIN_TIMEOUT;
         }
+		*/
 
         // create connector
         WebSocketConnector theConnector = new NettyConnector(engine, this);

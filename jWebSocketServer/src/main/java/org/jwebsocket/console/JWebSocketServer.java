@@ -18,7 +18,6 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.factory.JWebSocketFactory;
-import org.jwebsocket.plugins.sample.SamplePlugIn;
 import org.jwebsocket.server.TokenServer;
 
 /**
@@ -75,8 +74,10 @@ public class JWebSocketServer {
 		if (engine != null) {
 			TokenServer lTS = (TokenServer) JWebSocketFactory.getServer("ts0");
 			if (lTS != null) {
+			/*
 				SamplePlugIn lSP = new SamplePlugIn();
 				lTS.getPlugInChain().addPlugIn(lSP);
+			 */
 				while (engine.isAlive()) {
 					try {
 						Thread.sleep(250);

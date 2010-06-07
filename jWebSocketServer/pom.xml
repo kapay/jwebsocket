@@ -133,11 +133,13 @@
 			<artifactId>jWebSocketFactory</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+<!--
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketSamples</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+-->
 	</dependencies>
 
 	<!--  define repositories -->

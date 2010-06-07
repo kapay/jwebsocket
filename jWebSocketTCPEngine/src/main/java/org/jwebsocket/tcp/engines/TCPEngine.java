@@ -71,7 +71,12 @@ public class TCPEngine extends BaseEngine {
 	public void startEngine()
 			throws WebSocketException {
 		if (log.isDebugEnabled()) {
-			log.debug("Starting TCP engine '" + getId() + "' at port " + listenerPort + " with default timeout " + sessionTimeout + "ms...");
+			log.debug("Starting TCP engine '"
+					+ getId()
+					+ "' at port " + listenerPort
+					+ " with default timeout "
+					+ (sessionTimeout > 0 ? sessionTimeout + "ms" : "infinite")
+					+ "...");
 		}
 		try {
 			serverSocket = new ServerSocket(listenerPort);
@@ -94,7 +99,12 @@ public class TCPEngine extends BaseEngine {
 		// TODO: results in firing started event twice! make more clean!
 		// super.startEngine();
 		if (log.isInfoEnabled()) {
-			log.info("TCP engine '" + getId() + "' started' at port " + listenerPort + " with default timeout " + sessionTimeout + "ms.");
+			log.info("TCP engine '"
+					+ getId() + "' started' at port "
+					+ listenerPort + " with default timeout "
+					+ " with default timeout "
+					+ (sessionTimeout > 0 ? sessionTimeout + "ms" : "infinite")
+					+ "...");
 		}
 	}
 
@@ -335,16 +345,23 @@ public class TCPEngine extends BaseEngine {
 							// use tcp engine's timeout as default and
 							// check system's min and max timeout ranges
 							int lSessionTimeout = header.getTimeout(getSessionTimeout());
+							/* min and max range removed since 0.9.0.0602, see config documentation
 							if (lSessionTimeout > JWebSocketConstants.MAX_TIMEOUT) {
-								lSessionTimeout = JWebSocketConstants.MAX_TIMEOUT;
+							lSessionTimeout = JWebSocketConstants.MAX_TIMEOUT;
 							} else if (lSessionTimeout < JWebSocketConstants.MIN_TIMEOUT) {
-								lSessionTimeout = JWebSocketConstants.MIN_TIMEOUT;
+							lSessionTimeout = JWebSocketConstants.MIN_TIMEOUT;
 							}
+							 */
 							if (log.isDebugEnabled()) {
-								log.debug("Client accepted on port " + clientSocket.getPort() + " with timeout " + lSessionTimeout + "ms...");
+								log.debug("Client accepted on port "
+										+ clientSocket.getPort()
+										+ " with timeout "
+										+ (lSessionTimeout > 0 ? lSessionTimeout + "ms" : "infinite")
+										+ "...");
 							}
-							clientSocket.setSoTimeout(lSessionTimeout);
-
+							if (lSessionTimeout > 0) {
+								clientSocket.setSoTimeout(lSessionTimeout);
+							}
 							// create connector and pass header
 							// log.debug("Instantiating connector...");
 							WebSocketConnector connector = new TCPConnector(engine, clientSocket);

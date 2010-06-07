@@ -23,6 +23,8 @@ import static org.jwebsocket.config.JWebSocketConstants.CATALINA_HOME;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -350,7 +352,7 @@ public final class JWebSocketXmlConfigInitializer implements
 					if (jarFilePath != null) {
 						classLoader.addFile(jarFilePath);
 						if (log.isDebugEnabled()) {
-							log.debug("Loading filter '" + filterConfig.getName() + "' from '" + jarFilePath + "'...");
+						log.debug("Loading filter '" + filterConfig.getName() + "' from '" + jarFilePath + "'...");
 						}
 						filterClass = (Class<WebSocketFilter>) classLoader.loadClass(filterConfig.getName());
 					}

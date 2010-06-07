@@ -69,6 +69,7 @@ public class EngineConfigHandler implements ConfigHandler {
                 } else if (elementName.equals(DOMAINS)) {
                     domains = getDomains(streamReader);
                 } else if (elementName.equals(MAXFRAMESIZE)) {
+                    streamReader.next();
                     framesize = Integer.parseInt(streamReader.getText());
                 } else {
                     //ignore

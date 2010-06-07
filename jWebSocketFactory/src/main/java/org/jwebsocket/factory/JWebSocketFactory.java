@@ -34,7 +34,7 @@ public class JWebSocketFactory {
 		Logging.initLogs(aLogLevel, aLogTarget);
 		log = Logging.getLogger(JWebSocketFactory.class);
 		if (log.isDebugEnabled()) {
-			log.debug("Starting jWebSocket Server sub system...");
+			log.debug("Starting jWebSocket Server Sub System...");
 		}
 
 		JWebSocketLoader loader = new JWebSocketLoader();
@@ -141,7 +141,7 @@ public class JWebSocketFactory {
 
 	public static void stop() {
 		if (log.isDebugEnabled()) {
-			log.debug("Stopping jWebSocket sub system...");
+			log.debug("Stopping jWebSocket Sub System...");
 		}
 
 		// String lEngineId = "?";
@@ -179,7 +179,7 @@ public class JWebSocketFactory {
 		}
 
 		if (log.isInfoEnabled()) {
-			log.info("jWebSocket Server sub system stopped.");
+			log.info("jWebSocket Server Sub System stopped.");
 		}
 		Logging.exitLogs();
 	}

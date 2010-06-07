@@ -47,7 +47,9 @@ public class TCPConnector extends BaseConnector {
 			br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
 			os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
 		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + " instantiating " + getClass().getSimpleName() + ": " + ex.getMessage());
+			log.error(ex.getClass().getSimpleName()
+					+ " instantiating " + getClass().getSimpleName()
+					+ ": " + ex.getMessage());
 		}
 	}
 
@@ -61,13 +63,19 @@ public class TCPConnector extends BaseConnector {
 		} catch (Exception ex) {
 		}
 		if (log.isDebugEnabled()) {
-			log.debug("Starting TCP connector on port " + lPort + " with timeout " + lTimeout + " ms....");
+			log.debug("Starting TCP connector on port "
+					+ lPort + " with timeout "
+					+ (lTimeout > 0 ? lTimeout + "ms" : "infinite")
+					+ "");
 		}
 		ClientProcessor clientProc = new ClientProcessor(this);
 		Thread clientThread = new Thread(clientProc);
 		clientThread.start();
 		if (log.isInfoEnabled()) {
-			log.info("Started TCP connector on port " + lPort + " with timeout " + lTimeout + " ms.");
+			log.info("Started TCP connector on port "
+					+ lPort + " with timeout "
+					+ (lTimeout > 0 ? lTimeout + "ms" : "infinite")
+					+ "");
 		}
 	}
 
@@ -81,7 +89,8 @@ public class TCPConnector extends BaseConnector {
 		isRunning = false;
 		// TODO: Do we need to wait here? At least optionally?
 		if (log.isInfoEnabled()) {
-			log.info("Stopped TCP connector (" + aCloseReason.name() + ") on port " + lPort + ".");
+			log.info("Stopped TCP connector ("
+					+ aCloseReason.name() + ") on port " + lPort + ".");
 		}
 	}
 
@@ -100,7 +109,8 @@ public class TCPConnector extends BaseConnector {
 			os.write(255);
 			os.flush();
 		} catch (IOException ex) {
-			log.error(ex.getClass().getSimpleName() + " sending data packet: " + ex.getMessage());
+			log.error(ex.getClass().getSimpleName()
+					+ " sending data packet: " + ex.getMessage());
 		}
 	}
 
@@ -158,11 +168,15 @@ public class TCPConnector extends BaseConnector {
 						}
 
 					} catch (SocketTimeoutException ex) {
-						log.error("(timeout) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+						log.error("(timeout) "
+								+ ex.getClass().getSimpleName()
+								+ ": " + ex.getMessage());
 						closeReason = CloseReason.TIMEOUT;
 						line = null;
 					} catch (Exception ex) {
-						log.error("(other) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+						log.error("(other) "
+								+ ex.getClass().getSimpleName()
+								+ ": " + ex.getMessage());
 						closeReason = CloseReason.SERVER;
 						line = null;
 					}
@@ -174,7 +188,10 @@ public class TCPConnector extends BaseConnector {
 						try {
 							engine.processPacket(connector, dataPacket);
 						} catch (Exception ex) {
-							log.error(ex.getClass().getSimpleName() + " in processPacket of connector " + connector.getClass().getSimpleName() + ": " + ex.getMessage());
+							log.error(ex.getClass().getSimpleName()
+									+ " in processPacket of connector "
+									+ connector.getClass().getSimpleName()
+									+ ": " + ex.getMessage());
 							line = null;
 						}
 					} else {
@@ -192,14 +209,17 @@ public class TCPConnector extends BaseConnector {
 
 			} catch (Exception ex) {
 				// ignore this exception for now
-				log.error("(close) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				log.error("(close) "
+						+ ex.getClass().getSimpleName()
+						+ ": " + ex.getMessage());
 			}
 		}
 	}
 
 	@Override
 	public String generateUID() {
-		String lUID = clientSocket.getInetAddress().getHostAddress() + "@" + clientSocket.getPort();
+		String lUID = clientSocket.getInetAddress().getHostAddress()
+				+ "@" + clientSocket.getPort();
 		return lUID;
 	}
 
