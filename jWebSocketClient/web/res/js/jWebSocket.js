@@ -471,22 +471,13 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			this.fConn.onclose = null;
 			// TODO: what about CONNECTING state ?!
 			if( this.fConn.readyState == jws.OPEN ) {
-/*
-				var lThis = this;
-				setTimeout(
-					function() {
-						lThis.fConn.close();
-						lThis.fConn = null;
-					},
-					1
-				);
-*/
 				this.fConn.close();
-				this.fConn = null;
 			}
 			// TODO: should be called only if client was really opened before
 			this.processClosed();
 		}
+		// explicitely reset fConn to "null"
+		this.fConn = null;
 	},
 
 	//:m:*:close
@@ -1008,14 +999,19 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		try {
 			// if connected and timeout is passed give server a chance to
 			// register the disconnect properly and send a good bye response.
-			if( this.fConn  ) {
-				this.sendToken({
-					type: "close",
-					timeout: lTimeout
-				});
+			if( this.fConn ) {
+				// TODO: Work-around for Safari 5! Check in versions after 5.0.7533.16!
+				if( !(	/* lTimeout > 0 && */
+						navigator.userAgent.indexOf( "Safari" ) >= 0 &&
+						navigator.userAgent.indexOf( "Chrome" ) < 0 ) ) {
+					this.sendToken({
+						type: "close",
+						timeout: lTimeout
+					});
+					// call inherited disconnect, catching potential exception
+				}
+				arguments.callee.inherited.call( this, aOptions );
 			}
-			// call inherited disconnect, catching potential exception
-			arguments.callee.inherited.call( this, aOptions );
 		} catch( ex ) {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.ex";

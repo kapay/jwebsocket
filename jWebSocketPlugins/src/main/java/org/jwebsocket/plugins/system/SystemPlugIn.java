@@ -119,7 +119,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		super.connectorStopped(aConnector, aCloseReason);
 		// send good bye message to connector
-		sendGoodBye(aConnector, aCloseReason);
+		// removed in 0.9.0.0608
+		// sendGoodBye(aConnector, aCloseReason);
 		// notify other clients that client disconnected
 		broadcastDisconnectEvent(aConnector);
 	}
@@ -417,8 +418,13 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	private void close(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
+
+		int lTimeout = aToken.getInteger("timeout", 0);
 		// if logged in...
 		if (lServer.getUsername(aConnector) != null) {
+			if (lTimeout > 0) {
+				sendGoodBye(aConnector, CloseReason.CLIENT);
+			}
 			// broadcast the logout event.
 			broadcastLogoutEvent(aConnector);
 		}
@@ -426,7 +432,9 @@ public class SystemPlugIn extends TokenPlugIn {
 		lServer.removeUsername(aConnector);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Closing client...");
+			log.debug("Closing client "
+					+ (lTimeout > 0 ? "with timeout " + lTimeout + "ms" : "immediately")
+					+ "...");
 		}
 
 		// don't send a response here! We're about to close the connection!
