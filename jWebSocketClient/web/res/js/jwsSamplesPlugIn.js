@@ -32,8 +32,11 @@ jws.SamplesPlugIn = {
 			// directy in the plug-in if desired.
 			if( aToken.reqType == "requestServerTime" ) {
 				// this is just for demo purposes
-				// don't use blocking call here!
-				alert( "jWebSocket Server returned: " + aToken.time );
+				// don't use blocking calls here which block the communication!
+				// like alert( "jWebSocket Server returned: " + aToken.time );
+				if( this.OnSamplesServerTime ) {
+					this.OnSamplesServerTime( aToken );
+				}
 			}
 		}
 	},
@@ -52,6 +55,15 @@ jws.SamplesPlugIn = {
 			lRes.msg = "Not connected.";
 		}
 		return lRes;
+	},
+
+	setSamplesCallbacks: function( aListeners ) {
+		if( !aListeners ) {
+			aListeners = {};
+		}
+		if( aListeners.OnSamplesServerTime !== undefined ) {
+			this.OnSamplesServerTime = aListeners.OnSamplesServerTime;
+		}
 	}
 
 }

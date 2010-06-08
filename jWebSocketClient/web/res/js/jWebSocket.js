@@ -44,6 +44,19 @@ var jws = {
 		"ws://" + ( self.location.hostname ? self.location.hostname : "localhost" ) + ":8787",
 	JWS_FLASHBRIDGE: null,
 
+	//:const:*:CONNECTING:Integer:0
+	//:d:en:The connection has not yet been established.
+	CONNECTING: 0,
+	//:const:*:OPEN:Integer:1
+	//:d:en:The WebSocket connection is established and communication is possible.
+	OPEN: 1,
+	//:const:*:CLOSING:Integer:2
+	//:d:en:The connection is going through the closing handshake.
+	CLOSING: 2,
+	//:const:*:CLOSED:Integer:3
+	//:d:en:The connection has been closed or could not be opened.
+	CLOSED: 3,
+
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
 	//:d:en:Returns the first HTML element with the given id or [tt]null[/tt] _
@@ -286,9 +299,10 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 	// clone all methods of the plug-in to the class
 	for( var lField in aPlugIn ) {
 		// don't overwrite existing methods of class with plug-in methods
+		// ensure that native jWebSocket methods don't get overwritten!
 		if( !aClass.prototype[ lField ] ) {
 			aClass.prototype[ lField ] = aPlugIn[ lField ];
-			var lObj = aClass.prototype[ lField ];
+			// var lObj = aClass.prototype[ lField ];
 		}
 	}
 	// if the class already has descendants recursively
@@ -439,7 +453,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:a:en::::none
 	//:r:*:::boolean:[tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
 	isConnected: function() {
-		return( this.fConn && this.fConn.readyState == WebSocket.OPEN );
+		return( this.fConn && this.fConn.readyState == jws.OPEN );
 	},
 
 	//:m:*:forceClose
@@ -456,13 +470,23 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			this.fConn.onmessage = null;
 			this.fConn.onclose = null;
 			// TODO: what about CONNECTING state ?!
-			if( this.fConn.readyState == WebSocket.OPEN ) {
+			if( this.fConn.readyState == jws.OPEN ) {
+/*
+				var lThis = this;
+				setTimeout(
+					function() {
+						lThis.fConn.close();
+						lThis.fConn = null;
+					},
+					1
+				);
+*/
 				this.fConn.close();
+				this.fConn = null;
 			}
 			// TODO: should be called only if client was really opened before
 			this.processClosed();
 		}
-		this.fConn = null;
 	},
 
 	//:m:*:close

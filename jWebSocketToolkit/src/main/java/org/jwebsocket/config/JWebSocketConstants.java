@@ -42,7 +42,7 @@ public final class JWebSocketConstants {
     /**
      * Current version string of the jWebSocket package.
      */
-    public static final String VERSION_STR = "0.9.0.0607 beta";
+    public static final String VERSION_STR = "0.9.0.0608 beta";
     /**
      * Namespace base for tokens and plug-ins.
      */

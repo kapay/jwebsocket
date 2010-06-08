@@ -117,9 +117,7 @@
 					jWebSocketClient.sendToken( lToken,	{
 					});
 				} else {
-					lRes.code = -1;
-					lRes.localeKey = "jws.jsc.res.notConnected";
-					lRes.msg = "Not connected.";
+					log( "Not connected." );
 				}
 			}
 
@@ -134,6 +132,10 @@
 				}
 			}
 
+			function getServerTimeCallback( aToken ) {
+				log( "Server time: " + aToken.time );
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
 				eMessage = jws.$( "stxfMessage" );
@@ -144,6 +146,9 @@
 				// either natively, by the Flash Bridge or by the Chrome Frame.
 				if( jws.browserSupportsWebSockets() ) {
 					jWebSocketClient = new jws.jWebSocketJSONClient();
+					jWebSocketClient.setSamplesCallbacks({
+						OnSamplesServerTime: getServerTimeCallback
+					});
 					eUsername.focus();
 				} else {
 					jws.$( "sbtnLogon" ).setAttribute( "disabled", "disabled" );
