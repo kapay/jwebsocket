@@ -422,6 +422,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		int lTimeout = aToken.getInteger("timeout", 0);
 		// if logged in...
 		if (lServer.getUsername(aConnector) != null) {
+			// only send a good bye message if timeout is > 0
 			if (lTimeout > 0) {
 				sendGoodBye(aConnector, CloseReason.CLIENT);
 			}
