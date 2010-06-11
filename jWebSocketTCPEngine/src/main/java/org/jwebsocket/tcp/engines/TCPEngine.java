@@ -361,7 +361,7 @@ public class TCPEngine extends BaseEngine {
 					+ ")");
 		}
 		// now that we have parsed the header send handshake...
-		// since 0.9.0.0609 considering sec-key processing
+		// since 0.9.0.0609 considering Sec-WebSocket-Key processing
 		String res =
 				"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
 				+ "Upgrade: WebSocket\r\n"
@@ -376,7 +376,7 @@ public class TCPEngine extends BaseEngine {
 
 		byte[] ba = res.getBytes("US-ASCII");
 		os.write(ba);
-		// os.flush();
+		// if Sec-WebSocket-Keys are used send security response first
 		if (isSecure) {
 			os.write(secKeyResponse);
 		}
