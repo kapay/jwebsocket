@@ -16,6 +16,7 @@ package org.jwebsocket.factory;
 
 import java.io.File;
 import org.apache.log4j.Logger;
+import org.jwebsocket.config.xml.LoggingConfig;
 import org.jwebsocket.logging.Logging;
 import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
 import static org.jwebsocket.config.JWebSocketConstants.CATALINA_HOME;
@@ -23,8 +24,6 @@ import static org.jwebsocket.config.JWebSocketConstants.CATALINA_HOME;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +80,34 @@ public final class JWebSocketXmlConfigInitializer implements
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public WebSocketEngine intializeEngine() {
+	public void initializeLogging() {
+		LoggingConfig loggingConfig = config.getLoggingConfig();
+		if (log.isDebugEnabled()) {
+			log.debug("Logging settings"
+					+ ": appender: " + loggingConfig.getAppender()
+					+ ", filename: " + loggingConfig.getFilename()
+					+ ", level: " + loggingConfig.getLevel()
+					+ ", buffersize: " + loggingConfig.getBufferSize()
+					+ ", pattern: " + loggingConfig.getPattern());
+		}
+
+		// initialize log4j logging engine
+		// BEFORE instantiating any jWebSocket classes
+		Logging.initLogs(loggingConfig.getLevel(), loggingConfig.getAppender(),
+				loggingConfig.getFilename(), loggingConfig.getPattern(),
+				loggingConfig.getBufferSize());
+		log = Logging.getLogger(JWebSocketFactory.class);
+		if (log.isDebugEnabled()) {
+			log.debug("Starting jWebSocket Server Sub System...");
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public WebSocketEngine initializeEngine() {
 		WebSocketEngine newEngine = null;
 		EngineConfig engineConfig = config.getEngines().get(0);
 		String jarFilePath = "-";
@@ -352,7 +378,7 @@ public final class JWebSocketXmlConfigInitializer implements
 					if (jarFilePath != null) {
 						classLoader.addFile(jarFilePath);
 						if (log.isDebugEnabled()) {
-						log.debug("Loading filter '" + filterConfig.getName() + "' from '" + jarFilePath + "'...");
+							log.debug("Loading filter '" + filterConfig.getName() + "' from '" + jarFilePath + "'...");
 						}
 						filterClass = (Class<WebSocketFilter>) classLoader.loadClass(filterConfig.getName());
 					}

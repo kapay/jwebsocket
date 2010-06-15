@@ -127,13 +127,15 @@ public class TCPEngine extends BaseEngine {
 			// when done, close server socket
 			// closing the server socket should lead to an IOExeption
 			// at accept in the listener thread which terminates the listener
-			serverSocket.close();
+			if (serverSocket != null && !serverSocket.isClosed()) {
+				serverSocket.close();
+			}
 			if (log.isInfoEnabled()) {
 				log.info("TCP engine '" + getId() + "' stopped at port " + listenerPort + " (closed=" + serverSocket.isClosed() + ").");
 			}
 			serverSocket = null;
 		} catch (Exception ex) {
-			log.error("Stopping TCP engine '" + getId() + "':" + ex.getMessage());
+			log.error(ex.getClass().getSimpleName() + " on stopping TCP engine '" + getId() + "': " + ex.getMessage());
 		}
 
 		try {
@@ -407,8 +409,7 @@ public class TCPEngine extends BaseEngine {
 	 * listener thread.
 	 */
 	public boolean isAlive() {
-		// TODO: Check isAlive state of TCPEngine
-		return true;
+		return engineThread.isAlive();
 	}
 
 	private class EngineListener implements Runnable {

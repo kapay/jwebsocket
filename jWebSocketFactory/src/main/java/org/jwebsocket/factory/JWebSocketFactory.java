@@ -27,25 +27,31 @@ public class JWebSocketFactory {
 	// TODO: makes servers a map for faster access!
 	private static List<WebSocketServer> servers = null;
 
-	public static void start(String aLogLevel, int aLogTarget) {
+	public static void start(String aLogLevel, String aLogTarget,
+			String aFilename, String aLogPattern, Integer aLogBuffersize) {
 
 		// initialize log4j logging engine
 		// BEFORE instantiating any jWebSocket classes
+		/*
 		Logging.initLogs(aLogLevel, aLogTarget);
-		log = Logging.getLogger(JWebSocketFactory.class);
-		if (log.isDebugEnabled()) {
-			log.debug("Starting jWebSocket Server Sub System...");
-		}
+		 */
 
 		JWebSocketLoader loader = new JWebSocketLoader();
 		try {
 			WebSocketInitializer initializer = loader.initialize();
+
+			initializer.initializeLogging();
+			log = Logging.getLogger(JWebSocketFactory.class);
+			if (log.isDebugEnabled()) {
+				log.debug("Starting jWebSocket Server Sub System...");
+			}
+
 			if (initializer == null) {
 				log.error("jWebSocket Server sub system could not be initialized.");
 				return;
 			}
 
-			engine = initializer.intializeEngine();
+			engine = initializer.initializeEngine();
 			if (engine == null) {
 				// the loader already logs an error!
 				return;

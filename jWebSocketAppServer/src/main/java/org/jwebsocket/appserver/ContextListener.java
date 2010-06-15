@@ -36,8 +36,11 @@ public class ContextListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 		// start the jWebSocket server sub system
 		JWebSocketFactory.start(
-			"debug",
-			Logging.CONSOLE
+			null, // use default level
+			null, // use default target
+			null, // use default filename
+			null, // use default pattern
+			null  // use default buffersize
 		);
 
 		TokenServer lTS = (TokenServer)JWebSocketFactory.getServer("ts0");

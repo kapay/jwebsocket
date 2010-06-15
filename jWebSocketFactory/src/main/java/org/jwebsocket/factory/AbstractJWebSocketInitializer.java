@@ -46,11 +46,19 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	private static Logger log = Logging.getLogger(AbstractJWebSocketInitializer.class);
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void initializeLogging() {
+
+	}
+
+	/**
 	 * Initialize the engine to be started based on configuration.
 	 * @return the initialized engine ready to start
 	 */
 	@Override
-	public WebSocketEngine intializeEngine() {
+	public WebSocketEngine initializeEngine() {
 		if (log.isDebugEnabled()) {
 			log.debug("Instantiating engine...");
 		}

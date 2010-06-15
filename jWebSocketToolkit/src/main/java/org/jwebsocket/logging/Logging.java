@@ -52,11 +52,16 @@ public class Logging {
 	/**
 	 * Name of jWebSocket log file.
 	 */
-	public static String LOG_FILENAME = "jWebSocket.log";
+	private static String filename = "jWebSocket.log";
 	/**
-	 *
+	 * Pattern for jWebSocket log file.
 	 */
-	public static int BUFFER_SIZE = 2048;
+	private static String pattern = "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n";
+	/**
+	 * Buffersize if write cache for logs is activated (recommended)
+	 * Buffersize = 0 means no write cache.
+	 */
+	private static int buffersize = 2048;
 	private static int logTarget = CONSOLE; // ROLLING_FILE;
 
 	private static String getLogsFolderPath(String fileName) {
@@ -75,7 +80,7 @@ public class Logging {
 			lWebSocketLogs = lWebSocketHome + "logs" + lFileSep + fileName;
 		}
 
-		if( lWebSocketLogs == null ) {
+		if (lWebSocketLogs == null) {
 			// try to obtain CATALINA_HOME environment variable
 			lWebSocketHome = System.getenv(CATALINA_HOME);
 			if (lWebSocketHome != null) {
@@ -101,15 +106,17 @@ public class Logging {
 	private static void checkLogAppender() {
 		if (layout == null) {
 			layout = new PatternLayout();
-			layout.setConversionPattern("%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n");
+			layout.setConversionPattern(pattern);
 		}
 		if (appender == null) {
-			String logsPath = getLogsFolderPath(LOG_FILENAME);
+			String logsPath = getLogsFolderPath(filename);
 			if (ROLLING_FILE == logTarget && logsPath != null) {
 				try {
 					appender = new RollingFileAppender(layout, logsPath, true);
-					((RollingFileAppender) appender).setBufferedIO(false);
-					((RollingFileAppender) appender).setBufferSize(BUFFER_SIZE);
+					((RollingFileAppender) appender).setBufferedIO(buffersize > 0);
+					if (buffersize > 0) {
+						((RollingFileAppender) appender).setBufferSize(buffersize);
+					}
 					((RollingFileAppender) appender).setEncoding("UTF-8");
 				} catch (IOException ex) {
 					appender = new ConsoleAppender(layout);
@@ -117,8 +124,10 @@ public class Logging {
 			} else if (SINGLE_FILE == logTarget && logsPath != null) {
 				try {
 					appender = new FileAppender(layout, logsPath, true);
-					((FileAppender) appender).setBufferedIO(true);
-					((FileAppender) appender).setBufferSize(BUFFER_SIZE);
+					((FileAppender) appender).setBufferedIO(buffersize > 0);
+					if (buffersize > 0) {
+						((FileAppender) appender).setBufferSize(buffersize);
+					}
 					((FileAppender) appender).setEncoding("UTF-8");
 				} catch (IOException ex) {
 					appender = new ConsoleAppender(layout);
@@ -140,20 +149,29 @@ public class Logging {
 	 * setting.
 	 * @param aLogLevel
 	 */
-	public static void initLogs(String aLogLevel) {
-		logLevel = Level.toLevel(aLogLevel);
-		checkLogAppender();
-	}
-
-	/**
-	 * Initializes the jWebSocket logging system with the given log level.
-	 * All subsequently instantiated class specific loggers will use this
-	 * setting.
-	 * @param aLogLevel
-	 */
-	public static void initLogs(String aLogLevel, int aLogTarget) {
-		logLevel = Level.toLevel(aLogLevel);
-		logTarget = aLogTarget;
+	public static void initLogs(String aLogLevel, String aLogTarget,
+			String aFilename, String aPattern, Integer aBuffersize) {
+		if (aLogLevel != null) {
+			logLevel = Level.toLevel(aLogLevel);
+		}
+		if (aLogTarget != null) {
+			if ("console".equals(aLogTarget)) {
+				logTarget = Logging.CONSOLE;
+			} else if ("singlefile".equals(aLogTarget)) {
+				logTarget = Logging.SINGLE_FILE;
+			} else if ("rollingfile".equals(aLogTarget)) {
+				logTarget = Logging.ROLLING_FILE;
+			}
+		}
+		if (aFilename != null) {
+			filename = aFilename;
+		}
+		if (aPattern != null) {
+			pattern = aPattern;
+		}
+		if (aBuffersize != null) {
+			buffersize = aBuffersize;
+		}
 		checkLogAppender();
 	}
 
@@ -163,8 +181,10 @@ public class Logging {
 	 */
 	public static void exitLogs() {
 		if (appender != null) {
+			// System.out.println("Closing logs...");
 			// properly close log files if such
 			appender.close();
+			// System.out.println("Logs closed.");
 		}
 	}
 

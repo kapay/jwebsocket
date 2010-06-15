@@ -28,48 +28,58 @@ import java.util.List;
  */
 public class LoggingConfigHandler implements ConfigHandler {
 
-    private static final String APPENDER = "appender";
-    private static final String PATTERN = "pattern";
-    private static final String LEVEL = "level";
-    private static final String FILENAME = "filename";
-    private static final String ELEMENT_LOG4J = "log4j";
+	private static final String APPENDER = "appender";
+	private static final String PATTERN = "pattern";
+	private static final String LEVEL = "level";
+	private static final String FILENAME = "filename";
+	private static final String BUFFERED = "buffered";
+	private static final String BUFFERSIZE = "buffersize";
+	private static final String ELEMENT_LOG4J = "log4j";
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Config processConfig(XMLStreamReader streamReader)
-            throws XMLStreamException {
-        String appender = "", pattern = "", level = "", filename = "";
-        List<String> loggings = null;
-        while (streamReader.hasNext()) {
-            streamReader.next();
-            if (streamReader.isStartElement()) {
-                String elementName = streamReader.getLocalName();
-                if (elementName.equals(APPENDER)) {
-                    streamReader.next();
-                    appender = streamReader.getText();
-                } else if (elementName.equals(PATTERN)) {
-                    streamReader.next();
-                    pattern = streamReader.getText();
-                } else if (elementName.equals(LEVEL)) {
-                    streamReader.next();
-                    level = streamReader.getText();
-                } else if (elementName.equals(FILENAME)) {
-                    streamReader.next();
-                    filename = streamReader.getText();
-                } else {
-                    //ignore
-                }
-            }
-            if (streamReader.isEndElement()) {
-                String elementName = streamReader.getLocalName();
-                if (elementName.equals(ELEMENT_LOG4J)) {
-                    break;
-                }
-            }
-        }
-        return new LoggingConfig(appender, pattern, level, filename);
-    }
-
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Config processConfig(XMLStreamReader streamReader)
+			throws XMLStreamException {
+		String appender = "", pattern = "", level = "", filename = "";
+		Boolean isBuffered = true;
+		Integer bufferSize = 2048;
+		List<String> loggings = null;
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(APPENDER)) {
+					streamReader.next();
+					appender = streamReader.getText();
+				} else if (elementName.equals(PATTERN)) {
+					streamReader.next();
+					pattern = streamReader.getText();
+				} else if (elementName.equals(LEVEL)) {
+					streamReader.next();
+					level = streamReader.getText();
+				} else if (elementName.equals(FILENAME)) {
+					streamReader.next();
+					filename = streamReader.getText();
+				} else if (elementName.equals(BUFFERED)) {
+					streamReader.next();
+					isBuffered = Boolean.parseBoolean(streamReader.getText());
+				} else if (elementName.equals(BUFFERSIZE)) {
+					streamReader.next();
+					bufferSize = Integer.parseInt(streamReader.getText());
+				} else {
+					//ignore
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_LOG4J)) {
+					break;
+				}
+			}
+		}
+		return new LoggingConfig(appender, pattern, level, filename,
+				isBuffered, bufferSize);
+	}
 }

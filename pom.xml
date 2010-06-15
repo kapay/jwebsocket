@@ -23,6 +23,7 @@
 		<module>jWebSocketWebAppSupport</module>
 		<module>jWebSocketJavaClient</module>
 		<module>jWebSocketServer</module>
+		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>
 	</modules>

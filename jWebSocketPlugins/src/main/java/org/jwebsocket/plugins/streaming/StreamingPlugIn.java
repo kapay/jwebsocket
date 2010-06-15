@@ -40,7 +40,6 @@ public class StreamingPlugIn extends TokenPlugIn {
 	private String NS_STREAMING_DEFAULT = JWebSocketConstants.NS_BASE + ".plugins.streaming";
 	private FastMap<String, BaseStream> streams = new FastMap<String, BaseStream>();
 	private boolean streamsInitialized = false;
-
 	private TimeStream lTimeStream = null;
 	private MonitorStream lMonitorStream = null;
 
@@ -59,6 +58,9 @@ public class StreamingPlugIn extends TokenPlugIn {
 
 	private void startStreams() {
 		if (!streamsInitialized) {
+			if (log.isDebugEnabled()) {
+				log.debug("Starting registered streams...");
+			}
 			TokenServer lTokenServer = getServer();
 			if (lTokenServer != null) {
 				// create the stream for the time stream demo
@@ -74,15 +76,18 @@ public class StreamingPlugIn extends TokenPlugIn {
 
 	private void stopStreams() {
 		if (streamsInitialized) {
+			if (log.isDebugEnabled()) {
+				log.debug("Stopping registered streams...");
+			}
 			TokenServer lTokenServer = getServer();
 			if (lTokenServer != null) {
 				// create the stream for the time stream demo
-				if( lTimeStream != null ) {
+				if (lTimeStream != null) {
 					lTimeStream.stopStream(3000);
 				}
 				// create the stream for the monitor stream demo
 				// create the stream for the time stream demo
-				if( lMonitorStream != null ) {
+				if (lMonitorStream != null) {
 					lMonitorStream.stopStream(3000);
 				}
 				lTimeStream = null;
@@ -91,7 +96,6 @@ public class StreamingPlugIn extends TokenPlugIn {
 			}
 		}
 	}
-
 
 	/**
 	 * adds a new stream to the mapo of streams. The stream must not be null
@@ -167,7 +171,8 @@ public class StreamingPlugIn extends TokenPlugIn {
 		if (lStream != null) {
 			if (lStream.isConnectorRegistered(aConnector)) {
 				if (log.isDebugEnabled()) {
-					log.debug("Unregistering client from stream '" + lStreamID + "'...");
+					log.debug("Unregistering client from stream '"
+							+ lStreamID + "'...");
 				}
 				lStream.unregisterConnector(aConnector);
 			}
@@ -185,25 +190,19 @@ public class StreamingPlugIn extends TokenPlugIn {
 			try {
 				lStream.unregisterConnector(aConnector);
 			} catch (Exception ex) {
-				log.error(ex.getClass().getSimpleName() + " on stopping conncector: " + ex.getMessage());
+				log.error(ex.getClass().getSimpleName()
+						+ " on stopping conncector: " + ex.getMessage());
 			}
 		}
 	}
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-		if (log.isDebugEnabled()) {
-			log.debug("Starting registered streams...");
-		}
 		startStreams();
 	}
 
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
-		if (log.isDebugEnabled()) {
-			log.debug("Stopping registered streams...");
-		}
 		stopStreams();
 	}
-
 }

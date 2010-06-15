@@ -34,10 +34,14 @@ import java.util.Map;
  */
 public interface WebSocketInitializer {
 	/**
+	 * Initializes the loggins sub system
+	 */
+	void initializeLogging();
+	/**
 	 * Initialize the engine 
 	 * @return the initialized engine, which is ready to start
 	 */
-	WebSocketEngine intializeEngine();
+	WebSocketEngine initializeEngine();
 	/**
 	 * Initialize the servers, these initialized servers will not 
 	 * have plugins initialized in plugin chain.

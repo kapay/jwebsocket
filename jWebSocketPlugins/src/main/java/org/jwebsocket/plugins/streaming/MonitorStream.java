@@ -84,6 +84,8 @@ public class MonitorStream extends TokenStream {
 				log.debug("Monitor stream stopped after " + lDuration + "ms.");
 			}
 		}
+
+		super.stopStream(aTimeout);
 	}
 
 	private class MonitorProcess implements Runnable {

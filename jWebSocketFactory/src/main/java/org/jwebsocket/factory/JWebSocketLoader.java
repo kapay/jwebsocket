@@ -148,13 +148,13 @@ public final class JWebSocketLoader {
 			config = configHandler.processConfig(streamReader);
 		} catch (XMLStreamException ex) {
 			lMsg = "Exception occurred while creating XML stream.";
-			if (log.isDebugEnabled()) {
+			if (log != null && log.isDebugEnabled()) {
 				log.debug(lMsg);
 			}
 			throw new WebSocketException(lMsg);
 		} catch (FileNotFoundException ex) {
 			lMsg = "jWebSocket config not found while creating XML stream.";
-			if (log.isDebugEnabled()) {
+			if (log != null && log.isDebugEnabled()) {
 				log.debug(lMsg);
 			}
 			throw new WebSocketException(lMsg);

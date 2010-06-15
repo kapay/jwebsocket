@@ -17,8 +17,11 @@ package org.jwebsocket.plugins.admin;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
+import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
@@ -34,6 +37,17 @@ public class AdminPlugIn extends TokenPlugIn {
 	private static Logger log = Logging.getLogger(AdminPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private String NS_ADMIN = JWebSocketConstants.NS_BASE + ".plugins.admin";
+
+	/**
+	 *
+	 */
+	public AdminPlugIn() {
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating admin plug-in...");
+		}
+		// specify default name space for admin plugin
+		this.setNamespace(NS_ADMIN);
+	}
 
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
@@ -68,7 +82,16 @@ public class AdminPlugIn extends TokenPlugIn {
 
 		Token lResponseToken = lServer.createResponse(aToken);
 		lResponseToken.put("msg", "Shutdown in progress...");
-
 		lServer.sendToken(aConnector, lResponseToken);
+
+		for (WebSocketEngine lEngine : lServer.getEngines().values()) {
+			try {
+				lEngine.stopEngine(CloseReason.SHUTDOWN);
+			} catch (WebSocketException ex) {
+				log.error(ex.getClass().getSimpleName()
+						+ " on shutdown: " + ex.getMessage());
+			}
+		}
+
 	}
 }

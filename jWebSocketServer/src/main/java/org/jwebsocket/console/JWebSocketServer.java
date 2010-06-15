@@ -16,7 +16,6 @@ package org.jwebsocket.console;
 
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
-import org.jwebsocket.logging.Logging;
 import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.server.TokenServer;
 
@@ -32,8 +31,11 @@ public class JWebSocketServer {
 	 */
 	public static void main(String[] args) {
 		// TODO: get this from xml file
-		String loglevel = "debug";
-		int logTarget = Logging.CONSOLE;
+		String loglevel = null;
+		String logTarget = null;
+		String logFilename = null;
+		String logPattern = null;
+		Integer logBuffersize = null;
 
 		// parse optional command line arguments
 		int i = 0;
@@ -43,14 +45,7 @@ public class JWebSocketServer {
 				String key = keyVal[0];
 				String value = keyVal[1];
 				if ("logtarget".equalsIgnoreCase(key)) {
-					if ("console".equals(value)) {
-						logTarget = Logging.CONSOLE;
-					} else if ("rollingfile".equals(value)) {
-						logTarget = Logging.ROLLING_FILE;
-					}
-					if ("singlefile".equals(value)) {
-						logTarget = Logging.SINGLE_FILE;
-					}
+					logTarget = value;
 				} else if ("loglevel".equalsIgnoreCase(key)) {
 					loglevel = value;
 				}
@@ -66,23 +61,16 @@ public class JWebSocketServer {
 		System.out.println(JWebSocketConstants.LICENSE);
 		// System.out.println("Starting with logLevel=" + loglevel + " and logTarget=" + logTarget + "...");
 
-		JWebSocketFactory.start(
-				loglevel,
-				logTarget);
+		JWebSocketFactory.start(loglevel, logTarget, logFilename,
+				logPattern, logBuffersize);
 
 		WebSocketEngine engine = JWebSocketFactory.getEngine();
 		if (engine != null) {
-			TokenServer lTS = (TokenServer) JWebSocketFactory.getServer("ts0");
-			if (lTS != null) {
-			/*
-				SamplePlugIn lSP = new SamplePlugIn();
-				lTS.getPlugInChain().addPlugIn(lSP);
-			 */
-				while (engine.isAlive()) {
-					try {
-						Thread.sleep(250);
-					} catch (InterruptedException ex) {
-					}
+			while (engine.isAlive()) {
+				try {
+					Thread.sleep(250);
+				} catch (InterruptedException ex) {
+					// no handling required here
 				}
 			}
 		}
