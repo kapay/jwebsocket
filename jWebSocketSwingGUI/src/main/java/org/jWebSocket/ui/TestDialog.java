@@ -14,10 +14,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jWebSocket.client.WebSocketListener;
+import org.jwebsocket.api.WebSocketListener;
 import org.jwebsocket.kit.WebSocketException;
 import org.jWebSocket.client.BaseClientJ2SE;
-import org.jWebSocket.client.WebSocketEvent;
+import org.jwebsocket.kit.WebSocketEvent;
 
 /**
  *
@@ -294,24 +294,40 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketListener 
 		try {
 			jwsClient.open("ws://localhost:8787");
 		} catch (WebSocketException ex) {
-			System.out.println(ex.getClass().getSimpleName() + ":  " + ex.getMessage());
+			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}//GEN-LAST:event_btnConnectActionPerformed
 
 	private void btnDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDisconnectActionPerformed
-		jwsClient.close();
+		try {
+			jwsClient.close();
+		} catch (WebSocketException ex) {
+			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+		}
 	}//GEN-LAST:event_btnDisconnectActionPerformed
 
 	private void btnShutdownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShutdownActionPerformed
-		jwsClient.send("{\"type\":\"shutdown\"; \"ns\":\"org.jWebSocket.plugins.admin\"}\n", "US-ASCII");
+		try {
+			jwsClient.send("{\"type\":\"shutdown\"; \"ns\":\"org.jWebSocket.plugins.admin\"}\n", "US-ASCII");
+		} catch (WebSocketException ex) {
+			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+		}
 	}//GEN-LAST:event_btnShutdownActionPerformed
 
 	private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
-		jwsClient.send("{\"type\":\"login\"; \"ns\":\"org.jWebSocket.plugins.system\"; \"username\":\"aschulze\"}\n", "US-ASCII");
+		try {
+			jwsClient.send("{\"type\":\"login\"; \"ns\":\"org.jWebSocket.plugins.system\"; \"username\":\"aschulze\"}\n", "US-ASCII");
+		} catch (WebSocketException ex) {
+			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+		}
 	}//GEN-LAST:event_btnLoginActionPerformed
 
 	private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
-		jwsClient.send("{\"type\":\"logout\"; \"ns\":\"org.jWebSocket.plugins.system\"}\n", "US-ASCII");
+		try {
+			jwsClient.send("{\"type\":\"logout\"; \"ns\":\"org.jWebSocket.plugins.system\"}\n", "US-ASCII");
+		} catch (WebSocketException ex) {
+			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+		}
 	}//GEN-LAST:event_btnLogoutActionPerformed
 
 	private void btnClearLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearLogActionPerformed

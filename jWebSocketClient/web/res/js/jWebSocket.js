@@ -1622,9 +1622,7 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 			aToken.usid = this.fSessionId;
  		}
 		var lJSON = JSON.stringify( aToken );
-		// lJSON = lJSON.replace( /\n/g, "\\x0A" );
-		// lJSON = lJSON.replace( /\r/g, "\\x0D" );
- 		return( lJSON + "\n" );
+ 		return( lJSON );
 	},
 
 	//:m:*:streamToToken
@@ -1637,8 +1635,6 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 	//:r:*:Token:[i]field[/i]:[i]type[/i]:Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers.
 	streamToToken: function( aStream ) {
 		// parsing a JSON object in JavaScript couldn't be simpler...
-		// aStream = aStream.replace( /\\x0A/g, "\n" );
-		// aStream = aStream.replace( /\\x0D/g, "\r" );
 		var lObj = JSON.parse( aStream );
 		return lObj;
 	}
@@ -1682,7 +1678,6 @@ jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 				lCSV += "," + lKey + "=" + lVal;
 			}
 		}
-		lCSV += "\n";
 		return lCSV;
 	},
 

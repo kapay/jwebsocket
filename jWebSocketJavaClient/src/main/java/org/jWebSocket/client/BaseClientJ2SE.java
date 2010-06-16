@@ -4,40 +4,23 @@
  */
 package org.jWebSocket.client;
 
-import java.io.IOException;
+import org.jwebsocket.kit.WebSocketEvent;
+import org.jwebsocket.api.WebSocketListener;
+import org.jwebsocket.kit.WebSocketHandshake;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Map;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
  *
  * @author aschulze
  */
-public class BaseClientJ2SE {
+public class BaseClientJ2SE extends BaseClient {
 
-	/*
-	 * The connection has not yet been established.
-	 */
-	public static final int CONNECTING = 0;
-	/*
-	 * The WebSocket connection is established and communication is possible.
-	 */
-	public static final int OPEN = 1;
-	/*
-	 * The connection is going through the closing handshake.
-	 */
-	public static final int CLOSING = 2;
-	/*
-	 * The connection has been closed or could not be opened.
-	 */
-	public static final int CLOSED = 3;
-	/*
-	 * The maximum amount of bytes per frame
-	 */
-	public static final int MAX_FRAMESIZE = 16384;
 	private boolean isRunning = false;
 	private Thread inboundThread;
 	private InboundProcess inboundProcess;
@@ -52,56 +35,61 @@ public class BaseClientJ2SE {
 		listener = aListener;
 	}
 
+	@Override
 	public void open(String aURL) throws WebSocketException {
-
 		try {
 			url = new URI(aURL);
 			String lHost = url.getHost();
 			int lPort = url.getPort();
+
 			socket = new Socket(lHost, lPort);
 			is = socket.getInputStream();
 			os = socket.getOutputStream();
 
 			// send handshake to server
-			String lHandshake = Handshake.createHandshake(url);
-			os.write(lHandshake.getBytes("US-ASCII"));
+			byte[] lReq = WebSocketHandshake.generateC2SRequest(url);
+			os.write(lReq);
 			os.flush();
 
 			// wait on handshake response
 			byte[] lBuff = new byte[8192];
 			int lRead = is.read(lBuff);
-			String lResponse = new String(lBuff, 0, lRead, "US-ASCII");
+			Map lResp = WebSocketHandshake.parseS2CResponse(lBuff);
 
-			System.out.println(lResponse);
 
 			inboundProcess = new InboundProcess();
 			inboundThread = new Thread(inboundProcess);
 			inboundThread.start();
 
 		} catch (Exception ex) {
-			System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			throw new WebSocketException(ex.getClass().getSimpleName() + " when opening WebSocket connection: " + ex.getMessage());
+			// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 	}
 
-	public void send(String aData, String aEncoding) {
+	@Override
+	public void send(String aData, String aEncoding) throws WebSocketException {
 		try {
 			os.write(0x00);
 			os.write(aData.getBytes(aEncoding));
 			os.write(0xff);
 			os.flush();
 		} catch (Exception ex) {
-			System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			throw new WebSocketException(ex.getClass().getSimpleName() + " when sending via WebSocket connection: " + ex.getMessage());
+			// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 	}
 
-	public void close() {
+	@Override
+	public void close() throws WebSocketException {
 		isRunning = false;
 		try {
 			os.close();
 			is.close();
 			socket.close();
-		} catch (IOException ex) {
-			System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (Exception ex) {
+			throw new WebSocketException(ex.getClass().getSimpleName() + " when closing WebSocket connection: " + ex.getMessage());
+			// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 	}
 
@@ -119,9 +107,11 @@ public class BaseClientJ2SE {
 			while (isRunning) {
 				try {
 					int b = is.read();
+					// start of frame
 					if (b == 0x00) {
 						pos = 0;
 						lStart = 0;
+					// end of frame
 					} else if (b == 0xff) {
 						if (lStart >= 0) {
 							if (listener != null) {
@@ -131,6 +121,10 @@ public class BaseClientJ2SE {
 							}
 						}
 						lStart = -1;
+					// end of stream
+					} else if( b < 0 ) {
+						isRunning = false;
+					// any other byte within or outside a frame
 					} else {
 						if (lStart >= 0) {
 							lBuff[pos] = (byte) b;
@@ -138,7 +132,8 @@ public class BaseClientJ2SE {
 						pos++;
 					}
 				} catch (Exception ex) {
-					System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+					// throw new WebSocketException(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+					// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
 			}
 

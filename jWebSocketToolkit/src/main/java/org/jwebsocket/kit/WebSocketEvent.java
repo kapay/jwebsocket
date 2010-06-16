@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.jWebSocket.client;
+package org.jwebsocket.kit;
 
 import java.io.UnsupportedEncodingException;
 

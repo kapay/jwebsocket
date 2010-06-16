@@ -269,12 +269,14 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
                                       WebSocketFrame msg) throws WebSocketRuntimeException {
         String textData = "";
         if (msg.isBinary()) {
-            //TODO: handle binary data
+            // TODO: handle binary data
         } else if (msg.isText()) {
-            //Get the content of this frame into a UTF-8 string
-            String encodedData = msg.getTextData();
-            //remove the new line character "\n" which is a packate separator.
-            textData = encodedData.substring(0, encodedData.length() - 1);
+            // Get the content of this frame into a UTF-8 string
+            // String encodedData = msg.getTextData();
+            // remove the new line character "\n" which is a packate separator.
+			// !!! obsolete since v0.9.0.0616 because client doesn't send it anymore !!!
+            // textData = encodedData.substring(0, encodedData.length() - 1);
+            textData = msg.getTextData();
         } else {
             throw new WebSocketRuntimeException("Frame Doesn't contain any type of data");
         }

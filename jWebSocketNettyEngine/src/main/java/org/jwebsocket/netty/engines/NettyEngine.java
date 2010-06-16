@@ -72,11 +72,12 @@ public class NettyEngine extends BaseEngine {
      *
      * @param theEngineConfig the engine config object
      */
+/*
     public NettyEngine(EngineConfig theEngineConfig) {
         super(theEngineConfig.getId());
         this.engineConfig = theEngineConfig;
     }
-
+*/
 
     /**
      * {@inheritDoc}

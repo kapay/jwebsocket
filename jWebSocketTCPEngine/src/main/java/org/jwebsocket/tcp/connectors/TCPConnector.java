@@ -4,13 +4,14 @@
  */
 package org.jwebsocket.tcp.connectors;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.api.WebSocketConnector;
@@ -27,8 +28,8 @@ import org.jwebsocket.logging.Logging;
 public class TCPConnector extends BaseConnector {
 
 	private static Logger log = Logging.getLogger(TCPConnector.class);
-	private BufferedReader br = null;
-	private PrintStream os = null;
+	private InputStream is = null;
+	private OutputStream os = null;
 	private Socket clientSocket = null;
 	private boolean isRunning = false;
 	private CloseReason closeReason = CloseReason.TIMEOUT;
@@ -44,7 +45,8 @@ public class TCPConnector extends BaseConnector {
 		super(aEngine);
 		clientSocket = aClientSocket;
 		try {
-			br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
+			is = clientSocket.getInputStream();
+			// br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 			os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
 		} catch (Exception ex) {
 			log.error(ex.getClass().getSimpleName()
@@ -138,8 +140,12 @@ public class TCPConnector extends BaseConnector {
 
 		@Override
 		public void run() {
-			String line;
 			WebSocketEngine engine = getEngine();
+
+			// TODO: use and make MAX_FRAME_SIZE consistent!
+			byte[] lBuff = new byte[16384];
+			int pos = -1;
+			int lStart = -1;
 
 			try {
 				// start client listener loop
@@ -149,63 +155,47 @@ public class TCPConnector extends BaseConnector {
 				engine.connectorStarted(connector);
 
 				while (isRunning) {
-					// try to read line within timeout
-					try {
-						// TODO: optimize protocol packet handling!
-						line = br.readLine();
-						// if line is null the end of the stream is reached
-						// this means the connection has been closed
-						// by the client
-						if (line == null) {
-							// stream has been closed (by client)
+					try{
+						int b = is.read();
+						// start of frame
+						if (b == 0x00) {
+							pos = 0;
+							lStart = 0;
+						// end of frame
+						} else if (b == 0xff) {
+							if (lStart >= 0) {
+								RawPacket lPacket = new RawPacket(Arrays.copyOf(lBuff, pos));
+								try {
+									engine.processPacket(connector, lPacket);
+								} catch (Exception ex) {
+									log.error(ex.getClass().getSimpleName()
+											+ " in processPacket of connector "
+											+ connector.getClass().getSimpleName()
+											+ ": " + ex.getMessage());
+								}
+							}
+							lStart = -1;
+						// end of stream
+						} else if( b < 0 ) {
+							isRunning = false;
 							closeReason = CloseReason.CLIENT;
+						// any other byte within or outside a frame
 						} else {
-							// cut off potential starting 0x00 and 0xff characters
-							byte[] ba = line.getBytes();
-
-							int i = 0;
-							while (i < ba.length && ba[i] != 0) {
-								i++;
+							if (lStart >= 0) {
+								lBuff[pos] = (byte) b;
 							}
-							if (i < ba.length) {
-								i++;
-								line = new String(ba, i, ba.length - i, "UTF-8");
-							} else {
-								line = null;
-								// no data means stream has been closed (by client)
-								closeReason = CloseReason.CLIENT;
-							}
+							pos++;
 						}
-
 					} catch (SocketTimeoutException ex) {
 						log.error("(timeout) "
 								+ ex.getClass().getSimpleName()
 								+ ": " + ex.getMessage());
 						closeReason = CloseReason.TIMEOUT;
-						line = null;
 					} catch (Exception ex) {
 						log.error("(other) "
 								+ ex.getClass().getSimpleName()
 								+ ": " + ex.getMessage());
 						closeReason = CloseReason.SERVER;
-						line = null;
-					}
-
-					if (line != null) {
-						RawPacket dataPacket = new RawPacket(line);
-						// ensure that potential exceptions in a plug in
-						// do not abort the connector
-						try {
-							engine.processPacket(connector, dataPacket);
-						} catch (Exception ex) {
-							log.error(ex.getClass().getSimpleName()
-									+ " in processPacket of connector "
-									+ connector.getClass().getSimpleName()
-									+ ": " + ex.getMessage());
-							line = null;
-						}
-					} else {
-						isRunning = false;
 					}
 				}
 
@@ -213,7 +203,8 @@ public class TCPConnector extends BaseConnector {
 				// (e.g. to release client from streams)
 				engine.connectorStopped(connector, closeReason);
 
-				br.close();
+				// br.close();
+				is.close();
 				os.close();
 				clientSocket.close();
 

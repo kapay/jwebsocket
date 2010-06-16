@@ -2,7 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jWebSocket.client;
+package org.jwebsocket.api;
+
+import org.jwebsocket.kit.WebSocketEvent;
 
 /**
  *
