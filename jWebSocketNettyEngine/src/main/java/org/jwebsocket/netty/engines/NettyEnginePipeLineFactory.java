@@ -59,7 +59,10 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
         // Create a default pipeline implementation.
         ChannelPipeline pipeline = Channels.pipeline();
-        pipeline.getChannel().getConfig().setConnectTimeoutMillis(engine.getEngineConfig().getTimeout());
+        //set the timeout value if only it's greater than 0 in configuration
+        if (engine.getEngineConfig().getTimeout() > 0) {
+            pipeline.getChannel().getConfig().setConnectTimeoutMillis(engine.getEngineConfig().getTimeout());
+        }
         pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
         pipeline.addLast("encoder", new HttpResponseEncoder());
