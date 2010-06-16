@@ -45,7 +45,6 @@ public class NettyEngine extends BaseEngine {
 
     private static Logger log = Logging.getLogger(NettyEngine.class);
     private int listenerPort = 8787;
-    // TODO: need to use this timeout!!
     private int sessionTimeout = 120000;
     private volatile boolean isRunning = false;
     private static final ChannelGroup allChannels = new DefaultChannelGroup(
@@ -88,7 +87,6 @@ public class NettyEngine extends BaseEngine {
             log.debug("Starting Netty engine (" + getId() + ")...");
         }
         // Configure the server.
-        // TODO: figure out more on how advanced we can configure
         ServerBootstrap bootstrap = new ServerBootstrap(
                 new NioServerSocketChannelFactory(Executors
                         .newCachedThreadPool(), Executors.newCachedThreadPool()));
