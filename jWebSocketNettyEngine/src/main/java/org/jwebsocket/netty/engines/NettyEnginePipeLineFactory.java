@@ -14,11 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.netty.engines;
 
-import org.jboss.netty.channel.ChannelConfig;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.ServerChannel;
+import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
@@ -27,31 +23,32 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
  * Creates a channel pipeline to handle the incoming requests and
  * outgoing responses.
  * <p>
- *   When a {@linkplain ServerChannel server-side channel} accepts a new incoming
- *   connection, a new child channel is created for each newly accepted connection.
- *   A new child channel uses a new {@link ChannelPipeline}, which is created by
- *   the {@link ChannelPipelineFactory} specified in the server-side channel's
- *   {@link ChannelConfig#getPipelineFactory() "pipelineFactory"} option.
+ * When a {@linkplain ServerChannel server-side channel} accepts a new incoming
+ * connection, a new child channel is created for each newly accepted connection.
+ * A new child channel uses a new {@link ChannelPipeline}, which is created by
+ * the {@link ChannelPipelineFactory} specified in the server-side channel's
+ * {@link ChannelConfig#getPipelineFactory() "pipelineFactory"} option.
  * </p>
+ *
  * @author Puran Singh
  * @version $Id$
- *
  */
 public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
 
     private NettyEngine engine;
 
     /**
-     * constructor that takes engine 
+     * constructor that takes engine
+     *
      * @param engine
      */
     public NettyEnginePipeLineFactory(NettyEngine engine) {
-    	this.engine = engine;
+        this.engine = engine;
     }
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * NOTE: initially when the server is started <tt>HTTP</tt> encoder/decoder are
      * added in the channel pipeline which is required for the initial handshake
      * request for WebSocket connection. Once the connection is made by sending
@@ -62,10 +59,11 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
         // Create a default pipeline implementation.
         ChannelPipeline pipeline = Channels.pipeline();
+        pipeline.getChannel().getConfig().setConnectTimeoutMillis(engine.getEngineConfig().getTimeout());
         pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
         pipeline.addLast("encoder", new HttpResponseEncoder());
-        
+
         //create a new handler instance for each new channel to avoid a 
         //race condition where a unauthenticated client can get the confidential information:
         pipeline.addLast("handler", new NettyEngineHandler(engine));
