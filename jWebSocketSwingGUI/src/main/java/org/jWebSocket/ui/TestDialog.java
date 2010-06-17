@@ -12,8 +12,6 @@ package org.jWebSocket.ui;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jwebsocket.api.WebSocketListener;
 import org.jwebsocket.kit.WebSocketException;
 import org.jWebSocket.client.BaseClientJ2SE;

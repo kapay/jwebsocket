@@ -19,9 +19,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 import org.json.JSONTokener;
 import org.jwebsocket.api.WebSocketPaket;
 import org.jwebsocket.kit.RawPacket;
@@ -30,7 +30,7 @@ import org.jwebsocket.token.Token;
 
 /**
  * converts JSON formatted data packets into tokens and vice versa.
- * @author aschulze
+ * @author Alexander Schulze, Roderik Baier (improvements regarding JSON array).
  */
 public class JSONProcessor {
 
@@ -59,37 +59,46 @@ public class JSONProcessor {
 		return lToken;
 	}
 
-	public static WebSocketPaket tokenToPacket(Token aToken) {
-		WebSocketPaket lPacket = null;
+	public static WebSocketPaket tokenToPacket(Token token) {
+		WebSocketPaket packet = null;
+
 		try {
-			JSONStringer jsonStringer = new JSONStringer();
-			// start main object
-			jsonStringer.object();
-			// iterate through all items (fields) of the token
-			Iterator<String> lIterator = aToken.getKeys();
-			while (lIterator.hasNext()) {
-				String lKey = lIterator.next();
-				Object lVal = aToken.get(lKey);
-				if (lVal instanceof Collection) {
-					jsonStringer.key(lKey).array();
-					for (Object item : (Collection) lVal) {
-						jsonStringer.value(item);
-					}
-					jsonStringer.endArray();
-				} else {
-					jsonStringer.key(lKey).value(lVal);
-				}
-			}
-			// end main object
-			jsonStringer.endObject();
-			String lData = jsonStringer.toString();
-			lPacket = new RawPacket(lData, "UTF-8");
+			JSONObject json = tokenToJSON(token);
+			String data = json.toString();
+			packet = new RawPacket(data, "UTF-8");
 		} catch (JSONException ex) {
 			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		} catch (UnsupportedEncodingException ex) {
 			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
-		return lPacket;
+
+		return packet;
 	}
 
+	private static JSONObject tokenToJSON(Token token)
+			throws JSONException {
+		JSONObject json = new JSONObject();
+
+		Iterator<String> iterator = token.getKeys();
+		while (iterator.hasNext()) {
+			String key = iterator.next();
+			Object value = token.get(key);
+			if (value instanceof Collection) {
+				JSONArray array = new JSONArray();
+				for (Object item : (Collection) value) {
+					if (item instanceof Token) {
+						JSONObject object = tokenToJSON((Token) item);
+						array.put(object);
+					} else {
+						array.put(item);
+					}
+				}
+				json.put(key, array);
+			} else {
+				json.put(key, value);
+			}
+		}
+
+		return json;
+	}
 }

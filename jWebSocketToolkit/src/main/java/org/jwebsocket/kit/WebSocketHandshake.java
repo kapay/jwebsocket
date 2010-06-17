@@ -4,14 +4,14 @@
  */
 package org.jwebsocket.kit;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -19,9 +19,12 @@ import java.util.logging.Logger;
  */
 public class WebSocketHandshake {
 
+	public static int MAX_HEADER_SIZE = 16834;
+
 	/**
-	 * Generates the initial handshake request from a client
-	 * to the jWebSocket Server.
+	 * Generates the initial handshake request from a client to the jWebSocket 
+	 * Server. This is send from a Java client to the server when a connection
+	 * is about to be established. The browser's implement that internally.
 	 * @param aURI
 	 * @return
 	 */
@@ -67,11 +70,14 @@ public class WebSocketHandshake {
 	}
 
 	/**
-	 * Parses the response from the server on an initial handshake request.
+	 * Parses the response from the client on an initial client's handshake
+	 * request. This is always performed on the server only when a client
+	 * - irrespective of if it is a Java Client or Browser Client -
+	 * initiates a connection.
 	 * @param aResp
 	 * @return
 	 */
-	public static Map parseS2CResponse(byte[] aResp) {
+	public static Map parseC2SRequest(byte[] aResp) {
 		String lHost = null;
 		String lOrigin = null;
 		String lLocation = null;
@@ -222,8 +228,9 @@ public class WebSocketHandshake {
 	}
 
 	/**
-	 * Generates the response for the server to answer
-	 * an initial client request.
+	 * Generates the response for the server to answer an initial client 
+	 * request. This is performed on the server only as an answer to a client's
+	 * request - irrespective of if it is a Java or Browser Client.
 	 * @param aRequest
 	 * @return
 	 */
@@ -258,5 +265,60 @@ public class WebSocketHandshake {
 			return null;
 		}
 
+	}
+
+	/**
+	 * Reads the handshake response from the server into an byte array.
+	 * This is used on clients only. The browser client implement
+	 * that internally.
+	 * @param aIS
+	 * @return
+	 */
+	public static byte[] readS2CResponse(InputStream aIS) {
+		byte[] lBuff = new byte[MAX_HEADER_SIZE];
+		boolean lContinue = true;
+		int lIdx = 0;
+		int lB1 = 0, lB2 = 0, lB3 = 0, lB4 = 0;
+		while (lContinue && lIdx < MAX_HEADER_SIZE) {
+			int b;
+			try {
+				b = aIS.read();
+				if (b < 0) {
+					return null;
+				}
+			} catch (IOException ex) {
+				return null;
+			}
+			// build mini queue to check for \r\n\r\n sequence in handshake
+			lB1 = lB2;
+			lB2 = lB3;
+			lB3 = lB4;
+			lB4 = b;
+			lContinue = !(lB1 == 13 && lB2 == 10 && lB3 == 13 && lB4 == 10);
+			lBuff[lIdx] = (byte) b;
+			lIdx++;
+		}
+		byte[] lRes = new byte[lIdx];
+		System.arraycopy(lBuff, 0, lRes, 0, lIdx);
+		return lRes;
+	}
+
+	/*
+	 * Parses the websocket handshake response from the server.
+	 * This is performed on Java Client only, the browsers implement
+	 * that internally.
+	 * @param aResp
+	 * @return
+	 */
+	public static Map parseS2CResponse(byte[] aResp) {
+		Map lRes = new HashMap();
+		String lResp = null;
+		try {
+			lResp = new String(aResp, "US-ASCII");
+			
+		} catch (Exception ex) {
+			// TODO: add exception handling
+		}
+		return lRes;
 	}
 }

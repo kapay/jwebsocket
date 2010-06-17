@@ -52,10 +52,10 @@ public class BaseClientJ2SE extends BaseClient {
 			os.flush();
 
 			// wait on handshake response
-			byte[] lBuff = new byte[8192];
-			int lRead = is.read(lBuff);
-			Map lResp = WebSocketHandshake.parseS2CResponse(lBuff);
+			byte[] lBuff = WebSocketHandshake.readS2CResponse(is);
 
+			// parse handshake response from server
+			Map lResp = WebSocketHandshake.parseS2CResponse(lBuff);
 
 			inboundProcess = new InboundProcess();
 			inboundThread = new Thread(inboundProcess);
@@ -111,7 +111,7 @@ public class BaseClientJ2SE extends BaseClient {
 					if (b == 0x00) {
 						pos = 0;
 						lStart = 0;
-					// end of frame
+						// end of frame
 					} else if (b == 0xff) {
 						if (lStart >= 0) {
 							if (listener != null) {
@@ -121,10 +121,10 @@ public class BaseClientJ2SE extends BaseClient {
 							}
 						}
 						lStart = -1;
-					// end of stream
-					} else if( b < 0 ) {
+						// end of stream
+					} else if (b < 0) {
 						isRunning = false;
-					// any other byte within or outside a frame
+						// any other byte within or outside a frame
 					} else {
 						if (lStart >= 0) {
 							lBuff[pos] = (byte) b;
@@ -132,6 +132,7 @@ public class BaseClientJ2SE extends BaseClient {
 						pos++;
 					}
 				} catch (Exception ex) {
+					isRunning = false;
 					// throw new WebSocketException(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}

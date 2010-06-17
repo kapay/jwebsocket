@@ -181,7 +181,7 @@ public class TCPEngine extends BaseEngine {
 		byte[] lResp = new byte[lRead];
 		System.arraycopy(lBuff, 0, lResp, 0, lRead);
 
-		Map lRespMap = WebSocketHandshake.parseS2CResponse(lResp);
+		Map lRespMap = WebSocketHandshake.parseC2SRequest(lResp);
 
 		byte[] ba = WebSocketHandshake.generateS2CResponse(lRespMap);
 		os.write(ba);

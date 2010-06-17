@@ -177,8 +177,8 @@ public class TCPConnector extends BaseConnector {
 							lStart = -1;
 						// end of stream
 						} else if( b < 0 ) {
-							isRunning = false;
 							closeReason = CloseReason.CLIENT;
+							isRunning = false;
 						// any other byte within or outside a frame
 						} else {
 							if (lStart >= 0) {
@@ -191,11 +191,13 @@ public class TCPConnector extends BaseConnector {
 								+ ex.getClass().getSimpleName()
 								+ ": " + ex.getMessage());
 						closeReason = CloseReason.TIMEOUT;
+						isRunning = false;
 					} catch (Exception ex) {
 						log.error("(other) "
 								+ ex.getClass().getSimpleName()
 								+ ": " + ex.getMessage());
 						closeReason = CloseReason.SERVER;
+						isRunning = false;
 					}
 				}
 
