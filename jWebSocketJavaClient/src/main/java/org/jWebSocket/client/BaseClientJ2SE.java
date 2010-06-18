@@ -1,7 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - WebSocket Client for Java Standard Edition (J2SE)
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//	more details.
+//	You should have received a copy of the GNU General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/>.
+//	---------------------------------------------------------------------------
 package org.jWebSocket.client;
 
 import org.jwebsocket.kit.WebSocketEvent;
@@ -81,6 +92,27 @@ public class BaseClientJ2SE extends BaseClient {
 	}
 
 	@Override
+	public void send(byte[] aData) throws WebSocketException {
+		try {
+			os.write(0x00);
+			os.write(aData);
+			os.write(0xff);
+			os.flush();
+		} catch (Exception ex) {
+			throw new WebSocketException(ex.getClass().getSimpleName() + " when sending via WebSocket connection: " + ex.getMessage());
+			// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
+	}
+
+	@Override
+	public void received(String aData, String aEncoding) throws WebSocketException {
+	}
+
+	@Override
+	public void received(byte[] aData) throws WebSocketException {
+	}
+
+	@Override
 	public void close() throws WebSocketException {
 		isRunning = false;
 		try {
@@ -88,7 +120,8 @@ public class BaseClientJ2SE extends BaseClient {
 			is.close();
 			socket.close();
 		} catch (Exception ex) {
-			throw new WebSocketException(ex.getClass().getSimpleName() + " when closing WebSocket connection: " + ex.getMessage());
+			throw new WebSocketException(ex.getClass().getSimpleName()
+					+ " when closing WebSocket connection: " + ex.getMessage());
 			// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 	}
@@ -115,8 +148,10 @@ public class BaseClientJ2SE extends BaseClient {
 					} else if (b == 0xff) {
 						if (lStart >= 0) {
 							if (listener != null) {
+								byte[] lBA = Arrays.copyOf(lBuff, pos);
+								received(lBA);
 								WebSocketEvent lEvt = new WebSocketEvent();
-								lEvt.setData(Arrays.copyOf(lBuff, pos));
+								lEvt.setData(lBA);
 								listener.processPacket(lEvt);
 							}
 						}
@@ -140,5 +175,10 @@ public class BaseClientJ2SE extends BaseClient {
 
 			listener.processClosed(null);
 		}
+	}
+
+	@Override
+	public boolean isConnected() {
+		return isRunning;
 	}
 }
