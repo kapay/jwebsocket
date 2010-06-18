@@ -182,10 +182,29 @@ public class TCPEngine extends BaseEngine {
 		System.arraycopy(lBuff, 0, lResp, 0, lRead);
 
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(lResp);
-
+		// maybe the request is a flash policy-file-request
+		String lFlashBridgeReq = (String)lRespMap.get("policy-file-request");
+		if (lFlashBridgeReq != null) {
+			log.warn("TCPEngine returned policy file request ('" + lFlashBridgeReq + "'), check for FlashBridge plug-in.");
+		}
+		// generate the websocket handshake
+		// if policy-file-request is found answer it
 		byte[] ba = WebSocketHandshake.generateS2CResponse(lRespMap);
+		if( ba == null) {
+			if (log.isDebugEnabled()) {
+				log.warn("TCPEngine detected illegal handshake.");
+			}
+			return null;
+		}
 		os.write(ba);
 		os.flush();
+
+		// if we detected a flash policy-file-request return "null"
+		// (no websocket header detected)
+		if (lFlashBridgeReq != null) {
+			log.warn("TCPEngine returned policy file response ('" + new String(ba, "US-ASCII") + "'), check for FlashBridge plug-in.");
+			return null;
+		}
 
 		RequestHeader header = new RequestHeader();
 		Map<String, String> args = new HashMap<String, String>();

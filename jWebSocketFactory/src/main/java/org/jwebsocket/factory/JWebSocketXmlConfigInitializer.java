@@ -121,10 +121,11 @@ public final class JWebSocketXmlConfigInitializer implements
 				if (log.isDebugEnabled()) {
 					log.debug("Engine '" + engineConfig.getName() + "' loaded from classpath.");
 				}
-			} catch (Exception ex) {
+			} catch (ClassNotFoundException ex) {
+				// in case of a class not found exception we DO NOT want to
+				// show the exception but subsequently load the class from
 				if (log.isDebugEnabled()) {
-					log.debug(ex.getClass().getSimpleName()
-							+ ": Engine not yet in classpath, hence trying to load from file...");
+					log.debug("Engine '" + engineConfig.getName() + "' not yet in classpath, hence trying to load from file...");
 				}
 			}
 
@@ -202,10 +203,11 @@ public final class JWebSocketXmlConfigInitializer implements
 					if (log.isDebugEnabled()) {
 						log.debug("Server '" + serverConfig.getName() + "' loaded from classpath.");
 					}
-				} catch (Exception ex) {
+				} catch (ClassNotFoundException ex) {
+					// in case of a class not found exception we DO NOT want to
+					// show the exception but subsequently load the class from
 					if (log.isDebugEnabled()) {
-						log.debug(ex.getClass().getSimpleName()
-								+ ": Server not yet in classpath, hence trying to load from file...");
+						log.debug("Server '" + serverConfig.getName() + "' not yet in classpath, hence trying to load from file...");
 					}
 				}
 
@@ -286,10 +288,11 @@ public final class JWebSocketXmlConfigInitializer implements
 					if (log.isDebugEnabled()) {
 						log.debug("Plug-in '" + pluginConfig.getName() + "' loaded from classpath.");
 					}
-				} catch (Exception ex) {
+				} catch (ClassNotFoundException ex) {
+					// in case of a class not found exception we DO NOT want to
+					// show the exception but subsequently load the class from
 					if (log.isDebugEnabled()) {
-						log.debug(ex.getClass().getSimpleName()
-								+ ": Plug-in not yet in classpath, hence trying to load from file...");
+						log.debug("Plug-in '" + pluginConfig.getName() + "' not yet in classpath, hence trying to load from file...");
 					}
 				}
 
@@ -363,10 +366,11 @@ public final class JWebSocketXmlConfigInitializer implements
 					if (log.isDebugEnabled()) {
 						log.debug("Filter '" + filterConfig.getName() + "' loaded from classpath.");
 					}
-				} catch (Exception ex) {
+				} catch (ClassNotFoundException ex) {
+					// in case of a class not found exception we DO NOT want to
+					// show the exception but subsequently load the class from
 					if (log.isDebugEnabled()) {
-						log.debug(ex.getClass().getSimpleName()
-								+ ": Filter not yet in classpath, hence trying to load from file...");
+						log.debug("Filter '" + filterConfig.getName() + "' not yet in classpath, hence trying to load from file...");
 					}
 				}
 

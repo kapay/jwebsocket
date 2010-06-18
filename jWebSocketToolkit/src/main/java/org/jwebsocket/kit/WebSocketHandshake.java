@@ -90,6 +90,8 @@ public class WebSocketHandshake {
 		Long lSecNum2 = null;
 		byte[] lSecKeyResp = new byte[8];
 
+		HashMap lRes = new HashMap();
+
 		int lRespLen = aResp.length;
 		String lResp = "";
 		try {
@@ -97,6 +99,12 @@ public class WebSocketHandshake {
 		} catch (Exception ex) {
 			// TODO: add exception handling
 		}
+
+		if (lResp.indexOf("policy-file-request") >= 0) { // "<policy-file-request/>"
+			lRes.put("policy-file-request", lResp);
+			return lRes;
+		}
+
 		lIsSecure = (lResp.indexOf("Sec-WebSocket") > 0);
 
 		if (lIsSecure) {
@@ -212,8 +220,6 @@ public class WebSocketHandshake {
 			}
 		}
 
-		HashMap lRes = new HashMap();
-
 		lRes.put("path", lPath);
 		lRes.put("host", lHost);
 		lRes.put("origin", lOrigin);
@@ -235,6 +241,20 @@ public class WebSocketHandshake {
 	 * @return
 	 */
 	public static byte[] generateS2CResponse(Map aRequest) {
+
+		String lPolicyFileRequest = (String) aRequest.get("policy-file-request");
+		if (lPolicyFileRequest != null) {
+			byte[] lBA;
+			try {
+				lBA = ("<cross-domain-policy>"
+						+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
+						+ "</cross-domain-policy>\n").getBytes("US-ASCII");
+			} catch (UnsupportedEncodingException ex) {
+				lBA = null;
+			}
+			return lBA;
+		}
+
 		// now that we have parsed the header send handshake...
 		// since 0.9.0.0609 considering Sec-WebSocket-Key processing
 		Boolean lIsSecure = (Boolean) aRequest.get("isSecure");
@@ -255,8 +275,8 @@ public class WebSocketHandshake {
 			if (lIsSecure) {
 				byte[] lSecKey = (byte[]) aRequest.get("secKeyResponse");
 				byte[] lResult = new byte[lBA.length + lSecKey.length];
-				System.arraycopy(lBA, 0, lRes, 0, lBA.length);
-				System.arraycopy(lSecKey, lSecKey.length, lRes, lBA.length, lSecKey.length);
+				System.arraycopy(lBA, 0, lResult, 0, lBA.length);
+				System.arraycopy(lSecKey, 0, lResult, lBA.length, lSecKey.length);
 				return lResult;
 			} else {
 				return lBA;
@@ -315,7 +335,7 @@ public class WebSocketHandshake {
 		String lResp = null;
 		try {
 			lResp = new String(aResp, "US-ASCII");
-			
+
 		} catch (Exception ex) {
 			// TODO: add exception handling
 		}

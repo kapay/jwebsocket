@@ -30,7 +30,7 @@ import org.jwebsocket.token.Token;
 
 /**
  * converts JSON formatted data packets into tokens and vice versa.
- * @author Alexander Schulze, Roderik Baier (improvements regarding JSON array).
+ * @author Alexander Schulze, Roderick Baier (improvements regarding JSON array).
  */
 public class JSONProcessor {
 

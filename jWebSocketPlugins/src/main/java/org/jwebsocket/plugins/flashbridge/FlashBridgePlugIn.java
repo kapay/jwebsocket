@@ -16,8 +16,8 @@
 package org.jwebsocket.plugins.flashbridge;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -41,7 +41,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 	private int engineInstanceCount = 0;
 	private BridgeProcess bridgeProcess = null;
 	private Thread bridgeThread = null;
-	private int TIMEOUT = 2500;
+	// private int TIMEOUT = 2500;
 
 	/**
 	 *
@@ -96,31 +96,34 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 						log.debug("Client connected...");
 					}
 					try {
-						clientSocket.setSoTimeout(TIMEOUT);
-						InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream(), "UTF-8");
-						PrintStream os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
-
-						char[] ca = new char[1024];
+						// clientSocket.setSoTimeout(TIMEOUT);
+						InputStream is = clientSocket.getInputStream();
+						OutputStream os = clientSocket.getOutputStream();
+						byte[] ba = new byte[1024];
 						String lLine = "";
-						int lLen;
-						do {
-							lLen = isr.read(ca);
+						boolean lFoundPolicyFileRequest = false;
+						int lLen = 0;
+						while (lLen >= 0 && !lFoundPolicyFileRequest) {
+							lLen = is.read(ba);
 							if (lLen > 0) {
-								lLine += new String(ca, 0, lLen);
-							} else {
-								Thread.sleep(10);
+								lLine += new String(ba, 0, lLen, "US-ASCII");
 							}
 							if (log.isDebugEnabled()) {
 								log.debug("Received " + lLine + "...");
 							}
-						} while (lLen >= 0 && lLine.indexOf("<policy-file-request/>") < 0);
-						if (log.isDebugEnabled()) {
-							log.debug("Answering on flash policy-file-request (" + lLine + ")...");
+							lFoundPolicyFileRequest = lLine.indexOf("policy-file-request") >= 0; // "<policy-file-request/>"
 						}
-						os.print(
-								"<cross-domain-policy>"
-								+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
-								+ "</cross-domain-policy>\n");
+						if (lFoundPolicyFileRequest) {
+							if (log.isDebugEnabled()) {
+								log.debug("Answering on flash policy-file-request (" + lLine + ")...");
+							}
+							os.write(("<cross-domain-policy>"
+									+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
+									+ "</cross-domain-policy>\n").getBytes());
+							os.flush();
+						} else {
+							log.warn("Received invalid policy-file-request (" + lLine + ")...");
+						}
 					} catch (UnsupportedEncodingException ex) {
 						log.error("(encoding) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					} catch (IOException ex) {
@@ -135,7 +138,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 					}
 				} catch (Exception ex) {
 					isRunning = false;
-					log.error("(accept) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+					log.error("FlashBridge cannot be started due to " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
 			}
 			if (log.isDebugEnabled()) {
