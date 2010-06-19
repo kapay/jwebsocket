@@ -91,7 +91,7 @@ public class SamplePlugIn extends TokenPlugIn {
 			TokenServer lServer = getServer();
 
 			// get the server time
-			if (lType.equals("requestServerTime")) {
+			if ("requestServerTime".equals(lType)) {
 				// create the response token
 				// this includes the unique token-id
 				Token lResponse = lServer.createResponse(aToken);
@@ -106,7 +106,6 @@ public class SamplePlugIn extends TokenPlugIn {
 			} else if (lType.equals("processComplexObject")) {
 				// simply echo the complex object
 				lServer.sendToken(aConnector, aToken);
-
 			}
 		}
 	}

@@ -30,7 +30,7 @@ jws.SamplesPlugIn = {
 		if( aToken.ns == jws.SamplesPlugIn.NS ) {
 			// here you can handle incomimng tokens from the server
 			// directy in the plug-in if desired.
-			if( aToken.reqType == "requestServerTime" ) {
+			if( "requestServerTime" == aToken.reqType ) {
 				// this is just for demo purposes
 				// don't use blocking calls here which block the communication!
 				// like alert( "jWebSocket Server returned: " + aToken.time );
