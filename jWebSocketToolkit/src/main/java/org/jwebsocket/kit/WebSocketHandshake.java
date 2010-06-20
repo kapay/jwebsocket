@@ -197,15 +197,19 @@ public class WebSocketHandshake {
 			BigInteger sec2 = new BigInteger(lSecNum2.toString());
 
 			// concatene 3 parts secNum1 + secNum2 + secKey
-			byte[] l128Bit = new byte[16];
+			byte[] l128Bit = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 			byte[] lTmp;
+			int lOfs;
+
 			lTmp = sec1.toByteArray();
-			for (int i = 0; i < 4; i++) {
-				l128Bit[i] = lTmp[i];
+			lOfs = 4 - lTmp.length;
+			for (int i = 0; i < lTmp.length; i++) {
+				l128Bit[i + lOfs] = lTmp[i];
 			}
 			lTmp = sec2.toByteArray();
-			for (int i = 0; i < 4; i++) {
-				l128Bit[i + 4] = lTmp[i];
+			lOfs = 4 - lTmp.length;
+			for (int i = 0; i < lTmp.length; i++) {
+				l128Bit[i + 4 + lOfs] = lTmp[i];
 			}
 			lTmp = lSecKey3;
 			for (int i = 0; i < 8; i++) {

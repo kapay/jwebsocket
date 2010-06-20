@@ -609,7 +609,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::::none
 	//:r:*:::void:none
 	checkConnected: function() {
-		jws.CUR_TOKEN_ID++;
+		// jws.CUR_TOKEN_ID++;
 		var lRes = this.createDefaultResult();
 		if( !this.isConnected() ) {
 			lRes.code = -1;
@@ -630,7 +630,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::::none
 	//:r:*:::void:none
 	checkLoggedIn: function() {
-		jws.CUR_TOKEN_ID++;
+		// jws.CUR_TOKEN_ID++;
 		var lRes = this.createDefaultResult();
 		if( !this.isLoggedIn() ) {
 			lRes.code = -1;
