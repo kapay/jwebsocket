@@ -26,7 +26,6 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
@@ -44,8 +43,6 @@ import org.jwebsocket.logging.Logging;
 public class NettyEngine extends BaseEngine {
 
     private static Logger log = Logging.getLogger(NettyEngine.class);
-    private int listenerPort = JWebSocketConstants.DEFAULT_PORT;
-    private int sessionTimeout = JWebSocketConstants.DEFAULT_TIMEOUT;
     private volatile boolean isRunning = false;
     private static final ChannelGroup allChannels = new DefaultChannelGroup("jWebSocket-NettyEngine");
 
@@ -55,8 +52,6 @@ public class NettyEngine extends BaseEngine {
      */
     public NettyEngine(EngineConfiguration configuration) {
         super(configuration);
-        this.listenerPort = configuration.getPort();
-        this.sessionTimeout = configuration.getTimeout();
     }
     
     /**
@@ -68,14 +63,13 @@ public class NettyEngine extends BaseEngine {
             log.debug("Starting Netty engine (" + getId() + ")...");
         }
         // Configure the server.
-        ServerBootstrap bootstrap = new ServerBootstrap(
-                new NioServerSocketChannelFactory(Executors
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors
                         .newCachedThreadPool(), Executors.newCachedThreadPool()));
 
         // Set up the event pipeline factory.
         bootstrap.setPipelineFactory(new NettyEnginePipeLineFactory(this));
         // Bind and start to accept incoming connections.
-        Channel channel = bootstrap.bind(new InetSocketAddress(listenerPort));
+        Channel channel = bootstrap.bind(new InetSocketAddress(getConfiguration().getPort()));
 
         // fire the engine start event
         engineStarted();
@@ -120,8 +114,7 @@ public class NettyEngine extends BaseEngine {
      * {@inheritDoc}
      */
     @Override
-    public void connectorStopped(WebSocketConnector aConnector,
-                                 CloseReason aCloseReason) {
+    public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
         log.debug("Detected stopped connector at port "
                 + aConnector.getRemotePort() + ".");
         super.connectorStopped(aConnector, aCloseReason);
