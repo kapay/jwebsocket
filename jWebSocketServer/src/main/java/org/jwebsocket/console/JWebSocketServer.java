@@ -29,39 +29,12 @@ public class JWebSocketServer {
 	 * @param args the command line arguments
 	 */
 	public static void main(String[] args) {
-		// TODO: get this from xml file
-		String loglevel = null;
-		String logTarget = null;
-		String logFilename = null;
-		String logPattern = null;
-		Integer logBuffersize = null;
-
-		// parse optional command line arguments
-		int i = 0;
-		while (i < args.length) {
-			String[] keyVal = args[i].split("=", 2);
-			if (keyVal.length == 2) {
-				String key = keyVal[0];
-				String value = keyVal[1];
-				if ("logtarget".equalsIgnoreCase(key)) {
-					logTarget = value;
-				} else if ("loglevel".equalsIgnoreCase(key)) {
-					loglevel = value;
-				}
-			}
-			i++;
-		}
-
 		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
-		System.out.println("jWebSocket Ver. "
-				+ JWebSocketConstants.VERSION_STR
-				+ " (" + System.getProperty("sun.arch.data.model") + "bit)");
+		System.out.println("jWebSocket Ver. "+ JWebSocketConstants.VERSION_STR+ " (" + System.getProperty("sun.arch.data.model") + "bit)");
 		System.out.println(JWebSocketConstants.COPYRIGHT);
 		System.out.println(JWebSocketConstants.LICENSE);
-		// System.out.println("Starting with logLevel=" + loglevel + " and logTarget=" + logTarget + "...");
 
-		JWebSocketFactory.start(loglevel, logTarget, logFilename,
-				logPattern, logBuffersize);
+		JWebSocketFactory.start();
 
 		WebSocketEngine engine = JWebSocketFactory.getEngine();
 		if (engine != null) {
