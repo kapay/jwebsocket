@@ -65,12 +65,16 @@ public class NettyEngine extends BaseEngine {
         // Configure the server.
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors
                         .newCachedThreadPool(), Executors.newCachedThreadPool()));
-
         // Set up the event pipeline factory.
         bootstrap.setPipelineFactory(new NettyEnginePipeLineFactory(this));
         // Bind and start to accept incoming connections.
         Channel channel = bootstrap.bind(new InetSocketAddress(getConfiguration().getPort()));
 
+        //set the timeout value if only it's greater than 0 in configuration
+        if (getConfiguration().getTimeout() > 0) {
+            channel.getConfig().setConnectTimeoutMillis(getConfiguration().getTimeout());
+         }
+     
         // fire the engine start event
         engineStarted();
 
@@ -105,8 +109,7 @@ public class NettyEngine extends BaseEngine {
      */
     @Override
     public void connectorStarted(WebSocketConnector aConnector) {
-        log.debug("Detected new connector at port "
-                + aConnector.getRemotePort() + ".");
+        log.debug("Detected new connector at port "+ aConnector.getRemotePort() + ".");
         super.connectorStarted(aConnector);
     }
 
@@ -115,8 +118,7 @@ public class NettyEngine extends BaseEngine {
      */
     @Override
     public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-        log.debug("Detected stopped connector at port "
-                + aConnector.getRemotePort() + ".");
+        log.debug("Detected stopped connector at port "+ aConnector.getRemotePort() + ".");
         super.connectorStopped(aConnector, aCloseReason);
     }
 

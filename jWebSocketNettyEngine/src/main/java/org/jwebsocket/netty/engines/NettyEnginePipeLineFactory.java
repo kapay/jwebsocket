@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.netty.engines;
 
+import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
@@ -59,10 +60,6 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
         // Create a default pipeline implementation.
         ChannelPipeline pipeline = Channels.pipeline();
-        //set the timeout value if only it's greater than 0 in configuration
-        if (engine.getConfiguration().getTimeout() > 0) {
-            pipeline.getChannel().getConfig().setConnectTimeoutMillis(engine.getConfiguration().getTimeout());
-         }
         pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
         pipeline.addLast("encoder", new HttpResponseEncoder());
