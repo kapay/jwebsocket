@@ -17,8 +17,8 @@ package org.jwebsocket.appserver;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
 import org.jwebsocket.factory.JWebSocketFactory;
-import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.sample.SamplePlugIn;
 import org.jwebsocket.server.TokenServer;
 
@@ -35,13 +35,7 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		// start the jWebSocket server sub system
-		JWebSocketFactory.start(
-			null, // use default level
-			null, // use default target
-			null, // use default filename
-			null, // use default pattern
-			null  // use default buffersize
-		);
+		JWebSocketFactory.start();
 
 		TokenServer lTS = (TokenServer)JWebSocketFactory.getServer("ts0");
 		if( lTS != null ) {
