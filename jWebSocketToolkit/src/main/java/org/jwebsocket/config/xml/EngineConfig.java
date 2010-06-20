@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
@@ -25,7 +26,7 @@ import java.util.List;
  * @author puran
  * @version $Id$
  */
-public final class EngineConfig implements Config {
+public final class EngineConfig implements Config, EngineConfiguration {
 
 	private final String id;
 	private final String name;

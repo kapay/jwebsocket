@@ -42,13 +42,11 @@ public class BaseEngine implements WebSocketEngine {
     private final Map<String, WebSocketServer> servers = new FastMap<String, WebSocketServer>();
     private final Map<String, WebSocketConnector> connectors = new FastMap<String, WebSocketConnector>();
     private int sessionTimeout = JWebSocketConstants.DEFAULT_TIMEOUT;
-    private String id = "";
+    
+    private EngineConfiguration configuration;
 
-    /**
-     * @param aId
-     */
-    public BaseEngine(String aId) {
-        id = aId;
+    public BaseEngine(EngineConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     @Override
@@ -149,7 +147,7 @@ public class BaseEngine implements WebSocketEngine {
 
     @Override
     public int getMaxFrameSize() {
-        return JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE;
+        return configuration.getMaxframesize();
     }
 
     @Override
@@ -187,12 +185,11 @@ public class BaseEngine implements WebSocketEngine {
      */
     @Override
     public String getId() {
-        return id;
+        return configuration.getId();
 	}
 
     @Override
     public EngineConfiguration getConfiguration() {
-        // TODO Auto-generated method stub
-        return null;
+        return configuration;
     }
 }
