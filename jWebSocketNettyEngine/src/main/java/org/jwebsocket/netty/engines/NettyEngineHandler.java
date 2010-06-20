@@ -31,7 +31,6 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.channel.WriteCompletionEvent;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
@@ -50,6 +49,7 @@ import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.netty.connectors.NettyConnector;
+import org.jwebsocket.netty.http.HttpHeaders;
 
 /**
  * Handler class for the <tt>NettyEngine</tt> that recieves the events based on
@@ -316,10 +316,8 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
         }
 
         // Serve the WebSocket handshake request.
-        if (HttpHeaders.Values.UPGRADE.equalsIgnoreCase(req
-                .getHeader(HttpHeaders.Names.CONNECTION))
-                && HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(req
-                .getHeader(HttpHeaders.Names.UPGRADE))) {
+        if (HttpHeaders.Values.UPGRADE.equalsIgnoreCase(req.getHeader(HttpHeaders.Names.CONNECTION))
+                && HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(req.getHeader(HttpHeaders.Names.UPGRADE))) {
 
             // Create the WebSocket handshake response.
             HttpResponse response = constructHandShakeResponse(req, ctx);
