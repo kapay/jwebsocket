@@ -14,47 +14,94 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger;
 
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
+import org.jwebsocket.config.JWebSocketConstants;
 
 /**
  * Class that performs the default servers and plugins initialization
  * 
  * @author puran
- * @version $Id: JWebSocketInitializer.java 399 2010-04-30 01:00:57Z mailtopuran$
+ * @version $Id: JWebSocketInitializer.java 399 2010-04-30 01:00:57Z
+ *          mailtopuran$
  */
 public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
 
-	private static Logger log = null;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, List<WebSocketPlugIn>> initializeCustomPlugins() {
+        return Collections.emptyMap();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Map<String, List<WebSocketPlugIn>> initializeCustomPlugins() {
-		return Collections.emptyMap();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<WebSocketServer> initializeCustomServers() {
+        return Collections.emptyList();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<WebSocketServer> initializeCustomServers() {
-		return Collections.emptyList();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Map<String, List<WebSocketFilter>> initializeCustomFilters() {
-		return Collections.emptyMap();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, List<WebSocketFilter>> initializeCustomFilters() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public EngineConfiguration getEngineConfiguration() {
+        return new DefaultEngineConfiguration();
+    }
+    
+    private class DefaultEngineConfiguration implements EngineConfiguration {
+
+        @Override
+        public List<String> getDomains() {
+            List<String> domains =  new ArrayList<String>();
+            domains.add("localhost");
+            return domains;
+        }
+
+        @Override
+        public String getJar() {
+            return null;
+        }
+
+        @Override
+        public int getMaxframesize() {
+            return JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE;
+        }
+
+        @Override
+        public int getPort() {
+            return JWebSocketConstants.DEFAULT_PORT;
+        }
+
+        @Override
+        public int getTimeout() {
+            return JWebSocketConstants.DEFAULT_TIMEOUT;
+        }
+
+        @Override
+        public String getId() {
+            return "netty0";
+        }
+
+        @Override
+        public String getName() {
+            return "Netty";
+        }
+        
+    }
 
 }

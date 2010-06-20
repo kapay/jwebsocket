@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketInitializer;
@@ -78,7 +79,6 @@ public final class JWebSocketXmlConfigInitializer implements
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeLogging() {
 		LoggingConfig loggingConfig = config.getLoggingConfig();
@@ -146,12 +146,9 @@ public final class JWebSocketXmlConfigInitializer implements
 			// if class found
 			// try to create an instance
 			if (engineClass != null) {
-				Constructor<WebSocketEngine> ctor =
-						engineClass.getDeclaredConstructor(String.class, Integer.class,
-						Integer.class);
+				Constructor<WebSocketEngine> ctor = engineClass.getDeclaredConstructor(EngineConfiguration.class);
 				ctor.setAccessible(true);
-				newEngine = ctor.newInstance(new Object[]{engineConfig.getId(),
-							engineConfig.getPort(), engineConfig.getTimeout()});
+				newEngine = ctor.newInstance(new Object[]{engineConfig});
 				if (log.isDebugEnabled()) {
 					log.debug("Engine '" + engineConfig.getId() + "' successfully instantiated.");
 				}
@@ -159,24 +156,17 @@ public final class JWebSocketXmlConfigInitializer implements
 				log.error("jWebSocket engine class " + engineConfig.getName() + " could not be loaded.");
 			}
 		} catch (MalformedURLException e) {
-			log.error(
-					"Couldn't load the jar file for engine, make sure jar file exists or name is correct",
-					e);
+			log.error("Couldn't load the jar file for engine, make sure jar file exists or name is correct", e);
 		} catch (ClassNotFoundException e) {
-			log.error(
-					"Engine class '" + engineConfig.getName() + "'@'" + jarFilePath + "' not found", e);
+			log.error("Engine class '" + engineConfig.getName() + "'@'" + jarFilePath + "' not found", e);
 		} catch (InstantiationException e) {
-			log.error(
-					"Engine class could not be instantiated", e);
+			log.error("Engine class could not be instantiated", e);
 		} catch (IllegalAccessException e) {
-			log.error(
-					"Illegal Access Exception while intializing engine", e);
+			log.error("Illegal Access Exception while intializing engine", e);
 		} catch (NoSuchMethodException e) {
-			log.error(
-					"No Constructor found with given 3 arguments", e);
+			log.error("No Constructor found with given 3 arguments", e);
 		} catch (InvocationTargetException e) {
-			log.error(
-					"Exception invoking engine object", e);
+			log.error("Exception invoking engine object", e);
 		}
 
 		return newEngine;

@@ -51,10 +51,8 @@ public final class JWebSocketLoader {
 
 	/**
 	 * Initialize the jWebSocket Server system
-	 * 
 	 * @return the initializer object
-	 * @throws WebSocketException
-	 *             if there's an exception while initialization
+	 * @throws WebSocketException if there's an exception while initialization
 	 */
 	public final WebSocketInitializer initialize() throws WebSocketException {
 		String configPath = getConfigurationPath();
@@ -129,11 +127,9 @@ public final class JWebSocketLoader {
 	 * Load all the configurations based on jWebSocket.xml file at the given
 	 * <tt>configFilePath</tt> location.
 	 * 
-	 * @param configFilePath
-	 *            the path to jWebSocket.xml file
+	 * @param configFilePath the path to jWebSocket.xml file
 	 * @return the web socket config object with all the configuration
-	 * @throws WebSocketException
-	 *             if there's any while loading configuration
+	 * @throws WebSocketException if there's any while loading configuration
 	 */
 	private JWebSocketConfig loadConfiguration(final String configFilePath)
 			throws WebSocketException {
@@ -164,7 +160,6 @@ public final class JWebSocketLoader {
 
 	/**
 	 * private method that checks the path of the jWebSocket.xml file
-	 * 
 	 * @return the path to jWebSocket.xml
 	 */
 	private String getConfigurationPath() {

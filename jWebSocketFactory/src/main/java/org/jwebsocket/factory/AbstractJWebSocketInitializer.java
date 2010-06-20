@@ -18,23 +18,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger;
 
+import org.apache.log4j.Logger;
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.filters.custom.CustomTokenFilter;
 import org.jwebsocket.filters.system.SystemFilter;
 import org.jwebsocket.logging.Logging;
+import org.jwebsocket.netty.engines.NettyEngine;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
 import org.jwebsocket.plugins.system.SystemPlugIn;
 import org.jwebsocket.server.TokenServer;
-import org.jwebsocket.tcp.engines.TCPEngine;
 
 /**
  * Abstract initializer class
@@ -62,10 +62,11 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 		if (log.isDebugEnabled()) {
 			log.debug("Instantiating engine...");
 		}
+		EngineConfiguration config = getEngineConfiguration();
 		WebSocketEngine newEngine = null;
 		try {
-			newEngine = new TCPEngine("tcp0", JWebSocketConstants.DEFAULT_PORT, JWebSocketConstants.DEFAULT_TIMEOUT);
-			// newEngine = new NettyEngine("netty0", JWebSocketConstants.DEFAULT_PORT, JWebSocketConstants.DEFAULT_TIMEOUT);
+		  //newEngine = new TCPEngine(config);
+			newEngine = new NettyEngine(config);
 		} catch (Exception e) {
 			System.out.println("Error instantiating engine: " + e.getMessage());
 			System.exit(0);
@@ -194,4 +195,10 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	 * @return the list of custom filters to server id
 	 */
 	public abstract Map<String, List<WebSocketFilter>> initializeCustomFilters();
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public abstract EngineConfiguration getEngineConfiguration();
 }

@@ -27,8 +27,7 @@ public class JWebSocketFactory {
 	// TODO: makes servers a map for faster access!
 	private static List<WebSocketServer> servers = null;
 
-	public static void start(String aLogLevel, String aLogTarget,
-			String aFilename, String aLogPattern, Integer aLogBuffersize) {
+	public static void start() {
 
 		// initialize log4j logging engine
 		// BEFORE instantiating any jWebSocket classes
