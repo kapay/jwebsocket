@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
@@ -46,25 +47,15 @@ public class TCPEngine extends BaseEngine {
 
 	private static Logger log = Logging.getLogger(TCPEngine.class);
 	private ServerSocket serverSocket = null;
-	private int listenerPort = 8787;
-	private int sessionTimeout = 120000;
+	private int listenerPort = JWebSocketConstants.DEFAULT_PORT;
+	private int sessionTimeout = JWebSocketConstants.DEFAULT_TIMEOUT;
 	private boolean isRunning = false;
 	Thread engineThread = null;
 
-	/**
-	 * Constructor of the TCP engine. The port and the default session timeout
-	 * have to be passed. The session timout passed here is used only when no
-	 * explicit timeout per connection is specified.
-	 * @param aId
-	 * @param aPort TCP port the engine listens on.
-	 * @param aSessionTimeout The default server side session time out.
-	 * @throws WebSocketException
-	 */
-	public TCPEngine(String aId, Integer aPort, Integer aSessionTimeout)
-			throws WebSocketException {
-		super(aId);
-		listenerPort = aPort;
-		sessionTimeout = aSessionTimeout;
+	public TCPEngine(EngineConfiguration configuration) {
+	    super(configuration);
+	    listenerPort = configuration.getPort();
+	    sessionTimeout = configuration.getTimeout();
 	}
 
 	@Override
