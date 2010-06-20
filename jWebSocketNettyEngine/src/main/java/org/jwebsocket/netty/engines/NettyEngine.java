@@ -14,6 +14,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.netty.engines;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+
 import org.apache.log4j.Logger;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -21,16 +24,13 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketConstants;
-import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
 
 /**
  * Netty based implementation of {@code WebSocketEngine} engine.It uses the
@@ -44,41 +44,21 @@ import java.util.concurrent.Executors;
 public class NettyEngine extends BaseEngine {
 
     private static Logger log = Logging.getLogger(NettyEngine.class);
-    private int listenerPort = 8787;
-    private int sessionTimeout = 120000;
+    private int listenerPort = JWebSocketConstants.DEFAULT_PORT;
+    private int sessionTimeout = JWebSocketConstants.DEFAULT_TIMEOUT;
     private volatile boolean isRunning = false;
-    private static final ChannelGroup allChannels = new DefaultChannelGroup(
-            "jWebSocket-NettyEngine");
-    private EngineConfig engineConfig;
+    private static final ChannelGroup allChannels = new DefaultChannelGroup("jWebSocket-NettyEngine");
 
     /**
-     * Constructor of the Netty based engine. The port and the default session
-     * timeout have to be passed. The session timout passed here is used only
-     * when no explicit timeout per connection is specified.
-     *
-     * @param aPort           TCP port the engine listens on.
-     * @param aSessionTimeout The default server side session time out.
-     * @throws WebSocketException if exception creating <tt>NettyEngine</tt>
+     * constructor
+     * @param config
      */
-    public NettyEngine(String aId, Integer aPort, Integer aSessionTimeout)
-            throws WebSocketException {
-        super(aId);
-        listenerPort = aPort;
-        sessionTimeout = aSessionTimeout;
+    public NettyEngine(EngineConfiguration configuration) {
+        super(configuration);
+        this.listenerPort = configuration.getPort();
+        this.sessionTimeout = configuration.getTimeout();
     }
-
-    /**
-     * Construtor that takes the engine config as the argument
-     *
-     * @param theEngineConfig the engine config object
-     */
-/*
-    public NettyEngine(EngineConfig theEngineConfig) {
-        super(theEngineConfig.getId());
-        this.engineConfig = theEngineConfig;
-    }
-*/
-
+    
     /**
      * {@inheritDoc}
      */
@@ -156,25 +136,6 @@ public class NettyEngine extends BaseEngine {
             return true;
         } else {
             return false;
-        }
-    }
-
-    /**
-     * @return the engine config
-     */
-    public EngineConfig getEngineConfig() {
-        return engineConfig;
-    }
-
-    /**
-     * @return the max frame size
-     */
-    @Override
-    public int getMaxFrameSize() {
-        if (engineConfig == null || engineConfig.getMaxframesize() == 0) {
-            return JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE;
-        } else {
-            return engineConfig.getMaxframesize();
         }
     }
 

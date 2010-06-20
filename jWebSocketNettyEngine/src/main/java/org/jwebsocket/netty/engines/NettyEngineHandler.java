@@ -22,6 +22,7 @@ import org.jboss.netty.handler.codec.http.websocket.WebSocketFrame;
 import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameDecoder;
 import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameEncoder;
 import org.jboss.netty.util.CharsetUtil;
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.config.xml.EngineConfig;
@@ -315,7 +316,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
             // web socket data frame encoder/decoder
             ChannelPipeline p = ctx.getChannel().getPipeline();
             p.remove("aggregator");
-            EngineConfig config = engine.getEngineConfig();
+            EngineConfiguration config = engine.getConfiguration();
             if (config == null || config.getMaxframesize() == 0) {
                 p.replace("decoder", "wsdecoder", new WebSocketFrameDecoder(JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE));
             } else {
