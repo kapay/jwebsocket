@@ -18,7 +18,7 @@
 			   all the jar files given are ignored.
 			   Default value if not specified would be 'prod'
 	-->
-	<installation>prod</installation>
+	<installation>dev</installation>
 
 	<!--
 			define the protocol, default protocol if not specified is 'json'
