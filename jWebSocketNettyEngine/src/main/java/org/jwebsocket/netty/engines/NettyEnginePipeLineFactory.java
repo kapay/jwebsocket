@@ -16,8 +16,8 @@ package org.jwebsocket.netty.engines;
 
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
+import org.jwebsocket.netty.http.HttpRequestDecoder;
 
 /**
  * Creates a channel pipeline to handle the incoming requests and
