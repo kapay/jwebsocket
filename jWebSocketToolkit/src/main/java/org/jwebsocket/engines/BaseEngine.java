@@ -16,6 +16,8 @@
 package org.jwebsocket.engines;
 
 import javolution.util.FastMap;
+
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPaket;
@@ -187,4 +189,10 @@ public class BaseEngine implements WebSocketEngine {
     public String getId() {
         return id;
 	}
+
+    @Override
+    public EngineConfiguration getConfiguration() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
