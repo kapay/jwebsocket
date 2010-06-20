@@ -287,11 +287,6 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
         if (msg.isBinary()) {
             // TODO: handle binary data
         } else if (msg.isText()) {
-            // Get the content of this frame into a UTF-8 string
-            // String encodedData = msg.getTextData();
-            // remove the new line character "\n" which is a packate separator.
-			// !!! obsolete since v0.9.0.0616 because client doesn't send it anymore !!!
-            // textData = encodedData.substring(0, encodedData.length() - 1);
             textData = msg.getTextData();
         } else {
             throw new WebSocketRuntimeException("Frame Doesn't contain any type of data");
@@ -383,19 +378,10 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
     private WebSocketConnector initializeConnector(ChannelHandlerContext ctx, HttpRequest req) {
 
         RequestHeader header = getRequestHeader(req);
-
-        // TODO: figure out how to use it with netty.
-        // set socket timeout to given amount of milliseconds
-        // check min and max timeout ranges
         int lSessionTimeout = header.getTimeout(JWebSocketConstants.DEFAULT_TIMEOUT);
-		/* min and max range removed since 0.9.0.0602, see config documentation
-        if (lSessionTimeout > JWebSocketConstants.MAX_TIMEOUT) {
-            lSessionTimeout = JWebSocketConstants.MAX_TIMEOUT;
-        } else if (lSessionTimeout < JWebSocketConstants.MIN_TIMEOUT) {
-            lSessionTimeout = JWebSocketConstants.MIN_TIMEOUT;
+        if (lSessionTimeout > 0) {
+            ctx.getChannel().getConfig().setConnectTimeoutMillis(lSessionTimeout);
         }
-		*/
-
         // create connector
         WebSocketConnector theConnector = new NettyConnector(engine, this);
         theConnector.setHeader(header);
