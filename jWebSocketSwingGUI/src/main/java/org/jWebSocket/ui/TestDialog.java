@@ -13,8 +13,8 @@ package org.jWebSocket.ui;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import org.jwebsocket.api.WebSocketListener;
+import org.jwebsocket.client.BaseClientJ2SE;
 import org.jwebsocket.kit.WebSocketException;
-import org.jWebSocket.client.BaseClientJ2SE;
 import org.jwebsocket.kit.WebSocketEvent;
 
 /**
