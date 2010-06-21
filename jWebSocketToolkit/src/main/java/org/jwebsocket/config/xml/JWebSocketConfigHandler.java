@@ -14,9 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
-import org.apache.log4j.Logger;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.logging.Logging;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -35,7 +33,7 @@ import java.util.Map;
  */
 public class JWebSocketConfigHandler implements ConfigHandler {
 
-    private static Logger log = Logging.getLogger(JWebSocketConfigHandler.class);
+    // private static Logger log = Logging.getLogger(JWebSocketConfigHandler.class);
 
     private static final String ELEMENT_INSTALLATION = "installation";
     private static final String ELEMENT_PROTOCOL = "protocol";
@@ -81,9 +79,11 @@ public class JWebSocketConfigHandler implements ConfigHandler {
     @Override
     public JWebSocketConfig processConfig(XMLStreamReader streamReader) {
         JWebSocketConfig.Builder configBuilder = new JWebSocketConfig.Builder();
+		/*
         if (log.isDebugEnabled()) {
             log.debug("Reading jWebSocket Configuration...");
         }
+		 */
         try {
             while (streamReader.hasNext()) {
                 streamReader.next();
@@ -136,9 +136,11 @@ public class JWebSocketConfigHandler implements ConfigHandler {
                 if (streamReader.isEndElement()) {
                     String elementName = streamReader.getLocalName();
                     if (elementName.equals(JWEBSOCKET)) {
+						/*
                         if (log.isInfoEnabled()) {
                             log.info("jWebSocket configuration successfully processed.");
                         }
+						 */
                         break;
                     }
                 }

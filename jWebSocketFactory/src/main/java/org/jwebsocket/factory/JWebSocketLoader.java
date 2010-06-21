@@ -29,12 +29,10 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.JWebSocketConfigHandler;
 import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.logging.Logging;
 import org.jwebsocket.security.SecurityFactory;
 
 /**
@@ -46,7 +44,7 @@ import org.jwebsocket.security.SecurityFactory;
  */
 public final class JWebSocketLoader {
 
-	private static Logger log = Logging.getLogger(JWebSocketLoader.class);
+	// private static Logger log = Logging.getLogger(JWebSocketLoader.class);
 	private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
 	/**
@@ -108,18 +106,21 @@ public final class JWebSocketLoader {
 	private WebSocketInitializer instantiateInitializer(String initializerClass) {
 		WebSocketInitializer initializer = null;
 		try {
-			Class<WebSocketInitializer> clz = (Class<WebSocketInitializer>) Class.forName(initializerClass);
-			initializer = clz.newInstance();
-		} catch (ClassNotFoundException e) {
-			log.error("Error instantiating initializer", e);
-		} catch (InstantiationException e) {
-			log.error("Error instantiating initializer", e);
-		} catch (IllegalAccessException e) {
-			log.error("Error instantiating initializer", e);
+			Class<WebSocketInitializer> lClass = (Class<WebSocketInitializer>) Class.forName(initializerClass);
+			initializer = lClass.newInstance();
+		} catch (ClassNotFoundException ex) {
+			// log.error(ex.getClass().getSimpleName() + " instantiating initializer", ex);
+		} catch (InstantiationException ex) {
+			// log.error(ex.getClass().getSimpleName() + " instantiating initializer", ex);
+		} catch (IllegalAccessException ex) {
+			// log.error(ex.getClass().getSimpleName() + " instantiating initializer", ex);
 		}
+		/*
 		if (log.isInfoEnabled()) {
-			log.info("Initializer Found:" + initializer);
+			// log full class name incl. package here for convenience
+			log.info("Initializer found: " + initializer.getClass().getName());
 		}
+		 */
 		return initializer;
 	}
 
@@ -143,16 +144,20 @@ public final class JWebSocketLoader {
 			streamReader = factory.createXMLStreamReader(fis);
 			config = configHandler.processConfig(streamReader);
 		} catch (XMLStreamException ex) {
-			lMsg = "Exception occurred while creating XML stream.";
+			lMsg = ex.getClass().getSimpleName() + " occurred while creating XML stream (" + configFilePath+ ").";
+			/*
 			if (log != null && log.isDebugEnabled()) {
 				log.debug(lMsg);
 			}
+			 */
 			throw new WebSocketException(lMsg);
 		} catch (FileNotFoundException ex) {
-			lMsg = "jWebSocket config not found while creating XML stream.";
+			lMsg = "jWebSocket config file not found while creating XML stream (" + configFilePath+ ").";
+			/*
 			if (log != null && log.isDebugEnabled()) {
 				log.debug(lMsg);
 			}
+			 */
 			throw new WebSocketException(lMsg);
 		}
 		return config;
@@ -169,6 +174,8 @@ public final class JWebSocketLoader {
 		String lFileSep = System.getProperty("file.separator");
 		File lFile;
 
+/* TODO: remarked by Alex because it overrides the loading of %JWEBSOCKET_HOME%/conf or %CATALINA_HOME%/conf
+ * as long as the jWebSocket.xml is stored as a resource.
 		// first try to get the jWebSocket.xml file from the classpath
 		URL lURL = Thread.currentThread().getContextClassLoader().getResource(JWEBSOCKET_XML);
 		if (lURL != null) {
@@ -185,17 +192,10 @@ public final class JWebSocketLoader {
 				lWebSocketXML = lWebSocketXML.substring(1);
 			}
 			if (lWebSocketXML != null) {
-				if (log.isInfoEnabled()) {
-					log.info("Loading " + JWEBSOCKET_XML
-							+ " from classpath (" + lWebSocketXML + ")...");
-				}
 				return lWebSocketXML;
 			}
-			if (log.isDebugEnabled()) {
-				log.debug(JWEBSOCKET_XML + " not found at classpath.");
-			}
 		}
-
+*/
 		// try to obtain JWEBSOCKET_HOME environment variable
 		lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
 		if (lWebSocketHome != null) {
@@ -209,27 +209,33 @@ public final class JWebSocketLoader {
 					+ JWEBSOCKET_XML;
 			lFile = new File(lWebSocketXML);
 			if (lFile.exists()) {
+				/*
 				if (log.isInfoEnabled()) {
 					log.info("Loading " + JWEBSOCKET_XML
 							+ " from %" + JWEBSOCKET_HOME + "%/conf...");
 				}
+				 */
 				return lWebSocketXML;
 			}
+			/*
 			if (log.isDebugEnabled()) {
 				log.debug(JWEBSOCKET_XML
 						+ " not found at %" + JWEBSOCKET_HOME + "%/conf.");
 			}
+			 */
 		} else {
-			log.warn("%" + JWEBSOCKET_HOME + "% variable not set.");
+			// log.warn("%" + JWEBSOCKET_HOME + "% variable not set.");
 		}
 
 		// try to obtain CATALINA_HOME environment variable
 		lWebSocketHome = System.getenv(CATALINA_HOME);
 		if (lWebSocketHome != null) {
+			/*
 			if (log.isDebugEnabled()) {
 				log.debug("Trying to load " + JWEBSOCKET_XML
 						+ " from %" + CATALINA_HOME + "%/conf...");
 			}
+			 */
 			// append trailing slash if needed
 			if (!lWebSocketHome.endsWith(lFileSep)) {
 				lWebSocketHome += lFileSep;
@@ -240,20 +246,26 @@ public final class JWebSocketLoader {
 					+ JWEBSOCKET_XML;
 			lFile = new File(lWebSocketXML);
 			if (lFile.exists()) {
+				/*
 				if (log.isInfoEnabled()) {
 					log.info("Loading " + JWEBSOCKET_XML
 							+ " from %" + CATALINA_HOME + "%/conf...");
 				}
+				 */
 				return lWebSocketXML;
 			}
+			/*
 			if (log.isDebugEnabled()) {
 				log.debug(JWEBSOCKET_XML
 						+ " not found at %" + CATALINA_HOME + "%/conf.");
 			}
+			 */
 		} else {
+			/*
 			if (log.isDebugEnabled()) {
 				log.debug("%" + CATALINA_HOME + "% variable not set.");
 			}
+			 */
 		}
 
 		return null;

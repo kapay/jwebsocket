@@ -53,7 +53,8 @@ import org.jwebsocket.config.xml.ServerConfig;
 public final class JWebSocketXmlConfigInitializer implements
 		WebSocketInitializer {
 
-	private static Logger log = Logging.getLogger(JWebSocketXmlConfigInitializer.class);
+	// don't initialize logger here! Will be initialized with loaded settings!
+	private static Logger log = null; // Logging.getLogger(JWebSocketXmlConfigInitializer.class);
 	private final JWebSocketJarClassLoader classLoader = new JWebSocketJarClassLoader();
 	private JWebSocketConfig config;
 
@@ -82,6 +83,12 @@ public final class JWebSocketXmlConfigInitializer implements
 	@Override
 	public void initializeLogging() {
 		LoggingConfig loggingConfig = config.getLoggingConfig();
+		// initialize log4j logging engine
+		// BEFORE instantiating any jWebSocket classes
+		Logging.initLogs(loggingConfig.getLevel(), loggingConfig.getAppender(),
+				loggingConfig.getFilename(), loggingConfig.getPattern(),
+				loggingConfig.getBufferSize());
+		log = Logging.getLogger(JWebSocketXmlConfigInitializer.class);
 		if (log.isDebugEnabled()) {
 			log.debug("Logging settings"
 					+ ": appender: " + loggingConfig.getAppender()
@@ -90,13 +97,6 @@ public final class JWebSocketXmlConfigInitializer implements
 					+ ", buffersize: " + loggingConfig.getBufferSize()
 					+ ", pattern: " + loggingConfig.getPattern());
 		}
-
-		// initialize log4j logging engine
-		// BEFORE instantiating any jWebSocket classes
-		Logging.initLogs(loggingConfig.getLevel(), loggingConfig.getAppender(),
-				loggingConfig.getFilename(), loggingConfig.getPattern(),
-				loggingConfig.getBufferSize());
-		log = Logging.getLogger(JWebSocketFactory.class);
 		if (log.isDebugEnabled()) {
 			log.debug("Starting jWebSocket Server Sub System...");
 		}

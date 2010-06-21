@@ -35,16 +35,16 @@ public class JWebSocketFactory {
 		Logging.initLogs(aLogLevel, aLogTarget);
 		 */
 
+
 		JWebSocketLoader loader = new JWebSocketLoader();
 		try {
 			WebSocketInitializer initializer = loader.initialize();
-
 			initializer.initializeLogging();
+
 			log = Logging.getLogger(JWebSocketFactory.class);
 			if (log.isDebugEnabled()) {
 				log.debug("Starting jWebSocket Server Sub System...");
 			}
-
 			if (initializer == null) {
 				log.error("jWebSocket Server sub system could not be initialized.");
 				return;
@@ -129,23 +129,22 @@ public class JWebSocketFactory {
 				}
 			}
 
-		} catch (WebSocketException e) {
-			if (log.isDebugEnabled()) {
-				log.debug("Exception during startup", e);
+		} catch (WebSocketException ex) {
+			if (log != null) {
+				if (log.isDebugEnabled()) {
+					log.debug("Exception during startup", ex);
+				}
+			} else {
+				System.out.println(ex.getClass().getSimpleName() + " during jWebSocket Server startup: " + ex.getMessage());
 			}
-			if (log.isInfoEnabled()) {
-				log.info("jWebSocketServer failed to start");
+			if (log != null && log.isInfoEnabled()) {
+				log.info("jWebSocketServer failed to start.");
 			}
-
-			// System.out.println("ERROR during jWebSocket Server startup");
-			// TODO: return result here, especially to show in console server
-			// System.exit(0);
 		}
-
 	}
 
 	public static void stop() {
-		if (log.isDebugEnabled()) {
+		if (log != null && log.isDebugEnabled()) {
 			log.debug("Stopping jWebSocket Sub System...");
 		}
 
@@ -153,37 +152,41 @@ public class JWebSocketFactory {
 		// stop engine if previously started successfully
 		if (engine != null) {
 			// now stop the servers
-			if (log.isDebugEnabled()) {
+			if (log != null && log.isDebugEnabled()) {
 				log.debug("Stopping engine...");
 			}
 			try {
 				engine.stopEngine(CloseReason.SHUTDOWN);
-				if (log.isInfoEnabled()) {
+				if (log != null && log.isInfoEnabled()) {
 					log.info("jWebSocket engine '" + engine.getId() + "' stopped");
 				}
 			} catch (WebSocketException ex) {
-				log.error("Stopping engine: " + ex.getMessage());
+				if (log != null) {
+					log.error("Stopping engine: " + ex.getMessage());
+				}
 			}
 		}
 
 		if (servers != null) {
 			// now stop the servers
-			if (log.isDebugEnabled()) {
+			if (log != null && log.isDebugEnabled()) {
 				log.debug("Stopping servers...");
 			}
 			for (WebSocketServer server : servers) {
 				try {
 					server.stopServer();
-					if (log.isInfoEnabled()) {
+					if (log != null && log.isInfoEnabled()) {
 						log.info("jWebSocket server '" + server.getId() + "' stopped");
 					}
 				} catch (WebSocketException ex) {
-					log.error("Stopping server: " + ex.getMessage());
+					if (log != null) {
+						log.error("Stopping server: " + ex.getMessage());
+					}
 				}
 			}
 		}
 
-		if (log.isInfoEnabled()) {
+		if (log != null && log.isInfoEnabled()) {
 			log.info("jWebSocket Server Sub System stopped.");
 		}
 		Logging.exitLogs();

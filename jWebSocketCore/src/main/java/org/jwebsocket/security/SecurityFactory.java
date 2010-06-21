@@ -30,7 +30,7 @@ import org.jwebsocket.logging.Logging;
  */
 public class SecurityFactory {
 
-	private static Logger log = Logging.getLogger(SecurityFactory.class);
+	// private static Logger log = Logging.getLogger(SecurityFactory.class);
 	private static Users users = new Users();
 	/**
 	 *
@@ -45,9 +45,11 @@ public class SecurityFactory {
 	 * startup without a config file, this will be removed in the final release!
 	 */
 	public static void initDefault() {
+		/*
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing demo rights, roles and users...");
 		}
+		 */
 		Rights rights = new Rights();
 		// specify rights
 		Right lRPC = new Right("org.jWebSocket.plugins.rpc.rpc", "Allow Remote Procedure Calls (RPC) to server");
@@ -78,7 +80,7 @@ public class SecurityFactory {
 		users.addUser(lAdminUser);
 		users.addUser(lLockedUser);
 
-		log.info("Default rights, roles and users initialized.");
+		// log.info("Default rights, roles and users initialized.");
 	}
 
 	/**
@@ -136,12 +138,12 @@ public class SecurityFactory {
 			users.addUser(lUser);
 		}
 
-		log.info("Rights, roles and users successfully initialized.");
+		// log.info("Rights, roles and users successfully initialized.");
 	}
 
 	public static void init() {
-		System.out.println(
-				"JWEBSOCKET_HOME variable not set, using default configuration...");
+		// System.out.println(
+		//		"JWEBSOCKET_HOME variable not set, using default configuration...");
 		// initialize the security factory with some default demo data
 		// to show at least something even with no config
 		// TODO: only temporary, will be removed in the final release!
