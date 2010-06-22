@@ -222,9 +222,9 @@ public final class JWebSocketLoader {
 				log.debug(JWEBSOCKET_XML
 						+ " not found at %" + JWEBSOCKET_HOME + "%/conf.");
 			}
-			 */
 		} else {
 			// log.warn("%" + JWEBSOCKET_HOME + "% variable not set.");
+			 */
 		}
 
 		// try to obtain CATALINA_HOME environment variable
@@ -259,9 +259,7 @@ public final class JWebSocketLoader {
 				log.debug(JWEBSOCKET_XML
 						+ " not found at %" + CATALINA_HOME + "%/conf.");
 			}
-			 */
 		} else {
-			/*
 			if (log.isDebugEnabled()) {
 				log.debug("%" + CATALINA_HOME + "% variable not set.");
 			}
