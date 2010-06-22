@@ -3,15 +3,15 @@
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU General Public License as published by the
+//	under the terms of the GNU Lesser General Public License as published by the
 //	Free Software Foundation; either version 3 of the License, or (at your
 //	option) any later version.
 //	This program is distributed in the hope that it will be useful, but WITHOUT
 //	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
 //	more details.
-//	You should have received a copy of the GNU General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/>.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 package org.jwebsocket.tcp.engines;
 
@@ -119,11 +119,13 @@ public class TCPEngine extends BaseEngine {
 			// at accept in the listener thread which terminates the listener
 			if (serverSocket != null && !serverSocket.isClosed()) {
 				serverSocket.close();
+				if (log.isInfoEnabled()) {
+					log.info("TCP engine '" + getId() + "' stopped at port " + listenerPort + " (closed=" + serverSocket.isClosed() + ").");
+				}
+				serverSocket = null;
+			} else {
+				log.warn("Stopping TCP engine '" + getId() + "': no server socket or server socket closed.");
 			}
-			if (log.isInfoEnabled()) {
-				log.info("TCP engine '" + getId() + "' stopped at port " + listenerPort + " (closed=" + serverSocket.isClosed() + ").");
-			}
-			serverSocket = null;
 		} catch (Exception ex) {
 			log.error(ex.getClass().getSimpleName() + " on stopping TCP engine '" + getId() + "': " + ex.getMessage());
 		}

@@ -95,11 +95,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketSamples</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>

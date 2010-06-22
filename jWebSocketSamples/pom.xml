@@ -27,6 +27,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
+							<!--<classpathPrefix>/svn/jWebSocket/trunk/jWebSocketRTE/jWebSocket-0.9.5/libs/</classpathPrefix>-->
 						</manifest>
 					</archive>
 				</configuration>
@@ -54,4 +55,9 @@
 	<!--  define repositories -->
 	<repositories>
 	</repositories>
+
+    <properties>
+        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+    </properties>
+
 </project>

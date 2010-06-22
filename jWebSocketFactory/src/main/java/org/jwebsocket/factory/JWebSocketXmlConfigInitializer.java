@@ -2,15 +2,15 @@
 //	jWebSocket - Copyright (c) 2010 jwebsocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU General Public License as published by the
+//	under the terms of the GNU Lesser General Public License as published by the
 //	Free Software Foundation; either version 3 of the License, or (at your
 //	option) any later version.
 //	This program is distributed in the hope that it will be useful, but WITHOUT
 //	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
 //	more details.
-//	You should have received a copy of the GNU General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/>.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
@@ -40,6 +40,7 @@ import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.FilterConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.ServerConfig;
+import org.jwebsocket.plugins.TokenPlugIn;
 
 /**
  * Intialize the engine, servers and plugins based on jWebSocket.xml
@@ -303,29 +304,49 @@ public final class JWebSocketXmlConfigInitializer implements
 				// if class found
 				// try to create an instance
 				if (pluginClass != null) {
+/*
+					Constructor<WebSocketPlugIn> ctor = pluginClass.getDeclaredConstructor();
+					ctor.setAccessible(true);
+					Object lObj = ctor.newInstance(new Object[]{});
+					log.debug("lObj.classname = " + lObj.getClass().getName());
+					Object plugin = null;
+					try {
+						plugin = lObj;
+						log.info(
+							"lObj instanceof WebSocketPlugIn " + ( lObj instanceof WebSocketPlugIn ? "YES" : "NO" )
+						);
+					} catch (Exception ex) {
+						log.error(
+							ex.getClass().getSimpleName() + " while instantiating class '" + pluginConfig.getName() + "'.");
+					}
+*/
 					WebSocketPlugIn plugin = (WebSocketPlugIn) pluginClass.newInstance();
+
 					if (log.isDebugEnabled()) {
 						log.debug("Plug-in '" + pluginConfig.getId() + "' successfully instantiated.");
 					}
 
 					// now add the plugin to plugin map based on server ids
 					for (String serverId : pluginConfig.getServers()) {
-						pluginMap.get(serverId).add(plugin);
+						pluginMap.get(serverId).add((WebSocketPlugIn)plugin);
 					}
 				}
 
-			} catch (MalformedURLException e) {
+			} catch (MalformedURLException ex) {
 				log.error(
-						"Couldn't load the jar file for plugin, make sure the jar file exists and the name is correct.", e);
-			} catch (ClassNotFoundException e) {
+						"Couldn't load the jar file for plugin, make sure the jar file exists and the name is correct.", ex);
+			} catch (ClassNotFoundException ex) {
 				log.error(
-						"Plugin class '" + pluginConfig.getName() + "' not found.", e);
-			} catch (InstantiationException e) {
+						"Plugin class '" + pluginConfig.getName() + "' not found.", ex);
+			} catch (InstantiationException ex) {
 				log.error(
-						"Plugin class '" + pluginConfig.getName() + "' could not be instantiated.", e);
-			} catch (IllegalAccessException e) {
+						"Plugin class '" + pluginConfig.getName() + "' could not be instantiated.", ex);
+			} catch (IllegalAccessException ex) {
 				log.error(
-						"Illegal Access Exception while intializing plugin.", e);
+						"Illegal Access Exception while instantiating plugin.", ex);
+			} catch (Exception ex) {
+				log.error(
+						ex.getClass().getSimpleName() + " while instantiating plugin '" + pluginConfig.getName() + "'.", ex);
 			}
 		}
 		return pluginMap;
