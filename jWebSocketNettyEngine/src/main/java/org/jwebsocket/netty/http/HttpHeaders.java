@@ -1,5 +1,19 @@
+/*
+ * Copyright 2009 Red Hat, Inc.
+ *
+ * Red Hat licenses this file to you under the Apache License, version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jwebsocket.netty.http;
-
 
 import java.util.LinkedList;
 import java.util.List;
@@ -8,6 +22,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.jboss.netty.handler.codec.http.HttpMessage;
+import org.jboss.netty.handler.codec.http.HttpMethod;
+import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 
 
 /**
@@ -16,7 +33,7 @@ import org.jboss.netty.handler.codec.http.HttpMessage;
  *
  * @author <a href="http://www.jboss.org/netty/">The Netty Project</a>
  * @author Andy Taylor (andy.taylor@jboss.org)
- * @version $Rev: 2270 $, $Date$
+ * @version $Rev: 2312 $, $Date$
  *
  * @apiviz.landmark
  * @apiviz.stereotype static
@@ -28,7 +45,7 @@ public class HttpHeaders {
      *
      * @author <a href="http://www.jboss.org/netty/">The Netty Project</a>
      * @author Andy Taylor (andy.taylor@jboss.org)
-     * @version $Rev: 2270 $, $Date$
+     * @version $Rev: 2312 $, $Date$
      *
      * @apiviz.stereotype static
      */
@@ -202,6 +219,26 @@ public class HttpHeaders {
          */
         public static final String RETRY_AFTER = "Retry-After";
         /**
+         * {@code "Sec-WebSocket-Key1"}
+         */
+        public static final String SEC_WEBSOCKET_KEY1 = "Sec-WebSocket-Key1";
+        /**
+         * {@code "Sec-WebSocket-Key2"}
+         */
+        public static final String SEC_WEBSOCKET_KEY2 = "Sec-WebSocket-Key2";
+        /**
+         * {@code "Sec-WebSocket-Location"}
+         */
+        public static final String SEC_WEBSOCKET_LOCATION = "Sec-WebSocket-Location";
+        /**
+         * {@code "Sec-WebSocket-Origin"}
+         */
+        public static final String SEC_WEBSOCKET_ORIGIN = "Sec-WebSocket-Origin";
+        /**
+         * {@code "Sec-WebSocket-Protocol"}
+         */
+        public static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+        /**
          * {@code "Server"}
          */
         public static final String SERVER = "Server";
@@ -272,7 +309,7 @@ public class HttpHeaders {
      *
      * @author <a href="http://www.jboss.org/netty/">The Netty Project</a>
      * @author Andy Taylor (andy.taylor@jboss.org)
-     * @version $Rev: 2270 $, $Date$
+     * @version $Rev: 2312 $, $Date$
      *
      * @apiviz.stereotype static
      */
@@ -592,6 +629,24 @@ public class HttpHeaders {
         if (contentLength != null) {
             return Long.parseLong(contentLength);
         }
+
+        // WebSockset messages have constant content-lengths.
+        if (message instanceof HttpRequest) {
+            HttpRequest req = (HttpRequest) message;
+            if (HttpMethod.GET.equals(req.getMethod()) &&
+                req.containsHeader(Names.SEC_WEBSOCKET_KEY1) &&
+                req.containsHeader(Names.SEC_WEBSOCKET_KEY2)) {
+                return 8;
+            }
+        } else if (message instanceof HttpResponse) {
+            HttpResponse res = (HttpResponse) message;
+            if (res.getStatus().getCode() == 101 &&
+                res.containsHeader(Names.SEC_WEBSOCKET_ORIGIN) &&
+                res.containsHeader(Names.SEC_WEBSOCKET_LOCATION)) {
+                return 16;
+            }
+        }
+
         return defaultValue;
     }
 
