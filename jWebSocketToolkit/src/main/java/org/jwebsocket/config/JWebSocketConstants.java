@@ -24,17 +24,17 @@ package org.jwebsocket.config;
 public final class JWebSocketConstants {
 
 	/**
-	 * jWebSocket copyright string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
+	 * jWebSocket copyright string - MAY NOT BE CHANGED due to GNU LGPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.
 	 */
 	public static final String COPYRIGHT = "(C) 2010 jWebSocket.org by Innotrade GmbH, Germany, Herzogenrath";
 	/**
-	 * jWebSocket license string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
+	 * jWebSocket license string - MAY NOT BE CHANGED due to GNU LGPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.
 	 */
-	public static final String LICENSE = "Distributed under GNU GPL License Version 3.0 (http://www.gnu.org/licenses/gpl-3.0.html)";
+	public static final String LICENSE = "Distributed under GNU LGPL License Version 3.0 (http://www.gnu.org/licenses/lgpl.html)";
 	/**
-	 * jWebSocket vendor string - MAY NOT BE CHANGED due to GNU GPL v3.0 license!
+	 * jWebSocket vendor string - MAY NOT BE CHANGED due to GNU LGPL v3.0 license!
 	 * Please ask for conditions of a commercial license on demand.
 	 */
 	public static final String VENDOR = "jWebSocket.org";

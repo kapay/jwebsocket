@@ -53,9 +53,9 @@ public class TCPEngine extends BaseEngine {
 	Thread engineThread = null;
 
 	public TCPEngine(EngineConfiguration configuration) {
-	    super(configuration);
-	    listenerPort = configuration.getPort();
-	    sessionTimeout = configuration.getTimeout();
+		super(configuration);
+		listenerPort = configuration.getPort();
+		sessionTimeout = configuration.getTimeout();
 	}
 
 	@Override
@@ -176,14 +176,14 @@ public class TCPEngine extends BaseEngine {
 
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(lResp);
 		// maybe the request is a flash policy-file-request
-		String lFlashBridgeReq = (String)lRespMap.get("policy-file-request");
+		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
 		if (lFlashBridgeReq != null) {
 			log.warn("TCPEngine returned policy file request ('" + lFlashBridgeReq + "'), check for FlashBridge plug-in.");
 		}
 		// generate the websocket handshake
 		// if policy-file-request is found answer it
 		byte[] ba = WebSocketHandshake.generateS2CResponse(lRespMap);
-		if( ba == null) {
+		if (ba == null) {
 			if (log.isDebugEnabled()) {
 				log.warn("TCPEngine detected illegal handshake.");
 			}
@@ -201,21 +201,23 @@ public class TCPEngine extends BaseEngine {
 
 		RequestHeader header = new RequestHeader();
 		Map<String, String> args = new HashMap<String, String>();
-		String path = "";
-		String searchString = "";
+		String path = (String) lRespMap.get("path");
 
 		// isolate search string
-		int pos = path.indexOf(JWebSocketConstants.PATHARG_SEPARATOR);
-		if (pos >= 0) {
-			searchString = path.substring(pos + 1);
-			if (searchString.length() > 0) {
-				String[] lArgs = searchString.split(JWebSocketConstants.ARGARG_SEPARATOR);
-				for (int i = 0; i < lArgs.length; i++) {
-					String[] lKeyValuePair = lArgs[i].split(JWebSocketConstants.KEYVAL_SEPARATOR, 2);
-					if (lKeyValuePair.length == 2) {
-						args.put(lKeyValuePair[0], lKeyValuePair[1]);
-						if (log.isDebugEnabled()) {
-							log.debug("arg" + i + ": " + lKeyValuePair[0] + "=" + lKeyValuePair[1]);
+		String searchString = null;
+		if (path != null) {
+			int pos = path.indexOf(JWebSocketConstants.PATHARG_SEPARATOR);
+			if (pos >= 0) {
+				searchString = path.substring(pos + 1);
+				if (searchString.length() > 0) {
+					String[] lArgs = searchString.split(JWebSocketConstants.ARGARG_SEPARATOR);
+					for (int i = 0; i < lArgs.length; i++) {
+						String[] lKeyValuePair = lArgs[i].split(JWebSocketConstants.KEYVAL_SEPARATOR, 2);
+						if (lKeyValuePair.length == 2) {
+							args.put(lKeyValuePair[0], lKeyValuePair[1]);
+							if (log.isDebugEnabled()) {
+								log.debug("arg" + i + ": " + lKeyValuePair[0] + "=" + lKeyValuePair[1]);
+							}
 						}
 					}
 				}

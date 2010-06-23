@@ -4,15 +4,15 @@
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU General Public License as published by the
+//	under the terms of the GNU Lesser General Public License as published by the
 //	Free Software Foundation; either version 3 of the License, or (at your
 //	option) any later version.
 //	This program is distributed in the hope that it will be useful, but WITHOUT
 //	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
 //	more details.
-//	You should have received a copy of the GNU General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/>.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 var jws={NS_BASE:"org.jWebSocket",MSG_WS_NOT_SUPPORTED:"Unfortunately your browser does neither natively support WebSockets\n"+"nor you have the Adobe Flash-PlugIn 9+ installed.",CUR_TOKEN_ID:0,JWS_SERVER_URL:"ws://"+(self.location.hostname?self.location.hostname:"localhost")+":8787",JWS_FLASHBRIDGE:null,$:function(aT){return document.getElementById(aT);},browserSupportsWebSockets:function(){return(window.WebSocket!==null&&window.WebSocket!==undefined);},browserSupportsNativeWebSockets:(function(){return(window.WebSocket!==null&&window.WebSocket!==undefined);})(),browserSupportsJSON:function(){return(window.JSON!==null&&window.JSON!==undefined);},browserSupportsNativeJSON:(function(){return(window.JSON!==null&&window.JSON!==undefined);})(),isIE:(function(){var aS=navigator.userAgent;var aY=aS.indexOf("MSIE");return(aY>=0);})()};jws.events={addEventListener:(jws.isIE?function(as,r,aA){as.attachEvent("on"+r,aA);}:function(as,r,aA){as.addEventListener(r,aA,false);}),getTarget:(jws.isIE?function(r){return r.srcElement;}:function(r){return r.target;})};if(!jws.browserSupportsNativeWebSockets){
 	// --- swfobject.js ---

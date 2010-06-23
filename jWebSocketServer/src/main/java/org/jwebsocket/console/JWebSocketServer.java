@@ -29,10 +29,11 @@ public class JWebSocketServer {
 	 * @param args the command line arguments
 	 */
 	public static void main(String[] args) {
-		// the following 3 lines may not be removed due to GNU GPL 3.0 license!
+		// the following 3 lines may not be removed due to GNU LGPL 3.0 license!
 		System.out.println("jWebSocket Ver. "+ JWebSocketConstants.VERSION_STR+ " (" + System.getProperty("sun.arch.data.model") + "bit)");
 		System.out.println(JWebSocketConstants.COPYRIGHT);
 		System.out.println(JWebSocketConstants.LICENSE);
+		System.out.println("Log files per default in jWebSocket.log if not overwritten in jWebSocket.xml.");
 
 		JWebSocketFactory.start();
 

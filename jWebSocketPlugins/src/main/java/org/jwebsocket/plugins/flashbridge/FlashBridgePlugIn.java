@@ -41,7 +41,6 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 	private int engineInstanceCount = 0;
 	private BridgeProcess bridgeProcess = null;
 	private Thread bridgeThread = null;
-	// private int TIMEOUT = 2500;
 
 	/**
 	 *
@@ -119,7 +118,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 							}
 							os.write(("<cross-domain-policy>"
 									+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
-									+ "</cross-domain-policy>\n").getBytes());
+									+ "</cross-domain-policy>").getBytes());
 							os.flush();
 						} else {
 							log.warn("Received invalid policy-file-request (" + lLine + ")...");
