@@ -25,11 +25,20 @@ import org.jboss.netty.util.CharsetUtil;
 /**
  * Handler class for {@code JWebSocketClient}
  * @author puran
- * @version $Id:$
+ * @version $Id$
  */
 public class JWebSocketClientHandler extends SimpleChannelUpstreamHandler {
 
     private boolean readingChunks;
+    
+    private JWebSocketClient webSocketClient;
+    
+    /**
+     * @param client the web socket client
+     */
+    public JWebSocketClientHandler(JWebSocketClient client) {
+        this.webSocketClient = client;
+    }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {

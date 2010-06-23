@@ -22,29 +22,36 @@ import org.jboss.netty.handler.codec.http.HttpContentDecompressor;
 /**
  * Pipeline factory
  * @author puran
- * @version $Id:$
+ * @version $Id$
  */
 public class JWebSocketChannelPipelineFactory implements ChannelPipelineFactory {
 
-    private final boolean ssl;
+    private final boolean secure;
+    private final JWebSocketClient webSocketClient;
 
-    public JWebSocketChannelPipelineFactory(boolean ssl) {
-        this.ssl = ssl;
+    /**
+     * Constructor 
+     * @param ssl secure flag
+     * @param client web socket client
+     */
+    public JWebSocketChannelPipelineFactory(boolean secure, JWebSocketClient client) {
+        this.secure = secure;
+        this.webSocketClient = client;
     }
 
     public ChannelPipeline getPipeline() throws Exception {
         // Create a default pipeline implementation.
         ChannelPipeline pipeline = Channels.pipeline();
 
-        // Enable HTTPS if necessary.
-        if (ssl) {
+        // Enable wss if necessary.
+        if (secure) {
             //TODO:add ssl handler
         }
 
         pipeline.addLast("codec", new HttpClientCodec());
         pipeline.addLast("inflater", new HttpContentDecompressor());
 
-        pipeline.addLast("handler", new JWebSocketClientHandler());
+        pipeline.addLast("handler", new JWebSocketClientHandler(webSocketClient));
         return pipeline;
     }
 }
