@@ -204,7 +204,7 @@ public class TCPEngine extends BaseEngine {
 		String path = (String) lRespMap.get("path");
 
 		// isolate search string
-		String searchString = null;
+		String searchString = "";
 		if (path != null) {
 			int pos = path.indexOf(JWebSocketConstants.PATHARG_SEPARATOR);
 			if (pos >= 0) {
