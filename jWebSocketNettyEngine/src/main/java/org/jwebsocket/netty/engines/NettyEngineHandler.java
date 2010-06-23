@@ -14,10 +14,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.netty.engines;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelFuture;
@@ -64,7 +67,8 @@ import org.jwebsocket.netty.http.HttpHeaders;
  * Also it starts the <tt>NettyConnector</tt>.
  * </p>
  *
- * @author puran
+ * @author <a href="http://www.purans.net/">Puran Singh</a>
+ * @author <a href="http://gleamynode.net/">Trustin Lee</a>
  * @version $Id$
  */
 public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
@@ -309,13 +313,18 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
                     HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN));
             return;
         }
-
         // Serve the WebSocket handshake request.
         if (HttpHeaders.Values.UPGRADE.equalsIgnoreCase(req.getHeader(HttpHeaders.Names.CONNECTION))
                 && HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(req.getHeader(HttpHeaders.Names.UPGRADE))) {
-
             // Create the WebSocket handshake response.
-            HttpResponse response = constructHandShakeResponse(req, ctx);
+            HttpResponse response = null;
+            try {
+                response = constructHandShakeResponse(req, ctx);
+            } catch (NoSuchAlgorithmException e) {
+                //better to close the channel 
+                log.debug("Channel is disconnected");
+                ctx.getChannel().close();
+            }
 
             // write the response
             ctx.getChannel().write(response);
@@ -326,11 +335,11 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
             p.remove("aggregator");
             EngineConfiguration config = engine.getConfiguration();
             if (config == null || config.getMaxframesize() == 0) {
-                p.replace("decoder", "wsdecoder", new WebSocketFrameDecoder(JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE));
+                p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE));
             } else {
-                p.replace("decoder", "wsdecoder", new WebSocketFrameDecoder(config.getMaxframesize()));
+                p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(config.getMaxframesize()));
             }
-            p.replace("encoder", "wsencoder", new WebSocketFrameEncoder());
+            p.replace("encoder", "jwsencoder", new WebSocketFrameEncoder());
 
             // initialize the connector
             connector = initializeConnector(ctx, req);
@@ -339,8 +348,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
         }
 
         // Send an error page otherwise.
-        sendHttpResponse(ctx, req, new DefaultHttpResponse(
-                HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN));
+        sendHttpResponse(ctx, req, new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN));
     }
 
     /**
@@ -349,20 +357,45 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      * @param req the http request object
      * @param ctx the channel handler context
      * @return the http handshake response
+     * @throws NoSuchAlgorithmException 
      */
-    private HttpResponse constructHandShakeResponse(HttpRequest req,
-                                                    ChannelHandlerContext ctx) {
-        HttpResponse res = new DefaultHttpResponse(HttpVersion.HTTP_1_1,
-                new HttpResponseStatus(101, "Web Socket Protocol Handshake"));
+    private HttpResponse constructHandShakeResponse(HttpRequest req, ChannelHandlerContext ctx) throws NoSuchAlgorithmException {
+        HttpResponse res = new DefaultHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(101, 
+                "Web Socket Protocol Handshake"));
         res.addHeader(HttpHeaders.Names.UPGRADE, HttpHeaders.Values.WEBSOCKET);
         res.addHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.UPGRADE);
-        res.addHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN, req
-                .getHeader(HttpHeaders.Names.ORIGIN));
-        res.addHeader(HttpHeaders.Names.WEBSOCKET_LOCATION,
-                getWebSocketLocation(req));
-        String protocol = req.getHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL);
-        if (protocol != null) {
-            res.addHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL, protocol);
+
+        // Fill in the headers and contents depending on handshake method.
+        if (req.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY1) &&
+            req.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY2)) {
+            // New handshake method with a challenge:
+            res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_ORIGIN, req.getHeader(ORIGIN));
+            res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_LOCATION, getWebSocketLocation(req));
+            String protocol = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
+            if (protocol != null) {
+                res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL, protocol);
+            }
+
+            // Calculate the answer of the challenge.
+            String key1 = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY1);
+            String key2 = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY2);
+            int a = (int) (Long.parseLong(key1.replaceAll("[^0-9]", "")) / key1.replaceAll("[^ ]", "").length());
+            int b = (int) (Long.parseLong(key2.replaceAll("[^0-9]", "")) / key2.replaceAll("[^ ]", "").length());
+            long c = req.getContent().readLong();
+            ChannelBuffer input = ChannelBuffers.buffer(16);
+            input.writeInt(a);
+            input.writeInt(b);
+            input.writeLong(c);
+            ChannelBuffer output = ChannelBuffers.wrappedBuffer(MessageDigest.getInstance("MD5").digest(input.array()));
+            res.setContent(output);
+        } else {
+            // Old handshake method with no challenge:
+            res.addHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN, req.getHeader(ORIGIN));
+            res.addHeader(HttpHeaders.Names.WEBSOCKET_LOCATION, getWebSocketLocation(req));
+            String protocol = req.getHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL);
+            if (protocol != null) {
+                res.addHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL, protocol);
+            }
         }
         return res;
 
