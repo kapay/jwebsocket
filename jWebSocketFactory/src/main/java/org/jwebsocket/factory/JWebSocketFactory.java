@@ -17,24 +17,18 @@ import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
 
 /**
- *
+ * Factory to initialize and start the jWebSocket components
  * @author aschulze
+ * @version $Id:$
  */
 public class JWebSocketFactory {
 
-	private static Logger log = null; // don't instantiate logger here! first read args!
+  // don't instantiate logger here! first read args!
+	private static Logger log = null; 
 	private static WebSocketEngine engine = null;
-	// TODO: makes servers a map for faster access!
 	private static List<WebSocketServer> servers = null;
 
 	public static void start() {
-
-		// initialize log4j logging engine
-		// BEFORE instantiating any jWebSocket classes
-		/*
-		Logging.initLogs(aLogLevel, aLogTarget);
-		 */
-
 
 		JWebSocketLoader loader = new JWebSocketLoader();
 		try {
