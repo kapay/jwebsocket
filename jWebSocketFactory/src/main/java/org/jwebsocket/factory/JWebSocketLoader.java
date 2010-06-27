@@ -56,8 +56,9 @@ public final class JWebSocketLoader {
     public final WebSocketInitializer initialize() throws WebSocketException {
         String configPath = getConfigurationPath();
         if (configPath == null) {
-            throw new WebSocketException("Could not load the configuration file jWebSocket.xml. Make sure that " + "JWEBSOCKET_HOME variable is set " +
-            		"and jWebSocket.xml file exists at JWEBSOCKET_HOME/conf");
+            log.error("Error Loading Configuration File jWebSocket.xml");
+            throw new WebSocketException("Either JWEBSOCKET_HOME variable is not set " +
+            		"or jWebSocket.xml file exists at JWEBSOCKET_HOME/conf");
         }
         // load the entire settings from the configuration xml file
         JWebSocketConfig config = loadConfiguration(configPath);
