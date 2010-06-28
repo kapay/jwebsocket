@@ -60,6 +60,13 @@
 			<version>RELEASE65</version>
 			<type>jar</type>
 		</dependency>
+<!--
+		<dependency>
+			<groupId>net.sf.json-lib</groupId>
+			<artifactId>json-lib</artifactId>
+			<version>2.3</version>
+		</dependency>	
+-->
 	</dependencies>
 
 	<!--  define repositories -->

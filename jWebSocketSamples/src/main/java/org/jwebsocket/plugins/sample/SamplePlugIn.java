@@ -99,6 +99,7 @@ public class SamplePlugIn extends TokenPlugIn {
 				// add the "time" and "started" field
 				lResponse.put("time", new Date().toString());
 				lResponse.put("started", aConnector.getVar(SAMPLE_VAR));
+				lResponse.put("complex", new Object[]{1, 2, 3, 'a', 'b', 'c', "ABC", "XYZ", true, false});
 
 				// send the response token back to the client
 				lServer.sendToken(aConnector, lResponse);

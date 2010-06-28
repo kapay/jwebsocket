@@ -61,7 +61,6 @@ public class JSONProcessor {
 
 	public static WebSocketPaket tokenToPacket(Token token) {
 		WebSocketPaket packet = null;
-
 		try {
 			JSONObject json = tokenToJSON(token);
 			String data = json.toString();
@@ -83,18 +82,26 @@ public class JSONProcessor {
 			String key = iterator.next();
 			Object value = token.get(key);
 			if (value instanceof Collection) {
-				JSONArray array = new JSONArray();
+				JSONArray lArray = new JSONArray();
 				for (Object item : (Collection) value) {
 					if (item instanceof Token) {
 						JSONObject object = tokenToJSON((Token) item);
-						array.put(object);
+						lArray.put(object);
 					} else {
-						array.put(item);
+						lArray.put(item);
 					}
 				}
-				json.put(key, array);
+				json.put(key, lArray);
 			} else if (value instanceof Token) {
 				json.put(key, tokenToJSON((Token) value));
+			} else if (value instanceof Object[]) {
+				JSONArray lArray = new JSONArray();
+				Object[] lObjs = (Object[]) value;
+				for (int lIdx = 0; lIdx < lObjs.length; lIdx++) {
+					Object lObj = lObjs[lIdx];
+					lArray.put(lObj);
+				}
+				json.put(key, lArray);
 			} else {
 				json.put(key, value);
 			}
