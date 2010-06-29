@@ -48,7 +48,7 @@ public interface WebSocketPlugIn {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket);
+	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
 	/**
 	 *

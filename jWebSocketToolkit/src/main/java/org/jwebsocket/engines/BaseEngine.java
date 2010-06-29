@@ -20,7 +20,7 @@ import javolution.util.FastMap;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.CloseReason;
@@ -111,7 +111,7 @@ public class BaseEngine implements WebSocketEngine {
     }
 
     @Override
-    public void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+    public void processPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
         Map<String, WebSocketServer> lServers = getServers();
         for (WebSocketServer lServer : lServers.values()) {
             lServer.processPacket(this, aConnector, aDataPacket);
@@ -119,12 +119,12 @@ public class BaseEngine implements WebSocketEngine {
     }
 
     @Override
-    public void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+    public void sendPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
         aConnector.sendPacket(aDataPacket);
     }
 
     @Override
-    public void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket) {
+    public void broadcastPacket(WebSocketConnector aSource, WebSocketPacket aDataPacket) {
         for (WebSocketConnector connector : connectors.values()) {
             connector.sendPacket(aDataPacket);
         }

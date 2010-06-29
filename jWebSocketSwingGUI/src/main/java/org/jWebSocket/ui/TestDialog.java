@@ -13,6 +13,7 @@ package org.jWebSocket.ui;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import org.jwebsocket.api.WebSocketListener;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.client.BaseClientJ2SE;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.kit.WebSocketEvent;
@@ -43,12 +44,8 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketListener 
 	}
 
 	@Override
-	public void processPacket(WebSocketEvent aEvt) {
-		try {
-			txaLog.append(new String(aEvt.getData(), "US-ASCII") + "\n");
-		} catch (UnsupportedEncodingException ex) {
-			System.out.println(ex.getClass().getSimpleName() + ":  " + ex.getMessage());
-		}
+	public void processPacket(WebSocketEvent aEvent, WebSocketPacket aPacket) {
+		txaLog.append(aPacket.getASCII() + "\n");
 	}
 
 	@Override

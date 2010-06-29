@@ -20,7 +20,7 @@ import java.net.InetSocketAddress;
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
@@ -111,7 +111,7 @@ public class NettyConnector extends BaseConnector {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void processPacket(WebSocketPaket aDataPacket) {
+	public void processPacket(WebSocketPacket aDataPacket) {
 		// forward the data packet to the engine
 		getEngine().processPacket(this, aDataPacket);
 	}
@@ -120,7 +120,7 @@ public class NettyConnector extends BaseConnector {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendPacket(WebSocketPaket aDataPacket) {
+	public void sendPacket(WebSocketPacket aDataPacket) {
 		handler.getChannelHandlerContext().getChannel().write(
 				new DefaultWebSocketFrame(aDataPacket.getString()));
 	}

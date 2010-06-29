@@ -19,7 +19,7 @@ import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketFilterChain;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 
 /**
  *
@@ -41,11 +41,11 @@ public class BaseFilter implements WebSocketFilter {
 	}
 
 	@Override
-	public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket) {
+	public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aPacket) {
 	}
 
 	@Override
-	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket) {
+	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket) {
 	}
 
 	/**

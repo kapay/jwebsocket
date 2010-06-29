@@ -22,7 +22,7 @@ import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketFilterChain;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.logging.Logging;
 
@@ -73,7 +73,7 @@ public class BaseFilterChain implements WebSocketFilterChain {
 	}
 
 	@Override
-	public FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPaket aPacket) {
+	public FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPacket aPacket) {
 		FilterResponse lResponse = new FilterResponse();
 		for (WebSocketFilter lFilter : filters) {
 			lFilter.processPacketIn(lResponse, aConnector, aPacket);
@@ -85,7 +85,7 @@ public class BaseFilterChain implements WebSocketFilterChain {
 	}
 
 	@Override
-	public FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket) {
+	public FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket) {
 		FilterResponse lResponse = new FilterResponse();
 		for (WebSocketFilter lFilter : filters) {
 			lFilter.processPacketOut(lResponse, aSource, aTarget, aPacket);

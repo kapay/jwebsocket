@@ -14,7 +14,7 @@ public interface WebSocketListener {
 
 	public void processOpened(WebSocketEvent aEvent);
 
-	public void processPacket(WebSocketEvent aEvent);
+	public void processPacket(WebSocketEvent aEvent, WebSocketPacket aPacket);
 
 	public void processClosed(WebSocketEvent aEvent);
 }

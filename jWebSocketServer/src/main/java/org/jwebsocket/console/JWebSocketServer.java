@@ -14,9 +14,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.console;
 
+import java.util.ArrayList;
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.tcp.engines.TCPEngine;
 
 /**
  * @author puran
@@ -30,13 +34,27 @@ public class JWebSocketServer {
 	 */
 	public static void main(String[] args) {
 		// the following 3 lines may not be removed due to GNU LGPL 3.0 license!
-		System.out.println("jWebSocket Ver. "+ JWebSocketConstants.VERSION_STR+ " (" + System.getProperty("sun.arch.data.model") + "bit)");
+		System.out.println("jWebSocket Ver. " + JWebSocketConstants.VERSION_STR + " (" + System.getProperty("sun.arch.data.model") + "bit)");
 		System.out.println(JWebSocketConstants.COPYRIGHT);
 		System.out.println(JWebSocketConstants.LICENSE);
 		System.out.println("Log files per default in jWebSocket.log if not overwritten in jWebSocket.xml.");
 
-		JWebSocketFactory.start();
 
+		JWebSocketFactory.start();
+/*
+		ArrayList lDomains = new ArrayList();
+		lDomains.add("http://jwebsocket.org");
+		EngineConfiguration lConfig = new EngineConfig(
+				"tcp0", // id
+				"org.jwebsocket.tcp.engines.TCPEngine", // name
+				"jWebSocketTCPEngine-0.9.5.jar", // jar, if not in classpath
+				8787, // port
+				120000, // default session timeout
+				16384, // max framesize
+				lDomains // list of accepted domains
+				);
+		TCPEngine lEngine = new TCPEngine(lConfig);
+*/
 		WebSocketEngine engine = JWebSocketFactory.getEngine();
 		if (engine != null) {
 			while (engine.isAlive()) {

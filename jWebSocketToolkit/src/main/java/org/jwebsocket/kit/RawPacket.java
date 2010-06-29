@@ -16,7 +16,7 @@
 package org.jwebsocket.kit;
 
 import java.io.UnsupportedEncodingException;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 
 /**
  * Implements the low level data packets which are interchanged between
@@ -24,7 +24,7 @@ import org.jwebsocket.api.WebSocketPaket;
  * communication level.
  * @author aschulze
  */
-public class RawPacket implements WebSocketPaket {
+public class RawPacket implements WebSocketPacket {
 
 	public static final int FRAMETYPE_UTF8 = 0;
 	public static final int FRAMETYPE_BINARY = 1;
@@ -88,6 +88,15 @@ public class RawPacket implements WebSocketPaket {
 	}
 
 	@Override
+	public void setASCII(String aString) {
+		try {
+			data = aString.getBytes("US-ASCII");
+		} catch (UnsupportedEncodingException ex) {
+			// ignore exception here
+		}
+	}
+
+	@Override
 	public byte[] getByteArray() {
 		return data;
 	}
@@ -107,6 +116,15 @@ public class RawPacket implements WebSocketPaket {
 	public String getUTF8() {
 		try {
 			return new String(data, "UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			return null;
+		}
+	}
+
+	@Override
+	public String getASCII() {
+		try {
+			return new String(data, "US-ASCII");
 		} catch (UnsupportedEncodingException ex) {
 			return null;
 		}

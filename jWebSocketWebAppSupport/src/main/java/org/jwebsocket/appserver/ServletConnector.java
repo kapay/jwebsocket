@@ -20,7 +20,7 @@ import java.net.UnknownHostException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
@@ -61,11 +61,11 @@ public class ServletConnector extends BaseConnector {
 	}
 
 	@Override
-	public void processPacket(WebSocketPaket aDataPacket) {
+	public void processPacket(WebSocketPacket aDataPacket) {
 	}
 
 	@Override
-	public void sendPacket(WebSocketPaket aDataPacket) {
+	public void sendPacket(WebSocketPacket aDataPacket) {
 		plainResponse += aDataPacket.getUTF8() + "\n";
 	}
 

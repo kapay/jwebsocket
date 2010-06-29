@@ -68,7 +68,7 @@ public interface WebSocketPlugInChain {
 	 * @param aDataPacket The data packet which was received.
 	 * @return PlugInResponse specifies whether to continue or abort the processing of the plug-in chain.
 	 */
-	PlugInResponse processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket);
+	PlugInResponse processPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
 	/**
 	 * is called by the server when a connector has been stopped,

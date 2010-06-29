@@ -127,7 +127,7 @@ public interface WebSocketEngine {
      * @param aConnector
      * @param aDataPacket
      */
-    void processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket);
+    void processPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
     /**
      * Sends a data packet to a certain connector.
@@ -135,7 +135,7 @@ public interface WebSocketEngine {
      * @param aConnector
      * @param aDataPacket
      */
-    void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket);
+    void sendPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
     /**
      * Broadcasts a data packet to all connectors. Usually the implementation
@@ -145,7 +145,7 @@ public interface WebSocketEngine {
      * @param aSource
      * @param aDataPacket
      */
-    void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket);
+    void broadcastPacket(WebSocketConnector aSource, WebSocketPacket aDataPacket);
 
     /**
      * Removes a certain connector from the engine. This usually has not to be

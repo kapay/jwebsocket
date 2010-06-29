@@ -18,7 +18,7 @@ package org.jwebsocket.filter;
 import org.apache.log4j.Logger;
 import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
@@ -37,12 +37,12 @@ public class TokenFilter extends BaseFilter {
 
 	@Override
 	public void processPacketIn(FilterResponse aResponse,
-			WebSocketConnector aConnector, WebSocketPaket aPacket) {
+			WebSocketConnector aConnector, WebSocketPacket aPacket) {
 	}
 
 	@Override
 	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource,
-			WebSocketConnector aTarget, WebSocketPaket aPacket) {
+			WebSocketConnector aTarget, WebSocketPacket aPacket) {
 	}
 
 	public void processTokenIn(FilterResponse aResponse,

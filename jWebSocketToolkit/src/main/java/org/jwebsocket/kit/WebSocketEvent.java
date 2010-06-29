@@ -2,10 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.jwebsocket.kit;
-
-import java.io.UnsupportedEncodingException;
 
 /**
  *
@@ -13,28 +10,37 @@ import java.io.UnsupportedEncodingException;
  */
 public class WebSocketEvent {
 
-	private byte[] data = null;
+	private WebSocketSession session = null;
 
-	/**
-	 * @return the data
-	 */
-	public byte[] getData() {
-		return data;
+	public WebSocketEvent(WebSocketSession aSession) {
+		session = aSession;
 	}
 
 	/**
-	 * @param data the data to set
+	 * @return the sessionId
 	 */
-	public void setData(byte[] data) {
-		this.data = data;
+	public String getSessionId() {
+		return session.getSessionId();
 	}
 
-	public void setData( String aString) {
-		try {
-			this.data = aString.getBytes("US-ASCII");
-		} catch (UnsupportedEncodingException ex) {
-		}
+	/**
+	 * @param sessionId the sessionId to set
+	 */
+	public void setSessionId(String sessionId) {
+		session.setSessionId(sessionId);
 	}
 
+	/**
+	 * @return the session
+	 */
+	public WebSocketSession getSession() {
+		return session;
+	}
 
+	/**
+	 * @param session the session to set
+	 */
+	public void setSession(WebSocketSession session) {
+		this.session = session;
+	}
 }

@@ -18,11 +18,12 @@ package org.jwebsocket.connectors;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.WebSocketSession;
 
 /**
  * Provides the basic implementation of the jWebSocket connectors.
@@ -37,12 +38,9 @@ public class BaseConnector implements WebSocketConnector {
 	 * Default name for shared custom variable <tt>username</tt>.
 	 */
 	public final static String VAR_USERNAME = "$username";
-	/**
-	 * Default name for shared custom variable <tt>sessionid</tt>.
-	 */
-	public final static String VAR_SESSIONID = "$sessionId";
 	private WebSocketEngine engine = null;
 	private RequestHeader header = null;
+	private WebSocketSession session = new WebSocketSession();
 	private Map<String, Object> customVars = new HashMap<String, Object>();
 
 	/**
@@ -68,14 +66,14 @@ public class BaseConnector implements WebSocketConnector {
 	}
 
 	@Override
-	public void processPacket(WebSocketPaket aDataPacket) {
+	public void processPacket(WebSocketPacket aDataPacket) {
 		if (engine != null) {
 			engine.processPacket(this, aDataPacket);
 		}
 	}
 
 	@Override
-	public void sendPacket(WebSocketPaket aDataPacket) {
+	public void sendPacket(WebSocketPacket aDataPacket) {
 	}
 
 	@Override
@@ -166,4 +164,14 @@ public class BaseConnector implements WebSocketConnector {
 	public String getId() {
 		return String.valueOf(getRemotePort());
 	}
+
+	/*
+	 * Returns the session for the websocket connection.
+	 */
+	@Override
+	public WebSocketSession getSession() {
+		return session;
+	}
+
+
 }

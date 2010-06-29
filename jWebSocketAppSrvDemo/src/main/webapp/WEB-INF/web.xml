@@ -5,9 +5,14 @@
         <description>ServletContextListener</description>
         <listener-class>org.jwebsocket.appserver.ContextListener</listener-class>
     </listener>
+    <listener>
+        <description>HttpSessionListener</description>
+        <listener-class>org.jwebsocket.appserver.SessionListener</listener-class>
+    </listener>
     <servlet>
         <servlet-name>WebSocketDemo</servlet-name>
         <servlet-class>org.jwebsocket.appserver.WebSocketDemo</servlet-class>
+        <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>WebSocketDemo</servlet-name>

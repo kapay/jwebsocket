@@ -29,7 +29,7 @@ public interface WebSocketFilter {
 	 * @param aConnector
 	 * @param aPacket
 	 */
-	void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aPacket);
+	void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aPacket);
 
 	/**
 	 *
@@ -38,7 +38,7 @@ public interface WebSocketFilter {
 	 * @param aTarget
 	 * @param aPacket
 	 */
-	void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket);
+	void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket);
 
 	/**
 	 *

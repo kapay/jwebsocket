@@ -23,7 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
@@ -41,7 +41,7 @@ public class JSONProcessor {
 	 * @param aDataPacket
 	 * @return
 	 */
-	public static Token packetToToken(WebSocketPaket aDataPacket) {
+	public static Token packetToToken(WebSocketPacket aDataPacket) {
 		Token lToken = new Token();
 		try {
 			String lStr = aDataPacket.getString("UTF-8");
@@ -59,8 +59,8 @@ public class JSONProcessor {
 		return lToken;
 	}
 
-	public static WebSocketPaket tokenToPacket(Token token) {
-		WebSocketPaket packet = null;
+	public static WebSocketPacket tokenToPacket(Token token) {
+		WebSocketPacket packet = null;
 		try {
 			JSONObject json = tokenToJSON(token);
 			String data = json.toString();

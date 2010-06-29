@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketFilter;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
@@ -70,14 +70,14 @@ public class TokenFilterChain extends BaseFilterChain {
 	}
 
 	@Override
-	public FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+	public FilterResponse processPacketIn(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		// FilterResponse lFilterResponse = new FilterResponse();
 		// return lFilterResponse;
 		return null;
 	}
 
 	@Override
-	public FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aDataPacket) {
+	public FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aDataPacket) {
 		// FilterResponse lFilterResponse = new FilterResponse();
 		// return lFilterResponse;
 		return null;

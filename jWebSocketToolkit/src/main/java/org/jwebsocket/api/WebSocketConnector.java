@@ -18,6 +18,7 @@ package org.jwebsocket.api;
 import org.jwebsocket.kit.CloseReason;
 import java.net.InetAddress;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.WebSocketSession;
 
 /**
  * Specifies the API for jWebSocket connectors. Connectors are the low level
@@ -58,14 +59,14 @@ public interface WebSocketConnector {
 	 * {@code processPacket} method of the overlying engine.
 	 * @param aDataPacket raw web socket data packet
 	 */
-	void processPacket(WebSocketPaket aDataPacket);
+	void processPacket(WebSocketPacket aDataPacket);
 
 	/**
 	 * Sends a datapacket to a WebSocket client. Here the packet is finally
 	 * passed to client via the web socket connection.
 	 * @param aDataPacket raw web socket data packet
 	 */
-	void sendPacket(WebSocketPaket aDataPacket);
+	void sendPacket(WebSocketPacket aDataPacket);
 
 	/**
 	 * Returns the request header from the client during the connection
@@ -189,5 +190,10 @@ public interface WebSocketConnector {
 	 * @return String Unique id of the connector.
 	 */
 	String getId();
+
+	/*
+	 * Returns the session for the websocket connection.
+	 */
+	WebSocketSession getSession();
 
 }

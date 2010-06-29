@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
@@ -38,7 +38,7 @@ public class CSVProcessor {
 	 * @param aDataPacket
 	 * @return
 	 */
-	public static Token packetToToken(WebSocketPaket aDataPacket) {
+	public static Token packetToToken(WebSocketPacket aDataPacket) {
 		Token lToken = new Token();
 		try {
 			String aData = aDataPacket.getString("UTF-8");
@@ -106,7 +106,7 @@ public class CSVProcessor {
 	 * @param aToken
 	 * @return
 	 */
-	public static WebSocketPaket tokenToPacket(Token aToken) {
+	public static WebSocketPacket tokenToPacket(Token aToken) {
 		String lData = "";
 		Iterator<String> lIterator = aToken.getKeys();
 		while (lIterator.hasNext()) {
@@ -116,7 +116,7 @@ public class CSVProcessor {
 				lKey + "=" + objectToCSV(lVal)
 				+ (lIterator.hasNext() ? "," : "");
 		}
-		WebSocketPaket lPacket = null;
+		WebSocketPacket lPacket = null;
 		try {
 			lPacket = new RawPacket(lData, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {

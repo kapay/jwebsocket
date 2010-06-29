@@ -20,7 +20,7 @@ import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.CloseReason;
 
 /**
@@ -51,7 +51,7 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 * @param aDataPacket
 	 */
 	@Override
-	public abstract void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket);
+	public abstract void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
 	/**
 	 *

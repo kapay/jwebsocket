@@ -18,7 +18,7 @@ package org.jwebsocket.packetProcessors;
 import java.util.Collection;
 
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
@@ -35,7 +35,7 @@ public class XMLProcessor  {
 	 * @param aDataPacket
 	 * @return
 	 */
-	public static Token packetToToken(WebSocketPaket aDataPacket) {
+	public static Token packetToToken(WebSocketPacket aDataPacket) {
 		// todo: implement!
 		Token lArgs = new Token();
 		return lArgs;
@@ -64,7 +64,7 @@ public class XMLProcessor  {
 	 * @param aToken
 	 * @return
 	 */
-	public static WebSocketPaket tokenToPacket(Token aToken) {
+	public static WebSocketPacket tokenToPacket(Token aToken) {
 		// todo: implement!
 		return null;
 	}

@@ -10,13 +10,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
+import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.kit.WebSocketEvent;
+import org.jwebsocket.logging.Logging;
+import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
  *
  * @author aschulze
  */
-public class WebSocketDemo extends HttpServlet implements WebSocketServletTokenListener {
+public class WebSocketDemo extends HttpServlet implements WebSocketTokenListener {
+
+	private static Logger log = Logging.getLogger(WebSocketDemo.class);
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -27,37 +35,48 @@ public class WebSocketDemo extends HttpServlet implements WebSocketServletTokenL
 	 */
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		response.setContentType("text/html;charset=UTF-8");
+		response.setContentType("text/plain;charset=UTF-8");
 		PrintWriter out = response.getWriter();
+
 		try {
-			/* TODO output your page here
-			out.println("<html>");
-			out.println("<head>");
-			out.println("<title>Servlet WebSocketDemo</title>");
-			out.println("</head>");
-			out.println("<body>");
-			out.println("<h1>Servlet WebSocketDemo at " + request.getContextPath () + "</h1>");
-			out.println("</body>");
-			out.println("</html>");
-			 */
+			out.println("This session: " + request.getSession().getId());
+			out.println("Http sessions: " + WebSocketHttpSessionMerger.getHttpSessionsCSV());
+			out.println("WebSocket sessions: " + WebSocketHttpSessionMerger.getWebSocketSessionsCSV());
 		} finally {
 			out.close();
 		}
 	}
 
 	@Override
-	public void processWebSocketOpen() {
-
+	public void init() {
+		log.info("Adding servlet '" + getClass().getSimpleName() + "' to WebSocket listeners...");
+		TokenServer lServer = (TokenServer) JWebSocketFactory.getServer("ts0");
+		lServer.addListener(this);
 	}
 
 	@Override
-	public void processWebSocketToken(Token aToken) {
-
+	public void processOpened(WebSocketEvent aEvent) {
+		log.info("Opened WebSocket session: " + aEvent.getSession().getSessionId());
+		// if a new web socket connection has been started,
+		// update the session tables accordingly
+		WebSocketHttpSessionMerger.addWebSocketSession(aEvent.getSession());
 	}
 
 	@Override
-	public void processWebSocketClose() {
+	public void processPacket(WebSocketEvent aEvent, WebSocketPacket aPacket) {
+		log.info("Received WebSocket packet: " + aPacket.getASCII());
+	}
 
+	@Override
+	public void processWebSocketToken(WebSocketEvent aEvent, Token aToken) {
+	}
+
+	@Override
+	public void processClosed(WebSocketEvent aEvent) {
+		log.info("Closed WebSocket session: " + aEvent.getSession().getSessionId());
+		// if a web socket connection has been terminated,
+		// update the session tables accordingly
+		WebSocketHttpSessionMerger.removeWebSocketSession(aEvent.getSession());
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

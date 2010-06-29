@@ -16,7 +16,7 @@
 package org.jwebsocket.plugins;
 
 import org.jwebsocket.kit.PlugInResponse;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.kit.CloseReason;
@@ -57,7 +57,7 @@ public class TokenPlugIn extends BasePlugIn {
 	}
 
 	@Override
-	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		//
 	}
 

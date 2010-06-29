@@ -93,14 +93,14 @@ public interface WebSocketServer {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket);
+	void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
 	/**
 	 * Sends a packet to a certain connector.
 	 * @param aConnector 
 	 * @param aDataPacket
 	 */
-	void sendPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket);
+	void sendPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
 	/**
 	 * Broadcasts a datapacket to all connectors.
@@ -108,7 +108,7 @@ public interface WebSocketServer {
 	 * @param aDataPacket
 	 * @param aBroadcastOptions
 	 */
-	void broadcastPacket(WebSocketConnector aSource, WebSocketPaket aDataPacket, 
+	void broadcastPacket(WebSocketConnector aSource, WebSocketPacket aDataPacket,
 			BroadcastOptions aBroadcastOptions );
 
 	/**

@@ -5,6 +5,8 @@
 
 package org.jwebsocket.appserver;
 
+import org.jwebsocket.api.WebSocketListener;
+import org.jwebsocket.kit.WebSocketEvent;
 import org.jwebsocket.token.Token;
 
 /**
@@ -12,25 +14,13 @@ import org.jwebsocket.token.Token;
  * to process events from WebSocket clients
  * @author aschulze
  */
-public interface WebSocketServletTokenListener {
-
-	/**
-	 * This methods is called, when a WebSocket token client has been
-	 * connected.
-	 */
-	public void processWebSocketOpen();
+public interface WebSocketTokenListener extends WebSocketListener {
 
 	/**
 	 * This methods is called, when a token from a WebSocket token 
 	 * client has been received.
 	 */
-	public void processWebSocketToken(Token aToken);
-
-	/**
-	 * This methods is called, when a WebSocket token client has been
-	 * disconnected.
-	 */
-	public void processWebSocketClose();
+	public void processWebSocketToken(WebSocketEvent aEvent, Token aToken);
 
 
 }

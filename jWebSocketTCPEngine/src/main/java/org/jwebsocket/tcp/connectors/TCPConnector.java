@@ -13,7 +13,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.connectors.BaseConnector;
@@ -97,13 +97,13 @@ public class TCPConnector extends BaseConnector {
 	}
 
 	@Override
-	public void processPacket(WebSocketPaket aDataPacket) {
+	public void processPacket(WebSocketPacket aDataPacket) {
 		// forward the data packet to the engine
 		getEngine().processPacket(this, aDataPacket);
 	}
 
 	@Override
-	public void sendPacket(WebSocketPaket aDataPacket) {
+	public void sendPacket(WebSocketPacket aDataPacket) {
 		try {
 			if (aDataPacket.getFrameType() == RawPacket.FRAMETYPE_BINARY) {
 				// each packet is enclosed in 0xFF<length><data>

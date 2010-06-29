@@ -16,7 +16,7 @@
 package org.jwebsocket.server;
 
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.api.WebSocketPlugIn;
@@ -48,7 +48,7 @@ public class CustomServer extends BaseServer {
 	}
 
 	@Override
-	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		if (log.isDebugEnabled()) {
 			log.debug("Processing data packet '" + aDataPacket.getUTF8() + "'...");
 		}

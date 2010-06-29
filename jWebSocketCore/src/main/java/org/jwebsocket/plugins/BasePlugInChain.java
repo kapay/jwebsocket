@@ -25,7 +25,7 @@ import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
@@ -120,7 +120,7 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 	 * @return
 	 */
 	@Override
-	public PlugInResponse processPacket(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+	public PlugInResponse processPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		if (log.isDebugEnabled()) {
 			log.debug("Processing packet for plug-ins...");
 		}

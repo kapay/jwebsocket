@@ -17,7 +17,7 @@ package org.jwebsocket.server;
 
 import java.util.HashMap;
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.WebSocketPaket;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
@@ -127,6 +127,7 @@ public class TokenServer extends BaseServer {
 			// i.e. a client was sconnected.
 			plugInChain.connectorStarted(aConnector);
 		}
+		super.connectorStarted(aConnector);
 	}
 
 	@Override
@@ -139,6 +140,7 @@ public class TokenServer extends BaseServer {
 			}
 			plugInChain.connectorStopped(aConnector, aCloseReason);
 		}
+		super.connectorStopped(aConnector, aCloseReason);
 	}
 
 	/**
@@ -147,7 +149,7 @@ public class TokenServer extends BaseServer {
 	 * @param aDataPacket
 	 * @return
 	 */
-	public Token packetToToken(WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+	public Token packetToToken(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketConstants.SUB_PROT_DEFAULT);
 		Token lToken = null;
 		if (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)) {
@@ -166,9 +168,9 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 * @return
 	 */
-	public WebSocketPaket tokenToPacket(WebSocketConnector aConnector, Token aToken) {
+	public WebSocketPacket tokenToPacket(WebSocketConnector aConnector, Token aToken) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketConstants.SUB_PROT_DEFAULT);
-		WebSocketPaket lPacket = null;
+		WebSocketPacket lPacket = null;
 		if (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
 		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_CSV)) {
@@ -180,7 +182,7 @@ public class TokenServer extends BaseServer {
 	}
 
 	@Override
-	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPaket aDataPacket) {
+	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		// is the data packet supposed to be interpreted as token?
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
 			Token lToken = packetToToken(aConnector, aDataPacket);
@@ -201,6 +203,7 @@ public class TokenServer extends BaseServer {
 				log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
 			}
 		}
+		super.processPacket(aEngine, aConnector, aDataPacket);
 	}
 
 	/**
@@ -219,7 +222,7 @@ public class TokenServer extends BaseServer {
 				if (log.isDebugEnabled()) {
 					log.debug("Sending token '" + aToken + "' to '" + aTarget + "'...");
 				}
-				WebSocketPaket aPacket = tokenToPacket(aTarget, aToken);
+				WebSocketPacket aPacket = tokenToPacket(aTarget, aToken);
 				super.sendPacket(aTarget, aPacket);
 			} else {
 				if (log.isDebugEnabled()) {

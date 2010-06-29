@@ -107,30 +107,22 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
-		super.connectorStarted(aConnector);
+		// set session id first, so that it can be processed in the connectorStarted method
 		Random rand = new Random(System.nanoTime());
-		setSessionId(aConnector, Tools.getMD5(aConnector.generateUID() + "." + rand.nextInt()));
+		aConnector.getSession().setSessionId(Tools.getMD5(aConnector.generateUID() + "." + rand.nextInt()));
+		// call super connectorStarted
+		super.connectorStarted(aConnector);
+		// and send the welcome message incl. the session id
 		sendWelcome(aConnector);
-
+		// if new connector is active broadcast this event to then network
 		broadcastConnectEvent(aConnector);
 	}
 
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		super.connectorStopped(aConnector, aCloseReason);
-		// send good bye message to connector
-		// removed in 0.9.0.0608
-		// sendGoodBye(aConnector, aCloseReason);
 		// notify other clients that client disconnected
 		broadcastDisconnectEvent(aConnector);
-	}
-
-	private String getSessionId(WebSocketConnector aConnector) {
-		return aConnector.getString(BaseConnector.VAR_SESSIONID);
-	}
-
-	private void setSessionId(WebSocketConnector aConnector, String aSessionId) {
-		aConnector.setString(BaseConnector.VAR_SESSIONID, aSessionId);
 	}
 
 	private String getGroup(WebSocketConnector aConnector) {
@@ -200,7 +192,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		lWelcome.put("vendor", JWebSocketConstants.VENDOR);
 		lWelcome.put("version", JWebSocketConstants.VERSION_STR);
 		// here the session id is MANDATORY! to pass to the client!
-		lWelcome.put("usid", getSessionId(aConnector));
+		lWelcome.put("usid", aConnector.getSession().getSessionId());
 		lWelcome.put("sourceId", aConnector.getId());
 		lWelcome.put("timeout", aConnector.getEngine().getSessionTimeout());
 

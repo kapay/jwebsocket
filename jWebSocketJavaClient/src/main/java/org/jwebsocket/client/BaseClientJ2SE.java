@@ -24,6 +24,8 @@ import java.net.Socket;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
+import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -150,9 +152,10 @@ public class BaseClientJ2SE extends BaseClient {
 							if (listener != null) {
 								byte[] lBA = Arrays.copyOf(lBuff, pos);
 								received(lBA);
-								WebSocketEvent lEvt = new WebSocketEvent();
-								lEvt.setData(lBA);
-								listener.processPacket(lEvt);
+								WebSocketEvent lEvt = new WebSocketEvent(null);
+								// lEvt.setData(lBA);
+								WebSocketPacket lPacket = new RawPacket(lBA);
+								listener.processPacket(lEvt, lPacket);
 							}
 						}
 						lStart = -1;

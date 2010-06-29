@@ -28,7 +28,7 @@ public interface WebSocketFilterChain {
 	void removeFilter(WebSocketFilter aFilter);
 	List<WebSocketFilter> getFilters();
 
-	FilterResponse processPacketIn(WebSocketConnector aSource, WebSocketPaket aPacket);
-	FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPaket aPacket);
+	FilterResponse processPacketIn(WebSocketConnector aSource, WebSocketPacket aPacket);
+	FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket);
 
 }

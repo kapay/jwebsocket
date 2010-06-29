@@ -93,7 +93,6 @@ public class TCPEngine extends BaseEngine {
 			log.info("TCP engine '"
 					+ getId() + "' started' at port "
 					+ listenerPort + " with default timeout "
-					+ " with default timeout "
 					+ (sessionTimeout > 0 ? sessionTimeout + "ms" : "infinite")
 					+ "...");
 		}
