@@ -40,8 +40,8 @@ public interface EngineConfiguration extends Configuration {
      */
     int getTimeout();
     /**
-     * The maximum frame size in KB that engine will read any frame with 
-     * size greater than this will cause connection to be terminated
+     * The maximum frame size in KB, any data frame with 
+     * size greater than this value will cause connection to be terminated
      * @return the maximum frame size
      */
     int getMaxframesize();
