@@ -16,6 +16,7 @@
 package org.jwebsocket.server;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.RequestHeader;
@@ -23,7 +24,6 @@ import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.BasePlugInChain;
 
@@ -34,7 +34,6 @@ import org.jwebsocket.plugins.BasePlugInChain;
 public class CustomServer extends BaseServer {
 
 	private static Logger log = Logging.getLogger(CustomServer.class);
-	private BasePlugInChain plugInChain = null;
 
 	/**
 	 * Creates a new instance of the CustomeServer. The custom server is a
@@ -42,8 +41,8 @@ public class CustomServer extends BaseServer {
 	 *
 	 * @param aId
 	 */
-	public CustomServer(String aId) {
-		super(aId);
+	public CustomServer(ServerConfiguration aServerConfig) {
+		super(aServerConfig);
 		plugInChain = new BasePlugInChain(this);
 	}
 
@@ -126,6 +125,6 @@ public class CustomServer extends BaseServer {
 	 */
 	@Override
 	public BasePlugInChain getPlugInChain() {
-		return plugInChain;
+		return (BasePlugInChain)plugInChain;
 	}
 }

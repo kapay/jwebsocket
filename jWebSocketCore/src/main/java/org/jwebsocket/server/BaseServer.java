@@ -20,6 +20,7 @@ import java.util.Map;
 import javolution.util.FastList;
 
 import javolution.util.FastMap;
+import org.jwebsocket.api.ServerConfiguration;
 
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
@@ -55,8 +56,8 @@ public class BaseServer implements WebSocketServer {
 	 * used to easily address a certain server.
 	 * @param aId Id for the new server.
 	 */
-	public BaseServer(String aId) {
-		id = aId;
+	public BaseServer(ServerConfiguration aServerConfig) {
+		id = aServerConfig.getId();
 		engines = new FastMap<String, WebSocketEngine>();
 	}
 
@@ -141,9 +142,11 @@ public class BaseServer implements WebSocketServer {
 		// this method is supposed to be overwritten by descending classes.
 		// e.g. to notify the overlying appplications or plug-ins
 		// about the connectorStarted event
-		WebSocketEvent lEvent = new WebSocketEvent(aConnector.getSession());
+		WebSocketEvent lEvent = new WebSocketEvent(aConnector, this);
 		for (WebSocketListener lListener : listeners) {
-			lListener.processOpened(lEvent);
+			if (lListener != null) {
+				lListener.processOpened(lEvent);
+			}
 		}
 	}
 
@@ -155,9 +158,11 @@ public class BaseServer implements WebSocketServer {
 		// this method is supposed to be overwritten by descending classes.
 		// e.g. to notify the overlying appplications or plug-ins
 		// about the connectorStopped event
-		WebSocketEvent lEvent = new WebSocketEvent(aConnector.getSession());
+		WebSocketEvent lEvent = new WebSocketEvent(aConnector, this);
 		for (WebSocketListener lListener : listeners) {
-			lListener.processClosed(lEvent);
+			if (lListener != null) {
+				lListener.processClosed(lEvent);
+			}
 		}
 	}
 
@@ -167,9 +172,11 @@ public class BaseServer implements WebSocketServer {
 	@Override
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		// this method is supposed to be overwritten by descending classes.
-		WebSocketEvent lEvent = new WebSocketEvent(aConnector.getSession());
+		WebSocketEvent lEvent = new WebSocketEvent(aConnector, this);
 		for (WebSocketListener lListener : listeners) {
-			lListener.processPacket(lEvent, aDataPacket);
+			if (lListener != null) {
+				lListener.processPacket(lEvent, aDataPacket);
+			}
 		}
 	}
 
@@ -332,11 +339,11 @@ public class BaseServer implements WebSocketServer {
 
 	@Override
 	public WebSocketPlugInChain getPlugInChain() {
-		return null;
+		return plugInChain;
 	}
 
 	@Override
 	public WebSocketFilterChain getFilterChain() {
-		return null;
+		return filterChain;
 	}
 }

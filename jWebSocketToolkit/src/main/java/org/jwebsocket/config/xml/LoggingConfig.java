@@ -40,7 +40,7 @@ public class LoggingConfig implements Config {
 	 * @param filename the log file name
 	 */
 	public LoggingConfig(String appender, String pattern, String level,
-			String filename, Boolean aIsBuffered, Integer aBufferSize) {
+			String filename, Integer aBufferSize) {
 		this.appender = appender;
 		this.pattern = pattern;
 		this.level = level;

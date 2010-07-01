@@ -152,7 +152,7 @@ public class BaseClientJ2SE extends BaseClient {
 							if (listener != null) {
 								byte[] lBA = Arrays.copyOf(lBuff, pos);
 								received(lBA);
-								WebSocketEvent lEvt = new WebSocketEvent(null);
+								WebSocketEvent lEvt = new WebSocketEvent(null, null);
 								// lEvt.setData(lBA);
 								WebSocketPacket lPacket = new RawPacket(lBA);
 								listener.processPacket(lEvt, lPacket);

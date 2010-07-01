@@ -17,6 +17,7 @@ package org.jwebsocket.server;
 
 import java.util.HashMap;
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.WebSocketException;
@@ -52,8 +53,8 @@ public class TokenServer extends BaseServer {
 	 *
 	 * @param aId
 	 */
-	public TokenServer(String aId) {
-		super(aId);
+	public TokenServer(ServerConfiguration aServerConfig) {
+		super(aServerConfig);
 		plugInChain = new TokenPlugInChain(this);
 		filterChain = new TokenFilterChain(this);
 	}

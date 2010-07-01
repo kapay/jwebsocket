@@ -26,6 +26,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
+import org.jwebsocket.config.xml.LoggingConfig;
 
 /**
  * Provides the common used jWebSocket logging support based on
@@ -173,6 +174,18 @@ public class Logging {
 			buffersize = aBuffersize;
 		}
 		checkLogAppender();
+	}
+
+	public static void initLogs(LoggingConfig aLoggingConfig) {
+		if (aLoggingConfig != null) {
+			initLogs(
+					aLoggingConfig.getLevel(),
+					aLoggingConfig.getAppender(),
+					aLoggingConfig.getFilename(),
+					aLoggingConfig.getPattern(),
+					aLoggingConfig.getBufferSize()
+			);
+		}
 	}
 
 	/**

@@ -21,11 +21,13 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
+import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
+import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.filters.custom.CustomTokenFilter;
 import org.jwebsocket.filters.system.SystemFilter;
 import org.jwebsocket.logging.Logging;
@@ -88,7 +90,8 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 		}
 		List<WebSocketServer> servers = new ArrayList<WebSocketServer>();
 		// instantiate the Token server by default
-		TokenServer tokenServer = new TokenServer("ts0");
+		ServerConfiguration config = getServerConfiguration();
+		TokenServer tokenServer = new TokenServer(config);
 		servers.add(tokenServer);
 		if (log.isInfoEnabled()) {
 			log.info("Default server " + tokenServer.getId() + " instantiated.");
@@ -201,4 +204,10 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	 * @return
 	 */
 	public abstract EngineConfiguration getEngineConfiguration();
+
+	/**
+	 *
+	 * @return
+	 */
+	public abstract ServerConfiguration getServerConfiguration();
 }

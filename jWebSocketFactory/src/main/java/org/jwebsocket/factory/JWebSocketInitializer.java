@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jwebsocket.api.EngineConfiguration;
+import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
@@ -62,7 +63,12 @@ public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
     public EngineConfiguration getEngineConfiguration() {
         return new DefaultEngineConfiguration();
     }
-    
+
+    @Override
+    public ServerConfiguration getServerConfiguration() {
+        return new DefaultServerConfiguration();
+    }
+
     private class DefaultEngineConfiguration implements EngineConfiguration {
 
         @Override
@@ -102,6 +108,25 @@ public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
             return "Netty";
         }
         
+    }
+
+    private class DefaultServerConfiguration implements ServerConfiguration {
+
+        @Override
+        public String getJar() {
+            return null;
+        }
+
+        @Override
+        public String getId() {
+            return "ts0";
+        }
+
+        @Override
+        public String getName() {
+            return "Server";
+        }
+
     }
 
 }

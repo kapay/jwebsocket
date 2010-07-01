@@ -40,7 +40,6 @@ import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.FilterConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.ServerConfig;
-import org.jwebsocket.plugins.TokenPlugIn;
 
 /**
  * Intialize the engine, servers and plugins based on jWebSocket.xml

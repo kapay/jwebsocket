@@ -32,7 +32,6 @@ public class LoggingConfigHandler implements ConfigHandler {
 	private static final String PATTERN = "pattern";
 	private static final String LEVEL = "level";
 	private static final String FILENAME = "filename";
-	private static final String BUFFERED = "buffered";
 	private static final String BUFFERSIZE = "buffersize";
 	private static final String ELEMENT_LOG4J = "log4j";
 
@@ -62,9 +61,6 @@ public class LoggingConfigHandler implements ConfigHandler {
 				} else if (elementName.equals(FILENAME)) {
 					streamReader.next();
 					filename = streamReader.getText();
-				} else if (elementName.equals(BUFFERED)) {
-					streamReader.next();
-					isBuffered = Boolean.parseBoolean(streamReader.getText());
 				} else if (elementName.equals(BUFFERSIZE)) {
 					streamReader.next();
 					bufferSize = Integer.parseInt(streamReader.getText());
@@ -80,6 +76,6 @@ public class LoggingConfigHandler implements ConfigHandler {
 			}
 		}
 		return new LoggingConfig(appender, pattern, level, filename,
-				isBuffered, bufferSize);
+				bufferSize);
 	}
 }

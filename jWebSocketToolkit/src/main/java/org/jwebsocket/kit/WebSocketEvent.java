@@ -4,43 +4,48 @@
  */
 package org.jwebsocket.kit;
 
+import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketServer;
+
 /**
  *
  * @author aschulze
  */
 public class WebSocketEvent {
 
-	private WebSocketSession session = null;
+	private WebSocketServer server = null;
+	private WebSocketConnector connector = null;
 
-	public WebSocketEvent(WebSocketSession aSession) {
-		session = aSession;
+	public WebSocketEvent(WebSocketConnector aConnector, WebSocketServer aServer) {
+		connector = aConnector;
+		server = aServer;
 	}
 
 	/**
 	 * @return the sessionId
 	 */
 	public String getSessionId() {
-		return session.getSessionId();
-	}
-
-	/**
-	 * @param sessionId the sessionId to set
-	 */
-	public void setSessionId(String sessionId) {
-		session.setSessionId(sessionId);
+		return connector.getSession().getSessionId();
 	}
 
 	/**
 	 * @return the session
 	 */
 	public WebSocketSession getSession() {
-		return session;
+		return connector.getSession();
 	}
 
 	/**
-	 * @param session the session to set
+	 * @return the server
 	 */
-	public void setSession(WebSocketSession session) {
-		this.session = session;
+	public WebSocketServer getServer() {
+		return server;
+	}
+
+	/**
+	 * @return the connector
+	 */
+	public WebSocketConnector getConnector() {
+		return connector;
 	}
 }

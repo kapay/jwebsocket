@@ -14,15 +14,18 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
+
 /**
  * Represents the server config 
  * @author puran
  * @version $Id$
  * 
  */
-public final class ServerConfig implements Config {
+public final class ServerConfig implements Config, ServerConfiguration {
+
 	private final String id;
 	private final String name;
 	private final String jar;
@@ -38,6 +41,7 @@ public final class ServerConfig implements Config {
 	/**
 	 * @return the id
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -45,6 +49,7 @@ public final class ServerConfig implements Config {
 	/**
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -52,6 +57,7 @@ public final class ServerConfig implements Config {
 	/**
 	 * @return the jar
 	 */
+	@Override
 	public String getJar() {
 		return jar;
 	}

@@ -15,10 +15,10 @@
 package org.jwebsocket.config.xml;
 
 import org.jwebsocket.api.EngineConfiguration;
-import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
 import java.util.List;
+import org.jwebsocket.config.Config;
 
 /**
  * Class that represents the engine config
