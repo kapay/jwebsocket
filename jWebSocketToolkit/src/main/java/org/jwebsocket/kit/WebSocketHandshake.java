@@ -47,7 +47,8 @@ public class WebSocketHandshake {
 	}
 
 	private static long calcSecKeyNum(String aKey) {
-		StringBuffer lSB = new StringBuffer();
+		StringBuilder lSB = new StringBuilder();
+		// StringBuuffer lSB = new StringBuuffer();
 		int lSpaces = 0;
 		for (int i = 0; i < aKey.length(); i++) {
 			char lC = aKey.charAt(i);
@@ -113,13 +114,7 @@ public class WebSocketHandshake {
 				lSecKey3[i] = aResp[lRespLen + i];
 			}
 		}
-		/*
-		if (log.isDebugEnabled()) {
-		log.debug("Received "
-		+ (isSecure ? "secured" : "unsecured")
-		+ " Header (" + aResp.replace("\r\n", "\\n") + ")");
-		}
-		 */
+
 		// now parse header for correct handshake....
 		// get host....
 		int lPos = lResp.indexOf("Host:");
@@ -196,13 +191,14 @@ public class WebSocketHandshake {
 			BigInteger sec1 = new BigInteger(lSecNum1.toString());
 			BigInteger sec2 = new BigInteger(lSecNum2.toString());
 
-			// concatene 3 parts secNum1 + secNum2 + secKey
-			byte[] l128Bit = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+			// concatenate 3 parts secNum1 + secNum2 + secKey
+			byte[] l128Bit = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			byte[] lTmp;
 			int lOfs;
 
 			lTmp = sec1.toByteArray();
 			lOfs = 4 - lTmp.length;
+			// TODO: replace by arraycopy
 			for (int i = 0; i < lTmp.length; i++) {
 				l128Bit[i + lOfs] = lTmp[i];
 			}
@@ -212,6 +208,7 @@ public class WebSocketHandshake {
 				l128Bit[i + 4 + lOfs] = lTmp[i];
 			}
 			lTmp = lSecKey3;
+			// TODO: replace by arraycopy
 			for (int i = 0; i < 8; i++) {
 				l128Bit[i + 8] = lTmp[i];
 			}
@@ -245,7 +242,6 @@ public class WebSocketHandshake {
 	 * @return
 	 */
 	public static byte[] generateS2CResponse(Map aRequest) {
-
 		String lPolicyFileRequest = (String) aRequest.get("policy-file-request");
 		if (lPolicyFileRequest != null) {
 			byte[] lBA;
@@ -265,7 +261,9 @@ public class WebSocketHandshake {
 		String lOrigin = (String) aRequest.get("origin");
 		String lLocation = (String) aRequest.get("location");
 		String lRes =
-				"HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
+				// since IETF draft 76 "WebSocket Protocol" not "Web Socket Protocol"
+				// change implemented since v0.9.5.0701
+				"HTTP/1.1 101 Web" + (lIsSecure ? "" : " ") + "Socket Protocol Handshake\r\n"
 				+ "Upgrade: WebSocket\r\n"
 				+ "Connection: Upgrade\r\n"
 				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Origin: " + lOrigin + "\r\n"
@@ -339,7 +337,6 @@ public class WebSocketHandshake {
 		String lResp = null;
 		try {
 			lResp = new String(aResp, "US-ASCII");
-
 		} catch (Exception ex) {
 			// TODO: add exception handling
 		}

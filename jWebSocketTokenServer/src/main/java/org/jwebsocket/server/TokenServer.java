@@ -16,6 +16,7 @@
 package org.jwebsocket.server;
 
 import java.util.HashMap;
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketPacket;
@@ -25,11 +26,14 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketListener;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.filter.TokenFilterChain;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.FilterResponse;
+import org.jwebsocket.kit.WebSocketEvent;
+import org.jwebsocket.listener.WebSocketTokenListener;
 import org.jwebsocket.packetProcessors.CSVProcessor;
 import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.plugins.TokenPlugInChain;
@@ -189,7 +193,7 @@ public class TokenServer extends BaseServer {
 			Token lToken = packetToToken(aConnector, aDataPacket);
 			if (lToken != null) {
 				if (log.isDebugEnabled()) {
-					log.debug("Processing token '" + lToken.toString() + " from '" + aConnector + "'...");
+					log.debug("Processing token '" + lToken.toString() + "' from '" + aConnector + "'...");
 				}
 
 				// before forwarding the token to the plug-ins push it through filter chain
@@ -199,6 +203,14 @@ public class TokenServer extends BaseServer {
 				// if filter chain does not response "aborted"
 				if (!filterResponse.isRejected()) {
 					getPlugInChain().processToken(aConnector, lToken);
+					// forward the token to the listener chain
+					List<WebSocketListener> lListeners = getListeners();
+					WebSocketEvent lEvent = new WebSocketEvent(aConnector, this);
+					for (WebSocketListener lListener : lListeners) {
+						if (lListener != null && lListener instanceof WebSocketTokenListener) {
+							((WebSocketTokenListener) lListener).processToken(lEvent, lToken);
+						}
+					}
 				}
 			} else {
 				log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");

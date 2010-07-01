@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jwebsocket.api.EngineConfiguration;
+import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketInitializer;
@@ -218,9 +219,9 @@ public final class JWebSocketXmlConfigInitializer implements
 				// if class found
 				// try to create an instance
 				if (serverClass != null) {
-					Constructor<WebSocketServer> ctor = serverClass.getDeclaredConstructor(String.class);
+					Constructor<WebSocketServer> ctor = serverClass.getDeclaredConstructor(ServerConfiguration.class);
 					ctor.setAccessible(true);
-					server = ctor.newInstance(new Object[]{serverConfig.getId()});
+					server = ctor.newInstance(new Object[]{serverConfig});
 					if (log.isDebugEnabled()) {
 						log.debug("Server '" + serverConfig.getId() + "' successfully instantiated.");
 					}
@@ -303,22 +304,22 @@ public final class JWebSocketXmlConfigInitializer implements
 				// if class found
 				// try to create an instance
 				if (pluginClass != null) {
-/*
+					/*
 					Constructor<WebSocketPlugIn> ctor = pluginClass.getDeclaredConstructor();
 					ctor.setAccessible(true);
 					Object lObj = ctor.newInstance(new Object[]{});
 					log.debug("lObj.classname = " + lObj.getClass().getName());
 					Object plugin = null;
 					try {
-						plugin = lObj;
-						log.info(
-							"lObj instanceof WebSocketPlugIn " + ( lObj instanceof WebSocketPlugIn ? "YES" : "NO" )
-						);
+					plugin = lObj;
+					log.info(
+					"lObj instanceof WebSocketPlugIn " + ( lObj instanceof WebSocketPlugIn ? "YES" : "NO" )
+					);
 					} catch (Exception ex) {
-						log.error(
-							ex.getClass().getSimpleName() + " while instantiating class '" + pluginConfig.getName() + "'.");
+					log.error(
+					ex.getClass().getSimpleName() + " while instantiating class '" + pluginConfig.getName() + "'.");
 					}
-*/
+					 */
 					WebSocketPlugIn plugin = (WebSocketPlugIn) pluginClass.newInstance();
 
 					if (log.isDebugEnabled()) {
@@ -327,7 +328,7 @@ public final class JWebSocketXmlConfigInitializer implements
 
 					// now add the plugin to plugin map based on server ids
 					for (String serverId : pluginConfig.getServers()) {
-						pluginMap.get(serverId).add((WebSocketPlugIn)plugin);
+						pluginMap.get(serverId).add((WebSocketPlugIn) plugin);
 					}
 				}
 

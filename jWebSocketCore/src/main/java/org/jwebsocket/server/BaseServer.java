@@ -70,14 +70,6 @@ public class BaseServer implements WebSocketServer {
 		aEngine.addServer(this);
 	}
 
-	public void addListener(WebSocketListener aListener) {
-		listeners.add(aListener);
-	}
-
-	public void removeListener(WebSocketListener aListener) {
-		listeners.remove(aListener);
-	}
-
 	@Override
 	/**
 	 * {@inheritDoc }
@@ -173,7 +165,7 @@ public class BaseServer implements WebSocketServer {
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		// this method is supposed to be overwritten by descending classes.
 		WebSocketEvent lEvent = new WebSocketEvent(aConnector, this);
-		for (WebSocketListener lListener : listeners) {
+		for (WebSocketListener lListener : getListeners()) {
 			if (lListener != null) {
 				lListener.processPacket(lEvent, aDataPacket);
 			}
@@ -345,5 +337,23 @@ public class BaseServer implements WebSocketServer {
 	@Override
 	public WebSocketFilterChain getFilterChain() {
 		return filterChain;
+	}
+
+	@Override
+	public void addListener(WebSocketListener aListener) {
+		listeners.add(aListener);
+	}
+
+	@Override
+	public void removeListener(WebSocketListener aListener) {
+		listeners.remove(aListener);
+	}
+
+	/**
+	 * @return the listeners
+	 */
+	@Override
+	public FastList<WebSocketListener> getListeners() {
+		return listeners;
 	}
 }

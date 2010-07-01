@@ -21,7 +21,16 @@ package org.jwebsocket.console;
 public class JWebSocketEmbedded {
 
 	public static void main(String[] args) {
-		SampleEmbeddedServer embeddedServer = new SampleEmbeddedServer();
-		embeddedServer.runEmbeddedJWebSocketServer();
+		// instantiate an embedded jWebSocket Server
+		JWebSocketSubSystemSample jWebSocketSubsystem = new JWebSocketSubSystemSample();
+		// instantiate an embedded listener class and add it to the subsystem
+		jWebSocketSubsystem.addListener(new JWebSocketTokenListenerSample());
+
+		// start the subsystem
+		jWebSocketSubsystem.start();
+		// wait until shutdown requested
+		jWebSocketSubsystem.run();
+		// stop the subsystem
+		jWebSocketSubsystem.stop();
 	}
 }

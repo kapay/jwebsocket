@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.kit.WebSocketEvent;
+import org.jwebsocket.listener.WebSocketTokenListener;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
@@ -68,7 +69,8 @@ public class WebSocketDemo extends HttpServlet implements WebSocketTokenListener
 	}
 
 	@Override
-	public void processWebSocketToken(WebSocketEvent aEvent, Token aToken) {
+	public void processToken(WebSocketEvent aEvent, Token aToken) {
+		log.info("Received WebSocket token: " + aToken.toString());
 	}
 
 	@Override

@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import javolution.util.FastList;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.WebSocketException;
@@ -109,7 +110,7 @@ public interface WebSocketServer {
 	 * @param aBroadcastOptions
 	 */
 	void broadcastPacket(WebSocketConnector aSource, WebSocketPacket aDataPacket,
-			BroadcastOptions aBroadcastOptions );
+			BroadcastOptions aBroadcastOptions);
 
 	/**
 	 * Returns the unique ID of the server. Because the jWebSocket model
@@ -119,17 +120,33 @@ public interface WebSocketServer {
 	 */
 	String getId();
 
-
 	/**
-	 * Returns the plugin chain for the server 
+	 * Returns the plugin chain for the server .
 	 * @return the plugInChain
 	 */
 	public WebSocketPlugInChain getPlugInChain();
 
 	/**
-	 * Returns the filter chain
+	 * Returns the filter chain for the server.
 	 * @return the filterChain
 	 */
 	public WebSocketFilterChain getFilterChain();
 
+	/**
+	 * 
+	 * @param aListener
+	 */
+	public void addListener(WebSocketListener aListener);
+
+	/**
+	 *
+	 * @param aListener
+	 */
+	public void removeListener(WebSocketListener aListener);
+
+	/**
+	 * Returns the list of listeners for the server.
+	 * @return the filterChain
+	 */
+	public FastList<WebSocketListener> getListeners();
 }

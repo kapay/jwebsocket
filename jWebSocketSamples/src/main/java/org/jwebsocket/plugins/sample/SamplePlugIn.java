@@ -35,8 +35,8 @@ public class SamplePlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(SamplePlugIn.class);
 	// if namespace changed update client plug-in accordingly!
-	private static String NS_SAMPLE = JWebSocketConstants.NS_BASE + ".plugins.samples";
-	private static String SAMPLE_VAR = NS_SAMPLE + ".started";
+	private final static String NS_SAMPLE = JWebSocketConstants.NS_BASE + ".plugins.samples";
+	private final static String SAMPLE_VAR = NS_SAMPLE + ".started";
 
 	/**
 	 *
