@@ -16,28 +16,40 @@ package org.jwebsocket.api;
 
 import java.util.List;
 /**
- * Engine Configuration
+ * Base interface that provides the read-only access to all the engine configuration 
+ * values configured via <tt>jWebSocket.xml</tt> file for a given engine 
  * @author puran 
- * @version $Id:$
+ * @version $Id$
  */
 public interface EngineConfiguration extends Configuration {
     /**
-     * @return the jar file name
+     * Returns the fully qualified name of the external jar file from which 
+     * the engine is loaded. In case, no external library or jar file is used 
+     * then this value will return null or empty string.
+     * @return the jar file name or null value
      */
     String getJar();
     /**
-     * @return the port at which this engine runs
+     * Returns the port at which the engine is running
+     * @return the port number by default it's 8787 for jWebSocket
      */
     int getPort();
     /**
+     * Engine timeout value in milliseconds
      * @return timeout value
      */
     int getTimeout();
     /**
+     * The maximum frame size in KB that engine will read any frame with 
+     * size greater than this will cause connection to be terminated
      * @return the maximum frame size
      */
     int getMaxframesize();
     /**
+     * These are the list of allowed domains for accepting connections for the origin
+     * based security model. Any connection request with different origin than the origins
+     * in this list is not accepted and the connection is terminated immediately.
+     * 
      * @return the list of allowed domains
      */
     List<String> getDomains();
