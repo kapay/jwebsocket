@@ -14,6 +14,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.netty.engines;
 
+import javax.net.ssl.SSLEngine;
+
 import org.jboss.netty.channel.ChannelConfig;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -21,6 +23,7 @@ import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.ServerChannel;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
+import org.jboss.netty.handler.ssl.SslHandler;
 import org.jwebsocket.netty.http.HttpRequestDecoder;
 
 /**
@@ -63,6 +66,13 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
         // Create a default pipeline implementation.
         ChannelPipeline pipeline = Channels.pipeline();
+        
+        // Add SSL handler first to encrypt and decrypt everything.
+        SSLEngine sslEngine = JWebSocketSslContextFactory.getServerContext().createSSLEngine();
+        sslEngine.setUseClientMode(false);
+
+        pipeline.addLast("ssl", new SslHandler(sslEngine));
+        
         pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
         pipeline.addLast("encoder", new HttpResponseEncoder());
