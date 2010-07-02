@@ -32,7 +32,7 @@ import org.jwebsocket.filter.TokenFilterChain;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.FilterResponse;
-import org.jwebsocket.kit.WebSocketEvent;
+import org.jwebsocket.listener.WebSocketTokenEvent;
 import org.jwebsocket.listener.WebSocketTokenListener;
 import org.jwebsocket.packetProcessors.CSVProcessor;
 import org.jwebsocket.packetProcessors.JSONProcessor;
@@ -205,7 +205,7 @@ public class TokenServer extends BaseServer {
 					getPlugInChain().processToken(aConnector, lToken);
 					// forward the token to the listener chain
 					List<WebSocketListener> lListeners = getListeners();
-					WebSocketEvent lEvent = new WebSocketEvent(aConnector, this);
+					WebSocketTokenEvent lEvent = new WebSocketTokenEvent(aConnector, this);
 					for (WebSocketListener lListener : lListeners) {
 						if (lListener != null && lListener instanceof WebSocketTokenListener) {
 							((WebSocketTokenListener) lListener).processToken(lEvent, lToken);

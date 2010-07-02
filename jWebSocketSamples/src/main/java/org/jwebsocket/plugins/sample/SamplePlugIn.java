@@ -24,7 +24,6 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
-import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
@@ -88,13 +87,11 @@ public class SamplePlugIn extends TokenPlugIn {
 		// check if token has a type and a matching namespace
 		if (lType != null && lNS != null && lNS.equals(getNamespace())) {
 
-			TokenServer lServer = getServer();
-
 			// get the server time
 			if ("requestServerTime".equals(lType)) {
 				// create the response token
 				// this includes the unique token-id
-				Token lResponse = lServer.createResponse(aToken);
+				Token lResponse = createResponse(aToken);
 
 				// add the "time" and "started" field
 				lResponse.put("time", new Date().toString());
@@ -124,11 +121,11 @@ public class SamplePlugIn extends TokenPlugIn {
 				lResponse.put("token", lToken);
 
 				// send the response token back to the client
-				lServer.sendToken(aConnector, lResponse);
+				sendToken(aConnector, aConnector, lResponse);
 
 			} else if (lType.equals("processComplexObject")) {
 				// simply echo the complex object
-				lServer.sendToken(aConnector, aToken);
+				sendToken(aConnector, aConnector, aToken);
 			}
 		}
 	}

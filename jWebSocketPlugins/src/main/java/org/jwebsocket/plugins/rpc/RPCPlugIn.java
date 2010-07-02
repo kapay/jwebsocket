@@ -30,7 +30,6 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
-import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
@@ -58,7 +57,6 @@ public class RPCPlugIn extends TokenPlugIn {
 		if (log.isDebugEnabled()) {
 			log.debug("Instantiating rpc plug-in...");
 		}
-
 		// specify default name space
 		this.setNamespace(NS_RPC_DEFAULT);
 
@@ -75,7 +73,6 @@ public class RPCPlugIn extends TokenPlugIn {
 	public void connectorStarted(WebSocketConnector aConnector) {
 	}
 	 */
-
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
@@ -98,15 +95,13 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void rpc(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
 		// check if user is allowed to run 'rpc' command
-		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_RPC_DEFAULT + ".rpc")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+		if (!SecurityFactory.checkRight(getUsername(aConnector), NS_RPC_DEFAULT + ".rpc")) {
+			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
 
-		Token lResponseToken = lServer.createResponse(aToken);
+		Token lResponseToken = createResponse(aToken);
 
 		// currently rpcServer is the only supported RPCPlugIn server!
 		String lClassName = aToken.getString("classname");
@@ -139,7 +134,7 @@ public class RPCPlugIn extends TokenPlugIn {
 			lResponseToken.put("msg", lMsg);
 		}
 
-		lServer.sendToken(aConnector, lResponseToken);
+		sendToken(aConnector, aConnector, lResponseToken);
 	}
 
 	/**
@@ -148,11 +143,9 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void rrpc(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
 		// check if user is allowed to run 'rrpc' command
-		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_RPC_DEFAULT + ".rrpc")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+		if (!SecurityFactory.checkRight(getUsername(aConnector), NS_RPC_DEFAULT + ".rrpc")) {
+			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
 
@@ -169,7 +162,7 @@ public class RPCPlugIn extends TokenPlugIn {
 
 		// TODO: find solutions for hardcoded engine id
 		WebSocketConnector lTargetConnector =
-				lServer.getConnector("tcp0", lTargetId);
+				getServer().getConnector("tcp0", lTargetId);
 
 		if (log.isDebugEnabled()) {
 			log.debug("Processing 'rrpc'...");
@@ -181,12 +174,12 @@ public class RPCPlugIn extends TokenPlugIn {
 			lRRPC.put("args", lArgs);
 			lRRPC.put("sourceId", aConnector.getRemotePort());
 
-			lServer.sendToken(lTargetConnector, lRRPC);
+			sendToken(aConnector, lTargetConnector, lRRPC);
 		} else {
-			Token lResponse = lServer.createResponse(aToken);
+			Token lResponse = createResponse(aToken);
 			lResponse.put("code", -1);
 			lResponse.put("error", "Target " + lTargetId + " not found.");
-			lServer.sendToken(aConnector, lResponse);
+			sendToken(aConnector, aConnector, lResponse);
 		}
 	}
 
