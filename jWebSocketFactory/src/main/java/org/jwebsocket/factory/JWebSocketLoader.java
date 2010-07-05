@@ -43,7 +43,7 @@ import org.jwebsocket.security.SecurityFactory;
  */
 public final class JWebSocketLoader {
 
-    private static Logger log = Logging.getLogger(JWebSocketLoader.class);
+//    private static Logger log = Logging.getLogger(JWebSocketLoader.class);
     private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
     /**
@@ -56,9 +56,12 @@ public final class JWebSocketLoader {
     public final WebSocketInitializer initialize() throws WebSocketException {
         String configPath = getConfigurationPath();
         if (configPath == null) {
+			// TODO: Exception handling
+			/*
             log.error("Error Loading Configuration File jWebSocket.xml");
+			 */
             throw new WebSocketException("Either JWEBSOCKET_HOME variable is not set " +
-            		"or jWebSocket.xml file does not exists at JWEBSOCKET_HOME/conf");
+            		"or jWebSocket.xml file does not exists at %JWEBSOCKET_HOME%/conf");
         }
         // load the entire settings from the configuration xml file
         JWebSocketConfig config = loadConfiguration(configPath);
@@ -111,21 +114,33 @@ public final class JWebSocketLoader {
             Class<WebSocketInitializer> lClass = (Class<WebSocketInitializer>) Class.forName(initializerClass);
             initializer = lClass.newInstance();
         } catch (ClassNotFoundException ex) {
+			// TODO: Exception handling
+			/*
             if (log.isInfoEnabled()) {
                 log.info(ex.getClass().getSimpleName() + " instantiating initializer", ex);
             }
+			 */
         } catch (InstantiationException ex) {
+			// TODO: Exception handling
+			/*
             if (log.isInfoEnabled()) {
                 log.info(ex.getClass().getSimpleName() + " instantiating initializer", ex);
             }
+			 */
         } catch (IllegalAccessException ex) {
+			// TODO: Exception handling
+			/*
             if (log.isInfoEnabled()) {
                 log.info(ex.getClass().getSimpleName() + " instantiating initializer", ex);
             }
+			 */
         }
+			// TODO: Exception handling
+			/*
         if (log.isInfoEnabled()) {
             log.info("Initializer found: " + initializer.getClass().getName());
         }
+			 */
 
         return initializer;
     }

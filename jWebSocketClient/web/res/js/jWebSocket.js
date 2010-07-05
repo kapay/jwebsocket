@@ -1191,6 +1191,14 @@ jws.SystemClientPlugIn = {
 		return( this.isConnected() && this.fUsername );
 	},
 
+	broadcastToken: function( aToken, aOptions ) {
+		aToken.ns = jws.SystemClientPlugIn.NS;
+		aToken.type = "broadcast";
+		aToken.sourceId = this.fClientId;
+		aToken.sender = this.fUsername;
+		this.sendToken( aToken, aOptions );
+	},
+
 	//:m:*:getUsername
 	//:d:en:Returns the login name when the client is authenticated, _
 	//:d:en:otherwise [tt]null[/tt].
