@@ -17,6 +17,7 @@ package org.jwebsocket.console;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.server.TokenServer;
 
 /**
  * @author puran
@@ -35,22 +36,15 @@ public class JWebSocketServer {
 		System.out.println(JWebSocketConstants.LICENSE);
 		System.out.println("Log files per default in jWebSocket.log if not overwritten in jWebSocket.xml.");
 
-
 		JWebSocketFactory.start();
-/*
-		ArrayList lDomains = new ArrayList();
-		lDomains.add("http://jwebsocket.org");
-		EngineConfiguration lConfig = new EngineConfig(
-				"tcp0", // id
-				"org.jwebsocket.tcp.engines.TCPEngine", // name
-				"jWebSocketTCPEngine-0.9.5.jar", // jar, if not in classpath
-				8787, // port
-				120000, // default session timeout
-				16384, // max framesize
-				lDomains // list of accepted domains
-				);
-		TCPEngine lEngine = new TCPEngine(lConfig);
-*/
+
+		// get the token server
+		TokenServer lTS0 = (TokenServer)JWebSocketFactory.getServer("ts0");
+		if( lTS0 != null ) {
+			// and add the sample listener to the server's listener chain
+			lTS0.addListener(new JWebSocketTokenListenerSample());
+		}
+
 		WebSocketEngine engine = JWebSocketFactory.getEngine();
 		if (engine != null) {
 			while (engine.isAlive()) {

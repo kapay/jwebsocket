@@ -589,7 +589,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::::none
 	//:r:*:::void:none
 	createDefaultResult: function() {
-		jws.CUR_TOKEN_ID++;
+		// jws.CUR_TOKEN_ID++;
 		return{
 			code: 0,
 			msg: "Ok",
@@ -860,6 +860,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				lOnResponse = aOptions.OnResponse;
 			}
 		}
+		jws.CUR_TOKEN_ID++;
 		if( lOnResponse ) {
 			this.fRequestCallbacks[ "utid" + jws.CUR_TOKEN_ID ] = {
 				request: new Date().getTime(),
@@ -870,6 +871,25 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 
 		// console.log("sending" + lStream + "...");
 		this.sendStream( lStream );
+	},
+
+	//:m:*:getLastTokenId
+	//:d:en:Returns the last token id that has been used for the last recent
+	//:d:en:request.This id was already used and cannot be used for further
+	//:d:en:tranmissions.
+	//:a:en::::none
+	//:r:*:::Integer:Last recently used unique token-id.
+	getLastTokenId: function() {
+		return jws.CUR_TOKEN_ID;
+	},
+
+	//:m:*:getNextTokenId
+	//:d:en:Returns the next token id that will be used for the next request.
+	//:d:en:This id will be used by the next sendToken call.
+	//:a:en::::none
+	//:r:*:::Integer:Next unique token-id used for the next sendToken call.
+	getNextTokenId: function() {
+		return jws.CUR_TOKEN_ID + 1;
 	},
 
 	//:m:*:sendText

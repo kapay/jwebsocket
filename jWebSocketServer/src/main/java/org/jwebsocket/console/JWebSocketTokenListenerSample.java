@@ -16,6 +16,7 @@ package org.jwebsocket.console;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.kit.WebSocketEvent;
 import org.jwebsocket.listener.WebSocketTokenEvent;
 import org.jwebsocket.listener.WebSocketTokenListener;
@@ -46,10 +47,10 @@ public class JWebSocketTokenListenerSample implements WebSocketTokenListener {
 	 */
 	@Override
 	public void processPacket(WebSocketEvent aEvent, WebSocketPacket aPacket) {
-		log.info("Client '" + aEvent.getSessionId() + "' sent: '" + aPacket.getASCII() + "'.");
+		// log.info("Client '" + aEvent.getSessionId() + "' sent: '" + aPacket.getASCII() + "'.");
 		// Here you can answer an arbitrary text package...
 		// this is how to easily respond to a previous client's request
-		aEvent.sendPacket(aPacket);
+		// aEvent.sendPacket(aPacket);
 		// this is how to send a packet to any connector
 		// aEvent.getServer().sendPacket(aEvent.getConnector(), aPacket);
 	}
@@ -67,8 +68,22 @@ public class JWebSocketTokenListenerSample implements WebSocketTokenListener {
 		String lNS = aToken.getNS();
 		String lType = aToken.getType();
 
-		// simply return the same token to sender for demo purposes
-		aEvent.sendToken(aToken);
+		// check if token has a type and a matching namespace
+		if (lType != null && "my.namespace".equals(lNS)) {
+			// if type is "getInfo" return some server information
+			Token lResponse = aEvent.createResponse(aToken);
+			if ("getInfo".equals(lType)) {
+				lResponse.put("vendor", JWebSocketConstants.VENDOR);
+				lResponse.put("version", JWebSocketConstants.VERSION_STR);
+				lResponse.put("copyright", JWebSocketConstants.COPYRIGHT);
+				lResponse.put("license", JWebSocketConstants.LICENSE);
+			} else {
+				// if unknown type in this namespace, return corresponding error message
+				lResponse.put("code", -1);
+				lResponse.put("msg", "Token type '" + lType + "' not supported in namespace '" + lNS + "'.");
+			}
+			aEvent.sendToken(lResponse);
+		}
 	}
 
 	/**

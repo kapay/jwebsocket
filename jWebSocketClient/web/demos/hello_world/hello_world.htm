@@ -121,6 +121,26 @@
 				}
 			}
 
+			// example how to exchange data with a server side listener
+			function sampleListener() {
+				if( jWebSocketClient.isConnected() ) {
+					var lToken = {
+						ns: "my.namespace",
+						type: "getInfo"
+					};
+					jWebSocketClient.sendToken( lToken,	{
+						OnResponse: function( aToken ) {
+							log("Server responded: "
+								+ "vendor: " + aToken.vendor
+								+ ", version: " + aToken.version
+							);
+						}
+					});
+				} else {
+					log( "Not connected." );
+				}
+			}
+
 			// example how to request a result from a server side plugin
 			function sampleGetTime() {
 				log( "Requesting server time via WebSockets..." );
@@ -199,7 +219,8 @@
 					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="YourUsername" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Password</td>
@@ -207,10 +228,11 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();"></td>
 					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnGetTime" type="button" value="GetTime" onclick="sampleGetTime();"></td>
+					<td class="stdDlg" width="">&nbsp;</td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Message</td>
-					<td class="stdDlg" width="" colspan="4"><input class="stxfDlg" id="stxfMessage" type="text" value="Your Message" style="width:99%"></td>
+					<td class="stdDlg" width="" colspan="5"><input class="stxfDlg" id="stxfMessage" type="text" value="Your Message" style="width:99%"></td>
 				</tr>
 			</table>
 		</div>
