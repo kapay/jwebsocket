@@ -18,8 +18,8 @@ import org.jwebsocket.config.Config;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.util.ArrayList;
 import java.util.List;
+import javolution.util.FastList;
 
 /**
  * Handles the engine configuration
@@ -92,8 +92,8 @@ public class EngineConfigHandler implements ConfigHandler {
      * @return the list of domains for the engine
      * @throws XMLStreamException in case of stream exception
      */
-    private List<String> getDomains(XMLStreamReader streamReader) throws XMLStreamException {
-        List<String> domains = new ArrayList<String>();
+    private FastList<String> getDomains(XMLStreamReader streamReader) throws XMLStreamException {
+        FastList<String> domains = new FastList<String>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
