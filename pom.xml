@@ -21,7 +21,8 @@
 		<module>jWebSocketSamples</module>
 		<module>jWebSocketFactory</module>
 		<module>jWebSocketWebAppSupport</module>
-		<module>jWebSocketJavaClient</module>
+		<module>jWebSocketJavaSEClient</module>
+		<module>jWebSocketJavaMEClient</module>
 		<module>jWebSocketServer</module>
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>

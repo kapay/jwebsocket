@@ -22,7 +22,7 @@ import org.jwebsocket.api.WebSocketServer;
  *
  * @author aschulze
  */
-public class WebSocketEvent {
+public class WebSocketServerEvent {
 
 	private WebSocketServer server = null;
 	private WebSocketConnector connector = null;
@@ -32,7 +32,7 @@ public class WebSocketEvent {
 	 * @param aConnector
 	 * @param aServer
 	 */
-	public WebSocketEvent(WebSocketConnector aConnector, WebSocketServer aServer) {
+	public WebSocketServerEvent(WebSocketConnector aConnector, WebSocketServer aServer) {
 		connector = aConnector;
 		server = aServer;
 	}

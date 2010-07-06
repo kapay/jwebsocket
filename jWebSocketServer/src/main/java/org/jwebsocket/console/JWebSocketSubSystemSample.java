@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.ServerConfiguration;
-import org.jwebsocket.api.WebSocketListener;
+import org.jwebsocket.api.WebSocketServerListener;
 import org.jwebsocket.config.JWebSocketConstants;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.LoggingConfig;
@@ -141,7 +141,7 @@ public class JWebSocketSubSystemSample {
 	 * adds a new listener to the server of the jWebSocket subsystem.
 	 * @param aListener
 	 */
-	public void addListener(WebSocketListener aListener) {
+	public void addListener(WebSocketServerListener aListener) {
 		if (aListener != null && server != null) {
 			// add listener to the server
 			server.addListener(aListener);
@@ -152,7 +152,7 @@ public class JWebSocketSubSystemSample {
 	 * removes a listener from the server of the jWebSocket subsystem.
 	 * @param aListener
 	 */
-	public void removeListener(WebSocketListener aListener) {
+	public void removeListener(WebSocketServerListener aListener) {
 		if (aListener != null && server != null) {
 			// remove listener from the server
 			server.removeListener(aListener);

@@ -15,13 +15,19 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.client.se;
 
+import javolution.util.FastList;
 import org.jwebsocket.api.WebSocketClient;
+import org.jwebsocket.api.WebSocketClientListener;
+import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.kit.WebSocketClientEvent;
 
 /**
  *
  * @author aschulze
  */
 public abstract class BaseClient implements WebSocketClient {
+
+	private FastList<WebSocketClientListener> listeners = new FastList<WebSocketClientListener>();
 
 	/*
 	 * The connection has not yet been established.
@@ -44,4 +50,39 @@ public abstract class BaseClient implements WebSocketClient {
 	 */
 	public static final int MAX_FRAMESIZE = 16384;
 
+	@Override
+	public void addListener(WebSocketClientListener aListener) {
+		listeners.add(aListener);
+	}
+
+	@Override
+	public void removeListener(WebSocketClientListener aListener) {
+		listeners.remove(aListener);
+	}
+
+	@Override
+	public FastList<WebSocketClientListener> getListeners() {
+		return listeners;
+	}
+
+	@Override
+	public void notifyOpened(WebSocketClientEvent aEvent) {
+		for (WebSocketClientListener lListener : getListeners()) {
+			lListener.processOpened(aEvent);
+		}
+	}
+
+	@Override
+	public void notifyPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+		for (WebSocketClientListener lListener : getListeners()) {
+			lListener.processPacket(aEvent, aPacket);
+		}
+	}
+
+	@Override
+	public void notifyClosed(WebSocketClientEvent aEvent) {
+		for (WebSocketClientListener lListener : getListeners()) {
+			lListener.processClosed(aEvent);
+		}
+	}
 }

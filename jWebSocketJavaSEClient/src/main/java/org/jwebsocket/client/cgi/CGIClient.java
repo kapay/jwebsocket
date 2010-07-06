@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import org.jwebsocket.client.se.BaseClientJ2SE;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -42,7 +43,7 @@ public class CGIClient extends BaseClientJ2SE {
 	 */
 	public CGIClient() {
 		// assign listener
-		super(null);
+		super();
 	}
 
 	@Override

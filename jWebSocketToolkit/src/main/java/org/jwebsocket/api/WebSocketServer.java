@@ -136,17 +136,17 @@ public interface WebSocketServer {
 	 * 
 	 * @param aListener
 	 */
-	public void addListener(WebSocketListener aListener);
+	public void addListener(WebSocketServerListener aListener);
 
 	/**
 	 *
 	 * @param aListener
 	 */
-	public void removeListener(WebSocketListener aListener);
+	public void removeListener(WebSocketServerListener aListener);
 
 	/**
 	 * Returns the list of listeners for the server.
 	 * @return the filterChain
 	 */
-	public FastList<WebSocketListener> getListeners();
+	public FastList<WebSocketServerListener> getListeners();
 }

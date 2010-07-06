@@ -30,8 +30,8 @@ import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketFilterChain;
-import org.jwebsocket.api.WebSocketListener;
-import org.jwebsocket.kit.WebSocketEvent;
+import org.jwebsocket.api.WebSocketServerListener;
+import org.jwebsocket.kit.WebSocketServerEvent;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -48,7 +48,7 @@ public class BaseServer implements WebSocketServer {
 	private String id = null;
 	protected WebSocketPlugInChain plugInChain = null;
 	protected WebSocketFilterChain filterChain = null;
-	private FastList<WebSocketListener> listeners = new FastList<WebSocketListener>();
+	private FastList<WebSocketServerListener> listeners = new FastList<WebSocketServerListener>();
 
 	/**
 	 * Create a new instance of the Base Server. Each BaseServer maintains a
@@ -134,8 +134,8 @@ public class BaseServer implements WebSocketServer {
 		// this method is supposed to be overwritten by descending classes.
 		// e.g. to notify the overlying appplications or plug-ins
 		// about the connectorStarted event
-		WebSocketEvent lEvent = new WebSocketEvent(aConnector, this);
-		for (WebSocketListener lListener : listeners) {
+		WebSocketServerEvent lEvent = new WebSocketServerEvent(aConnector, this);
+		for (WebSocketServerListener lListener : listeners) {
 			if (lListener != null) {
 				lListener.processOpened(lEvent);
 			}
@@ -150,8 +150,8 @@ public class BaseServer implements WebSocketServer {
 		// this method is supposed to be overwritten by descending classes.
 		// e.g. to notify the overlying appplications or plug-ins
 		// about the connectorStopped event
-		WebSocketEvent lEvent = new WebSocketEvent(aConnector, this);
-		for (WebSocketListener lListener : listeners) {
+		WebSocketServerEvent lEvent = new WebSocketServerEvent(aConnector, this);
+		for (WebSocketServerListener lListener : listeners) {
 			if (lListener != null) {
 				lListener.processClosed(lEvent);
 			}
@@ -164,8 +164,8 @@ public class BaseServer implements WebSocketServer {
 	@Override
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		// this method is supposed to be overwritten by descending classes.
-		WebSocketEvent lEvent = new WebSocketEvent(aConnector, this);
-		for (WebSocketListener lListener : getListeners()) {
+		WebSocketServerEvent lEvent = new WebSocketServerEvent(aConnector, this);
+		for (WebSocketServerListener lListener : getListeners()) {
 			if (lListener != null) {
 				lListener.processPacket(lEvent, aDataPacket);
 			}
@@ -340,12 +340,12 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	@Override
-	public void addListener(WebSocketListener aListener) {
+	public void addListener(WebSocketServerListener aListener) {
 		listeners.add(aListener);
 	}
 
 	@Override
-	public void removeListener(WebSocketListener aListener) {
+	public void removeListener(WebSocketServerListener aListener) {
 		listeners.remove(aListener);
 	}
 
@@ -353,7 +353,7 @@ public class BaseServer implements WebSocketServer {
 	 * @return the listeners
 	 */
 	@Override
-	public FastList<WebSocketListener> getListeners() {
+	public FastList<WebSocketServerListener> getListeners() {
 		return listeners;
 	}
 }

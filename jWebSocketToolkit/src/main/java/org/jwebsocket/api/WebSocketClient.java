@@ -13,9 +13,10 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-
 package org.jwebsocket.api;
 
+import javolution.util.FastList;
+import org.jwebsocket.kit.WebSocketClientEvent;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -30,6 +31,7 @@ public interface WebSocketClient {
 	 * @throws WebSocketException
 	 */
 	public void open(String aURL) throws WebSocketException;
+
 	/**
 	 *
 	 * @param aData
@@ -37,6 +39,7 @@ public interface WebSocketClient {
 	 * @throws WebSocketException
 	 */
 	public void send(String aData, String aEncoding) throws WebSocketException;
+
 	/**
 	 *
 	 * @param aData
@@ -44,18 +47,21 @@ public interface WebSocketClient {
 	 * @throws WebSocketException
 	 */
 	public void received(String aData, String aEncoding) throws WebSocketException;
+
 	/**
 	 *
 	 * @param aData
 	 * @throws WebSocketException
 	 */
 	public void send(byte[] aData) throws WebSocketException;
+
 	/**
 	 *
 	 * @param aData
 	 * @throws WebSocketException
 	 */
 	public void received(byte[] aData) throws WebSocketException;
+
 	/**
 	 *
 	 * @throws WebSocketException
@@ -64,7 +70,40 @@ public interface WebSocketClient {
 
 	/**
 	 *
-	 * @throws WebSocketException
+	 * @return
 	 */
 	public boolean isConnected();
+
+	/**
+	 *
+	 * @param aListener
+	 */
+	void addListener(WebSocketClientListener aListener);
+
+	/**
+	 * 
+	 * @param aListener
+	 */
+	void removeListener(WebSocketClientListener aListener);
+
+	/**
+	 * 
+	 * @return
+	 */
+	FastList<WebSocketClientListener> getListeners();
+
+	/**
+	 *
+	 */
+	void notifyOpened(WebSocketClientEvent aEvent);
+
+	/**
+	 *
+	 */
+	void notifyPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket);
+
+	/**
+	 *
+	 */
+	void notifyClosed(WebSocketClientEvent aEvent);
 }

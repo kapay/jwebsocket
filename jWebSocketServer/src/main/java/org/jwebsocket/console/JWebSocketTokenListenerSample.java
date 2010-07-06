@@ -17,9 +17,9 @@ package org.jwebsocket.console;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.config.JWebSocketConstants;
-import org.jwebsocket.kit.WebSocketEvent;
-import org.jwebsocket.listener.WebSocketTokenEvent;
-import org.jwebsocket.listener.WebSocketTokenListener;
+import org.jwebsocket.kit.WebSocketServerEvent;
+import org.jwebsocket.listener.WebSocketServerTokenEvent;
+import org.jwebsocket.listener.WebSocketServerTokenListener;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
@@ -27,7 +27,7 @@ import org.jwebsocket.token.Token;
  * This shows an example of a simple websocket listener
  * @author aschulze
  */
-public class JWebSocketTokenListenerSample implements WebSocketTokenListener {
+public class JWebSocketTokenListenerSample implements WebSocketServerTokenListener {
 
 	private static Logger log = Logging.getLogger(JWebSocketTokenListenerSample.class);
 
@@ -36,7 +36,7 @@ public class JWebSocketTokenListenerSample implements WebSocketTokenListener {
 	 * @param aEvent
 	 */
 	@Override
-	public void processOpened(WebSocketEvent aEvent) {
+	public void processOpened(WebSocketServerEvent aEvent) {
 		log.info("Client '" + aEvent.getSessionId() + "' connected.");
 	}
 
@@ -46,7 +46,7 @@ public class JWebSocketTokenListenerSample implements WebSocketTokenListener {
 	 * @param aPacket
 	 */
 	@Override
-	public void processPacket(WebSocketEvent aEvent, WebSocketPacket aPacket) {
+	public void processPacket(WebSocketServerEvent aEvent, WebSocketPacket aPacket) {
 		// log.info("Client '" + aEvent.getSessionId() + "' sent: '" + aPacket.getASCII() + "'.");
 		// Here you can answer an arbitrary text package...
 		// this is how to easily respond to a previous client's request
@@ -61,7 +61,7 @@ public class JWebSocketTokenListenerSample implements WebSocketTokenListener {
 	 * @param aToken
 	 */
 	@Override
-	public void processToken(WebSocketTokenEvent aEvent, Token aToken) {
+	public void processToken(WebSocketServerTokenEvent aEvent, Token aToken) {
 		log.info("Client '" + aEvent.getSessionId() + "' sent Token: '" + aToken.toString() + "'.");
 		// here you can simply interpret the token type sent from the client
 		// according to your needs.
@@ -91,7 +91,7 @@ public class JWebSocketTokenListenerSample implements WebSocketTokenListener {
 	 * @param aEvent
 	 */
 	@Override
-	public void processClosed(WebSocketEvent aEvent) {
+	public void processClosed(WebSocketServerEvent aEvent) {
 		log.info("Client '" + aEvent.getSessionId() + "' disconnected.");
 	}
 }

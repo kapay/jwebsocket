@@ -14,21 +14,23 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.listener;
 
-import org.jwebsocket.api.WebSocketListener;
+import org.jwebsocket.api.WebSocketClientListener;
+import org.jwebsocket.kit.WebSocketClientEvent;
 import org.jwebsocket.token.Token;
 
 /**
  * Interface for the Token WebSocket listeners based on the low level listeners.
  * @author aschulze
  */
-public interface WebSocketTokenListener extends WebSocketListener {
+public interface WebSocketClientTokenListener extends WebSocketClientListener {
 
 	/**
 	 * This method is invoked when a token (JSON, CSV or XML) from a client is
-	 * received. The event provides getter for the server and the connector to
+	 * received. The event provides getter for the Client and the connector to
 	 * send responses to back the client.
 	 * @param aEvent
 	 * @param aToken
 	 */
-	public void processToken(WebSocketTokenEvent aEvent, Token aToken);
+	public void processToken(WebSocketClientEvent aEvent, Token aToken);
+
 }

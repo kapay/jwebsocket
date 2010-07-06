@@ -15,8 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.client.se;
 
-import org.jwebsocket.kit.WebSocketEvent;
-import org.jwebsocket.api.WebSocketListener;
+import org.jwebsocket.kit.WebSocketClientEvent;
+import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.kit.WebSocketHandshake;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,14 +38,11 @@ public class BaseClientJ2SE extends BaseClient {
 	private Thread inboundThread;
 	private InboundProcess inboundProcess;
 	private URI url = null;
-	private WebSocketListener listener = null;
 	private Socket socket = null;
 	private InputStream is = null;
 	private OutputStream os = null;
 
-	public BaseClientJ2SE(WebSocketListener aListener) {
-		// assign listener
-		listener = aListener;
+	public BaseClientJ2SE() {
 	}
 
 	@Override
@@ -137,7 +134,8 @@ public class BaseClientJ2SE extends BaseClient {
 			int pos = -1;
 			int lStart = -1;
 
-			listener.processOpened(null);
+			WebSocketClientEvent lEvent = new WebSocketClientEvent();
+			notifyOpened(lEvent);
 
 			while (isRunning) {
 				try {
@@ -149,14 +147,11 @@ public class BaseClientJ2SE extends BaseClient {
 						// end of frame
 					} else if (b == 0xff) {
 						if (lStart >= 0) {
-							if (listener != null) {
-								byte[] lBA = Arrays.copyOf(lBuff, pos);
-								received(lBA);
-								WebSocketEvent lEvt = new WebSocketEvent(null, null);
-								// lEvt.setData(lBA);
-								WebSocketPacket lPacket = new RawPacket(lBA);
-								listener.processPacket(lEvt, lPacket);
-							}
+							byte[] lBA = Arrays.copyOf(lBuff, pos);
+							received(lBA);
+							lEvent = new WebSocketClientEvent();
+							WebSocketPacket lPacket = new RawPacket(lBA);
+							notifyPacket(lEvent, lPacket);
 						}
 						lStart = -1;
 						// end of stream
@@ -176,7 +171,8 @@ public class BaseClientJ2SE extends BaseClient {
 				}
 			}
 
-			listener.processClosed(null);
+			lEvent = new WebSocketClientEvent();
+			notifyClosed(lEvent);
 		}
 	}
 

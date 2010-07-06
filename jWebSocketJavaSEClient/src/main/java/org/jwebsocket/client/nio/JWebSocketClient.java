@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jwebsocket.client.BaseClient;
+import org.jwebsocket.client.se.BaseClient;
 import org.jwebsocket.kit.WebSocketException;
 
 /**

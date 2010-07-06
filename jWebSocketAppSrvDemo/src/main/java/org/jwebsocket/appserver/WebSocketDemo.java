@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.factory.JWebSocketFactory;
-import org.jwebsocket.kit.WebSocketEvent;
-import org.jwebsocket.listener.WebSocketTokenEvent;
-import org.jwebsocket.listener.WebSocketTokenListener;
+import org.jwebsocket.kit.WebSocketServerEvent;
+import org.jwebsocket.listener.WebSocketServerTokenEvent;
+import org.jwebsocket.listener.WebSocketServerTokenListener;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
@@ -24,7 +24,7 @@ import org.jwebsocket.token.Token;
  *
  * @author aschulze
  */
-public class WebSocketDemo extends HttpServlet implements WebSocketTokenListener {
+public class WebSocketDemo extends HttpServlet implements WebSocketServerTokenListener {
 
 	private static Logger log = Logging.getLogger(WebSocketDemo.class);
 
@@ -57,7 +57,7 @@ public class WebSocketDemo extends HttpServlet implements WebSocketTokenListener
 	}
 
 	@Override
-	public void processOpened(WebSocketEvent aEvent) {
+	public void processOpened(WebSocketServerEvent aEvent) {
 		log.info("Opened WebSocket session: " + aEvent.getSession().getSessionId());
 		// if a new web socket connection has been started,
 		// update the session tables accordingly
@@ -65,17 +65,17 @@ public class WebSocketDemo extends HttpServlet implements WebSocketTokenListener
 	}
 
 	@Override
-	public void processPacket(WebSocketEvent aEvent, WebSocketPacket aPacket) {
+	public void processPacket(WebSocketServerEvent aEvent, WebSocketPacket aPacket) {
 		log.info("Received WebSocket packet: " + aPacket.getASCII());
 	}
 
 	@Override
-	public void processToken(WebSocketTokenEvent aEvent, Token aToken) {
+	public void processToken(WebSocketServerTokenEvent aEvent, Token aToken) {
 		log.info("Received WebSocket token: " + aToken.toString());
 	}
 
 	@Override
-	public void processClosed(WebSocketEvent aEvent) {
+	public void processClosed(WebSocketServerEvent aEvent) {
 		log.info("Closed WebSocket session: " + aEvent.getSession().getSessionId());
 		// if a web socket connection has been terminated,
 		// update the session tables accordingly

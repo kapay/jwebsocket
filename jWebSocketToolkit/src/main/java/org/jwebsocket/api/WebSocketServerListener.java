@@ -14,19 +14,19 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
-import org.jwebsocket.kit.WebSocketEvent;
+import org.jwebsocket.kit.WebSocketServerEvent;
 
 /**
  * Interface for the low level WebSocket listeners.
  * @author aschulze
  */
-public interface WebSocketListener {
+public interface WebSocketServerListener {
 
 	/**
 	 * This method is invoked when a new client connects to the server.
 	 * @param aEvent
 	 */
-	public void processOpened(WebSocketEvent aEvent);
+	public void processOpened(WebSocketServerEvent aEvent);
 
 	/**
 	 * This method is invoked when a data packet from a client is received.
@@ -35,11 +35,11 @@ public interface WebSocketListener {
 	 * @param aEvent
 	 * @param aPacket
 	 */
-	public void processPacket(WebSocketEvent aEvent, WebSocketPacket aPacket);
+	public void processPacket(WebSocketServerEvent aEvent, WebSocketPacket aPacket);
 
 	/**
 	 * This method is invoked when a client was disconnted from the server.
 	 * @param aEvent
 	 */
-	public void processClosed(WebSocketEvent aEvent);
+	public void processClosed(WebSocketServerEvent aEvent);
 }

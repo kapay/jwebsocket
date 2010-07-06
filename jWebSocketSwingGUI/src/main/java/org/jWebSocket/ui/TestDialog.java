@@ -1,7 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - Copyright (c) 2010 Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
 
 /*
  * TestDialog.java
@@ -10,46 +20,53 @@
  */
 package org.jWebSocket.ui;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import org.jwebsocket.api.WebSocketListener;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.client.BaseClientJ2SE;
+import org.jwebsocket.client.se.BaseClientJ2SE;
+import org.jwebsocket.client.token.TokenClient;
 import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.kit.WebSocketEvent;
+import org.jwebsocket.kit.WebSocketClientEvent;
+import org.jwebsocket.listener.WebSocketClientTokenEvent;
+import org.jwebsocket.listener.WebSocketClientTokenListener;
+import org.jwebsocket.token.Token;
 
 /**
  *
  * @author aschulze
  */
-public class TestDialog extends javax.swing.JFrame implements WebSocketListener {
+public class TestDialog extends javax.swing.JFrame implements WebSocketClientTokenListener {
 
-	private BaseClientJ2SE jwsClient = null;
+	private TokenClient client = null;
 
 	/** Creates new form TestDialog */
 	public TestDialog() {
 		initComponents();
 		try {
 			URI lURI = new URI("ws://localhost:8787");
-			jwsClient = new BaseClientJ2SE(this);
-
+			client = new TokenClient(new BaseClientJ2SE());
+			client.addListener(this);
 		} catch (Exception ex) {
 			System.out.println(ex.getClass().getSimpleName() + ":  " + ex.getMessage());
 		}
 	}
 
 	@Override
-	public void processOpened(WebSocketEvent aEvent) {
+	public void processOpened(WebSocketClientEvent aEvent) {
 		txaLog.append("Opened.\n");
 	}
 
 	@Override
-	public void processPacket(WebSocketEvent aEvent, WebSocketPacket aPacket) {
-		txaLog.append(aPacket.getASCII() + "\n");
+	public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+		// ignore that here
 	}
 
 	@Override
-	public void processClosed(WebSocketEvent aEvent) {
+	public void processToken(WebSocketClientEvent aEvent, Token aToken) {
+		txaLog.append("Received Token: " + aToken.toString() + "\n");
+	}
+
+	@Override
+	public void processClosed(WebSocketClientEvent aEvent) {
 		txaLog.append("Closed.\n");
 	}
 
@@ -287,7 +304,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketListener 
 
 	private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
 		try {
-			jwsClient.open("ws://localhost:8787");
+			client.open("ws://localhost:8787");
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -295,7 +312,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketListener 
 
 	private void btnDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDisconnectActionPerformed
 		try {
-			jwsClient.close();
+			client.close();
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -303,7 +320,10 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketListener 
 
 	private void btnShutdownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShutdownActionPerformed
 		try {
-			jwsClient.send("{\"type\":\"shutdown\"; \"ns\":\"org.jWebSocket.plugins.admin\"}\n", "US-ASCII");
+			Token lToken = new Token();
+			lToken.put("type", "shutdown");
+			lToken.put("ns", "org.jWebSocket.plugins.admin");
+			client.sendToken(lToken);
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -311,7 +331,12 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketListener 
 
 	private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
 		try {
-			jwsClient.send("{\"type\":\"login\"; \"ns\":\"org.jWebSocket.plugins.system\"; \"username\":\"aschulze\"}\n", "US-ASCII");
+			Token lToken = new Token();
+			lToken.put("type", "login");
+			lToken.put("ns", "org.jWebSocket.plugins.system");
+			lToken.put("username", "guest");
+			lToken.put("password", "guest");
+			client.sendToken(lToken);
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -319,7 +344,10 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketListener 
 
 	private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
 		try {
-			jwsClient.send("{\"type\":\"logout\"; \"ns\":\"org.jWebSocket.plugins.system\"}\n", "US-ASCII");
+			Token lToken = new Token();
+			lToken.put("type", "logout");
+			lToken.put("ns", "org.jWebSocket.plugins.system");
+			client.sendToken(lToken);
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}

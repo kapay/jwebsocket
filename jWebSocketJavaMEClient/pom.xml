@@ -7,14 +7,14 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
-	<artifactId>jWebSocketJavaClient</artifactId>
-	<name>jWebSocketJavaClient</name>
-	<description>jWebSocket Java Client</description>
+	<artifactId>jWebSocketJavaMEClient</artifactId>
+	<name>jWebSocketJavaMEClient</name>
+	<description>jWebSocket Java ME Client</description>
 	<packaging>jar</packaging>
 	
 	<scm>
-        <connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketJavaClient</connection>
-        <developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketJavaClient</developerConnection>
+        <connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketJavaMEClient</connection>
+        <developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketJavaMEClient</developerConnection>
     </scm>
     
     <build>
@@ -35,8 +35,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketJavaClient</reportOutputDirectory>
-					<stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css</stylesheetfile>
+					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketJavaMEClient</reportOutputDirectory>
+					<stylesheetfile>${project.build.directory}/../../jWebSocketMEClient/web/javadocs/stylesheet.css</stylesheetfile>
 				</configuration>
 			</plugin>
 		</plugins>

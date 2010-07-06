@@ -26,14 +26,14 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketListener;
+import org.jwebsocket.api.WebSocketServerListener;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.filter.TokenFilterChain;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.FilterResponse;
-import org.jwebsocket.listener.WebSocketTokenEvent;
-import org.jwebsocket.listener.WebSocketTokenListener;
+import org.jwebsocket.listener.WebSocketServerTokenEvent;
+import org.jwebsocket.listener.WebSocketServerTokenListener;
 import org.jwebsocket.packetProcessors.CSVProcessor;
 import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.plugins.TokenPlugInChain;
@@ -204,11 +204,11 @@ public class TokenServer extends BaseServer {
 				if (!filterResponse.isRejected()) {
 					getPlugInChain().processToken(aConnector, lToken);
 					// forward the token to the listener chain
-					List<WebSocketListener> lListeners = getListeners();
-					WebSocketTokenEvent lEvent = new WebSocketTokenEvent(aConnector, this);
-					for (WebSocketListener lListener : lListeners) {
-						if (lListener != null && lListener instanceof WebSocketTokenListener) {
-							((WebSocketTokenListener) lListener).processToken(lEvent, lToken);
+					List<WebSocketServerListener> lListeners = getListeners();
+					WebSocketServerTokenEvent lEvent = new WebSocketServerTokenEvent(aConnector, this);
+					for (WebSocketServerListener lListener : lListeners) {
+						if (lListener != null && lListener instanceof WebSocketServerTokenListener) {
+							((WebSocketServerTokenListener) lListener).processToken(lEvent, lToken);
 						}
 					}
 				}
