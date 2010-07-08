@@ -1,3 +1,4 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
@@ -13,11 +14,11 @@
 	<packaging>jar</packaging>
 	
 	<scm>
-        <connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketSwingGUI</connection>
-        <developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketSwingGUI</developerConnection>
-    </scm>
+		<connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketSwingGUI</connection>
+		<developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketSwingGUI</developerConnection>
+	</scm>
     
-    <build>
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -30,6 +31,10 @@
 							<mainClass>org.jWebSocket.ui.TestDialog</mainClass>
 						</manifest>
 					</archive>
+					<includes>
+						<include>**/*.class</include>
+						<include>**/*.png</include>
+					</includes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -45,21 +50,21 @@
 
 	<!--  define all the dependencies here -->
 	<dependencies>
-	  <dependency>
-	     <groupId>org.jwebsocket</groupId>
-	     <artifactId>jWebSocketToolkit</artifactId>
-	     <version>${project.version}</version>
-	  </dependency>
-	  <dependency>
-	     <groupId>org.jwebsocket</groupId>
-	     <artifactId>jWebSocketTokenServer</artifactId>
-	     <version>${project.version}</version>
-	  </dependency>
-	  <dependency>
-	     <groupId>org.jwebsocket</groupId>
-	     <artifactId>jWebSocketJavaSEClient</artifactId>
-	     <version>${project.version}</version>
-	  </dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketShared</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketJavaClient</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketJavaSEClient</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 	<!--  define repositories -->

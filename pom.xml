@@ -8,25 +8,31 @@
 	<version>0.9.5</version>
 	<description>Parent project for jWebSocket</description>
 	<modules>
-		<module>jWebSocketToolkit</module>
-		<module>jWebSocketTCPEngine</module>
-		<module>jWebSocketNettyEngine</module>
-		<module>jWebSocketCore</module>
-		<module>jWebSocketCustomServer</module>
-		<module>jWebSocketTokenServer</module>
+		<module>jWebSocketShared</module>
+		<module>jWebSocketSamples</module>
+		<module>jWebSocketJavaClient</module>
+		<module>jWebSocketJavaSEClient</module>
+<!-- obsolete
+		<module>jWebSocketCluster</module>
+		<module>jWebSocketWebAppSupport</module>
+		<module>jWebSocketFactory</module>
+		<module>jWebSocketAdmin</module>
 		<module>jWebSocketPlugins</module>
 		<module>jWebSocketSharedObjects</module>
-		<module>jWebSocketCluster</module>
-		<module>jWebSocketAdmin</module>
-		<module>jWebSocketSamples</module>
-		<module>jWebSocketFactory</module>
-		<module>jWebSocketWebAppSupport</module>
-		<module>jWebSocketJavaSEClient</module>
+		<module>jWebSocketCore</module>
+		<module>jWebSocketToolkit</module>
+		<module>jWebSocketNettyEngine</module>
+		<module>jWebSocketCustomServer</module>
+		<module>jWebSocketTokenServer</module>
+		<module>jWebSocketTCPEngine</module>
+-->
+	<!--
 		<module>jWebSocketJavaMEClient</module>
 		<module>jWebSocketServer</module>
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>
+	-->
 	</modules>
 
 	<build>

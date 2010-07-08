@@ -15,13 +15,12 @@
 package org.jwebsocket.client.token;
 
 import org.jwebsocket.api.WebSocketClientListener;
+import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.listener.WebSocketClientTokenListener;
-import org.jwebsocket.client.se.BaseClient;
+import org.jwebsocket.client.java.BaseClient;
 import org.jwebsocket.config.JWebSocketConstants;
-import org.jwebsocket.kit.WebSocketClientEvent;
+import org.jwebsocket.listener.WebSocketClientEvent;
 import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.listener.WebSocketClientTokenEvent;
 import org.jwebsocket.packetProcessors.CSVProcessor;
 import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.packetProcessors.XMLProcessor;
@@ -33,14 +32,55 @@ import org.jwebsocket.token.Token;
  */
 public class TokenClient {
 
+	public final static int DISCONNECTED = 0;
+	public final static int CONNECTED = 1;
+	public final static int AUTHENTICATED = 2;
+	private int CUR_TOKEN_ID = 0;
 	private BaseClient client = null;
 	private String lSubProt = JWebSocketConstants.SUB_PROT_DEFAULT;
+	private final static String NS_BASE = "org.jWebSocket";
+	private String fUsername = null;
+	private String fClientId = null;
+	private String fSessionId = null;
+	private String fRestoreSessionId = null;
+
+	public TokenClient(BaseClient aClient) {
+		client = aClient;
+		client.addListener(new Listener());
+	}
+
+	public boolean isConnected() {
+		return client.isConnected();
+	}
+
+	/**
+	 * @return the fUsername
+	 */
+	public String getUsername() {
+		return fUsername;
+	}
+
+	/**
+	 * @return the fClientId
+	 */
+	public String getClientId() {
+		return fClientId;
+	}
+
+	/**
+	 * @return the fSessionId
+	 */
+	public String getfSessionId() {
+		return fSessionId;
+	}
 
 	class Listener implements WebSocketClientListener {
 
 		@Override
 		public void processOpened(WebSocketClientEvent aEvent) {
-			// no need to do anything here
+			fUsername = null;
+			fClientId = null;
+			fSessionId = null;
 		}
 
 		@Override
@@ -48,6 +88,26 @@ public class TokenClient {
 			for (WebSocketClientListener lListener : client.getListeners()) {
 				if (lListener instanceof WebSocketClientTokenListener) {
 					Token lToken = packetToToken(aPacket);
+
+					String lNS = lToken.getNS();
+					String lType = lToken.getType();
+					String lReqType = lToken.getString("reqType");
+
+					if (lType != null) {
+						if ("welcome".equals(lType)) {
+							fClientId = lToken.getString("sourceId");
+							fSessionId = lToken.getString("usid");
+						} else if ("goodBye".equals(lType)) {
+							fUsername = null;
+						}
+					}
+					if (lReqType != null) {
+						if ("login".equals(lReqType)) {
+							fUsername = lToken.getString("username");
+						} else if ("logout".equals(lReqType)) {
+							fUsername = null;
+						}
+					}
 					((WebSocketClientTokenListener) lListener).processToken(aEvent, lToken);
 				}
 			}
@@ -55,13 +115,11 @@ public class TokenClient {
 
 		@Override
 		public void processClosed(WebSocketClientEvent aEvent) {
-			// no need to do anything here
+			fUsername = null;
+			fClientId = null;
+			fRestoreSessionId = fSessionId;
+			fSessionId = null;
 		}
-	}
-
-	public TokenClient(BaseClient aClient) {
-		client = aClient;
-		client.addListener(new Listener());
 	}
 
 	public void addListener(WebSocketClientTokenListener aListener) {
@@ -89,9 +147,14 @@ public class TokenClient {
 	}
 
 	public void close() throws WebSocketException {
+		fUsername = null;
+		fClientId = null;
+		fRestoreSessionId = fSessionId;
+		fSessionId = null;
 		client.close();
 	}
 
+	// TODO: Check if the following two methods packetToToken and tokenToPacket can be shared for server and client
 	/**
 	 *
 	 * @param aConnector
@@ -118,6 +181,7 @@ public class TokenClient {
 	 */
 	public WebSocketPacket tokenToPacket(Token aToken) {
 		WebSocketPacket lPacket = null;
+
 		if (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
 		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_CSV)) {
@@ -129,6 +193,69 @@ public class TokenClient {
 	}
 
 	public void sendToken(Token aToken) throws WebSocketException {
+		CUR_TOKEN_ID++;
+		aToken.put("utid", CUR_TOKEN_ID);
 		send(tokenToPacket(aToken));
+	}
+	// TODO: put the following methods into client side plug-ins or separate them in a different way.
+
+	/* functions of the System Plug-in */
+	private final static String NS_SYSTEM_PLUGIN = NS_BASE + ".plugins.system";
+
+	public void login(String aUsername, String aPassword) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "login");
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		lToken.put("username", aUsername);
+		lToken.put("password", aPassword);
+		sendToken(lToken);
+	}
+
+	public void logout() throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "logout");
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		sendToken(lToken);
+	}
+
+	public void ping(boolean aEcho) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		lToken.put("type", "ping");
+		lToken.put("echo", aEcho);
+		sendToken(lToken);
+	}
+
+	public void sendText(String aTarget, String aData) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		lToken.put("type", "send");
+		lToken.put("targetId", aTarget);
+		lToken.put("sourceId", getClientId());
+		lToken.put("sender", getUsername());
+		lToken.put("data", aData);
+		sendToken(lToken);
+	}
+
+	public void broadcastText(String aData) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		lToken.put("type", "broadcast");
+		lToken.put("sourceId", getClientId());
+		lToken.put("sender", getUsername());
+		lToken.put("data", aData);
+		lToken.put("senderIncluded", false);
+		lToken.put("responseRequested", true);
+		sendToken(lToken);
+	}
+
+	/* functions of the Admin Plug-in */
+	private final static String NS_ADMIN_PLUGIN = NS_BASE + ".plugins.admin";
+
+	public void shutdownServer() throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "shutdown");
+		lToken.put("ns", NS_ADMIN_PLUGIN);
+		sendToken(lToken);
 	}
 }

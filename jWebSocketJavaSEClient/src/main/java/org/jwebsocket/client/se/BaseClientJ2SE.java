@@ -15,8 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.client.se;
 
-import org.jwebsocket.kit.WebSocketClientEvent;
-import org.jwebsocket.api.WebSocketClientListener;
+import org.jwebsocket.client.java.BaseClient;
+import org.jwebsocket.listener.WebSocketClientEvent;
 import org.jwebsocket.kit.WebSocketHandshake;
 import java.io.InputStream;
 import java.io.OutputStream;
