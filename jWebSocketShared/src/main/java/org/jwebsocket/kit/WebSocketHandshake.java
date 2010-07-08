@@ -18,9 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.URI;
 import java.security.MessageDigest;
-import java.util.Map;
 import javolution.util.FastMap;
 
 /**
@@ -38,9 +36,10 @@ public class WebSocketHandshake {
 	 * @param aURI
 	 * @return
 	 */
-	public static byte[] generateC2SRequest(URI aURI) {
-		String lPath = aURI.getPath();
-		String lHost = aURI.getHost();
+	// public static byte[] generateC2SRequest(URI aURI) {
+	public static byte[] generateC2SRequest(String lHost, String lPath) {
+		// String lPath = aURI.getPath();
+		// String lHost = aURI.getHost();
 		String lOrigin = "http://" + lHost;
 		String lHandshake = "GET " + lPath + " HTTP/1.1\r\n"
 				+ "Upgrade: WebSocket\r\n"
@@ -88,7 +87,7 @@ public class WebSocketHandshake {
 	 * @param aResp
 	 * @return
 	 */
-	public static Map parseC2SRequest(byte[] aResp) {
+	public static FastMap parseC2SRequest(byte[] aResp) {
 		String lHost = null;
 		String lOrigin = null;
 		String lLocation = null;
@@ -251,7 +250,7 @@ public class WebSocketHandshake {
 	 * @param aRequest
 	 * @return
 	 */
-	public static byte[] generateS2CResponse(Map aRequest) {
+	public static byte[] generateS2CResponse(FastMap aRequest) {
 		String lPolicyFileRequest = (String) aRequest.get("policy-file-request");
 		if (lPolicyFileRequest != null) {
 			byte[] lBA;
@@ -342,8 +341,8 @@ public class WebSocketHandshake {
 	 * @param aResp
 	 * @return
 	 */
-	public static Map parseS2CResponse(byte[] aResp) {
-		Map lRes = new FastMap();
+	public static FastMap parseS2CResponse(byte[] aResp) {
+		FastMap lRes = new FastMap();
 		String lResp = null;
 		try {
 			lResp = new String(aResp, "US-ASCII");

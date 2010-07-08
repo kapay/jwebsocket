@@ -19,9 +19,8 @@ import org.jwebsocket.config.JWebSocketConfig;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import javolution.util.FastMap;
 
 /**
  * Handler class that handles the <tt>jWebSocket.xml</tt> configuration. This
@@ -58,7 +57,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
     private static final String ELEMENT_USER = "user";
     private static final String JWEBSOCKET = "jWebSocket";
 
-    private static Map<String, ConfigHandler> handlerContext = new HashMap<String, ConfigHandler>();
+    private static FastMap<String, ConfigHandler> handlerContext = new FastMap<String, ConfigHandler>();
 
     // initialize the different config handler implementations
 
@@ -147,7 +146,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
             }
         } catch (XMLStreamException e) {
         }
-        // we are done with the handler context map, release it for garbage
+        // we are done with the handler context FastMap, release it for garbage
         // collection
         handlerContext = null;
         // now return the config object, this is the only one config object that

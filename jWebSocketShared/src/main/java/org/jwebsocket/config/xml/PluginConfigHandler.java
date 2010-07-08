@@ -17,10 +17,9 @@ package org.jwebsocket.config.xml;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javolution.util.FastMap;
 
 import org.jwebsocket.config.Config;
 
@@ -51,7 +50,7 @@ public class PluginConfigHandler implements ConfigHandler {
 			throws XMLStreamException {
 		String id = "", name = "", packageName = "", jar = "", namespace = "";
 		List<String> servers = new ArrayList<String>();
-		Map<String, String> settings = null;
+		FastMap<String, String> settings = null;
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {
@@ -129,10 +128,10 @@ public class PluginConfigHandler implements ConfigHandler {
 	 *             in case of stream exception
 	 * TODO: PURAN, FIX THIS!! YOU LAZY GUY!!!            
 	 */
-	private Map<String, String> getSettings(XMLStreamReader streamReader)
+	private FastMap<String, String> getSettings(XMLStreamReader streamReader)
 			throws XMLStreamException {
 		//TODO: implement this
-		return Collections.emptyMap();
+		return new FastMap<String, String>();
 	}
 
 }

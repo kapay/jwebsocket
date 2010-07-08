@@ -16,7 +16,7 @@ package org.jwebsocket.config.xml;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import javolution.util.FastMap;
 
 import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
@@ -34,7 +34,7 @@ public final class PluginConfig implements Config {
 	private final String packageName;
 	private final String namespace;
 	private final List<String> servers;
-	private final Map<String, String> settings;
+	private final FastMap<String, String> settings;
 
 	/**
 	 * default constructor
@@ -42,10 +42,10 @@ public final class PluginConfig implements Config {
 	 * @param name the plugin name
 	 * @param jar the plugin jar
 	 * @param namespace the namespace 
-	 * @param settings map of settings key and value
+	 * @param settings FastMap of settings key and value
 	 */
 	public PluginConfig(String id, String name, String packageName, String jar, String namespace,
-		 List<String> servers, Map<String, String> settings) {
+		 List<String> servers, FastMap<String, String> settings) {
 		this.id = id;
 		this.name = name;
 		this.packageName = packageName;
@@ -99,8 +99,8 @@ public final class PluginConfig implements Config {
 	/**
 	 * @return the settings
 	 */
-	public Map<String, String> getSettings() {
-		return Collections.unmodifiableMap(settings);
+	public FastMap<String, String> getSettings() {
+		return settings; // (FastMap)(settings.unmodifiable());
 	}
 
 	/**

@@ -8,6 +8,7 @@
 	<version>0.9.5</version>
 	<description>Parent project for jWebSocket</description>
 	<modules>
+		<module>jWebSocketCommon</module>
 		<module>jWebSocketShared</module>
 		<module>jWebSocketSamples</module>
 		<module>jWebSocketJavaClient</module>

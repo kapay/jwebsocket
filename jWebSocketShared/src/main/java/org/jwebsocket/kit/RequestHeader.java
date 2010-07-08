@@ -15,20 +15,18 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.kit;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import javolution.util.FastMap;
 
 /**
  * Holds the header of the initial WebSocket request from the client
- * to the server. The RequestHeader internally maintains a HashMap to store
+ * to the server. The RequestHeader internally maintains a FastMap to store
  * key/values pairs.
  * @author aschulze
  * @version $Id: RequestHeader.java 596 2010-06-22 17:09:54Z fivefeetfurther $
  */
 public final class RequestHeader {
 
-    private Map<String, Object> args = new ConcurrentHashMap<String, Object>();
+    private FastMap<String, Object> args = new FastMap<String, Object>();
     private static final String ARGS = "args";
     private static final String PROT = "prot";
     private static final String TIMEOUT = "timeout";
@@ -63,11 +61,11 @@ public final class RequestHeader {
     }
 
     /**
-     * Returns a HashMap of the optional URL arguments passed by the client.
-     * @return HashMap of the optional URL arguments.
+     * Returns a FastMap of the optional URL arguments passed by the client.
+     * @return FastMap of the optional URL arguments.
      */
-    public HashMap getArgs() {
-        return (HashMap) args.get(ARGS);
+    public FastMap getArgs() {
+        return (FastMap) args.get(ARGS);
     }
 
     /**
@@ -78,7 +76,7 @@ public final class RequestHeader {
      * @return Sub protocol passed by the client or default value.
      */
     public String getSubProtocol(String aDefault) {
-        HashMap lArgs = getArgs();
+        FastMap lArgs = getArgs();
         String lSubProt = null;
         if (lArgs != null) {
             lSubProt = (String) lArgs.get(PROT);
@@ -94,7 +92,7 @@ public final class RequestHeader {
      * @return Session timeout passed by the client or default value.
      */
     public Integer getTimeout(Integer aDefault) {
-        HashMap lArgs = getArgs();
+        FastMap lArgs = getArgs();
         Integer lTimeout = null;
         if (lArgs != null) {
             try {

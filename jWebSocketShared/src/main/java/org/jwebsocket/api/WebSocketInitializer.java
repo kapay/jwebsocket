@@ -15,7 +15,7 @@
 package org.jwebsocket.api;
 
 import java.util.List;
-import java.util.Map;
+import javolution.util.FastMap;
 
 /**
  * Base interface that defines the methods to initialize jWebSocket engine, servers
@@ -50,15 +50,15 @@ public interface WebSocketInitializer {
 	List<WebSocketServer> initializeServers();
 	/**
 	 * Initialize the plugins specific to server ids.
-	 * @return the map of server id to the list of plugins 
+	 * @return the FastMap of server id to the list of plugins
 	 * associated with it.
 	 */
-	Map<String, List<WebSocketPlugIn>> initializePlugins();
+	FastMap<String, List<WebSocketPlugIn>> initializePlugins();
 	
 	/**
 	 * Initialize the filters specific to the server ids
-	 * @return the map of server id to the list of filters associated
+	 * @return the FastMap of server id to the list of filters associated
 	 * with it.
 	 */
-	Map<String, List<WebSocketFilter>> initializeFilters();
+	FastMap<String, List<WebSocketFilter>> initializeFilters();
 }

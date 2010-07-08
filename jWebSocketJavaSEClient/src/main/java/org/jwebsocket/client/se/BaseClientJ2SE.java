@@ -51,13 +51,14 @@ public class BaseClientJ2SE extends BaseClient {
 			url = new URI(aURL);
 			String lHost = url.getHost();
 			int lPort = url.getPort();
+			String lPath = url.getPath();
 
 			socket = new Socket(lHost, lPort);
 			is = socket.getInputStream();
 			os = socket.getOutputStream();
 
 			// send handshake to server
-			byte[] lReq = WebSocketHandshake.generateC2SRequest(url);
+			byte[] lReq = WebSocketHandshake.generateC2SRequest(lHost, lPath);
 			os.write(lReq);
 			os.flush();
 

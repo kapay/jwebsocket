@@ -15,8 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.token;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import javolution.util.FastMap;
 
 /**
  * A token is ...
@@ -24,7 +24,7 @@ import java.util.Iterator;
  */
 public class Token {
 
-	private HashMap<String, Object> items = new HashMap<String, Object>();
+	private FastMap<String, Object> items = new FastMap<String, Object>();
 
 	/**
 	 * Creates a new empty instance of a token.

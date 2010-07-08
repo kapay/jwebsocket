@@ -23,7 +23,7 @@ import org.jwebsocket.kit.WebSocketSession;
 /**
  * Specifies the API for jWebSocket connectors. Connectors are the low level
  * link to the client. Connectors are maintained by the engine only but can be
- * accessed up to the application. Each connector provides a map for shared
+ * accessed up to the application. Each connector provides a FastMap for shared
  * custom variables (public) which can be used in all overlying tiers.
  * @author aschulze
  */
@@ -195,5 +195,4 @@ public interface WebSocketConnector {
 	 * Returns the session for the websocket connection.
 	 */
 	WebSocketSession getSession();
-
 }
