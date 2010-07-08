@@ -16,9 +16,9 @@
 package org.jwebsocket.plugins.system;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
@@ -472,7 +472,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		if (getUsername(aConnector) != null) {
 			String lGroup = aToken.getString("group");
 			Integer lMode = aToken.getInteger("mode", 0);
-			HashMap lFilter = new HashMap();
+			FastMap lFilter = new FastMap();
 			lFilter.put(BaseConnector.VAR_USERNAME, ".*");
 			List<String> listOut = new ArrayList<String>();
 			for (WebSocketConnector lConnector : getServer().selectConnectors(lFilter).values()) {

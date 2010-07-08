@@ -16,9 +16,7 @@ package org.jwebsocket.netty.engines;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
-
+import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -435,7 +433,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      */
     private RequestHeader getRequestHeader(HttpRequest req) {
         RequestHeader header = new RequestHeader();
-        Map<String, String> args = new HashMap<String, String>();
+        FastMap<String, String> args = new FastMap<String, String>();
         String searchString = "";
         String path = req.getUri();
 

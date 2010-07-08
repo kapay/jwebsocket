@@ -19,7 +19,7 @@ import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 
 /**
- * implements a map of rights to act as a role.
+ * implements a FastMap of rights to act as a role.
  * @author aschulze
  */
 public class Rights {
@@ -28,8 +28,8 @@ public class Rights {
 	private FastMap<String, Right> rights = new FastMap<String, Right>();
 
 	/**
-	 * adds a new right to the map of rights. If there is already a right with
-	 * the given stored in the map it will be overwritten. If null is passed or
+	 * adds a new right to the FastMap of rights. If there is already a right with
+	 * the given stored in the FastMap it will be overwritten. If null is passed or
 	 * if the right has no valid key no operation is performed.
 	 * @param aRight
 	 */
@@ -41,7 +41,7 @@ public class Rights {
 
 	/**
 	 * returns a right identified by its key or <tt>null</tt> if the right
-	 * cannot be found in the map or the key passed is <tt>null</tt>.
+	 * cannot be found in the FastMap or the key passed is <tt>null</tt>.
 	 * @param aKey
 	 * @return
 	 */
@@ -54,8 +54,8 @@ public class Rights {
 	}
 
 	/**
-	 * removes a certain right indentified by its key from the map of rights.
-	 * If the key is <tt>null</tt> or right could not be found in the map no
+	 * removes a certain right indentified by its key from the FastMap of rights.
+	 * If the key is <tt>null</tt> or right could not be found in the FastMap no
 	 * operation is performed.
 	 * @param aKey
 	 */
@@ -66,8 +66,8 @@ public class Rights {
 	}
 
 	/**
-	 * removes a certain right from the map of rights.
-	 * If the right could not be found in the map no operation is performed.
+	 * removes a certain right from the FastMap of rights.
+	 * If the right could not be found in the FastMap no operation is performed.
 	 * @param aRight
 	 */
 	public void removeRight(Right aRight) {
@@ -77,7 +77,7 @@ public class Rights {
 	}
 
 	/**
-	 * checks if the map of rights contains a certain right. The key of the
+	 * checks if the FastMap of rights contains a certain right. The key of the
 	 * right passed must not be null.
 	 * @param aRight
 	 * @return
@@ -91,7 +91,7 @@ public class Rights {
 	}
 
 	/**
-	 * checks if the map of rights contains a certain right identified by its
+	 * checks if the FastMap of rights contains a certain right identified by its
 	 * key. The key must not be null.
 	 * @param aKey
 	 * @return

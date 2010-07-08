@@ -16,8 +16,7 @@
 package org.jwebsocket.connectors;
 
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
+import javolution.util.FastMap;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
@@ -41,7 +40,7 @@ public class BaseConnector implements WebSocketConnector {
 	private WebSocketEngine engine = null;
 	private RequestHeader header = null;
 	private WebSocketSession session = new WebSocketSession();
-	private Map<String, Object> customVars = new HashMap<String, Object>();
+	private FastMap<String, Object> customVars = new FastMap<String, Object>();
 
 	/**
 	 * 

@@ -17,11 +17,11 @@ package org.jwebsocket.appserver;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javolution.util.FastMap;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
@@ -57,14 +57,14 @@ public class ServletBridge extends HttpServlet {
 	 * @throws IOException if an I/O error occurs
 	 */
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
+			throws ServletException, IOException {
 		response.setContentType("text/plain;charset=UTF-8");
 		PrintWriter out = response.getWriter();
 
 		try {
 			if (server != null) {
 				// convert request arguments to token
-				Map<String, String[]> lParms = request.getParameterMap();
+				FastMap<String, String[]> lParms = new FastMap(request.getParameterMap());
 				Token lToken = new Token();
 				for (String lParm : lParms.keySet()) {
 					String[] lValues = lParms.get(lParm);
@@ -93,7 +93,7 @@ public class ServletBridge extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
+			throws ServletException, IOException {
 		processRequest(request, response);
 	}
 
@@ -106,7 +106,7 @@ public class ServletBridge extends HttpServlet {
 	 */
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
+			throws ServletException, IOException {
 		processRequest(request, response);
 	}
 

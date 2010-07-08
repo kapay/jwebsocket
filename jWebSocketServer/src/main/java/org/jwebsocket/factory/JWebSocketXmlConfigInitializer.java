@@ -25,9 +25,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import javolution.util.FastMap;
 
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.ServerConfiguration;
@@ -259,10 +258,10 @@ public final class JWebSocketXmlConfigInitializer implements
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, List<WebSocketPlugIn>> initializePlugins() {
-		Map<String, List<WebSocketPlugIn>> pluginMap = new HashMap<String, List<WebSocketPlugIn>>();
+	public FastMap<String, List<WebSocketPlugIn>> initializePlugins() {
+		FastMap<String, List<WebSocketPlugIn>> pluginMap = new FastMap<String, List<WebSocketPlugIn>>();
 
-		// populate the plugin map with server id and empty list
+		// populate the plugin FastMap with server id and empty list
 		for (ServerConfig serverConfig : config.getServers()) {
 			pluginMap.put(serverConfig.getId(),
 					new ArrayList<WebSocketPlugIn>());
@@ -326,7 +325,7 @@ public final class JWebSocketXmlConfigInitializer implements
 						log.debug("Plug-in '" + pluginConfig.getId() + "' successfully instantiated.");
 					}
 
-					// now add the plugin to plugin map based on server ids
+					// now add the plugin to plugin FastMap based on server ids
 					for (String serverId : pluginConfig.getServers()) {
 						pluginMap.get(serverId).add((WebSocketPlugIn) plugin);
 					}
@@ -357,10 +356,10 @@ public final class JWebSocketXmlConfigInitializer implements
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, List<WebSocketFilter>> initializeFilters() {
-		Map<String, List<WebSocketFilter>> filterMap = new HashMap<String, List<WebSocketFilter>>();
+	public FastMap<String, List<WebSocketFilter>> initializeFilters() {
+		FastMap<String, List<WebSocketFilter>> filterMap = new FastMap<String, List<WebSocketFilter>>();
 
-		// populate the filter map with server id and empty list
+		// populate the filter FastMap with server id and empty list
 		for (ServerConfig serverConfig : config.getServers()) {
 			filterMap.put(serverConfig.getId(),
 					new ArrayList<WebSocketFilter>());
@@ -408,7 +407,7 @@ public final class JWebSocketXmlConfigInitializer implements
 					if (log.isDebugEnabled()) {
 						log.debug("Filter '" + filterConfig.getName() + "' successfully instantiated.");
 					}
-					// now add the filter to filter map based on server ids
+					// now add the filter to filter FastMap based on server ids
 					for (String serverId : filterConfig.getServers()) {
 						filterMap.get(serverId).add(filter);
 					}

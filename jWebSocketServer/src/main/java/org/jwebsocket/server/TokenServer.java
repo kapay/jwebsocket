@@ -15,8 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server;
 
-import java.util.HashMap;
 import java.util.List;
+import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketPacket;
@@ -300,7 +300,7 @@ public class TokenServer extends BaseServer {
 		// before sending the token push it through filter chain
 		FilterResponse filterResponse = getFilterChain().processTokenOut(aSource, null, aToken);
 
-		HashMap<String, Object> lFilter = new HashMap<String, Object>();
+		FastMap<String, Object> lFilter = new FastMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		// TODO: converting the token within the loop is not that efficient!
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
@@ -324,7 +324,7 @@ public class TokenServer extends BaseServer {
 		// before sending the token push it through filter chain
 		FilterResponse filterResponse = getFilterChain().processTokenOut(aSource, null, aToken);
 
-		HashMap<String, Object> lFilter = new HashMap<String, Object>();
+		FastMap<String, Object> lFilter = new FastMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		// TODO: converting the token within the loop is not that efficient!
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
@@ -347,7 +347,7 @@ public class TokenServer extends BaseServer {
 		// before sending the token push it through filter chain
 		FilterResponse filterResponse = getFilterChain().processTokenOut(null, null, aToken);
 
-		HashMap<String, Object> lFilter = new HashMap<String, Object>();
+		FastMap<String, Object> lFilter = new FastMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 		// TODO: converting the token within the loop is not that efficient!
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {

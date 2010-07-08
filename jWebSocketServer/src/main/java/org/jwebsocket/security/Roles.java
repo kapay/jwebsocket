@@ -46,7 +46,7 @@ public class Roles {
 	}
 
 	/**
-	 * Adds a new role to the map of roles.
+	 * Adds a new role to the FastMap of roles.
 	 * @param aRole
 	 */
 	public void addRole(Role aRole) {
@@ -56,8 +56,8 @@ public class Roles {
 	}
 
 	/**
-	 * Returns a certain role from the map of roles identified by its key or
-	 * <tt>null</tt> if no role with the given exists in the map of roles.
+	 * Returns a certain role from the FastMap of roles identified by its key or
+	 * <tt>null</tt> if no role with the given exists in the FastMap of roles.
 	 * @param aKey
 	 */
 	public Role getRole(String aKey) {
@@ -65,7 +65,7 @@ public class Roles {
 	}
 
 	/**
-	 * Removes a certain role from the map of roles.
+	 * Removes a certain role from the FastMap of roles.
 	 * @param aKey
 	 */
 	public void removeRole(String aKey) {
@@ -73,7 +73,7 @@ public class Roles {
 	}
 
 	/**
-	 * Removes a certain role from the map of roles.
+	 * Removes a certain role from the FastMap of roles.
 	 * @param aRole
 	 */
 	public void removeRole(Role aRole) {

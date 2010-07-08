@@ -19,7 +19,7 @@ import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 
 /**
- * maintains the internal jWebSocket user map. The users are loaded during the
+ * maintains the internal jWebSocket user FastMap. The users are loaded during the
  * startup process from the jWebSocket.xml file.
  * @author aschulze
  */
@@ -42,7 +42,7 @@ public class Users {
 	}
 
 	/**
-	 * Adds a new user to the map of users. If null is passed no operation
+	 * Adds a new user to the FastMap of users. If null is passed no operation
 	 * is performed.
 	 * @param aUser
 	 */
@@ -53,7 +53,7 @@ public class Users {
 	}
 
 	/**
-	 * Removes a certain user identified by its login name from the map
+	 * Removes a certain user identified by its login name from the FastMap
 	 * of users. If no user with the given login name could be found or the
 	 * given login name is null no operation is performed.
 	 * @param aLoginName
@@ -65,7 +65,7 @@ public class Users {
 	}
 
 	/**
-	 * Removes a certain user from the map of users. If the user could be found
+	 * Removes a certain user from the FastMap of users. If the user could be found
 	 * or the given user object is null no operation is performed.
 	 * @param aUser
 	 */

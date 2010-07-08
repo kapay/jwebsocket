@@ -15,13 +15,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server;
 
-import java.util.Collections;
-import java.util.Map;
 import javolution.util.FastList;
-
 import javolution.util.FastMap;
 import org.jwebsocket.api.ServerConfiguration;
-
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
@@ -37,7 +33,7 @@ import org.jwebsocket.kit.WebSocketException;
 /**
  * The implementation of the basic websocket server. A server is the central
  * instance which either processes incoming data from the engines directly or
- * routes it to the chain of plug-ins. Each server maintains a map of underlying
+ * routes it to the chain of plug-ins. Each server maintains a FastMap of underlying
  * engines. An application can instantiate multiple servers to process different
  * kinds of data packets.
  * @author aschulze
@@ -52,7 +48,7 @@ public class BaseServer implements WebSocketServer {
 
 	/**
 	 * Create a new instance of the Base Server. Each BaseServer maintains a
-	 * map of all its underlying engines. Each Server has an Id whioch can be
+	 * FastMap of all its underlying engines. Each Server has an Id whioch can be
 	 * used to easily address a certain server.
 	 * @param aId Id for the new server.
 	 */
@@ -195,51 +191,54 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 * returns the map of all underlying engines. Each engine has its own unique
-	 * id which is used as key in the map.
-	 * @return map with the underlying engines.
+	 * returns the FastMap of all underlying engines. Each engine has its own unique
+	 * id which is used as key in the FastMap.
+	 * @return FastMap with the underlying engines.
 	 */
-	public Map<String, WebSocketEngine> getEngines() {
-		return (engines != null ? Collections.unmodifiableMap(engines) : null);
+	public FastMap<String, WebSocketEngine> getEngines() {
+		// return (engines != null ? (FastMap)(engines.unmodifiable()) : null);
+		return (engines != null ? engines : null);
 	}
 
 	/**
-	 * returns all connectors of the passed engine as a map. Each connector has
-	 * its own unique id which is used as key in the connectors map.
+	 * returns all connectors of the passed engine as a FastMap. Each connector has
+	 * its own unique id which is used as key in the connectors FastMap.
 	 * @param aEngine
 	 * @return the engines
 	 */
-	public Map<String, WebSocketConnector> getConnectors(WebSocketEngine aEngine) {
-		return Collections.unmodifiableMap(aEngine.getConnectors());
+	public FastMap<String, WebSocketConnector> getConnectors(WebSocketEngine aEngine) {
+		// TODO: does this need to be so nested?
+		// return (FastMap)((FastMap)aEngine.getConnectors()).unmodifiable();
+		return aEngine.getConnectors();
 	}
 
 	/**
 	 * returns all connectors of all engines connected to the server. Each
 	 * connector has its own unique id which is used as key in the connectors
-	 * map.
+	 * FastMap.
 	 * @return the engines
 	 */
-	public Map<String, WebSocketConnector> getAllConnectors() {
+	public FastMap<String, WebSocketConnector> getAllConnectors() {
 		FastMap<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
 		for (WebSocketEngine lEngine : engines.values()) {
 			lClients.putAll(lEngine.getConnectors());
 		}
-		return Collections.unmodifiableMap(lClients);
+		return lClients;
 	}
 
 	/**
 	 * returns only those connectors that match the passed shared variables.
-	 * The search criteria is passed as a map with key/value pairs. The key
+	 * The search criteria is passed as a FastMap with key/value pairs. The key
 	 * represents the name of the shared custom variable for the connector and
 	 * the value the value for that variable. If multiple key/value pairs are
 	 * passed they are combined by a logical 'and'.
 	 * Each connector has its own unique id which is used as key in the
-	 * connectors map.
-	 * @param aFilter Map of key/values pairs as search criteria.
-	 * @return map with the selected connector or empty map if no connector matches the search criteria.
+	 * connectors FastMap.
+	 * @param aFilter FastMap of key/values pairs as search criteria.
+	 * @return FastMap with the selected connector or empty FastMap if no connector matches the search criteria.
 	 */
-	public Map<String, WebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
-		Map<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
+	public FastMap<String, WebSocketConnector> selectConnectors(FastMap<String, Object> aFilter) {
+		FastMap<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
 		for (WebSocketEngine lEngine : engines.values()) {
 			for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
 				boolean lMatch = true;
@@ -265,7 +264,8 @@ public class BaseServer implements WebSocketServer {
 				}
 			}
 		}
-		return Collections.unmodifiableMap(lClients);
+		// return (FastMap)(lClients.unmodifiable());
+		return lClients;
 	}
 
 	/**

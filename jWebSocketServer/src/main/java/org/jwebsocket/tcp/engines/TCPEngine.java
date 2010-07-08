@@ -22,8 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
@@ -173,7 +172,7 @@ public class TCPEngine extends BaseEngine {
 		byte[] lResp = new byte[lRead];
 		System.arraycopy(lBuff, 0, lResp, 0, lRead);
 
-		Map lRespMap = WebSocketHandshake.parseC2SRequest(lResp);
+		FastMap lRespMap = WebSocketHandshake.parseC2SRequest(lResp);
 		// maybe the request is a flash policy-file-request
 		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
 		if (lFlashBridgeReq != null) {
@@ -199,7 +198,7 @@ public class TCPEngine extends BaseEngine {
 		}
 
 		RequestHeader header = new RequestHeader();
-		Map<String, String> args = new HashMap<String, String>();
+		FastMap<String, String> args = new FastMap<String, String>();
 		String path = (String) lRespMap.get("path");
 
 		// isolate search string
