@@ -8,13 +8,13 @@
 	<version>0.9.5</version>
 	<description>Parent project for jWebSocket</description>
 	<modules>
-		<module>jWebSocketCommon</module>
 		<module>jWebSocketShared</module>
-		<module>jWebSocketSamples</module>
+		<module>jWebSocketServer</module>
 		<module>jWebSocketJavaClient</module>
 		<module>jWebSocketJavaSEClient</module>
-		<module>jWebSocketServer</module>
+		<module>jWebSocketSamples</module>
 	<!--
+		<module>jWebSocketCommon</module>
 		<module>jWebSocketJavaMEClient</module>
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>

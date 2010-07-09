@@ -96,12 +96,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketFactory</artifactId>
+			<artifactId>jWebSocketShared</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketWebAppSupport</artifactId>
+			<artifactId>jWebSocketServer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

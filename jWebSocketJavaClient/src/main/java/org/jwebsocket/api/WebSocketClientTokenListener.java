@@ -14,7 +14,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
-import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.listener.WebSocketClientEvent;
 import org.jwebsocket.token.Token;
 
