@@ -93,14 +93,25 @@
 				// console.log( "Start x: " + lX + ", y: " + lY );
 			}
 
+			var eAvg = null;
+			var loops = 0;
+			var total = 0;
+
 			function mouseMoveLsnr( aEvent ) {
 				aEvent.preventDefault();
 				if( lPainting ) {
 					// console.log( "Drawing x: " + lX + ", y: " + lY );
 					lX = aEvent.clientX - eCanvas.offsetLeft;
 					lY = aEvent.clientY - eCanvas.offsetTop;
+
+					loops++;
+					start = new Date().getTime();
+
 					lWSC.canvasLineTo( lCID, lX, lY );
 					// lWSC.canvasStroke( lCID );
+
+					total += ( new Date().getTime() - start );
+					eAvg.innerHTML = ( total / loops + "ms" );
 				}
 			}
 
@@ -133,6 +144,7 @@
 			function initPage() {
 				// get some required HTML elements
 
+				eAvg = jws.$("spnAvg");
 				eCanvas = jws.$( "cnvDemo" );
 				ctx = eCanvas.getContext( "2d" );
 
@@ -187,7 +199,7 @@
 		onunload="exitPage();"
 		>
 		<div> <!-- style="border:1px solid red" -->
-			<input class="sbtnClear" id="sbtnClear" type="button" value="Clear" onclick="doClear();" style="display:block">
+			<input class="sbtnClear" id="sbtnClear" type="button" value="Clear" onclick="doClear();"><p id="spnAvg">0ms</p>
 			<canvas id="cnvDemo" width="300" height="280" style="border:1px solid green; cursor:crosshair" >
 			</canvas>
 		</div>
