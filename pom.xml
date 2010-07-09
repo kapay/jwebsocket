@@ -10,16 +10,11 @@
 	<modules>
 		<module>jWebSocketShared</module>
 		<module>jWebSocketServer</module>
-		<module>jWebSocketJavaClient</module>
 		<module>jWebSocketJavaSEClient</module>
 		<module>jWebSocketSamples</module>
-	<!--
-		<module>jWebSocketCommon</module>
-		<module>jWebSocketJavaMEClient</module>
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>
-	-->
 	</modules>
 
 	<build>
