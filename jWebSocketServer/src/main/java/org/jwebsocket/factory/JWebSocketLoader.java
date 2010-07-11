@@ -14,8 +14,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
-import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
 import static org.jwebsocket.config.JWebSocketConstants.CATALINA_HOME;
+import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
 import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_XML;
 
 import java.io.File;
@@ -43,7 +43,7 @@ import org.jwebsocket.security.SecurityFactory;
  */
 public final class JWebSocketLoader {
 
-//    private static Logger log = Logging.getLogger(JWebSocketLoader.class);
+    private static Logger log = Logging.getLogger(JWebSocketLoader.class);
     private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
     /**
@@ -56,10 +56,7 @@ public final class JWebSocketLoader {
     public final WebSocketInitializer initialize() throws WebSocketException {
         String configPath = getConfigurationPath();
         if (configPath == null) {
-			// TODO: Exception handling
-			/*
             log.error("Error Loading Configuration File jWebSocket.xml");
-			 */
             throw new WebSocketException("Either JWEBSOCKET_HOME variable is not set " +
             		"or jWebSocket.xml file does not exists at %JWEBSOCKET_HOME%/conf");
         }
@@ -71,6 +68,8 @@ public final class JWebSocketLoader {
 
         WebSocketInitializer initializer = getInitializer(config);
         if (initializer == null) {
+            log.info("Error instantiating custom initializer:"+config.getInitializer()+ "so using default XML based " +
+            		"initializer");
             initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
         }
         return initializer;
@@ -114,34 +113,12 @@ public final class JWebSocketLoader {
             Class<WebSocketInitializer> lClass = (Class<WebSocketInitializer>) Class.forName(initializerClass);
             initializer = lClass.newInstance();
         } catch (ClassNotFoundException ex) {
-			// TODO: Exception handling
-			/*
-            if (log.isInfoEnabled()) {
-                log.info(ex.getClass().getSimpleName() + " instantiating initializer", ex);
-            }
-			 */
+            log.info("Error instantiating initializer:"+initializerClass, ex);
         } catch (InstantiationException ex) {
-			// TODO: Exception handling
-			/*
-            if (log.isInfoEnabled()) {
-                log.info(ex.getClass().getSimpleName() + " instantiating initializer", ex);
-            }
-			 */
+            log.info("Error instantiating initializer:"+initializerClass, ex);
         } catch (IllegalAccessException ex) {
-			// TODO: Exception handling
-			/*
-            if (log.isInfoEnabled()) {
-                log.info(ex.getClass().getSimpleName() + " instantiating initializer", ex);
-            }
-			 */
+            log.info("Error instantiating initializer:"+initializerClass, ex);
         }
-			// TODO: Exception handling
-			/*
-        if (log.isInfoEnabled()) {
-            log.info("Initializer found: " + initializer.getClass().getName());
-        }
-			 */
-
         return initializer;
     }
 
