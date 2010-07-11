@@ -16,9 +16,8 @@ package org.jwebsocket.factory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
 import javolution.util.FastMap;
-import javolution.util.FastMap.Entry;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
