@@ -36,6 +36,7 @@ import org.jwebsocket.plugins.rpc.RPCPlugIn;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;
 import org.jwebsocket.plugins.system.SystemPlugIn;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.tcp.engines.TCPEngine;
 
 /**
  * Abstract initializer class
@@ -65,8 +66,8 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 		EngineConfiguration config = getEngineConfiguration();
 		WebSocketEngine newEngine = null;
 		try {
-			//newEngine = new TCPEngine(config);
-			newEngine = new NettyEngine(config);
+			newEngine = new TCPEngine(config);
+			//newEngine = new NettyEngine(config);
 		} catch (Exception e) {
 			System.out.println("Error instantiating engine: " + e.getMessage());
 			System.exit(0);
