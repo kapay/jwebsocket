@@ -14,25 +14,30 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
-import org.jwebsocket.config.JWebSocketConfig;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+
 import javolution.util.FastMap;
+
+import org.apache.log4j.Logger;
+import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.kit.WebSocketRuntimeException;
+import org.jwebsocket.logging.Logging;
 
 /**
  * Handler class that handles the <tt>jWebSocket.xml</tt> configuration. This
  * class starts from the root and delegates the handler to specific config
  * handler, to read the whole config file.
- *
+ * 
  * @author puran
  * @version $Id: JWebSocketConfigHandler.java 596 2010-06-22 17:09:54Z fivefeetfurther $
  */
 public class JWebSocketConfigHandler implements ConfigHandler {
 
-    // private static Logger log = Logging.getLogger(JWebSocketConfigHandler.class);
+    private static Logger log = Logging.getLogger(JWebSocketConfigHandler.class);
 
     private static final String ELEMENT_INSTALLATION = "installation";
     private static final String ELEMENT_PROTOCOL = "protocol";
@@ -60,7 +65,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
     private static FastMap<String, ConfigHandler> handlerContext = new FastMap<String, ConfigHandler>();
 
     // initialize the different config handler implementations
-
     static {
         handlerContext.put("engine", new EngineConfigHandler());
         handlerContext.put("plugin", new PluginConfigHandler());
@@ -78,11 +82,11 @@ public class JWebSocketConfigHandler implements ConfigHandler {
     @Override
     public JWebSocketConfig processConfig(XMLStreamReader streamReader) {
         JWebSocketConfig.Builder configBuilder = new JWebSocketConfig.Builder();
-		/*
+
         if (log.isDebugEnabled()) {
             log.debug("Reading jWebSocket Configuration...");
         }
-		 */
+
         try {
             while (streamReader.hasNext()) {
                 streamReader.next();
@@ -135,20 +139,16 @@ public class JWebSocketConfigHandler implements ConfigHandler {
                 if (streamReader.isEndElement()) {
                     String elementName = streamReader.getLocalName();
                     if (elementName.equals(JWEBSOCKET)) {
-						/*
                         if (log.isInfoEnabled()) {
                             log.info("jWebSocket configuration successfully processed.");
                         }
-						 */
                         break;
                     }
                 }
             }
         } catch (XMLStreamException e) {
+            throw new WebSocketRuntimeException("Error parsing jWebSocket.xml configuration file", e);
         }
-        // we are done with the handler context FastMap, release it for garbage
-        // collection
-        handlerContext = null;
         // now return the config object, this is the only one config object that
         // should exists
         // in the system
@@ -157,21 +157,21 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
     /**
      * private method to handle the user config.
-     *
-     * @param streamReader the stream reader object
+     * 
+     * @param streamReader
+     *            the stream reader object
      * @return the list of user config
-     * @throws XMLStreamException if there's any exception reading configuration
+     * @throws XMLStreamException
+     *             if there's any exception reading configuration
      */
-    private List<UserConfig> handleUsers(XMLStreamReader streamReader)
-            throws XMLStreamException {
+    private List<UserConfig> handleUsers(XMLStreamReader streamReader) throws XMLStreamException {
         List<UserConfig> users = new ArrayList<UserConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
                 String elementName = streamReader.getLocalName();
                 if (elementName.equals(ELEMENT_USER)) {
-                    UserConfig user = (UserConfig) handlerContext.get(
-                            elementName).processConfig(streamReader);
+                    UserConfig user = (UserConfig) handlerContext.get(elementName).processConfig(streamReader);
                     users.add(user);
                 }
             }
@@ -187,21 +187,21 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
     /**
      * method that reads the roles configuration
-     *
-     * @param streamReader the stream reader object
+     * 
+     * @param streamReader
+     *            the stream reader object
      * @return the list of roles config
-     * @throws XMLStreamException if there's any exception reading configuration
+     * @throws XMLStreamException
+     *             if there's any exception reading configuration
      */
-    private List<RoleConfig> handleRoles(XMLStreamReader streamReader)
-            throws XMLStreamException {
+    private List<RoleConfig> handleRoles(XMLStreamReader streamReader) throws XMLStreamException {
         List<RoleConfig> roles = new ArrayList<RoleConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
                 String elementName = streamReader.getLocalName();
                 if (elementName.equals(ELEMENT_ROLE)) {
-                    RoleConfig role = (RoleConfig) handlerContext.get(
-                            elementName).processConfig(streamReader);
+                    RoleConfig role = (RoleConfig) handlerContext.get(elementName).processConfig(streamReader);
                     roles.add(role);
                 }
             }
@@ -217,21 +217,21 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
     /**
      * private method to read the list of rights configuration
-     *
-     * @param streamReader the stream reader object
+     * 
+     * @param streamReader
+     *            the stream reader object
      * @return the list of rights configuration
-     * @throws XMLStreamException if there's any exception reading configuration
+     * @throws XMLStreamException
+     *             if there's any exception reading configuration
      */
-    private List<RightConfig> handleRights(XMLStreamReader streamReader)
-            throws XMLStreamException {
+    private List<RightConfig> handleRights(XMLStreamReader streamReader) throws XMLStreamException {
         List<RightConfig> rights = new ArrayList<RightConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
                 String elementName = streamReader.getLocalName();
                 if (elementName.equals(ELEMENT_RIGHT)) {
-                    RightConfig right = (RightConfig) handlerContext.get(
-                            elementName).processConfig(streamReader);
+                    RightConfig right = (RightConfig) handlerContext.get(elementName).processConfig(streamReader);
                     rights.add(right);
                 }
             }
@@ -247,21 +247,21 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
     /**
      * private method that reads the config for plugins
-     *
-     * @param streamReader the stream reader object
+     * 
+     * @param streamReader
+     *            the stream reader object
      * @return the list of plugin configs
-     * @throws XMLStreamException if exception occurs while reading
+     * @throws XMLStreamException
+     *             if exception occurs while reading
      */
-    private List<PluginConfig> handlePlugins(XMLStreamReader streamReader)
-            throws XMLStreamException {
+    private List<PluginConfig> handlePlugins(XMLStreamReader streamReader) throws XMLStreamException {
         List<PluginConfig> plugins = new ArrayList<PluginConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
                 String elementName = streamReader.getLocalName();
                 if (elementName.equals(ELEMENT_PLUGIN)) {
-                    PluginConfig plugin = (PluginConfig) handlerContext.get(
-                            elementName).processConfig(streamReader);
+                    PluginConfig plugin = (PluginConfig) handlerContext.get(elementName).processConfig(streamReader);
                     plugins.add(plugin);
                 }
             }
@@ -277,21 +277,21 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
     /**
      * private method that reads the config for filters
-     *
-     * @param streamReader the stream reader object
+     * 
+     * @param streamReader
+     *            the stream reader object
      * @return the list of filter configs
-     * @throws XMLStreamException if exception occurs while reading
+     * @throws XMLStreamException
+     *             if exception occurs while reading
      */
-    private List<FilterConfig> handleFilters(XMLStreamReader streamReader)
-            throws XMLStreamException {
+    private List<FilterConfig> handleFilters(XMLStreamReader streamReader) throws XMLStreamException {
         List<FilterConfig> filters = new ArrayList<FilterConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
                 String elementName = streamReader.getLocalName();
                 if (elementName.equals(ELEMENT_FILTER)) {
-                    FilterConfig filter = (FilterConfig) handlerContext.get(
-                            elementName).processConfig(streamReader);
+                    FilterConfig filter = (FilterConfig) handlerContext.get(elementName).processConfig(streamReader);
                     filters.add(filter);
                 }
             }
@@ -305,24 +305,23 @@ public class JWebSocketConfigHandler implements ConfigHandler {
         return filters;
     }
 
-
     /**
      * private method that reads the config for logging
-     *
-     * @param streamReader the stream reader object
+     * 
+     * @param streamReader
+     *            the stream reader object
      * @return the list of logging configs
-     * @throws XMLStreamException if exception occurs while reading
+     * @throws XMLStreamException
+     *             if exception occurs while reading
      */
-    private List<LoggingConfig> handleLoggingConfigs(XMLStreamReader streamReader)
-            throws XMLStreamException {
+    private List<LoggingConfig> handleLoggingConfigs(XMLStreamReader streamReader) throws XMLStreamException {
         List<LoggingConfig> loggingConfigs = new ArrayList<LoggingConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
                 String elementName = streamReader.getLocalName();
                 if (elementName.equals(ELEMENT_LOG4J)) {
-                    LoggingConfig loggingConfig = (LoggingConfig) handlerContext.get(
-                            elementName).processConfig(streamReader);
+                    LoggingConfig loggingConfig = (LoggingConfig) handlerContext.get(elementName).processConfig(streamReader);
                     loggingConfigs.add(loggingConfig);
                 }
             }
@@ -338,21 +337,21 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
     /**
      * private method that reads the list of server configs
-     *
-     * @param streamReader the stream reader object
+     * 
+     * @param streamReader
+     *            the stream reader object
      * @return the list of server configs
-     * @throws XMLStreamException if exception occurs reading xml
+     * @throws XMLStreamException
+     *             if exception occurs reading xml
      */
-    private List<ServerConfig> handleServers(XMLStreamReader streamReader)
-            throws XMLStreamException {
+    private List<ServerConfig> handleServers(XMLStreamReader streamReader) throws XMLStreamException {
         List<ServerConfig> servers = new ArrayList<ServerConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
                 String elementName = streamReader.getLocalName();
                 if (elementName.equals(ELEMENT_SERVER)) {
-                    ServerConfig server = (ServerConfig) handlerContext.get(
-                            elementName).processConfig(streamReader);
+                    ServerConfig server = (ServerConfig) handlerContext.get(elementName).processConfig(streamReader);
                     servers.add(server);
                 }
             }
@@ -368,31 +367,31 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
     /**
      * private method that reads the list of engines config from the xml file
-     *
-     * @param streamReader the stream reader object
+     * 
+     * @param streamReader
+     *            the stream reader object
      * @return the list of engine configs
-     * @throws XMLStreamException if exception occurs while reading
+     * @throws XMLStreamException
+     *             if exception occurs while reading
      */
-    private List<EngineConfig> handleEngines(XMLStreamReader streamReader)
-            throws XMLStreamException {
+    private List<EngineConfig> handleEngines(XMLStreamReader streamReader) throws XMLStreamException {
         List<EngineConfig> engines = new ArrayList<EngineConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
                 String elementName = streamReader.getLocalName();
                 if (elementName.equals(ELEMENT_ENGINE)) {
-                    EngineConfig engine = (EngineConfig) handlerContext.get(
-                            elementName).processConfig(streamReader);
+                    EngineConfig engine = (EngineConfig) handlerContext.get(elementName).processConfig(streamReader);
                     engines.add(engine);
                 }
             }
             if (streamReader.isEndElement()) {
                 String elementName = streamReader.getLocalName();
-				if (elementName.equals(ELEMENT_ENGINES)) {
-					break;
-				}
-			}
-		}
-		return engines;
-	}
+                if (elementName.equals(ELEMENT_ENGINES)) {
+                    break;
+                }
+            }
+        }
+        return engines;
+    }
 }
