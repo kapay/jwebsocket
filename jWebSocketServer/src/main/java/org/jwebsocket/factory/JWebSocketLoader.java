@@ -68,8 +68,10 @@ public final class JWebSocketLoader {
 
         WebSocketInitializer initializer = getInitializer(config);
         if (initializer == null) {
-            log.info("Error instantiating custom initializer:"+config.getInitializer()+ "so using default XML based " +
-            		"initializer");
+            if (log.isInfoEnabled()) {
+                log.info("Error instantiating custom initializer:"+config.getInitializer()+ "so using default XML based " +
+                "initializer");
+            }
             initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
         }
         return initializer;
@@ -113,11 +115,17 @@ public final class JWebSocketLoader {
             Class<WebSocketInitializer> lClass = (Class<WebSocketInitializer>) Class.forName(initializerClass);
             initializer = lClass.newInstance();
         } catch (ClassNotFoundException ex) {
-            log.info("Error instantiating initializer:"+initializerClass, ex);
+            if (log.isInfoEnabled()) {
+                log.info("Error instantiating initializer:"+initializerClass, ex);
+            }
         } catch (InstantiationException ex) {
-            log.info("Error instantiating initializer:"+initializerClass, ex);
+            if (log.isInfoEnabled()) {
+                log.info("Error instantiating initializer:"+initializerClass, ex);
+            }
         } catch (IllegalAccessException ex) {
-            log.info("Error instantiating initializer:"+initializerClass, ex);
+            if (log.isInfoEnabled()) {
+                log.info("Error instantiating initializer:"+initializerClass, ex);
+            }
         }
         return initializer;
     }
