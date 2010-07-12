@@ -30,7 +30,6 @@ import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.filters.custom.CustomTokenFilter;
 import org.jwebsocket.filters.system.SystemFilter;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.netty.engines.NettyEngine;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
 import org.jwebsocket.plugins.streaming.StreamingPlugIn;

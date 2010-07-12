@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONStringer;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
@@ -37,7 +37,7 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(SharedObjectsPlugIn.class);
 	// if namespace is changed update client plug-in accordingly!
-	private String NS_SHARED_OBJECTS = JWebSocketConstants.NS_BASE + ".plugins.sharedObjs";
+	private String NS_SHARED_OBJECTS = JWebSocketServerConstants.NS_BASE + ".plugins.sharedObjs";
 	private SharedObjects sharedObjects = new SharedObjects();
 	// if data types are changed update client plug-in accordingly!
 	private FastList DATA_TYPES = new FastList(Arrays.asList(new String[]{

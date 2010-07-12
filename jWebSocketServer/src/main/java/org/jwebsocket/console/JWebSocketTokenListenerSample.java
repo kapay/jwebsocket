@@ -16,7 +16,8 @@ package org.jwebsocket.console;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.WebSocketServerEvent;
 import org.jwebsocket.listener.WebSocketServerTokenEvent;
 import org.jwebsocket.listener.WebSocketServerTokenListener;
@@ -24,7 +25,7 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
- * This shows an example of a simple websocket listener
+ * This shows an example of a simple WebSocket listener
  * @author aschulze
  */
 public class JWebSocketTokenListenerSample implements WebSocketServerTokenListener {
@@ -73,10 +74,10 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 			// if type is "getInfo" return some server information
 			Token lResponse = aEvent.createResponse(aToken);
 			if ("getInfo".equals(lType)) {
-				lResponse.put("vendor", JWebSocketConstants.VENDOR);
-				lResponse.put("version", JWebSocketConstants.VERSION_STR);
-				lResponse.put("copyright", JWebSocketConstants.COPYRIGHT);
-				lResponse.put("license", JWebSocketConstants.LICENSE);
+				lResponse.put("vendor", JWebSocketCommonConstants.VENDOR);
+				lResponse.put("version", JWebSocketServerConstants.VERSION_STR);
+				lResponse.put("copyright", JWebSocketCommonConstants.COPYRIGHT);
+				lResponse.put("license", JWebSocketCommonConstants.LICENSE);
 			} else {
 				// if unknown type in this namespace, return corresponding error message
 				lResponse.put("code", -1);

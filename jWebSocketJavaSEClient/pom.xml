@@ -55,6 +55,11 @@
 			<artifactId>jWebSocketShared</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketClientAPI</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 	<!--  define repositories -->

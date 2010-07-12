@@ -15,9 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.logging;
 
-import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
-import static org.jwebsocket.config.JWebSocketConstants.CATALINA_HOME;
-
 import java.io.IOException;
 import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
@@ -38,6 +35,7 @@ public class Logging {
 	private static PatternLayout layout = null;
 	private static Appender appender = null;
 	private static Level logLevel = Level.DEBUG;
+	private static String[] searchPaths = null;
 	/**
 	 * Log output is send to the console (stdout).
 	 */
@@ -65,10 +63,10 @@ public class Logging {
 	private static int buffersize = 2048;
 	private static int logTarget = CONSOLE; // ROLLING_FILE;
 
-	private static String getLogsFolderPath(String fileName) {
+	private static String getLogsFolderPath(String fileName, String[] aPaths) {
 
 		// try to obtain JWEBSOCKET_HOME environment variable
-		String lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
+		String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
 		String lFileSep = System.getProperty("file.separator");
 		String lWebSocketLogs = null;
 
@@ -83,7 +81,7 @@ public class Logging {
 
 		if (lWebSocketLogs == null) {
 			// try to obtain CATALINA_HOME environment variable
-			lWebSocketHome = System.getenv(CATALINA_HOME);
+			lWebSocketHome = System.getenv("CATALINA_HOME");
 			if (lWebSocketHome != null) {
 				// append trailing slash if needed
 				if (!lWebSocketHome.endsWith(lFileSep)) {
@@ -110,7 +108,7 @@ public class Logging {
 			layout.setConversionPattern(pattern);
 		}
 		if (appender == null) {
-			String logsPath = getLogsFolderPath(filename);
+			String logsPath = getLogsFolderPath(filename, searchPaths);
 			if (ROLLING_FILE == logTarget && logsPath != null) {
 				try {
 					appender = new RollingFileAppender(layout, logsPath, true);
@@ -136,7 +134,7 @@ public class Logging {
 			} else {
 				appender = new ConsoleAppender(layout);
 				if (CONSOLE != logTarget) {
-					System.out.println(JWEBSOCKET_HOME
+					System.out.println("JWEBSOCKET_HOME"
 							+ " variable not set or invalid configuration,"
 							+ " using console output for log file.");
 				}
@@ -151,7 +149,9 @@ public class Logging {
 	 * @param aLogLevel
 	 */
 	public static void initLogs(String aLogLevel, String aLogTarget,
-			String aFilename, String aPattern, Integer aBuffersize) {
+			String aFilename, String aPattern, Integer aBuffersize,
+			String[] aSearchPaths) {
+		searchPaths = aSearchPaths;
 		if (aLogLevel != null) {
 			logLevel = Level.toLevel(aLogLevel);
 		}
@@ -176,15 +176,15 @@ public class Logging {
 		checkLogAppender();
 	}
 
-	public static void initLogs(LoggingConfig aLoggingConfig) {
+	public static void initLogs(LoggingConfig aLoggingConfig, String[] aSearchPaths) {
 		if (aLoggingConfig != null) {
 			initLogs(
 					aLoggingConfig.getLevel(),
 					aLoggingConfig.getAppender(),
 					aLoggingConfig.getFilename(),
 					aLoggingConfig.getPattern(),
-					aLoggingConfig.getBufferSize()
-			);
+					aLoggingConfig.getBufferSize(),
+					aSearchPaths);
 		}
 	}
 

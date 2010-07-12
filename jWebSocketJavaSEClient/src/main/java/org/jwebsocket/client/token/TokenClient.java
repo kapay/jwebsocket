@@ -18,7 +18,7 @@ import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.client.java.BaseClient;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.listener.WebSocketClientEvent;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.packetProcessors.CSVProcessor;
@@ -37,7 +37,7 @@ public class TokenClient {
 	public final static int AUTHENTICATED = 2;
 	private int CUR_TOKEN_ID = 0;
 	private BaseClient client = null;
-	private String lSubProt = JWebSocketConstants.SUB_PROT_DEFAULT;
+	private String lSubProt = JWebSocketCommonConstants.SUB_PROT_DEFAULT;
 	private final static String NS_BASE = "org.jWebSocket";
 	private String fUsername = null;
 	private String fClientId = null;
@@ -163,11 +163,11 @@ public class TokenClient {
 	 */
 	public Token packetToToken(WebSocketPacket aPacket) {
 		Token lToken = null;
-		if (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)) {
+		if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
 			lToken = JSONProcessor.packetToToken(aPacket);
-		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_CSV)) {
+		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
 			lToken = CSVProcessor.packetToToken(aPacket);
-		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_XML)) {
+		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
 			lToken = XMLProcessor.packetToToken(aPacket);
 		}
 		return lToken;
@@ -182,11 +182,11 @@ public class TokenClient {
 	public WebSocketPacket tokenToPacket(Token aToken) {
 		WebSocketPacket lPacket = null;
 
-		if (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)) {
+		if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
-		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_CSV)) {
+		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
 			lPacket = CSVProcessor.tokenToPacket(aToken);
-		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_XML)) {
+		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
 			lPacket = XMLProcessor.tokenToPacket(aToken);
 		}
 		return lPacket;

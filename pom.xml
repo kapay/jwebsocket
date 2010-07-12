@@ -9,6 +9,8 @@
 	<description>Parent project for jWebSocket</description>
 	<modules>
 		<module>jWebSocketShared</module>
+		<module>jWebSocketServerAPI</module>
+		<module>jWebSocketClientAPI</module>
 		<module>jWebSocketServer</module>
 		<module>jWebSocketJavaSEClient</module>
 		<module>jWebSocketSamples</module>

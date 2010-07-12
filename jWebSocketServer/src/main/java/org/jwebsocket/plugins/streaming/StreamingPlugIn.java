@@ -19,7 +19,7 @@ import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
@@ -37,7 +37,7 @@ import org.jwebsocket.token.Token;
 public class StreamingPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(StreamingPlugIn.class);
-	private String NS_STREAMING_DEFAULT = JWebSocketConstants.NS_BASE + ".plugins.streaming";
+	private String NS_STREAMING_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.streaming";
 	private FastMap<String, BaseStream> streams = new FastMap<String, BaseStream>();
 	private boolean streamsInitialized = false;
 	private TimeStream lTimeStream = null;

@@ -24,7 +24,7 @@ import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 
 /**
  * Class that performs the default servers and plugins initialization
@@ -85,17 +85,17 @@ public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
 
         @Override
         public int getMaxframesize() {
-            return JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE;
+            return JWebSocketServerConstants.DEFAULT_MAX_FRAME_SIZE;
         }
 
         @Override
         public int getPort() {
-            return JWebSocketConstants.DEFAULT_PORT;
+            return JWebSocketServerConstants.DEFAULT_PORT;
         }
 
         @Override
         public int getTimeout() {
-            return JWebSocketConstants.DEFAULT_TIMEOUT;
+            return JWebSocketServerConstants.DEFAULT_TIMEOUT;
         }
 
         @Override

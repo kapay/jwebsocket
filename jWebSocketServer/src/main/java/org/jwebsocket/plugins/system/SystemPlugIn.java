@@ -22,7 +22,8 @@ import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
@@ -42,7 +43,7 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(SystemPlugIn.class);
 	// specify name space for system plug-in
-	private static final String NS_SYSTEM_DEFAULT = JWebSocketConstants.NS_BASE + ".plugins.system";
+	private static final String NS_SYSTEM_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.system";
 	// specify token types processed by system plug-in
 	private static final String TT_SEND = "send";
 	private static final String TT_BROADCAST = "broadcast";
@@ -182,8 +183,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		}
 		// send "welcome" token to client
 		Token lWelcome = new Token(TT_WELCOME);
-		lWelcome.put("vendor", JWebSocketConstants.VENDOR);
-		lWelcome.put("version", JWebSocketConstants.VERSION_STR);
+		lWelcome.put("vendor", JWebSocketCommonConstants.VENDOR);
+		lWelcome.put("version", JWebSocketServerConstants.VERSION_STR);
 		// here the session id is MANDATORY! to pass to the client!
 		lWelcome.put("usid", aConnector.getSession().getSessionId());
 		lWelcome.put("sourceId", aConnector.getId());
@@ -241,8 +242,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		}
 		// send "goodBye" token to client
 		Token lGoodBye = new Token(TT_GOODBYE);
-		lGoodBye.put("vendor", JWebSocketConstants.VENDOR);
-		lGoodBye.put("version", JWebSocketConstants.VERSION_STR);
+		lGoodBye.put("vendor", JWebSocketCommonConstants.VENDOR);
+		lGoodBye.put("version", JWebSocketServerConstants.VERSION_STR);
 		lGoodBye.put("sourceId", aConnector.getId());
 		if (aCloseReason != null) {
 			lGoodBye.put("reason", aCloseReason.toString().toLowerCase());

@@ -18,7 +18,7 @@ package org.jwebsocket.plugins.admin;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.kit.WebSocketException;
@@ -36,7 +36,7 @@ public class AdminPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(AdminPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
-	private String NS_ADMIN = JWebSocketConstants.NS_BASE + ".plugins.admin";
+	private String NS_ADMIN = JWebSocketServerConstants.NS_BASE + ".plugins.admin";
 
 	/**
 	 *

@@ -66,7 +66,7 @@ public interface WebSocketPacket {
 	 * @return Data packet as array of bytes.
 	 */
 	byte[] getByteArray();
-	
+
 	/**
 	 * Returns the content of the data packet as a string using default
 	 * encoding.
@@ -100,5 +100,4 @@ public interface WebSocketPacket {
 	int getFrameType();
 
 	void setFrameType(int aFrameType);
-
 }

@@ -19,7 +19,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
@@ -34,7 +34,7 @@ public class SamplePlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(SamplePlugIn.class);
 	// if namespace changed update client plug-in accordingly!
-	private final static String NS_SAMPLE = JWebSocketConstants.NS_BASE + ".plugins.samples";
+	private final static String NS_SAMPLE = JWebSocketServerConstants.NS_BASE + ".plugins.samples";
 	private final static String SAMPLE_VAR = NS_SAMPLE + ".started";
 
 	/**

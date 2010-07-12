@@ -28,7 +28,8 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.tcp.connectors.TCPConnector;
@@ -46,8 +47,8 @@ public class TCPEngine extends BaseEngine {
 
 	private static Logger log = Logging.getLogger(TCPEngine.class);
 	private ServerSocket serverSocket = null;
-	private int listenerPort = JWebSocketConstants.DEFAULT_PORT;
-	private int sessionTimeout = JWebSocketConstants.DEFAULT_TIMEOUT;
+	private int listenerPort = JWebSocketServerConstants.DEFAULT_PORT;
+	private int sessionTimeout = JWebSocketServerConstants.DEFAULT_TIMEOUT;
 	private boolean isRunning = false;
 	Thread engineThread = null;
 
@@ -204,13 +205,13 @@ public class TCPEngine extends BaseEngine {
 		// isolate search string
 		String searchString = "";
 		if (path != null) {
-			int pos = path.indexOf(JWebSocketConstants.PATHARG_SEPARATOR);
+			int pos = path.indexOf(JWebSocketCommonConstants.PATHARG_SEPARATOR);
 			if (pos >= 0) {
 				searchString = path.substring(pos + 1);
 				if (searchString.length() > 0) {
-					String[] lArgs = searchString.split(JWebSocketConstants.ARGARG_SEPARATOR);
+					String[] lArgs = searchString.split(JWebSocketCommonConstants.ARGARG_SEPARATOR);
 					for (int i = 0; i < lArgs.length; i++) {
-						String[] lKeyValuePair = lArgs[i].split(JWebSocketConstants.KEYVAL_SEPARATOR, 2);
+						String[] lKeyValuePair = lArgs[i].split(JWebSocketCommonConstants.KEYVAL_SEPARATOR, 2);
 						if (lKeyValuePair.length == 2) {
 							args.put(lKeyValuePair[0], lKeyValuePair[1]);
 							if (log.isDebugEnabled()) {
@@ -228,7 +229,7 @@ public class TCPEngine extends BaseEngine {
 
 		// set default sub protocol if none passed
 		if (args.get("prot") == null) {
-			args.put("prot", JWebSocketConstants.SUB_PROT_DEFAULT);
+			args.put("prot", JWebSocketCommonConstants.SUB_PROT_DEFAULT);
 		}
 
 		header.put("host", lRespMap.get("host"));
@@ -289,10 +290,10 @@ public class TCPEngine extends BaseEngine {
 							// check system's min and max timeout ranges
 							int lSessionTimeout = header.getTimeout(getSessionTimeout());
 							/* min and max range removed since 0.9.0.0602, see config documentation
-							if (lSessionTimeout > JWebSocketConstants.MAX_TIMEOUT) {
-							lSessionTimeout = JWebSocketConstants.MAX_TIMEOUT;
-							} else if (lSessionTimeout < JWebSocketConstants.MIN_TIMEOUT) {
-							lSessionTimeout = JWebSocketConstants.MIN_TIMEOUT;
+							if (lSessionTimeout > JWebSocketServerConstants.MAX_TIMEOUT) {
+							lSessionTimeout = JWebSocketServerConstants.MAX_TIMEOUT;
+							} else if (lSessionTimeout < JWebSocketServerConstants.MIN_TIMEOUT) {
+							lSessionTimeout = JWebSocketServerConstants.MIN_TIMEOUT;
 							}
 							 */
 							if (log.isDebugEnabled()) {

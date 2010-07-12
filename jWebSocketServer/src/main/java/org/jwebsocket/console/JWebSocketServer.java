@@ -15,7 +15,8 @@
 package org.jwebsocket.console;
 
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.server.TokenServer;
 
@@ -31,9 +32,9 @@ public class JWebSocketServer {
 	 */
 	public static void main(String[] args) {
 		// the following 3 lines may not be removed due to GNU LGPL 3.0 license!
-		System.out.println("jWebSocket Ver. " + JWebSocketConstants.VERSION_STR + " (" + System.getProperty("sun.arch.data.model") + "bit)");
-		System.out.println(JWebSocketConstants.COPYRIGHT);
-		System.out.println(JWebSocketConstants.LICENSE);
+		System.out.println("jWebSocket Ver. " + JWebSocketServerConstants.VERSION_STR + " (" + System.getProperty("sun.arch.data.model") + "bit)");
+		System.out.println(JWebSocketCommonConstants.COPYRIGHT);
+		System.out.println(JWebSocketCommonConstants.LICENSE);
 		System.out.println("Log files per default in jWebSocket.log if not overwritten in jWebSocket.xml.");
 
 		JWebSocketFactory.start();

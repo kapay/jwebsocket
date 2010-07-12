@@ -24,7 +24,7 @@ import java.net.URLClassLoader;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
@@ -43,7 +43,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	private FastMap<String, Object> grantedProcs = new FastMap<String, Object>();
 	private DemoRPCServer rpcServer = null;
 	// if namespace changed update client plug-in accordingly!
-	private String NS_RPC_DEFAULT = JWebSocketConstants.NS_BASE + ".plugins.rpc";
+	private String NS_RPC_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.rpc";
 
 	// TODO: RRPC calls do not yet allow quotes in arguments
 	// TODO: We need simple unique IDs to address a certain target, session id not suitable here.
@@ -211,7 +211,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @return
 	 */
 	public static Class loadClass(String aClassName) {
-		// return loadClass(aClassName, "file:/" + JWebSocketConstants.CLASS_OUT_PATH);
+		// return loadClass(aClassName, "file:/" + JWebSocketServerConstants.CLASS_OUT_PATH);
 		return null;
 	}
 

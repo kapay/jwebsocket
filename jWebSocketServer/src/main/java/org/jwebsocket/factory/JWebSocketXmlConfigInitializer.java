@@ -18,8 +18,8 @@ import java.io.File;
 import org.apache.log4j.Logger;
 import org.jwebsocket.config.xml.LoggingConfig;
 import org.jwebsocket.logging.Logging;
-import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
-import static org.jwebsocket.config.JWebSocketConstants.CATALINA_HOME;
+import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
+import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -87,7 +87,8 @@ public final class JWebSocketXmlConfigInitializer implements
 		// BEFORE instantiating any jWebSocket classes
 		Logging.initLogs(loggingConfig.getLevel(), loggingConfig.getAppender(),
 				loggingConfig.getFilename(), loggingConfig.getPattern(),
-				loggingConfig.getBufferSize());
+				loggingConfig.getBufferSize(),
+				new String[]{"%JWEBSOCKET_HOME%/logs", "%CATALINA_HOME%/logs"});
 		log = Logging.getLogger(JWebSocketXmlConfigInitializer.class);
 		if (log.isDebugEnabled()) {
 			log.debug("Logging settings"

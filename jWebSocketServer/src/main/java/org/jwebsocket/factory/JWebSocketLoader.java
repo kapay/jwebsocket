@@ -14,9 +14,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
-import static org.jwebsocket.config.JWebSocketConstants.CATALINA_HOME;
-import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_HOME;
-import static org.jwebsocket.config.JWebSocketConstants.JWEBSOCKET_XML;
+import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
+import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
+import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_XML;
 
 import java.io.File;
 import java.io.FileInputStream;

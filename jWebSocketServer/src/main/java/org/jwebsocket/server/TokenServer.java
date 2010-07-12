@@ -20,13 +20,14 @@ import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketServerListener;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.filter.TokenFilterChain;
 import org.jwebsocket.kit.BroadcastOptions;
@@ -48,7 +49,7 @@ public class TokenServer extends BaseServer {
 
 	private static Logger log = Logging.getLogger(TokenServer.class);
 	// specify name space for token server
-	private static final String NS_TOKENSERVER = JWebSocketConstants.NS_BASE + ".tokenserver";
+	private static final String NS_TOKENSERVER = JWebSocketServerConstants.NS_BASE + ".tokenserver";
 	// specify shared connector variables
 	private static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
 	private volatile boolean isAlive = false;
@@ -119,9 +120,9 @@ public class TokenServer extends BaseServer {
 	public void connectorStarted(WebSocketConnector aConnector) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(null);
 		if ((lSubProt != null)
-				&& (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)
-				|| lSubProt.equals(JWebSocketConstants.SUB_PROT_CSV)
-				|| lSubProt.equals(JWebSocketConstants.SUB_PROT_XML))) {
+				&& (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)
+				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)
+				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML))) {
 
 			aConnector.setBoolean(VAR_IS_TOKENSERVER, true);
 
@@ -155,13 +156,13 @@ public class TokenServer extends BaseServer {
 	 * @return
 	 */
 	public Token packetToToken(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
-		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketConstants.SUB_PROT_DEFAULT);
+		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.SUB_PROT_DEFAULT);
 		Token lToken = null;
-		if (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)) {
+		if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
 			lToken = JSONProcessor.packetToToken(aDataPacket);
-		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_CSV)) {
+		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
 			lToken = CSVProcessor.packetToToken(aDataPacket);
-		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_XML)) {
+		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
 			lToken = XMLProcessor.packetToToken(aDataPacket);
 		}
 		return lToken;
@@ -174,13 +175,13 @@ public class TokenServer extends BaseServer {
 	 * @return
 	 */
 	public WebSocketPacket tokenToPacket(WebSocketConnector aConnector, Token aToken) {
-		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketConstants.SUB_PROT_DEFAULT);
+		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.SUB_PROT_DEFAULT);
 		WebSocketPacket lPacket = null;
-		if (lSubProt.equals(JWebSocketConstants.SUB_PROT_JSON)) {
+		if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
-		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_CSV)) {
+		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
 			lPacket = CSVProcessor.tokenToPacket(aToken);
-		} else if (lSubProt.equals(JWebSocketConstants.SUB_PROT_XML)) {
+		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
 			lPacket = XMLProcessor.tokenToPacket(aToken);
 		}
 		return lPacket;

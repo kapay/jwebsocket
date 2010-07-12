@@ -46,7 +46,8 @@ import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.util.CharsetUtil;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketConstants;
+import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
@@ -327,7 +328,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
             p.remove("aggregator");
             EngineConfiguration config = engine.getConfiguration();
             if (config == null || config.getMaxframesize() == 0) {
-                p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(JWebSocketConstants.DEFAULT_MAX_FRAME_SIZE));
+                p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(JWebSocketServerConstants.DEFAULT_MAX_FRAME_SIZE));
             } else {
                 p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(config.getMaxframesize()));
             }
@@ -409,7 +410,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
     private WebSocketConnector initializeConnector(ChannelHandlerContext ctx, HttpRequest req) {
 
         RequestHeader header = getRequestHeader(req);
-        int lSessionTimeout = header.getTimeout(JWebSocketConstants.DEFAULT_TIMEOUT);
+        int lSessionTimeout = header.getTimeout(JWebSocketServerConstants.DEFAULT_TIMEOUT);
         if (lSessionTimeout > 0) {
             ctx.getChannel().getConfig().setConnectTimeoutMillis(lSessionTimeout);
         }
@@ -438,13 +439,13 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
         String path = req.getUri();
 
         // isolate search string
-        int pos = path.indexOf(JWebSocketConstants.PATHARG_SEPARATOR);
+        int pos = path.indexOf(JWebSocketCommonConstants.PATHARG_SEPARATOR);
         if (pos >= 0) {
             searchString = path.substring(pos + 1);
             if (searchString.length() > 0) {
-                String[] lArgs = searchString.split(JWebSocketConstants.ARGARG_SEPARATOR);
+                String[] lArgs = searchString.split(JWebSocketCommonConstants.ARGARG_SEPARATOR);
                 for (int i = 0; i < lArgs.length; i++) {
-                    String[] lKeyValuePair = lArgs[i].split(JWebSocketConstants.KEYVAL_SEPARATOR, 2);
+                    String[] lKeyValuePair = lArgs[i].split(JWebSocketCommonConstants.KEYVAL_SEPARATOR, 2);
                     if (lKeyValuePair.length == 2) {
                         args.put(lKeyValuePair[0], lKeyValuePair[1]);
                         if (log.isDebugEnabled()) {
@@ -456,7 +457,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
         }
         // set default sub protocol if none passed
         if (args.get("prot") == null) {
-            args.put("prot", JWebSocketConstants.SUB_PROT_DEFAULT);
+            args.put("prot", JWebSocketCommonConstants.SUB_PROT_DEFAULT);
         }
         header.put(ARGS, args);
         header.put(ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));

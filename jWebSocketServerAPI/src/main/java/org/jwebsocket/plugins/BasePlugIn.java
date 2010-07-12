@@ -1,0 +1,80 @@
+//	---------------------------------------------------------------------------
+//	jWebSocket - Basic PlugIn Class
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
+package org.jwebsocket.plugins;
+
+import org.jwebsocket.kit.PlugInResponse;
+import org.jwebsocket.api.WebSocketPlugIn;
+import org.jwebsocket.api.WebSocketPlugInChain;
+import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.kit.CloseReason;
+
+/**
+ *
+ * @author aschulze
+ */
+public abstract class BasePlugIn implements WebSocketPlugIn {
+
+	private WebSocketPlugInChain plugInChain = null;
+
+	@Override
+	public abstract void engineStarted(WebSocketEngine aEngine);
+
+	@Override
+	public abstract void engineStopped(WebSocketEngine aEngine);
+
+	/**
+	 *
+	 * @param aConnector
+	 */
+	@Override
+	public abstract void connectorStarted(WebSocketConnector aConnector);
+
+	/**
+	 *
+	 * @param aResponse 
+	 * @param aConnector
+	 * @param aDataPacket
+	 */
+	@Override
+	public abstract void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aCloseReason
+	 */
+	@Override
+	public abstract void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
+
+	/**
+	 *
+	 * @param aPlugInChain
+	 */
+	@Override
+	public void setPlugInChain(WebSocketPlugInChain aPlugInChain) {
+		plugInChain = aPlugInChain;
+	}
+
+	/**
+	 * @return the plugInChain
+	 */
+	@Override
+	public WebSocketPlugInChain getPlugInChain() {
+		return plugInChain;
+	}
+}

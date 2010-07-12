@@ -113,8 +113,8 @@ public class CSVProcessor {
 			String lKey = lIterator.next();
 			Object lVal = aToken.get(lKey);
 			lData +=
-				lKey + "=" + objectToCSV(lVal)
-				+ (lIterator.hasNext() ? "," : "");
+					lKey + "=" + objectToCSV(lVal)
+					+ (lIterator.hasNext() ? "," : "");
 		}
 		WebSocketPacket lPacket = null;
 		try {
