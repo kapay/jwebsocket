@@ -12,55 +12,70 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config.xml;
+package org.jwebsocket.config;
+
+import org.jwebsocket.config.Config;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import org.jwebsocket.config.Config;
-/**
- * Handler class that reads the server configuration
- * @author puran
- * @version $Id: ServerConfigHandler.java 596 2010-06-22 17:09:54Z fivefeetfurther $
- *
- */
-public class ServerConfigHandler implements ConfigHandler {
+import java.util.List;
 
-	private static final String ID = "id";
-	private static final String NAME = "name";
-	private static final String JAR = "jar";
-	private static final String ELEMENT_SERVER = "server";
-	
+/**
+ * Handler for the logging configuration
+ *
+ * @author puran
+ * @version $Id: LoggingConfigHandler.java 616 2010-07-01 08:04:51Z fivefeetfurther $
+ */
+public class LoggingConfigHandler implements ConfigHandler {
+
+	private static final String APPENDER = "appender";
+	private static final String PATTERN = "pattern";
+	private static final String LEVEL = "level";
+	private static final String FILENAME = "filename";
+	private static final String BUFFERSIZE = "buffersize";
+	private static final String ELEMENT_LOG4J = "log4j";
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Config processConfig(XMLStreamReader streamReader) throws XMLStreamException {
-		String id = "", name = "", jar = "";
+	public Config processConfig(XMLStreamReader streamReader)
+			throws XMLStreamException {
+		String appender = "", pattern = "", level = "", filename = "";
+		Boolean isBuffered = true;
+		Integer bufferSize = 2048;
+		List<String> loggings = null;
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {
 				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ID)) {
+				if (elementName.equals(APPENDER)) {
 					streamReader.next();
-					id = streamReader.getText();
-				} else if (elementName.equals(NAME)) {
+					appender = streamReader.getText();
+				} else if (elementName.equals(PATTERN)) {
 					streamReader.next();
-					name = streamReader.getText();
-				} else if (elementName.equals(JAR)) {
+					pattern = streamReader.getText();
+				} else if (elementName.equals(LEVEL)) {
 					streamReader.next();
-					jar = streamReader.getText();
+					level = streamReader.getText();
+				} else if (elementName.equals(FILENAME)) {
+					streamReader.next();
+					filename = streamReader.getText();
+				} else if (elementName.equals(BUFFERSIZE)) {
+					streamReader.next();
+					bufferSize = Integer.parseInt(streamReader.getText());
 				} else {
 					//ignore
 				}
 			}
 			if (streamReader.isEndElement()) {
 				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ELEMENT_SERVER)) {
+				if (elementName.equals(ELEMENT_LOG4J)) {
 					break;
 				}
 			}
 		}
-		return new ServerConfig(id, name, jar);
+		return new LoggingConfig(appender, pattern, level, filename,
+				bufferSize);
 	}
-
 }
