@@ -18,7 +18,7 @@ import j2me.util.Iterator;
 import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.client.java.BaseClient;
+import org.jwebsocket.client.me.BaseClientJ2ME;
 import org.jwebsocket.listener.WebSocketClientEvent;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.packetProcessors.JSONProcessor;
@@ -29,23 +29,41 @@ import org.jwebsocket.packetProcessors.JSONProcessor;
  */
 public class TokenClient {
 
+	/**
+	 *
+	 */
 	public final static int DISCONNECTED = 0;
+	/**
+	 *
+	 */
 	public final static int CONNECTED = 1;
+	/**
+	 *
+	 */
 	public final static int AUTHENTICATED = 2;
 	private int CUR_TOKEN_ID = 0;
-	private BaseClient client = null;
+	private BaseClientJ2ME client = null;
 	private String lSubProt = "json"; // is hardcoded for java me
 	private final static String NS_BASE = "org.jWebSocket";
 	private String fUsername = null;
 	private String fClientId = null;
 	private String fSessionId = null;
 	private String fRestoreSessionId = null;
+	public String DEMO = "DEMO";
 
-	public TokenClient(BaseClient aClient) {
+	/**
+	 *
+	 * @param aClient
+	 */
+	public TokenClient(BaseClientJ2ME aClient) {
 		client = aClient;
 		client.addListener(new Listener());
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public boolean isConnected() {
 		return client.isConnected();
 	}
@@ -71,6 +89,198 @@ public class TokenClient {
 		return fSessionId;
 	}
 
+	/**
+	 *
+	 * @param aListener
+	 */
+	public void addListener(WebSocketClientTokenListener aListener) {
+		client.addListener(aListener);
+	}
+
+	/**
+	 *
+	 * @param aListener
+	 */
+	public void removeListener(WebSocketClientTokenListener aListener) {
+		client.removeListener(aListener);
+	}
+
+	/**
+	 *
+	 * @param aURL
+	 * @throws WebSocketException
+	 */
+	public void open(String aURL) throws WebSocketException {
+		try {
+			client.open(aURL);
+		} catch (Exception ex) {
+			throw new WebSocketException("I can't: " + ex.getMessage());
+		}
+	}
+
+	/**
+	 *
+	 * @param aData
+	 * @param aEncoding
+	 * @throws WebSocketException
+	 */
+	public void send(String aData, String aEncoding) throws WebSocketException {
+		client.send(aData, aEncoding);
+	}
+
+	/**
+	 *
+	 * @param aData
+	 * @throws WebSocketException
+	 */
+	public void send(byte[] aData) throws WebSocketException {
+		client.send(aData);
+	}
+
+	/**
+	 *
+	 * @param aPacket
+	 * @throws WebSocketException
+	 */
+	public void send(WebSocketPacket aPacket) throws WebSocketException {
+		client.send(aPacket.getByteArray());
+	}
+
+	/**
+	 *
+	 * @throws WebSocketException
+	 */
+	public void close() throws WebSocketException {
+		fUsername = null;
+		fClientId = null;
+		fRestoreSessionId = fSessionId;
+		fSessionId = null;
+		client.close();
+	}
+
+	// TODO: Check if the following two methods packetToToken and tokenToPacket can be shared for server and client
+	/**
+	 *
+	 * @param aPacket
+	 * @return
+	 */
+	public Token packetToToken(WebSocketPacket aPacket) {
+		Token lToken = JSONProcessor.packetToToken(aPacket);
+		return lToken;
+	}
+
+	/**
+	 *
+	 * @param aToken
+	 * @return
+	 */
+	public WebSocketPacket tokenToPacket(Token aToken) {
+		WebSocketPacket lPacket = JSONProcessor.tokenToPacket(aToken);
+		return lPacket;
+	}
+
+	/**
+	 *
+	 * @param aToken
+	 * @throws WebSocketException
+	 */
+	public void sendToken(Token aToken) throws WebSocketException {
+		CUR_TOKEN_ID++;
+		aToken.put("utid", new Integer(CUR_TOKEN_ID));
+		send(tokenToPacket(aToken));
+	}
+	// TODO: put the following methods into client side plug-ins or separate them in a different way.
+
+	/* functions of the System Plug-in */
+	private final static String NS_SYSTEM_PLUGIN = NS_BASE + ".plugins.system";
+
+	/**
+	 *
+	 * @param aUsername
+	 * @param aPassword
+	 * @throws WebSocketException
+	 */
+	public void login(String aUsername, String aPassword) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "login");
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		lToken.put("username", aUsername);
+		lToken.put("password", aPassword);
+		sendToken(lToken);
+	}
+
+	/**
+	 *
+	 * @throws WebSocketException
+	 */
+	public void logout() throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "logout");
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		sendToken(lToken);
+	}
+
+	/**
+	 *
+	 * @param aEcho
+	 * @throws WebSocketException
+	 */
+	public void ping(boolean aEcho) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		lToken.put("type", "ping");
+		lToken.put("echo", new Boolean(aEcho)); //
+		sendToken(lToken);
+	}
+
+	/**
+	 *
+	 * @param aTarget
+	 * @param aData
+	 * @throws WebSocketException
+	 */
+	public void sendText(String aTarget, String aData) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		lToken.put("type", "send");
+		lToken.put("targetId", aTarget);
+		lToken.put("sourceId", getClientId());
+		lToken.put("sender", getUsername());
+		lToken.put("data", aData);
+		sendToken(lToken);
+	}
+
+	/**
+	 *
+	 * @param aData
+	 * @throws WebSocketException
+	 */
+	public void broadcastText(String aData) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		lToken.put("type", "broadcast");
+		lToken.put("sourceId", getClientId());
+		lToken.put("sender", getUsername());
+		lToken.put("data", aData);
+		lToken.put("senderIncluded", Boolean.FALSE);
+		lToken.put("responseRequested", Boolean.TRUE);
+		sendToken(lToken);
+	}
+
+	/* functions of the Admin Plug-in */
+	private final static String NS_ADMIN_PLUGIN = NS_BASE + ".plugins.admin";
+
+	/**
+	 *
+	 * @throws WebSocketException
+	 */
+	public void shutdownServer() throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "shutdown");
+		lToken.put("ns", NS_ADMIN_PLUGIN);
+		sendToken(lToken);
+	}
+
 	class Listener implements WebSocketClientListener {
 
 		public void processOpened(WebSocketClientEvent aEvent) {
@@ -81,8 +291,8 @@ public class TokenClient {
 
 		public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
 			Iterator lIterator = client.getListeners().iterator();
-			while( lIterator.hasNext()) {
-				WebSocketClientListener lListener = (WebSocketClientListener)lIterator.next();
+			while (lIterator.hasNext()) {
+				WebSocketClientListener lListener = (WebSocketClientListener) lIterator.next();
 				if (lListener instanceof WebSocketClientTokenListener) {
 					Token lToken = packetToToken(aPacket);
 
@@ -116,127 +326,5 @@ public class TokenClient {
 			fRestoreSessionId = fSessionId;
 			fSessionId = null;
 		}
-	}
-
-	public void addListener(WebSocketClientTokenListener aListener) {
-		client.addListener(aListener);
-	}
-
-	public void removeListener(WebSocketClientTokenListener aListener) {
-		client.removeListener(aListener);
-	}
-
-	public void open(String aURL) throws WebSocketException {
-		client.open(aURL);
-	}
-
-	public void send(String aData, String aEncoding) throws WebSocketException {
-		client.send(aData, aEncoding);
-	}
-
-	public void send(byte[] aData) throws WebSocketException {
-		client.send(aData);
-	}
-
-	public void send(WebSocketPacket aPacket) throws WebSocketException {
-		client.send(aPacket.getByteArray());
-	}
-
-	public void close() throws WebSocketException {
-		fUsername = null;
-		fClientId = null;
-		fRestoreSessionId = fSessionId;
-		fSessionId = null;
-		client.close();
-	}
-
-	// TODO: Check if the following two methods packetToToken and tokenToPacket can be shared for server and client
-	/**
-	 *
-	 * @param aConnector
-	 * @param aPacket
-	 * @return
-	 */
-	public Token packetToToken(WebSocketPacket aPacket) {
-		Token lToken = JSONProcessor.packetToToken(aPacket);
-		return lToken;
-	}
-
-	/**
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 * @return
-	 */
-	public WebSocketPacket tokenToPacket(Token aToken) {
-		WebSocketPacket lPacket = JSONProcessor.tokenToPacket(aToken);
-		return lPacket;
-	}
-
-	public void sendToken(Token aToken) throws WebSocketException {
-		CUR_TOKEN_ID++;
-		aToken.put("utid", new Integer(CUR_TOKEN_ID));
-		send(tokenToPacket(aToken));
-	}
-	// TODO: put the following methods into client side plug-ins or separate them in a different way.
-
-	/* functions of the System Plug-in */
-	private final static String NS_SYSTEM_PLUGIN = NS_BASE + ".plugins.system";
-
-	public void login(String aUsername, String aPassword) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("type", "login");
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
-		lToken.put("username", aUsername);
-		lToken.put("password", aPassword);
-		sendToken(lToken);
-	}
-
-	public void logout() throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("type", "logout");
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
-		sendToken(lToken);
-	}
-
-	public void ping(boolean aEcho) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
-		lToken.put("type", "ping");
-		lToken.put("echo", new Boolean(aEcho));
-		sendToken(lToken);
-	}
-
-	public void sendText(String aTarget, String aData) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
-		lToken.put("type", "send");
-		lToken.put("targetId", aTarget);
-		lToken.put("sourceId", getClientId());
-		lToken.put("sender", getUsername());
-		lToken.put("data", aData);
-		sendToken(lToken);
-	}
-
-	public void broadcastText(String aData) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
-		lToken.put("type", "broadcast");
-		lToken.put("sourceId", getClientId());
-		lToken.put("sender", getUsername());
-		lToken.put("data", aData);
-		lToken.put("senderIncluded", Boolean.FALSE);
-		lToken.put("responseRequested", Boolean.TRUE);
-		sendToken(lToken);
-	}
-
-	/* functions of the Admin Plug-in */
-	private final static String NS_ADMIN_PLUGIN = NS_BASE + ".plugins.admin";
-
-	public void shutdownServer() throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("type", "shutdown");
-		lToken.put("ns", NS_ADMIN_PLUGIN);
-		sendToken(lToken);
 	}
 }

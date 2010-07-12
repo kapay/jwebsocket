@@ -44,7 +44,7 @@ public class BaseClientJ2ME extends BaseClient {
 
 	public void open(String aURL) throws WebSocketException {
 		try {
-			socket = (SocketConnection) Connector.open(aURL); // "socket://localhost:8787"
+			socket = (SocketConnection) Connector.open(aURL, Connector.READ_WRITE); // "socket://localhost:8787"
 
 			is = socket.openInputStream();
 			os = socket.openOutputStream();
@@ -167,5 +167,4 @@ public class BaseClientJ2ME extends BaseClient {
 	public boolean isConnected() {
 		return isRunning;
 	}
-
 }

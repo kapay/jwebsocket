@@ -17,7 +17,7 @@ package org.jwebsocket.kit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
+// import java.security.MessageDigest;
 import javolution.util.FastMap;
 
 /**
@@ -221,9 +221,9 @@ public class WebSocketHandshake {
 			}
 			// build md5 sum of this new 128 byte string
 			try {
-				MessageDigest md = MessageDigest.getInstance("MD5");
-				md.update(l128Bit, 0, 32);
-				md.digest(lSecKeyResp, 0, 32);
+				// MessageDigest md = MessageDigest.getInstance("MD5");
+				// md.update(l128Bit, 0, 32);
+				// md.digest(lSecKeyResp, 0, 32);
 			} catch (Exception ex) {
 //				log.error("getMD5: " + ex.getMessage());
 			}

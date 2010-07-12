@@ -351,7 +351,7 @@
     </target>
     <!--deps-jar-->
     <target name="deps-jar" depends="conditional-clean" unless="no.deps">
-        <ant target="jar" inheritall="false" antfile="${project.javalutionME}/build.xml">
+        <ant target="jar" inheritall="false" antfile="${project.javalution}/build.xml">
             <property name="config.active" value=""/>
         </ant>
     </target>
