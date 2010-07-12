@@ -14,11 +14,11 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javolution.util.FastList;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.config.ConfigHandler;
 /**
@@ -95,7 +95,7 @@ public class UserConfigHandler implements ConfigHandler {
 	 * @return the list of user roles
 	 */
 	private List<String> getRoles(XMLStreamReader streamReader) throws XMLStreamException {
-		List<String> roles = new ArrayList<String>();
+		List<String> roles = new FastList<String>();
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {

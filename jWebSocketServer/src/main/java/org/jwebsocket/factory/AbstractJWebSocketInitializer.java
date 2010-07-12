@@ -14,9 +14,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
-import java.util.ArrayList;
 import java.util.List;
-
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
@@ -86,7 +85,7 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 		if (log.isDebugEnabled()) {
 			log.debug("Instantiating default servers...");
 		}
-		List<WebSocketServer> servers = new ArrayList<WebSocketServer>();
+		List<WebSocketServer> servers = new FastList<WebSocketServer>();
 		// instantiate the Token server by default
 		ServerConfiguration config = getServerConfiguration();
 		TokenServer tokenServer = new TokenServer(config);
@@ -119,7 +118,7 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 			log.debug("Instantiating default plug-ins...");
 		}
 		FastMap<String, List<WebSocketPlugIn>> pluginMap = new FastMap<String, List<WebSocketPlugIn>>();
-		List<WebSocketPlugIn> defaultPlugins = new ArrayList<WebSocketPlugIn>();
+		List<WebSocketPlugIn> defaultPlugins = new FastList<WebSocketPlugIn>();
 
 		defaultPlugins.add(new SystemPlugIn());
 		defaultPlugins.add(new RPCPlugIn());
@@ -157,7 +156,7 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 			log.debug("Instantiating default filters...");
 		}
 		FastMap<String, List<WebSocketFilter>> filterMap = new FastMap<String, List<WebSocketFilter>>();
-		List<WebSocketFilter> defaultFilters = new ArrayList<WebSocketFilter>();
+		List<WebSocketFilter> defaultFilters = new FastList<WebSocketFilter>();
 		defaultFilters.add(new SystemFilter("systemFilter"));
 		defaultFilters.add(new CustomTokenFilter("userFilter"));
 

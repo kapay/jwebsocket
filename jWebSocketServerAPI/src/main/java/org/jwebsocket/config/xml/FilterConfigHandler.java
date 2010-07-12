@@ -14,13 +14,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javolution.util.FastList;
 
 import org.jwebsocket.config.Config;
 import org.jwebsocket.config.ConfigHandler;
@@ -50,7 +50,7 @@ public class FilterConfigHandler implements ConfigHandler {
 	public Config processConfig(XMLStreamReader streamReader)
 			throws XMLStreamException {
 		String id = "", name = "", packageName = "", jar = "", namespace = "";
-		List<String> servers = new ArrayList<String>();
+		List<String> servers = new FastList<String>();
 		Map<String, String> settings = null;
 		while (streamReader.hasNext()) {
 			streamReader.next();
@@ -95,7 +95,7 @@ public class FilterConfigHandler implements ConfigHandler {
 	 */
 	private List<String> getServers(XMLStreamReader streamReader)
 			throws XMLStreamException {
-		List<String> servers = new ArrayList<String>();
+		List<String> servers = new FastList<String>();
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {

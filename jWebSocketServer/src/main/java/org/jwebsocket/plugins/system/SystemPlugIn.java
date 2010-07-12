@@ -15,9 +15,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.system;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
@@ -475,7 +475,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			Integer lMode = aToken.getInteger("mode", 0);
 			FastMap lFilter = new FastMap();
 			lFilter.put(BaseConnector.VAR_USERNAME, ".*");
-			List<String> listOut = new ArrayList<String>();
+			List<String> listOut = new FastList<String>();
 			for (WebSocketConnector lConnector : getServer().selectConnectors(lFilter).values()) {
 				listOut.add(getUsername(lConnector) + "@"
 						+ lConnector.getRemotePort());

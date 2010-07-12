@@ -14,9 +14,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.jwebsocket.api.EngineConfiguration;
@@ -24,7 +24,7 @@ import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.config.JWebSocketServerConstants;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 
 /**
  * Class that performs the default servers and plugins initialization
@@ -73,7 +73,7 @@ public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
 
         @Override
         public List<String> getDomains() {
-            List<String> domains =  new ArrayList<String>();
+            List<String> domains =  new FastList<String>();
             domains.add("localhost");
             return domains;
         }
@@ -85,17 +85,17 @@ public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
 
         @Override
         public int getMaxframesize() {
-            return JWebSocketServerConstants.DEFAULT_MAX_FRAME_SIZE;
+            return JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE;
         }
 
         @Override
         public int getPort() {
-            return JWebSocketServerConstants.DEFAULT_PORT;
+            return JWebSocketCommonConstants.DEFAULT_PORT;
         }
 
         @Override
         public int getTimeout() {
-            return JWebSocketServerConstants.DEFAULT_TIMEOUT;
+            return JWebSocketCommonConstants.DEFAULT_TIMEOUT;
         }
 
         @Override

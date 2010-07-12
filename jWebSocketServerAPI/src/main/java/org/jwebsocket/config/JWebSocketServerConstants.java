@@ -26,7 +26,7 @@ public final class JWebSocketServerConstants {
 	/**
 	 * Current version string of the jWebSocket package.
 	 */
-	public static final String VERSION_STR = "0.9.5.0706 beta";
+	public static final String VERSION_STR = "0.9.5.0711 beta";
 	/**
 	 * Namespace base for tokens and plug-ins.
 	 */
@@ -48,39 +48,7 @@ public final class JWebSocketServerConstants {
 	 */
 	public static final String JWEBSOCKET_XML = "jWebSocket.xml";
 	/**
-	 * Minimum allow outgoing TCP Socket port.
-	 */
-	public static int MIN_IN_PORT = 1024;
-	/**
-	 * Maximum allow outgoing TCP Socket port.
-	 */
-	public static int MAX_IN_PORT = 65535;
-	/**
 	 * Default engine for jWebSocket server.
 	 */
 	public static String DEFAULT_ENGINE = "tcp";
-	/**
-	 * the max frame size
-	 */
-	public static int DEFAULT_MAX_FRAME_SIZE = 16384;
-	/**
-	 * Default socket port for jWebSocket clients.
-	 */
-	public static int DEFAULT_PORT = 8787;
-	/**
-	 * Default Session Timeout for client connections (120000ms = 2min)
-	 */
-	public static int DEFAULT_TIMEOUT = 120000;
-	/**
-	 * Minimum session Timeout for client connections in milliseconds
-	 * (1000ms = 1sec).
-	 */
-	// min and max ranged removed since 0.9.0.0602, see config documentation
-	// public static int MIN_TIMEOUT = 0;
-	/**
-	 * Maximum session Timeout for client connections in milliseconds
-	 * (3600000ms = 1h).
-	 */
-	// min and max ranged removed since 0.9.0.0602, see config documentation
-	// public static int MAX_TIMEOUT = 3600000;
 }

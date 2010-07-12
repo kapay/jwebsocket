@@ -14,11 +14,11 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javolution.util.FastList;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.config.ConfigHandler;
 
@@ -43,7 +43,7 @@ public class RoleConfigHandler implements ConfigHandler {
 	public Config processConfig(XMLStreamReader streamReader)
 			throws XMLStreamException {
 		String id = "", description = "";
-		List<String> rights = new ArrayList<String>();
+		List<String> rights = new FastList<String>();
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {
@@ -79,7 +79,7 @@ public class RoleConfigHandler implements ConfigHandler {
 	 */
 	private List<String> getRights(XMLStreamReader streamReader)
 			throws XMLStreamException {
-		List<String> rights = new ArrayList<String>();
+		List<String> rights = new FastList<String>();
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {

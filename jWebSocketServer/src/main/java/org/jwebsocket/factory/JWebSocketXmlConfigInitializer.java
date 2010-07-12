@@ -23,8 +23,8 @@ import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.List;
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.jwebsocket.api.EngineConfiguration;
@@ -179,7 +179,7 @@ public final class JWebSocketXmlConfigInitializer implements
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<WebSocketServer> initializeServers() {
-		List<WebSocketServer> servers = new ArrayList<WebSocketServer>();
+		List<WebSocketServer> servers = new FastList<WebSocketServer>();
 		List<ServerConfig> serverConfigs = config.getServers();
 		for (ServerConfig serverConfig : serverConfigs) {
 			WebSocketServer server = null;
@@ -265,7 +265,7 @@ public final class JWebSocketXmlConfigInitializer implements
 		// populate the plugin FastMap with server id and empty list
 		for (ServerConfig serverConfig : config.getServers()) {
 			pluginMap.put(serverConfig.getId(),
-					new ArrayList<WebSocketPlugIn>());
+					new FastList<WebSocketPlugIn>());
 		}
 		// now initialize the pluin
 		for (PluginConfig pluginConfig : config.getPlugins()) {
@@ -363,7 +363,7 @@ public final class JWebSocketXmlConfigInitializer implements
 		// populate the filter FastMap with server id and empty list
 		for (ServerConfig serverConfig : config.getServers()) {
 			filterMap.put(serverConfig.getId(),
-					new ArrayList<WebSocketFilter>());
+					new FastList<WebSocketFilter>());
 		}
 		// now initialize the filter
 		for (FilterConfig filterConfig : config.getFilters()) {

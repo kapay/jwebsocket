@@ -47,7 +47,6 @@ import org.jboss.netty.util.CharsetUtil;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketCommonConstants;
-import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
@@ -328,7 +327,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
             p.remove("aggregator");
             EngineConfiguration config = engine.getConfiguration();
             if (config == null || config.getMaxframesize() == 0) {
-                p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(JWebSocketServerConstants.DEFAULT_MAX_FRAME_SIZE));
+                p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE));
             } else {
                 p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(config.getMaxframesize()));
             }
@@ -410,7 +409,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
     private WebSocketConnector initializeConnector(ChannelHandlerContext ctx, HttpRequest req) {
 
         RequestHeader header = getRequestHeader(req);
-        int lSessionTimeout = header.getTimeout(JWebSocketServerConstants.DEFAULT_TIMEOUT);
+        int lSessionTimeout = header.getTimeout(JWebSocketCommonConstants.DEFAULT_TIMEOUT);
         if (lSessionTimeout > 0) {
             ctx.getChannel().getConfig().setConnectTimeoutMillis(lSessionTimeout);
         }

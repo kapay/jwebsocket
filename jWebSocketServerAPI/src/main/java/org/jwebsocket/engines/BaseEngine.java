@@ -22,11 +22,10 @@ import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.config.JWebSocketServerConstants;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 
-import java.util.Collections;
 
 /**
  * Provides the basic implementation of the jWebSocket engines.
@@ -40,7 +39,7 @@ public class BaseEngine implements WebSocketEngine {
 
 	private final FastMap<String, WebSocketServer> servers = new FastMap<String, WebSocketServer>();
 	private final FastMap<String, WebSocketConnector> connectors = new FastMap<String, WebSocketConnector>();
-	private int sessionTimeout = JWebSocketServerConstants.DEFAULT_TIMEOUT;
+	private int sessionTimeout = JWebSocketCommonConstants.DEFAULT_TIMEOUT;
 	private EngineConfiguration configuration;
 
 	public BaseEngine(EngineConfiguration configuration) {

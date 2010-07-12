@@ -14,7 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.console;
 
-import java.util.ArrayList;
+import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.ServerConfiguration;
@@ -63,7 +63,7 @@ public class JWebSocketSubSystemSample {
 		log = Logging.getLogger(JWebSocketEmbedded.class);
 
 		// initialize the engine
-		ArrayList lDomains = new ArrayList();
+		FastList lDomains = new FastList();
 		lDomains.add("http://jwebsocket.org");
 		EngineConfiguration engineConfig = new EngineConfig(
 				"tcp0", // id

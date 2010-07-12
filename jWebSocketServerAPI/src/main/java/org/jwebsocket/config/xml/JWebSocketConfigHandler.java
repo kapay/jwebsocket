@@ -14,11 +14,11 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javolution.util.FastList;
 
 import javolution.util.FastMap;
 
@@ -168,7 +168,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
      *             if there's any exception reading configuration
      */
     private List<UserConfig> handleUsers(XMLStreamReader streamReader) throws XMLStreamException {
-        List<UserConfig> users = new ArrayList<UserConfig>();
+        List<UserConfig> users = new FastList<UserConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
@@ -198,7 +198,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
      *             if there's any exception reading configuration
      */
     private List<RoleConfig> handleRoles(XMLStreamReader streamReader) throws XMLStreamException {
-        List<RoleConfig> roles = new ArrayList<RoleConfig>();
+        List<RoleConfig> roles = new FastList<RoleConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
@@ -228,7 +228,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
      *             if there's any exception reading configuration
      */
     private List<RightConfig> handleRights(XMLStreamReader streamReader) throws XMLStreamException {
-        List<RightConfig> rights = new ArrayList<RightConfig>();
+        List<RightConfig> rights = new FastList<RightConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
@@ -258,7 +258,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
      *             if exception occurs while reading
      */
     private List<PluginConfig> handlePlugins(XMLStreamReader streamReader) throws XMLStreamException {
-        List<PluginConfig> plugins = new ArrayList<PluginConfig>();
+        List<PluginConfig> plugins = new FastList<PluginConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
@@ -288,7 +288,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
      *             if exception occurs while reading
      */
     private List<FilterConfig> handleFilters(XMLStreamReader streamReader) throws XMLStreamException {
-        List<FilterConfig> filters = new ArrayList<FilterConfig>();
+        List<FilterConfig> filters = new FastList<FilterConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
@@ -318,7 +318,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
      *             if exception occurs while reading
      */
     private List<LoggingConfig> handleLoggingConfigs(XMLStreamReader streamReader) throws XMLStreamException {
-        List<LoggingConfig> loggingConfigs = new ArrayList<LoggingConfig>();
+        List<LoggingConfig> loggingConfigs = new FastList<LoggingConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
@@ -348,7 +348,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
      *             if exception occurs reading xml
      */
     private List<ServerConfig> handleServers(XMLStreamReader streamReader) throws XMLStreamException {
-        List<ServerConfig> servers = new ArrayList<ServerConfig>();
+        List<ServerConfig> servers = new FastList<ServerConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {
@@ -378,7 +378,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
      *             if exception occurs while reading
      */
     private List<EngineConfig> handleEngines(XMLStreamReader streamReader) throws XMLStreamException {
-        List<EngineConfig> engines = new ArrayList<EngineConfig>();
+        List<EngineConfig> engines = new FastList<EngineConfig>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {

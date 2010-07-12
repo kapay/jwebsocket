@@ -29,7 +29,6 @@ import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketCommonConstants;
-import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.tcp.connectors.TCPConnector;
@@ -47,8 +46,8 @@ public class TCPEngine extends BaseEngine {
 
 	private static Logger log = Logging.getLogger(TCPEngine.class);
 	private ServerSocket serverSocket = null;
-	private int listenerPort = JWebSocketServerConstants.DEFAULT_PORT;
-	private int sessionTimeout = JWebSocketServerConstants.DEFAULT_TIMEOUT;
+	private int listenerPort = JWebSocketCommonConstants.DEFAULT_PORT;
+	private int sessionTimeout = JWebSocketCommonConstants.DEFAULT_TIMEOUT;
 	private boolean isRunning = false;
 	Thread engineThread = null;
 
