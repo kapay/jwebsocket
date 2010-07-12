@@ -16,7 +16,6 @@ package org.jwebsocket.factory;
 
 import java.io.File;
 import org.apache.log4j.Logger;
-import org.jwebsocket.config.xml.LoggingConfig;
 import org.jwebsocket.logging.Logging;
 import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
 import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
@@ -36,6 +35,7 @@ import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.config.LoggingConfig;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.FilterConfig;
 import org.jwebsocket.config.xml.PluginConfig;

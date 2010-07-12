@@ -23,7 +23,10 @@ import javax.xml.stream.XMLStreamReader;
 import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.config.ConfigHandler;
 import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.config.LoggingConfig;
+import org.jwebsocket.config.LoggingConfigHandler;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 import org.jwebsocket.logging.Logging;
 

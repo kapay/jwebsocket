@@ -20,6 +20,7 @@ import java.util.List;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.jwebsocket.config.Config;
+import org.jwebsocket.config.ConfigHandler;
 
 /**
  * Handler class to read roles

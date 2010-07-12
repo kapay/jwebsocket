@@ -20,6 +20,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.util.List;
 import javolution.util.FastList;
+import org.jwebsocket.config.ConfigHandler;
 
 /**
  * Handles the engine configuration

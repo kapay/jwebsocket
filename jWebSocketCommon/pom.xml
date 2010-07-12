@@ -1,6 +1,5 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<artifactId>jWebSocket-Parent</artifactId>
 		<groupId>org.jwebsocket</groupId>
@@ -8,16 +7,16 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
-	<artifactId>jWebSocketSwingGUI</artifactId>
-	<name>jWebSocketSwingGUI</name>
-	<description>jWebSocket SwingGUI PlugIn</description>
+	<artifactId>jWebSocketCommon</artifactId>
+	<name>jWebSocketCommon</name>
+	<description>jWebSocket Common Module</description>
 	<packaging>jar</packaging>
-	
+
 	<scm>
-		<connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketSwingGUI</connection>
-		<developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketSwingGUI</developerConnection>
+		<connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketCommon</connection>
+		<developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketCommon</developerConnection>
 	</scm>
-    
+
 	<build>
 		<plugins>
 			<plugin>
@@ -28,20 +27,16 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>org.jWebSocket.ui.TestDialog</mainClass>
+							<!--<classpathPrefix>/svn/jWebSocket/trunk/jWebSocketRTE/jWebSocket-0.9.5/libs/</classpathPrefix>-->
 						</manifest>
 					</archive>
-					<includes>
-						<include>**/*.class</include>
-						<include>**/*.png</include>
-					</includes>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketSwingGUI</reportOutputDirectory>
+					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketCommon</reportOutputDirectory>
 					<stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css</stylesheetfile>
 				</configuration>
 			</plugin>
@@ -51,18 +46,15 @@
 	<!--  define all the dependencies here -->
 	<dependencies>
 		<dependency>
-			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketCommon</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketJavaSEClient</artifactId>
-			<version>${project.version}</version>
+			<groupId>org.netbeans.external</groupId>
+			<artifactId>json-2</artifactId>
+			<version>RELEASE65</version>
+			<type>jar</type>
 		</dependency>
 	</dependencies>
 
 	<!--  define repositories -->
 	<repositories>
 	</repositories>
+
 </project>

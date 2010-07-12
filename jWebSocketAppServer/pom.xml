@@ -38,7 +38,7 @@
 						**/jWebSocketTokenServer*.jar,
 						**/jWebSocketCustomServer*.jar,
 						**/jWebSocketPlugIns*.jar,
-						**/jWebSocketSharedObjects*.jar,
+						**/jWebSocketCommonObjects*.jar,
 						**/jWebSocketCluster*.jar,
 						**/jWebSocketAdmin*.jar,
 						**/jWebSocketWebAppSupport*.jar,
@@ -95,7 +95,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketShared</artifactId>
+			<artifactId>jWebSocketCommon</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

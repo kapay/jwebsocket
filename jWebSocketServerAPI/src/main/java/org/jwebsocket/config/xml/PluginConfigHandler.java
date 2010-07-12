@@ -15,13 +15,13 @@
 package org.jwebsocket.config.xml;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javolution.util.FastMap;
 
 import org.jwebsocket.config.Config;
+import org.jwebsocket.config.ConfigHandler;
 
 /**
  * Config handler for reading plugins configuration
