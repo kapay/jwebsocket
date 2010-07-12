@@ -13,9 +13,31 @@
                 <script>${project.jWebSocketJavaME}/build.xml</script>
                 <target>jar</target>
                 <clean-target>clean</clean-target>
-                <id>jar</id>
+                <id>jar.DefaultCldcJtwiPhone1</id>
                 <properties>
-                    <property name="config.active"/>
+                    <property name="config.active">DefaultCldcJtwiPhone1</property>
+                </properties>
+            </reference>
+            <reference>
+                <foreign-project>javalution</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>${project.javalution}/build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar.DefaultCldcJtwiPhone1</id>
+                <properties>
+                    <property name="config.active">DefaultCldcJtwiPhone1</property>
+                </properties>
+            </reference>
+            <reference>
+                <foreign-project>json</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>${project.json}/build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar.DefaultCldcJtwiPhone1</id>
+                <properties>
+                    <property name="config.active">DefaultCldcJtwiPhone1</property>
                 </properties>
             </reference>
         </references>
