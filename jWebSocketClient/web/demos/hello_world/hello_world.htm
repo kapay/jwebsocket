@@ -28,6 +28,8 @@
 		<script type="text/javascript" src="../../res/js/jWebSocket.js"></script>
 		<!-- this one imports the client side sample plug-in -->
 		<script type="text/javascript" src="../../res/js/jwsSamplesPlugIn.js"></script>
+		<!-- this one imports the client side JDBC plug-in -->
+		<script type="text/javascript" src="../../res/js/jwsJDBCPlugIn.js"></script>
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
@@ -156,6 +158,24 @@
 				log( "Server time: " + aToken.time );
 			}
 
+			// example how to request a result from a server side plugin
+			function sampleSelect() {
+				log( "Requesting JDBC data via WebSockets..." );
+				// call the getTime method of the client side plug-in
+				var lRes = jWebSocketClient.jdbcSelect({
+					table	: "locales",
+					fields	: "*",
+					order	: "code",
+					where	: "",
+					group	: "",
+					having	: ""
+				});
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( jWebSocketClient.resultToString( lRes ) );
+				}
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
 				eMessage = jws.$( "stxfMessage" );
@@ -228,7 +248,7 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();"></td>
 					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnGetTime" type="button" value="GetTime" onclick="sampleGetTime();"></td>
-					<td class="stdDlg" width="">&nbsp;</td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSelect" type="button" value="Select" onclick="sampleSelect();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Message</td>
