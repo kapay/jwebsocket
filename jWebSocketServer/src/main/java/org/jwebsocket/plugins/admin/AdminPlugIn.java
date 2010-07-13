@@ -15,10 +15,14 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.admin;
 
+import javolution.util.FastList;
+import javolution.util.FastMap;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketServerConstants;
+import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.kit.WebSocketException;
@@ -58,6 +62,8 @@ public class AdminPlugIn extends TokenPlugIn {
 			// remote shut down server
 			if (lType.equals("shutdown")) {
 				shutdown(aConnector, aToken);
+			} else if (lType.equals("getConnections")) {
+				getConnections(aConnector, aToken);
 			}
 		}
 	}
@@ -93,5 +99,50 @@ public class AdminPlugIn extends TokenPlugIn {
 			}
 		}
 
+	}
+
+	/**
+	 * return all session
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void getConnections(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'getConnections'...");
+		}
+
+		// check if user is allowed to run 'shutdown' command
+		/*
+		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_ADMIN + ".shutdown")) {
+		lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+		return;
+		}
+		 */
+
+		Token lResponse = lServer.createResponse(aToken);
+		try {
+			FastList<JSONObject> lResultList = new FastList<JSONObject>();
+			FastMap lConnectors = lServer.getAllConnectors();
+			for (FastMap.Entry<String, WebSocketConnector> lItem = lConnectors.head(), end = lConnectors.tail();
+					(lItem = lItem.getNext()) != end;) {
+				// String key = lItem.getKey(); 
+				WebSocketConnector lConnector = lItem.getValue();
+				// TODO: should work for for (sub-)tokens as well!
+				JSONObject lResultItem = new JSONObject();
+				lResultItem.put("port", lConnector.getRemotePort());
+				lResultItem.put("usid", lConnector.getSession().getSessionId());
+				lResultItem.put("username", lConnector.getString(BaseConnector.VAR_USERNAME));
+				lResultItem.put("isToken", lConnector.getBoolean(TokenServer.VAR_IS_TOKENSERVER));
+				lResultList.add(lResultItem);
+			}
+			lResponse.put("connections", lResultList);
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName()
+					+ " on getConnections: " + ex.getMessage());
+		}
+
+		lServer.sendToken(aConnector, lResponse);
 	}
 }

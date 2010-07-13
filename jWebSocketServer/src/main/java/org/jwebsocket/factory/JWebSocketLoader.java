@@ -26,12 +26,10 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.JWebSocketConfigHandler;
 import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.logging.Logging;
 import org.jwebsocket.security.SecurityFactory;
 
 /**
@@ -43,7 +41,7 @@ import org.jwebsocket.security.SecurityFactory;
  */
 public final class JWebSocketLoader {
 
-    private static Logger log = Logging.getLogger(JWebSocketLoader.class);
+    // We cannot use the logging subsystem here because its config needs to be loaded first!
     private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
     /**
@@ -56,7 +54,7 @@ public final class JWebSocketLoader {
     public final WebSocketInitializer initialize() throws WebSocketException {
         String configPath = getConfigurationPath();
         if (configPath == null) {
-            log.error("Error Loading Configuration File jWebSocket.xml");
+            // log.error("Error Loading Configuration File jWebSocket.xml");
             throw new WebSocketException("Either JWEBSOCKET_HOME variable is not set " +
             		"or jWebSocket.xml file does not exists at %JWEBSOCKET_HOME%/conf");
         }
@@ -68,10 +66,6 @@ public final class JWebSocketLoader {
 
         WebSocketInitializer initializer = getInitializer(config);
         if (initializer == null) {
-            if (log.isInfoEnabled()) {
-                log.info("Error instantiating custom initializer:"+config.getInitializer()+ "so using default XML based " +
-                "initializer");
-            }
             initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
         }
         return initializer;
@@ -115,17 +109,14 @@ public final class JWebSocketLoader {
             Class<WebSocketInitializer> lClass = (Class<WebSocketInitializer>) Class.forName(initializerClass);
             initializer = lClass.newInstance();
         } catch (ClassNotFoundException ex) {
-            if (log.isInfoEnabled()) {
-                log.info("Error instantiating initializer:"+initializerClass, ex);
-            }
+			// TODO: handle exceptions properly, logging not yet initialized here!
+            // "Error instantiating initializer:"+initializerClass, ex;
         } catch (InstantiationException ex) {
-            if (log.isInfoEnabled()) {
-                log.info("Error instantiating initializer:"+initializerClass, ex);
-            }
+			// TODO: handle exceptions properly, logging not yet initialized here!
+            // "Error instantiating initializer:"+initializerClass, ex);
         } catch (IllegalAccessException ex) {
-            if (log.isInfoEnabled()) {
-                log.info("Error instantiating initializer:"+initializerClass, ex);
-            }
+			// TODO: handle exceptions properly, logging not yet initialized here!
+            // "Error instantiating initializer:"+initializerClass, ex);
         }
         return initializer;
     }

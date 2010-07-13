@@ -51,7 +51,7 @@ public class TokenServer extends BaseServer {
 	// specify name space for token server
 	private static final String NS_TOKENSERVER = JWebSocketServerConstants.NS_BASE + ".tokenserver";
 	// specify shared connector variables
-	private static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
+	public static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
 	private volatile boolean isAlive = false;
 
 	/**

@@ -258,4 +258,12 @@ public class TokenClient {
 		lToken.put("ns", NS_ADMIN_PLUGIN);
 		sendToken(lToken);
 	}
+
+	public void getConnections() throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "getConnections");
+		lToken.put("ns", NS_ADMIN_PLUGIN);
+		sendToken(lToken);
+	}
+
 }

@@ -377,8 +377,12 @@ public class SystemPlugIn extends TokenPlugIn {
 				&& lSenderIncluded.equals("true"));
 		boolean bResponseRequested = (lResponseRequested != null
 				&& lResponseRequested.equals("true"));
+
+		// broadcast the token
 		broadcastToken(aConnector, aToken,
 				new BroadcastOptions(bSenderIncluded, bResponseRequested));
+
+		// check if response was requested
 		if (bResponseRequested) {
 			sendToken(aConnector, aConnector, lResponse);
 		}
