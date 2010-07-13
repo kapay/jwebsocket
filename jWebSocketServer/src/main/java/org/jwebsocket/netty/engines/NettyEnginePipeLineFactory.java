@@ -27,16 +27,17 @@ import org.jboss.netty.handler.ssl.SslHandler;
 import org.jwebsocket.netty.http.HttpRequestDecoder;
 
 /**
- * Creates a channel pipeline to handle the incoming requests and
- * outgoing responses.
+ * Creates a channel pipeline to handle the incoming requests and outgoing
+ * responses.
  * <p>
  * When a {@linkplain ServerChannel server-side channel} accepts a new incoming
- * connection, a new child channel is created for each newly accepted connection.
- * A new child channel uses a new {@link ChannelPipeline}, which is created by
- * the {@link ChannelPipelineFactory} specified in the server-side channel's
- * {@link ChannelConfig#getPipelineFactory() "pipelineFactory"} option.
+ * connection, a new child channel is created for each newly accepted
+ * connection. A new child channel uses a new {@link ChannelPipeline}, which is
+ * created by the {@link ChannelPipelineFactory} specified in the server-side
+ * channel's {@link ChannelConfig#getPipelineFactory() "pipelineFactory"}
+ * option.
  * </p>
- *
+ * 
  * @author Puran Singh
  * @version $Id: NettyEnginePipeLineFactory.java 613 2010-07-01 07:13:29Z mailtopuran@gmail.com $
  */
@@ -44,9 +45,11 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
 
     private NettyEngine engine;
 
+    private boolean sslEnabled = false;
+
     /**
      * constructor that takes engine
-     *
+     * 
      * @param engine
      */
     public NettyEnginePipeLineFactory(NettyEngine engine) {
@@ -56,29 +59,33 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
     /**
      * {@inheritDoc}
      * <p/>
-     * NOTE: initially when the server is started <tt>HTTP</tt> encoder/decoder are
-     * added in the channel pipeline which is required for the initial handshake
-     * request for WebSocket connection. Once the connection is made by sending
-     * the appropriate response the encoder/decoder is replaced at runtime by
-     * {@code WebSocketFrameDecoder} and {@code WebSocketFrameEncoder}.
+     * NOTE: initially when the server is started <tt>HTTP</tt> encoder/decoder
+     * are added in the channel pipeline which is required for the initial
+     * handshake request for WebSocket connection. Once the connection is made
+     * by sending the appropriate response the encoder/decoder is replaced at
+     * runtime by {@code WebSocketFrameDecoder} and {@code
+     * WebSocketFrameEncoder}.
      */
     @Override
     public ChannelPipeline getPipeline() throws Exception {
         // Create a default pipeline implementation.
         ChannelPipeline pipeline = Channels.pipeline();
-        
-        // Add SSL handler first to encrypt and decrypt everything.
-        SSLEngine sslEngine = JWebSocketSslContextFactory.getServerContext().createSSLEngine();
-        sslEngine.setUseClientMode(false);
 
-        pipeline.addLast("ssl", new SslHandler(sslEngine));
-        
+        // Add SSL handler first to encrypt and decrypt everything.
+        if (sslEnabled) {
+            SSLEngine sslEngine = JWebSocketSslContextFactory.getServerContext().createSSLEngine();
+            sslEngine.setUseClientMode(false);
+
+            pipeline.addLast("ssl", new SslHandler(sslEngine));
+
+        }
         pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
         pipeline.addLast("encoder", new HttpResponseEncoder());
 
-        //create a new handler instance for each new channel to avoid a 
-        //race condition where a unauthenticated client can get the confidential information:
+        // create a new handler instance for each new channel to avoid a
+        // race condition where a unauthenticated client can get the
+        // confidential information:
         pipeline.addLast("handler", new NettyEngineHandler(engine));
         return pipeline;
     }
