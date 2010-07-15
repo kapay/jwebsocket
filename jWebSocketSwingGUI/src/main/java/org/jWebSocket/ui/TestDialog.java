@@ -54,7 +54,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 			icoConnected = new ImageIcon(getClass().getResource("/images/connected.png"));
 			icoAuthenticated = new ImageIcon(getClass().getResource("/images/authenticated.png"));
 		} catch (Exception ex) {
-			System.out.println(ex.getClass().getSimpleName() + ":  " + ex.getMessage());
+			System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 	}
 

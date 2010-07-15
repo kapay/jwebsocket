@@ -16,7 +16,6 @@
 package org.jwebsocket.api;
 
 import java.util.List;
-import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.FilterResponse;
 
 /**

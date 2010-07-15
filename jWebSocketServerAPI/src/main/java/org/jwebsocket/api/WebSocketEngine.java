@@ -16,7 +16,6 @@
 package org.jwebsocket.api;
 
 import javolution.util.FastMap;
-import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 

@@ -16,7 +16,6 @@
 package org.jwebsocket.plugins.sharedobjects;
 
 import javolution.util.FastMap;
-import org.apache.log4j.Logger;
 import org.jwebsocket.plugins.TokenPlugIn;
 
 /**

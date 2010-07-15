@@ -14,7 +14,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config;
 
-import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**

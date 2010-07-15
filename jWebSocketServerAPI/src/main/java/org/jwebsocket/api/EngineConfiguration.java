@@ -15,7 +15,7 @@
 package org.jwebsocket.api;
 
 import java.util.List;
-import org.jwebsocket.api.Configuration;
+
 /**
  * Base interface that provides the read-only access to all the engine configuration 
  * values configured via <tt>jWebSocket.xml</tt> file for a given engine 

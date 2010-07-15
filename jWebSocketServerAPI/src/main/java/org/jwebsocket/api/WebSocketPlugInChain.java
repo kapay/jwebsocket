@@ -18,7 +18,6 @@ package org.jwebsocket.api;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import java.util.List;
-import org.jwebsocket.api.WebSocketPacket;
 
 
 /**

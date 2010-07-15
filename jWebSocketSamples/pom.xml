@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>jWebSocket-Parent</artifactId>
 		<groupId>org.jwebsocket</groupId>
-		<version>0.9.5</version>
+		<version>0.10</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
@@ -27,7 +27,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<!--<classpathPrefix>/svn/jWebSocket/trunk/jWebSocketRTE/jWebSocket-0.9.5/libs/</classpathPrefix>-->
+							<!--<classpathPrefix>/svn/jWebSocket/trunk/jWebSocketRTE/jWebSocket-0.10/libs/</classpathPrefix>-->
 						</manifest>
 					</archive>
 				</configuration>

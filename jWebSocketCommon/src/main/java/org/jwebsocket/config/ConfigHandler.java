@@ -17,7 +17,6 @@ package org.jwebsocket.config;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.jwebsocket.config.Config;
 
 /**
  * Base interface for config handler.

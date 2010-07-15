@@ -17,7 +17,6 @@ package org.jwebsocket.api;
 
 import org.jwebsocket.kit.CloseReason;
 import java.net.InetAddress;
-import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketSession;
 

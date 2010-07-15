@@ -5,7 +5,6 @@
 package org.jwebsocket.plugins.jdbc;
 
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 
 /**
  *

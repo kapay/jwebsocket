@@ -14,8 +14,6 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
-import org.jwebsocket.api.Configuration;
-
 /**
  * Server Configuration
  * @author aschulze

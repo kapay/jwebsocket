@@ -15,7 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
-import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 
