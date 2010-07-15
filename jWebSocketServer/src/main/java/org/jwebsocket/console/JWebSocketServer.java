@@ -18,6 +18,7 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.server.CustomServer;
 import org.jwebsocket.server.TokenServer;
 
 /**
@@ -44,6 +45,13 @@ public class JWebSocketServer {
 		if( lTS0 != null ) {
 			// and add the sample listener to the server's listener chain
 			lTS0.addListener(new JWebSocketTokenListenerSample());
+		}
+
+		// get the custom server
+		CustomServer lCS0 = (CustomServer)JWebSocketFactory.getServer("cs0");
+		if( lCS0 != null ) {
+			// and add the sample listener to the server's listener chain
+			lCS0.addListener(new JWebSocketCustomListenerSample());
 		}
 
 		WebSocketEngine engine = JWebSocketFactory.getEngine();

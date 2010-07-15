@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server;
 
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketPacket;
@@ -23,8 +24,10 @@ import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketServerListener;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.kit.WebSocketServerEvent;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.BasePlugInChain;
 
@@ -60,20 +63,20 @@ public class CustomServer extends BaseServer {
 		if (lSubProt != null && lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CUSTOM)) {
 			// send a modified echo packet back to sender.
 
-			aDataPacket.setUTF8("[echo from jWebSocket v" + JWebSocketServerConstants.VERSION_STR + "] " + aDataPacket.getUTF8());
-			/*
-			// byte[] lBA = new byte[] { 17, 123, -65, 122, -2, -62, -38, 115, -79 };
-			byte[] lBA = new byte[] { 65, 66, 67, 68, 69, 70, 71 };
-			aDataPacket.setFrameType(RawPacket.FRAMETYPE_BINARY);
-			aDataPacket.setByteArray(lBA);
-			 */
-			sendPacket(aConnector, aDataPacket);
-
 			// you also could broadcast the packet here...
 			// broadcastPacket(aDataPacket);
 			// ...or forward it to your custom specific plug-in chain
 			// PlugInResponse response = new PlugInResponse();
 			// plugInChain.processPacket(response, aConnector, aDataPacket);
+
+			// forward the token to the listener chain
+			List<WebSocketServerListener> lListeners = getListeners();
+			WebSocketServerEvent lEvent = new WebSocketServerEvent(aConnector, this);
+			for (WebSocketServerListener lListener : lListeners) {
+				if (lListener != null && lListener instanceof WebSocketServerListener) {
+					((WebSocketServerListener) lListener).processPacket(lEvent, aDataPacket);
+				}
+			}
 		}
 	}
 
