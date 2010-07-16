@@ -38,7 +38,9 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	 */
 	@Override
 	public void processOpened(WebSocketServerEvent aEvent) {
-		log.info("Client '" + aEvent.getSessionId() + "' connected.");
+		if (log.isDebugEnabled()) {
+			log.debug("Client '" + aEvent.getSessionId() + "' connected.");
+		}
 	}
 
 	/**
@@ -48,7 +50,9 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	 */
 	@Override
 	public void processPacket(WebSocketServerEvent aEvent, WebSocketPacket aPacket) {
-		// log.info("Client '" + aEvent.getSessionId() + "' sent: '" + aPacket.getASCII() + "'.");
+		if (log.isDebugEnabled()) {
+			log.debug("Processing data packet '" + aPacket.getUTF8() + "'...");
+		}
 		// Here you can answer an arbitrary text package...
 		// this is how to easily respond to a previous client's request
 		// aEvent.sendPacket(aPacket);
@@ -63,7 +67,9 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	 */
 	@Override
 	public void processToken(WebSocketServerTokenEvent aEvent, Token aToken) {
-		log.info("Client '" + aEvent.getSessionId() + "' sent Token: '" + aToken.toString() + "'.");
+		if (log.isDebugEnabled()) {
+			log.debug("Client '" + aEvent.getSessionId() + "' sent Token: '" + aToken.toString() + "'.");
+		}
 		// here you can simply interpret the token type sent from the client
 		// according to your needs.
 		String lNS = aToken.getNS();
@@ -93,6 +99,8 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	 */
 	@Override
 	public void processClosed(WebSocketServerEvent aEvent) {
-		log.info("Client '" + aEvent.getSessionId() + "' disconnected.");
+		if (log.isDebugEnabled()) {
+			log.debug("Client '" + aEvent.getSessionId() + "' disconnected.");
+		}
 	}
 }

@@ -90,7 +90,7 @@
 				var lMsg = eMessage.value;
 				log( "Sending '" + lMsg + "'..." );
 				try {
-					lWSC.sendStream( lMsg + "\n" );
+					lWSC.sendStream( lMsg );
 					log( "Message sent." );
 				} catch( ex ) {
 					log( "Exception: " + ex.message );

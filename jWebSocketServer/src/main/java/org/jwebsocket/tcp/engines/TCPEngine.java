@@ -280,6 +280,8 @@ public class TCPEngine extends BaseEngine {
 					//	log.debug("Waiting for client...");
 					// }
 					Socket clientSocket = serverSocket.accept();
+					boolean lTCPNoDelay = clientSocket.getTcpNoDelay();
+					clientSocket.setTcpNoDelay(true);
 					try {
 						// process handshake to parse header data
 						RequestHeader header = processHandshake(clientSocket);
@@ -300,7 +302,7 @@ public class TCPEngine extends BaseEngine {
 										+ clientSocket.getPort()
 										+ " with timeout "
 										+ (lSessionTimeout > 0 ? lSessionTimeout + "ms" : "infinite")
-										+ "...");
+										+ " (TCPNoDelay was: " + lTCPNoDelay + ")...");
 							}
 							if (lSessionTimeout > 0) {
 								clientSocket.setSoTimeout(lSessionTimeout);

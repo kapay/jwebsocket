@@ -112,6 +112,7 @@ public class CustomServer extends BaseServer {
 		// notify plugins that a connector has started,
 		// i.e. a client was sconnected.
 		plugInChain.connectorStarted(aConnector);
+		super.connectorStarted(aConnector);
 	}
 
 	@Override
@@ -122,6 +123,7 @@ public class CustomServer extends BaseServer {
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
 		plugInChain.connectorStopped(aConnector, aCloseReason);
+		super.connectorStopped(aConnector, aCloseReason);
 	}
 
 	/**

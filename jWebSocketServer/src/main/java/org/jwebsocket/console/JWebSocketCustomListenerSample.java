@@ -35,7 +35,9 @@ public class JWebSocketCustomListenerSample implements WebSocketServerListener {
 	 */
 	@Override
 	public void processOpened(WebSocketServerEvent aEvent) {
-		log.info("Client '" + aEvent.getSessionId() + "' connected.");
+		if (log.isDebugEnabled()) {
+			log.debug("Client '" + aEvent.getSessionId() + "' connected.");
+		}
 	}
 
 	/**
@@ -45,6 +47,9 @@ public class JWebSocketCustomListenerSample implements WebSocketServerListener {
 	 */
 	@Override
 	public void processPacket(WebSocketServerEvent aEvent, WebSocketPacket aPacket) {
+		if (log.isDebugEnabled()) {
+			log.debug("Processing data packet '" + aPacket.getUTF8() + "'...");
+		}
 		aPacket.setUTF8("[echo from jWebSocket v" + JWebSocketServerConstants.VERSION_STR + "] " + aPacket.getUTF8());
 		aEvent.sendPacket(aPacket);
 	}
@@ -55,6 +60,8 @@ public class JWebSocketCustomListenerSample implements WebSocketServerListener {
 	 */
 	@Override
 	public void processClosed(WebSocketServerEvent aEvent) {
-		log.info("Client '" + aEvent.getSessionId() + "' disconnected.");
+		if (log.isDebugEnabled()) {
+			log.debug("Client '" + aEvent.getSessionId() + "' disconnected.");
+		}
 	}
 }
