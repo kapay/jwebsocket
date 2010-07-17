@@ -48,6 +48,14 @@ public interface JWebSocketClient {
      * @throws WebSocketException
      */
     public void received(String aData, String aEncoding) throws WebSocketException;
+    
+    /**
+     * 
+     * @param aData
+     * @throws WebSocketException
+     */
+    public void received(byte[] aData) throws WebSocketException;
+
 
     /**
      * 
@@ -55,13 +63,6 @@ public interface JWebSocketClient {
      * @throws WebSocketException
      */
     public void send(byte[] aData) throws WebSocketException;
-
-    /**
-     * 
-     * @param aData
-     * @throws WebSocketException
-     */
-    public void received(byte[] aData) throws WebSocketException;
 
     /**
      * 
