@@ -20,28 +20,31 @@ import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketEventHandler;
 import org.jwebsocket.api.WebSocketMessage;
 import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.kit.WebSocketException;
 
 /**
- * Implementation for WebSocketEventHandler that handles all the <tt>WebSocket</tt>
- * events.
+ * Implementation for WebSocketEventHandler that handles all the
+ * <tt>WebSocket</tt> events.
+ * 
  * @author agali
  * @author puran
  */
 public class BaseWebSocketEventHandler implements WebSocketEventHandler {
-    
-    /** reference to jWebSocket Client object*/
+
+    /** reference to jWebSocket Client object */
     private JWebSocketClient jWebSocketClient = null;
-    
+
     private BaseWebSocket baseWebSocket = null;
-    
+
     /**
      * Base constructor for the WebSocket event handler that delegates the
-     * events to appropriate 
+     * events to appropriate
+     * 
      * @param jWebSocketClient the jWebSocket client object reference
      */
     public BaseWebSocketEventHandler(JWebSocketClient jWebSocketClient, WebSocket webSocket) {
         this.jWebSocketClient = jWebSocketClient;
-        this.baseWebSocket = (BaseWebSocket)webSocket;
+        this.baseWebSocket = (BaseWebSocket) webSocket;
     }
 
     @Override
@@ -57,31 +60,37 @@ public class BaseWebSocketEventHandler implements WebSocketEventHandler {
     public void onMessage(WebSocketMessage message) {
         WebSocketPacket dataPacket = getPacket(message);
         jWebSocketClient.notifyPacket(new WebSocketPacketEvent(), dataPacket);
+        try {
+            jWebSocketClient.received(dataPacket.getByteArray());
+            jWebSocketClient.received(dataPacket.getUTF8(), "UTF-8");
+        } catch (WebSocketException e) {
+            // log
+        }
     }
 
     @Override
     public void onOpen() {
         jWebSocketClient.notifyOpened(new WebSocketOpenEvent());
     }
-    
+
     private WebSocketPacket getPacket(WebSocketMessage message) {
         return null;
     }
 
-    
     /**
-     * Connection open event for jWebSocket client 
+     * Connection open event for jWebSocket client
+     * 
      * @author puran
      * @version Id:$
      */
     class WebSocketOpenEvent implements WebSocketClientEvent {
     }
-    
+
     class WebSocketPacketEvent implements WebSocketClientEvent {
-        
+
     }
-    
+
     class WebSocketCloseEvent implements WebSocketClientEvent {
-        
+
     }
 }
