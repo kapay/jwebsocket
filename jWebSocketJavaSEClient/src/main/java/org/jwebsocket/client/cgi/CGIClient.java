@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-import org.jwebsocket.client.java.BaseJWebSocketClient;
+import org.jwebsocket.client.java.AbstractJWebSocketClient;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -29,7 +29,7 @@ import org.jwebsocket.kit.WebSocketException;
  * stdErr channel to the linked application.
  * @author aschulze
  */
-public class CGIClient extends BaseJWebSocketClient {
+public class CGIClient extends AbstractJWebSocketClient {
 
 	private final static int MAX_FRAMESIZE = 16384;
 	private boolean isRunning = false;

@@ -18,15 +18,15 @@ package org.jwebsocket.client.cgi;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import org.jwebsocket.client.java.BaseJWebSocketClient;
-import org.jwebsocket.client.token.TokenClient;
+
+import org.jwebsocket.client.token.BaseTokenClient;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
  *
  * @author aschulze
  */
-public class CGITokenClient extends TokenClient {
+public class CGITokenClient extends BaseTokenClient {
 
 	private final static char START_FRAME = 0x02; // ASCII STX
 	private final static char END_FRAME = 0x03; // ASCII ETX
@@ -43,8 +43,7 @@ public class CGITokenClient extends TokenClient {
 	 *
 	 * @param aListener
 	 */
-	public CGITokenClient(BaseJWebSocketClient aClient) {
-		super(aClient);
+	public CGITokenClient() {
 	}
 
 	@Override
