@@ -14,30 +14,21 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import org.jwebsocket.token.Token;
 
 /**
- * Interface for the jWebSocket client listeners
+ * Interface for the Token WebSocket listeners based on the low level listeners.
  * @author aschulze
  */
-public interface WebSocketClientListener {
-   /**
-    * This method is invoked when a new client connects to the Client.
-    * @param aEvent
-    */
-   void processOpened(WebSocketClientEvent aEvent);
+public interface WebSocketClientTokenListener extends WebSocketClientListener {
 
-   /**
-    * This method is invoked when a data packet from a client is received.
-    * The event provides getter for the Client and the connector to send
-    * responses to back the client.
-    * @param aEvent
-    * @param aPacket
-    */
-   void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket);
+	/**
+	 * This method is invoked when a token (JSON, CSV or XML) from a client is
+	 * received. The event provides getter for the Client and the connector to
+	 * send responses to back the client.
+	 * @param aEvent
+	 * @param aToken
+	 */
+	public void processToken(WebSocketClientEvent aEvent, Token aToken);
 
-   /**
-    * This method is invoked when a client was disconnted from the Client.
-    * @param aEvent
-    */
-   void processClosed(WebSocketClientEvent aEvent);
 }

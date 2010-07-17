@@ -14,8 +14,6 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
-import java.util.List;
-
 import org.jwebsocket.kit.WebSocketException;
 
 
@@ -30,7 +28,7 @@ import org.jwebsocket.kit.WebSocketException;
  * @author Anuradha Gali
  * @author Puran Singh
  * @author Alexander Schulze
- * @version $Id:$
+ * @version $Id$
  */
 public interface WebSocket {
     /**
@@ -42,7 +40,7 @@ public interface WebSocket {
      * @return {@code true} if the connection was successful {@code false} otherwise 
      * @throws WebSocketException if there's any error while opening a connection
      */
-    boolean open(String url) throws WebSocketException;
+    WebSocketEventHandler open(String url) throws WebSocketException;
   
     /**
      * Sends the data to the server,data is sent in the form of UTF-8 text. 
@@ -86,23 +84,5 @@ public interface WebSocket {
      * @return the connect status 
      */
     WebSocketStatus getConnectionStatus();
-    
-    /**
-     * Adds the <tt>listener</tt> for <tt>WebSocket</tt> event notification 
-     * @param aListener the event listner object
-     */
-    void addListener(WebSocketClientListener aListener);
 
-    /**
-     * Remove the listener from the list of listeners, once the listener is 
-     * removed it won't be notified of any <tt>WebSocket</tt> events.
-     * @param aListener the listener object to remove 
-     */
-    void removeListener(WebSocketClientListener aListener);
-    
-    /**
-     * Returns the list of listeners registered.
-     * @return the list of listeners.
-     */
-    List<WebSocketClientListener> getListeners();
 }
