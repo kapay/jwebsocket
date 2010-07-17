@@ -22,12 +22,13 @@ package org.jWebSocket.ui;
 
 import java.net.URL;
 import javax.swing.ImageIcon;
+
+import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.client.se.BaseClientJ2SE;
+import org.jwebsocket.client.java.BaseClientJ2SE;
 import org.jwebsocket.client.token.TokenClient;
 import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.listener.WebSocketClientEvent;
 import org.jwebsocket.token.Token;
 
 /**
