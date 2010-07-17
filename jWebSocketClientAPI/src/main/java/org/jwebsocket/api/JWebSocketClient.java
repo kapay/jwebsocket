@@ -64,6 +64,12 @@ public interface JWebSocketClient {
      */
     void send(String aData, String aEncoding) throws WebSocketException;
     /**
+     * Sends the websocket data packet to the <tt>WebSocket</tt> client
+     * @param dataPacket the data packet to send
+     * @throws WebSocketException if there's any exception while sending
+     */
+    void send(WebSocketPacket dataPacket) throws WebSocketException;
+    /**
      * Close the jWebSocket connection. This method should perform all the cleanup
      * operation to release the jWebSocket resources 
      * @throws WebSocketException if exception while close operation
