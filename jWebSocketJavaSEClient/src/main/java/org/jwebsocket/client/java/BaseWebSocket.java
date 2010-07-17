@@ -36,9 +36,8 @@ import org.jwebsocket.kit.WebSocketException;
  * Base {@code WebSocket} implementation based on
  * http://weberknecht.googlecode.com by Roderick Baier. This uses thread model
  * for handling WebSocket connection which is defined by the <tt>WebSocket</tt>
- * protocol specification. {@linkplain http
- * ://www.whatwg.org/specs/web-socket-protocol/} {@linkplain http
- * ://www.w3.org/TR/websockets/}
+ * protocol specification. {@linkplain http://www.whatwg.org/specs/web-socket-protocol/} 
+ * {@linkplain http://www.w3.org/TR/websockets/}
  * 
  * @author Roderick Baier
  * @author agali
