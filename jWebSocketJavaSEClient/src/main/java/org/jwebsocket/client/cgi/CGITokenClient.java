@@ -18,7 +18,7 @@ package org.jwebsocket.client.cgi;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import org.jwebsocket.client.java.BaseClient;
+import org.jwebsocket.client.java.BaseJWebSocketClient;
 import org.jwebsocket.client.token.TokenClient;
 import org.jwebsocket.kit.WebSocketException;
 
@@ -43,7 +43,7 @@ public class CGITokenClient extends TokenClient {
 	 *
 	 * @param aListener
 	 */
-	public CGITokenClient(BaseClient aClient) {
+	public CGITokenClient(BaseJWebSocketClient aClient) {
 		super(aClient);
 	}
 

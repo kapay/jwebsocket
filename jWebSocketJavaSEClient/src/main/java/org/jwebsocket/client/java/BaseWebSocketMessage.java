@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - WebSocket CGI Client
+//	jWebSocket - WebSocket Client Interface
 //	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,22 +13,51 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.api;
+package org.jwebsocket.client.java;
 
-import org.jwebsocket.api.data.WebSocketMessage;
+import org.jwebsocket.api.WebSocketMessage;
 
 /**
- * Referenced http://weberknecht.googlecode.com
+ * Based on the implementation from http://weberknecht.googlecode.com
+ * @author Roderick Baier
  * @author agali
+ * @version $Id:$
  */
-public interface WebSocketEventHandler {
+public class BaseWebSocketMessage implements WebSocketMessage {
 
-	public void onOpen(WebSocket client);
+	private Byte[] message;
+
+	/**
+	 * contruct the websocketMessage
+	 * @param message client message
+	 */
+	public BaseWebSocketMessage(final Byte[] message) {
+		this.message = message;
+	}
+
+	/**
+	 * 
+	 * @return message
+	 */
+	public String getText() {
+		byte[] message = new byte[this.message.length];
+		for (int i = 0; i < this.message.length; i++) {
+			message[i] = this.message[i];
+		}
+		try {
+			return new String(message, "UTF-8");
+		}
+		catch (Exception e) {
+			return null;
+		}
+	}
 	
-	public void onMessage(WebSocket client, WebSocketMessage message);
-	
-	public void onClose(WebSocket client);
-	
-	public void onException(WebSocket client, Throwable clause);
+	/**
+	 * generic implementation for all objects
+	 * @return object
+	 */
+	public Object getObject() {
+		return null; // TODO implement
+	}
 
 }

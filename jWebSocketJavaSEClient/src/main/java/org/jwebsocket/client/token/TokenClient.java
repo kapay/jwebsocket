@@ -14,12 +14,12 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.client.token;
 
+import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.client.java.BaseClient;
+import org.jwebsocket.client.java.BaseJWebSocketClient;
 import org.jwebsocket.config.JWebSocketCommonConstants;
-import org.jwebsocket.listener.WebSocketClientEvent;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.packetProcessors.CSVProcessor;
 import org.jwebsocket.packetProcessors.JSONProcessor;
@@ -36,7 +36,7 @@ public class TokenClient {
 	public final static int CONNECTED = 1;
 	public final static int AUTHENTICATED = 2;
 	private int CUR_TOKEN_ID = 0;
-	private BaseClient client = null;
+	private BaseJWebSocketClient client = null;
 	private String lSubProt = JWebSocketCommonConstants.SUB_PROT_DEFAULT;
 	private final static String NS_BASE = "org.jWebSocket";
 	private String fUsername = null;
@@ -44,7 +44,7 @@ public class TokenClient {
 	private String fSessionId = null;
 	private String fRestoreSessionId = null;
 
-	public TokenClient(BaseClient aClient) {
+	public TokenClient(BaseJWebSocketClient aClient) {
 		client = aClient;
 		client.addListener(new Listener());
 	}

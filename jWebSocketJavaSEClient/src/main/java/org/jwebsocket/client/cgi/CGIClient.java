@@ -19,7 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import org.jwebsocket.client.se.BaseClientJ2SE;
+
+import org.jwebsocket.client.java.BaseJWebSocketClient;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -28,7 +29,7 @@ import org.jwebsocket.kit.WebSocketException;
  * stdErr channel to the linked application.
  * @author aschulze
  */
-public class CGIClient extends BaseClientJ2SE {
+public class CGIClient extends BaseJWebSocketClient {
 
 	private final static int MAX_FRAMESIZE = 16384;
 	private boolean isRunning = false;
@@ -81,7 +82,6 @@ public class CGIClient extends BaseClientJ2SE {
 		// stop CGI listener
 		isRunning = false;
 		// and close WebSocket connection
-		super.close();
 	}
 
 	private class InboundProcess implements Runnable {
@@ -126,4 +126,28 @@ public class CGIClient extends BaseClientJ2SE {
 
 		}
 	}
+
+    @Override
+    public boolean isConnected() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void received(String aData, String aEncoding) throws WebSocketException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void send(String aData, String aEncoding) throws WebSocketException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void send(byte[] aData) throws WebSocketException {
+        // TODO Auto-generated method stub
+        
+    }
 }

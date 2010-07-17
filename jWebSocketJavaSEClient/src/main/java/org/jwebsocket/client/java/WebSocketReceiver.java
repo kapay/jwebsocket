@@ -1,3 +1,18 @@
+//  ---------------------------------------------------------------------------
+//  jWebSocket - WebSocket Client Interface
+//  Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
+//  ---------------------------------------------------------------------------
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU Lesser General Public License as published by the
+//  Free Software Foundation; either version 3 of the License, or (at your
+//  option) any later version.
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//  more details.
+//  You should have received a copy of the GNU Lesser General Public License along
+//  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//  ---------------------------------------------------------------------------
 package org.jwebsocket.client.java;
 
 import java.io.IOException;
@@ -6,20 +21,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jwebsocket.api.WebSocketEventHandler;
-import org.jwebsocket.api.data.WebSocketMessage;
+import org.jwebsocket.api.WebSocketMessage;
 
+/**
+ * Based on the implementation from http://weberknecht.googlecode.com
+ * @author Roderick Baier
+ * @version $Id:$
+ */
 public class WebSocketReceiver extends Thread {
 
 	private InputStream input = null;
-	private BaseWebSocket websocket = null;
 	private WebSocketEventHandler eventHandler = null;
 
 	private boolean stop = false;
 	
-	public WebSocketReceiver(InputStream input, BaseWebSocket websocket) {
+	public WebSocketReceiver(InputStream input, WebSocketEventHandler eventHandler) {
 		this.input = input;
-		this.websocket = websocket;
-		this.eventHandler = websocket.getEventHandler();
+		this.eventHandler = eventHandler;
 	}
 
 	public void run() {
@@ -36,7 +54,8 @@ public class WebSocketReceiver extends Thread {
 				else if (b == 0xff && frameStart == true) {
 					frameStart = false;
 					Byte[] message = messageBytes.toArray(new Byte[messageBytes.size()]);
-					eventHandler.onMessage(websocket, new WebSocketMessage(message));
+					WebSocketMessage webSocketMessage = new BaseWebSocketMessage(message); 
+					eventHandler.onMessage(webSocketMessage);
 					messageBytes.clear();
 				}
 				else if (frameStart == true){
@@ -62,7 +81,6 @@ public class WebSocketReceiver extends Thread {
 	
 	private void handleError() {
 		stopit();
-		websocket.handleReceiverError();
 	}
 
 }

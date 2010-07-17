@@ -14,10 +14,11 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.listener;
 
+import org.jwebsocket.api.WebSocketClientEvent;
+
 /**
  *
  * @author aschulze
  */
-public class WebSocketClientTokenEvent extends WebSocketClientEvent {
-
+public class WebSocketClientTokenEvent implements WebSocketClientEvent {
 }
