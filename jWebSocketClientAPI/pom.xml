@@ -51,6 +51,11 @@
 			<version>RELEASE65</version>
 			<type>jar</type>
 		</dependency>
+		<dependency>
+		   <groupId>org.jwebsocket</groupId>
+	        <artifactId>jWebSocketCommon</artifactId>
+	        <version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 	<!--  define repositories -->
