@@ -17,33 +17,32 @@ package org.jwebsocket.api;
 import java.util.List;
 
 import org.jwebsocket.kit.WebSocketException;
-
 /**
- * Base interface that represents the jWebSocket java client that implements 
+ * Base interface that represents the <tt>jWebSocket</tt> java client and that implements 
  * all the jWebSocket specific protocols and listeners for different types of 
- * communication and data format. 
+ * communication and data format. The implementation of this interface handles all 
+ * the data formats and client protocols.
  * @author aschulze
  * @author puran
- * @version $Id:$
+ * @version $Id$
  */
 public interface JWebSocketClient {
     /**
      * Opens the jWebSocket connection
-     * @param aURL the websocket connection url
+     * @param uriString the websocket connection url
      * @throws WebSocketException if therre's an 
      */
-    public void open(String aURL) throws WebSocketException;
+    void open(String uriString) throws WebSocketException;
 
     /**
-     * 
-     * @param aData
-     * @param aEncoding
-     * @throws WebSocketException
+     * Sends the data to the jWebSocket server
+     * @param aData the data to send
+     * @param aEncoding the encoding type
+     * @throws WebSocketException if there's any exception while sending the data
      */
-    public void send(String aData, String aEncoding) throws WebSocketException;
+    void send(String aData, String aEncoding) throws WebSocketException;
 
     /**
-     * 
      * @param aData
      * @param aEncoding
      * @throws WebSocketException

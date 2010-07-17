@@ -15,7 +15,6 @@
 package org.jwebsocket.api;
 
 import org.jwebsocket.token.Token;
-
 /**
  * Interface for the Token WebSocket listeners based on the low level listeners.
  * @author aschulze

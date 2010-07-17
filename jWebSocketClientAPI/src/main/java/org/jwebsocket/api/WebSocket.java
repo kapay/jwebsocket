@@ -14,6 +14,8 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import java.net.URI;
+
 import org.jwebsocket.kit.WebSocketException;
 
 
@@ -36,11 +38,10 @@ public interface WebSocket {
      * be as per the <tt>WebSocket</tt> URL schema definition, ws://<host>:<port>/resource_name
      * and wss://<host>:<port>/resource_name for the secure connection over port 443.
      * 
-     * @param url the WebSocket connection url.
-     * @return {@code true} if the connection was successful {@code false} otherwise 
+     * @param uri the WebSocket connection url.
      * @throws WebSocketException if there's any error while opening a connection
      */
-    WebSocketEventHandler open(String url) throws WebSocketException;
+    void open(URI uri) throws WebSocketException;
   
     /**
      * Sends the data to the server,data is sent in the form of UTF-8 text. 
@@ -84,5 +85,16 @@ public interface WebSocket {
      * @return the connect status 
      */
     WebSocketStatus getConnectionStatus();
+    
+    /**
+     * Set the <tt>WebSocket</tt> event handler to handle core WebSocket events.
+     * @param eventHandler the event handler object
+     */
+    void setEventHandler(WebSocketEventHandler eventHandler);
+    
+    /**
+     * @return the registered event handler
+     */
+    WebSocketEventHandler getEventHandler();
 
 }

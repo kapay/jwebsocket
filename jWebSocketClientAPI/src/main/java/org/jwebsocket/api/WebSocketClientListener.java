@@ -14,7 +14,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
-
 /**
  * Interface for the jWebSocket client listeners
  * @author aschulze

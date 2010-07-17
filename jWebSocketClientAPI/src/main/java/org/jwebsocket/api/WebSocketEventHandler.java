@@ -14,11 +14,14 @@
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
-
-
 /**
- * Referenced http://weberknecht.googlecode.com
+ * Handler for all the <tt>WebSocket</tt> connection events 
+ * referenced from http://weberknecht.googlecode.com by 
+ * Roderick Baier.
+ * 
+ * @author Roderick Baier
  * @author agali
+ * @version $Id:$
  */
 public interface WebSocketEventHandler {
 
@@ -33,7 +36,7 @@ public interface WebSocketEventHandler {
      * @param websocket the WebSocket connection object
      * @param aPacket the data packet
      */
-     void onMessage(WebSocket websocket, WebSocketPacket aPacket);
+     void onMessage(WebSocket websocket, WebSocketMessage message);
 
     /**
      * This method is invoked when a client is disconnected
