@@ -18,7 +18,6 @@ import java.net.URI;
 
 import org.jwebsocket.kit.WebSocketException;
 
-
 /**
  * Base interface that represents the <tt>WebSocket</tt> connection to the
  * </tt>jWeSocket</tt> server. It contains all the necessary methods to 
