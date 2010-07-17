@@ -21,34 +21,32 @@ package org.jwebsocket.api;
  * 
  * @author Roderick Baier
  * @author agali
- * @version $Id:$
+ * @version $Id$
  */
 public interface WebSocketEventHandler {
 
     /**
      * This method is invoked when a new client connects to the server.
-     * @param websocket the WebSocket connection object
      */
-     void onOpen(WebSocket websocket);
+     void onOpen();
 
     /**
      * This method is invoked when a data packet is received from the server
-     * @param websocket the WebSocket connection object
      * @param aPacket the data packet
      */
-     void onMessage(WebSocket websocket, WebSocketMessage message);
+     void onMessage(WebSocketMessage message);
 
     /**
      * This method is invoked when a client is disconnected
      * @param websocket the WebSocket connection object 
      */
-     void onClose(WebSocket websocket);
+     void onClose();
     
      /**
       * Invoked if there's any exception
       * @param websocket the websocket object
       * @param clause the cause of the exception
       */
-     void onException(WebSocket websocket, Throwable clause);
+     void onException(Throwable clause);
 
 }
