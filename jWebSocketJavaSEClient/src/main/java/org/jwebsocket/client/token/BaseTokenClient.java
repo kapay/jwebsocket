@@ -29,8 +29,8 @@ import org.jwebsocket.token.Token;
 
 /**
  * Token based implementation of {@code JWebSocketClient}
- * 
  * @author aschulze
+ * @author puran
  * @version $Id:$
  */
 public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketTokenClient {
@@ -203,10 +203,6 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
         super.send(tokenToPacket(aToken));
     }
 
-    // TODO: put the following methods into client side plug-ins or separate
-    // them in a different way.
-
-    /* functions of the System Plug-in */
     private final static String NS_SYSTEM_PLUGIN = NS_BASE + ".plugins.system";
 
     public void login(String aUsername, String aPassword) throws WebSocketException {
