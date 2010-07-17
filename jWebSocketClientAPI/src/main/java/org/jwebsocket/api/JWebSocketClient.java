@@ -18,88 +18,91 @@ import java.util.List;
 
 import org.jwebsocket.kit.WebSocketException;
 /**
- * Base interface that represents the <tt>jWebSocket</tt> java client and that implements 
- * all the jWebSocket specific protocols and listeners for different types of 
- * communication and data format. The implementation of this interface handles all 
- * the data formats and client protocols.
+ * Base interface that represents the <tt>jWebSocket</tt> java client and it defines
+ * all the methods and operations to allow the implementation of jWebSocket specific 
+ * client protocols and allows to register/deregister different types of listeners 
+ * for different types of communication and data format.The implementation of this
+ * interface handles all the data formats and client protocols and delegates the events
+ * and the data to different listeners for further processing.
  * @author aschulze
  * @author puran
  * @version $Id$
  */
 public interface JWebSocketClient {
     /**
-     * Opens the jWebSocket connection
+     * Opens the jWebSocket connection 
      * @param uriString the websocket connection url
      * @throws WebSocketException if therre's an 
      */
     void open(String uriString) throws WebSocketException;
-
     /**
-     * Sends the data to the jWebSocket server
+     * Callback method that is invoked when the jWebSocketClient receieves the message
+     * from the WebSocket client.
+     * @param aData the string data
+     * @param aEncoding encoding format 
+     * @throws WebSocketException if any error while receiving and processing the data.
+     */
+    void received(String aData, String aEncoding) throws WebSocketException;
+    /**
+     * Callback method invoked upon receiving the byte data
+     * @param aData the byte data
+     * @throws WebSocketException if there's any exception recieving or processing the data
+     */
+    void received(byte[] aData) throws WebSocketException;
+    /**
+     * Send the given byte data to the server
+     * @param aData the byte data
+     * @throws WebSocketException if exception occurs while sending the data
+     */
+    void send(byte[] aData) throws WebSocketException;
+    
+    /**
+     * Sends the data to the jWebSocket server, data has to be UTF-8 encoded.
      * @param aData the data to send
      * @param aEncoding the encoding type
      * @throws WebSocketException if there's any exception while sending the data
      */
     void send(String aData, String aEncoding) throws WebSocketException;
-
     /**
-     * @param aData
-     * @param aEncoding
-     * @throws WebSocketException
-     */
-    public void received(String aData, String aEncoding) throws WebSocketException;
-    
-    /**
-     * 
-     * @param aData
-     * @throws WebSocketException
-     */
-    public void received(byte[] aData) throws WebSocketException;
-
-
-    /**
-     * 
-     * @param aData
-     * @throws WebSocketException
-     */
-    public void send(byte[] aData) throws WebSocketException;
-
-    /**
-     * 
-     * @throws WebSocketException
+     * Close the jWebSocket connection. This method should perform all the cleanup
+     * operation to release the jWebSocket resources 
+     * @throws WebSocketException if exception while close operation
      */
     public void close() throws WebSocketException;
-
     /**
-     * 
-     * @return
+     * Method to check if the jWebSocketClient is still connected to the jWebSocketServer
+     * @return {@code true} if there's a persistent connection {@code false} otherwise
      */
     public boolean isConnected();
-
     /**
-    *
-    */
+     * Notifies the <tt>jWebSocket</tT> client implementation about the connection being opened
+     * to the jWebSocket server via <tt>WebSocket</tt> 
+     * @param aEvent the websocket client event object
+     */
     void notifyOpened(WebSocketClientEvent aEvent);
-
     /**
-    *
-    */
+     * Notifies the <tt>jWebSocket</tT> client implementation about the packet being received
+     * from the <tt>WebSocket</tt> client. 
+     * @param aEvent the websocket client event object
+     * @param aPacket the data packet received
+     */
     void notifyPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket);
-
     /**
-    *
-    */
+     * Notifies the <tt>jWebSocket</tT> client implementation about the connection being closed
+     * @param aEvent the websocket client event object
+     */
     void notifyClosed(WebSocketClientEvent aEvent);
-
     /**
-     * Adds the <tt>listener</tt> for <tt>WebSocket</tt> event notification
-     * @param aListener the event listner object
+     * Adds the client listener to the lists of listener which are interested in receiving the 
+     * <tt>jWebSocket</tt> connection and data events. Listeners are good way to handle all the
+     * <tt>jWebSocket</tt> specific protocol and data format 
+     * @param aListener the event listener object
      */
     void addListener(WebSocketClientListener aListener);
 
     /**
      * Remove the listener from the list of listeners, once the listener is
-     * removed it won't be notified of any <tt>WebSocket</tt> events.
+     * removed it won't be notified of any <tt>jWebSocket</tt> events.
      * 
      * @param aListener the listener object to remove
      */
@@ -107,8 +110,7 @@ public interface JWebSocketClient {
 
     /**
      * Returns the list of listeners registered.
-     * 
-     * @return the list of listeners.
+     * @return the list of all listeners.
      */
     List<WebSocketClientListener> getListeners();
 }
