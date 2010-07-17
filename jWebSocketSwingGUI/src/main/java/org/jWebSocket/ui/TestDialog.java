@@ -21,93 +21,95 @@
 package org.jWebSocket.ui;
 
 import java.net.URL;
+
 import javax.swing.ImageIcon;
 
+import org.jwebsocket.api.JWebSocketTokenClient;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.client.java.BaseClientJ2SE;
-import org.jwebsocket.client.token.TokenClient;
+import org.jwebsocket.client.token.BaseTokenClient;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * Java Swing client for jWebSocket
  * @author aschulze
+ * @version $Id:$
  */
 public class TestDialog extends javax.swing.JFrame implements WebSocketClientTokenListener {
+    private static final long serialVersionUID = 1L;
+    private JWebSocketTokenClient client = null;
+    private int prevStatus = BaseTokenClient.DISCONNECTED;
+    private ImageIcon icoDisconnected = null;
+    private ImageIcon icoConnected = null;
+    private ImageIcon icoAuthenticated = null;
 
-	private TokenClient client = null;
-	private int prevStatus = TokenClient.DISCONNECTED;
-	private ImageIcon icoDisconnected = null;
-	private ImageIcon icoConnected = null;
-	private ImageIcon icoAuthenticated = null;
+    /** Creates new form TestDialog */
+    public TestDialog() {
+        initComponents();
+        try {
+            client = new BaseTokenClient();
+            client.addListener(this);
+            URL lURL = getClass().getResource("/images/disconnected.png");
+            icoDisconnected = new ImageIcon(lURL);
+            icoConnected = new ImageIcon(getClass().getResource("/images/connected.png"));
+            icoAuthenticated = new ImageIcon(getClass().getResource("/images/authenticated.png"));
+        } catch (Exception ex) {
+            System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+        }
+    }
 
-	/** Creates new form TestDialog */
-	public TestDialog() {
-		initComponents();
-		try {
-			// URI lURI = new URI("ws://localhost:8787");
-			client = new TokenClient(new BaseClientJ2SE());
-			client.addListener(this);
-			URL lURL = getClass().getResource("/images/disconnected.png");
-			icoDisconnected = new ImageIcon(lURL);
-			icoConnected = new ImageIcon(getClass().getResource("/images/connected.png"));
-			icoAuthenticated = new ImageIcon(getClass().getResource("/images/authenticated.png"));
-		} catch (Exception ex) {
-			System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
-		}
-	}
+    private void checkStatusIcon() {
+        int lStatus = BaseTokenClient.DISCONNECTED;
+        if (client.getUsername() != null) {
+            lStatus = BaseTokenClient.AUTHENTICATED;
+        } else if (client.isConnected()) {
+            lStatus = BaseTokenClient.CONNECTED;
+        }
+        if (lStatus != prevStatus) {
+            prevStatus = lStatus;
+            if (lStatus == BaseTokenClient.AUTHENTICATED) {
+                lblStatus.setIcon(icoAuthenticated);
+            } else if (lStatus == BaseTokenClient.CONNECTED) {
+                lblStatus.setIcon(icoConnected);
+            } else {
+                lblStatus.setIcon(icoDisconnected);
+            }
+        }
+    }
 
-	private void checkStatusIcon() {
-		int lStatus = TokenClient.DISCONNECTED;
-		if (client.getUsername() != null) {
-			lStatus = TokenClient.AUTHENTICATED;
-		} else if (client.isConnected()) {
-			lStatus = TokenClient.CONNECTED;
-		}
-		if (lStatus != prevStatus) {
-			prevStatus = lStatus;
-			if (lStatus == TokenClient.AUTHENTICATED) {
-				lblStatus.setIcon(icoAuthenticated);
-			} else if (lStatus == TokenClient.CONNECTED) {
-				lblStatus.setIcon(icoConnected);
-			} else {
-				lblStatus.setIcon(icoDisconnected);
-			}
-		}
-	}
+    @Override
+    public void processOpened(WebSocketClientEvent aEvent) {
+        txaLog.append("Opened.\n");
+        checkStatusIcon();
+    }
 
-	@Override
-	public void processOpened(WebSocketClientEvent aEvent) {
-		txaLog.append("Opened.\n");
-		checkStatusIcon();
-	}
+    @Override
+    public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+        // ignore that here
+    }
 
-	@Override
-	public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
-		// ignore that here
-	}
+    @Override
+    public void processToken(WebSocketClientEvent aEvent, Token aToken) {
+        txaLog.append("Received Token: " + aToken.toString() + "\n");
+        checkStatusIcon();
+    }
 
-	@Override
-	public void processToken(WebSocketClientEvent aEvent, Token aToken) {
-		txaLog.append("Received Token: " + aToken.toString() + "\n");
-		checkStatusIcon();
-	}
+    @Override
+    public void processClosed(WebSocketClientEvent aEvent) {
+        txaLog.append("Closed.\n");
+        checkStatusIcon();
+    }
 
-	@Override
-	public void processClosed(WebSocketClientEvent aEvent) {
-		txaLog.append("Closed.\n");
-		checkStatusIcon();
-	}
-
-	/** This method is called from within the constructor to
-	 * initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is
-	 * always regenerated by the Form Editor.
-	 */
-	@SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed"
+    // desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
@@ -394,94 +396,96 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-	private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
-		try {
-			client.open("ws://localhost:8787");
-		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
-	}//GEN-LAST:event_btnConnectActionPerformed
+    private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnConnectActionPerformed
+        try {
+            client.open("ws://localhost:8787");
+        } catch (WebSocketException ex) {
+            txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+        }
+    }// GEN-LAST:event_btnConnectActionPerformed
 
-	private void btnDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDisconnectActionPerformed
-		try {
-			client.close();
-		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
-	}//GEN-LAST:event_btnDisconnectActionPerformed
+    private void btnDisconnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnDisconnectActionPerformed
+        try {
+            client.close();
+        } catch (WebSocketException ex) {
+            txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+        }
+    }// GEN-LAST:event_btnDisconnectActionPerformed
 
-	private void btnShutdownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShutdownActionPerformed
-		try {
-			client.shutdownServer();
-		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
-	}//GEN-LAST:event_btnShutdownActionPerformed
+    private void btnShutdownActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnShutdownActionPerformed
+        try {
+            client.disconnect();
+        } catch (WebSocketException ex) {
+            txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+        }
+    }// GEN-LAST:event_btnShutdownActionPerformed
 
-	private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
-		try {
-			client.login("guest", "guest");
-		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
-	}//GEN-LAST:event_btnLoginActionPerformed
+    private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnLoginActionPerformed
+        try {
+            client.login("guest", "guest");
+        } catch (WebSocketException ex) {
+            txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+        }
+    }// GEN-LAST:event_btnLoginActionPerformed
 
-	private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
-		try {
-			client.logout();
-		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
-	}//GEN-LAST:event_btnLogoutActionPerformed
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnLogoutActionPerformed
+        try {
+            client.logout();
+        } catch (WebSocketException ex) {
+            txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+        }
+    }// GEN-LAST:event_btnLogoutActionPerformed
 
-	private void btnClearLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearLogActionPerformed
-		txaLog.setText("");
-	}//GEN-LAST:event_btnClearLogActionPerformed
+    private void btnClearLogActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnClearLogActionPerformed
+        txaLog.setText("");
+    }// GEN-LAST:event_btnClearLogActionPerformed
 
-	private void btnBroadcastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBroadcastActionPerformed
-		try {
-			client.broadcastText(txfMessage.getText());
-		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
-	}//GEN-LAST:event_btnBroadcastActionPerformed
+    private void btnBroadcastActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnBroadcastActionPerformed
+        try {
+            client.broadcastText(txfMessage.getText());
+        } catch (WebSocketException ex) {
+            txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+        }
+    }// GEN-LAST:event_btnBroadcastActionPerformed
 
-	private void btnPingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPingActionPerformed
-		try {
-			client.ping(true);
-		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
-	}//GEN-LAST:event_btnPingActionPerformed
+    private void btnPingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnPingActionPerformed
+        try {
+            client.ping(true);
+        } catch (WebSocketException ex) {
+            txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+        }
+    }// GEN-LAST:event_btnPingActionPerformed
 
-	private void btnSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSendActionPerformed
-		try {
-			client.sendText(txfTarget.getText(), txfMessage.getText());
-		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
-	}//GEN-LAST:event_btnSendActionPerformed
+    private void btnSendActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnSendActionPerformed
+        try {
+            client.sendText(txfTarget.getText(), txfMessage.getText());
+        } catch (WebSocketException ex) {
+            txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+        }
+    }// GEN-LAST:event_btnSendActionPerformed
 
-	private void btnGetSessionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetSessionsActionPerformed
-		try {
-			client.getConnections();
-		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
-	}//GEN-LAST:event_btnGetSessionsActionPerformed
+    private void btnGetSessionsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnGetSessionsActionPerformed
+        try {
+            client.getConnections();
+        } catch (WebSocketException ex) {
+            txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+        }
+    }// GEN-LAST:event_btnGetSessionsActionPerformed
 
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String args[]) {
-		java.awt.EventQueue.invokeLater(new Runnable() {
+    /**
+     * @param args
+     *            the command line arguments
+     */
+    public static void main(String args[]) {
+        java.awt.EventQueue.invokeLater(new Runnable() {
 
-			@Override
-			public void run() {
-				new TestDialog().setVisible(true);
-			}
-		});
-	}
+            @Override
+            public void run() {
+                new TestDialog().setVisible(true);
+            }
+        });
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bntSend;
     private javax.swing.JButton btnBroadcast;
