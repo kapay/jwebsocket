@@ -170,7 +170,7 @@ public class BaseWebSocket implements WebSocket {
             output.write(0x00);
             output.write(data.getBytes(("UTF-8")));
             output.write(0xff);
-            output.write("\r\n".getBytes());
+            output.flush();
         } catch (UnsupportedEncodingException uee) {
             throw new WebSocketException("error while sending text data: unsupported encoding", uee);
         } catch (IOException ioe) {
@@ -187,12 +187,12 @@ public class BaseWebSocket implements WebSocket {
                 output.write(0x80);
                 output.write(data.length);
                 output.write(data);
-                output.write("\r\n".getBytes());    
+                output.flush();
             } else {
                 output.write(0x00);
                 output.write(data);
                 output.write(0xff);
-                output.write("\r\n".getBytes());
+                output.flush();
             }
         } catch (IOException ioe) {
             throw new WebSocketException("error while sending binary data: ", ioe);

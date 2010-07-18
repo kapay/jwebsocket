@@ -62,6 +62,7 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
      * Default constructor
      */
     public BaseTokenClient() {
+        addListener(new TokenClientListener());
     }
 
     /**
