@@ -134,7 +134,6 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
         synchronized (listeners) {
             listeners.clear();
         }
-        listeners = null;
     }
 
     /**
@@ -143,7 +142,6 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
     @Override
     public void close() throws WebSocketException {
         webSocket.close();
-        eventHandler = null;
     }
 
     /**

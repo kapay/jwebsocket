@@ -57,8 +57,6 @@ public class BaseWebSocketEventHandler implements WebSocketEventHandler {
     @Override
     public void onClose() {
         jWebSocketClient.notifyClosed(new WebSocketCloseEvent());
-        jWebSocketClient = null;
-        baseWebSocket = null;
     }
 
     /**
@@ -66,6 +64,7 @@ public class BaseWebSocketEventHandler implements WebSocketEventHandler {
      */
     @Override
     public void onException(Throwable clause) {
+        clause.printStackTrace();
     }
 
     @Override

@@ -39,6 +39,9 @@ public class WebSocketHandshake {
 	private String origin = null;
 	private String protocol = null;
 	
+	public WebSocketHandshake(URI url) {
+	    this(url, null);
+	}
 	
 	public WebSocketHandshake(URI url, String protocol) {
 		this.url = url;

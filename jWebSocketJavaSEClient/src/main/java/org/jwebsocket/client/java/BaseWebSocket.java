@@ -94,6 +94,7 @@ public class BaseWebSocket implements WebSocket {
      */
     public void open(URI uri) throws WebSocketException {
         this.url = uri;
+        handshake = new WebSocketHandshake(url);
         try {
             socket = createSocket();
             input = socket.getInputStream();
