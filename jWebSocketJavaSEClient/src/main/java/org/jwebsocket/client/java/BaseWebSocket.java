@@ -31,6 +31,7 @@ import org.jwebsocket.api.WebSocket;
 import org.jwebsocket.api.WebSocketEventHandler;
 import org.jwebsocket.api.WebSocketStatus;
 import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.kit.WebSocketHandshake;
 
 /**
  * Base {@code WebSocket} implementation based on
