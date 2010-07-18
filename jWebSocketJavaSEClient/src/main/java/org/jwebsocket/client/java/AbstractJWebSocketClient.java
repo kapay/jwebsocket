@@ -135,6 +135,7 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
      */
     @Override
     public void close() throws WebSocketException {
+        webSocket.close();
         eventHandler = null;
         //just in case someone else is trying to update it
         synchronized (listeners) {
