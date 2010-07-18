@@ -33,7 +33,7 @@ public class WebSocketReceiver extends Thread {
 	private InputStream input = null;
 	private WebSocketEventHandler eventHandler = null;
 
-	private boolean stop = false;
+	private volatile boolean stop = false;
 	
 	public WebSocketReceiver(InputStream input, WebSocketEventHandler eventHandler) {
 		this.input = input;
