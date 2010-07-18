@@ -128,6 +128,13 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
         for (WebSocketClientListener lListener : getListeners()) {
             lListener.processClosed(aEvent);
         }
+        //clear the listeners since WebSocket connection is closed 
+        //at this time to so release resources
+        //just in case someone else is trying to update it
+        synchronized (listeners) {
+            listeners.clear();
+        }
+        listeners = null;
     }
 
     /**
@@ -137,10 +144,6 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
     public void close() throws WebSocketException {
         webSocket.close();
         eventHandler = null;
-        //just in case someone else is trying to update it
-        synchronized (listeners) {
-            listeners.clear();
-        }
     }
 
     /**
