@@ -20,7 +20,7 @@ package org.jwebsocket.api;
  *  
  * @author Roderick Baier
  * @author puran
- * @version $Id:$
+ * @version $Id$
  */
 public interface WebSocketMessage {
     /**
@@ -28,6 +28,12 @@ public interface WebSocketMessage {
      * @return message
      */
     String getText();
+    
+    /**
+     * Returns the data as byte array
+     * @return the byte data
+     */
+    byte[] getByteData();
     
     /**
      * generic implementation for all objects
