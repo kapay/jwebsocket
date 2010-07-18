@@ -23,17 +23,20 @@ import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
- * Implementation for WebSocketEventHandler that handles all the
- * <tt>WebSocket</tt> events.
- * 
+ * Implementation for WebSocketEventHandler that handles all the base
+ * <tt>WebSocket</tt> events and delegates the event handling along with 
+ * event data to <tt>jWebSocket</tt> clients and listeners for specific 
+ * event handling
  * @author agali
  * @author puran
+ * @version $Id:$
  */
 public class BaseWebSocketEventHandler implements WebSocketEventHandler {
 
     /** reference to jWebSocket Client object */
     private JWebSocketClient jWebSocketClient = null;
 
+    /** reference of WebSocket */
     private BaseWebSocket baseWebSocket = null;
 
     /**
@@ -47,18 +50,27 @@ public class BaseWebSocketEventHandler implements WebSocketEventHandler {
         this.baseWebSocket = (BaseWebSocket) webSocket;
     }
 
+    /**
+     * {@inheritDoc}
+     * Perform the clean up
+     */
     @Override
     public void onClose() {
         jWebSocketClient.notifyClosed(new WebSocketCloseEvent());
+        jWebSocketClient = null;
+        baseWebSocket = null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onException(Throwable clause) {
     }
 
     @Override
     public void onMessage(WebSocketMessage message) {
-        WebSocketPacket dataPacket = getPacket(message);
+        WebSocketPacket dataPacket = new RawClientPacket(message);
         jWebSocketClient.notifyPacket(new WebSocketPacketEvent(), dataPacket);
         try {
             jWebSocketClient.received(dataPacket.getByteArray());
@@ -73,16 +85,8 @@ public class BaseWebSocketEventHandler implements WebSocketEventHandler {
         jWebSocketClient.notifyOpened(new WebSocketOpenEvent());
     }
 
-    private WebSocketPacket getPacket(WebSocketMessage message) {
-        return null;
-    }
-
-    /**
-     * Connection open event for jWebSocket client
-     * 
-     * @author puran
-     * @version Id:$
-     */
+    // event classes 
+    
     class WebSocketOpenEvent implements WebSocketClientEvent {
     }
 
