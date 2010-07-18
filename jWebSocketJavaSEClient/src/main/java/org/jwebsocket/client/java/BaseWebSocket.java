@@ -54,6 +54,8 @@ public class BaseWebSocket implements WebSocket {
 
     /** flag for connection test */
     private volatile boolean connected = false;
+    
+    private boolean isBinaryData = false;
 
     /** TCP socket */
     private Socket socket = null;
@@ -179,12 +181,18 @@ public class BaseWebSocket implements WebSocket {
         if (!connected) {
             throw new WebSocketException("error while sending binary data: not connected");
         }
-
         try {
-            output.write(0x80);
-            output.write(data.length);
-            output.write(data);
-            output.write("\r\n".getBytes());
+            if (isBinaryData) {
+                output.write(0x80);
+                output.write(data.length);
+                output.write(data);
+                output.write("\r\n".getBytes());    
+            } else {
+                output.write(0x00);
+                output.write(data);
+                output.write(0xff);
+                output.write("\r\n".getBytes());
+            }
         } catch (IOException ioe) {
             throw new WebSocketException("error while sending binary data: ", ioe);
         }
