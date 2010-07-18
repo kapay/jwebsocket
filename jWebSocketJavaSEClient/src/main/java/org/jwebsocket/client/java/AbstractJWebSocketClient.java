@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.client.java;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -134,6 +135,11 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
      */
     @Override
     public void close() throws WebSocketException {
+        eventHandler = null;
+        //just in case someone else is trying to update it
+        synchronized (listeners) {
+            listeners.clear();
+        }
     }
 
     /**
@@ -149,6 +155,7 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
      */
     @Override
     public void received(String aData, String aEncoding) throws WebSocketException {
+        //implemented by subclasses to handle received data
     }
 
     /**
@@ -156,6 +163,7 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
      */
     @Override
     public void received(byte[] aData) throws WebSocketException {
+        //implemented by subclasses to handle received data
     }
 
     /**
@@ -163,6 +171,13 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
      */
     @Override
     public void send(String aData, String aEncoding) throws WebSocketException {
+        byte[] data;
+        try {
+            data = aData.getBytes("UTF-8");
+            send(data);
+        } catch (UnsupportedEncodingException e) {
+            throw new WebSocketException("Encoding exception while sending the data:"+e.getMessage(), e);
+        }
     }
 
     /**
@@ -170,6 +185,7 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
      */
     @Override
     public void send(byte[] aData) throws WebSocketException {
+        webSocket.send(aData);
     }
 
     /**
@@ -177,6 +193,7 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
      */
     @Override
     public void send(WebSocketPacket dataPacket) throws WebSocketException {
+        send(dataPacket.getByteArray());
     }
 
     /**
