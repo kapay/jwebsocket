@@ -18,8 +18,8 @@ package org.jwebsocket.api;
  * Base interface jWebSocket events
  * @author puran
  * @author aschulze
- * @version $Id:$
+ * @version $Id$
  */
 public interface WebSocketClientEvent {
-
+  //TODO: add event methods.
 }
