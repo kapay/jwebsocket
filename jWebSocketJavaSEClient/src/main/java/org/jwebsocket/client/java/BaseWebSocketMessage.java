@@ -19,45 +19,54 @@ import org.jwebsocket.api.WebSocketMessage;
 
 /**
  * Based on the implementation from http://weberknecht.googlecode.com
+ * 
  * @author Roderick Baier
  * @author agali
  * @version $Id:$
  */
 public class BaseWebSocketMessage implements WebSocketMessage {
 
-	private Byte[] message;
+    private Byte[] message;
 
-	/**
-	 * contruct the websocketMessage
-	 * @param message client message
-	 */
-	public BaseWebSocketMessage(final Byte[] message) {
-		this.message = message;
-	}
+    /**
+     * contruct the websocketMessage
+     * @param message client message
+     */
+    public BaseWebSocketMessage(final Byte[] message) {
+        this.message = message;
+    }
 
-	/**
-	 * 
-	 * @return message
-	 */
-	public String getText() {
-		byte[] message = new byte[this.message.length];
-		for (int i = 0; i < this.message.length; i++) {
-			message[i] = this.message[i];
-		}
-		try {
-			return new String(message, "UTF-8");
-		}
-		catch (Exception e) {
-			return null;
-		}
-	}
-	
-	/**
-	 * generic implementation for all objects
-	 * @return object
-	 */
-	public Object getObject() {
-		return null; // TODO implement
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] getByteData() {
+        byte[] message = new byte[this.message.length];
+        for (int i = 0; i < this.message.length; i++) {
+            message[i] = this.message[i];
+        }
+        return message;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getText() {
+        try {
+            return new String(getByteData(), "UTF-8");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * generic implementation for all objects
+     * @return object
+     */
+    @Override
+    public Object getObject() {
+        return null; // TODO implement
+    }
 
 }
