@@ -47,8 +47,8 @@
 			var lWSC = null;
 
 			function connect() {
-				// var lURL = jws.JWS_SERVER_URL + "/;prot=custom";
-				var lURL = "ws://localhost:80/ws" + "/;prot=custom";
+				var lURL = jws.JWS_SERVER_URL + "/;prot=custom";
+				// var lURL = "ws://localhost:80/ws" + "/;prot=custom";
 
 				log( "Connecting to " + lURL + " ..." );
 				try {
@@ -91,6 +91,12 @@
 				var lMsg = eMessage.value;
 				log( "Sending '" + lMsg + "'..." );
 				try {
+					/*
+					lMsg = "";
+					for (var i = 0; i < 1000; i++) {
+						lMsg += "<br>" + i + ": 1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<br>";
+					}
+					*/
 					lWSC.sendStream( lMsg );
 					log( "Message sent." );
 				} catch( ex ) {

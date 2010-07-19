@@ -17,7 +17,6 @@ package org.jwebsocket.console;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServerListener;
-import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.WebSocketServerEvent;
 import org.jwebsocket.logging.Logging;
 
@@ -51,6 +50,13 @@ public class JWebSocketCustomListenerSample implements WebSocketServerListener {
 			log.debug("Processing data packet '" + aPacket.getUTF8() + "'...");
 		}
 		aPacket.setUTF8("[echo from jWebSocket v" + JWebSocketServerConstants.VERSION_STR + "] " + aPacket.getUTF8());
+		/*
+		StringBuilder lStrBuf = new StringBuilder();
+		for (int i = 0; i < 10000; i++) {
+			lStrBuf.append("<br>" + i + ": 1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		}
+		aPacket.setUTF8(lStrBuf.toString());
+		 */
 		aEvent.sendPacket(aPacket);
 	}
 

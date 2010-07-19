@@ -26,7 +26,7 @@ public final class JWebSocketServerConstants {
 	/**
 	 * Current version string of the jWebSocket package.
 	 */
-	public static final String VERSION_STR = "0.10.0716 alpha";
+	public static final String VERSION_STR = "0.10.0719 alpha";
 	/**
 	 * Namespace base for tokens and plug-ins.
 	 */
