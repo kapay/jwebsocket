@@ -199,6 +199,10 @@
 					log( jWebSocketClient.resultToString( lRes ) );
 				}
 			}
+
+			function onFileLoadedObs( aToken ) {
+				log( "Loaded file: " + aToken.data );
+			}
 			
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
@@ -212,6 +216,9 @@
 					jWebSocketClient = new jws.jWebSocketJSONClient();
 					jWebSocketClient.setSamplesCallbacks({
 						OnSamplesServerTime: getServerTimeCallback
+					});
+					jWebSocketClient.setFileSystemCallbacks({
+						OnFileLoaded: onFileLoadedObs
 					});
 					eUsername.focus();
 				} else {

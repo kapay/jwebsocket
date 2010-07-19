@@ -30,7 +30,8 @@ jws.FileSystemPlugIn = {
 		if( aToken.ns == jws.FileSystemPlugIn.NS ) {
 			// here you can handle incomimng tokens from the server
 			// directy in the plug-in if desired.
-			if( "fileLoad" == aToken.reqType ) {
+			if( "load" == aToken.reqType ) {
+				aToken.data = Base64.decode( aToken.data );
 				if( this.OnFileLoaded ) {
 					this.OnFileLoaded( aToken );
 				}
@@ -61,7 +62,7 @@ jws.FileSystemPlugIn = {
 			var lToken = {
 				ns: jws.FileSystemPlugIn.NS,
 				type: "save",
-				data: aData,
+				data: Base64.encode( aData ),
 				filename: aFilename
 			};
 			this.sendToken( lToken,	aOptions );

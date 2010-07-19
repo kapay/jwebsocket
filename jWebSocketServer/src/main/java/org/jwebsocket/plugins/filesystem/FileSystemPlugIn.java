@@ -21,6 +21,7 @@ package org.jwebsocket.plugins.filesystem;
 
 import java.io.File;
 import java.io.IOException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
@@ -90,7 +91,11 @@ public class FileSystemPlugIn extends TokenPlugIn {
 
 		// obtain required parameters for file load operation
 		String lFilename = aToken.getString("filename");
-		String lData = aToken.getString("data");
+		String lBase64 = aToken.getString("data");
+		byte[] lBA = null;
+		if (lBase64 != null) {
+			lBA = Base64.decodeBase64(lBase64);
+		}
 
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
@@ -98,7 +103,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		// complete the response token
 		File lFile = new File(BASE_DIR_USER + lFilename);
 		try {
-			FileUtils.writeStringToFile(lFile, lData, "UTF-8");
+			FileUtils.writeByteArrayToFile(lFile, lBA);
 		} catch (IOException ex) {
 			lResponse.put("code", -1);
 			lResponse.put("msg", ex.getMessage());
@@ -136,8 +141,12 @@ public class FileSystemPlugIn extends TokenPlugIn {
 
 		// complete the response token
 		File lFile = new File(BASE_DIR_USER + lFilename);
+		byte[] lBA = null;
 		try {
-			lData = FileUtils.readFileToString(lFile, "UTF-8");
+			lBA = FileUtils.readFileToByteArray(lFile);
+			if (lBA != null && lBA.length > 0) {
+				lData = new String(Base64.encodeBase64(lBA), "UTF-8");
+			}
 			lResponse.put("data", lData);
 		} catch (IOException ex) {
 			lResponse.put("code", -1);
