@@ -71,7 +71,7 @@ public class JWebSocketSubSystemSample {
 				"-", // jar, needs to be in classpath, i.e. embedded in .jar'/manifest
 				8787, // port
 				120000, // default session timeout
-				16384, // max framesize
+				JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE, // max framesize
 				lDomains // list of accepted domains
 				);
 		engine = new TCPEngine(engineConfig);

@@ -62,11 +62,9 @@ public class DBConnectSingleton {
 	 * @since 1.0
 	 */
 	public final static String USR_DEMO = "DEMO";
-
 	// DB_DRIVER
 	public static String DB_DRIVER = "com.mysql.jdbc.Driver";
 	public static String DB_URL = "jdbc:mysql://localhost:3306/ria-db";
-
 	// USR_SYSTEM
 	public static String DB_SYS_USER_ID = "fffSys";
 	public static String DB_SYS_USER_PW = "sys_password";
@@ -108,13 +106,17 @@ public class DBConnectSingleton {
 				// Prüfen, ob eine Verbindung besteht, und ggf. neu aufbauen.
 				if (lConnection == null || lConnection.isClosed()) {
 					try {
-						log.debug("Verbindungsaufbau (" + aUsr + ") zur Datenbank...");
+						if (log.isDebugEnabled()) {
+							log.debug("Verbindungsaufbau (" + aUsr + ") zur Datenbank...");
+						}
 						Class.forName(DB_DRIVER);
 						lConnection = DriverManager.getConnection(
 								DB_URL,
 								lUsername,
 								lPassword);
-						log.info("Verbindungsaufbau (" + aUsr + ") erfolgreich.");
+						if (log.isInfoEnabled()) {
+							log.info("Verbindungsaufbau (" + aUsr + ") erfolgreich.");
+						}
 						connections.put(aUsr, lConnection);
 						return lConnection;
 					} catch (SQLException ex) {
@@ -153,14 +155,20 @@ public class DBConnectSingleton {
 	public static void closeConnection(String aUsr) {
 
 		try {
-			log.info("Verbindung zur Datenbank (" + aUsr + ") wird getrennt...");
+			if (log.isDebugEnabled()) {
+				log.debug("Verbindung zur Datenbank (" + aUsr + ") wird getrennt...");
+			}
 			Connection lConnection = (Connection) connections.get(aUsr);
 
 			if (lConnection != null && !lConnection.isClosed()) {
 				lConnection.close();
-				log.info("Datenbankverbindung (" + aUsr + ") erfolgreich getrennt.");
+				if (log.isInfoEnabled()) {
+					log.info("Datenbankverbindung (" + aUsr + ") erfolgreich getrennt.");
+				}
 			} else {
-				log.info("Es besteht keine Verbindung (" + aUsr + ") zur Datenbank.");
+				if (log.isInfoEnabled()) {
+					log.info("Es besteht keine Verbindung (" + aUsr + ") zur Datenbank.");
+				}
 			}
 		} catch (SQLException ex) {
 			lastRecentException =

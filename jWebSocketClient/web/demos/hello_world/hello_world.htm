@@ -30,6 +30,8 @@
 		<script type="text/javascript" src="../../res/js/jwsSamplesPlugIn.js"></script>
 		<!-- this one imports the client side JDBC plug-in -->
 		<script type="text/javascript" src="../../res/js/jwsJDBCPlugIn.js"></script>
+		<!-- this one imports the client side file system plug-in -->
+		<script type="text/javascript" src="../../res/js/jwsFilesystemPlugIn.js"></script>
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
@@ -176,6 +178,28 @@
 				}
 			}
 
+			function loadFile() {
+				log( "Loading a file from the server via WebSockets..." );
+				// call the getTime method of the client side plug-in
+				var lRes = jWebSocketClient.fileLoad( "test.txt", {
+				});
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( jWebSocketClient.resultToString( lRes ) );
+				}
+			}
+
+			function saveFile() {
+				log( "Saving a file from the server via WebSockets..." );
+				// call the getTime method of the client side plug-in
+				var lRes = jWebSocketClient.fileSave( "test.txt", eMessage.value, {
+				});
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( jWebSocketClient.resultToString( lRes ) );
+				}
+			}
+			
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
 				eMessage = jws.$( "stxfMessage" );
@@ -240,15 +264,17 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSaveFile" type="button" value="Save File" onclick="saveFile();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Password</td>
 					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnGetTime" type="button" value="GetTime" onclick="sampleGetTime();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSelect" type="button" value="Select" onclick="sampleSelect();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetTime" type="button" value="GetTime" onclick="sampleGetTime();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSelect" type="button" value="Select" onclick="sampleSelect();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnLoadFile" type="button" value="Load File" onclick="loadFile();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Message</td>

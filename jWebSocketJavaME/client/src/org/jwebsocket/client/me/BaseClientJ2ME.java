@@ -117,7 +117,7 @@ public class BaseClientJ2ME extends BaseClient {
 
 		public void run() {
 			isRunning = true;
-			byte[] lBuff = new byte[MAX_FRAMESIZE];
+			byte[] lBuff = new byte[MAX_FRAME_SIZE];
 			int lPos = -1;
 			int lStart = -1;
 

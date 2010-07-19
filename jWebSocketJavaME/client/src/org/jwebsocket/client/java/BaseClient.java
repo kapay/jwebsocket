@@ -49,7 +49,7 @@ public abstract class BaseClient implements WebSocketClient {
 	/*
 	 * The maximum amount of bytes per frame
 	 */
-	public static final int MAX_FRAMESIZE = 16384;
+	public static final int MAX_FRAME_SIZE = 16384;
 
 	// @Override
 	public void addListener(WebSocketClientListener aListener) {

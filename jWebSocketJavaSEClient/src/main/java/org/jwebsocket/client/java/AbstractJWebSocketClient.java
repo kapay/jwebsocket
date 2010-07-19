@@ -42,10 +42,12 @@ import org.jwebsocket.kit.WebSocketException;
 public abstract class AbstractJWebSocketClient implements JWebSocketClient {
 
     /** default maximum data frame size processed */
-    public static final int MAX_FRAMESIZE = 16384;
+	// used from JWebSocketCommonConstants from v0.10
+    // public static final int MAX_FRAMESIZE = 16384;
 
     /** max data frame size */
-    private int maxFrameSize = MAX_FRAMESIZE;
+	// used from JWebSocketCommonConstants from v0.10
+    // private int maxFrameSize = MAX_FRAMESIZE;
 
     /** list of the listeners registered */
     private List<WebSocketClientListener> listeners = new FastList<WebSocketClientListener>();
@@ -201,7 +203,9 @@ public abstract class AbstractJWebSocketClient implements JWebSocketClient {
     /**
      * @return the max data frame size
      */
+	/* obsolete from v0.10
     public int getMaxFrameSize() {
         return maxFrameSize;
     }
+	 */
 }

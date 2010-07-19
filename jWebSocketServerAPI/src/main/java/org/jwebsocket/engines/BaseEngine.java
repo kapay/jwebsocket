@@ -144,7 +144,7 @@ public class BaseEngine implements WebSocketEngine {
 
 	@Override
 	public int getMaxFrameSize() {
-		return configuration.getMaxframesize();
+		return configuration.getMaxFramesize();
 	}
 
 	@Override

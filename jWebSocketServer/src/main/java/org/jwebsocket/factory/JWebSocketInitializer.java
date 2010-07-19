@@ -84,7 +84,7 @@ public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
         }
 
         @Override
-        public int getMaxframesize() {
+        public int getMaxFramesize() {
             return JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE;
         }
 

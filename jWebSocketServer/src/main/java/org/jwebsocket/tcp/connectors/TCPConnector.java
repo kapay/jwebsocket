@@ -13,9 +13,11 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
@@ -142,8 +144,12 @@ public class TCPConnector extends BaseConnector {
 		public void run() {
 			WebSocketEngine engine = getEngine();
 
-			// TODO: use and make MAX_FRAME_SIZE consistent!
-			byte[] lBuff = new byte[16384];
+			int lMaxFrameSize = JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE;
+			EngineConfiguration config = engine.getConfiguration();
+			if (config != null && config.getMaxFramesize() > 0) {
+				lMaxFrameSize = config.getMaxFramesize();
+			}
+			byte[] lBuff = new byte[lMaxFrameSize];
 			int pos = -1;
 			int lStart = -1;
 
@@ -155,33 +161,37 @@ public class TCPConnector extends BaseConnector {
 				engine.connectorStarted(connector);
 
 				while (isRunning) {
-					try{
+					try {
 						int b = is.read();
 						// start of frame
 						if (b == 0x00) {
 							pos = 0;
 							lStart = 0;
-						// end of frame
+							// end of frame
 						} else if (b == 0xff) {
 							if (lStart >= 0) {
-								RawPacket lPacket = new RawPacket(Arrays.copyOf(lBuff, pos));
-								try {
-									engine.processPacket(connector, lPacket);
-								} catch (Exception ex) {
-									log.error(ex.getClass().getSimpleName()
-											+ " in processPacket of connector "
-											+ connector.getClass().getSimpleName()
-											+ ": " + ex.getMessage());
+								if (pos <= lMaxFrameSize) {
+									RawPacket lPacket = new RawPacket(Arrays.copyOf(lBuff, pos));
+									try {
+										engine.processPacket(connector, lPacket);
+									} catch (Exception ex) {
+										log.error(ex.getClass().getSimpleName()
+												+ " in processPacket of connector "
+												+ connector.getClass().getSimpleName()
+												+ ": " + ex.getMessage());
+									}
+								} else {
+									log.error("Datapacket exceeded maximum size of " + lMaxFrameSize + " bytes and will not be processed!");
 								}
 							}
 							lStart = -1;
-						// end of stream
-						} else if( b < 0 ) {
+							// end of stream
+						} else if (b < 0) {
 							closeReason = CloseReason.CLIENT;
 							isRunning = false;
-						// any other byte within or outside a frame
+							// any other byte within or outside a frame
 						} else {
-							if (lStart >= 0) {
+							if (lStart >= 0 && pos < lMaxFrameSize) {
 								lBuff[pos] = (byte) b;
 							}
 							pos++;

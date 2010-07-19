@@ -81,9 +81,9 @@ public class JWebSocketCommonConstants {
 	 */
 	public static int MAX_IN_PORT = 65535;
 	/**
-	 * the max frame size
+	 * the default maximum frame size if not configured
 	 */
-	public static int DEFAULT_MAX_FRAME_SIZE = 16384;
+	public static final int DEFAULT_MAX_FRAME_SIZE = 16384;
 	/**
 	 * Default socket port for jWebSocket clients.
 	 */

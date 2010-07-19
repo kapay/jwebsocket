@@ -2,6 +2,10 @@
 //	jWebSocket - jWebSocket JDBC Plug-In
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
+//  THIS CODE IS FOR RESEARCH, EVALUATION AND TEST PURPOSES ONLY!
+//  THIS CODE MAY BE SUBJECT TO CHANGES WITHOUT ANY NOTIFICATION!
+//	THIS CODE IS NOT YET SECURE AND MAY NOT BE USED FOR PRODUCTION ENVIRONMENTS!
+//	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
 //	Free Software Foundation; either version 3 of the License, or (at your
@@ -36,7 +40,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(JDBCPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
-	private String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
+	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
 
 	/**
 	 *
@@ -123,7 +127,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		// check if user is allowed to run 'select' command
 		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			return;
+			// return;
 		}
 
 		// obtain required parameters for query

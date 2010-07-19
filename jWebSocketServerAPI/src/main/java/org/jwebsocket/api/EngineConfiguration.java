@@ -45,7 +45,7 @@ public interface EngineConfiguration extends Configuration {
      * size greater than this value will cause connection to be terminated
      * @return the maximum frame size
      */
-    int getMaxframesize();
+    int getMaxFramesize();
     /**
      * These are the list of allowed domains for accepting connections for the origin
      * based security model. Any connection request with different origin than the origins

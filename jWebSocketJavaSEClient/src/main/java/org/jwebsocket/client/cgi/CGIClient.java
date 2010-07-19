@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 
 import org.jwebsocket.client.java.AbstractJWebSocketClient;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -31,7 +32,8 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class CGIClient extends AbstractJWebSocketClient {
 
-	private final static int MAX_FRAMESIZE = 16384;
+	// used from JWebSocketCommonConstants from v0.10
+	// private final static int MAX_FRAMESIZE = 16384;
 	private boolean isRunning = false;
 	private Thread inboundThread;
 	private InboundProcess inboundProcess;
@@ -89,7 +91,7 @@ public class CGIClient extends AbstractJWebSocketClient {
 		@Override
 		public void run() {
 			isRunning = true;
-			byte[] lBuff = new byte[MAX_FRAMESIZE];
+			byte[] lBuff = new byte[JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE];
 			int pos = -1;
 			int lStart = -1;
 

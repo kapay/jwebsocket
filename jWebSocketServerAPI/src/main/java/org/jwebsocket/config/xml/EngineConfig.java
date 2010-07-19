@@ -63,6 +63,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	/**
 	 * @return the id
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -70,6 +71,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	/**
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -77,6 +79,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	/**
 	 * @return the jar
 	 */
+	@Override
 	public String getJar() {
 		return jar;
 	}
@@ -84,6 +87,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	/**
 	 * @return the port
 	 */
+	@Override
 	public int getPort() {
 		return port;
 	}
@@ -91,6 +95,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	/**
 	 * @return the timeout
 	 */
+	@Override
 	public int getTimeout() {
 		return timeout;
 	}
@@ -98,13 +103,15 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	/**
 	 * @return the max frame size
 	 */
-	public int getMaxframesize() {
+	@Override
+	public int getMaxFramesize() {
 		return maxframesize;
 	}
 
 	/**
 	 * @return the domains
 	 */
+	@Override
 	public List<String> getDomains() {
 		return domains;
 	}
