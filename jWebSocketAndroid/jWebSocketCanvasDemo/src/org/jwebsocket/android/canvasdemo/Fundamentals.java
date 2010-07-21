@@ -16,46 +16,32 @@ package org.jwebsocket.android.canvasdemo;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.Toast;
 
 /**
  *
  * @author aschulze
  */
-public class ConfigActivity extends Activity {
-
-    private Button lBtnCancel;
-    private Button lBtnSave;
+public class Fundamentals extends Activity {
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        setContentView(R.layout.config_hvga_p);
+        setContentView(R.layout.fundamentals_hvga_p);
 
-        lBtnCancel = (Button) findViewById(R.id.btnCancel);
-        lBtnSave = (Button) findViewById(R.id.btnSave);
+        Toast.makeText(getApplicationContext(), "CONNECTING...",
+                Toast.LENGTH_SHORT).show();
+        // JWC.open();
+    }
 
-        lBtnCancel.setOnClickListener(new OnClickListener() {
+    @Override
+    public void onDestroy() {
+        Toast.makeText(getApplicationContext(), "DISCONNECTING...",
+                Toast.LENGTH_SHORT).show();
+        // JWC.close();
 
-            public void onClick(View v) {
+        super.onDestroy();
 
-                Toast.makeText(getApplicationContext(), "DISCARDING...",
-                        Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        });
-
-        lBtnSave.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "SAVING...",
-                        Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        });
     }
 }

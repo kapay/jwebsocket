@@ -1,7 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+// ---------------------------------------------------------------------------
+// jWebSocket - Copyright (c) 2010 Innotrade GmbH
+// ---------------------------------------------------------------------------
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU Lesser General Public License as published by the
+// Free Software Foundation; either version 3 of the License, or (at your
+// option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License 
+// for more details.
+// You should have received a copy of the GNU Lesser General Public License 
+// along with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+// ---------------------------------------------------------------------------
 package org.jwebsocket.android.canvasdemo;
 
 import android.app.Activity;
@@ -11,6 +21,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -36,80 +48,78 @@ public class CanvasActivity extends Activity {
         // Create a LinearLayout in which to add the ImageView
         mLinearLayout = new LinearLayout(this);
 
+        // get the display metric (width and height)
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
         final int width = metrics.widthPixels;
         final int height = metrics.heightPixels;
 
-        final Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        final Canvas c = new Canvas(b);
-        final ImageView i = new ImageView(this);
-        // i.setAdjustViewBounds(true); // set the ImageView bounds to match the Drawable's dimensions
-        i.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        i.setImageBitmap(b);
-        i.setScaleType(ImageView.ScaleType.CENTER);
-        i.setPadding(0, 0, 0, 0);
+        final Bitmap lBmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        final Canvas lCanvas = new Canvas(lBmp);
+        final ImageView lImgView = new ImageView(this);
+
+        lImgView.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        lImgView.setImageBitmap(lBmp);
+        lImgView.setScaleType(ImageView.ScaleType.CENTER);
+        lImgView.setPadding(0, 0, 0, 0);
 
         final Paint bck = new Paint();
         bck.setARGB(0xff, 0x80, 0x80, 0x80);
-        c.drawRect(0, 0, width, height, bck);
+        lCanvas.drawRect(0, 0, width, height, bck);
 
         final Paint p = new Paint();
-        p.setARGB(0xff, 0xff, 0xff, 0xff);
-        c.drawText("Hello World!", 10, 10, p);
-
-        mLinearLayout.addView(i);
+        p.setARGB(0xff, 0xff, 0x00, 0xff);
+  
+        mLinearLayout.addView(lImgView);
         setContentView(mLinearLayout);
 
+        lImgView.setOnTouchListener(new OnTouchListener() {
 
-
-        i.setOnTouchListener(new OnTouchListener() {
-
+            // start and end coordinates for a single line
             float sx, sy, ex, ey;
 
             public boolean onTouch(View aView, MotionEvent aME) {
 
-                Rect rect = new Rect();
-                Window window = getWindow();
-                window.getDecorView().getWindowVisibleDisplayFrame(rect);
-                int statusBarHeight = rect.top;
-                int contentViewTop =
-                        window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
-                final int titleBarHeight = contentViewTop - statusBarHeight;
+                Rect lRect = new Rect();
+                Window lWindow = getWindow();
+                lWindow.getDecorView().getWindowVisibleDisplayFrame(lRect);
+                int lStatusBarHeight = lRect.top;
+                int lContentViewTop =
+                        lWindow.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+                final int lTitleBarHeight = lContentViewTop - lStatusBarHeight;
 
                 int lAction = aME.getAction();
+
                 float lX = aME.getX();
                 float lY = aME.getY();
-                float lOfsX = 0;
-                float lOfsY = 20;
-                c.drawRect(0, 0, width, 100, bck);
-                c.drawText("getX/Y:" + aME.getX() + "/" + aME.getY(), 0, 10, p);
-                c.drawText("getRawX/Y:" + aME.getRawX() + "/" + aME.getRawY(), 0, 25, p);
-                c.drawText("getPrecisionX/Y:" + aME.getXPrecision() + "/" + aME.getXPrecision(), 0, 40, p);
-                c.drawText("getTop/Left:" + i.getTop() + "/" + i.getLeft(), 0, 55, p);
+
                 switch (lAction) {
                     case MotionEvent.ACTION_DOWN:
-                        ex = lX + lOfsX;
-                        ey = lY + titleBarHeight;
+                        ex = lX;
+                        ey = lY + lTitleBarHeight;
                         break;
                     case MotionEvent.ACTION_MOVE:
                         sx = ex;
                         sy = ey;
-                        ex = lX + lOfsX;
-                        ey = lY + titleBarHeight;
-                        c.drawLine(sx, sy, ex, ey, p);
+                        ex = lX;
+                        ey = lY + lTitleBarHeight;
+                        lCanvas.drawLine(sx, sy, ex, ey, p);
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         break;
                 }
-                i.invalidate();
-                //Matrix m = c.getMatrix();
-                //m.setScale(1.0f, 1.0f);
+                lImgView.invalidate();
                 return true;
             }
         });
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu aMenu) {
+        MenuInflater lMenInfl = getMenuInflater();
+        lMenInfl.inflate(R.menu.canvas_menu, aMenu);
+        return true;
     }
 }

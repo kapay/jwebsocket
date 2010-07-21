@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
      package="org.jwebsocket.android.canvasdemo">
-    <application>
+    <application android:debuggable="true">
         <activity android:name=".MainActivity" android:label="jWebSocket Android Demo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="Fundamentals" android:label="jWebSocket Fundamentals">
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT"/>
+                <category android:name="android.intent.category.ALTERNATIVE"/>
             </intent-filter>
         </activity>
         <activity android:name=".ConfigActivity" android:label="jWebSocket Configuration">
@@ -20,5 +26,15 @@
                 <category android:name="android.intent.category.ALTERNATIVE"/>
             </intent-filter>
         </activity>
+        <activity android:name=".CameraActivity" android:label="jWebSocket Camera Demo" android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT"/>
+                <category android:name="android.intent.category.ALTERNATIVE"/>
+            </intent-filter>
+        </activity>
     </application>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
 </manifest>

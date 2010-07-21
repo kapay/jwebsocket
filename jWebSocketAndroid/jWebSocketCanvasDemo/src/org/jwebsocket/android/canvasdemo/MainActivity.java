@@ -1,7 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+// ---------------------------------------------------------------------------
+// jWebSocket - Copyright (c) 2010 Innotrade GmbH
+// ---------------------------------------------------------------------------
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU Lesser General Public License as published by the
+// Free Software Foundation; either version 3 of the License, or (at your
+// option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+// for more details.
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+// ---------------------------------------------------------------------------
 package org.jwebsocket.android.canvasdemo;
 
 import android.app.ListActivity;
@@ -23,14 +33,15 @@ public class MainActivity extends ListActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        // setContentView(R.layout.config_hvga_p);
+        // setContentView(R.layout.config_hvga_p)
 
-        String[] ITEMS = {"Fundamentals", "Canvas Demo", "Setup"};
+        String[] lItems = {"Fundamentals", "Canvas Demo", "Camera Demo", "Setup"};
 
-        setListAdapter(new ArrayAdapter<String>(this, R.layout.list_item, ITEMS));
+        setListAdapter(new ArrayAdapter<String>(this, R.layout.list_item, lItems));
 
         ListView lv = getListView();
         lv.setTextFilterEnabled(true);
+
 
         lv.setOnItemClickListener(new OnItemClickListener() {
 
@@ -38,12 +49,16 @@ public class MainActivity extends ListActivity {
                     int position, long id) {
                 switch (position) {
                     case 0:
+                        startActivity(new Intent(MainActivity.this, Fundamentals.class));
                         break;
                     case 1:
                         startActivity(new Intent(MainActivity.this, CanvasActivity.class));
                         break;
                     case 2:
-                        MainActivity.this.startActivity(new Intent(MainActivity.this, ConfigActivity.class));
+                        startActivity(new Intent(MainActivity.this, CameraActivity.class));
+                        break;
+                    case 3:
+                        startActivity(new Intent(MainActivity.this, ConfigActivity.class));
                         break;
                 }
                 //Toast.makeText(getApplicationContext(), ((TextView) view).getText(),

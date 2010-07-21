@@ -63,6 +63,7 @@ android:id="@+id/btnCancel"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Cancel"
+android:drawableLeft="@drawable/mni_cancel"
 android:layout_weight="1"
 >
         </Button>
@@ -71,6 +72,7 @@ android:id="@+id/btnSave"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Save"
+android:drawableLeft="@drawable/mni_save"
 android:layout_weight="1"
 >
         </Button>
