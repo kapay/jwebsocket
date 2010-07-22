@@ -38,6 +38,11 @@
 	</build>
 
 	<repositories>
+		  <repository>
+                        <id>netbeans</id>
+                        <name>NetBeans Repository</name>
+                        <url>http://bits.netbeans.org/maven2</url>
+                </repository>
 		<repository>
 			<id>maven-central-repo</id>
 			<name>Maven Central Repository</name>

@@ -14,6 +14,9 @@
 // ---------------------------------------------------------------------------
 package org.jwebsocket.android.canvasdemo;
 
+import org.jwebsocket.client.token.BaseTokenClient;
+import org.jwebsocket.kit.WebSocketException;
+
 /**
  *
  * @author aschulze
@@ -21,13 +24,14 @@ package org.jwebsocket.android.canvasdemo;
 public class JWC {
 
     private static String URL = "ws://192.168.2.232:8787";
-    // private static BaseTokenClient jwc = new BaseTokenClient();;
+    private static BaseTokenClient jwc = new BaseTokenClient();
 
-    public static void open() /* throws WebSocketException */ {
-        //jwc.open(URL);
+
+    public static void open() throws WebSocketException {
+        jwc.open(URL);
     }
-    
-    public static void close() /* throws WebSocketException */ {
-        //jwc.close();
+
+    public static void close() throws WebSocketException {
+        jwc.close();
     }
 }

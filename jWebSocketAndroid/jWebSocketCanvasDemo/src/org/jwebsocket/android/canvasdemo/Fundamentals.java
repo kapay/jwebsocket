@@ -17,6 +17,7 @@ package org.jwebsocket.android.canvasdemo;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Toast;
+import org.jwebsocket.kit.WebSocketException;
 
 /**
  *
@@ -30,16 +31,24 @@ public class Fundamentals extends Activity {
         super.onCreate(icicle);
         setContentView(R.layout.fundamentals_hvga_p);
 
-        Toast.makeText(getApplicationContext(), "CONNECTING...",
+        Toast.makeText(getApplicationContext(), "CONNECTING 2...",
                 Toast.LENGTH_SHORT).show();
-        // JWC.open();
+        try {
+            JWC.open();
+        } catch (WebSocketException ex) {
+
+        }
     }
 
     @Override
     public void onDestroy() {
-        Toast.makeText(getApplicationContext(), "DISCONNECTING...",
+        Toast.makeText(getApplicationContext(), "DISCONNECTING 2...",
                 Toast.LENGTH_SHORT).show();
-        // JWC.close();
+        try {
+            JWC.close();
+        } catch (WebSocketException ex) {
+            
+        }
 
         super.onDestroy();
 

@@ -85,6 +85,11 @@ is divided into following sections:
         </condition>
         <condition property="have.sources">
             <or>
+                <available file="${src.json2.dir}"/>
+                <available file="${src.javolution.dir}"/>
+                <available file="${src.jWebSocketCommon.dir}"/>
+                <available file="${src.jWebSocketClientAPI.dir}"/>
+                <available file="${src.jWebSocketJavaSEClient.dir}"/>
                 <available file="${src.dir}"/>
             </or>
         </condition>
@@ -148,6 +153,11 @@ is divided into following sections:
         <!-- You can override this target in the ../build.xml file. -->
     </target>
     <target depends="-pre-init,-init-private,-init-user,-init-project,-do-init" name="-init-check">
+        <fail unless="src.json2.dir">Must set src.json2.dir</fail>
+        <fail unless="src.javolution.dir">Must set src.javolution.dir</fail>
+        <fail unless="src.jWebSocketCommon.dir">Must set src.jWebSocketCommon.dir</fail>
+        <fail unless="src.jWebSocketClientAPI.dir">Must set src.jWebSocketClientAPI.dir</fail>
+        <fail unless="src.jWebSocketJavaSEClient.dir">Must set src.jWebSocketJavaSEClient.dir</fail>
         <fail unless="src.dir">Must set src.dir</fail>
         <fail unless="test.src.dir">Must set test.src.dir</fail>
         <fail unless="build.dir">Must set build.dir</fail>
@@ -170,7 +180,7 @@ is divided into following sections:
     </target>
     <target name="-init-macrodef-javac">
         <macrodef name="javac" uri="http://www.netbeans.org/ns/android-project/1">
-            <attribute default="${src.dir}" name="srcdir"/>
+            <attribute default="${src.json2.dir}:${src.javolution.dir}:${src.jWebSocketCommon.dir}:${src.jWebSocketClientAPI.dir}:${src.jWebSocketJavaSEClient.dir}:${src.dir}" name="srcdir"/>
             <attribute default="${build.classes.dir}" name="destdir"/>
             <attribute default="${javac.classpath}" name="classpath"/>
             <attribute default="${includes}" name="includes"/>
@@ -189,7 +199,7 @@ is divided into following sections:
             </sequential>
         </macrodef>
         <macrodef name="depend" uri="http://www.netbeans.org/ns/android-project/1">
-            <attribute default="${src.dir}" name="srcdir"/>
+            <attribute default="${src.json2.dir}:${src.javolution.dir}:${src.jWebSocketCommon.dir}:${src.jWebSocketClientAPI.dir}:${src.jWebSocketJavaSEClient.dir}:${src.dir}" name="srcdir"/>
             <attribute default="${build.classes.dir}" name="destdir"/>
             <attribute default="${javac.classpath}" name="classpath"/>
             <sequential>
@@ -368,6 +378,11 @@ is divided into following sections:
     <target depends="init,deps-jar,-pre-pre-compile,-pre-compile,-compile-depend" if="have.sources" name="-do-compile">
         <androidproject1:javac/>
         <copy todir="${build.classes.dir}">
+            <fileset dir="${src.json2.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${src.javolution.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${src.jWebSocketCommon.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${src.jWebSocketClientAPI.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${src.jWebSocketJavaSEClient.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
             <fileset dir="${src.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
         </copy>
     </target>
@@ -383,7 +398,7 @@ is divided into following sections:
     <target depends="init,deps-jar,-pre-pre-compile" name="-do-compile-single">
         <fail unless="javac.includes">Must select some files in the IDE or set javac.includes</fail>
         <androidproject1:force-recompile/>
-        <androidproject1:javac excludes="" includes="${javac.includes}" sourcepath="${src.dir}"/>
+        <androidproject1:javac excludes="" includes="${javac.includes}" sourcepath="${src.json2.dir}:${src.javolution.dir}:${src.jWebSocketCommon.dir}:${src.jWebSocketClientAPI.dir}:${src.jWebSocketJavaSEClient.dir}:${src.dir}"/>
     </target>
     <target name="-post-compile-single">
         <!-- Empty placeholder for easier customization. -->
@@ -399,13 +414,12 @@ is divided into following sections:
         <dirname file="${dist.apk}" property="dist.apk.dir"/>
         <mkdir dir="${dist.apk.dir}"/>
     </target>
-
     <target name="-pre-jar">
-        
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
     </target>
-
     <target name="-post-jar">
-            
+        <!--
         <zip update="true" destfile="${dist.apk}">
             <zipfileset dir="${external.libs.dir}" includes="json-2-RELEASE65.jar" prefix="" />
             <zipfileset dir="${external.libs.dir}" includes="jWebSocketCommon-0.10.jar" prefix="" />
@@ -416,9 +430,9 @@ is divided into following sections:
             <zipfileset dir="${external.libs.dir}" includes="log4j-1.2.15.jar" prefix="" />
             <zipfileset dir="${external.libs.dir}" includes="netty-3.2.0.BETA1" prefix="" />
         </zip>
-            
+        -->
 
-         <zip destfile="tmp.apk">
+        <zip destfile="tmp.apk">
             <zipfileset src="${dist.apk}">
                 <exclude name="META-INF/*.*" />
             </zipfileset>
@@ -441,7 +455,6 @@ CN: "CN=Android Debug,O=Android,C=US"
             keypass="jWebSocket"
             keystore="jWebSocket_demo.keystore"/>
     </target>
-    
     <target depends="init,compile,-pre-pre-jar,-pre-jar" name="-dex">
         <exec executable="${dx}" failonerror="true">
             <arg value="--dex"/>
@@ -617,6 +630,21 @@ CN: "CN=Android Debug,O=Android,C=US"
             <classpath>
                 <path path="${javac.classpath}"/>
             </classpath>
+            <fileset dir="${src.json2.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${src.javolution.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${src.jWebSocketCommon.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${src.jWebSocketClientAPI.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${src.jWebSocketJavaSEClient.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
             <fileset dir="${src.dir}" excludes="${excludes}" includes="${includes}">
                 <filename name="**/*.java"/>
             </fileset>

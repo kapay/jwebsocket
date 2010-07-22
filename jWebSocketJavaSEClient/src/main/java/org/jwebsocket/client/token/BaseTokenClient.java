@@ -37,27 +37,23 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
 
     /** base namespace for jWebSocket */
     private final static String NS_BASE = "org.jWebSocket";
-
     /** constants for connection status */
     public final static int DISCONNECTED = 0;
     public final static int CONNECTED = 1;
     public final static int AUTHENTICATED = 2;
-
     /** token client protocols */
     private final static String WELCOME = "welcome";
     private final static String LOGIN = "login";
     private final static String GOODBYE = "goodBye";
     private final static String LOGOUT = "logout";
-
     /** token id */
     private int CUR_TOKEN_ID = 0;
     /** subprotocol value */
     private String lSubProt = JWebSocketCommonConstants.SUB_PROT_DEFAULT;
-
     private String fUsername = null;
     private String fClientId = null;
     private String fSessionId = null;
-    
+
     /**
      * Default constructor
      */
@@ -203,9 +199,9 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
         aToken.put("utid", CUR_TOKEN_ID);
         super.send(tokenToPacket(aToken));
     }
-
     private final static String NS_SYSTEM_PLUGIN = NS_BASE + ".plugins.system";
 
+    @Override
     public void login(String aUsername, String aPassword) throws WebSocketException {
         Token lToken = new Token();
         lToken.put("type", "login");
@@ -215,6 +211,7 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
         sendToken(lToken);
     }
 
+    @Override
     public void logout() throws WebSocketException {
         Token lToken = new Token();
         lToken.put("type", "logout");
@@ -222,6 +219,7 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
         sendToken(lToken);
     }
 
+    @Override
     public void ping(boolean aEcho) throws WebSocketException {
         Token lToken = new Token();
         lToken.put("ns", NS_SYSTEM_PLUGIN);
@@ -230,6 +228,7 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
         sendToken(lToken);
     }
 
+    @Override
     public void sendText(String aTarget, String aData) throws WebSocketException {
         Token lToken = new Token();
         lToken.put("ns", NS_SYSTEM_PLUGIN);
@@ -241,6 +240,7 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
         sendToken(lToken);
     }
 
+    @Override
     public void broadcastText(String aData) throws WebSocketException {
         Token lToken = new Token();
         lToken.put("ns", NS_SYSTEM_PLUGIN);
@@ -256,6 +256,7 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
     /* functions of the Admin Plug-in */
     private final static String NS_ADMIN_PLUGIN = NS_BASE + ".plugins.admin";
 
+    @Override
     public void disconnect() throws WebSocketException {
         Token lToken = new Token();
         lToken.put("type", "shutdown");
@@ -263,6 +264,7 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
         sendToken(lToken);
     }
 
+    @Override
     public void getConnections() throws WebSocketException {
         Token lToken = new Token();
         lToken.put("type", "getConnections");
@@ -279,5 +281,4 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
     public void removeTokenClientListener(WebSocketClientTokenListener tokenListener) {
         super.removeListener(tokenListener);
     }
-
 }
