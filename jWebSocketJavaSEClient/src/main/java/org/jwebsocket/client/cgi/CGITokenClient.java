@@ -29,89 +29,91 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class CGITokenClient extends BaseTokenClient {
 
-	private final static char START_FRAME = 0x02; // ASCII STX
-	private final static char END_FRAME = 0x03; // ASCII ETX
+    private final static char START_FRAME = 0x02; // ASCII STX
+    private final static char END_FRAME = 0x03; // ASCII ETX
+    // used from JWebSocketCommonConstants from v0.10
+    // private final static int MAX_FRAMESIZE = 16384;
+    private boolean isRunning = false;
+    private Thread inboundThread;
+    private InboundProcess inboundProcess;
+    private InputStream is = null;
+    private OutputStream os = null;
+    private OutputStream es = null;
 
-	// used from JWebSocketCommonConstants from v0.10
-	// private final static int MAX_FRAMESIZE = 16384;
-	private boolean isRunning = false;
-	private Thread inboundThread;
-	private InboundProcess inboundProcess;
-	private InputStream is = null;
-	private OutputStream os = null;
-	private OutputStream es = null;
+    /**
+     *
+     * @param aListener
+     */
+    public CGITokenClient() {
+    }
 
-	/**
-	 *
-	 * @param aListener
-	 */
-	public CGITokenClient() {
-	}
+    @Override
+    public void open(String aURL) throws WebSocketException {
+        // establish connection to WebSocket Network
+        super.open(aURL);
 
-	@Override
-	public void open(String aURL) throws WebSocketException {
-		// establish connection to WebSocket Network
-		super.open(aURL);
+        // assign streams to CGI channels
+        is = System.in;
+        os = System.out;
+        es = System.err;
 
-		// assign streams to CGI channels
-		is = System.in;
-		os = System.out;
-		es = System.err;
+        // instantiate thread to process messages coming from stdIn
+        inboundProcess = new InboundProcess();
+        inboundThread = new Thread(inboundProcess);
+        inboundThread.start();
+    }
 
-		// instantiate thread to process messages coming from stdIn
-		inboundProcess = new InboundProcess();
-		inboundThread = new Thread(inboundProcess);
-		inboundThread.start();
-	}
+    @Override
+    public void close() throws WebSocketException {
+        // stop CGI listener
+        isRunning = false;
+        // and close WebSocket connection
+        super.close();
+    }
 
-	@Override
-	public void close() throws WebSocketException {
-		// stop CGI listener
-		isRunning = false;
-		// and close WebSocket connection
-		super.close();
-	}
+    private class InboundProcess implements Runnable {
 
-	private class InboundProcess implements Runnable {
+        @Override
+        public void run() {
+            isRunning = true;
+            byte[] lBuff = new byte[JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE];
+            int lIdx = -1;
+            int lStart = -1;
 
-		@Override
-		public void run() {
-			isRunning = true;
-			byte[] lBuff = new byte[JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE];
-			int pos = -1;
-			int lStart = -1;
+            while (isRunning) {
+                try {
+                    int b = is.read();
+                    // start of frame
+                    if (b == START_FRAME) {
+                        lIdx = 0;
+                        lStart = 0;
+                        // end of frame
+                    } else if (b == END_FRAME) {
+                        if (lStart >= 0) {
+                            byte[] lBA = new byte[lIdx];
+                            System.arraycopy(lBuff, 0, lBA, 0, lIdx);
+                            // Arrays class is not supported in Android
+                            // byte[] lBA = Arrays.copyOf(lBuff, pos);
+                            send(lBA);
+                        }
+                        lStart = -1;
+                        // end of stream
+                    } else if (b < 0) {
+                        isRunning = false;
+                        // any other byte within or outside a frame
+                    } else {
+                        if (lStart >= 0) {
+                            lBuff[lIdx] = (byte) b;
+                        }
+                        lIdx++;
+                    }
+                } catch (Exception ex) {
+                    isRunning = false;
+                    // throw new WebSocketException(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                    // System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                }
+            }
 
-			while (isRunning) {
-				try {
-					int b = is.read();
-					// start of frame
-					if (b == START_FRAME) {
-						pos = 0;
-						lStart = 0;
-						// end of frame
-					} else if (b == END_FRAME) {
-						if (lStart >= 0) {
-							byte[] lBA = Arrays.copyOf(lBuff, pos);
-							send(lBA);
-						}
-						lStart = -1;
-						// end of stream
-					} else if (b < 0) {
-						isRunning = false;
-						// any other byte within or outside a frame
-					} else {
-						if (lStart >= 0) {
-							lBuff[pos] = (byte) b;
-						}
-						pos++;
-					}
-				} catch (Exception ex) {
-					isRunning = false;
-					// throw new WebSocketException(ex.getClass().getSimpleName() + ": " + ex.getMessage());
-					// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
-				}
-			}
-
-		}
-	}
+        }
+    }
 }

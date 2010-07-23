@@ -17,55 +17,53 @@ package org.jwebsocket.packetProcessors;
 
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
  * converts XML formatted data packets into tokens and vice versa.
  * @author aschulze
  */
-public class XMLProcessor  {
+public class XMLProcessor {
 
-	private static Logger log = Logging.getLogger(XMLProcessor.class);
+    // TODO: Logging cannot be used in common module because not supported on all clients
+    // private static Logger log = Logging.getLogger(XMLProcessor.class);
+    /**
+     * converts a XML formatted data packet into a token.
+     * @param aDataPacket
+     * @return
+     */
+    public static Token packetToToken(WebSocketPacket aDataPacket) {
+        // todo: implement!
+        Token lArgs = new Token();
+        return lArgs;
+    }
 
-	/**
-	 * converts a XML formatted data packet into a token.
-	 * @param aDataPacket
-	 * @return
-	 */
-	public static Token packetToToken(WebSocketPacket aDataPacket) {
-		// todo: implement!
-		Token lArgs = new Token();
-		return lArgs;
-	}
+    private static String stringToXML(String aString) {
+        // todo: implement!
+        String lRes = null;
+        return lRes;
+    }
 
-	private static String stringToXML(String aString) {
-		// todo: implement!
-		String lRes = null;
-		return lRes;
-	}
+    private static String listToXML(Collection<Object> aCollection) {
+        // todo: implement!
+        String lRes = null;
+        return lRes;
+    }
 
-	private static String listToXML(Collection<Object> aCollection) {
-		// todo: implement!
-		String lRes = null;
-		return lRes;
-	}
+    private static String objectToXML(Object aObj) {
+        // todo: implement!
+        String lRes = null;
+        return lRes;
+    }
 
-	private static String objectToXML(Object aObj) {
-		// todo: implement!
-		String lRes = null;
-		return lRes;
-	}
-
-	/**
-	 * converts a token into a XML formatted data packet.
-	 * @param aToken
-	 * @return
-	 */
-	public static WebSocketPacket tokenToPacket(Token aToken) {
-		// todo: implement!
-		return null;
-	}
+    /**
+     * converts a token into a XML formatted data packet.
+     * @param aToken
+     * @return
+     */
+    public static WebSocketPacket tokenToPacket(Token aToken) {
+        // todo: implement!
+        return null;
+    }
 }
