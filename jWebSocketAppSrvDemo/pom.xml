@@ -1,3 +1,4 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
@@ -26,9 +27,9 @@
 				<configuration>
 					<outputDirectory>${project.build.directory}/../../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
 					<webResources>
-            			<resource>
+						<resource>
               				<!-- this is relative to the pom.xml directory -->
-              				<directory>../jWebSocketClient/web</directory>
+							<directory>../jWebSocketClient/web</directory>
 							<!-- enable filtering -->
 							<filtering>true</filtering>
 							<excludes>
@@ -38,7 +39,7 @@
 								<exclude>**/devguide/**</exclude>
 							</excludes>
 						</resource>
-          			</webResources>
+					</webResources>
 
 					<!-- all packages below are already included in jWebSocketServer-Bundle -->
 					<packagingExcludes>
@@ -96,11 +97,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
-			<artifactId>jWebSocketCommon</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketServer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -110,8 +106,8 @@
 	<repositories>
 	</repositories>
 
-    <properties>
-        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
-    </properties>
+	<properties>
+		<netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+	</properties>
 
 </project>
