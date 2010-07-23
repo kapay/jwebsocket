@@ -14,8 +14,12 @@
 	<packaging>jar</packaging>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>../shared/J2SE/jWebSocketServer</directory>
+			</resource>
+		</resources>
 		<plugins>
-
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<groupId>org.apache.maven.plugins</groupId>
