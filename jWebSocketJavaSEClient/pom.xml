@@ -19,11 +19,14 @@
     </scm>
     
     <build>
+		<sourceDirectory>../shared/J2SE/jWebSocketJavaSEClient</sourceDirectory>
+<!--
         <resources>
             <resource>
                 <directory>../shared/J2SE/jWebSocketJavaSEClient</directory>
             </resource>
         </resources>
+-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
