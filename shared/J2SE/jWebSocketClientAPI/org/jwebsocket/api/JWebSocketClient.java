@@ -44,16 +44,20 @@ public interface JWebSocketClient {
      * @param aEncoding encoding format 
      * @throws WebSocketException if any error while receiving and processing the data.
      */
+	/*
     @Deprecated
     void received(String aData, String aEncoding) throws WebSocketException;
+	 */
     /**
      * Callback method invoked upon receiving the byte data. 
      * This method should be deprecated since we have a event handlers for message received
      * @param aData the byte data
      * @throws WebSocketException if there's any exception recieving or processing the data
      */
+	/*
     @Deprecated
     void received(byte[] aData) throws WebSocketException;
+	 */
     /**
      * Send the given byte data to the server
      * @param aData the byte data

@@ -17,7 +17,6 @@ package org.jwebsocket.client.cgi;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 
 import org.jwebsocket.client.token.BaseTokenClient;
 import org.jwebsocket.config.JWebSocketCommonConstants;

@@ -97,7 +97,15 @@ public interface WebSocketPacket {
 	 */
 	String getASCII();
 
+	/**
+	 *
+	 * @return
+	 */
 	int getFrameType();
 
+	/**
+	 *
+	 * @param aFrameType
+	 */
 	void setFrameType(int aFrameType);
 }

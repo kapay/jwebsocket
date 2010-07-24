@@ -19,7 +19,7 @@ import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.client.java.BaseJWebSocketClient;
+import org.jwebsocket.client.java.BaseWebSocket;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.packetProcessors.CSVProcessor;
@@ -33,7 +33,7 @@ import org.jwebsocket.token.Token;
  * @author puran
  * @version $Id:$
  */
-public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketTokenClient {
+public class BaseTokenClient extends BaseWebSocket implements JWebSocketTokenClient {
 
     /** base namespace for jWebSocket */
     private final static String NS_BASE = "org.jWebSocket";
@@ -129,6 +129,7 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
     /**
      * {@ 
      */
+	@Override
     public void close() throws WebSocketException {
         super.close();
         fUsername = null;
@@ -139,6 +140,7 @@ public class BaseTokenClient extends BaseJWebSocketClient implements JWebSocketT
     /**
      * @return the fUsername
      */
+	@Override
     public String getUsername() {
         return fUsername;
     }

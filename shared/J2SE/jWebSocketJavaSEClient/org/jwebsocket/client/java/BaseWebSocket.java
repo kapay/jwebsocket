@@ -14,22 +14,31 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.client.java;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
+import javolution.util.FastList;
+import org.jwebsocket.api.JWebSocketClient;
+import org.jwebsocket.api.WebSocketClientEvent;
+import org.jwebsocket.api.WebSocketClientListener;
+import org.jwebsocket.api.WebSocketPacket;
 
-import org.jwebsocket.api.WebSocket;
-import org.jwebsocket.api.WebSocketEventHandler;
 import org.jwebsocket.api.WebSocketStatus;
+import org.jwebsocket.client.token.WebSocketClientTokenEvent;
+import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.kit.WebSocketHandshake;
 
@@ -45,264 +54,399 @@ import org.jwebsocket.kit.WebSocketHandshake;
  * @author puran
  * @version $Id:$
  */
-public class BaseWebSocket implements WebSocket {
+public class BaseWebSocket implements JWebSocketClient {
 
-    /** WebSocket connection url */
-    private URI url = null;
+	/** WebSocket connection url */
+	private URI url = null;
+	/** list of the listeners registered */
+	private List<WebSocketClientListener> listeners = new FastList<WebSocketClientListener>();
+	/** flag for connection test */
+	private volatile boolean connected = false;
+	private boolean isBinaryData = false;
+	/** TCP socket */
+	private Socket socket = null;
+	/** IO streams */
+	private InputStream input = null;
+	private PrintStream output = null;
+	/** Data receiver */
+	private WebSocketReceiver receiver = null;
+	private WebSocketHandshake handshake = null;
+	/** represents the WebSocket status */
+	private WebSocketStatus status = WebSocketStatus.CLOSED;
 
-    /** websocket event handler */
-    private WebSocketEventHandler eventHandler = null;
+	/**
+	 * Base constructor
+	 */
+	public BaseWebSocket() {
+	}
 
-    /** flag for connection test */
-    private volatile boolean connected = false;
-    
-    private boolean isBinaryData = false;
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void open(String uriString) throws WebSocketException {
+		URI uri = null;
+		try {
+			uri = new URI(uriString);
+		} catch (URISyntaxException e) {
+			throw new WebSocketException("Error parsing WebSocket URL:" + uriString, e);
+		}
+		this.url = uri;
+		handshake = new WebSocketHandshake(url);
+		try {
+			socket = createSocket();
+			input = socket.getInputStream();
+			output = new PrintStream(socket.getOutputStream());
 
-    /** TCP socket */
-    private Socket socket = null;
+			output.write(handshake.getHandshake());
 
-    /** IO streams */
-    private InputStream input = null;
-    private PrintStream output = null;
+			boolean handshakeComplete = false;
+			boolean header = true;
+			int len = 1000;
+			byte[] buffer = new byte[len];
+			int pos = 0;
+			ArrayList<String> handshakeLines = new ArrayList<String>();
 
-    /** Data receiver */
-    private WebSocketReceiver receiver = null;
-    private WebSocketHandshake handshake = null;
+			byte[] serverResponse = new byte[16];
 
-    /** represents the WebSocket status */
-    private WebSocketStatus status = WebSocketStatus.CLOSED;
+			while (!handshakeComplete) {
+				status = WebSocketStatus.CONNECTING;
+				int b = input.read();
+				buffer[pos] = (byte) b;
+				pos += 1;
 
-    /**
-     * Base constructor
-     */
-    public BaseWebSocket() {
-    }
+				if (!header) {
+					serverResponse[pos - 1] = (byte) b;
+					if (pos == 16) {
+						handshakeComplete = true;
+					}
+				} else if (buffer[pos - 1] == 0x0A && buffer[pos - 2] == 0x0D) {
+					String line = new String(buffer, "UTF-8");
+					if (line.trim().equals("")) {
+						header = false;
+					} else {
+						handshakeLines.add(line.trim());
+					}
 
-    /**
-     * {@inheritDoc}
-     */
-    public void setEventHandler(WebSocketEventHandler eventHandler) {
-        this.eventHandler = eventHandler;
-    }
+					buffer = new byte[len];
+					pos = 0;
+				}
+			}
 
-    /**
-     * {@inheritDoc}
-     */
-    public WebSocketEventHandler getEventHandler() {
-        return this.eventHandler;
-    }
+			handshake.verifyServerStatusLine(handshakeLines.get(0));
+			handshake.verifyServerResponse(serverResponse);
 
-    /**
-     * {@inheritDoc}
-     */
-    public void open(URI uri) throws WebSocketException {
-        this.url = uri;
-        handshake = new WebSocketHandshake(url);
-        try {
-            socket = createSocket();
-            input = socket.getInputStream();
-            output = new PrintStream(socket.getOutputStream());
+			handshakeLines.remove(0);
 
-            output.write(handshake.getHandshake());
+			HashMap<String, String> headers = new HashMap<String, String>();
+			for (String line : handshakeLines) {
+				String[] keyValue = line.split(": ", 2);
+				headers.put(keyValue[0], keyValue[1]);
+			}
+			handshake.verifyServerHandshakeHeaders(headers);
 
-            boolean handshakeComplete = false;
-            boolean header = true;
-            int len = 1000;
-            byte[] buffer = new byte[len];
-            int pos = 0;
-            ArrayList<String> handshakeLines = new ArrayList<String>();
+			receiver = new WebSocketReceiver(input);
 
-            byte[] serverResponse = new byte[16];
+			// TODO: Add event parameter
+			notifyOpened(null);
 
-            while (!handshakeComplete) {
-                status = WebSocketStatus.CONNECTING;
-                int b = input.read();
-                buffer[pos] = (byte) b;
-                pos += 1;
+			receiver.start();
+			connected = true;
+			status = WebSocketStatus.OPEN;
+		} catch (WebSocketException wse) {
+			throw wse;
+		} catch (IOException ioe) {
+			throw new WebSocketException("error while connecting: " + ioe.getMessage(), ioe);
+		}
+	}
+/*
+	@Override
+	public void send(String data) throws WebSocketException {
+		if (!connected) {
+			throw new WebSocketException("error while sending text data: not connected");
+		}
+		try {
+			output.write(0x00);
+			output.write(data.getBytes(("UTF-8")));
+			output.write(0xff);
+			output.flush();
+		} catch (UnsupportedEncodingException uee) {
+			throw new WebSocketException("error while sending text data: unsupported encoding", uee);
+		} catch (IOException ioe) {
+			throw new WebSocketException("error while sending text data", ioe);
+		}
+	}
+*/
+	@Override
+	public void send(byte[] data) throws WebSocketException {
+		if (!connected) {
+			throw new WebSocketException("error while sending binary data: not connected");
+		}
+		try {
+			if (isBinaryData) {
+				output.write(0x80);
+				output.write(data.length);
+				output.write(data);
+				output.flush();
+			} else {
+				output.write(0x00);
+				output.write(data);
+				output.write(0xff);
+				output.flush();
+			}
+		} catch (IOException ioe) {
+			throw new WebSocketException("error while sending binary data: ", ioe);
+		}
+	}
 
-                if (!header) {
-                    serverResponse[pos - 1] = (byte) b;
-                    if (pos == 16) {
-                        handshakeComplete = true;
-                    }
-                } else if (buffer[pos - 1] == 0x0A && buffer[pos - 2] == 0x0D) {
-                    String line = new String(buffer, "UTF-8");
-                    if (line.trim().equals("")) {
-                        header = false;
-                    } else {
-                        handshakeLines.add(line.trim());
-                    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void send(String aData, String aEncoding) throws WebSocketException {
+		byte[] data;
+		try {
+			data = aData.getBytes("UTF-8");
+			send(data);
+		} catch (UnsupportedEncodingException e) {
+			throw new WebSocketException("Encoding exception while sending the data:" + e.getMessage(), e);
+		}
+	}
 
-                    buffer = new byte[len];
-                    pos = 0;
-                }
-            }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void send(WebSocketPacket dataPacket) throws WebSocketException {
+		send(dataPacket.getByteArray());
+	}
 
-            handshake.verifyServerStatusLine(handshakeLines.get(0));
-            handshake.verifyServerResponse(serverResponse);
+	public void handleReceiverError() {
+		try {
+			if (connected) {
+				status = WebSocketStatus.CLOSING;
+				close();
+			}
+		} catch (WebSocketException wse) {
+			wse.printStackTrace();
+		}
+	}
 
-            handshakeLines.remove(0);
+	@Override
+	public synchronized void close() throws WebSocketException {
+		if (!connected) {
+			return;
+		}
+		sendCloseHandshake();
+		if (receiver.isRunning()) {
+			receiver.stopit();
+		}
+		try {
+			input.close();
+			output.close();
+			socket.close();
+			status = WebSocketStatus.CLOSED;
+		} catch (IOException ioe) {
+			throw new WebSocketException("error while closing websocket connection: ", ioe);
+		}
+		// TODO: add event
+		notifyClosed(null);
+	}
 
-            HashMap<String, String> headers = new HashMap<String, String>();
-            for (String line : handshakeLines) {
-                String[] keyValue = line.split(": ", 2);
-                headers.put(keyValue[0], keyValue[1]);
-            }
-            handshake.verifyServerHandshakeHeaders(headers);
+	private void sendCloseHandshake() throws WebSocketException {
+		if (!connected) {
+			throw new WebSocketException("error while sending close handshake: not connected");
+		}
+		try {
+			output.write(0xff00);
+			output.write("\r\n".getBytes());
+		} catch (IOException ioe) {
+			throw new WebSocketException("error while sending close handshake", ioe);
+		}
 
-            receiver = new WebSocketReceiver(input, eventHandler);
-            receiver.start();
-            connected = true;
-            status = WebSocketStatus.OPEN;
-            eventHandler.onOpen();
-        } catch (WebSocketException wse) {
-            throw wse;
-        } catch (IOException ioe) {
-            throw new WebSocketException("error while connecting: " + ioe.getMessage(), ioe);
-        }
-    }
+		connected = false;
+	}
 
-    public void send(String data) throws WebSocketException {
-        if (!connected) {
-            throw new WebSocketException("error while sending text data: not connected");
-        }
-        try {
-            output.write(0x00);
-            output.write(data.getBytes(("UTF-8")));
-            output.write(0xff);
-            output.flush();
-        } catch (UnsupportedEncodingException uee) {
-            throw new WebSocketException("error while sending text data: unsupported encoding", uee);
-        } catch (IOException ioe) {
-            throw new WebSocketException("error while sending text data", ioe);
-        }
-    }
+	private Socket createSocket() throws WebSocketException {
+		String scheme = url.getScheme();
+		String host = url.getHost();
+		int port = url.getPort();
 
-    public void send(byte[] data) throws WebSocketException {
-        if (!connected) {
-            throw new WebSocketException("error while sending binary data: not connected");
-        }
-        try {
-            if (isBinaryData) {
-                output.write(0x80);
-                output.write(data.length);
-                output.write(data);
-                output.flush();
-            } else {
-                output.write(0x00);
-                output.write(data);
-                output.write(0xff);
-                output.flush();
-            }
-        } catch (IOException ioe) {
-            throw new WebSocketException("error while sending binary data: ", ioe);
-        }
-    }
+		socket = null;
 
-    public void handleReceiverError() {
-        try {
-            if (connected) {
-                status = WebSocketStatus.CLOSING;
-                close();
-            }
-        } catch (WebSocketException wse) {
-            wse.printStackTrace();
-        }
-    }
+		if (scheme != null && scheme.equals("ws")) {
+			if (port == -1) {
+				port = 80;
+			}
+			try {
+				socket = new Socket(host, port);
+			} catch (UnknownHostException uhe) {
+				throw new WebSocketException("unknown host: " + host, uhe);
+			} catch (IOException ioe) {
+				throw new WebSocketException("error while creating socket to " + url, ioe);
+			}
+		} else if (scheme != null && scheme.equals("wss")) {
+			if (port == -1) {
+				port = 443;
+			}
+			try {
+				SocketFactory factory = SSLSocketFactory.getDefault();
+				socket = factory.createSocket(host, port);
+			} catch (UnknownHostException uhe) {
+				throw new WebSocketException("unknown host: " + host, uhe);
+			} catch (IOException ioe) {
+				throw new WebSocketException("error while creating secure socket to " + url, ioe);
+			}
+		} else {
+			throw new WebSocketException("unsupported protocol: " + scheme);
+		}
 
-    public synchronized void close() throws WebSocketException {
-        if (!connected) {
-            return;
-        }
-        sendCloseHandshake();
-        if (receiver.isRunning()) {
-            receiver.stopit();
-        }
-        try {
-            input.close();
-            output.close();
-            socket.close();
-            status = WebSocketStatus.CLOSED;
-        } catch (IOException ioe) {
-            throw new WebSocketException("error while closing websocket connection: ", ioe);
-        }
-        eventHandler.onClose();
-    }
+		return socket;
+	}
 
-    private void sendCloseHandshake() throws WebSocketException {
-        if (!connected) {
-            throw new WebSocketException("error while sending close handshake: not connected");
-        }
+	/**
+	 * {@inheritDoc }
+	 */
+	@Override
+	public boolean isConnected() {
+		if (connected && status.equals(WebSocketStatus.OPEN)) {
+			return true;
+		}
+		return false;
+	}
 
-        try {
-            output.write(0xff00);
-            output.write("\r\n".getBytes());
-        } catch (IOException ioe) {
-            throw new WebSocketException("error while sending close handshake", ioe);
-        }
+	/**
+	 * {@inheritDoc }
+	 */
+	public WebSocketStatus getConnectionStatus() {
+		return status;
+	}
 
-        connected = false;
-    }
+	/**
+	 * @return the client socket
+	 */
+	public Socket getConnectionSocket() {
+		return socket;
+	}
 
-    private Socket createSocket() throws WebSocketException {
-        String scheme = url.getScheme();
-        String host = url.getHost();
-        int port = url.getPort();
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addListener(WebSocketClientListener aListener) {
+		listeners.add(aListener);
+	}
 
-        Socket socket = null;
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void removeListener(WebSocketClientListener aListener) {
+		listeners.remove(aListener);
+	}
 
-        if (scheme != null && scheme.equals("ws")) {
-            if (port == -1) {
-                port = 80;
-            }
-            try {
-                socket = new Socket(host, port);
-            } catch (UnknownHostException uhe) {
-                throw new WebSocketException("unknown host: " + host, uhe);
-            } catch (IOException ioe) {
-                throw new WebSocketException("error while creating socket to " + url, ioe);
-            }
-        } else if (scheme != null && scheme.equals("wss")) {
-            if (port == -1) {
-                port = 443;
-            }
-            try {
-                SocketFactory factory = SSLSocketFactory.getDefault();
-                socket = factory.createSocket(host, port);
-            } catch (UnknownHostException uhe) {
-                throw new WebSocketException("unknown host: " + host, uhe);
-            } catch (IOException ioe) {
-                throw new WebSocketException("error while creating secure socket to " + url, ioe);
-            }
-        } else {
-            throw new WebSocketException("unsupported protocol: " + scheme);
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<WebSocketClientListener> getListeners() {
+		return Collections.unmodifiableList(listeners);
+	}
 
-        return socket;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void notifyOpened(WebSocketClientEvent aEvent) {
+		for (WebSocketClientListener lListener : getListeners()) {
+			lListener.processOpened(aEvent);
+		}
+	}
 
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    public boolean isConnected() {
-        if (connected && status.equals(WebSocketStatus.OPEN)) {
-            return true;
-        }
-        return false;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void notifyPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+		for (WebSocketClientListener lListener : getListeners()) {
+			lListener.processPacket(aEvent, aPacket);
+		}
+	}
 
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    public WebSocketStatus getConnectionStatus() {
-        return status;
-    }
-    /**
-     * @return the client socket
-     */
-    public Socket getConnectionSocket() {
-        return socket;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void notifyClosed(WebSocketClientEvent aEvent) {
+		for (WebSocketClientListener lListener : getListeners()) {
+			lListener.processClosed(aEvent);
+		}
+		//clear the listeners since WebSocket connection is closed
+		//at this time to so release resources
+		//just in case someone else is trying to update it
+		// Nonsense! If you clear the listeners here they are not called on re-connect!
+		/*
+		synchronized (listeners) {
+			listeners.clear();
+		}
+		 */
+	}
+
+	class WebSocketReceiver extends Thread {
+
+		private InputStream input = null;
+		private volatile boolean stop = false;
+
+		public WebSocketReceiver(InputStream input) {
+			this.input = input;
+		}
+
+		@Override
+		public void run() {
+			boolean frameStart = false;
+			// List<Byte> messageBytes = new ArrayList<Byte>();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+			while (!stop) {
+				try {
+					int b = input.read();
+					// TODO support binary frames
+					if (b == 0x00) {
+						frameStart = true;
+					} else if (b == 0xff && frameStart == true) {
+						frameStart = false;
+						/*
+						Byte[] message = messageBytes.toArray(new Byte[messageBytes.size()]);
+						WebSocketMessage webSocketMessage = new BaseWebSocketMessage(message);
+						eventHandler.onMessage(webSocketMessage);
+						 */
+						WebSocketClientEvent lWSCE = new WebSocketClientTokenEvent();
+						RawPacket lPacket = new RawPacket(baos.toByteArray());
+						// messageBytes.clear();
+						baos.reset();
+						notifyPacket(lWSCE, lPacket);
+					} else if (frameStart == true) {
+						// messageBytes.add((byte) b);
+						baos.write(b);
+					} else if (b == -1) {
+						handleError();
+					}
+				} catch (IOException ioe) {
+					handleError();
+				}
+			}
+		}
+
+		public void stopit() {
+			stop = true;
+		}
+
+		public boolean isRunning() {
+			return !stop;
+		}
+
+		private void handleError() {
+			stopit();
+		}
+	}
 }

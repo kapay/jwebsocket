@@ -15,12 +15,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.client.cgi;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 
-import org.jwebsocket.client.java.AbstractJWebSocketClient;
+import org.jwebsocket.client.java.BaseWebSocket;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.WebSocketException;
 
@@ -30,7 +28,7 @@ import org.jwebsocket.kit.WebSocketException;
  * stdErr channel to the linked application.
  * @author aschulze
  */
-public class CGIClient extends AbstractJWebSocketClient {
+public class CGIClient extends BaseWebSocket {
 
     // used from JWebSocketCommonConstants from v0.10
     // private final static int MAX_FRAMESIZE = 16384;
@@ -65,7 +63,7 @@ public class CGIClient extends AbstractJWebSocketClient {
         inboundThread = new Thread(inboundProcess);
         inboundThread.start();
     }
-
+/*
     @Override
     public void received(byte[] aData) {
         try {
@@ -78,7 +76,7 @@ public class CGIClient extends AbstractJWebSocketClient {
             //
         }
     }
-
+*/
     @Override
     public void close() throws WebSocketException {
         // stop CGI listener
@@ -137,12 +135,12 @@ public class CGIClient extends AbstractJWebSocketClient {
         // TODO Auto-generated method stub
         return false;
     }
-
+/*
     @Override
     public void received(String aData, String aEncoding) throws WebSocketException {
         // TODO Auto-generated method stub
     }
-
+*/
     @Override
     public void send(String aData, String aEncoding) throws WebSocketException {
         // TODO Auto-generated method stub
