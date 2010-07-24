@@ -7,23 +7,14 @@ android:orientation="vertical"
 xmlns:android="http://schemas.android.com/apk/res/android"
 >
     <TextView
-android:id="@+id/lblFundLog"
-android:layout_width="fill_parent"
-android:layout_height="wrap_content"
-android:background="#E0E0E0"
-android:text="Incoming Messages..."
-android:layout_weight="1"
->
-    </TextView>
-    <TextView
-android:id="@+id/lblMessage"
+android:id="@+id/lblFundMessage"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Message"
 >
     </TextView>
     <EditText
-android:id="@+id/txfMessage"
+android:id="@+id/txfFundMessage"
 android:layout_width="fill_parent"
 android:layout_height="wrap_content"
 android:text="Your Message"
@@ -31,14 +22,14 @@ android:textSize="18sp"
 >
     </EditText>
     <TextView
-android:id="@+id/lblTarget"
+android:id="@+id/lblFundTarget"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Target"
 >
     </TextView>
     <EditText
-android:id="@+id/txfTarget"
+android:id="@+id/txfFundTarget"
 android:layout_width="fill_parent"
 android:layout_height="wrap_content"
 android:text="Target"
@@ -65,5 +56,23 @@ android:layout_height="wrap_content"
 android:text="Broadcast"
 android:layout_weight="1">
         </Button>
+        <Button
+android:id="@+id/btnFundClearLog"
+android:layout_width="50sp"
+android:layout_height="wrap_content"
+android:text="Clear"
+android:layout_weight="1">
+        </Button>
     </LinearLayout>
+        <TextView
+android:id="@+id/lblFundLog"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+android:background="#E0E0E0"
+android:text="Incoming Messages...\n"
+android:layout_weight="1"
+android:editable="true"
+>
+    </TextView>
+
 </LinearLayout>

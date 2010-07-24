@@ -148,7 +148,7 @@ public class BaseWebSocket implements JWebSocketClient {
             receiver = new WebSocketReceiver(input);
 
             // TODO: Add event parameter
-            notifyOpened(null);
+            // notifyOpened(null);
 
             receiver.start();
             connected = true;
@@ -159,24 +159,6 @@ public class BaseWebSocket implements JWebSocketClient {
             throw new WebSocketException("error while connecting: " + ioe.getMessage(), ioe);
         }
     }
-    /*
-    @Override
-    public void send(String data) throws WebSocketException {
-    if (!connected) {
-    throw new WebSocketException("error while sending text data: not connected");
-    }
-    try {
-    output.write(0x00);
-    output.write(data.getBytes(("UTF-8")));
-    output.write(0xff);
-    output.flush();
-    } catch (UnsupportedEncodingException uee) {
-    throw new WebSocketException("error while sending text data: unsupported encoding", uee);
-    } catch (IOException ioe) {
-    throw new WebSocketException("error while sending text data", ioe);
-    }
-    }
-     */
 
     @Override
     public void send(byte[] data) throws WebSocketException {
@@ -207,7 +189,7 @@ public class BaseWebSocket implements JWebSocketClient {
     public void send(String aData, String aEncoding) throws WebSocketException {
         byte[] data;
         try {
-            data = aData.getBytes("UTF-8");
+            data = aData.getBytes(aEncoding);
             send(data);
         } catch (UnsupportedEncodingException e) {
             throw new WebSocketException("Encoding exception while sending the data:" + e.getMessage(), e);
@@ -384,15 +366,6 @@ public class BaseWebSocket implements JWebSocketClient {
         for (WebSocketClientListener lListener : getListeners()) {
             lListener.processClosed(aEvent);
         }
-        //clear the listeners since WebSocket connection is closed
-        //at this time to so release resources
-        //just in case someone else is trying to update it
-        // Nonsense! If you clear the listeners here they are not called on re-connect!
-		/*
-        synchronized (listeners) {
-        listeners.clear();
-        }
-         */
     }
 
     class WebSocketReceiver extends Thread {
@@ -407,9 +380,8 @@ public class BaseWebSocket implements JWebSocketClient {
         @Override
         public void run() {
             boolean frameStart = false;
-            // List<Byte> messageBytes = new ArrayList<Byte>();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
+            notifyOpened(null);
             while (!stop) {
                 try {
                     int b = input.read();
@@ -418,14 +390,10 @@ public class BaseWebSocket implements JWebSocketClient {
                         frameStart = true;
                     } else if (b == 0xff && frameStart == true) {
                         frameStart = false;
-                        /*
-                        Byte[] message = messageBytes.toArray(new Byte[messageBytes.size()]);
-                        WebSocketMessage webSocketMessage = new BaseWebSocketMessage(message);
-                        eventHandler.onMessage(webSocketMessage);
-                         */
+
                         WebSocketClientEvent lWSCE = new WebSocketClientTokenEvent();
                         RawPacket lPacket = new RawPacket(baos.toByteArray());
-                        // messageBytes.clear();
+
                         baos.reset();
                         notifyPacket(lWSCE, lPacket);
                     } else if (frameStart == true) {

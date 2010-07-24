@@ -24,28 +24,29 @@ public final class R {
     }
     public static final class id {
         public static final int btnCancel=0x7f060008;
-        public static final int btnFundBroadcast=0x7f060011;
-        public static final int btnFundSend=0x7f060010;
+        public static final int btnFundBroadcast=0x7f060010;
+        public static final int btnFundClearLog=0x7f060011;
+        public static final int btnFundSend=0x7f06000f;
         public static final int btnSave=0x7f060009;
-        public static final int lblFundLog=0x7f06000b;
-        public static final int lblMessage=0x7f06000c;
+        public static final int lblFundLog=0x7f060012;
+        public static final int lblFundMessage=0x7f06000b;
+        public static final int lblFundTarget=0x7f06000d;
         public static final int lblPassword=0x7f060006;
-        public static final int lblTarget=0x7f06000e;
         public static final int lblURL=0x7f060002;
         public static final int lblUsername=0x7f060004;
         public static final int lytConfig=0x7f060001;
         public static final int lytFund=0x7f06000a;
-        public static final int mniCanvasConnect=0x7f060014;
-        public static final int mniCanvasDisconnect=0x7f060015;
-        public static final int mniCanvasExit=0x7f060016;
+        public static final int mniCanvasConnect=0x7f060015;
+        public static final int mniCanvasDisconnect=0x7f060016;
+        public static final int mniCanvasExit=0x7f060017;
         public static final int sfvCamera=0x7f060000;
-        public static final int txfMessage=0x7f06000d;
+        public static final int txfFundMessage=0x7f06000c;
+        public static final int txfFundTarget=0x7f06000e;
         public static final int txfPassword=0x7f060007;
-        public static final int txfTarget=0x7f06000f;
         public static final int txfURL=0x7f060003;
         public static final int txfUsername=0x7f060005;
-        public static final int txvURL=0x7f060013;
-        public static final int widget47=0x7f060012;
+        public static final int txvURL=0x7f060014;
+        public static final int widget47=0x7f060013;
     }
     public static final class layout {
         public static final int camera_hvga_p=0x7f030000;

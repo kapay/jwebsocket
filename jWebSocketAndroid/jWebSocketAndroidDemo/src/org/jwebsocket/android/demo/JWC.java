@@ -14,8 +14,17 @@
 // ---------------------------------------------------------------------------
 package org.jwebsocket.android.demo;
 
+import android.os.Handler;
+import android.os.Message;
+import java.util.List;
+import javolution.util.FastList;
+import org.jwebsocket.api.WebSocketClientEvent;
+import org.jwebsocket.api.WebSocketClientTokenListener;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.client.token.BaseTokenClient;
+import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.token.Token;
 
 /**
  *
@@ -23,9 +32,19 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class JWC {
 
+    private final static int MT_OPENED = 0;
+    private final static int MT_PACKET = 1;
+    private final static int MT_CLOSED = 2;
+    private final static int MT_TOKEN = 3;
     private static String URL = "ws://192.168.2.15:8787";
-    private static BaseTokenClient jwc = new BaseTokenClient();
+    private static BaseTokenClient jwc;
+    private static List<WebSocketClientTokenListener> listeners = new FastList<WebSocketClientTokenListener>();
+    private static String DEF_ENCODING = "UTF-8";
 
+    public static void init() {
+        jwc = new BaseTokenClient();
+        jwc.addListener(new Listener());
+    }
 
     public static void open() throws WebSocketException {
         jwc.open(URL);
@@ -33,5 +52,105 @@ public class JWC {
 
     public static void close() throws WebSocketException {
         jwc.close();
+    }
+
+    public static void send(String aString) throws WebSocketException {
+        jwc.send(URL, DEF_ENCODING);
+    }
+
+    public static void sendToken(Token aToken) throws WebSocketException {
+        jwc.sendToken(aToken);
+    }
+
+    public static void sendText(String aTarget, String aData) throws WebSocketException {
+        jwc.sendText(aTarget, aData);
+
+    }
+
+    public static void broadcastText(String aData) throws WebSocketException {
+        jwc.broadcastText(aData);
+
+    }
+
+    public static void addListener(WebSocketClientTokenListener aListener) {
+        listeners.add(aListener);
+    }
+
+    public static void removeListener(WebSocketClientTokenListener aListener) {
+        listeners.remove(aListener);
+    }
+    private static Handler messageHandler = new Handler() {
+
+        @Override
+        public void handleMessage(Message message) {
+
+            switch (message.what) {
+                case MT_OPENED:
+                    notifyOpened(null);
+                    break;
+                case MT_PACKET:
+                    notifyPacket(null, (RawPacket) message.obj);
+                    break;
+                case MT_TOKEN:
+                    notifyToken(null, (Token) message.obj);
+                    break;
+                case MT_CLOSED:
+                    notifyClosed(null);
+                    break;
+            }
+        }
+    };
+
+    public static void notifyOpened(WebSocketClientEvent aEvent) {
+        for (WebSocketClientTokenListener lListener : listeners) {
+            lListener.processOpened(aEvent);
+        }
+    }
+
+    public static void notifyPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+        for (WebSocketClientTokenListener lListener : listeners) {
+            lListener.processPacket(aEvent, aPacket);
+        }
+    }
+
+    public static void notifyToken(WebSocketClientEvent aEvent, Token aToken) {
+        for (WebSocketClientTokenListener lListener : listeners) {
+            lListener.processToken(aEvent, aToken);
+        }
+    }
+
+    public static void notifyClosed(WebSocketClientEvent aEvent) {
+        for (WebSocketClientTokenListener lListener : listeners) {
+            lListener.processClosed(aEvent);
+        }
+    }
+
+    static class Listener implements WebSocketClientTokenListener {
+
+        public void processOpened(WebSocketClientEvent aEvent) {
+            Message lMsg = new Message();
+            lMsg.what = MT_OPENED;
+            messageHandler.sendMessage(lMsg);
+        }
+
+        public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+            Message lMsg = new Message();
+            lMsg.what = MT_PACKET;
+            lMsg.obj = aPacket;
+            messageHandler.sendMessage(lMsg);
+        }
+
+        public void processToken(WebSocketClientEvent aEvent, Token aToken) {
+            Message lMsg = new Message();
+            lMsg.what = MT_TOKEN;
+            lMsg.obj = aToken;
+            messageHandler.sendMessage(lMsg);
+        }
+
+        public void processClosed(WebSocketClientEvent aEvent) {
+            Message lMsg = new Message();
+            lMsg.what = MT_CLOSED;
+            messageHandler.sendMessage(lMsg);
+        }
     }
 }

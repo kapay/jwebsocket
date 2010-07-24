@@ -33,7 +33,8 @@ public class MainActivity extends ListActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        // setContentView(R.layout.config_hvga_p)
+
+        JWC.init();
 
         String[] lItems = {"Fundamentals", "Canvas Demo", "Camera Demo", "Setup"};
 
