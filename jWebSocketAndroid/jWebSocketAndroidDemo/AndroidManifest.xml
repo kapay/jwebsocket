@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="org.jwebsocket.android.canvasdemo">
+     package="org.jwebsocket.android.demo">
     <application android:debuggable="true">
         <activity android:name=".MainActivity" android:label="jWebSocket Android Demo">
             <intent-filter>

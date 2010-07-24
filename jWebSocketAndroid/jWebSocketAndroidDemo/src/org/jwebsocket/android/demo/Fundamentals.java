@@ -12,7 +12,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 // ---------------------------------------------------------------------------
-package org.jwebsocket.android.canvasdemo;
+package org.jwebsocket.android.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -30,27 +30,37 @@ public class Fundamentals extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.fundamentals_hvga_p);
-
-        Toast.makeText(getApplicationContext(), "CONNECTING 2...",
+/*
+        Toast.makeText(getApplicationContext(), "CONNECTING...",
                 Toast.LENGTH_SHORT).show();
         try {
             JWC.open();
         } catch (WebSocketException ex) {
+        }
+ * 
+ */
+    }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Toast.makeText(getApplicationContext(), "RE-CONNECTING...",
+                Toast.LENGTH_SHORT).show();
+        try {
+            JWC.open();
+        } catch (WebSocketException ex) {
         }
     }
 
     @Override
-    public void onDestroy() {
-        Toast.makeText(getApplicationContext(), "DISCONNECTING 2...",
+    protected void onPause() {
+        Toast.makeText(getApplicationContext(), "DISCONNECTING...",
                 Toast.LENGTH_SHORT).show();
         try {
             JWC.close();
         } catch (WebSocketException ex) {
-            
         }
-
-        super.onDestroy();
-
+        super.onPause();
     }
 }

@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package org.jwebsocket.android.canvasdemo;
+package org.jwebsocket.android.demo;
 
 public final class R {
     public static final class attr {

@@ -12,7 +12,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 // ---------------------------------------------------------------------------
-package org.jwebsocket.android.canvasdemo;
+package org.jwebsocket.android.demo;
 
 import org.jwebsocket.client.token.BaseTokenClient;
 import org.jwebsocket.kit.WebSocketException;
@@ -23,7 +23,7 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class JWC {
 
-    private static String URL = "ws://192.168.2.232:8787";
+    private static String URL = "ws://192.168.2.15:8787";
     private static BaseTokenClient jwc = new BaseTokenClient();
 
 
