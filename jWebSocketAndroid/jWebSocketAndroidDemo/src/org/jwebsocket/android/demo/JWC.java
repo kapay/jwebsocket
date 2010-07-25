@@ -36,7 +36,7 @@ public class JWC {
     private final static int MT_PACKET = 1;
     private final static int MT_CLOSED = 2;
     private final static int MT_TOKEN = 3;
-    private static String URL = "ws://192.168.2.15:8787";
+    private static String URL = "ws://192.168.2.232:8787";
     private static BaseTokenClient jwc;
     private static List<WebSocketClientTokenListener> listeners = new FastList<WebSocketClientTokenListener>();
     private static String DEF_ENCODING = "UTF-8";
@@ -69,7 +69,10 @@ public class JWC {
 
     public static void broadcastText(String aData) throws WebSocketException {
         jwc.broadcastText(aData);
+    }
 
+    public static void saveFile(byte[] aData, String aFilename) throws WebSocketException {
+        jwc.saveFile(aData, aFilename);
     }
 
     public static void addListener(WebSocketClientTokenListener aListener) {

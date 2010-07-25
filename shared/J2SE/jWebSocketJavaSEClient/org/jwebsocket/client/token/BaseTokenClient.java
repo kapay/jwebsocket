@@ -26,6 +26,7 @@ import org.jwebsocket.packetProcessors.CSVProcessor;
 import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.packetProcessors.XMLProcessor;
 import org.jwebsocket.token.Token;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * Token based implementation of {@code JWebSocketClient}
@@ -129,7 +130,7 @@ public class BaseTokenClient extends BaseWebSocket implements JWebSocketTokenCli
     /**
      * {@ 
      */
-	@Override
+    @Override
     public void close() throws WebSocketException {
         super.close();
         fUsername = null;
@@ -140,7 +141,7 @@ public class BaseTokenClient extends BaseWebSocket implements JWebSocketTokenCli
     /**
      * @return the fUsername
      */
-	@Override
+    @Override
     public String getUsername() {
         return fUsername;
     }
@@ -252,6 +253,21 @@ public class BaseTokenClient extends BaseWebSocket implements JWebSocketTokenCli
         lToken.put("data", aData);
         lToken.put("senderIncluded", false);
         lToken.put("responseRequested", true);
+        sendToken(lToken);
+    }
+
+    private final static String NS_MEDIA_PLUGIN = NS_BASE + ".plugins.filesystem";
+
+    // @Override
+    public void saveFile(byte[] aData, String aFilename) throws WebSocketException {
+        Token lToken = new Token();
+        lToken.put("ns", NS_MEDIA_PLUGIN);
+        lToken.put("type", "save");
+        lToken.put("sourceId", getClientId());
+        lToken.put("sender", getUsername());
+        lToken.put("filename", aFilename);
+
+        lToken.put("data", new String(Base64.encodeBase64(aData)));
         sendToken(lToken);
     }
 

@@ -26,6 +26,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jwebsocket.kit.WebSocketException;
 
 /**
  *
@@ -37,17 +40,20 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private SurfaceHolder mSurfaceHolder;
     private Camera mCamera;
     private boolean mPreviewRunning = false;
-    Camera.PictureCallback mPictureCallback;
+    private Camera.PictureCallback mPictureCallback;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        getWindow().setFormat(PixelFormat.TRANSLUCENT);
+
+        Window lWin = getWindow();
+        lWin.setFormat(PixelFormat.TRANSLUCENT);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        // needs to be called before setContentView to be applied
+        lWin.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.camera_hvga_p);
@@ -59,7 +65,12 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
         mPictureCallback = new Camera.PictureCallback() {
 
-            public void onPictureTaken(byte[] imageData, Camera c) {
+            public void onPictureTaken(byte[] imageData, Camera aCamera) {
+                try {
+                    JWC.saveFile(imageData, "foto.jpg");
+                } catch (WebSocketException ex) {
+                    // TODO: handle exception
+                }
                 Toast.makeText(getApplicationContext(), "Photo has been taken!",
                         Toast.LENGTH_SHORT).show();
             }
@@ -85,19 +96,39 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         });
     }
 
-    public void surfaceCreated(SurfaceHolder holder) {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            // JWC.addListener(this);
+            JWC.open();
+        } catch (WebSocketException ex) {
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        try {
+            JWC.close();
+            // JWC.removeListener(this);
+        } catch (WebSocketException ex) {
+        }
+        super.onPause();
+    }
+
+    public void surfaceCreated(SurfaceHolder aSurfaceHolder) {
         mCamera = Camera.open();
     }
 
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+    public void surfaceChanged(SurfaceHolder aSurfaceHolder, int aFormat, int aWidth, int aHeight) {
         if (mPreviewRunning) {
             mCamera.stopPreview();
         }
-        Camera.Parameters p = mCamera.getParameters();
-        p.setPreviewSize(w, h);
-        mCamera.setParameters(p);
+        Camera.Parameters lParms = mCamera.getParameters();
+        lParms.setPreviewSize(aWidth, aHeight);
+        mCamera.setParameters(lParms);
         try {
-            mCamera.setPreviewDisplay(holder);
+            mCamera.setPreviewDisplay(aSurfaceHolder);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,7 +136,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         mPreviewRunning = true;
     }
 
-    public void surfaceDestroyed(SurfaceHolder holder) {
+    public void surfaceDestroyed(SurfaceHolder aSurfaceHolder) {
         mCamera.stopPreview();
         mPreviewRunning = false;
         mCamera.release();

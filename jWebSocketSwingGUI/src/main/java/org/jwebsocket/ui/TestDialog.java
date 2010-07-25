@@ -18,7 +18,7 @@
  *
  * Created on Mar 15, 2010, 2:55:47 PM
  */
-package org.jWebSocket.ui;
+package org.jwebsocket.ui;
 
 import java.awt.Toolkit;
 
@@ -438,7 +438,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnConnectActionPerformed
 		try {
-			client.open("ws://localhost:8787");
+			client.open("ws://192.168.2.15:8787");
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
