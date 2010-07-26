@@ -44,6 +44,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
     private static final String NS_FILESYSTEM = JWebSocketServerConstants.NS_BASE + ".plugins.filesystem";
 //	private static String BASE_DIR_USER = "C:/temp/users/";
     private static String BASE_DIR_USER = "/Users/aschulze/";
+    private String WEB_BASE_URL = "http://192.168.2.232/jwc/images/";
 
     /**
      *
@@ -92,6 +93,9 @@ public class FileSystemPlugIn extends TokenPlugIn {
 
         // obtain required parameters for file load operation
         String lFilename = aToken.getString("filename");
+        String lScope = aToken.getString("scope");
+        String lNotify = aToken.getString("notify");
+        // scope may be "private", "group" or "public"
         String lBase64 = aToken.getString("data");
         byte[] lBA = null;
         if (lBase64 != null) {
@@ -104,7 +108,10 @@ public class FileSystemPlugIn extends TokenPlugIn {
         // complete the response token
         File lFile = new File(BASE_DIR_USER + lFilename);
         try {
-            FileUtils.writeByteArrayToFile(lFile, lBA);
+            // prevent to threads at a time writing to that file
+            synchronized (this) {
+                FileUtils.writeByteArrayToFile(lFile, lBA);
+            }
         } catch (IOException ex) {
             lResponse.put("code", -1);
             lResponse.put("msg", ex.getMessage());
@@ -112,6 +119,16 @@ public class FileSystemPlugIn extends TokenPlugIn {
 
         // send response to requester
         lServer.sendToken(aConnector, lResponse);
+
+        if ("true".equals(lNotify)) {
+            Token lNotify = new Token(TT_EVENT);
+            lNotify.put("name", "connect");
+            lNotify.put("sourceId", aConnector.getId());
+            lNotify.put("url", WEB_BASE_URL + lFilename);
+            // TODO: Limit notification to desired scope
+            lServer.broadcastToken(lNotify);
+        }
+
     }
 
     /**
