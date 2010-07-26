@@ -149,21 +149,25 @@
 			}
 
 			function stressTest() {
-				var MAX = 100;
+				eStressBtn.setAttribute("disabled", "disabled");
+				var MAX = 10;
 				for( var i = 0; i < MAX; i++) {
 					var lIframe = document.createElement( "iframe" );
 					lIframe.src = "iframe.htm";
 					lIframe.id = "iframe" + i;
 					lIframe.setAttribute( "frameborder", "0" );
-					lIframe.style.width = "100px";
-					lIframe.style.height = "100px";
+					lIframe.style.width = "320px";
+					lIframe.style.height = "200px";
 					lIframe.style.border = "1px solid #ccc";
+					lIframe.style.margin = "2px";
 					document.body.appendChild( lIframe );
 				}
+
 			}
 
 			function initPage() {
 				eLog = jws.$("sdivChat");
+				eStressBtn = jws.$("sbtnStressTest");
 				// check if WebSockets are supported by the browser
 				if( jws.browserSupportsWebSockets() ) {
 					// instaniate new TokenClient, either JSON, CSV or XML
@@ -204,12 +208,14 @@
 		</script>
 -->
 		<h1>jWebSocket Canvas Demo</h1>
-		<p>This demo shows...</p>
+		<p>This demo shows how to commonly work together on a shared canvas. Updates applied to a certain canvas
+			are automatically distributed to all other clients connected to the jWebSocket network. Simply take the mouse
+			and draw something. Please consider that not all browsers do support the HTML5 Canvas element yet.</p>
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="" align="right">
-						<input class="sbtnDlg" id="sbtnClearLog" type="button" value="Clear Log" onclick="clearLog();">
+						<input style="display:none" class="sbtnDlg" id="sbtnClearLog" type="button" value="Clear Log" onclick="clearLog();">
 					</td>
 					<td class="stdDlg" width="" align="right">
 						<input class="sbtnDlg" id="sbtnStressTest" type="button" value="Stress Test" onclick="stressTest();">
@@ -218,12 +224,12 @@
 			</table>
 		</div>
 		<div id="sdivChat" class="sdivContainer"
-			 style="position:relative; height:50px; overflow:auto;">
+			 style="position:relative; height:50px; overflow:auto; display:none">
 		</div>
 		<table width="100%">
 			<tr>
-				<td><iframe style="width:100%; height:320px; border:1px solid #ccc" frameborder="0" src="iframe.htm"></iframe></td>
-				<td><iframe style="width:100%; height:320px; border:1px solid #ccc" frameborder="0" src="iframe.htm"></iframe></td>
+				<td><iframe style="width:100%; height:200px; border:1px solid #ccc" frameborder="0" src="iframe.htm"></iframe></td>
+				<td><iframe style="width:100%; height:200px; border:1px solid #ccc" frameborder="0" src="iframe.htm"></iframe></td>
 			</tr>
 		</table>
 	</body>

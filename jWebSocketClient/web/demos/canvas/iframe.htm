@@ -30,11 +30,6 @@
 		<script type="text/javascript" language="JavaScript">
 			var lJWSID = "jWebSocket Chat",
 			lWSC = null,
-			eLog = null,
-			eUsername = null,
-			ePool = null,
-			eMessage = null,
-			eDebug = null,
 			eKeepAlive = null;
 			lCID = "c1";
 
@@ -172,7 +167,6 @@
 
 				} else {
 					// jws.$( "sbtnClearLog" ).setAttribute( "disabled", "disabled" );
-					// eMessage.setAttribute( "disabled", "disabled" );
 					
 					var lMsg = jws.MSG_WS_NOT_SUPPORTED;
 					alert( lMsg );
@@ -199,8 +193,9 @@
 		onunload="exitPage();"
 		>
 		<div> <!-- style="border:1px solid red" -->
-			<input class="sbtnClear" id="sbtnClear" type="button" value="Clear" onclick="doClear();"><p id="spnAvg">0ms</p>
-			<canvas id="cnvDemo" width="300" height="280" style="border:1px solid green; cursor:crosshair" >
+			<p><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear" onclick="doClear();"></p>
+			<p id="spnAvg" style="display:none">0ms</p>
+			<canvas id="cnvDemo" width="300" height="140" style="border:1px solid green; cursor:crosshair" >
 			</canvas>
 		</div>
 	</body>

@@ -39,15 +39,15 @@ public class Logging {
 	/**
 	 * Log output is send to the console (stdout).
 	 */
-	public static int CONSOLE = 0;
+	public final static int CONSOLE = 0;
 	/**
 	 * Log output is send to a rolling file.
 	 */
-	public static int ROLLING_FILE = 1;
+	public final static int ROLLING_FILE = 1;
 	/**
 	 * Log output is send to a single file.
 	 */
-	public static int SINGLE_FILE = 2;
+	public final static int SINGLE_FILE = 2;
 	/**
 	 * Name of jWebSocket log file.
 	 */
@@ -60,7 +60,7 @@ public class Logging {
 	 * Buffersize if write cache for logs is activated (recommended)
 	 * Buffersize = 0 means no write cache.
 	 */
-	private static int buffersize = 2048;
+	private static int buffersize = 8096; // 8K is log4j default
 	private static int logTarget = CONSOLE; // ROLLING_FILE;
 
 	private static String getLogsFolderPath(String fileName, String[] aPaths) {
@@ -111,23 +111,29 @@ public class Logging {
 			String logsPath = getLogsFolderPath(filename, searchPaths);
 			if (ROLLING_FILE == logTarget && logsPath != null) {
 				try {
-					appender = new RollingFileAppender(layout, logsPath, true);
-					((RollingFileAppender) appender).setBufferedIO(buffersize > 0);
+					RollingFileAppender lRFA = new RollingFileAppender(layout,
+							logsPath, true /* append, don't truncate */);
+					lRFA.setBufferedIO(buffersize > 0);
+					lRFA.setImmediateFlush(true);
 					if (buffersize > 0) {
-						((RollingFileAppender) appender).setBufferSize(buffersize);
+						lRFA.setBufferSize(buffersize);
 					}
-					((RollingFileAppender) appender).setEncoding("UTF-8");
+					lRFA.setEncoding("UTF-8");
+					appender = lRFA;
 				} catch (IOException ex) {
 					appender = new ConsoleAppender(layout);
 				}
 			} else if (SINGLE_FILE == logTarget && logsPath != null) {
 				try {
-					appender = new FileAppender(layout, logsPath, true);
-					((FileAppender) appender).setBufferedIO(buffersize > 0);
+					FileAppender lFA = new FileAppender(layout, logsPath,
+							true /* append, don't truncate */);
+					lFA.setBufferedIO(buffersize > 0);
+					lFA.setImmediateFlush(true);
 					if (buffersize > 0) {
-						((FileAppender) appender).setBufferSize(buffersize);
+						lFA.setBufferSize(buffersize);
 					}
-					((FileAppender) appender).setEncoding("UTF-8");
+					lFA.setEncoding("UTF-8");
+					appender = lFA;
 				} catch (IOException ex) {
 					appender = new ConsoleAppender(layout);
 				}
@@ -140,6 +146,7 @@ public class Logging {
 				}
 			}
 		}
+
 	}
 
 	/**
