@@ -256,12 +256,12 @@ public class BaseTokenClient extends BaseWebSocket implements JWebSocketTokenCli
         sendToken(lToken);
     }
 
-    private final static String NS_MEDIA_PLUGIN = NS_BASE + ".plugins.filesystem";
+    private final static String NS_FILESYSTEM_PLUGIN = NS_BASE + ".plugins.filesystem";
 
     // @Override
     public void saveFile(byte[] aData, String aFilename) throws WebSocketException {
         Token lToken = new Token();
-        lToken.put("ns", NS_MEDIA_PLUGIN);
+        lToken.put("ns", NS_FILESYSTEM_PLUGIN);
         lToken.put("type", "save");
         lToken.put("sourceId", getClientId());
         lToken.put("sender", getUsername());

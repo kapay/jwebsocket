@@ -133,6 +133,13 @@ public class RPCPlugIn extends TokenPlugIn {
 			lResponseToken.put("msg", lMsg);
 		}
 
+		/* just for testing purposes of multi-threaded rpc's
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException ex) {
+		}
+		 */
+
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
 

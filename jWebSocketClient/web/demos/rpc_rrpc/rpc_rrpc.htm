@@ -92,6 +92,7 @@
 				var lRes = lWSC.rpc(
 					// pass class, method and argument for server java method:
 					"org.jWebSocket.demo.DemoRPCServer", aMethod, lArgs, {
+					spawnThread: eSpawnThread.checked,
 					// new easy-to-use response callback
 					OnResponse: function( aToken ) {
 						if( aToken.code != 0 ) {
@@ -133,14 +134,15 @@
 					lMethod,				// method
 					"'" + lArgs + "'",		// arguments as a string
 					{						// options
-					// new easy-to-use response callback
-					OnResponse: function( aToken ) {
-						if( aToken.error ) {
-							log( "RRPC Error: " + aToken.error );
-						} else {
-							log( "Received RRPC result: " + aToken.result );
+						spawnThread: eSpawnThread.checked,
+						// new easy-to-use response callback
+						OnResponse: function( aToken ) {
+							if( aToken.error ) {
+								log( "RRPC Error: " + aToken.error );
+							} else {
+								log( "Received RRPC result: " + aToken.result );
+							}
 						}
-					}
 				});
 
 				log( lWSC.resultToString( lRes ) );
@@ -150,6 +152,7 @@
 				eLog = jws.$( "sdivChat" );
 				eArgs = jws.$( "stxfMsg" );
 				eTarget = jws.$( "stxfTarget" );
+				eSpawnThread = jws.$( "schkThreaded" );
 
 				if( jws.browserSupportsWebSockets() ) {
 					lWSC = new jws.jWebSocketJSONClient();
@@ -206,7 +209,7 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Disconnect" onclick="disconnect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
 					<td class="stdDlg" width="5">Arguments</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="My Remote Procedure Arguments" style="width:100%"></td>
+					<td class="stdDlg" width="" colspan="2"><input class="stxfDlg" id="stxfMsg" type="text" value="My Remote Procedure Arguments" style="width:100%"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGranted" type="button" value="Call granted" onclick="rpcGrantedDemo();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnProtected" type="button" value="Call protect." onclick="rpcProtectedDemo();"></td>
 				</tr>
@@ -216,8 +219,10 @@
 					<td class="stdDlg" width="5"></td>
 					<td class="stdDlg" width="5">Target&nbsp;Id</td>
 					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfTarget" type="text" value="ID" style="width:100%"></td>
+					<td class="stdDlg" width=""><input class="schkThreaded" id="schkThreaded" type="checkbox" value="on" checked="checked" title="run remote procedure in separate thread on server"> spawn thread</td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRRPC" type="button" value="Call reverse" onclick="rrpcDemo();"></td>
 					<td class="stdDlg" width="5"></td>
+					
 				</tr>
 			</table>
 		</div>

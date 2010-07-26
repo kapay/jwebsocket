@@ -49,7 +49,6 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String TT_BROADCAST = "broadcast";
 	private static final String TT_WELCOME = "welcome";
 	private static final String TT_GOODBYE = "goodBye";
-	private static final String TT_EVENT = "event";
 	private static final String TT_LOGIN = "login";
 	private static final String TT_LOGOUT = "logout";
 	private static final String TT_CLOSE = "close";
@@ -147,7 +146,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Broadcasting connect...");
 		}
 		// broadcast connect event to other clients of the jWebSocket network
-		Token lConnect = new Token(TT_EVENT);
+		Token lConnect = new Token(Token.TT_EVENT);
 		lConnect.put("name", "connect");
 		// lConnect.put("usid", getSessionId(aConnector));
 		lConnect.put("sourceId", aConnector.getId());
@@ -167,7 +166,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Broadcasting disconnect...");
 		}
 		// broadcast connect event to other clients of the jWebSocket network
-		Token lDisconnect = new Token(TT_EVENT);
+		Token lDisconnect = new Token(Token.TT_EVENT);
 		lDisconnect.put("name", "disconnect");
 		// lDisconnect.put("usid", getSessionId(aConnector));
 		lDisconnect.put("sourceId", aConnector.getId());
@@ -201,7 +200,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Broadcasting login event...");
 		}
 		// broadcast login event to other clients of the jWebSocket network
-		Token lLogin = new Token(TT_EVENT);
+		Token lLogin = new Token(Token.TT_EVENT);
 		lLogin.put("name", "login");
 		lLogin.put("username", getUsername(aConnector));
 		lLogin.put("clientCount", getConnectorCount());
@@ -220,7 +219,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Broadcasting logout event...");
 		}
 		// broadcast login event to other clients of the jWebSocket network
-		Token lLogout = new Token(TT_EVENT);
+		Token lLogout = new Token(Token.TT_EVENT);
 		lLogout.put("name", "logout");
 		lLogout.put("username", getUsername(aConnector));
 		lLogout.put("clientCount", getConnectorCount());

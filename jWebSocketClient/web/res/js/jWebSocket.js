@@ -861,9 +861,13 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:r:*:::void:none
 	sendToken: function( aToken, aOptions ) {
 		var lOnResponse = null;
+		var lSpawnThread = false;
 		if( aOptions ) {
 			if( aOptions.OnResponse ) {
 				lOnResponse = aOptions.OnResponse;
+			}
+			if( aOptions.spawnThread ) {
+				lSpawnThread  = aOptions.spawnThread;
 			}
 		}
 		jws.CUR_TOKEN_ID++;
@@ -872,6 +876,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				request: new Date().getTime(),
 				callback: lOnResponse
 			}
+		}
+		if( lSpawnThread ) {
+			aToken.spawnThread = true;
 		}
 		var lStream = this.tokenToStream( aToken );
 

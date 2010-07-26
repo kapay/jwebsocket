@@ -25,6 +25,7 @@ import javolution.util.FastMap;
 public class Token {
 
     private FastMap<String, Object> items = new FastMap<String, Object>();
+	public static final String TT_EVENT = "event";
 
     /**
      * Creates a new empty instance of a token.

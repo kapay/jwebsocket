@@ -187,32 +187,68 @@ public class TokenServer extends BaseServer {
 		return lPacket;
 	}
 
+	private void processToken(WebSocketConnector aConnector, Token aToken) {
+		// before forwarding the token to the plug-ins push it through filter chain
+		FilterResponse filterResponse = getFilterChain().processTokenIn(aConnector, aToken);
+
+		// only forward the token to the plug-in chain
+		// if filter chain does not response "aborted"
+		if (!filterResponse.isRejected()) {
+			getPlugInChain().processToken(aConnector, aToken);
+			// forward the token to the listener chain
+			List<WebSocketServerListener> lListeners = getListeners();
+			WebSocketServerTokenEvent lEvent = new WebSocketServerTokenEvent(aConnector, this);
+			for (WebSocketServerListener lListener : lListeners) {
+				if (lListener != null && lListener instanceof WebSocketServerTokenListener) {
+					((WebSocketServerTokenListener) lListener).processToken(lEvent, aToken);
+				}
+			}
+		}
+	}
+
 	@Override
-	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
+	public void processPacket(WebSocketEngine aEngine, final WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		// is the data packet supposed to be interpreted as token?
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
-			Token lToken = packetToToken(aConnector, aDataPacket);
+			final Token lToken = packetToToken(aConnector, aDataPacket);
 			if (lToken != null) {
-				if (log.isDebugEnabled()) {
-					log.debug("Processing token '" + lToken.toString() + "' from '" + aConnector + "'...");
-				}
+				boolean lRunReqInOwnThread = "true".equals(lToken.getString("spawnThread"));
+				// TODO: create list of running threads and close all properly on shutdown
+				if (lRunReqInOwnThread) {
+					if (log.isDebugEnabled()) {
+						log.debug("Processing threaded token '" + lToken.toString() + "' from '" + aConnector + "'...");
+					}
+					new Thread(new Runnable() {
 
+						@Override
+						public void run() {
+							processToken(aConnector, lToken);
+						}
+					}).start();
+				} else {
+					if (log.isDebugEnabled()) {
+						log.debug("Processing token '" + lToken.toString() + "' from '" + aConnector + "'...");
+					}
+					processToken(aConnector, lToken);
+				}
+				/*
 				// before forwarding the token to the plug-ins push it through filter chain
 				FilterResponse filterResponse = getFilterChain().processTokenIn(aConnector, lToken);
 
 				// only forward the token to the plug-in chain
 				// if filter chain does not response "aborted"
 				if (!filterResponse.isRejected()) {
-					getPlugInChain().processToken(aConnector, lToken);
-					// forward the token to the listener chain
-					List<WebSocketServerListener> lListeners = getListeners();
-					WebSocketServerTokenEvent lEvent = new WebSocketServerTokenEvent(aConnector, this);
-					for (WebSocketServerListener lListener : lListeners) {
-						if (lListener != null && lListener instanceof WebSocketServerTokenListener) {
-							((WebSocketServerTokenListener) lListener).processToken(lEvent, lToken);
-						}
-					}
+				getPlugInChain().processToken(aConnector, lToken);
+				// forward the token to the listener chain
+				List<WebSocketServerListener> lListeners = getListeners();
+				WebSocketServerTokenEvent lEvent = new WebSocketServerTokenEvent(aConnector, this);
+				for (WebSocketServerListener lListener : lListeners) {
+				if (lListener != null && lListener instanceof WebSocketServerTokenListener) {
+				((WebSocketServerTokenListener) lListener).processToken(lEvent, lToken);
 				}
+				}
+				}
+				 */
 			} else {
 				log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
 			}
