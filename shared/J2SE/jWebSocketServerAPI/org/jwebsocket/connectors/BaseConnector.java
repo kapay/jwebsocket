@@ -16,6 +16,7 @@
 package org.jwebsocket.connectors;
 
 import java.net.InetAddress;
+import java.util.Map;
 import javolution.util.FastMap;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
@@ -37,10 +38,14 @@ public class BaseConnector implements WebSocketConnector {
 	 * Default name for shared custom variable <tt>username</tt>.
 	 */
 	public final static String VAR_USERNAME = "$username";
+	/**
+	 * Default name for shared custom variable <tt>nodeid</tt>.
+	 */
+	public final static String VAR_NODEID = "$nodeid";
 	private WebSocketEngine engine = null;
 	private RequestHeader header = null;
-	private WebSocketSession session = new WebSocketSession();
-	private FastMap<String, Object> customVars = new FastMap<String, Object>();
+	private final WebSocketSession session = new WebSocketSession();
+	private final Map<String, Object> customVars = new FastMap<String, Object>();
 
 	/**
 	 * 
@@ -90,7 +95,16 @@ public class BaseConnector implements WebSocketConnector {
 	 */
 	@Override
 	public void setHeader(RequestHeader header) {
+		// TODO: the sub protocol should be a connector variable! not part of the header!
 		this.header = header;
+
+		// TODO: this can be improved, maybe distinguish between header and URL args!
+		Map lArgs = header.getArgs();
+		String lNodeId = (String) lArgs.get("unid");
+		if (lNodeId != null) {
+			setNodeId(lNodeId);
+			lArgs.remove("unid");
+		}
 	}
 
 	@Override
@@ -166,11 +180,64 @@ public class BaseConnector implements WebSocketConnector {
 
 	/*
 	 * Returns the session for the websocket connection.
+	 * @return
 	 */
 	@Override
 	public WebSocketSession getSession() {
 		return session;
 	}
 
+	// some convenience methods to easier process username (login-status)
+	// and configured unique node id for clusters (independent from tcp port)
+	/**
+	 *
+	 * @return
+	 */
+	@Override
+	public String getUsername() {
+		return getString(BaseConnector.VAR_USERNAME);
+	}
 
+	/**
+	 *
+	 * @param aUsername
+	 */
+	@Override
+	public void setUsername(String aUsername) {
+		setString(BaseConnector.VAR_USERNAME, aUsername);
+	}
+
+	/**
+	 *
+	 */
+	@Override
+	public void removeUsername() {
+		removeVar(BaseConnector.VAR_USERNAME);
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	@Override
+	public String getNodeId() {
+		return getString(BaseConnector.VAR_NODEID);
+	}
+
+	/**
+	 *
+	 * @param aNodeId
+	 */
+	@Override
+	public void setNodeId(String aNodeId) {
+		setString(BaseConnector.VAR_NODEID, aNodeId);
+	}
+
+	/**
+	 *
+	 */
+	@Override
+	public void removeNodeId() {
+		removeVar(BaseConnector.VAR_NODEID);
+	}
 }

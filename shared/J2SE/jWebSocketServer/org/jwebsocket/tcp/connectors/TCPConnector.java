@@ -48,7 +48,6 @@ public class TCPConnector extends BaseConnector {
 		clientSocket = aClientSocket;
 		try {
 			is = clientSocket.getInputStream();
-			// br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 			os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
 		} catch (Exception ex) {
 			log.error(ex.getClass().getSimpleName()
@@ -109,7 +108,7 @@ public class TCPConnector extends BaseConnector {
 		try {
 			if (aDataPacket.getFrameType() == RawPacket.FRAMETYPE_BINARY) {
 				// each packet is enclosed in 0xFF<length><data>
-				// TODO: for future use! Not yet released!
+				// TODO: for future use! Not yet finally spec'd in IETF drafts!
 				os.write(0xFF);
 				byte[] lBA = aDataPacket.getByteArray();
 				// TODO: implement multi byte length!

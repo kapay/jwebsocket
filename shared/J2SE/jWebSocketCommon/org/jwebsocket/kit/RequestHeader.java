@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.kit;
 
+import java.util.Map;
 import javolution.util.FastMap;
 
 /**
@@ -26,7 +27,7 @@ import javolution.util.FastMap;
  */
 public final class RequestHeader {
 
-    private FastMap<String, Object> args = new FastMap<String, Object>();
+    private Map<String, Object> args = new FastMap<String, Object>();
     private static final String ARGS = "args";
     private static final String PROT = "prot";
     private static final String TIMEOUT = "timeout";
@@ -64,8 +65,8 @@ public final class RequestHeader {
      * Returns a FastMap of the optional URL arguments passed by the client.
      * @return FastMap of the optional URL arguments.
      */
-    public FastMap getArgs() {
-        return (FastMap) args.get(ARGS);
+    public Map getArgs() {
+        return (Map) args.get(ARGS);
     }
 
     /**
@@ -76,7 +77,7 @@ public final class RequestHeader {
      * @return Sub protocol passed by the client or default value.
      */
     public String getSubProtocol(String aDefault) {
-        FastMap lArgs = getArgs();
+        Map lArgs = getArgs();
         String lSubProt = null;
         if (lArgs != null) {
             lSubProt = (String) lArgs.get(PROT);
@@ -92,7 +93,7 @@ public final class RequestHeader {
      * @return Session timeout passed by the client or default value.
      */
     public Integer getTimeout(Integer aDefault) {
-        FastMap lArgs = getArgs();
+        Map lArgs = getArgs();
         Integer lTimeout = null;
         if (lArgs != null) {
             try {

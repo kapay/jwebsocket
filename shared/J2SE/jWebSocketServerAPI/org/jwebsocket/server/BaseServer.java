@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server;
 
+import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 import org.jwebsocket.api.ServerConfiguration;
@@ -27,6 +28,7 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketFilterChain;
 import org.jwebsocket.api.WebSocketServerListener;
+import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.WebSocketServerEvent;
 import org.jwebsocket.kit.WebSocketException;
 
@@ -206,7 +208,8 @@ public class BaseServer implements WebSocketServer {
 	 * @param aEngine
 	 * @return the engines
 	 */
-	public FastMap<String, WebSocketConnector> getConnectors(WebSocketEngine aEngine) {
+	@Override
+	public Map<String, WebSocketConnector> getConnectors(WebSocketEngine aEngine) {
 		// TODO: does this need to be so nested?
 		// return (FastMap)((FastMap)aEngine.getConnectors()).unmodifiable();
 		return aEngine.getConnectors();
@@ -218,8 +221,9 @@ public class BaseServer implements WebSocketServer {
 	 * FastMap.
 	 * @return the engines
 	 */
-	public FastMap<String, WebSocketConnector> getAllConnectors() {
-		FastMap<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
+	@Override
+	public Map<String, WebSocketConnector> getAllConnectors() {
+		Map<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
 		for (WebSocketEngine lEngine : engines.values()) {
 			lClients.putAll(lEngine.getConnectors());
 		}
@@ -237,8 +241,9 @@ public class BaseServer implements WebSocketServer {
 	 * @param aFilter FastMap of key/values pairs as search criteria.
 	 * @return FastMap with the selected connector or empty FastMap if no connector matches the search criteria.
 	 */
-	public FastMap<String, WebSocketConnector> selectConnectors(FastMap<String, Object> aFilter) {
-		FastMap<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
+	@Override
+	public Map<String, WebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
+		Map<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
 		for (WebSocketEngine lEngine : engines.values()) {
 			for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
 				boolean lMatch = true;
@@ -275,11 +280,32 @@ public class BaseServer implements WebSocketServer {
 	 * @param aId id of the connector to be returned.
 	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
 	 */
+	@Override
 	public WebSocketConnector getConnector(String aId) {
 		for (WebSocketEngine lEngine : engines.values()) {
 			WebSocketConnector lConnector = lEngine.getConnectors().get(aId);
 			if (lConnector != null) {
 				return lConnector;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the connector identified by it's node-id or <tt>null</tt>
+	 * if no connector with that id could be found. This method iterates
+	 * through all embedded engines.
+	 * @param aId id of the connector to be returned.
+	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
+	 */
+	public WebSocketConnector getNode(String aNodeId) {
+		if (aNodeId != null) {
+			for (WebSocketEngine lEngine : engines.values()) {
+				for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
+					if (aNodeId.equals(lConnector.getString(BaseConnector.VAR_NODEID))) {
+						return lConnector;
+					}
+				}
 			}
 		}
 		return null;
@@ -356,4 +382,63 @@ public class BaseServer implements WebSocketServer {
 	public FastList<WebSocketServerListener> getListeners() {
 		return listeners;
 	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @return
+	 */
+	@Override
+	public String getUsername(WebSocketConnector aConnector) {
+		return aConnector.getString(BaseConnector.VAR_USERNAME);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aUsername
+	 */
+	@Override
+	public void setUsername(WebSocketConnector aConnector, String aUsername) {
+		aConnector.setString(BaseConnector.VAR_USERNAME, aUsername);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 */
+	@Override
+	public void removeUsername(WebSocketConnector aConnector) {
+		aConnector.removeVar(BaseConnector.VAR_USERNAME);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @return
+	 */
+	@Override
+	public String getNodeId(WebSocketConnector aConnector) {
+		return aConnector.getString(BaseConnector.VAR_NODEID);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aNodeId
+	 */
+	@Override
+	public void setNodeId(WebSocketConnector aConnector, String aNodeId) {
+		aConnector.setString(BaseConnector.VAR_NODEID, aNodeId);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 */
+	@Override
+	public void removeNodeId(WebSocketConnector aConnector) {
+		aConnector.removeVar(BaseConnector.VAR_NODEID);
+	}
+
 }

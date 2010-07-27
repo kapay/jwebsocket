@@ -99,4 +99,11 @@ public interface WebSocketPlugInChain {
 	 * @param aPlugIn Plug-in to be removed from the plug-in chain.
 	 */
 	void removePlugIn(WebSocketPlugIn aPlugIn);
+
+	/**
+	 * 
+	 * @return
+	 */
+	WebSocketServer getServer();
+
 }

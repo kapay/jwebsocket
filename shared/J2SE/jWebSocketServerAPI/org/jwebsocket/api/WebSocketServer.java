@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import java.util.Map;
 import javolution.util.FastList;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.BroadcastOptions;
@@ -149,4 +150,54 @@ public interface WebSocketServer {
 	 * @return the filterChain
 	 */
 	public FastList<WebSocketServerListener> getListeners();
+
+	/**
+	 *
+	 * @param aConnector
+	 * @return
+	 */
+	String getUsername(WebSocketConnector aConnector);
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aUsername
+	 */
+	void setUsername(WebSocketConnector aConnector, String aUsername);
+
+	/**
+	 *
+	 * @param aConnector
+	 */
+	void removeUsername(WebSocketConnector aConnector);
+
+	/**
+	 *
+	 * @param aConnector
+	 * @return
+	 */
+	String getNodeId(WebSocketConnector aConnector);
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aNodeId
+	 */
+	void setNodeId(WebSocketConnector aConnector, String aNodeId);
+
+	/**
+	 *
+	 * @param aConnector
+	 */
+	void removeNodeId(WebSocketConnector aConnector);
+
+	WebSocketConnector getConnector(String aId);
+
+	WebSocketConnector getNode(String aNodeId);
+
+	Map<String, WebSocketConnector> getConnectors(WebSocketEngine aEngine);
+
+	Map<String, WebSocketConnector> selectConnectors(Map<String, Object> aFilter);
+
+	Map<String, WebSocketConnector> getAllConnectors();
 }

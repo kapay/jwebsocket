@@ -88,14 +88,18 @@ public class TokenPlugIn extends BasePlugIn {
 	 *
 	 * @return
 	 */
+	@Override
 	public TokenServer getServer() {
 		// TODO: obtaining server for a plug-in probably can be improved
-		TokenServer lServer = null;
+		return (TokenServer)super.getServer();
+		/*
+		TokenServer lServer =
 		TokenPlugInChain plugInChain = (TokenPlugInChain) getPlugInChain();
 		if (plugInChain != null) {
 			lServer = (TokenServer) plugInChain.getServer();
 		}
 		return lServer;
+		 */
 	}
 
 	/**
@@ -179,59 +183,4 @@ public class TokenPlugIn extends BasePlugIn {
 		}
 	}
 
-	/**
-	 * Convenience method, just a wrapper for token server method
-	 * <tt>getUsername</tt> to simplify token plug-in code.
-	 * @param aSource
-	 * @param aTarget
-	 * @param aToken
-	 */
-	public String getUsername(WebSocketConnector aConnector) {
-		return getServer().getUsername(aConnector);
-	}
-
-	/**
-	 * Convenience method, just a wrapper for token server method
-	 * <tt>setUsername</tt> to simplify token plug-in code.
-	 * @param aSource
-	 * @param aTarget
-	 * @param aToken
-	 */
-	public void setUsername(WebSocketConnector aConnector, String aUsername) {
-		getServer().setUsername(aConnector, aUsername);
-	}
-
-	/**
-	 * Convenience method, just a wrapper for token server method
-	 * <tt>removeUsername</tt> to simplify token plug-in code.
-	 * @param aSource
-	 * @param aTarget
-	 * @param aToken
-	 */
-	public void removeUsername(WebSocketConnector aConnector) {
-		getServer().removeUsername(aConnector);
-	}
-
-	/**
-	 * Convenience method, just a wrapper for token server method
-	 * <tt>getConnector</tt> to simplify token plug-in code.
-	 * @param aSource
-	 * @param aTarget
-	 * @param aToken
-	 */
-	public WebSocketConnector getConnector(String aId) {
-		return getServer().getConnector(aId);
-	}
-
-	/**
-	 * Convenience method, just a wrapper for token server method
-	 * <tt>getServer().getAllConnectors().size()</tt> to simplify token
-	 * plug-in code.
-	 * @param aSource
-	 * @param aTarget
-	 * @param aToken
-	 */
-	public int getConnectorCount() {
-		return getServer().getAllConnectors().size();
-	}
 }

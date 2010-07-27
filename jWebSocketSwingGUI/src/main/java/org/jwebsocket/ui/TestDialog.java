@@ -137,6 +137,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         mnbMain = new javax.swing.JMenuBar();
         pmnFile = new javax.swing.JMenu();
         mniExit = new javax.swing.JMenuItem();
+        mniPreferences = new javax.swing.JMenuItem();
         pmnTests = new javax.swing.JMenu();
         mniConnect = new javax.swing.JMenuItem();
         mniDisconnect = new javax.swing.JMenuItem();
@@ -390,6 +391,14 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         pmnFile.add(mniExit);
 
+        mniPreferences.setText("Preferences");
+        mniPreferences.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mniPreferencesActionPerformed(evt);
+            }
+        });
+        pmnFile.add(mniPreferences);
+
         mnbMain.add(pmnFile);
 
         pmnTests.setText("Edit");
@@ -436,9 +445,13 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		checkDisconnect();
 	}//GEN-LAST:event_formWindowClosing
 
+	private void mniPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniPreferencesActionPerformed
+		// open preferences dialog
+	}//GEN-LAST:event_mniPreferencesActionPerformed
+
 	private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnConnectActionPerformed
 		try {
-			client.open("ws://192.168.2.15:8787");
+			client.open("ws://localhost:8787/;unid=admin_ui_1");
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -546,6 +559,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
     private javax.swing.JMenuItem mniConnect;
     private javax.swing.JMenuItem mniDisconnect;
     private javax.swing.JMenuItem mniExit;
+    private javax.swing.JMenuItem mniPreferences;
     private javax.swing.JMenuItem mniSend;
     private javax.swing.JMenu pmnFile;
     private javax.swing.JMenu pmnTests;

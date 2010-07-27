@@ -108,6 +108,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	public void connectorStarted(WebSocketConnector aConnector) {
 		// set session id first, so that it can be processed in the connectorStarted method
 		Random rand = new Random(System.nanoTime());
+
+		// TODO: if unique node id is passed check if already assigned in the network and reject connect if so!
+
 		aConnector.getSession().setSessionId(Tools.getMD5(aConnector.generateUID() + "." + rand.nextInt()));
 		// call super connectorStarted
 		super.connectorStarted(aConnector);
@@ -150,6 +153,11 @@ public class SystemPlugIn extends TokenPlugIn {
 		lConnect.put("name", "connect");
 		// lConnect.put("usid", getSessionId(aConnector));
 		lConnect.put("sourceId", aConnector.getId());
+		// if a unique node id is specified for the client include that
+		String lNodeId = aConnector.getNodeId();
+		if (lNodeId != null) {
+			lConnect.put("unid", lNodeId);
+		}
 		lConnect.put("clientCount", getConnectorCount());
 
 		// broadcast to all except source
@@ -170,6 +178,11 @@ public class SystemPlugIn extends TokenPlugIn {
 		lDisconnect.put("name", "disconnect");
 		// lDisconnect.put("usid", getSessionId(aConnector));
 		lDisconnect.put("sourceId", aConnector.getId());
+		// if a unique node id is specified for the client include that
+		String lNodeId = aConnector.getNodeId();
+		if (lNodeId != null) {
+			lDisconnect.put("unid", lNodeId);
+		}
 		lDisconnect.put("clientCount", getConnectorCount());
 
 		// broadcast to all except source
@@ -187,7 +200,12 @@ public class SystemPlugIn extends TokenPlugIn {
 		// here the session id is MANDATORY! to pass to the client!
 		lWelcome.put("usid", aConnector.getSession().getSessionId());
 		lWelcome.put("sourceId", aConnector.getId());
-		lWelcome.put("timeout", aConnector.getEngine().getSessionTimeout());
+		// if a unique node id is specified for the client include that
+		String lNodeId = aConnector.getNodeId();
+		if (lNodeId != null) {
+			lWelcome.put("unid", lNodeId);
+		}
+		lWelcome.put("timeout", aConnector.getEngine().getConfiguration().getTimeout());
 
 		sendToken(aConnector, aConnector, lWelcome);
 	}
@@ -206,7 +224,11 @@ public class SystemPlugIn extends TokenPlugIn {
 		lLogin.put("clientCount", getConnectorCount());
 		// lLogin.put("usid", getSessionId(aConnector));
 		lLogin.put("sourceId", aConnector.getId());
-
+		// if a unique node id is specified for the client include that
+		String lNodeId = aConnector.getNodeId();
+		if (lNodeId != null) {
+			lLogin.put("unid", lNodeId);
+		}
 		// broadcast to all except source
 		broadcastToken(aConnector, lLogin);
 	}
@@ -225,7 +247,11 @@ public class SystemPlugIn extends TokenPlugIn {
 		lLogout.put("clientCount", getConnectorCount());
 		// lLogout.put("usid", getSessionId(aConnector));
 		lLogout.put("sourceId", aConnector.getId());
-
+		// if a unique node id is specified for the client include that
+		String lNodeId = aConnector.getNodeId();
+		if (lNodeId != null) {
+			lLogout.put("unid", lNodeId);
+		}
 		// broadcast to all except source
 		broadcastToken(aConnector, lLogout);
 	}
@@ -319,21 +345,26 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		Token lResponse = createResponse(aToken);
 
-		// get the target
-		String lTargetId = aToken.getString("targetId");
-
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'send' (username='"
-					+ getUsername(aConnector) + "') from '"
-					+ aConnector + "' to " + lTargetId + "...");
+		WebSocketConnector lTargetConnector;
+		String lTargetId = aToken.getString("unid");
+		if (lTargetId != null) {
+			lTargetConnector = getNode(lTargetId);
+		} else {
+			// get the target
+			lTargetId = aToken.getString("targetId");
+			lTargetConnector = getConnector(lTargetId);
 		}
 
-		WebSocketConnector lTargetConnector = getConnector(lTargetId);
 		/*
 		if (getUsername(aConnector) != null)
 		{
 		 */
 		if (lTargetConnector != null) {
+			if (log.isDebugEnabled()) {
+				log.debug("Processing 'send' (username='"
+						+ getUsername(aConnector) + "') from '"
+						+ aConnector + "' to " + lTargetId + "...");
+			}
 			aToken.put("sourceId", aConnector.getId());
 			sendToken(aConnector, lTargetConnector, aToken);
 		} else {

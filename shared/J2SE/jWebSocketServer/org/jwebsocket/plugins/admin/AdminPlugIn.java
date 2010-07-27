@@ -15,14 +15,15 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.admin;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import javolution.util.FastList;
-import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketServerConstants;
-import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.kit.WebSocketException;
@@ -113,27 +114,25 @@ public class AdminPlugIn extends TokenPlugIn {
 			log.debug("Processing 'getConnections'...");
 		}
 
-		// check if user is allowed to run 'shutdown' command
-		/*
-		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_ADMIN + ".shutdown")) {
-		lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-		return;
+		// check if user is allowed to run 'getConnections' command
+		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_ADMIN + ".getConnections")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// TODO: consider security settings
+			// return;
 		}
-		 */
 
 		Token lResponse = lServer.createResponse(aToken);
 		try {
-			FastList<JSONObject> lResultList = new FastList<JSONObject>();
-			FastMap lConnectors = lServer.getAllConnectors();
-			for (FastMap.Entry<String, WebSocketConnector> lItem = lConnectors.head(), end = lConnectors.tail();
-					(lItem = lItem.getNext()) != end;) {
-				// String key = lItem.getKey(); 
-				WebSocketConnector lConnector = lItem.getValue();
+			// TODO: Is using JSON objects correct here? Shouldn't we use normal maps to be independent of format? I.e. build normal token?
+			List<JSONObject> lResultList = new FastList<JSONObject>();
+			Map lConnectorMap = lServer.getAllConnectors();
+			Collection<WebSocketConnector> lConnectors = lConnectorMap.values();
+			for (WebSocketConnector lConnector : lConnectors) {
 				// TODO: should work for for (sub-)tokens as well!
 				JSONObject lResultItem = new JSONObject();
 				lResultItem.put("port", lConnector.getRemotePort());
 				lResultItem.put("usid", lConnector.getSession().getSessionId());
-				lResultItem.put("username", lConnector.getString(BaseConnector.VAR_USERNAME));
+				lResultItem.put("username", lConnector.getUsername());
 				lResultItem.put("isToken", lConnector.getBoolean(TokenServer.VAR_IS_TOKENSERVER));
 				lResultList.add(lResultItem);
 			}

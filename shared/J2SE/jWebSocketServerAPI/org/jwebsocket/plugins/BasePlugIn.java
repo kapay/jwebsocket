@@ -21,7 +21,9 @@ import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.server.BaseServer;
 
 /**
  *
@@ -76,5 +78,105 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	@Override
 	public WebSocketPlugInChain getPlugInChain() {
 		return plugInChain;
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public WebSocketServer getServer() {
+		WebSocketServer lServer = null;
+		if (plugInChain != null) {
+			lServer = plugInChain.getServer();
+		}
+		return lServer;
+	}
+
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>getUsername</tt> to simplify token plug-in code.
+	 * @param aConnector
+	 * @return
+	 */
+	public String getUsername(WebSocketConnector aConnector) {
+		return getServer().getUsername(aConnector);
+	}
+
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>setUsername</tt> to simplify token plug-in code.
+	 * @param aConnector
+	 * @param aUsername
+	 */
+	public void setUsername(WebSocketConnector aConnector, String aUsername) {
+		getServer().setUsername(aConnector, aUsername);
+	}
+
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>removeUsername</tt> to simplify token plug-in code.
+	 * @param aConnector
+	 */
+	public void removeUsername(WebSocketConnector aConnector) {
+		getServer().removeUsername(aConnector);
+	}
+
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>getNodeId</tt> to simplify token plug-in code.
+	 * @param aConnector
+	 * @return
+	 */
+	public String getNodeId(WebSocketConnector aConnector) {
+		return getServer().getNodeId(aConnector);
+	}
+
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>setNodeId</tt> to simplify token plug-in code.
+	 * @param aConnector
+	 * @param aNodeId
+	 */
+	public void setNodeId(WebSocketConnector aConnector, String aNodeId) {
+		getServer().setNodeId(aConnector, aNodeId);
+	}
+
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>removeNodeId</tt> to simplify token plug-in code.
+	 * @param aConnector
+	 */
+	public void removeNodeId(WebSocketConnector aConnector) {
+		getServer().removeNodeId(aConnector);
+	}
+
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>getConnector</tt> to simplify token plug-in code.
+	 * @param aId
+	 * @return
+	 */
+	public WebSocketConnector getConnector(String aId) {
+		return (aId != null ? getServer().getConnector(aId) : null);
+	}
+
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>getNode</tt> to simplify token plug-in code.
+	 * @param aNodeId
+	 * @return
+	 */
+	public WebSocketConnector getNode(String aNodeId) {
+		return (aNodeId != null ? getServer().getNode(aNodeId) : null);
+	}
+
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>getServer().getAllConnectors().size()</tt> to simplify token
+	 * plug-in code.
+	 * @return
+	 */
+	public int getConnectorCount() {
+		return getServer().getAllConnectors().size();
 	}
 }

@@ -456,29 +456,4 @@ public class TokenServer extends BaseServer {
 		return (TokenFilterChain) filterChain;
 	}
 
-	/**
-	 *
-	 * @param aConnector
-	 * @return
-	 */
-	public String getUsername(WebSocketConnector aConnector) {
-		return aConnector.getString(BaseConnector.VAR_USERNAME);
-	}
-
-	/**
-	 *
-	 * @param aConnector
-	 * @param aUsername
-	 */
-	public void setUsername(WebSocketConnector aConnector, String aUsername) {
-		aConnector.setString(BaseConnector.VAR_USERNAME, aUsername);
-	}
-
-	/**
-	 *
-	 * @param aConnector
-	 */
-	public void removeUsername(WebSocketConnector aConnector) {
-		aConnector.removeVar(BaseConnector.VAR_USERNAME);
-	}
 }

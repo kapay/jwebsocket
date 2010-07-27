@@ -195,4 +195,16 @@ public interface WebSocketConnector {
 	 * Returns the session for the websocket connection.
 	 */
 	WebSocketSession getSession();
+
+	String getUsername();
+
+	void setUsername(String aUsername);
+
+	void removeUsername();
+
+	String getNodeId();
+
+	void setNodeId(String aNodeId);
+
+	void removeNodeId();
 }

@@ -199,6 +199,16 @@
 					log( jWebSocketClient.resultToString( lRes ) );
 				}
 			}
+			
+			function cgiTest() {
+				jWebSocketClient.sendToken({
+					ns: "org.jWebSocket.plugins.system",
+					type: "send",
+					subType: "exec",
+					unid: "ssal",
+					cmd: "test()"
+				});
+			}
 
 			function onFileLoadedObs( aToken ) {
 				log( "Loaded file: " + aToken.data );
@@ -273,6 +283,7 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();"></td>
 					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSaveFile" type="button" value="Save File" onclick="saveFile();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnCGITest" type="button" value="CGI Test" onclick="cgiTest();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Password</td>

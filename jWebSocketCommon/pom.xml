@@ -20,14 +20,14 @@
 
     <build>
 		<!-- use shared directory here, to share code across various platforms -->
+<!--
 		<sourceDirectory>../shared/J2SE/jWebSocketCommon</sourceDirectory>
-<!--		
+-->
         <resources>
             <resource>
                 <directory>../shared/J2SE/jWebSocketCommon</directory>
             </resource>
         </resources>
--->			
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -70,6 +70,12 @@
             <version>RELEASE65</version>
             <type>jar</type>
         </dependency>
+		<dependency>
+			<groupId>javolution</groupId>
+			<artifactId>javolution</artifactId>
+			<version>5.5.1</version>
+		</dependency>
+
     </dependencies>
 
 	<!--  define repositories -->
