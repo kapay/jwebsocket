@@ -5,7 +5,8 @@
 package org.jwebsocket.factory;
 
 import java.util.List;
-import javolution.util.FastMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketFilter;
@@ -33,17 +34,16 @@ public class JWebSocketFactory {
 		JWebSocketLoader loader = new JWebSocketLoader();
 		try {
 			WebSocketInitializer initializer = loader.initialize();
+			if (initializer == null) {
+				System.err.println("ERROR:jWebSocket Server sub system could not be initialized.");
+				return;
+			}
 			initializer.initializeLogging();
 
 			log = Logging.getLogger(JWebSocketFactory.class);
 			if (log.isDebugEnabled()) {
 				log.debug("Starting jWebSocket Server Sub System...");
 			}
-			if (initializer == null) {
-				log.error("jWebSocket Server sub system could not be initialized.");
-				return;
-			}
-
 			engine = initializer.initializeEngine();
 			if (engine == null) {
 				// the loader already logs an error!
@@ -56,7 +56,7 @@ public class JWebSocketFactory {
 			}
 			servers = initializer.initializeServers();
 
-			FastMap<String, List<WebSocketPlugIn>> pluginFastMap = initializer.initializePlugins();
+			Map<String, List<WebSocketPlugIn>> pluginFastMap = initializer.initializePlugins();
 			if (log.isDebugEnabled()) {
 				log.debug("Initializing plugins...");
 			}
@@ -71,7 +71,7 @@ public class JWebSocketFactory {
 				log.info("Plugins initialized.");
 			}
 
-			FastMap<String, List<WebSocketFilter>> filterFastMap = initializer.initializeFilters();
+			Map<String, List<WebSocketFilter>> filterFastMap = initializer.initializeFilters();
 			if (log.isDebugEnabled()) {
 				log.debug("Initializing filters...");
 			}
