@@ -104,7 +104,7 @@ public class TCPConnector extends BaseConnector {
 	}
 
 	@Override
-	public void sendPacket(WebSocketPacket aDataPacket) {
+	public synchronized void sendPacket(WebSocketPacket aDataPacket) {
 		try {
 			if (aDataPacket.getFrameType() == RawPacket.FRAMETYPE_BINARY) {
 				// each packet is enclosed in 0xFF<length><data>
