@@ -15,7 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
-import javolution.util.FastMap;
+import java.util.Map;
+
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 
@@ -92,13 +93,13 @@ public interface WebSocketEngine {
 	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
 	/**
-	 * Returns the FastMap of clients connected to this engine. Please consider
+	 * Returns the Map of clients connected to this engine. Please consider
 	 * that a server can support multiple engines. This method only returns
 	 * the clients of this engine.
 	 *
 	 * @return the connector clients
 	 */
-	FastMap<String, WebSocketConnector> getConnectors();
+	Map<String, WebSocketConnector> getConnectors();
 
 	/**
 	 * Returns the TCP connector identified by its remote port number or
@@ -161,7 +162,7 @@ public interface WebSocketEngine {
 	 *
 	 * @return List of servers bound to the engine.
 	 */
-	FastMap<String, WebSocketServer> getServers();
+	Map<String, WebSocketServer> getServers();
 
 	/**
 	 * Registers a server at the engine so that the engine is able to notify
