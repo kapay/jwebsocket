@@ -9,7 +9,7 @@
  * Created on Mar 15, 2010, 2:56:00 PM
  */
 
-package org.jWebSocket.ui;
+package org.jwebsocket.ui;
 
 /**
  *
