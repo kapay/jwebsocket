@@ -16,6 +16,8 @@ package org.jwebsocket.factory;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -30,8 +32,7 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
  * Class that performs the default servers and plugins initialization
  * 
  * @author puran
- * @version $Id: JWebSocketInitializer.java 399 2010-04-30 01:00:57Z
- *          mailtopuran$
+ * @version $Id: JWebSocketInitializer.java 399 2010-04-30 01:00:57Z mailtopuran$
  */
 public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
 
@@ -39,7 +40,7 @@ public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
      * {@inheritDoc}
      */
     @Override
-    public FastMap<String, List<WebSocketPlugIn>> initializeCustomPlugins() {
+    public Map<String, List<WebSocketPlugIn>> initializeCustomPlugins() {
         return new FastMap<String, List<WebSocketPlugIn>>();
     }
 
@@ -55,7 +56,7 @@ public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
      * {@inheritDoc}
      */
     @Override
-    public FastMap<String, List<WebSocketFilter>> initializeCustomFilters() {
+    public Map<String, List<WebSocketFilter>> initializeCustomFilters() {
         return new FastMap<String, List<WebSocketFilter>>();
     }
 
