@@ -15,6 +15,8 @@
 package org.jwebsocket.factory;
 
 import java.util.List;
+import java.util.Map;
+
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -112,12 +114,11 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	 * @return the FastMap of server id to list of plugins
 	 */
 	@Override
-	public FastMap<String, List<WebSocketPlugIn>> initializePlugins() {
-
+	public Map<String, List<WebSocketPlugIn>> initializePlugins() {
 		if (log.isDebugEnabled()) {
 			log.debug("Instantiating default plug-ins...");
 		}
-		FastMap<String, List<WebSocketPlugIn>> pluginMap = new FastMap<String, List<WebSocketPlugIn>>();
+		Map<String, List<WebSocketPlugIn>> pluginMap = new FastMap<String, List<WebSocketPlugIn>>();
 		List<WebSocketPlugIn> defaultPlugins = new FastList<WebSocketPlugIn>();
 
 		defaultPlugins.add(new SystemPlugIn());
@@ -134,11 +135,14 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 			log.debug("Instantiating custom plug-ins...");
 		}
 
-		FastMap<String, List<WebSocketPlugIn>> customPluginMap = initializeCustomPlugins();
-		for (FastMap.Entry<String, List<WebSocketPlugIn>> lEntry = customPluginMap.head(), end = customPluginMap.tail();
-				(lEntry = lEntry.getNext()) != end;) {
-			String id = lEntry.getKey();
-			pluginMap.get(id).addAll(lEntry.getValue());
+		Map<String, List<WebSocketPlugIn>> customPluginMap = initializeCustomPlugins();
+		for (Map.Entry<String, List<WebSocketPlugIn>>  entry : customPluginMap.entrySet()) {
+			String id = entry.getKey();
+			if (pluginMap.containsKey(id)) {
+				pluginMap.get(id).addAll(entry.getValue());
+			} else {
+				pluginMap.put(id, entry.getValue());
+			}
 		}
 		if (log.isInfoEnabled()) {
 			log.info("Custom plug-ins instantiated.");
@@ -150,12 +154,12 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	 * {@inheritDoc}
 	 */
 	@Override
-	public FastMap<String, List<WebSocketFilter>> initializeFilters() {
+	public Map<String, List<WebSocketFilter>> initializeFilters() {
 
 		if (log.isDebugEnabled()) {
 			log.debug("Instantiating default filters...");
 		}
-		FastMap<String, List<WebSocketFilter>> filterMap = new FastMap<String, List<WebSocketFilter>>();
+		Map<String, List<WebSocketFilter>> filterMap = new FastMap<String, List<WebSocketFilter>>();
 		List<WebSocketFilter> defaultFilters = new FastList<WebSocketFilter>();
 		defaultFilters.add(new SystemFilter("systemFilter"));
 		defaultFilters.add(new CustomTokenFilter("userFilter"));
@@ -168,13 +172,16 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 		if (log.isDebugEnabled()) {
 			log.debug("Instantiating custom filters...");
 		}
-		FastMap<String, List<WebSocketFilter>> customFilterMap = initializeCustomFilters();
-
-		for (FastMap.Entry<String, List<WebSocketFilter>> lEntry = customFilterMap.head(), end = customFilterMap.tail();
-				(lEntry = lEntry.getNext()) != end;) {
-			String id = lEntry.getKey();
-			filterMap.get(id).addAll(lEntry.getValue());
+		Map<String, List<WebSocketFilter>> customFilterMap = initializeCustomFilters();
+		for (Map.Entry<String, List<WebSocketFilter>>  entry : customFilterMap.entrySet()) {
+			String id = entry.getKey();
+			if (filterMap.containsKey(id)) {
+				filterMap.get(id).addAll(entry.getValue());
+			} else {
+				filterMap.put(id, entry.getValue());
+			}
 		}
+		
 		if (log.isInfoEnabled()) {
 			log.info("Custom filters instantiated.");
 		}
@@ -185,7 +192,7 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	 * Allow subclass of this class to initialize custom plugins.
 	 * @return the FastMap of custom plugins to server id.
 	 */
-	public abstract FastMap<String, List<WebSocketPlugIn>> initializeCustomPlugins();
+	public abstract Map<String, List<WebSocketPlugIn>> initializeCustomPlugins();
 
 	/**
 	 * Allow the subclass of this class to initialize custom servers
@@ -197,7 +204,7 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	 * Allow the subclass of this class to initialize custom filters
 	 * @return the list of custom filters to server id
 	 */
-	public abstract FastMap<String, List<WebSocketFilter>> initializeCustomFilters();
+	public abstract Map<String, List<WebSocketFilter>> initializeCustomFilters();
 
 	/**
 	 * 
