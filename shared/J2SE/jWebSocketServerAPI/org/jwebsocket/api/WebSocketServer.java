@@ -15,10 +15,11 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import java.util.List;
 import java.util.Map;
-import javolution.util.FastList;
-import org.jwebsocket.kit.CloseReason;
+
 import org.jwebsocket.kit.BroadcastOptions;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
@@ -125,31 +126,31 @@ public interface WebSocketServer {
 	 * Returns the plugin chain for the server .
 	 * @return the plugInChain
 	 */
-	public WebSocketPlugInChain getPlugInChain();
+     WebSocketPlugInChain getPlugInChain();
 
 	/**
 	 * Returns the filter chain for the server.
 	 * @return the filterChain
 	 */
-	public WebSocketFilterChain getFilterChain();
+	 WebSocketFilterChain getFilterChain();
 
 	/**
 	 * 
 	 * @param aListener
 	 */
-	public void addListener(WebSocketServerListener aListener);
+	 void addListener(WebSocketServerListener aListener);
 
 	/**
 	 *
 	 * @param aListener
 	 */
-	public void removeListener(WebSocketServerListener aListener);
+	 void removeListener(WebSocketServerListener aListener);
 
 	/**
 	 * Returns the list of listeners for the server.
 	 * @return the filterChain
 	 */
-	public FastList<WebSocketServerListener> getListeners();
+	 List<WebSocketServerListener> getListeners();
 
 	/**
 	 *
