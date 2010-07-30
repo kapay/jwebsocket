@@ -51,7 +51,7 @@ public class Fundamentals extends Activity implements WebSocketClientTokenListen
         lBtnClearLog = (Button) findViewById(R.id.btnFundClearLog);
         lMessage = (EditText) findViewById(R.id.txfFundMessage);
         lTarget = (EditText) findViewById(R.id.txfFundTarget);
-        lLog = (TextView) findViewById(R.id.lblFundLog);
+        lLog = (EditText) findViewById(R.id.lblFundLog);
 
         lBtnSend.setOnClickListener(new OnClickListener() {
 
@@ -87,7 +87,7 @@ public class Fundamentals extends Activity implements WebSocketClientTokenListen
     @Override
     protected void onResume() {
         super.onResume();
-        log("opening...");
+        log("* opening... ");
         try {
             JWC.addListener(this);
             JWC.open();
@@ -97,7 +97,7 @@ public class Fundamentals extends Activity implements WebSocketClientTokenListen
 
     @Override
     protected void onPause() {
-        log("closing...");
+        log("* closing... ");
         try {
             JWC.close();
             JWC.removeListener(this);
@@ -108,7 +108,7 @@ public class Fundamentals extends Activity implements WebSocketClientTokenListen
 
     private void log(CharSequence aString) {
         try {
-            lLog.append(aString + "\n");
+            lLog.append(aString);
         } catch (Exception ex) {
             Toast.makeText(getApplicationContext(), ex.getClass().getSimpleName(),
                     Toast.LENGTH_SHORT).show();
@@ -116,17 +116,18 @@ public class Fundamentals extends Activity implements WebSocketClientTokenListen
     }
 
     public void processOpened(WebSocketClientEvent aEvent) {
-        log("opened");
+        log("opened\n");
     }
 
     public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+        log("> " + aPacket.getUTF8() + "\n");
     }
 
     public void processToken(WebSocketClientEvent aEvent, Token aToken) {
-        log(aToken.toString());
+        // log("> " + aToken.toString() + "\n");
     }
 
     public void processClosed(WebSocketClientEvent aEvent) {
-        log("closed");
+        log("closed\n");
     }
 }

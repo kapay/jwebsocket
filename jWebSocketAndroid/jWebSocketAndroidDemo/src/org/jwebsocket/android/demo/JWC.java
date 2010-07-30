@@ -14,9 +14,14 @@
 // ---------------------------------------------------------------------------
 package org.jwebsocket.android.demo;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.Toast;
+import java.io.FileInputStream;
 import java.util.List;
+import java.util.Properties;
 import javolution.util.FastList;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
@@ -36,7 +41,8 @@ public class JWC {
     private final static int MT_PACKET = 1;
     private final static int MT_CLOSED = 2;
     private final static int MT_TOKEN = 3;
-    private static String URL = "ws://192.168.2.232:8787";
+    private final static String CONFIG_FILE = "jWebSocket";
+    private static String URL = "ws://jwebsocket.org:8787";
     private static BaseTokenClient jwc;
     private static List<WebSocketClientTokenListener> listeners = new FastList<WebSocketClientTokenListener>();
     private static String DEF_ENCODING = "UTF-8";
@@ -44,6 +50,28 @@ public class JWC {
     public static void init() {
         jwc = new BaseTokenClient();
         jwc.addListener(new Listener());
+    }
+
+    public static void loadSettings(Activity aActivity) {
+        Properties lProps = new Properties();
+        try {
+            lProps.load(aActivity.openFileInput(CONFIG_FILE));
+        } catch (Exception ex) {
+            Toast.makeText(aActivity.getApplicationContext(), ex.getClass().getSimpleName() + ":" + ex.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        }
+        URL = (String) lProps.getProperty("url", "http://jwebsocket.org:8787/");
+    }
+
+    public static void saveSettings(Activity aActivity) {
+        Properties lProps = new Properties();
+        try {
+            lProps.put("url", URL);
+            lProps.save(aActivity.openFileOutput(CONFIG_FILE, Context.MODE_PRIVATE), "jWebSocketClient Configuration");
+        } catch (Exception ex) {
+            Toast.makeText(aActivity.getApplicationContext(), ex.getClass().getSimpleName() + ":" + ex.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     public static void open() throws WebSocketException {
@@ -126,6 +154,20 @@ public class JWC {
         for (WebSocketClientTokenListener lListener : listeners) {
             lListener.processClosed(aEvent);
         }
+    }
+
+    /**
+     * @return the URL
+     */
+    public static String getURL() {
+        return URL;
+    }
+
+    /**
+     * @param aURL the URL to set
+     */
+    public static void setURL(String aURL) {
+        URL = aURL;
     }
 
     static class Listener implements WebSocketClientTokenListener {

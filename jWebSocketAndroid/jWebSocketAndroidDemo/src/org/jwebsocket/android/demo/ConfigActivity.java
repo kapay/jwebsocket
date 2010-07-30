@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 /**
@@ -29,6 +30,8 @@ public class ConfigActivity extends Activity {
 
     private Button lBtnCancel;
     private Button lBtnSave;
+    private EditText lTxfURL;
+    private Activity lInstance;
 
     /** Called when the activity is first created. */
     @Override
@@ -36,8 +39,10 @@ public class ConfigActivity extends Activity {
         super.onCreate(icicle);
         setContentView(R.layout.config_hvga_p);
 
-        lBtnCancel = (Button) findViewById(R.id.btnCancel);
-        lBtnSave = (Button) findViewById(R.id.btnSave);
+        lBtnCancel = (Button) findViewById(R.id.cfgBtnCancel);
+        lBtnSave = (Button) findViewById(R.id.cfgBtnSave);
+        lTxfURL = (EditText) findViewById(R.id.cfgTxfURL);
+        lInstance = this;
 
         lBtnCancel.setOnClickListener(new OnClickListener() {
 
@@ -54,8 +59,24 @@ public class ConfigActivity extends Activity {
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), "SAVING...",
                         Toast.LENGTH_SHORT).show();
+
+                JWC.setURL(lTxfURL.getText().toString());
+                JWC.saveSettings(lInstance);
                 finish();
             }
         });
+        JWC.loadSettings(this);
+        lTxfURL.setText(JWC.getURL());
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 }

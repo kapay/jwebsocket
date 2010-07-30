@@ -39,40 +39,53 @@ android:textSize="18sp"
     <LinearLayout
       android:orientation="horizontal"
       android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="60sp"
       android:layout_weight="0"
-      android:paddingTop="15sp">-->
+      android:paddingTop="5sp">
         <Button
 android:id="@+id/btnFundSend"
 android:layout_width="50sp"
 android:layout_height="wrap_content"
-android:text="Send"
+android:text="Send\n"
+android:drawableLeft="@drawable/send"
 android:layout_weight="1">
         </Button>
         <Button
 android:id="@+id/btnFundBroadcast"
 android:layout_width="50sp"
 android:layout_height="wrap_content"
-android:text="Broadcast"
+android:text="Broad-\ncast"
+android:drawableLeft="@drawable/broadcast"
 android:layout_weight="1">
         </Button>
         <Button
 android:id="@+id/btnFundClearLog"
 android:layout_width="50sp"
 android:layout_height="wrap_content"
-android:text="Clear"
+android:text="Clear\nLogs"
+android:drawableLeft="@drawable/mni_clear"
 android:layout_weight="1">
         </Button>
     </LinearLayout>
-        <TextView
+
+    <TextView
+android:id="@+id/fundLblLogTitle"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Incoming Messages"
+>
+    </TextView>
+    <EditText
 android:id="@+id/lblFundLog"
 android:layout_width="fill_parent"
 android:layout_height="wrap_content"
-android:background="#E0E0E0"
-android:text="Incoming Messages...\n"
+android:textSize="12sp"
+android:text=""
 android:layout_weight="1"
-android:editable="true"
+android:gravity="top|left"
+android:editable="false"
 >
-    </TextView>
+    </EditText>
+
 
 </LinearLayout>
