@@ -168,15 +168,15 @@ public class BaseWebSocket implements JWebSocketClient {
         try {
             if (isBinaryData) {
                 output.write(0x80);
+                // TODO: what if frame is longer than 255 characters (8bit?) Refer to IETF spec!
                 output.write(data.length);
-                output.write(data);
-                output.flush();
+                output.write(data);                
             } else {
                 output.write(0x00);
                 output.write(data);
                 output.write(0xff);
-                output.flush();
             }
+            output.flush();
         } catch (IOException ioe) {
             throw new WebSocketException("error while sending binary data: ", ioe);
         }
@@ -211,6 +211,7 @@ public class BaseWebSocket implements JWebSocketClient {
                 close();
             }
         } catch (WebSocketException wse) {
+            // TODO: don't use printStackTrace
             wse.printStackTrace();
         }
     }
@@ -244,11 +245,12 @@ public class BaseWebSocket implements JWebSocketClient {
         }
         try {
             output.write(0xff00);
+            // TODO: check if final CR/LF is required/valid!
             output.write("\r\n".getBytes());
+            // TODO: shouldn't we put a flush here?
         } catch (IOException ioe) {
             throw new WebSocketException("error while sending close handshake", ioe);
         }
-
         connected = false;
     }
 

@@ -167,10 +167,15 @@ public class TCPEngine extends BaseEngine {
         InputStream is = aClientSocket.getInputStream();
         OutputStream os = aClientSocket.getOutputStream();
 
+        // TODO: Replace this structure by more dynamic ByteArrayOutputStream?
         byte[] lBuff = new byte[8192];
         int lRead = is.read(lBuff);
         byte[] lResp = new byte[lRead];
         System.arraycopy(lBuff, 0, lResp, 0, lRead);
+
+        //if (log.isDebugEnabled()) {
+        //    log.debug("Handshake Request:\n" + new String(lResp));
+        //}
 
         FastMap lRespMap = WebSocketHandshake.parseC2SRequest(lResp);
         // maybe the request is a flash policy-file-request
@@ -187,6 +192,9 @@ public class TCPEngine extends BaseEngine {
             }
             return null;
         }
+        //if (log.isDebugEnabled()) {
+        //    log.debug("Handshake Response:\n" + new String(lResp));
+        //}
         os.write(ba);
         os.flush();
 
