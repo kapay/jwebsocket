@@ -19,7 +19,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
-import java.io.FileInputStream;
 import java.util.List;
 import java.util.Properties;
 import javolution.util.FastList;
@@ -41,6 +40,7 @@ public class JWC {
     private final static int MT_PACKET = 1;
     private final static int MT_CLOSED = 2;
     private final static int MT_TOKEN = 3;
+
     private final static String CONFIG_FILE = "jWebSocket";
     private static String URL = "ws://jwebsocket.org:8787";
     private static BaseTokenClient jwc;
@@ -99,8 +99,8 @@ public class JWC {
         jwc.broadcastText(aData);
     }
 
-    public static void saveFile(byte[] aData, String aFilename) throws WebSocketException {
-        jwc.saveFile(aData, aFilename);
+    public static void saveFile(byte[] aData, String aFilename, String aScope, Boolean aNotify) throws WebSocketException {
+        jwc.saveFile(aData, aFilename, aScope, aNotify);
     }
 
     public static void addListener(WebSocketClientTokenListener aListener) {

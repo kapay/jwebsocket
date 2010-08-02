@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Map;
 
 import javolution.util.FastMap;
 
@@ -276,7 +276,7 @@ public final class WebSocketHandshake {
      * @param aRequest
      * @return
      */
-    public static byte[] generateS2CResponse(FastMap aRequest) {
+    public static byte[] generateS2CResponse(Map aRequest) {
         String lPolicyFileRequest = (String) aRequest.get("policy-file-request");
         if (lPolicyFileRequest != null) {
             byte[] lBA;
@@ -361,8 +361,8 @@ public final class WebSocketHandshake {
      * 
      * @return
      */
-    public static FastMap parseS2CResponse(byte[] aResp) {
-        FastMap lRes = new FastMap();
+    public static Map parseS2CResponse(byte[] aResp) {
+        Map lRes = new FastMap();
         String lResp = null;
         try {
             lResp = new String(aResp, "US-ASCII");
@@ -412,7 +412,7 @@ public final class WebSocketHandshake {
         }
     }
 
-    public void verifyServerHandshakeHeaders(HashMap<String, String> headers) throws WebSocketException {
+    public void verifyServerHandshakeHeaders(Map<String, String> headers) throws WebSocketException {
         if (!headers.get("Upgrade").equals("WebSocket")) {
             throw new WebSocketException("connection failed: missing header field in server handshake: Upgrade");
         } else if (!headers.get("Connection").equals("Upgrade")) {

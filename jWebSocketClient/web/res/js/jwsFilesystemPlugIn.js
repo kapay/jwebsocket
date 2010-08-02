@@ -35,6 +35,12 @@ jws.FileSystemPlugIn = {
 				if( this.OnFileLoaded ) {
 					this.OnFileLoaded( aToken );
 				}
+			} else if( "event" == aToken.type ) {
+				if( "filesaved" == aToken.name ) {
+					if( this.OnFileSaved ) {
+						this.OnFileSaved( aToken );
+					}
+				}
 			}
 		}
 	},
@@ -80,6 +86,9 @@ jws.FileSystemPlugIn = {
 		}
 		if( aListeners.OnFileLoaded !== undefined ) {
 			this.OnFileLoaded = aListeners.OnFileLoaded;
+		}
+		if( aListeners.OnFileSaved !== undefined ) {
+			this.OnFileSaved = aListeners.OnFileSaved;
 		}
 	}
 

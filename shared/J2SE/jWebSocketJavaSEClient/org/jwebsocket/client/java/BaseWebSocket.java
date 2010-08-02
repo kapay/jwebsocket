@@ -25,13 +25,14 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import javolution.util.FastList;
-import org.jwebsocket.api.JWebSocketClient;
+import javolution.util.FastMap;
+import org.jwebsocket.api.WebSocketClient;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.api.WebSocketPacket;
@@ -54,7 +55,7 @@ import org.jwebsocket.kit.WebSocketHandshake;
  * @author puran
  * @version $Id:$
  */
-public class BaseWebSocket implements JWebSocketClient {
+public class BaseWebSocket implements WebSocketClient {
 
     /** WebSocket connection url */
     private URI url = null;
@@ -138,7 +139,7 @@ public class BaseWebSocket implements JWebSocketClient {
 
             handshakeLines.remove(0);
 
-            HashMap<String, String> headers = new HashMap<String, String>();
+            Map<String, String> headers = new FastMap<String, String>();
             for (String line : handshakeLines) {
                 String[] keyValue = line.split(": ", 2);
                 headers.put(keyValue[0], keyValue[1]);

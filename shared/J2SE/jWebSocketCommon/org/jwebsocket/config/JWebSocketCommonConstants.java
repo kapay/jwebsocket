@@ -92,4 +92,14 @@ public class JWebSocketCommonConstants {
 	 * Default Session Timeout for client connections (120000ms = 2min)
 	 */
 	public static int DEFAULT_TIMEOUT = 120000;
+
+	/**
+	 * private scope only authenticated user can read and write his personal files
+	 */
+	public static final String SCOPE_PRIVATE = "private";
+	/**
+	 * public scope everybody can read and write files from this scope
+	 */
+	public static final String SCOPE_PUBLIC = "public";
+
 }

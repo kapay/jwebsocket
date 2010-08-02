@@ -26,15 +26,15 @@ import org.jwebsocket.kit.WebSocketException;
  * and the data to different listeners for further processing.
  * @author aschulze
  * @author puran
- * @version $Id: JWebSocketClient.java 701 2010-07-18 17:53:06Z mailtopuran@gmail.com $
+ * @version $Id: WebSocketClient.java 701 2010-07-18 17:53:06Z mailtopuran@gmail.com $
  */
-public interface JWebSocketClient {
+public interface WebSocketClient {
     /**
      * Opens the jWebSocket connection 
-     * @param uriString the websocket connection url
+     * @param aURL the websocket connection url
      * @throws WebSocketException if therre's an 
      */
-    void open(String uriString) throws WebSocketException;
+    void open(String aURL) throws WebSocketException;
     /**
      * Send the given byte data to the server
      * @param aData the byte data
@@ -51,21 +51,21 @@ public interface JWebSocketClient {
     void send(String aData, String aEncoding) throws WebSocketException;
     /**
      * Sends the websocket data packet to the <tt>WebSocket</tt> client
-     * @param dataPacket the data packet to send
+     * @param aPacket the data packet to send
      * @throws WebSocketException if there's any exception while sending
      */
-    void send(WebSocketPacket dataPacket) throws WebSocketException;
+    void send(WebSocketPacket aPacket) throws WebSocketException;
     /**
      * Close the jWebSocket connection. This method should perform all the cleanup
      * operation to release the jWebSocket resources 
      * @throws WebSocketException if exception while close operation
      */
-    public void close() throws WebSocketException;
+    void close() throws WebSocketException;
     /**
      * Method to check if the jWebSocketClient is still connected to the jWebSocketServer
      * @return {@code true} if there's a persistent connection {@code false} otherwise
      */
-    public boolean isConnected();
+    boolean isConnected();
     /**
      * Notifies the <tt>jWebSocket</tT> client implementation about the connection being opened
      * to the jWebSocket server via <tt>WebSocket</tt> 

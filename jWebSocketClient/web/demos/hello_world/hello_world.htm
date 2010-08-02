@@ -214,6 +214,11 @@
 				log( "Loaded file: " + aToken.data );
 			}
 			
+			function onFileSavedObs( aToken ) {
+				var lHTML = "<img src=\"" + aToken.url + "\"/>";
+				log( lHTML );
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
 				eMessage = jws.$( "stxfMessage" );
@@ -228,7 +233,8 @@
 						OnSamplesServerTime: getServerTimeCallback
 					});
 					jWebSocketClient.setFileSystemCallbacks({
-						OnFileLoaded: onFileLoadedObs
+						OnFileLoaded: onFileLoadedObs,
+						OnFileSaved: onFileSavedObs
 					});
 					eUsername.focus();
 				} else {
