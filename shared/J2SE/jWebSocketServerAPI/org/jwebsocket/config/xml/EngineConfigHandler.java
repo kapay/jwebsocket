@@ -93,8 +93,8 @@ public class EngineConfigHandler implements ConfigHandler {
      * @return the list of domains for the engine
      * @throws XMLStreamException in case of stream exception
      */
-    private FastList<String> getDomains(XMLStreamReader streamReader) throws XMLStreamException {
-        FastList<String> domains = new FastList<String>();
+    private List<String> getDomains(XMLStreamReader streamReader) throws XMLStreamException {
+        List<String> domains = new FastList<String>();
         while (streamReader.hasNext()) {
             streamReader.next();
             if (streamReader.isStartElement()) {

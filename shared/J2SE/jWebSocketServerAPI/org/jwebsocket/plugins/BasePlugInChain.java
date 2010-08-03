@@ -39,7 +39,7 @@ import org.jwebsocket.logging.Logging;
 public class BasePlugInChain implements WebSocketPlugInChain {
 
 	private static Logger log = Logging.getLogger(BasePlugInChain.class);
-	private FastList<WebSocketPlugIn> plugins = new FastList<WebSocketPlugIn>();
+	private List<WebSocketPlugIn> plugins = new FastList<WebSocketPlugIn>();
 	private WebSocketServer server = null;
 
 	/**
@@ -195,6 +195,7 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 	/**
 	 * @return the server
 	 */
+	@Override
 	public WebSocketServer getServer() {
 		return server;
 	}

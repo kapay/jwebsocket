@@ -15,6 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins;
 
+import java.util.Map;
+import javolution.util.FastMap;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketPlugInChain;
@@ -23,7 +25,6 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.server.BaseServer;
 
 /**
  *
@@ -31,7 +32,10 @@ import org.jwebsocket.server.BaseServer;
  */
 public abstract class BasePlugIn implements WebSocketPlugIn {
 
-	private WebSocketPlugInChain plugInChain = null;
+	// TODO: a plug-in should have a name and an id to be uniquely identified in the chain!
+
+	private WebSocketPlugInChain mPlugInChain = null;
+	private Map<String, String> mSettings = new FastMap<String, String>();
 
 	@Override
 	public abstract void engineStarted(WebSocketEngine aEngine);
@@ -69,7 +73,7 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 */
 	@Override
 	public void setPlugInChain(WebSocketPlugInChain aPlugInChain) {
-		plugInChain = aPlugInChain;
+		mPlugInChain = aPlugInChain;
 	}
 
 	/**
@@ -77,7 +81,7 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 */
 	@Override
 	public WebSocketPlugInChain getPlugInChain() {
-		return plugInChain;
+		return mPlugInChain;
 	}
 
 	/**
@@ -86,8 +90,8 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 */
 	public WebSocketServer getServer() {
 		WebSocketServer lServer = null;
-		if (plugInChain != null) {
-			lServer = plugInChain.getServer();
+		if (mPlugInChain != null) {
+			lServer = mPlugInChain.getServer();
 		}
 		return lServer;
 	}
@@ -178,5 +182,62 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 */
 	public int getConnectorCount() {
 		return getServer().getAllConnectors().size();
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aValue
+	 */
+	@Override
+	public void addSetting(String aKey, String aValue) {
+		mSettings.put(aKey, aValue);
+	}
+
+	/**
+	 *
+	 */
+	@Override
+	public void addAllSettings(Map aSettings) {
+		mSettings.putAll(aSettings);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 */
+	@Override
+	public void removeSetting(String aKey) {
+		mSettings.remove(aKey);
+	}
+
+	/**
+	 *
+	 */
+	@Override
+	public void clearSettings() {
+		mSettings.clear();
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public String getSetting(String aKey, String aDefault) {
+		String lRes = mSettings.get(aKey);
+		return (lRes != null ? lRes : aDefault);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public String getSetting(String aKey) {
+		return getSetting(aKey, null);
 	}
 }

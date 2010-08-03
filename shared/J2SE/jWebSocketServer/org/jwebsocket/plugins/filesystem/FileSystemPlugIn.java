@@ -45,11 +45,12 @@ public class FileSystemPlugIn extends TokenPlugIn {
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_FILESYSTEM = JWebSocketServerConstants.NS_BASE + ".plugins.filesystem";
 	// TODO: make these settings configurable
-	private static String PRIVATE_DIR = "c:/svn/jWebSocket/trunk/jWebSocketClient/web/users/{username}/";
-	private static String PUBLIC_DIR = "c:/svn/jWebSocket/trunk/jWebSocketClient/web/images/";
-	private String WEB_BASE_URL = "http://localhost/jwc/images/";
-	// private static String BASE_DIR_USER = "/Users/aschulze/";
-	// private String WEB_BASE_URL = "http://192.168.2.232/jwc/images/";
+	private static String PRIVATE_DIR_KEY = "privateDir";
+	private static String PUBLIC_DIR_KEY = "publicDir";
+	private static String WEB_ROOT_KEY = "webroot";
+	private static String PRIVATE_DIR_DEF = "%JWEBSOCKET_HOME%/private/{username}/";
+	private static String PUBLIC_DIR_DEF = "%JWEBSOCKET_HOME%/public/";
+	private static String WEB_ROOT_DEF = "http://jwebsocket.org/";
 
 	/**
 	 *
@@ -102,12 +103,14 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		// obtain required parameters for file load operation
 		String lFilename = aToken.getString("filename");
 		String lScope = aToken.getString("scope", JWebSocketCommonConstants.SCOPE_PRIVATE);
+		
+		// TODO: Replace optional variables in path like %JWEBSOCKET_HOME% by env var values!
 
 		// scope may be "private" or "public"
 		String lBaseDir;
 		if (JWebSocketCommonConstants.SCOPE_PRIVATE.equals(lScope)) {
 			String lUsername = getUsername(aConnector);
-			lBaseDir = PRIVATE_DIR;
+			lBaseDir = getSetting(PRIVATE_DIR_KEY, PRIVATE_DIR_DEF);
 			if (lUsername != null) {
 				lBaseDir = lBaseDir.replace("{username}", lUsername);
 			} else {
@@ -118,7 +121,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				return;
 			}
 		} else if (JWebSocketCommonConstants.SCOPE_PUBLIC.equals(lScope)) {
-			lBaseDir = PUBLIC_DIR;
+			lBaseDir = getSetting(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
 		} else {
 			lResponse.put("code", -1);
 			lResponse.put("msg", "invalid scope");
@@ -163,7 +166,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			lEvent.put("name", "filesaved");
 			lEvent.put("filename", lFilename);
 			lEvent.put("sourceId", aConnector.getId());
-			lEvent.put("url", WEB_BASE_URL + lFilename);
+			lEvent.put("url", getSetting(WEB_ROOT_KEY, WEB_ROOT_DEF) + lFilename);
 			// TODO: Limit notification to desired scope
 			lServer.broadcastToken(lEvent);
 		}
@@ -197,7 +200,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		Token lResponse = lServer.createResponse(aToken);
 
 		// complete the response token
-		File lFile = new File(PUBLIC_DIR + lFilename);
+		File lFile = new File(PUBLIC_DIR_DEF + lFilename);
 		byte[] lBA = null;
 		try {
 			lBA = FileUtils.readFileToByteArray(lFile);

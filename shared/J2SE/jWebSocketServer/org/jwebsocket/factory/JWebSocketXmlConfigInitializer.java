@@ -24,6 +24,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -259,45 +260,44 @@ public final class JWebSocketXmlConfigInitializer implements
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public FastMap<String, List<WebSocketPlugIn>> initializePlugins() {
-		FastMap<String, List<WebSocketPlugIn>> pluginMap = new FastMap<String, List<WebSocketPlugIn>>();
+	public Map<String, List<WebSocketPlugIn>> initializePlugins() {
+		Map<String, List<WebSocketPlugIn>> pluginMap = new FastMap<String, List<WebSocketPlugIn>>();
 
 		// populate the plugin FastMap with server id and empty list
-		for (ServerConfig serverConfig : config.getServers()) {
-			pluginMap.put(serverConfig.getId(),
-					new FastList<WebSocketPlugIn>());
+		for (ServerConfig lServerConfig : config.getServers()) {
+			pluginMap.put(lServerConfig.getId(), new FastList<WebSocketPlugIn>());
 		}
 		// now initialize the pluin
-		for (PluginConfig pluginConfig : config.getPlugins()) {
+		for (PluginConfig lPluginConfig : config.getPlugins()) {
 			try {
 				Class pluginClass = null;
 
 				// try to load plug-in from classpath first,
 				// could be located in server bundle
 				try {
-					pluginClass = Class.forName(pluginConfig.getName());
+					pluginClass = Class.forName(lPluginConfig.getName());
 					if (log.isDebugEnabled()) {
-						log.debug("Plug-in '" + pluginConfig.getName() + "' loaded from classpath.");
+						log.debug("Plug-in '" + lPluginConfig.getName() + "' loaded from classpath.");
 					}
 				} catch (ClassNotFoundException ex) {
 					// in case of a class not found exception we DO NOT want to
 					// show the exception but subsequently load the class from
 					if (log.isDebugEnabled()) {
-						log.debug("Plug-in '" + pluginConfig.getName() + "' not yet in classpath, hence trying to load from file...");
+						log.debug("Plug-in '" + lPluginConfig.getName() + "' not yet in classpath, hence trying to load from file...");
 					}
 				}
 
 				// if not in classpath...
 				// try to load plug-in from given .jar file
 				if (pluginClass == null) {
-					String jarFilePath = getLibraryFolderPath(pluginConfig.getJar());
+					String jarFilePath = getLibraryFolderPath(lPluginConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
 					if (jarFilePath != null) {
 						classLoader.addFile(jarFilePath);
 						if (log.isDebugEnabled()) {
-							log.debug("Loading plug-in '" + pluginConfig.getName() + "' from '" + jarFilePath + "'...");
+							log.debug("Loading plug-in '" + lPluginConfig.getName() + "' from '" + jarFilePath + "'...");
 						}
-						pluginClass = (Class<WebSocketPlugIn>) classLoader.loadClass(pluginConfig.getName());
+						pluginClass = (Class<WebSocketPlugIn>) classLoader.loadClass(lPluginConfig.getName());
 					}
 				}
 
@@ -321,13 +321,15 @@ public final class JWebSocketXmlConfigInitializer implements
 					}
 					 */
 					WebSocketPlugIn plugin = (WebSocketPlugIn) pluginClass.newInstance();
+					// TODO: Also set id and name once these are available
+					plugin.addAllSettings(lPluginConfig.getSettings());
 
 					if (log.isDebugEnabled()) {
-						log.debug("Plug-in '" + pluginConfig.getId() + "' successfully instantiated.");
+						log.debug("Plug-in '" + lPluginConfig.getId() + "' successfully instantiated.");
 					}
 
 					// now add the plugin to plugin FastMap based on server ids
-					for (String serverId : pluginConfig.getServers()) {
+					for (String serverId : lPluginConfig.getServers()) {
 						pluginMap.get(serverId).add((WebSocketPlugIn) plugin);
 					}
 				}
@@ -337,16 +339,16 @@ public final class JWebSocketXmlConfigInitializer implements
 						"Couldn't load the jar file for plugin, make sure the jar file exists and the name is correct.", ex);
 			} catch (ClassNotFoundException ex) {
 				log.error(
-						"Plugin class '" + pluginConfig.getName() + "' not found.", ex);
+						"Plugin class '" + lPluginConfig.getName() + "' not found.", ex);
 			} catch (InstantiationException ex) {
 				log.error(
-						"Plugin class '" + pluginConfig.getName() + "' could not be instantiated.", ex);
+						"Plugin class '" + lPluginConfig.getName() + "' could not be instantiated.", ex);
 			} catch (IllegalAccessException ex) {
 				log.error(
 						"Illegal Access Exception while instantiating plugin.", ex);
 			} catch (Exception ex) {
 				log.error(
-						ex.getClass().getSimpleName() + " while instantiating plugin '" + pluginConfig.getName() + "'.", ex);
+						ex.getClass().getSimpleName() + " while instantiating plugin '" + lPluginConfig.getName() + "'.", ex);
 			}
 		}
 		return pluginMap;
@@ -357,12 +359,12 @@ public final class JWebSocketXmlConfigInitializer implements
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public FastMap<String, List<WebSocketFilter>> initializeFilters() {
-		FastMap<String, List<WebSocketFilter>> filterMap = new FastMap<String, List<WebSocketFilter>>();
+	public Map<String, List<WebSocketFilter>> initializeFilters() {
+		Map<String, List<WebSocketFilter>> filterMap = new FastMap<String, List<WebSocketFilter>>();
 
 		// populate the filter FastMap with server id and empty list
-		for (ServerConfig serverConfig : config.getServers()) {
-			filterMap.put(serverConfig.getId(),
+		for (ServerConfig lServerConfig : config.getServers()) {
+			filterMap.put(lServerConfig.getId(),
 					new FastList<WebSocketFilter>());
 		}
 		// now initialize the filter

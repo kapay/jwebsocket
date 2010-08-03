@@ -38,19 +38,19 @@ public final class PluginConfig implements Config {
 
 	/**
 	 * default constructor
-	 * @param id the plugin id
-	 * @param name the plugin name
-	 * @param jar the plugin jar
-	 * @param namespace the namespace 
+	 * @param aId the plugin id
+	 * @param aName the plugin name
+	 * @param aJar the plugin jar
+	 * @param aNamespace the namespace
 	 * @param settings FastMap of settings key and value
 	 */
-	public PluginConfig(String id, String name, String packageName, String jar, String namespace,
+	public PluginConfig(String aId, String aName, String aPackage, String aJar, String aNamespace,
 		 List<String> servers, Map<String, String> settings) {
-		this.id = id;
-		this.name = name;
-		this.packageName = packageName;
-		this.jar = jar;
-		this.namespace = namespace;
+		this.id = aId;
+		this.name = aName;
+		this.packageName = aPackage;
+		this.jar = aJar;
+		this.namespace = aNamespace;
 		this.servers = servers;
 		this.settings = settings;
 		validate();

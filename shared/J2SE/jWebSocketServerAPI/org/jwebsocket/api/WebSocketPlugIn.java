@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import java.util.Map;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 
@@ -23,6 +24,8 @@ import org.jwebsocket.kit.PlugInResponse;
  * @author aschulze
  */
 public interface WebSocketPlugIn {
+
+	// TODO: a plug-in should have a name and an id to be uniquely identified in the chain!
 
 	/**
 	 * is called by the server when the engine has been started.
@@ -40,7 +43,7 @@ public interface WebSocketPlugIn {
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStarted(WebSocketConnector aConnector);
+	void connectorStarted(WebSocketConnector aConnector);
 
 	/**
 	 *
@@ -48,24 +51,62 @@ public interface WebSocketPlugIn {
 	 * @param aConnector
 	 * @param aDataPacket
 	 */
-	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
+	void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
 	/**
 	 *
 	 * @param aConnector
 	 * @param aCloseReason
 	 */
-	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
+	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
 	/**
 	 *
 	 * @param aPlugInChain
 	 */
-	public void setPlugInChain(WebSocketPlugInChain aPlugInChain);
+	void setPlugInChain(WebSocketPlugInChain aPlugInChain);
 
 	/**
 	 * @return the plugInChain
 	 */
-	public WebSocketPlugInChain getPlugInChain();
+	WebSocketPlugInChain getPlugInChain();
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aValue
+	 */
+	void addSetting(String aKey, String aValue);
+
+	/**
+	 *
+	 */
+	void addAllSettings(Map aSettings);
+
+	/**
+	 *
+	 * @param aKey
+	 */
+	void removeSetting(String aKey);
+
+	/**
+	 *
+	 */
+	void clearSettings();
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	String getSetting(String aKey, String aDefault);
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	String getSetting(String aKey);
 
 }

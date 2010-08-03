@@ -47,47 +47,46 @@ public class PluginConfigHandler implements ConfigHandler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Config processConfig(XMLStreamReader streamReader)
+	public Config processConfig(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
-		String id = "", name = "", packageName = "", jar = "", namespace = "";
-		List<String> servers = new FastList<String>();
-		Map<String, String> settings = null;
-		while (streamReader.hasNext()) {
-			streamReader.next();
-			if (streamReader.isStartElement()) {
-				String elementName = streamReader.getLocalName();
+		String lId = "", lName = "", lPackage = "", lJar = "", lNamespace = "";
+		List<String> lServers = new FastList<String>();
+		Map<String, String> lSettings = null;
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(ID)) {
-					streamReader.next();
-					id = streamReader.getText();
+					aStreamReader.next();
+					lId = aStreamReader.getText();
 				} else if (elementName.equals(NAME)) {
-					streamReader.next();
-					name = streamReader.getText();
+					aStreamReader.next();
+					lName = aStreamReader.getText();
 				} else if (elementName.equals(PACKAGE)) {
-					streamReader.next();
-					packageName = streamReader.getText();
+					aStreamReader.next();
+					lPackage = aStreamReader.getText();
 				} else if (elementName.equals(JAR)) {
-					streamReader.next();
-					jar = streamReader.getText();
+					aStreamReader.next();
+					lJar = aStreamReader.getText();
 				} else if (elementName.equals(NAMESPACE)) {
-					streamReader.next();
-					namespace = streamReader.getText();
+					aStreamReader.next();
+					lNamespace = aStreamReader.getText();
 				} else if (elementName.equals(SETTINGS)) {
-					settings = getSettings(streamReader);
+					lSettings = getSettings(aStreamReader);
 				} else if (elementName.equals(SERVERS)) {
-					servers = getServers(streamReader);
+					lServers = getServers(aStreamReader);
 				} else {
 					// ignore
 				}
 			}
-			if (streamReader.isEndElement()) {
-				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ELEMENT_PLUGIN)) {
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(ELEMENT_PLUGIN)) {
 					break;
 				}
 			}
 		}
-
-		return new PluginConfig(id, name, packageName, jar, namespace, servers, settings);
+		return new PluginConfig(lId, lName, lPackage, lJar, lNamespace, lServers, lSettings);
 	}
 
 	/**
@@ -120,19 +119,38 @@ public class PluginConfigHandler implements ConfigHandler {
 	}
 
 	/**
-	 * Read the list of domains
-	 * 
-	 * @param streamReader
+	 * Read the map of plug-in specific settings
+	 * @param aStreamReader
 	 *            the stream reader object
 	 * @return the list of domains for the engine
 	 * @throws XMLStreamException
 	 *             in case of stream exception
-	 * TODO: PURAN, FIX THIS!! YOU LAZY GUY!!!            
 	 */
-	private Map<String, String> getSettings(XMLStreamReader streamReader)
+	private Map<String, String> getSettings(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
-		//TODO: implement this
-		return new FastMap<String, String>();
-	}
 
+		Map<String, String> lSettings = new FastMap<String, String>();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SETTING)) {
+					// TODO: Don't just get first attribute here! Scan for key="xxx"!
+					String lKey = aStreamReader.getAttributeValue(0);
+					aStreamReader.next();
+					String lValue = aStreamReader.getText();
+					if (lKey != null && lValue != null) {
+						lSettings.put(lKey, lValue);
+					}
+				}
+			}
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SETTINGS)) {
+					break;
+				}
+			}
+		}
+		return lSettings;
+	}
 }

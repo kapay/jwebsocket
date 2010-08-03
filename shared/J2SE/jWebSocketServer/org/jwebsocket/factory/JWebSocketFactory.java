@@ -56,13 +56,13 @@ public class JWebSocketFactory {
 			}
 			servers = initializer.initializeServers();
 
-			Map<String, List<WebSocketPlugIn>> pluginFastMap = initializer.initializePlugins();
+			Map<String, List<WebSocketPlugIn>> pluginMap = initializer.initializePlugins();
 			if (log.isDebugEnabled()) {
 				log.debug("Initializing plugins...");
 			}
 			for (WebSocketServer server : servers) {
 				server.addEngine(engine);
-				List<WebSocketPlugIn> plugins = pluginFastMap.get(server.getId());
+				List<WebSocketPlugIn> plugins = pluginMap.get(server.getId());
 				for (WebSocketPlugIn plugin : plugins) {
 					server.getPlugInChain().addPlugIn(plugin);
 				}
@@ -71,13 +71,13 @@ public class JWebSocketFactory {
 				log.info("Plugins initialized.");
 			}
 
-			Map<String, List<WebSocketFilter>> filterFastMap = initializer.initializeFilters();
+			Map<String, List<WebSocketFilter>> filterMap = initializer.initializeFilters();
 			if (log.isDebugEnabled()) {
 				log.debug("Initializing filters...");
 			}
 			for (WebSocketServer server : servers) {
 				server.addEngine(engine);
-				List<WebSocketFilter> filters = filterFastMap.get(server.getId());
+				List<WebSocketFilter> filters = filterMap.get(server.getId());
 				for (WebSocketFilter filter : filters) {
 					server.getFilterChain().addFilter(filter);
 				}
