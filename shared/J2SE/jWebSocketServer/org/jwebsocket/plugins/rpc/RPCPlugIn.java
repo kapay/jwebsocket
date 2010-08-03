@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Map;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
@@ -40,7 +41,7 @@ import org.jwebsocket.token.Token;
 public class RPCPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(RPCPlugIn.class);
-	private FastMap<String, Object> grantedProcs = new FastMap<String, Object>();
+	private Map<String, Object> grantedProcs = new FastMap<String, Object>();
 	private DemoRPCServer rpcServer = null;
 	// if namespace changed update client plug-in accordingly!
 	private String NS_RPC_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.rpc";
@@ -59,8 +60,8 @@ public class RPCPlugIn extends TokenPlugIn {
 		// specify default name space
 		this.setNamespace(NS_RPC_DEFAULT);
 
-		// specify granted remnote procedure calls
-		// todo: Make configurable
+		// specify granted remote procedure calls
+		// TODO: Use granted procs setting from plug-in config!
 		grantedProcs.put("org.jWebSocket.demo.DemoRPCServer.getMD5", null);
 
 		// currently this is the only supported RPCPlugIn server

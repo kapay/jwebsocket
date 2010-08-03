@@ -81,6 +81,8 @@ public class AdminPlugIn extends TokenPlugIn {
 			log.debug("Processing 'shutdown'...");
 		}
 
+		// TODO: check for allowShutdown setting, irrespective of user right!
+
 		// check if user is allowed to run 'shutdown' command
 		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_ADMIN + ".shutdown")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));

@@ -37,7 +37,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
     private SurfaceView mSurfaceView;
     private SurfaceHolder mSurfaceHolder;
-    private Camera mCamera;
+    private Camera mCamera = null;
     private boolean mPreviewRunning = false;
     private Camera.PictureCallback mPictureCallback;
 
@@ -130,7 +130,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         try {
             mCamera.setPreviewDisplay(aSurfaceHolder);
         } catch (IOException e) {
-            e.printStackTrace();
+            // TODO: exception handling
         }
         mCamera.startPreview();
         mPreviewRunning = true;

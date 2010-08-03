@@ -406,7 +406,11 @@ public final class JWebSocketXmlConfigInitializer implements
 				if (filterClass != null) {
 					Constructor<WebSocketFilter> ctor = filterClass.getDeclaredConstructor(String.class);
 					ctor.setAccessible(true);
+
 					WebSocketFilter filter = ctor.newInstance(new Object[]{filterConfig.getId()});
+					// TODO: Also set settings, id and name once these are available
+					// filter.addAllSettings(filterConfig.getSettings());
+
 					if (log.isDebugEnabled()) {
 						log.debug("Filter '" + filterConfig.getName() + "' successfully instantiated.");
 					}

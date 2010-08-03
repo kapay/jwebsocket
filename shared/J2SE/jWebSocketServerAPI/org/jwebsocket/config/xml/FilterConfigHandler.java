@@ -14,13 +14,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javolution.util.FastList;
+import javolution.util.FastMap;
 
 import org.jwebsocket.config.Config;
 import org.jwebsocket.config.ConfigHandler;
@@ -47,37 +47,37 @@ public class FilterConfigHandler implements ConfigHandler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Config processConfig(XMLStreamReader streamReader)
+	public Config processConfig(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
 		String id = "", name = "", packageName = "", jar = "", namespace = "";
 		List<String> servers = new FastList<String>();
 		Map<String, String> settings = null;
-		while (streamReader.hasNext()) {
-			streamReader.next();
-			if (streamReader.isStartElement()) {
-				String elementName = streamReader.getLocalName();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(ID)) {
-					streamReader.next();
-					id = streamReader.getText();
+					aStreamReader.next();
+					id = aStreamReader.getText();
 				} else if (elementName.equals(NAME)) {
-					streamReader.next();
-					name = streamReader.getText();
+					aStreamReader.next();
+					name = aStreamReader.getText();
 				} else if (elementName.equals(JAR)) {
-					streamReader.next();
-					jar = streamReader.getText();
+					aStreamReader.next();
+					jar = aStreamReader.getText();
 				} else if (elementName.equals(NAMESPACE)) {
-					streamReader.next();
-					namespace = streamReader.getText();
+					aStreamReader.next();
+					namespace = aStreamReader.getText();
 				} else if (elementName.equals(SETTINGS)) {
-					settings = getSettings(streamReader);
+					settings = getSettings(aStreamReader);
 				} else if (elementName.equals(SERVERS)) {
-					servers = getServers(streamReader);
+					servers = getServers(aStreamReader);
 				} else {
 					// ignore
 				}
 			}
-			if (streamReader.isEndElement()) {
-				String elementName = streamReader.getLocalName();
+			if (aStreamReader.isEndElement()) {
+				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(ELEMENT_FILTER)) {
 					break;
 				}
@@ -117,19 +117,39 @@ public class FilterConfigHandler implements ConfigHandler {
 	}
 
 	/**
-	 * Read the list of domains
+	 * Read the map of settings
 	 * 
 	 * @param streamReader
 	 *            the stream reader object
 	 * @return the list of domains for the engine
 	 * @throws XMLStreamException
 	 *             in case of stream exception
-	 * TODO: PURAN, FIX THIS!! YOU LAZY GUY!!!            
 	 */
-	private Map<String, String> getSettings(XMLStreamReader streamReader)
+	private Map<String, String> getSettings(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
-		//TODO: implement this
-		return Collections.emptyMap();
+		Map<String, String> lSettings = new FastMap<String, String>();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SETTING)) {
+					// TODO: Don't just get first attribute here! Scan for key="xxx"!
+					String lKey = aStreamReader.getAttributeValue(0);
+					aStreamReader.next();
+					String lValue = aStreamReader.getText();
+					if (lKey != null && lValue != null) {
+						lSettings.put(lKey, lValue);
+					}
+				}
+			}
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SETTINGS)) {
+					break;
+				}
+			}
+		}
+		return lSettings;
 	}
 
 }

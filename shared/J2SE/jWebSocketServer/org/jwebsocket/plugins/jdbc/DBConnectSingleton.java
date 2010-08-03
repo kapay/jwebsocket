@@ -32,7 +32,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
+import java.util.Map;
+import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 
 /**
@@ -45,7 +46,7 @@ import org.apache.log4j.Logger;
 public class DBConnectSingleton {
 
 	private static Logger log = Logging.getLogger(DBConnectSingleton.class);
-	private static HashMap connections = new HashMap();
+	private static Map connections = new FastMap();
 	public static String lastRecentException = null;
 	/**
 	 * Name of the database user for system access
@@ -62,6 +63,9 @@ public class DBConnectSingleton {
 	 * @since 1.0
 	 */
 	public final static String USR_DEMO = "DEMO";
+
+	// TODO: use plug-in settings for DB access here!
+
 	// DB_DRIVER
 	public static String DB_DRIVER = "com.mysql.jdbc.Driver";
 	public static String DB_URL = "jdbc:mysql://localhost:3306/ria-db";

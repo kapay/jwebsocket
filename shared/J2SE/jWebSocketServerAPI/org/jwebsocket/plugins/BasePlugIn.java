@@ -33,7 +33,6 @@ import org.jwebsocket.kit.CloseReason;
 public abstract class BasePlugIn implements WebSocketPlugIn {
 
 	// TODO: a plug-in should have a name and an id to be uniquely identified in the chain!
-
 	private WebSocketPlugInChain mPlugInChain = null;
 	private Map<String, String> mSettings = new FastMap<String, String>();
 
@@ -191,15 +190,21 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 */
 	@Override
 	public void addSetting(String aKey, String aValue) {
-		mSettings.put(aKey, aValue);
+		if (aKey != null) {
+			mSettings.put(aKey, aValue);
+		}
 	}
 
 	/**
 	 *
+	 *
+	 * @param aSettings
 	 */
 	@Override
 	public void addAllSettings(Map aSettings) {
-		mSettings.putAll(aSettings);
+		if (aSettings != null) {
+			mSettings.putAll(aSettings);
+		}
 	}
 
 	/**
@@ -208,7 +213,9 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 */
 	@Override
 	public void removeSetting(String aKey) {
-		mSettings.remove(aKey);
+		if (aKey != null) {
+			mSettings.remove(aKey);
+		}
 	}
 
 	/**
@@ -238,6 +245,6 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 */
 	@Override
 	public String getSetting(String aKey) {
-		return getSetting(aKey, null);
+		return (aKey != null ? getSetting(aKey, null) : null);
 	}
 }
