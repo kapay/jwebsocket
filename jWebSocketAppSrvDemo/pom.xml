@@ -30,8 +30,8 @@
 						<resource>
               				<!-- this is relative to the pom.xml directory -->
 							<directory>../jWebSocketClient/web</directory>
-							<!-- enable filtering -->
-							<filtering>true</filtering>
+							<!-- disable filtering! otherwise flash swf files get destroyed! -->
+							<filtering>false</filtering>
 							<excludes>
 								<!-- don't include documentation in the .war -->
 								<exclude>**/javadocs/**</exclude>
@@ -42,21 +42,9 @@
 					</webResources>
 
 					<!-- all packages below are already included in jWebSocketServer-Bundle -->
-					<packagingExcludes>
-						**/jWebSocketToolkit*.jar,
-						**/jWebSocketTCPEngine*.jar,
-						**/jWebSocketNettyEngine*.jar,
-						**/jWebSocketCore*.jar,
-						**/jWebSocketTokenServer*.jar,
-						**/jWebSocketCustomServer*.jar,
-						**/jWebSocketPlugIns*.jar,
-						**/jWebSocketCommonObjects*.jar,
-						**/jWebSocketCluster*.jar,
-						**/jWebSocketAdmin*.jar,
-						**/jWebSocketWebAppSupport*.jar,
+					<!--
+						**/jWebSocketCommon*.jar,
 						**/jWebSocketServer*.jar,
-						**/jWebSocketFactory*.jar,
-						**/jWebSocketSamples*.jar,
 						**/log4j*.jar,
 						**/javolution*.jar,
 						**/commons-lang*.jar,
@@ -66,6 +54,9 @@
 						**/slf4j-jdk14*.jar,
 						**/netty*.jar,
 						**/servlet-api*.jar
+					-->
+					<packagingExcludes>
+						**/*.jar
 					</packagingExcludes>
 				</configuration>
 			</plugin>

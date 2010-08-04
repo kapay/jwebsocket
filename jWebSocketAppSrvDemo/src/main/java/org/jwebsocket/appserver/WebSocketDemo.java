@@ -26,7 +26,7 @@ import org.jwebsocket.token.Token;
  */
 public class WebSocketDemo extends HttpServlet implements WebSocketServerTokenListener {
 
-	private static Logger log = Logging.getLogger(WebSocketDemo.class);
+	private static Logger log = null;
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -51,9 +51,12 @@ public class WebSocketDemo extends HttpServlet implements WebSocketServerTokenLi
 
 	@Override
 	public void init() {
+		log = Logging.getLogger(WebSocketDemo.class);
 		log.info("Adding servlet '" + getClass().getSimpleName() + "' to WebSocket listeners...");
 		TokenServer lServer = (TokenServer) JWebSocketFactory.getServer("ts0");
-		lServer.addListener(this);
+		if (lServer != null) {
+			lServer.addListener(this);
+		}
 	}
 
 	@Override

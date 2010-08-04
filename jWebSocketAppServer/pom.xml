@@ -30,36 +30,31 @@
 					<outputDirectory>${project.build.directory}/../../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
 
 					<!-- all packages below are already included in jWebSocketServer-Bundle -->
-					<packagingExcludes>
-						**/jWebSocketToolkit*.jar,
-						**/jWebSocketTCPEngine*.jar,
-						**/jWebSocketNettyEngine*.jar,
-						**/jWebSocketCore*.jar,
-						**/jWebSocketTokenServer*.jar,
-						**/jWebSocketCustomServer*.jar,
-						**/jWebSocketPlugIns*.jar,
-						**/jWebSocketCommonObjects*.jar,
-						**/jWebSocketCluster*.jar,
-						**/jWebSocketAdmin*.jar,
-						**/jWebSocketWebAppSupport*.jar,
+					<!--
+						**/jWebSocketCommon*.jar,
 						**/jWebSocketServer*.jar,
-						**/jWebSocketFactory*.jar,
-						**/jWebSocketSamples*.jar,
-						**/log4j-1.2.15.jar,
-						**/javolution-5.5.1.jar,
-						**/commons-lang-2.5.jar,
-						**/servlet-api-2.5-6.1.14.jar,
-						**/json-2-RELEASE65.jar,
-						**/slf4j-api-1.5.10.jar,
-						**/slf4j-jdk14-1.5.10.jar,
+						**/log4j*.jar,
+						**/javolution*.jar,
+						**/commons-lang*.jar,
+						**/servlet-api*.jar,
+						**/json-2*.jar,
+						**/slf4j-api*.jar,
+						**/slf4j-jdk14*.jar,
 						**/netty*.jar,
-						**/servlet-api-2.5.jar
+						**/servlet-api*.jar
+					-->
+					<packagingExcludes>
+						**/*.jar
 					</packagingExcludes>
 
 <!-- add your additional web resources here!
 					<webResources>
             			<resource>
               				<directory>../jWebSocketClient/web</directory>
+							<filtering>false</filtering>
+							<excludes>
+								<exclude>**/javadocs/**</exclude>
+							</excludes>
             			</resource>
           			</webResources>
 -->

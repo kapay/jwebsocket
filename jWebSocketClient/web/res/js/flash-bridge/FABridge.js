@@ -6,7 +6,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
 and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,8 +18,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 /*
-* The Bridge class, responsible for navigating AS instances
-*/
+ * The Bridge class, responsible for navigating AS instances
+ */
 function FABridge(target,bridgeName)
 {
     this.target = target;
@@ -37,24 +37,24 @@ function FABridge(target,bridgeName)
 }
 
 // type codes for packed values
-FABridge.TYPE_ASINSTANCE = 1;
-FABridge.TYPE_ASFUNCTION = 2;
+FABridge.TYPE_ASINSTANCE =  1;
+FABridge.TYPE_ASFUNCTION =  2;
 
-FABridge.TYPE_JSFUNCTION = 3;
-FABridge.TYPE_ANONYMOUS = 4;
+FABridge.TYPE_JSFUNCTION =  3;
+FABridge.TYPE_ANONYMOUS =   4;
 
 FABridge.initCallbacks = {};
 FABridge.userTypes = {};
 
 FABridge.addToUserTypes = function()
 {
-for (var i = 0; i < arguments.length; i++)
-{
-FABridge.userTypes[arguments[i]] = {
-'typeName': arguments[i],
-'enriched': false
-};
-}
+	for (var i = 0; i < arguments.length; i++)
+	{
+		FABridge.userTypes[arguments[i]] = {
+			'typeName': arguments[i], 
+			'enriched': false
+		};
+	}
 }
 
 FABridge.argsToArray = function(args)
@@ -74,11 +74,11 @@ function instanceFactory(objID)
 }
 
 function FABridge__invokeJSFunction(args)
-{
+{  
     var funcID = args[0];
     var throughArgs = args.concat();//FABridge.argsToArray(arguments);
     throughArgs.shift();
-
+   
     var bridge = FABridge.extractBridgeFromID(funcID);
     return bridge.invokeLocalFunction(funcID, throughArgs);
 }
@@ -107,19 +107,19 @@ function FABridge__bridgeInitialized(bridgeName) {
     var ol = objects.length;
     var activeObjects = [];
     if (ol > 0) {
-for (var i = 0; i < ol; i++) {
-if (typeof objects[i].SetVariable != "undefined") {
-activeObjects[activeObjects.length] = objects[i];
-}
-}
-}
+		for (var i = 0; i < ol; i++) {
+			if (typeof objects[i].SetVariable != "undefined") {
+				activeObjects[activeObjects.length] = objects[i];
+			}
+		}
+	}
     var embeds = document.getElementsByTagName("embed");
     var el = embeds.length;
     var activeEmbeds = [];
     if (el > 0) {
-for (var j = 0; j < el; j++) {
-if (typeof embeds[j].SetVariable != "undefined") {
-             activeEmbeds[activeEmbeds.length] = embeds[j];
+		for (var j = 0; j < el; j++) {
+			if (typeof embeds[j].SetVariable != "undefined") {
+            	activeEmbeds[activeEmbeds.length] = embeds[j];
             }
         }
     }
@@ -127,20 +127,20 @@ if (typeof embeds[j].SetVariable != "undefined") {
     var ael = activeEmbeds.length;
     var searchStr = "bridgeName="+ bridgeName;
     if ((aol == 1 && !ael) || (aol == 1 && ael == 1)) {
-     FABridge.attachBridge(activeObjects[0], bridgeName);
+    	FABridge.attachBridge(activeObjects[0], bridgeName);	 
     }
     else if (ael == 1 && !aol) {
-     FABridge.attachBridge(activeEmbeds[0], bridgeName);
+    	FABridge.attachBridge(activeEmbeds[0], bridgeName);
         }
     else {
                 var flash_found = false;
-if (aol > 1) {
-for (var k = 0; k < aol; k++) {
-var params = activeObjects[k].childNodes;
-for (var l = 0; l < params.length; l++) {
-var param = params[l];
-if (param.nodeType == 1 && param.tagName.toLowerCase() == "param" && param["name"].toLowerCase() == "flashvars" && param["value"].indexOf(searchStr) >= 0) {
-FABridge.attachBridge(activeObjects[k], bridgeName);
+		if (aol > 1) {
+			for (var k = 0; k < aol; k++) {
+				 var params = activeObjects[k].childNodes;
+				 for (var l = 0; l < params.length; l++) {
+					var param = params[l];
+					if (param.nodeType == 1 && param.tagName.toLowerCase() == "param" && param["name"].toLowerCase() == "flashvars" && param["value"].indexOf(searchStr) >= 0) {
+						FABridge.attachBridge(activeObjects[k], bridgeName);
                             flash_found = true;
                             break;
                         }
@@ -150,12 +150,12 @@ FABridge.attachBridge(activeObjects[k], bridgeName);
                 }
             }
         }
-if (!flash_found && ael > 1) {
-for (var m = 0; m < ael; m++) {
-var flashVars = activeEmbeds[m].attributes.getNamedItem("flashVars").nodeValue;
-if (flashVars.indexOf(searchStr) >= 0) {
-FABridge.attachBridge(activeEmbeds[m], bridgeName);
-break;
+		if (!flash_found && ael > 1) {
+			for (var m = 0; m < ael; m++) {
+				var flashVars = activeEmbeds[m].attributes.getNamedItem("flashVars").nodeValue;
+				if (flashVars.indexOf(searchStr) >= 0) {
+					FABridge.attachBridge(activeEmbeds[m], bridgeName);
+					break;
     }
             }
         }
@@ -182,9 +182,9 @@ FABridge.attachBridge = function(instance, bridgeName)
 
     FABridge[bridgeName] = newBridgeInstance;
 
-/* FABridge[bridgeName] = function() {
-return newBridgeInstance.root();
-}
+/*  FABridge[bridgeName] = function() {
+        return newBridgeInstance.root();
+    }
 */
     var callbacks = FABridge.initCallbacks[bridgeName];
     if (callbacks == null)
@@ -198,7 +198,7 @@ return newBridgeInstance.root();
     delete FABridge.initCallbacks[bridgeName]
 }
 
-// some methods can't be proxied. You can use the explicit get,set, and call methods if necessary.
+// some methods can't be proxied.  You can use the explicit get,set, and call methods if necessary.
 
 FABridge.blockedMethods =
 {
@@ -232,7 +232,7 @@ FABridge.prototype =
         }
         else
         {
-            var ret = this.target.releaseNamedASObject(value.fb_instance_id);
+            var ret =  this.target.releaseNamedASObject(value.fb_instance_id);
             return ret;
         }
     },
@@ -338,7 +338,7 @@ FABridge.prototype =
     },
 
     // Object Types and Proxies
-
+	
     // accepts an object reference, returns a type object matching the obj reference.
     getTypeFromName: function(objTypeName)
     {
@@ -348,8 +348,8 @@ FABridge.prototype =
     createProxy: function(objID, typeName)
     {
         var objType = this.getTypeFromName(typeName);
-instanceFactory.prototype = objType;
-var instance = new instanceFactory(objID);
+	        instanceFactory.prototype = objType;
+	        var instance = new instanceFactory(objID);
         this.remoteInstanceCache[objID] = instance;
         return instance;
     },
@@ -433,7 +433,7 @@ var instance = new instanceFactory(objID);
         }
         return this.remoteFunctionCache[funcID];
     },
-
+    
     //reutrns the ID of the given function; if it doesnt exist it is created and added to the local cache
     getFunctionID: function(func)
     {
@@ -468,7 +468,7 @@ var instance = new instanceFactory(objID);
         }
         else if (t == "function")
         {
-            //js functions are assigned an ID and stored in the local cache
+            //js functions are assigned an ID and stored in the local cache 
             result.type = FABridge.TYPE_JSFUNCTION;
             result.value = this.getFunctionID(value);
         }
@@ -487,7 +487,7 @@ var instance = new instanceFactory(objID);
     },
 
     //on deserialization we always check the return for the specific error code that is used to marshall NPE's into JS errors
-    // the unpacking is done by returning the value on each pachet for objects/arrays
+    // the unpacking is done by returning the value on each pachet for objects/arrays 
     deserialize: function(packedValue)
     {
 
@@ -548,7 +548,7 @@ var instance = new instanceFactory(objID);
 
     // check the given value for the components of the hard-coded error code : __FLASHERROR
     // used to marshall NPE's into flash
-
+    
     handleError: function(value)
     {
         if (typeof(value)=="string" && value.indexOf("__FLASHERROR")==0)
@@ -564,7 +564,7 @@ var instance = new instanceFactory(objID);
         else
         {
             return value;
-        }
+        }   
     }
 };
 
@@ -592,12 +592,12 @@ ASProxy.prototype =
     call: function(funcName, args)
     {
         this.bridge.callASMethod(this.fb_instance_id, funcName, args);
-    },
-
+    }, 
+    
     addRef: function() {
         this.bridge.addRef(this);
-    },
-
+    }, 
+    
     release: function() {
         this.bridge.release(this);
     }

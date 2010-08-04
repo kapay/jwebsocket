@@ -21,7 +21,7 @@ import javax.servlet.ServletContextListener;
 import org.jwebsocket.factory.JWebSocketFactory;
 
 /**
- * Web application lifecycle listener.
+ * Web application life cycle listener.
  * @author aschulze
  */
 public class ContextListener implements ServletContextListener {
