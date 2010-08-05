@@ -21,6 +21,7 @@ import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_XML;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.URL;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -41,155 +42,168 @@ import org.jwebsocket.security.SecurityFactory;
  */
 public final class JWebSocketLoader {
 
-    // We cannot use the logging subsystem here because its config needs to be loaded first!
-    private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
+	// We cannot use the logging subsystem here because its config needs to be loaded first!
+	private JWebSocketConfigHandler configHandler = new JWebSocketConfigHandler();
 
-    /**
-     * Initialize the jWebSocket Server system
-     * 
-     * @return the initializer object
-     * @throws WebSocketException
-     *             if there's an exception while initialization
-     */
-    public final WebSocketInitializer initialize() throws WebSocketException {
-        String configPath = getConfigurationPath();
-        if (configPath == null) {
-            // log.error("Error Loading Configuration File jWebSocket.xml");
-            throw new WebSocketException("Either JWEBSOCKET_HOME variable is not set " +
-            		"or jWebSocket.xml file does not exists at %JWEBSOCKET_HOME%/conf");
-        }
-        // load the entire settings from the configuration xml file
-        JWebSocketConfig config = loadConfiguration(configPath);
+	/**
+	 * Initialize the jWebSocket Server system
+	 *
+	 * @return the initializer object
+	 * @throws WebSocketException
+	 *             if there's an exception while initialization
+	 */
+	public final WebSocketInitializer initialize() throws WebSocketException {
+		String configPath = getConfigurationPath();
+		if (configPath == null) {
+			throw new WebSocketException(
+					"Either JWEBSOCKET_HOME variable is not set"
+					+ " or jWebSocket.xml file does neither exist at %JWEBSOCKET_HOME%/conf"
+					+ " nor at %CLASSPATH%/conf.");
+		}
+		// load the entire settings from the configuration xml file
+		JWebSocketConfig config = loadConfiguration(configPath);
 
-        // initialize security by using config settings
-        SecurityFactory.initFromConfig(config);
+		// initialize security by using config settings
+		SecurityFactory.initFromConfig(config);
 
-        WebSocketInitializer initializer = getInitializer(config);
-        if (initializer == null) {
-            initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
-        }
-        return initializer;
-    }
+		WebSocketInitializer initializer = getInitializer(config);
+		if (initializer == null) {
+			initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
+		}
+		return initializer;
+	}
 
-    /**
-     * Returns the appropriate {@code WebSocketInitializer} implementation
-     * 
-     * @param config
-     *            the config object
-     * @return the {@code WebSocketInitializer} object
-     */
-    private WebSocketInitializer getInitializer(JWebSocketConfig config) {
-        WebSocketInitializer initializer = null;
-        // if we are in development mode load the initializer class
-        if ("dev".equals(config.getInstallation())) {
-            initializer = instantiateInitializer(config.getInitializer());
-            // if we are in production mode use the
-            // JWebSocketXmlConfigInitializer class
-        } else if ("prod".equals(config.getInstallation())) {
-            initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
-        } else {
-            // ignore
-        }
-        return initializer;
-    }
+	/**
+	 * Returns the appropriate {@code WebSocketInitializer} implementation
+	 *
+	 * @param config
+	 *            the config object
+	 * @return the {@code WebSocketInitializer} object
+	 */
+	private WebSocketInitializer getInitializer(JWebSocketConfig config) {
+		WebSocketInitializer initializer = null;
+		// if we are in development mode load the initializer class
+		if ("dev".equals(config.getInstallation())) {
+			initializer = instantiateInitializer(config.getInitializer());
+			// if we are in production mode use the
+			// JWebSocketXmlConfigInitializer class
+		} else if ("prod".equals(config.getInstallation())) {
+			initializer = JWebSocketXmlConfigInitializer.getInitializer(config);
+		} else {
+			// ignore
+		}
+		return initializer;
+	}
 
-    /**
-     * Instantiate the initializer custom initializer class if there's any
-     * configured via xml configuration, otherwise return the default {@code
-     * JWebSocketInitializer} class that initialize all the default engine,
-     * plugins and servers.
-     * 
-     * @param initializerClass the class name to instantiate
-     * @return the instantiated initializer object
-     */
-    @SuppressWarnings("unchecked")
-    private WebSocketInitializer instantiateInitializer(String initializerClass) {
-        WebSocketInitializer initializer = null;
-        try {
-            Class<WebSocketInitializer> lClass = (Class<WebSocketInitializer>) Class.forName(initializerClass);
-            initializer = lClass.newInstance();
-        } catch (ClassNotFoundException ex) {
+	/**
+	 * Instantiate the initializer custom initializer class if there's any
+	 * configured via xml configuration, otherwise return the default {@code
+	 * JWebSocketInitializer} class that initialize all the default engine,
+	 * plugins and servers.
+	 *
+	 * @param initializerClass the class name to instantiate
+	 * @return the instantiated initializer object
+	 */
+	@SuppressWarnings("unchecked")
+	private WebSocketInitializer instantiateInitializer(String initializerClass) {
+		WebSocketInitializer initializer = null;
+		try {
+			Class<WebSocketInitializer> lClass = (Class<WebSocketInitializer>) Class.forName(initializerClass);
+			initializer = lClass.newInstance();
+		} catch (ClassNotFoundException ex) {
 			// TODO: handle exceptions properly, logging not yet initialized here!
-            // "Error instantiating initializer:"+initializerClass, ex;
-        } catch (InstantiationException ex) {
+			// "Error instantiating initializer:"+initializerClass, ex;
+		} catch (InstantiationException ex) {
 			// TODO: handle exceptions properly, logging not yet initialized here!
-            // "Error instantiating initializer:"+initializerClass, ex);
-        } catch (IllegalAccessException ex) {
+			// "Error instantiating initializer:"+initializerClass, ex);
+		} catch (IllegalAccessException ex) {
 			// TODO: handle exceptions properly, logging not yet initialized here!
-            // "Error instantiating initializer:"+initializerClass, ex);
-        }
-        return initializer;
-    }
+			// "Error instantiating initializer:"+initializerClass, ex);
+		}
+		return initializer;
+	}
 
-    /**
-     * Load all the configurations based on jWebSocket.xml file at the given
-     * <tt>configFilePath</tt> location.
-     * 
-     * @param configFilePath
-     *            the path to jWebSocket.xml file
-     * @return the web socket config object with all the configuration
-     * @throws WebSocketException
-     *             if there's any while loading configuration
-     */
-    private JWebSocketConfig loadConfiguration(final String configFilePath) throws WebSocketException {
-        JWebSocketConfig config = null;
-        File lFile = new File(configFilePath);
-        String lMsg;
-        try {
-            FileInputStream fis = new FileInputStream(lFile);
-            XMLInputFactory factory = XMLInputFactory.newInstance();
-            XMLStreamReader streamReader = null;
-            streamReader = factory.createXMLStreamReader(fis);
-            config = configHandler.processConfig(streamReader);
-        } catch (XMLStreamException ex) {
-            lMsg = ex.getClass().getSimpleName() + " occurred while creating XML stream (" + configFilePath + ").";
-            throw new WebSocketException(lMsg);
-        } catch (FileNotFoundException ex) {
-            lMsg = "jWebSocket config file not found while creating XML stream (" + configFilePath + ").";
-            throw new WebSocketException(lMsg);
-        }
-        return config;
-    }
+	/**
+	 * Load all the configurations based on jWebSocket.xml file at the given
+	 * <tt>configFilePath</tt> location.
+	 *
+	 * @param configFilePath
+	 *            the path to jWebSocket.xml file
+	 * @return the web socket config object with all the configuration
+	 * @throws WebSocketException
+	 *             if there's any while loading configuration
+	 */
+	private JWebSocketConfig loadConfiguration(final String configFilePath) throws WebSocketException {
+		JWebSocketConfig config = null;
+		File lFile = new File(configFilePath);
+		String lMsg;
+		try {
+			FileInputStream fis = new FileInputStream(lFile);
+			XMLInputFactory factory = XMLInputFactory.newInstance();
+			XMLStreamReader streamReader = null;
+			streamReader = factory.createXMLStreamReader(fis);
+			config = configHandler.processConfig(streamReader);
+		} catch (XMLStreamException ex) {
+			lMsg = ex.getClass().getSimpleName() + " occurred while creating XML stream (" + configFilePath + ").";
+			throw new WebSocketException(lMsg);
+		} catch (FileNotFoundException ex) {
+			lMsg = "jWebSocket config file not found while creating XML stream (" + configFilePath + ").";
+			throw new WebSocketException(lMsg);
+		}
+		return config;
+	}
 
-    /**
-     * private method that checks the path of the jWebSocket.xml file
-     * 
-     * @return the path to jWebSocket.xml
-     */
-    private String getConfigurationPath() {
-        String lWebSocketXML = null;
-        String lWebSocketHome = null;
-        String lFileSep = System.getProperty("file.separator");
-        File lFile;
-        // try to obtain JWEBSOCKET_HOME environment variable
-        lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
-        if (lWebSocketHome != null) {
-            // append trailing slash if needed
-            if (!lWebSocketHome.endsWith(lFileSep)) {
-                lWebSocketHome += lFileSep;
-            }
-            // jWebSocket.xml can be located in %JWEBSOCKET_HOME%/conf
-            lWebSocketXML = lWebSocketHome + "conf" + lFileSep + JWEBSOCKET_XML;
-            lFile = new File(lWebSocketXML);
-            if (lFile.exists()) {
-                return lWebSocketXML;
-            }
-        }
+	/**
+	 * private method that checks the path of the jWebSocket.xml file
+	 *
+	 * @return the path to jWebSocket.xml
+	 */
+	private String getConfigurationPath() {
+		String lWebSocketXML = null;
+		String lWebSocketHome = null;
+		String lFileSep = System.getProperty("file.separator");
+		File lFile;
 
-        // try to obtain CATALINA_HOME environment variable
-        lWebSocketHome = System.getenv(CATALINA_HOME);
-        if (lWebSocketHome != null) {
-            // append trailing slash if needed
-            if (!lWebSocketHome.endsWith(lFileSep)) {
-                lWebSocketHome += lFileSep;
-            }
-            // jWebSocket.xml can be located in %CATALINA_HOME%/conf
-            lWebSocketXML = lWebSocketHome + "conf" + lFileSep + JWEBSOCKET_XML;
-            lFile = new File(lWebSocketXML);
-            if (lFile.exists()) {
-                return lWebSocketXML;
-            }
-        }
-        return null;
-    }
+		// try to obtain JWEBSOCKET_HOME environment variable
+		lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
+		if (lWebSocketHome != null) {
+			// append trailing slash if needed
+			if (!lWebSocketHome.endsWith(lFileSep)) {
+				lWebSocketHome += lFileSep;
+			}
+			// jWebSocket.xml can be located in %JWEBSOCKET_HOME%/conf
+			lWebSocketXML = lWebSocketHome + "conf" + lFileSep + JWEBSOCKET_XML;
+			lFile = new File(lWebSocketXML);
+			if (lFile.exists()) {
+				return lWebSocketXML;
+			}
+		}
+
+		// try to obtain CATALINA_HOME environment variable
+		lWebSocketHome = System.getenv(CATALINA_HOME);
+		if (lWebSocketHome != null) {
+			// append trailing slash if needed
+			if (!lWebSocketHome.endsWith(lFileSep)) {
+				lWebSocketHome += lFileSep;
+			}
+			// jWebSocket.xml can be located in %CATALINA_HOME%/conf
+			lWebSocketXML = lWebSocketHome + "conf" + lFileSep + JWEBSOCKET_XML;
+			lFile = new File(lWebSocketXML);
+			if (lFile.exists()) {
+				return lWebSocketXML;
+			}
+		}
+
+		// finally try to find config file at %CLASSPATH%/conf/
+		URL lURL = Thread.currentThread().getContextClassLoader().getResource("conf/" + JWEBSOCKET_XML);
+		if (lURL != null) {
+			lWebSocketXML = lURL.getFile();
+			lFile = new File(lWebSocketXML);
+			if (lFile.exists()) {
+				return lWebSocketXML;
+			}
+		}
+
+		return null;
+	}
 }

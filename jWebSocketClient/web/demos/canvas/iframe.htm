@@ -30,7 +30,9 @@
 		<script type="text/javascript" language="JavaScript">
 			var lJWSID = "jWebSocket Chat",
 			lWSC = null,
-			eKeepAlive = null;
+			eCanvas = null;
+			eStatus = null;
+			lIsConnected = false;
 			lCID = "c1";
 
 			var IN = 0;
@@ -50,6 +52,8 @@
 					OnOpen: function( aEvent ) {
 						// start keep alive if user selected that option
 						lWSC.startKeepAlive({ interval: 30000 });
+						eStatus.src = "../../images/authenticated.png";
+						lIsConnected = true;
 					},
 
 					// OnMessage callback
@@ -58,6 +62,8 @@
 
 					// OnClose callback
 					OnClose: function( aEvent ) {
+						eStatus.src = "../../images/disconnected.png";
+						lIsConnected = false;
 						lWSC.stopKeepAlive();
 					}
 					
@@ -80,12 +86,14 @@
 
 			function mouseDownLsnr( aEvent ) {
 				aEvent.preventDefault();
-				lPainting = true;
-				lX = aEvent.clientX - eCanvas.offsetLeft;
-				lY = aEvent.clientY - eCanvas.offsetTop;
-				lWSC.canvasBeginPath( lCID );
-				lWSC.canvasMoveTo( lCID, lX, lY );
-				// console.log( "Start x: " + lX + ", y: " + lY );
+				if( lIsConnected ) {
+					lPainting = true;
+					lX = aEvent.clientX - eCanvas.offsetLeft;
+					lY = aEvent.clientY - eCanvas.offsetTop;
+					lWSC.canvasBeginPath( lCID );
+					lWSC.canvasMoveTo( lCID, lX, lY );
+					// console.log( "Start x: " + lX + ", y: " + lY );
+				}
 			}
 
 			var eAvg = null;
@@ -94,7 +102,7 @@
 
 			function mouseMoveLsnr( aEvent ) {
 				aEvent.preventDefault();
-				if( lPainting ) {
+				if( lIsConnected && lPainting ) {
 					// console.log( "Drawing x: " + lX + ", y: " + lY );
 					lX = aEvent.clientX - eCanvas.offsetLeft;
 					lY = aEvent.clientY - eCanvas.offsetTop;
@@ -112,28 +120,24 @@
 
 			function mouseUpLsnr( aEvent ) {
 				aEvent.preventDefault();
-				lX = aEvent.clientX - eCanvas.offsetLeft;
-				lY = aEvent.clientY - eCanvas.offsetTop;
-				lWSC.canvasLineTo( lX, lY );
-				lWSC.canvasClosePath( lCID );
-				// console.log( "Stop x: " + lX + ", y: " + lY );
-				lPainting = false;
+				if( lIsConnected && lPainting ) {
+					lX = aEvent.clientX - eCanvas.offsetLeft;
+					lY = aEvent.clientY - eCanvas.offsetTop;
+					lWSC.canvasLineTo( lX, lY );
+					lWSC.canvasClosePath( lCID );
+					// console.log( "Stop x: " + lX + ", y: " + lY );
+					lPainting = false;
+				}
 			}
 
-			function checkKeepAlive( aOptions ) {
-				if( !aOptions ) {
-					aOptions = {};
-				}
-				aOptions.interval = 30000;
-				if( eKeepAlive.checked ) {
-					lWSC.startKeepAlive( aOptions );
-				} else {
-					lWSC.stopKeepAlive();
-				}
+			function mouseOutLsnr( aEvent ) {
+				mouseUpLsnr( aEvent );
 			}
 
 			function doClear() {
-				lWSC.canvasClear( lCID );
+				if( lIsConnected ) {
+					lWSC.canvasClear( lCID );
+				}
 			}
 
 			function initPage() {
@@ -141,11 +145,13 @@
 
 				eAvg = jws.$("spnAvg");
 				eCanvas = jws.$( "cnvDemo" );
+				eStatus = jws.$( "simgStatus" );
 				ctx = eCanvas.getContext( "2d" );
 
 				eCanvas.addEventListener( "mousedown", mouseDownLsnr, false );
 				eCanvas.addEventListener( "mousemove", mouseMoveLsnr, false );
 				eCanvas.addEventListener( "mouseup", mouseUpLsnr, false );
+				eCanvas.addEventListener( "mouseout", mouseOutLsnr, false );
 /*
 				ctx.fillStyle = "rgb(200,0,0)";
 				ctx.fillRect (10, 10, 55, 50);
@@ -193,7 +199,10 @@
 		onunload="exitPage();"
 		>
 		<div> <!-- style="border:1px solid red" -->
-			<p><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear" onclick="doClear();"></p>
+			<p>
+				<input class="sbtnDlg" id="sbtnClear" type="button" value="Clear" onclick="doClear();">&nbsp;
+				<img id="simgStatus" alt="status"  src="../../images/disconnected.png"/>
+			</p>
 			<p id="spnAvg" style="display:none">0ms</p>
 			<canvas id="cnvDemo" width="300" height="140" style="border:1px solid green; cursor:crosshair" >
 			</canvas>

@@ -29,25 +29,12 @@
 					<warName>jWebSocketAppServer-${project.version}</warName>
 					<outputDirectory>${project.build.directory}/../../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
 
-					<!-- all packages below are already included in jWebSocketServer-Bundle -->
-					<!--
-						**/jWebSocketCommon*.jar,
-						**/jWebSocketServer*.jar,
-						**/log4j*.jar,
-						**/javolution*.jar,
-						**/commons-lang*.jar,
-						**/servlet-api*.jar,
-						**/json-2*.jar,
-						**/slf4j-api*.jar,
-						**/slf4j-jdk14*.jar,
-						**/netty*.jar,
-						**/servlet-api*.jar
-					-->
+					<!-- if you want to create a self-sufficient war comment out the following directive -->
 					<packagingExcludes>
 						**/*.jar
 					</packagingExcludes>
 
-<!-- add your additional web resources here!
+					<!-- add your additional web resources here!
 					<webResources>
             			<resource>
               				<directory>../jWebSocketClient/web</directory>
@@ -57,7 +44,7 @@
 							</excludes>
             			</resource>
           			</webResources>
--->
+					-->
 				</configuration>
 			</plugin>
 

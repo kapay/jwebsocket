@@ -41,23 +41,11 @@
 						</resource>
 					</webResources>
 
-					<!-- all packages below are already included in jWebSocketServer-Bundle -->
-					<!--
-						**/jWebSocketCommon*.jar,
-						**/jWebSocketServer*.jar,
-						**/log4j*.jar,
-						**/javolution*.jar,
-						**/commons-lang*.jar,
-						**/servlet-api*.jar,
-						**/json-2*.jar,
-						**/slf4j-api*.jar,
-						**/slf4j-jdk14*.jar,
-						**/netty*.jar,
-						**/servlet-api*.jar
-					-->
+					<!-- if you want to create a self-sufficient war comment out the following directive -->
 					<packagingExcludes>
 						**/*.jar
 					</packagingExcludes>
+
 				</configuration>
 			</plugin>
 			<plugin>
