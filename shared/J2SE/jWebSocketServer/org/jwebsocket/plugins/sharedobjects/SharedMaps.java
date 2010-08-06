@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.sharedobjects;
 
+import java.util.Map;
 import javolution.util.FastMap;
 import org.jwebsocket.plugins.TokenPlugIn;
 
@@ -24,6 +25,6 @@ import org.jwebsocket.plugins.TokenPlugIn;
  */
 public class SharedMaps extends TokenPlugIn {
 
-	private FastMap maps = new FastMap();
+	private Map mMaps = new FastMap();
 
 }

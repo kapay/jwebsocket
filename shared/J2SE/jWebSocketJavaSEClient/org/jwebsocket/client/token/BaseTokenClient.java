@@ -282,6 +282,9 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 
 	@Override
 	public void disconnect() throws WebSocketException {
+	}
+
+	public void shutdown() throws WebSocketException {
 		Token lToken = new Token();
 		lToken.put("type", "shutdown");
 		lToken.put("ns", NS_ADMIN_PLUGIN);

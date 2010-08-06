@@ -4,6 +4,7 @@
  */
 package org.jwebsocket.plugins.sharedobjects;
 
+import java.util.List;
 import javolution.util.FastList;
 
 /**
@@ -12,13 +13,13 @@ import javolution.util.FastList;
  */
 public class SharedCanvas extends BaseSharedObject {
 
-	private FastList cmds = new FastList();
+	private List mCmds = new FastList();
 
 	public void addCmd(String aCmd) {
-		 cmds.add(aCmd);
+		 mCmds.add(aCmd);
 	}
 
 	public void removeCmd(int aIndex) {
-		 cmds.remove(aIndex);
+		 mCmds.remove(aIndex);
 	}
 }

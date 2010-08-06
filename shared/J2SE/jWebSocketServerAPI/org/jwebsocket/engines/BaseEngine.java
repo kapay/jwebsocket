@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.engines;
 
+import java.util.Map;
 import javolution.util.FastMap;
 
 import org.jwebsocket.api.EngineConfiguration;
@@ -26,7 +27,6 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 
-
 /**
  * Provides the basic implementation of the jWebSocket engines.
  * The {@code BaseEngine} is supposed to be used as ancestor for the
@@ -37,41 +37,41 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class BaseEngine implements WebSocketEngine {
 
-	private final FastMap<String, WebSocketServer> servers = new FastMap<String, WebSocketServer>();
-	private final FastMap<String, WebSocketConnector> connectors = new FastMap<String, WebSocketConnector>();
-	private int sessionTimeout = JWebSocketCommonConstants.DEFAULT_TIMEOUT;
-	private EngineConfiguration configuration;
+	private final Map<String, WebSocketServer> mServers = new FastMap<String, WebSocketServer>();
+	private final Map<String, WebSocketConnector> mConnectors = new FastMap<String, WebSocketConnector>();
+	private int mSessionTimeout = JWebSocketCommonConstants.DEFAULT_TIMEOUT;
+	private EngineConfiguration mConfiguration;
 
-	public BaseEngine(EngineConfiguration configuration) {
-		this.configuration = configuration;
+	public BaseEngine(EngineConfiguration aConfiguration) {
+		this.mConfiguration = aConfiguration;
 	}
 
 	@Override
 	public void startEngine() throws WebSocketException {
 		// this method will be overridden by engine implementations.
-		// notify server that the engine has started
-		engineStarted();
+		// The implementation will notify server that the engine has started
+		// Don't do this here: engineStarted();
 	}
 
 	@Override
 	public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
 		try {
-			// stop all connectors
-			for (WebSocketConnector connector : getConnectors().values()) {
-				connector.stopConnector(aCloseReason);
+			// stop all connectors of this engine
+			for (WebSocketConnector lConnector : getConnectors().values()) {
+				lConnector.stopConnector(aCloseReason);
 			}
 		} catch (Exception ex) {
 			// log.info("Exception on sleep " + ex.getMessage());
 		}
 		// this method will be overridden by engine implementations.
-		// notify server that the engine has started
-		engineStopped();
+		// The implementation will notify server that the engine has stopped
+		// Don't do this here: engineStopped();
 	}
 
 	@Override
 	public void engineStarted() {
 		// notify servers that the engine has started
-		for (WebSocketServer lServer : servers.values()) {
+		for (WebSocketServer lServer : mServers.values()) {
 			lServer.engineStarted(this);
 		}
 	}
@@ -79,7 +79,7 @@ public class BaseEngine implements WebSocketEngine {
 	@Override
 	public void engineStopped() {
 		// notify servers that the engine has stopped
-		for (WebSocketServer lServer : servers.values()) {
+		for (WebSocketServer lServer : mServers.values()) {
 			lServer.engineStopped(this);
 		}
 	}
@@ -87,7 +87,7 @@ public class BaseEngine implements WebSocketEngine {
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		// notify servers that a connector has started
-		for (WebSocketServer lServer : servers.values()) {
+		for (WebSocketServer lServer : mServers.values()) {
 			lServer.connectorStarted(aConnector);
 		}
 	}
@@ -95,7 +95,7 @@ public class BaseEngine implements WebSocketEngine {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// notify servers that a connector has stopped
-		for (WebSocketServer lServer : servers.values()) {
+		for (WebSocketServer lServer : mServers.values()) {
 			lServer.connectorStopped(aConnector, aCloseReason);
 		}
 		// once a connector stopped remove it from the list of connectors
@@ -109,7 +109,7 @@ public class BaseEngine implements WebSocketEngine {
 
 	@Override
 	public void processPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
-		FastMap<String, WebSocketServer> lServers = getServers();
+		Map<String, WebSocketServer> lServers = getServers();
 		for (WebSocketServer lServer : lServers.values()) {
 			lServer.processPacket(this, aConnector, aDataPacket);
 		}
@@ -122,34 +122,34 @@ public class BaseEngine implements WebSocketEngine {
 
 	@Override
 	public void broadcastPacket(WebSocketConnector aSource, WebSocketPacket aDataPacket) {
-		for (WebSocketConnector connector : connectors.values()) {
-			connector.sendPacket(aDataPacket);
+		for (WebSocketConnector lConnector : mConnectors.values()) {
+			lConnector.sendPacket(aDataPacket);
 		}
 	}
 
 	@Override
 	public void removeConnector(WebSocketConnector aConnector) {
-		connectors.remove(aConnector.getId());
+		mConnectors.remove(aConnector.getId());
 	}
 
 	@Override
 	public int getSessionTimeout() {
-		return sessionTimeout;
+		return mSessionTimeout;
 	}
 
 	@Override
 	public void setSessionTimeout(int aSessionTimeout) {
-		this.sessionTimeout = aSessionTimeout;
+		this.mSessionTimeout = aSessionTimeout;
 	}
 
 	@Override
 	public int getMaxFrameSize() {
-		return configuration.getMaxFramesize();
+		return mConfiguration.getMaxFramesize();
 	}
 
 	@Override
-	public FastMap<String, WebSocketConnector> getConnectors() {
-		return connectors;
+	public Map<String, WebSocketConnector> getConnectors() {
+		return mConnectors;
 	}
 
 	@Override
@@ -163,18 +163,18 @@ public class BaseEngine implements WebSocketEngine {
 	}
 
 	@Override
-	public FastMap<String, WebSocketServer> getServers() {
-		return servers; // (FastMap) (servers.unmodifiable());
+	public Map<String, WebSocketServer> getServers() {
+		return mServers; // (FastMap) (servers.unmodifiable());
 	}
 
 	@Override
 	public void addServer(WebSocketServer aServer) {
-		this.servers.put(aServer.getId(), aServer);
+		this.mServers.put(aServer.getId(), aServer);
 	}
 
 	@Override
 	public void removeServer(WebSocketServer aServer) {
-		this.servers.remove(aServer.getId());
+		this.mServers.remove(aServer.getId());
 	}
 
 	/**
@@ -182,11 +182,11 @@ public class BaseEngine implements WebSocketEngine {
 	 */
 	@Override
 	public String getId() {
-		return configuration.getId();
+		return mConfiguration.getId();
 	}
 
 	@Override
 	public EngineConfiguration getConfiguration() {
-		return configuration;
+		return mConfiguration;
 	}
 }

@@ -15,6 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.sharedobjects;
 
+import java.util.List;
+import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 import org.jwebsocket.token.Token;
@@ -25,24 +27,24 @@ import org.jwebsocket.token.Token;
  */
 public class SharedLists {
 
-	private FastMap<String, FastList> lists = new FastMap<String, FastList>();
+	private Map<String, FastList> mLists = new FastMap<String, FastList>();
 
 	public void create(Token aResponse, String aId) {
-		FastList lList = lists.get(aId);
+		FastList lList = mLists.get(aId);
 		if (lList != null) {
-			lists.put(aId, new FastList());
+			mLists.put(aId, new FastList());
 		}
 	}
 
 	public void clear(Token aResponse, String aId) {
-		FastList lList = lists.get(aId);
+		List lList = mLists.get(aId);
 		if (lList != null) {
-			lists.clear();
+			mLists.clear();
 		}
 	}
 
 	public Object get(Token aResponse, String aId, int aIndex) {
-		FastList lList = lists.get(aId);
+		List lList = mLists.get(aId);
 		if (lList != null) {
 			return lList.get(aIndex);
 		}
@@ -50,20 +52,20 @@ public class SharedLists {
 	}
 
 	public void add(Token aResponse, String aId, Object aObject) {
-		FastList lList = lists.get(aId);
+		List lList = mLists.get(aId);
 		if (lList != null) {
 			lList.add(aObject);
 		}
 	}
 
 	public void remove(Token aResponse, String aId, int aIndex) {
-		FastList lList = lists.get(aId);
+		List lList = mLists.get(aId);
 		if (lList != null) {
 			lList.remove(aIndex);
 		}
 	}
 
 	public void destroy(Token aResponse, String aId) {
-		lists.remove(aId);
+		mLists.remove(aId);
 	}
 }

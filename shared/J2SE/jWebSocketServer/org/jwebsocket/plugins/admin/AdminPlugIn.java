@@ -22,11 +22,9 @@ import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketServerConstants;
-import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.instance.JWebSocketInstance;
 import org.jwebsocket.kit.PlugInResponse;
-import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
@@ -89,18 +87,12 @@ public class AdminPlugIn extends TokenPlugIn {
 			return;
 		}
 
+		// notify clients about shutdown
 		Token lResponseToken = lServer.createResponse(aToken);
 		lResponseToken.put("msg", "Shutdown in progress...");
-		lServer.sendToken(aConnector, lResponseToken);
+		lServer.broadcastToken(lResponseToken);
 
-		for (WebSocketEngine lEngine : lServer.getEngines().values()) {
-			try {
-				lEngine.stopEngine(CloseReason.SHUTDOWN);
-			} catch (WebSocketException ex) {
-				log.error(ex.getClass().getSimpleName()
-						+ " on shutdown: " + ex.getMessage());
-			}
-		}
+		JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
 
 	}
 

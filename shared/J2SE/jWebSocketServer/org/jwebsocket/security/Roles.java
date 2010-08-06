@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.security;
 
+import java.util.Map;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 
@@ -25,7 +26,7 @@ import org.apache.log4j.Logger;
 public class Roles {
 
 	private static Logger log = Logger.getLogger(Roles.class);
-	private FastMap<String, Role> roles = new FastMap<String, Role>();
+	private Map<String, Role> mRoles = new FastMap<String, Role>();
 
 	/**
 	 *
@@ -51,7 +52,7 @@ public class Roles {
 	 */
 	public void addRole(Role aRole) {
 		if (aRole != null) {
-			roles.put(aRole.getKey(), aRole);
+			mRoles.put(aRole.getKey(), aRole);
 		}
 	}
 
@@ -61,7 +62,7 @@ public class Roles {
 	 * @param aKey
 	 */
 	public Role getRole(String aKey) {
-		return roles.get(aKey);
+		return mRoles.get(aKey);
 	}
 
 	/**
@@ -69,7 +70,7 @@ public class Roles {
 	 * @param aKey
 	 */
 	public void removeRole(String aKey) {
-		roles.remove(aKey);
+		mRoles.remove(aKey);
 	}
 
 	/**
@@ -78,7 +79,7 @@ public class Roles {
 	 */
 	public void removeRole(Role aRole) {
 		if (aRole != null) {
-			roles.remove(aRole.getKey());
+			mRoles.remove(aRole.getKey());
 		}
 	}
 
@@ -88,7 +89,7 @@ public class Roles {
 	 * @return
 	 */
 	public boolean hasRight(String aRight) {
-		for(Role lRole : roles.values() ) {
+		for(Role lRole : mRoles.values() ) {
 			if( lRole.hasRight(aRight))
 				return true;
 		}

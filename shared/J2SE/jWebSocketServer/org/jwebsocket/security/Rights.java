@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.security;
 
+import java.util.Map;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 
@@ -25,7 +26,7 @@ import org.apache.log4j.Logger;
 public class Rights {
 
 	private static Logger log = Logger.getLogger(Rights.class);
-	private FastMap<String, Right> rights = new FastMap<String, Right>();
+	private Map<String, Right> mRights = new FastMap<String, Right>();
 
 	/**
 	 * adds a new right to the FastMap of rights. If there is already a right with
@@ -35,7 +36,7 @@ public class Rights {
 	 */
 	public void addRight(Right aRight) {
 		if (aRight != null && aRight.getKey() != null) {
-			rights.put(aRight.getKey(), aRight);
+			mRights.put(aRight.getKey(), aRight);
 		}
 	}
 
@@ -47,7 +48,7 @@ public class Rights {
 	 */
 	public Right get(String aKey) {
 		if (aKey != null) {
-			return rights.get(aKey);
+			return mRights.get(aKey);
 		} else {
 			return null;
 		}
@@ -61,7 +62,7 @@ public class Rights {
 	 */
 	public void removeRight(String aKey) {
 		if (aKey != null) {
-			rights.remove(aKey);
+			mRights.remove(aKey);
 		}
 	}
 
@@ -72,7 +73,7 @@ public class Rights {
 	 */
 	public void removeRight(Right aRight) {
 		if (aRight != null) {
-			rights.remove(aRight.getKey());
+			mRights.remove(aRight.getKey());
 		}
 	}
 
@@ -84,7 +85,7 @@ public class Rights {
 	 */
 	public boolean hasRight(Right aRight) {
 		if (aRight != null && aRight.getKey() != null) {
-			return rights.containsKey(aRight.getKey());
+			return mRights.containsKey(aRight.getKey());
 		} else {
 			return false;
 		}
@@ -98,7 +99,7 @@ public class Rights {
 	 */
 	public boolean hasRight(String aKey) {
 		if (aKey != null) {
-			return rights.containsKey(aKey);
+			return mRights.containsKey(aKey);
 		} else {
 			return false;
 		}

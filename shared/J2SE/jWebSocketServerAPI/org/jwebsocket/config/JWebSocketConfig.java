@@ -32,30 +32,42 @@ import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATI
  */
 public final class JWebSocketConfig implements Config {
 
-    private final String installation;
-    private final String protocol;
+    private final String mInstallation;
+    private final String mProtocol;
     private final String jWebSocketHome;
-    private final String libraryFolder;
-    private final String initializer;
+    private final String mLibraryFolder;
+    private final String mInitializer;
+
+    private final List<EngineConfig> mEngines;
+    private final List<ServerConfig> mServers;
+    private final List<UserConfig> mUsers;
+    private final List<PluginConfig> mPlugins;
+    private final List<FilterConfig> mFilters;
+    private final LoggingConfig mLoggingConfig;
+    private final List<RightConfig> mGlobalRights;
+    private final List<RoleConfig> mGlobalRoles;
+
+    private static JWebSocketConfig mConfig = null;
+
 
     /**
      * @return the installation
      */
     public String getInstallation() {
-        if (installation == null || installation.length() == 0) {
+        if (mInstallation == null || mInstallation.length() == 0) {
             return DEFAULT_INSTALLATION;
         }
-        return installation;
+        return mInstallation;
     }
 
     /**
      * @return the protocol
      */
     public String getProtocol() {
-        if (protocol == null || protocol.length() == 0) {
+        if (mProtocol == null || mProtocol.length() == 0) {
             return DEFAULT_PROTOCOL;
         }
-        return protocol;
+        return mProtocol;
     }
 
     /**
@@ -69,33 +81,22 @@ public final class JWebSocketConfig implements Config {
      * @return the libraryFolder
      */
     public String getLibraryFolder() {
-        return libraryFolder;
+        return mLibraryFolder;
     }
 
     /**
      * @return the initializer
      */
     public String getInitializer() {
-        return initializer;
+        return mInitializer;
     }
 
     /**
      * @return the config
      */
     public static JWebSocketConfig getConfig() {
-        return config;
+        return mConfig;
     }
-
-    private final List<EngineConfig> engines;
-    private final List<ServerConfig> servers;
-    private final List<UserConfig> users;
-    private final List<PluginConfig> plugins;
-    private final List<FilterConfig> filters;
-    private final LoggingConfig loggingConfig;
-    private final List<RightConfig> globalRights;
-    private final List<RoleConfig> globalRoles;
-
-    private static JWebSocketConfig config = null;
 
     /**
      * private constructor used by the builder
@@ -108,19 +109,19 @@ public final class JWebSocketConfig implements Config {
             throw new WebSocketRuntimeException(
                     "Configuration is not loaded completely.");
         }
-        installation = builder.installation;
-        protocol = builder.protocol;
+        mInstallation = builder.installation;
+        mProtocol = builder.protocol;
         jWebSocketHome = builder.jWebSocketHome;
-        libraryFolder = builder.libraryFolder;
-        initializer = builder.initializer;
-        engines = builder.engines;
-        servers = builder.servers;
-        users = builder.users;
-        plugins = builder.plugins;
-        filters = builder.filters;
-        loggingConfig = builder.loggingConfig;
-        globalRights = builder.globalRights;
-        globalRoles = builder.globalRoles;
+        mLibraryFolder = builder.libraryFolder;
+        mInitializer = builder.initializer;
+        mEngines = builder.engines;
+        mServers = builder.servers;
+        mUsers = builder.users;
+        mPlugins = builder.plugins;
+        mFilters = builder.filters;
+        mLoggingConfig = builder.loggingConfig;
+        mGlobalRights = builder.globalRights;
+        mGlobalRoles = builder.globalRoles;
         // validate the config
         validate();
     }
@@ -213,10 +214,10 @@ public final class JWebSocketConfig implements Config {
         }
 
         public synchronized JWebSocketConfig buildConfig() {
-            if (config == null) {
-                config = new JWebSocketConfig(this);
+            if (mConfig == null) {
+                mConfig = new JWebSocketConfig(this);
             }
-            return config;
+            return mConfig;
         }
     }
 
@@ -224,56 +225,56 @@ public final class JWebSocketConfig implements Config {
      * @return the engines
      */
     public List<EngineConfig> getEngines() {
-        return Collections.unmodifiableList(engines);
+        return Collections.unmodifiableList(mEngines);
     }
 
     /**
      * @return the servers
      */
     public List<ServerConfig> getServers() {
-        return Collections.unmodifiableList(servers);
+        return Collections.unmodifiableList(mServers);
     }
 
     /**
      * @return the users
      */
     public List<UserConfig> getUsers() {
-        return Collections.unmodifiableList(users);
+        return Collections.unmodifiableList(mUsers);
     }
 
     /**
      * @return the plugins
      */
     public List<PluginConfig> getPlugins() {
-        return Collections.unmodifiableList(plugins);
+        return Collections.unmodifiableList(mPlugins);
     }
 
     /**
      * @return the filters
      */
     public List<FilterConfig> getFilters() {
-        return Collections.unmodifiableList(filters);
+        return Collections.unmodifiableList(mFilters);
     }
 
     /**
      * @return the logging config object
      */
     public LoggingConfig getLoggingConfig() {
-        return loggingConfig;
+        return mLoggingConfig;
     }
 
     /**
      * @return the globalRights
      */
     public List<RightConfig> getGlobalRights() {
-        return Collections.unmodifiableList(globalRights);
+        return Collections.unmodifiableList(mGlobalRights);
     }
 
     /**
      * @return the globalRoles
      */
     public List<RoleConfig> getGlobalRoles() {
-        return Collections.unmodifiableList(globalRoles);
+        return Collections.unmodifiableList(mGlobalRoles);
     }
 
     /**
@@ -281,14 +282,14 @@ public final class JWebSocketConfig implements Config {
      */
     @Override
     public void validate() {
-        if ((engines == null || engines.isEmpty())
-                || (servers == null || servers.isEmpty())
-                || (users == null || users.isEmpty())
-                || (plugins == null || plugins.isEmpty())
-                || (filters == null || filters.isEmpty())
-                || (loggingConfig == null)
-                || (globalRights == null || globalRights.isEmpty())
-                || (globalRoles == null || globalRoles.isEmpty())) {
+        if ((mEngines == null || mEngines.isEmpty())
+                || (mServers == null || mServers.isEmpty())
+                || (mUsers == null || mUsers.isEmpty())
+                || (mPlugins == null || mPlugins.isEmpty())
+                || (mFilters == null || mFilters.isEmpty())
+                || (mLoggingConfig == null)
+                || (mGlobalRights == null || mGlobalRights.isEmpty())
+                || (mGlobalRoles == null || mGlobalRoles.isEmpty())) {
             throw new WebSocketRuntimeException(
                     "Missing one of the server configuration, please check your configuration file");
 		}

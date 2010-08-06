@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.security;
 
+import java.util.Map;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 
@@ -26,7 +27,7 @@ import org.apache.log4j.Logger;
 public class Users {
 
 	private static Logger log = Logger.getLogger(Users.class);
-	private FastMap<String, User> users = new FastMap<String, User>();
+	private Map<String, User> users = new FastMap<String, User>();
 
 	/**
 	 * returns the user identified by its login name or <tt>null</tt> if no

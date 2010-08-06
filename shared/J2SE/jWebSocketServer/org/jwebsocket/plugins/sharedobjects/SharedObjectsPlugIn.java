@@ -18,6 +18,7 @@ package org.jwebsocket.plugins.sharedobjects;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
@@ -40,7 +41,7 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 	private String NS_SHARED_OBJECTS = JWebSocketServerConstants.NS_BASE + ".plugins.sharedObjs";
 	private SharedObjects sharedObjects = new SharedObjects();
 	// if data types are changed update client plug-in accordingly!
-	private FastList DATA_TYPES = new FastList(Arrays.asList(new String[]{
+	private List DATA_TYPES = new FastList(Arrays.asList(new String[]{
 				"number", "string", "boolean", "object",
 				"set", "list", "map", "table"}));
 

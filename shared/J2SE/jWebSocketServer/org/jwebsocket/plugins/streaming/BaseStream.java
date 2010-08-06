@@ -16,6 +16,7 @@
 package org.jwebsocket.plugins.streaming;
 
 import java.util.Date;
+import java.util.List;
 import javolution.util.FastList;
 
 import org.apache.log4j.Logger;
@@ -38,10 +39,10 @@ import org.jwebsocket.server.BaseServer;
 public class BaseStream implements WebSocketStream {
 
 	private static Logger log = Logging.getLogger(BaseStream.class);
-	private FastList<WebSocketConnector> connectors = new FastList<WebSocketConnector>();
+	private List<WebSocketConnector> mConnectors = new FastList<WebSocketConnector>();
 	private boolean isRunning = false;
 	private String streamID = null;
-	private final FastList<Object> queue = new FastList<Object>();
+	private final List<Object> mQueue = new FastList<Object>();
 	private Thread queueThread = null;
 
 	/**
@@ -69,9 +70,9 @@ public class BaseStream implements WebSocketStream {
 		}
 		long lStarted = new Date().getTime();
 		isRunning = false;
-		synchronized (queue) {
+		synchronized (mQueue) {
 			// trigger sender thread to terminate
-			queue.notify();
+			mQueue.notify();
 		}
 		try {
 			queueThread.join(aTimeout);
@@ -95,7 +96,7 @@ public class BaseStream implements WebSocketStream {
 	 */
 	public void registerConnector(WebSocketConnector aConnector) {
 		if (aConnector != null) {
-			connectors.add(aConnector);
+			mConnectors.add(aConnector);
 		}
 	}
 
@@ -105,7 +106,7 @@ public class BaseStream implements WebSocketStream {
 	 * @return <tt>true</tt> if the connector is already registered otherwise <tt>false</tt>.
 	 */
 	public boolean isConnectorRegistered(WebSocketConnector aConnector) {
-		return (aConnector != null && connectors.indexOf(aConnector) >= 0);
+		return (aConnector != null && mConnectors.indexOf(aConnector) >= 0);
 	}
 
 	/**
@@ -115,7 +116,7 @@ public class BaseStream implements WebSocketStream {
 	 */
 	public void unregisterConnector(WebSocketConnector aConnector) {
 		if (aConnector != null) {
-			connectors.remove(aConnector);
+			mConnectors.remove(aConnector);
 		}
 	}
 
@@ -144,11 +145,11 @@ public class BaseStream implements WebSocketStream {
 	 * @param aObject
 	 */
 	public void put(Object aObject) {
-		synchronized (queue) {
+		synchronized (mQueue) {
 			// add the queue item into the queue
-			queue.add(aObject);
+			mQueue.add(aObject);
 			// trigger sender thread
-			queue.notify();
+			mQueue.notify();
 		}
 	}
 
@@ -171,7 +172,7 @@ public class BaseStream implements WebSocketStream {
 	 * @param aObject
 	 */
 	protected void processItem(Object aObject) {
-		for (WebSocketConnector lConnector : connectors) {
+		for (WebSocketConnector lConnector : mConnectors) {
 			processConnector(lConnector, aObject);
 		}
 	}
@@ -182,13 +183,13 @@ public class BaseStream implements WebSocketStream {
 		public void run() {
 			isRunning = true;
 			while (isRunning) {
-				synchronized (queue) {
-					if (queue.size() > 0) {
-						Object lObject = queue.remove(0);
+				synchronized (mQueue) {
+					if (mQueue.size() > 0) {
+						Object lObject = mQueue.remove(0);
 						processItem(lObject);
 					} else {
 						try {
-							queue.wait();
+							mQueue.wait();
 						} catch (InterruptedException ex) {
 							log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 						}

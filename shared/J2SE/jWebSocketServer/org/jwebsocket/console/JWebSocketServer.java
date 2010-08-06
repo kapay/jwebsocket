@@ -14,10 +14,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.console;
 
-import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.instance.JWebSocketInstance;
 import org.jwebsocket.server.CustomServer;
 import org.jwebsocket.server.TokenServer;
 
@@ -41,27 +41,37 @@ public class JWebSocketServer {
 		JWebSocketFactory.start();
 
 		// get the token server
-		TokenServer lTS0 = (TokenServer)JWebSocketFactory.getServer("ts0");
-		if( lTS0 != null ) {
+		TokenServer lTS0 = (TokenServer) JWebSocketFactory.getServer("ts0");
+		if (lTS0 != null) {
 			// and add the sample listener to the server's listener chain
 			lTS0.addListener(new JWebSocketTokenListenerSample());
 		}
 
 		// get the custom server
-		CustomServer lCS0 = (CustomServer)JWebSocketFactory.getServer("cs0");
-		if( lCS0 != null ) {
+		CustomServer lCS0 = (CustomServer) JWebSocketFactory.getServer("cs0");
+		if (lCS0 != null) {
 			// and add the sample listener to the server's listener chain
 			lCS0.addListener(new JWebSocketCustomListenerSample());
 		}
-
+		/*
 		WebSocketEngine engine = JWebSocketFactory.getEngine();
 		if (engine != null) {
-			while (engine.isAlive()) {
-				try {
-					Thread.sleep(250);
-				} catch (InterruptedException ex) {
-					// no handling required here
-				}
+		while (engine.isAlive()) {
+		try {
+		Thread.sleep(250);
+		} catch (InterruptedException ex) {
+		// no handling required here
+		}
+		}
+		}
+		 */
+
+		// remain here until shut down request
+		while (JWebSocketInstance.getStatus() != JWebSocketInstance.SHUTTING_DOWN) {
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException ex) {
+				// no handling required here
 			}
 		}
 

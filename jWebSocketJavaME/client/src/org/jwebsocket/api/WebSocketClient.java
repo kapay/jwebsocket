@@ -15,7 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
-import javolution.util.FastList;
+import j2me.util.List;
 import org.jwebsocket.listener.WebSocketClientEvent;
 import org.jwebsocket.kit.WebSocketException;
 
@@ -90,7 +90,7 @@ public interface WebSocketClient {
 	 * 
 	 * @return
 	 */
-	FastList getListeners();
+	List getListeners();
 
 	/**
 	 *

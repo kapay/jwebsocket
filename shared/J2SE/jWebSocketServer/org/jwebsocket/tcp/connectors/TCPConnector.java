@@ -29,12 +29,12 @@ import org.jwebsocket.logging.Logging;
  */
 public class TCPConnector extends BaseConnector {
 
-	private static Logger log = Logging.getLogger(TCPConnector.class);
-	private InputStream is = null;
-	private OutputStream os = null;
-	private Socket clientSocket = null;
-	private boolean isRunning = false;
-	private CloseReason closeReason = CloseReason.TIMEOUT;
+	private static Logger mLog = Logging.getLogger(TCPConnector.class);
+	private InputStream mIn = null;
+	private OutputStream mOut = null;
+	private Socket mClientSocket = null;
+	private boolean mIsRunning = false;
+	private CloseReason mCloseReason = CloseReason.TIMEOUT;
 
 	/**
 	 * creates a new TCP connector for the passed engine using the passed 
@@ -45,12 +45,12 @@ public class TCPConnector extends BaseConnector {
 	 */
 	public TCPConnector(WebSocketEngine aEngine, Socket aClientSocket) {
 		super(aEngine);
-		clientSocket = aClientSocket;
+		mClientSocket = aClientSocket;
 		try {
-			is = clientSocket.getInputStream();
-			os = new PrintStream(clientSocket.getOutputStream(), true, "UTF-8");
+			mIn = mClientSocket.getInputStream();
+			mOut = new PrintStream(mClientSocket.getOutputStream(), true, "UTF-8");
 		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName()
+			mLog.error(ex.getClass().getSimpleName()
 					+ " instantiating " + getClass().getSimpleName()
 					+ ": " + ex.getMessage());
 		}
@@ -61,12 +61,12 @@ public class TCPConnector extends BaseConnector {
 		int lPort = -1;
 		int lTimeout = -1;
 		try {
-			lPort = clientSocket.getPort();
-			lTimeout = clientSocket.getSoTimeout();
+			lPort = mClientSocket.getPort();
+			lTimeout = mClientSocket.getSoTimeout();
 		} catch (Exception ex) {
 		}
-		if (log.isDebugEnabled()) {
-			log.debug("Starting TCP connector on port "
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Starting TCP connector on port "
 					+ lPort + " with timeout "
 					+ (lTimeout > 0 ? lTimeout + "ms" : "infinite")
 					+ "");
@@ -74,8 +74,8 @@ public class TCPConnector extends BaseConnector {
 		ClientProcessor clientProc = new ClientProcessor(this);
 		Thread clientThread = new Thread(clientProc);
 		clientThread.start();
-		if (log.isInfoEnabled()) {
-			log.info("Started TCP connector on port "
+		if (mLog.isInfoEnabled()) {
+			mLog.info("Started TCP connector on port "
 					+ lPort + " with timeout "
 					+ (lTimeout > 0 ? lTimeout + "ms" : "infinite")
 					+ "");
@@ -84,16 +84,24 @@ public class TCPConnector extends BaseConnector {
 
 	@Override
 	public void stopConnector(CloseReason aCloseReason) {
-		if (log.isDebugEnabled()) {
-			log.debug("Stopping TCP connector (" + aCloseReason.name() + ")...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Stopping TCP connector (" + aCloseReason.name() + ")...");
 		}
-		int lPort = clientSocket.getPort();
-		closeReason = aCloseReason;
-		isRunning = false;
-		// TODO: Do we need to wait here? At least optionally?
-		if (log.isInfoEnabled()) {
-			log.info("Stopped TCP connector ("
-					+ aCloseReason.name() + ") on port " + lPort + ".");
+		int lPort = mClientSocket.getPort();
+		mCloseReason = aCloseReason;
+		mIsRunning = false;
+
+		try {
+			mIn.close();
+			if (mLog.isInfoEnabled()) {
+				mLog.info("Stopped TCP connector ("
+						+ aCloseReason.name() + ") on port " + lPort + ".");
+			}
+		} catch (IOException ex) {
+			if (mLog.isDebugEnabled()) {
+				mLog.info(ex.getClass().getSimpleName() + " while stopping TCP connector ("
+						+ aCloseReason.name() + ") on port " + lPort + ": " + ex.getMessage());
+			}
 		}
 	}
 
@@ -109,20 +117,20 @@ public class TCPConnector extends BaseConnector {
 			if (aDataPacket.getFrameType() == RawPacket.FRAMETYPE_BINARY) {
 				// each packet is enclosed in 0xFF<length><data>
 				// TODO: for future use! Not yet finally spec'd in IETF drafts!
-				os.write(0xFF);
+				mOut.write(0xFF);
 				byte[] lBA = aDataPacket.getByteArray();
 				// TODO: implement multi byte length!
-				os.write(lBA.length);
-				os.write(lBA);
+				mOut.write(lBA.length);
+				mOut.write(lBA);
 			} else {
 				// each packet is enclosed in 0x00<data>0xFF
-				os.write(0x00);
-				os.write(aDataPacket.getByteArray());
-				os.write(0xFF);
+				mOut.write(0x00);
+				mOut.write(aDataPacket.getByteArray());
+				mOut.write(0xFF);
 			}
-			os.flush();
+			mOut.flush();
 		} catch (IOException ex) {
-			log.error(ex.getClass().getSimpleName()
+			mLog.error(ex.getClass().getSimpleName()
 					+ " sending data packet: " + ex.getMessage());
 		}
 	}
@@ -154,14 +162,14 @@ public class TCPConnector extends BaseConnector {
 
 			try {
 				// start client listener loop
-				isRunning = true;
+				mIsRunning = true;
 
 				// call connectorStarted method of engine
 				engine.connectorStarted(connector);
 
-				while (isRunning) {
+				while (mIsRunning) {
 					try {
-						int b = is.read();
+						int b = mIn.read();
 						// start of frame
 						if (b == 0x00) {
 							pos = 0;
@@ -174,20 +182,20 @@ public class TCPConnector extends BaseConnector {
 									try {
 										engine.processPacket(connector, lPacket);
 									} catch (Exception ex) {
-										log.error(ex.getClass().getSimpleName()
+										mLog.error(ex.getClass().getSimpleName()
 												+ " in processPacket of connector "
 												+ connector.getClass().getSimpleName()
 												+ ": " + ex.getMessage());
 									}
 								} else {
-									log.error("Datapacket exceeded maximum size of " + lMaxFrameSize + " bytes and will not be processed!");
+									mLog.error("Datapacket exceeded maximum size of " + lMaxFrameSize + " bytes and will not be processed!");
 								}
 							}
 							lStart = -1;
 							// end of stream
 						} else if (b < 0) {
-							closeReason = CloseReason.CLIENT;
-							isRunning = false;
+							mCloseReason = CloseReason.CLIENT;
+							mIsRunning = false;
 							// any other byte within or outside a frame
 						} else {
 							if (lStart >= 0 && pos < lMaxFrameSize) {
@@ -196,32 +204,32 @@ public class TCPConnector extends BaseConnector {
 							pos++;
 						}
 					} catch (SocketTimeoutException ex) {
-						log.error("(timeout) "
+						mLog.error("(timeout) "
 								+ ex.getClass().getSimpleName()
 								+ ": " + ex.getMessage());
-						closeReason = CloseReason.TIMEOUT;
-						isRunning = false;
+						mCloseReason = CloseReason.TIMEOUT;
+						mIsRunning = false;
 					} catch (Exception ex) {
-						log.error("(other) "
+						mLog.error("(other) "
 								+ ex.getClass().getSimpleName()
 								+ ": " + ex.getMessage());
-						closeReason = CloseReason.SERVER;
-						isRunning = false;
+						mCloseReason = CloseReason.SERVER;
+						mIsRunning = false;
 					}
 				}
 
 				// call client stopped method of engine
 				// (e.g. to release client from streams)
-				engine.connectorStopped(connector, closeReason);
+				engine.connectorStopped(connector, mCloseReason);
 
 				// br.close();
-				is.close();
-				os.close();
-				clientSocket.close();
+				mIn.close();
+				mOut.close();
+				mClientSocket.close();
 
 			} catch (Exception ex) {
 				// ignore this exception for now
-				log.error("(close) "
+				mLog.error("(close) "
 						+ ex.getClass().getSimpleName()
 						+ ": " + ex.getMessage());
 			}
@@ -230,19 +238,19 @@ public class TCPConnector extends BaseConnector {
 
 	@Override
 	public String generateUID() {
-		String lUID = clientSocket.getInetAddress().getHostAddress()
-				+ "@" + clientSocket.getPort();
+		String lUID = mClientSocket.getInetAddress().getHostAddress()
+				+ "@" + mClientSocket.getPort();
 		return lUID;
 	}
 
 	@Override
 	public int getRemotePort() {
-		return clientSocket.getPort();
+		return mClientSocket.getPort();
 	}
 
 	@Override
 	public InetAddress getRemoteHost() {
-		return clientSocket.getInetAddress();
+		return mClientSocket.getInetAddress();
 	}
 
 	@Override

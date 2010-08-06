@@ -16,6 +16,7 @@
 package org.jwebsocket.token;
 
 import j2me.util.Iterator;
+import j2me.util.Map;
 import javolution.util.FastMap;
 
 /**
@@ -24,7 +25,7 @@ import javolution.util.FastMap;
  */
 public class Token {
 
-	private FastMap items = new FastMap();
+	private Map mItems = new FastMap();
 
 	/**
 	 * Creates a new empty instance of a token.
@@ -40,7 +41,7 @@ public class Token {
 	 * @param aValue value of the token item.
 	 */
 	public void put(String aKey, Object aValue) {
-		items.put(aKey, aValue);
+		mItems.put(aKey, aValue);
 	}
 
 	/**
@@ -49,7 +50,7 @@ public class Token {
 	 * @return
 	 */
 	public Object get(String aKey) {
-		return items.get(aKey);
+		return mItems.get(aKey);
 	}
 
 	/**
@@ -58,7 +59,7 @@ public class Token {
 	 * @return
 	 */
 	public Object remove(String aKey) {
-		return items.remove(aKey);
+		return mItems.remove(aKey);
 	}
 
 	/**
@@ -66,7 +67,7 @@ public class Token {
 	 * @return
 	 */
 	public Iterator getKeys() {
-		return items.keySet().iterator();
+		return mItems.keySet().iterator();
 	}
 
 	/**
@@ -93,7 +94,7 @@ public class Token {
 	 * @return
 	 */
 	public String getString(String aArg) {
-		Object lObj = items.get(aArg);
+		Object lObj = mItems.get(aArg);
 		if (lObj == null) {
 			return null;
 		} else {
@@ -108,7 +109,7 @@ public class Token {
 	 * @return
 	 */
 	public Integer getInteger(String aArg, Integer aDefault) {
-		Object lObj = items.get(aArg);
+		Object lObj = mItems.get(aArg);
 		Integer lResult = aDefault;
 		if (lObj != null) {
 			if (lObj instanceof Integer) {
@@ -129,7 +130,7 @@ public class Token {
 	 * @return
 	 */
 	public String getType() {
-		return (String) items.get("type");
+		return (String) mItems.get("type");
 	}
 
 	/**
@@ -137,7 +138,7 @@ public class Token {
 	 * @param aType
 	 */
 	public void setType(String aType) {
-		items.put("type", aType);
+		mItems.put("type", aType);
 	}
 
 	/**
@@ -147,7 +148,7 @@ public class Token {
 	 * @return the namespace.
 	 */
 	public String getNS() {
-		return (String) items.get("ns");
+		return (String) mItems.get("ns");
 	}
 
 	/**
@@ -157,14 +158,14 @@ public class Token {
 	 * @param aNS the namespace to be set for the token.
 	 */
 	public void setNS(String aNS) {
-		items.put("ns", aNS);
+		mItems.put("ns", aNS);
 	}
 
 	public String toString() {
 		String lRes = "{";
-		for (Iterator i = items.keySet().iterator(); i.hasNext();) {
+		for (Iterator i = mItems.keySet().iterator(); i.hasNext();) {
 			String lKey = (String) i.next();
-			lRes += lKey + "=" + items.get(lKey) + (i.hasNext() ? "," : "");
+			lRes += lKey + "=" + mItems.get(lKey) + (i.hasNext() ? "," : "");
 		}
 		return lRes + "}";
 	}

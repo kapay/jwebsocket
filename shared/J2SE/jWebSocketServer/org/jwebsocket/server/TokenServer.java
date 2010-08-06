@@ -28,7 +28,6 @@ import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketServerListener;
 import org.jwebsocket.config.JWebSocketCommonConstants;
-import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.filter.TokenFilterChain;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
@@ -47,12 +46,12 @@ import org.jwebsocket.packetProcessors.XMLProcessor;
  */
 public class TokenServer extends BaseServer {
 
-	private static Logger log = Logging.getLogger(TokenServer.class);
+	private static Logger mLog = Logging.getLogger(TokenServer.class);
 	// specify name space for token server
 	private static final String NS_TOKENSERVER = JWebSocketServerConstants.NS_BASE + ".tokenserver";
 	// specify shared connector variables
 	public static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
-	private volatile boolean isAlive = false;
+	private volatile boolean mIsAlive = false;
 
 	/**
 	 *
@@ -67,9 +66,10 @@ public class TokenServer extends BaseServer {
 	@Override
 	public void startServer()
 			throws WebSocketException {
-		isAlive = true;
-		if (log.isInfoEnabled()) {
-			log.info("Token server '" + getId() + "' started.");
+
+		mIsAlive = true;
+		if (mLog.isInfoEnabled()) {
+			mLog.info("Token server '" + getId() + "' started.");
 		}
 	}
 
@@ -77,20 +77,21 @@ public class TokenServer extends BaseServer {
 	public boolean isAlive() {
 		// nothing special to do here.
 		// Token server does not contain any thread or similar.
-		return isAlive;
+		return mIsAlive;
 	}
 
 	@Override
 	public void stopServer()
 			throws WebSocketException {
-		isAlive = false;
-		if (log.isInfoEnabled()) {
-			log.info("Token server '" + getId() + "' stopped.");
+
+		mIsAlive = false;
+		if (mLog.isInfoEnabled()) {
+			mLog.info("Token server '" + getId() + "' stopped.");
 		}
 	}
 
 	/**
-	 * removes a plugin from the plugin chain of the server.
+	 * removes a plug-in from the plug-in chain of the server.
 	 * @param aPlugIn
 	 */
 	public void removePlugIn(WebSocketPlugIn aPlugIn) {
@@ -99,16 +100,16 @@ public class TokenServer extends BaseServer {
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing engine '" + aEngine.getId() + "' started...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing engine '" + aEngine.getId() + "' started...");
 		}
 		plugInChain.engineStarted(aEngine);
 	}
 
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing engine '" + aEngine.getId() + "' stopped...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing engine '" + aEngine.getId() + "' stopped...");
 		}
 		plugInChain.engineStopped(aEngine);
 	}
@@ -126,8 +127,8 @@ public class TokenServer extends BaseServer {
 
 			aConnector.setBoolean(VAR_IS_TOKENSERVER, true);
 
-			if (log.isDebugEnabled()) {
-				log.debug("Processing connector '" + aConnector.getId() + "' started...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Processing connector '" + aConnector.getId() + "' started...");
 			}
 			// notify plugins that a connector has started,
 			// i.e. a client was sconnected.
@@ -141,8 +142,8 @@ public class TokenServer extends BaseServer {
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
-			if (log.isDebugEnabled()) {
-				log.debug("Processing connector '" + aConnector.getId() + "' stopped...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Processing connector '" + aConnector.getId() + "' stopped...");
 			}
 			plugInChain.connectorStopped(aConnector, aCloseReason);
 		}
@@ -215,8 +216,8 @@ public class TokenServer extends BaseServer {
 				boolean lRunReqInOwnThread = "true".equals(lToken.getString("spawnThread"));
 				// TODO: create list of running threads and close all properly on shutdown
 				if (lRunReqInOwnThread) {
-					if (log.isDebugEnabled()) {
-						log.debug("Processing threaded token '" + lToken.toString() + "' from '" + aConnector + "'...");
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("Processing threaded token '" + lToken.toString() + "' from '" + aConnector + "'...");
 					}
 					new Thread(new Runnable() {
 
@@ -226,8 +227,8 @@ public class TokenServer extends BaseServer {
 						}
 					}).start();
 				} else {
-					if (log.isDebugEnabled()) {
-						log.debug("Processing token '" + lToken.toString() + "' from '" + aConnector + "'...");
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("Processing token '" + lToken.toString() + "' from '" + aConnector + "'...");
 					}
 					processToken(aConnector, lToken);
 				}
@@ -250,7 +251,7 @@ public class TokenServer extends BaseServer {
 				}
 				 */
 			} else {
-				log.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
+				mLog.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
 			}
 		}
 		super.processPacket(aEngine, aConnector, aDataPacket);
@@ -269,18 +270,18 @@ public class TokenServer extends BaseServer {
 			// only forward the token to the plug-in chain
 			// if filter chain does not response "aborted"
 			if (!filterResponse.isRejected()) {
-				if (log.isDebugEnabled()) {
-					log.debug("Sending token '" + aToken + "' to '" + aTarget + "'...");
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Sending token '" + aToken + "' to '" + aTarget + "'...");
 				}
 				WebSocketPacket aPacket = tokenToPacket(aTarget, aToken);
 				super.sendPacket(aTarget, aPacket);
 			} else {
-				if (log.isDebugEnabled()) {
-					log.debug("");
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("");
 				}
 			}
 		} else {
-			log.warn("Connector not supposed to handle tokens.");
+			mLog.warn("Connector not supposed to handle tokens.");
 		}
 	}
 
@@ -307,15 +308,15 @@ public class TokenServer extends BaseServer {
 				// before sending the token push it through filter chain
 				FilterResponse filterResponse = getFilterChain().processTokenOut(null, lTargetConnector, aToken);
 
-				if (log.isDebugEnabled()) {
-					log.debug("Sending token '" + aToken + "' to '" + lTargetConnector + "'...");
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Sending token '" + aToken + "' to '" + lTargetConnector + "'...");
 				}
 				super.sendPacket(lTargetConnector, tokenToPacket(lTargetConnector, aToken));
 			} else {
-				log.warn("Connector not supposed to handle tokens.");
+				mLog.warn("Connector not supposed to handle tokens.");
 			}
 		} else {
-			log.warn("Target connector '" + aConnectorId + "' not found.");
+			mLog.warn("Target connector '" + aConnectorId + "' not found.");
 		}
 	}
 
@@ -330,8 +331,8 @@ public class TokenServer extends BaseServer {
 	 */
 	public void broadcastToken(WebSocketConnector aSource, Token aToken,
 			BroadcastOptions aBroadcastOptions) {
-		if (log.isDebugEnabled()) {
-			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		}
 
 		// before sending the token push it through filter chain
@@ -354,8 +355,8 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 */
 	public void broadcastToken(WebSocketConnector aSource, Token aToken) {
-		if (log.isDebugEnabled()) {
-			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		}
 
 		// before sending the token push it through filter chain
@@ -377,8 +378,8 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 */
 	public void broadcastToken(Token aToken) {
-		if (log.isDebugEnabled()) {
-			log.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Broadcasting token '" + aToken + " to all token based connectors...");
 		}
 
 		// before sending the token push it through filter chain
@@ -455,5 +456,4 @@ public class TokenServer extends BaseServer {
 	public TokenFilterChain getFilterChain() {
 		return (TokenFilterChain) filterChain;
 	}
-
 }

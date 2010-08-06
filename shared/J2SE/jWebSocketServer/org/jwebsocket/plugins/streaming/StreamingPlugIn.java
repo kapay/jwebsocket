@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.streaming;
 
+import java.util.Map;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
@@ -38,7 +39,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(StreamingPlugIn.class);
 	private String NS_STREAMING_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.streaming";
-	private FastMap<String, BaseStream> streams = new FastMap<String, BaseStream>();
+	private Map<String, BaseStream> streams = new FastMap<String, BaseStream>();
 	private boolean streamsInitialized = false;
 	private TimeStream lTimeStream = null;
 	private MonitorStream lMonitorStream = null;
@@ -46,7 +47,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 
 	/**
 	 * create a new instance of the streaming plug-in and set the default
-	 * namespace for the plug-in.
+	 * name space for the plug-in.
 	 */
 	public StreamingPlugIn() {
 		if (log.isDebugEnabled()) {
@@ -85,17 +86,21 @@ public class StreamingPlugIn extends TokenPlugIn {
 			}
 			TokenServer lTokenServer = getServer();
 			if (lTokenServer != null) {
-				// create the stream for the time stream demo
+				// stop the stream for the time stream demo
 				if (lTimeStream != null) {
 					lTimeStream.stopStream(3000);
 				}
-				// create the stream for the monitor stream demo
-				// create the stream for the time stream demo
+				// stop the stream for the monitor stream demo
 				if (lMonitorStream != null) {
 					lMonitorStream.stopStream(3000);
 				}
+				// stop the stream for the stress stream demo
+				if (lStressStream != null) {
+					lStressStream.stopStream(3000);
+				}
 				lTimeStream = null;
 				lMonitorStream = null;
+				lStressStream = null;
 				streamsInitialized = false;
 			}
 		}

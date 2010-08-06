@@ -16,6 +16,7 @@
 package org.jwebsocket.client.java;
 
 import j2me.util.Iterator;
+import j2me.util.List;
 import javolution.util.FastList;
 import org.jwebsocket.api.WebSocketClient;
 import org.jwebsocket.api.WebSocketClientListener;
@@ -28,7 +29,7 @@ import org.jwebsocket.listener.WebSocketClientEvent;
  */
 public abstract class BaseClient implements WebSocketClient {
 
-	private FastList listeners = new FastList();
+	private List mListeners = new FastList();
 
 	/*
 	 * The connection has not yet been established.
@@ -53,17 +54,17 @@ public abstract class BaseClient implements WebSocketClient {
 
 	// @Override
 	public void addListener(WebSocketClientListener aListener) {
-		listeners.add(aListener);
+		mListeners.add(aListener);
 	}
 
 	// @Override
 	public void removeListener(WebSocketClientListener aListener) {
-		listeners.remove(aListener);
+		mListeners.remove(aListener);
 	}
 
 	// @Override
-	public FastList getListeners() {
-		return listeners;
+	public List getListeners() {
+		return mListeners;
 	}
 
 	// @Override

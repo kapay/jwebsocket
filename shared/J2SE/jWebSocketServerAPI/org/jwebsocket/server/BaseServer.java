@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.server;
 
+import java.util.List;
 import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -42,11 +43,11 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class BaseServer implements WebSocketServer {
 
-	private FastMap<String, WebSocketEngine> engines = null;
-	private String id = null;
+	private Map<String, WebSocketEngine> mEngines = null;
+	private String mId = null;
 	protected WebSocketPlugInChain plugInChain = null;
 	protected WebSocketFilterChain filterChain = null;
-	private FastList<WebSocketServerListener> listeners = new FastList<WebSocketServerListener>();
+	private List<WebSocketServerListener> mListeners = new FastList<WebSocketServerListener>();
 
 	/**
 	 * Create a new instance of the Base Server. Each BaseServer maintains a
@@ -55,8 +56,8 @@ public class BaseServer implements WebSocketServer {
 	 * @param aId Id for the new server.
 	 */
 	public BaseServer(ServerConfiguration aServerConfig) {
-		id = aServerConfig.getId();
-		engines = new FastMap<String, WebSocketEngine>();
+		mId = aServerConfig.getId();
+		mEngines = new FastMap<String, WebSocketEngine>();
 	}
 
 	@Override
@@ -64,7 +65,7 @@ public class BaseServer implements WebSocketServer {
 	 * {@inheritDoc }
 	 */
 	public void addEngine(WebSocketEngine aEngine) {
-		engines.put(aEngine.getId(), aEngine);
+		mEngines.put(aEngine.getId(), aEngine);
 		aEngine.addServer(this);
 	}
 
@@ -73,7 +74,7 @@ public class BaseServer implements WebSocketServer {
 	 * {@inheritDoc }
 	 */
 	public void removeEngine(WebSocketEngine aEngine) {
-		engines.remove(aEngine.getId());
+		mEngines.remove(aEngine.getId());
 		aEngine.removeServer(this);
 	}
 
@@ -133,7 +134,7 @@ public class BaseServer implements WebSocketServer {
 		// e.g. to notify the overlying appplications or plug-ins
 		// about the connectorStarted event
 		WebSocketServerEvent lEvent = new WebSocketServerEvent(aConnector, this);
-		for (WebSocketServerListener lListener : listeners) {
+		for (WebSocketServerListener lListener : mListeners) {
 			if (lListener != null) {
 				lListener.processOpened(lEvent);
 			}
@@ -149,7 +150,7 @@ public class BaseServer implements WebSocketServer {
 		// e.g. to notify the overlying appplications or plug-ins
 		// about the connectorStopped event
 		WebSocketServerEvent lEvent = new WebSocketServerEvent(aConnector, this);
-		for (WebSocketServerListener lListener : listeners) {
+		for (WebSocketServerListener lListener : mListeners) {
 			if (lListener != null) {
 				lListener.processClosed(lEvent);
 			}
@@ -197,9 +198,9 @@ public class BaseServer implements WebSocketServer {
 	 * id which is used as key in the FastMap.
 	 * @return FastMap with the underlying engines.
 	 */
-	public FastMap<String, WebSocketEngine> getEngines() {
+	public Map<String, WebSocketEngine> getEngines() {
 		// return (engines != null ? (FastMap)(engines.unmodifiable()) : null);
-		return (engines != null ? engines : null);
+		return (mEngines != null ? mEngines : null);
 	}
 
 	/**
@@ -224,7 +225,7 @@ public class BaseServer implements WebSocketServer {
 	@Override
 	public Map<String, WebSocketConnector> getAllConnectors() {
 		Map<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
-		for (WebSocketEngine lEngine : engines.values()) {
+		for (WebSocketEngine lEngine : mEngines.values()) {
 			lClients.putAll(lEngine.getConnectors());
 		}
 		return lClients;
@@ -244,7 +245,7 @@ public class BaseServer implements WebSocketServer {
 	@Override
 	public Map<String, WebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
 		Map<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
-		for (WebSocketEngine lEngine : engines.values()) {
+		for (WebSocketEngine lEngine : mEngines.values()) {
 			for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
 				boolean lMatch = true;
 				for (String lKey : aFilter.keySet()) {
@@ -282,7 +283,7 @@ public class BaseServer implements WebSocketServer {
 	 */
 	@Override
 	public WebSocketConnector getConnector(String aId) {
-		for (WebSocketEngine lEngine : engines.values()) {
+		for (WebSocketEngine lEngine : mEngines.values()) {
 			WebSocketConnector lConnector = lEngine.getConnectors().get(aId);
 			if (lConnector != null) {
 				return lConnector;
@@ -298,9 +299,10 @@ public class BaseServer implements WebSocketServer {
 	 * @param aId id of the connector to be returned.
 	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
 	 */
+	@Override
 	public WebSocketConnector getNode(String aNodeId) {
 		if (aNodeId != null) {
-			for (WebSocketEngine lEngine : engines.values()) {
+			for (WebSocketEngine lEngine : mEngines.values()) {
 				for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
 					if (aNodeId.equals(lConnector.getString(BaseConnector.VAR_NODEID))) {
 						return lConnector;
@@ -321,7 +323,7 @@ public class BaseServer implements WebSocketServer {
 	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
 	 */
 	public WebSocketConnector getConnector(String aEngine, String aId) {
-		WebSocketEngine lEngine = engines.get(aEngine);
+		WebSocketEngine lEngine = mEngines.get(aEngine);
 		if (lEngine != null) {
 			return lEngine.getConnectors().get(aId);
 		}
@@ -351,7 +353,7 @@ public class BaseServer implements WebSocketServer {
 	 */
 	@Override
 	public String getId() {
-		return id;
+		return mId;
 
 	}
 
@@ -367,20 +369,20 @@ public class BaseServer implements WebSocketServer {
 
 	@Override
 	public void addListener(WebSocketServerListener aListener) {
-		listeners.add(aListener);
+		mListeners.add(aListener);
 	}
 
 	@Override
 	public void removeListener(WebSocketServerListener aListener) {
-		listeners.remove(aListener);
+		mListeners.remove(aListener);
 	}
 
 	/**
 	 * @return the listeners
 	 */
 	@Override
-	public FastList<WebSocketServerListener> getListeners() {
-		return listeners;
+	public List<WebSocketServerListener> getListeners() {
+		return mListeners;
 	}
 
 	/**
