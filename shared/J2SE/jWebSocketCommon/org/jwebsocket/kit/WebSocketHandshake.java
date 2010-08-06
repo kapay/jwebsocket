@@ -36,22 +36,22 @@ public final class WebSocketHandshake {
 
     public static int MAX_HEADER_SIZE = 16834;
 
-    private String key1 = null;
-    private String key2 = null;
-    private byte[] key3 = null;
-    private byte[] expectedServerResponse = null;
+    private String mKey1 = null;
+    private String mKey2 = null;
+    private byte[] mKey3 = null;
+    private byte[] mExpectedServerResponse = null;
 
-    private URI url = null;
-    private String origin = null;
-    private String protocol = null;
+    private URI mURL = null;
+    private String mOrigin = null;
+    private String mProtocol = null;
 
-    public WebSocketHandshake(URI url) {
-        this(url, null);
+    public WebSocketHandshake(URI aURL) {
+        this(aURL, null);
     }
 
-    public WebSocketHandshake(URI url, String protocol) {
-        this.url = url;
-        this.protocol = null;
+    public WebSocketHandshake(URI aURL, String aProtocol) {
+        this.mURL = aURL;
+        this.mProtocol = null;
         generateKeys();
     }
 
@@ -64,11 +64,11 @@ public final class WebSocketHandshake {
      * @return
      */
     // public static byte[] generateC2SRequest(URI aURI) {
-    public static byte[] generateC2SRequest(String lHost, String lPath) {
+    public static byte[] generateC2SRequest(String aHost, String aPath) {
         // String lPath = aURI.getPath();
         // String lHost = aURI.getHost();
-        String lOrigin = "http://" + lHost;
-        String lHandshake = "GET " + lPath + " HTTP/1.1\r\n" + "Upgrade: WebSocket\r\n" + "Connection: Upgrade\r\n" + "Host: " + lHost + "\r\n" + "Origin: " + lOrigin + "\r\n" + "\r\n";
+        String lOrigin = "http://" + aHost;
+        String lHandshake = "GET " + aPath + " HTTP/1.1\r\n" + "Upgrade: WebSocket\r\n" + "Connection: Upgrade\r\n" + "Host: " + aHost + "\r\n" + "Origin: " + lOrigin + "\r\n" + "\r\n";
         byte[] lBA = null;
         try {
             lBA = lHandshake.getBytes("US-ASCII");
@@ -108,10 +108,10 @@ public final class WebSocketHandshake {
      * irrespective of if it is a Java Client or Browser Client - initiates a
      * connection.
      * 
-     * @param aResp
+     * @param aReq
      * @return
      */
-    public static FastMap parseC2SRequest(byte[] aResp) {
+    public static Map parseC2SRequest(byte[] aReq) {
         String lHost = null;
         String lOrigin = null;
         String lLocation = null;
@@ -124,47 +124,47 @@ public final class WebSocketHandshake {
         Long lSecNum2 = null;
         byte[] lSecKeyResp = new byte[8];
 
-        FastMap lRes = new FastMap();
+        Map lRes = new FastMap();
 
-        int lRespLen = aResp.length;
-        String lResp = "";
+        int lReqLen = aReq.length;
+        String lRequest = "";
         try {
-            lResp = new String(aResp, "US-ASCII");
+            lRequest = new String(aReq, "US-ASCII");
         } catch (Exception ex) {
             // TODO: add exception handling
         }
 
-        if (lResp.indexOf("policy-file-request") >= 0) { // "<policy-file-request/>"
-            lRes.put("policy-file-request", lResp);
+        if (lRequest.indexOf("policy-file-request") >= 0) { // "<policy-file-request/>"
+            lRes.put("policy-file-request", lRequest);
             return lRes;
         }
 
-        lIsSecure = (lResp.indexOf("Sec-WebSocket") > 0);
+        lIsSecure = (lRequest.indexOf("Sec-WebSocket") > 0);
 
         if (lIsSecure) {
-            lRespLen -= 8;
+            lReqLen -= 8;
             for (int i = 0; i < 8; i++) {
-                lSecKey3[i] = aResp[lRespLen + i];
+                lSecKey3[i] = aReq[lReqLen + i];
             }
         }
 
         // now parse header for correct handshake....
         // get host....
-        int lPos = lResp.indexOf("Host:");
+        int lPos = lRequest.indexOf("Host:");
         lPos += 6;
-        lHost = lResp.substring(lPos);
+        lHost = lRequest.substring(lPos);
         lPos = lHost.indexOf("\r\n");
         lHost = lHost.substring(0, lPos);
         // get origin....
-        lPos = lResp.indexOf("Origin:");
+        lPos = lRequest.indexOf("Origin:");
         lPos += 8;
-        lOrigin = lResp.substring(lPos);
+        lOrigin = lRequest.substring(lPos);
         lPos = lOrigin.indexOf("\r\n");
         lOrigin = lOrigin.substring(0, lPos);
         // get path....
-        lPos = lResp.indexOf("GET");
+        lPos = lRequest.indexOf("GET");
         lPos += 4;
-        lPath = lResp.substring(lPos);
+        lPath = lRequest.substring(lPos);
         lPos = lPath.indexOf("HTTP");
         lPath = lPath.substring(0, lPos - 1);
 
@@ -188,19 +188,21 @@ public final class WebSocketHandshake {
          * number (155712099 and 173347027). These two resulting numbers are
          * then used in the server handshake, as described below.
          */
-        lPos = lResp.indexOf("Sec-WebSocket-Key1:");
+
+        lPos = lRequest.indexOf("Sec-WebSocket-Key1:");
         if (lPos > 0) {
             lPos += 20;
-            lSecKey1 = lResp.substring(lPos);
+            lSecKey1 = lRequest.substring(lPos);
             lPos = lSecKey1.indexOf("\r\n");
             lSecKey1 = lSecKey1.substring(0, lPos);
             lSecNum1 = calcSecKeyNum(lSecKey1);
             // log.debug("Sec-WebSocket-Key1:" + secKey1 + " => " + secNum1);
         }
-        lPos = lResp.indexOf("Sec-WebSocket-Key2:");
+
+        lPos = lRequest.indexOf("Sec-WebSocket-Key2:");
         if (lPos > 0) {
             lPos += 20;
-            lSecKey2 = lResp.substring(lPos);
+            lSecKey2 = lRequest.substring(lPos);
             lPos = lSecKey2.indexOf("\r\n");
             lSecKey2 = lSecKey2.substring(0, lPos);
             lSecNum2 = calcSecKeyNum(lSecKey2);
@@ -225,27 +227,37 @@ public final class WebSocketHandshake {
             BigInteger sec1 = new BigInteger(lSecNum1.toString());
             BigInteger sec2 = new BigInteger(lSecNum2.toString());
 
-            // concatenate 3 parts secNum1 + secNum2 + secKey
+            // concatenate 3 parts secNum1 + secNum2 + secKey (16 Bytes)
             byte[] l128Bit = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             byte[] lTmp;
             int lOfs;
 
             lTmp = sec1.toByteArray();
-            lOfs = 4 - lTmp.length;
-            // TODO: replace by arraycopy
-            for (int i = 0; i < lTmp.length; i++) {
-                l128Bit[i + lOfs] = lTmp[i];
+			int lIdx = lTmp.length;
+			int lCnt = 0;
+			while(lIdx > 0 && lCnt < 4) {
+				lIdx--;
+				lCnt++;
+                l128Bit[4 - lCnt] = lTmp[lIdx];
             }
+
             lTmp = sec2.toByteArray();
-            lOfs = 4 - lTmp.length;
-            for (int i = 0; i < lTmp.length; i++) {
-                l128Bit[i + 4 + lOfs] = lTmp[i];
+			lIdx = lTmp.length;
+			lCnt = 0;
+			while(lIdx > 0 && lCnt < 4) {
+				lIdx--;
+				lCnt++;
+                l128Bit[8 - lCnt] = lTmp[lIdx];
             }
+
             lTmp = lSecKey3;
+			System.arraycopy(lSecKey3, 0, l128Bit, 8, 8);
+/*
             // TODO: replace by arraycopy
             for (int i = 0; i < 8; i++) {
                 l128Bit[i + 8] = lTmp[i];
             }
+ */
             // build md5 sum of this new 128 byte string
             try {
                 MessageDigest md = MessageDigest.getInstance("MD5");
@@ -373,29 +385,29 @@ public final class WebSocketHandshake {
     }
 
     public byte[] getHandshake() {
-        String path = url.getPath();
-        String host = url.getHost();
-        origin = "http://" + host;
+        String path = mURL.getPath();
+        String host = mURL.getHost();
+        mOrigin = "http://" + host;
         if ("".equals(path)) {
             path = "/";
         }
-        String handshake = "GET " + path + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: Upgrade\r\n" + "Sec-WebSocket-Key2: " + key2 + "\r\n";
+        String handshake = "GET " + path + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: Upgrade\r\n" + "Sec-WebSocket-Key2: " + mKey2 + "\r\n";
 
-        if (protocol != null) {
-            handshake += "Sec-WebSocket-Protocol: " + protocol + "\r\n";
+        if (mProtocol != null) {
+            handshake += "Sec-WebSocket-Protocol: " + mProtocol + "\r\n";
         }
 
-        handshake += "Upgrade: WebSocket\r\n" + "Sec-WebSocket-Key1: " + key1 + "\r\n" + "Origin: " + origin + "\r\n" + "\r\n";
+        handshake += "Upgrade: WebSocket\r\n" + "Sec-WebSocket-Key1: " + mKey1 + "\r\n" + "Origin: " + mOrigin + "\r\n" + "\r\n";
 
         byte[] handshakeBytes = new byte[handshake.getBytes().length + 8];
         System.arraycopy(handshake.getBytes(), 0, handshakeBytes, 0, handshake.getBytes().length);
-        System.arraycopy(key3, 0, handshakeBytes, handshake.getBytes().length, 8);
+        System.arraycopy(mKey3, 0, handshakeBytes, handshake.getBytes().length, 8);
 
         return handshakeBytes;
     }
 
     public void verifyServerResponse(byte[] bytes) throws WebSocketException {
-        if (!Arrays.equals(bytes, expectedServerResponse)) {
+        if (!Arrays.equals(bytes, mExpectedServerResponse)) {
             throw new WebSocketException("not a WebSocket Server");
         }
     }
@@ -417,7 +429,7 @@ public final class WebSocketHandshake {
             throw new WebSocketException("connection failed: missing header field in server handshake: Upgrade");
         } else if (!headers.get("Connection").equals("Upgrade")) {
             throw new WebSocketException("connection failed: missing header field in server handshake: Connection");
-        } else if (!headers.get("Sec-WebSocket-Origin").equals(origin)) {
+        } else if (!headers.get("Sec-WebSocket-Origin").equals(mOrigin)) {
             throw new WebSocketException("connection failed: missing header field in server handshake: Sec-WebSocket-Origin");
         }
     }
@@ -436,16 +448,16 @@ public final class WebSocketHandshake {
         int product1 = number1 * spaces1;
         int product2 = number2 * spaces2;
 
-        key1 = Integer.toString(product1);
-        key2 = Integer.toString(product2);
+        mKey1 = Integer.toString(product1);
+        mKey2 = Integer.toString(product2);
 
-        key1 = insertRandomCharacters(key1);
-        key2 = insertRandomCharacters(key2);
+        mKey1 = insertRandomCharacters(mKey1);
+        mKey2 = insertRandomCharacters(mKey2);
 
-        key1 = insertSpaces(key1, spaces1);
-        key2 = insertSpaces(key2, spaces2);
+        mKey1 = insertSpaces(mKey1, spaces1);
+        mKey2 = insertSpaces(mKey2, spaces2);
 
-        key3 = createRandomBytes();
+        mKey3 = createRandomBytes();
 
         ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.putInt(number1);
@@ -457,9 +469,9 @@ public final class WebSocketHandshake {
         byte[] challenge = new byte[16];
         System.arraycopy(number1Array, 0, challenge, 0, 4);
         System.arraycopy(number2Array, 0, challenge, 4, 4);
-        System.arraycopy(key3, 0, challenge, 8, 8);
+        System.arraycopy(mKey3, 0, challenge, 8, 8);
 
-        expectedServerResponse = md5(challenge);
+        mExpectedServerResponse = md5(challenge);
     }
 
     private String insertRandomCharacters(String key) {

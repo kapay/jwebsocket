@@ -19,8 +19,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javolution.util.FastList;
+import javolution.util.FastMap;
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.instance.JWebSocketInstance;
@@ -117,13 +117,11 @@ public class AdminPlugIn extends TokenPlugIn {
 
 		Token lResponse = lServer.createResponse(aToken);
 		try {
-			// TODO: Is using JSON objects correct here? Shouldn't we use normal maps to be independent of format? I.e. build normal token?
-			List<JSONObject> lResultList = new FastList<JSONObject>();
+			List<Map> lResultList = new FastList<Map>();
 			Map lConnectorMap = lServer.getAllConnectors();
 			Collection<WebSocketConnector> lConnectors = lConnectorMap.values();
 			for (WebSocketConnector lConnector : lConnectors) {
-				// TODO: should work for for (sub-)tokens as well!
-				JSONObject lResultItem = new JSONObject();
+				Map lResultItem = new FastMap<String,Object>();
 				lResultItem.put("port", lConnector.getRemotePort());
 				lResultItem.put("usid", lConnector.getSession().getSessionId());
 				lResultItem.put("username", lConnector.getUsername());

@@ -20,9 +20,11 @@
 package org.jwebsocket.plugins.jdbc;
 
 import java.sql.ResultSet;
+import java.util.List;
+import java.util.Map;
+import javolution.util.FastList;
+import javolution.util.FastMap;
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
@@ -38,7 +40,7 @@ import org.jwebsocket.token.Token;
  */
 public class JDBCPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logging.getLogger(JDBCPlugIn.class);
+	private static Logger mLog = Logging.getLogger(JDBCPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
 
@@ -46,8 +48,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 *
 	 */
 	public JDBCPlugIn() {
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating jdbc plug-in...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating JDBC plug-in...");
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_JDBC);
@@ -66,17 +68,17 @@ public class JDBCPlugIn extends TokenPlugIn {
 		}
 	}
 
-	public JSONArray getResultColumns(ResultSet aResultSet, int aColCount) {
+	public List getResultColumns(ResultSet aResultSet, int aColCount) {
 		// String blobStr = null;
 
 		// TODO: should work with usual arrays!
-		JSONArray lDataRow = new JSONArray();
+		List lDataRow = new FastList();
 		Object lObj = null;
 
 		try {
 			for (int i = 1; i <= aColCount; i++) {
 				lObj = aResultSet.getObject(i);
-				lDataRow.put(lObj);
+				lDataRow.add(lObj);
 				/*
 				if (obj == null) {
 				// nothing todo
@@ -120,8 +122,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 	public void select(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'select'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'select'...");
 		}
 
 		// check if user is allowed to run 'select' command
@@ -157,8 +159,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 		// Object[] lColumns = null;
 		int lRowCount = 0;
 		int lColCount = 0;
-		JSONArray lColumns = new JSONArray();
-		JSONArray lData = new JSONArray();
+		List<Map> lColumns = new FastList<Map>();
+		List lData = new FastList<Map>();
 		try {
 			DBQueryResult lRes = DBConnectSingleton.querySQL(DBConnectSingleton.USR_SYSTEM, lSQL);
 
@@ -174,23 +176,21 @@ public class JDBCPlugIn extends TokenPlugIn {
 				// convert to json type
 				String lRIAType = JDBCTools.getJSONType(lSimpleClass, lRes.metaData);
 
-				// TODO: should work with usual (sub-)tokens as well!
-				JSONObject lColHeader = new JSONObject();
+				Map lColHeader = new FastMap<String, Object>();
 				lColHeader.put("name", lRes.metaData.getColumnName(i));
 				lColHeader.put("jsontype", lRIAType);
 				lColHeader.put("jdbctype", lRes.metaData.getColumnTypeName(i));
 
-				lColumns.put(lColHeader);
-				// lColumns[i] = lColHeader;
+				lColumns.add(lColHeader);
 			}
 
 			// generate the result data
 			while (lRes.resultSet.next()) {
-				lData.put(getResultColumns(lRes.resultSet, lColCount));
+				lData.add(getResultColumns(lRes.resultSet, lColCount));
 				lRowCount++;
 			}
 		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + " on query: " + ex.getMessage());
+			mLog.error(ex.getClass().getSimpleName() + " on query: " + ex.getMessage());
 		}
 
 		// complete the response token

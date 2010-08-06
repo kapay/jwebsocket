@@ -32,7 +32,7 @@ import org.jwebsocket.token.Token;
  */
 public class SamplePlugIn extends TokenPlugIn {
 
-	private static Logger log = Logging.getLogger(SamplePlugIn.class);
+	private static Logger mLog = Logging.getLogger(SamplePlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private final static String NS_SAMPLE = JWebSocketServerConstants.NS_BASE + ".plugins.samples";
 	private final static String SAMPLE_VAR = NS_SAMPLE + ".started";
@@ -41,8 +41,8 @@ public class SamplePlugIn extends TokenPlugIn {
 	 *
 	 */
 	public SamplePlugIn() {
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating sample plug-in...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating sample plug-in...");
 		}
 		// specify default name space for sample plugin
 		this.setNamespace(NS_SAMPLE);

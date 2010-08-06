@@ -160,11 +160,11 @@ public class TCPEngine extends BaseEngine {
 			long lDuration = new Date().getTime() - lStarted;
 			int lRemConns = getConnectors().size();
 			if (lRemConns > 0) {
-				mLog.warn(lRemConns + " of " + lNumConns 
+				mLog.warn(lRemConns + " of " + lNumConns
 						+ " TCP connectors '" + getId()
 						+ "' did not stop after " + lDuration + "ms.");
 			} else {
-				mLog.debug(lNumConns 
+				mLog.debug(lNumConns
 						+ " TCP connectors '" + getId()
 						+ "' stopped after " + lDuration + "ms.");
 			}
@@ -196,18 +196,23 @@ public class TCPEngine extends BaseEngine {
 		// TODO: Replace this structure by more dynamic ByteArrayOutputStream?
 		byte[] lBuff = new byte[8192];
 		int lRead = lIn.read(lBuff);
-		byte[] lResp = new byte[lRead];
-		System.arraycopy(lBuff, 0, lResp, 0, lRead);
+		if (lRead <= 0) {
+			mLog.warn("Connection did not detect initial handshake.");
+			return null;
+		}
+		byte[] lReq = new byte[lRead];
+		System.arraycopy(lBuff, 0, lReq, 0, lRead);
 
-		//if (log.isDebugEnabled()) {
-		//    log.debug("Handshake Request:\n" + new String(lResp));
+		//if (mLog.isDebugEnabled()) {
+		//    mLog.debug("Handshake Request:\n" + new String(lResp));
+		//    mLog.debug("Parsing initial WebSocket handshake...");
 		//}
-
-		FastMap lRespMap = WebSocketHandshake.parseC2SRequest(lResp);
+		Map lRespMap = WebSocketHandshake.parseC2SRequest(lReq);
 		// maybe the request is a flash policy-file-request
 		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
 		if (lFlashBridgeReq != null) {
-			mLog.warn("TCPEngine returned policy file request ('" + lFlashBridgeReq + "'), check for FlashBridge plug-in.");
+			mLog.warn("TCPEngine returned policy file request ('"
+					+ lFlashBridgeReq + "'), check for FlashBridge plug-in.");
 		}
 		// generate the websocket handshake
 		// if policy-file-request is found answer it
@@ -219,7 +224,8 @@ public class TCPEngine extends BaseEngine {
 			return null;
 		}
 		//if (log.isDebugEnabled()) {
-		//    log.debug("Handshake Response:\n" + new String(lResp));
+		//	log.debug("Handshake Response:\n" + new String(lResp));
+		//	mLog.debug("Flushing initial WebSocket handshake...");
 		//}
 		lOut.write(lBA);
 		lOut.flush();

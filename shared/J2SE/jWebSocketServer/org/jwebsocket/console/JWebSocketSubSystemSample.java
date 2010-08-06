@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.console;
 
+import java.util.List;
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
@@ -39,9 +40,9 @@ import org.jwebsocket.tcp.engines.TCPEngine;
  */
 public class JWebSocketSubSystemSample {
 
-	private static Logger log = null;
-	private TokenServer server = null;
-	private TCPEngine engine = null;
+	private static Logger mLog = null;
+	private TokenServer mServer = null;
+	private TCPEngine mEngine = null;
 
 	/**
 	 */
@@ -52,20 +53,20 @@ public class JWebSocketSubSystemSample {
 		System.out.println(JWebSocketCommonConstants.LICENSE);
 
 		// initialize the logging system
-		LoggingConfig loggingConfig = new LoggingConfig(
+		LoggingConfig lLoggingConfig = new LoggingConfig(
 				"console", // target
 				"%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n", // pattern
 				"debug", // level
 				"jWebSocket.log", // file name, if logging to file only
 				4096 // bufferSize, if logging to file only
 				);
-		Logging.initLogs(loggingConfig, new String[]{"%JWEBSOCKET_HOME%/logs", "%CATALINA_HOME%/logs"});
-		log = Logging.getLogger(JWebSocketEmbedded.class);
+		Logging.initLogs(lLoggingConfig, new String[]{"%JWEBSOCKET_HOME%/logs", "%CATALINA_HOME%/logs"});
+		mLog = Logging.getLogger(JWebSocketEmbedded.class);
 
 		// initialize the engine
-		FastList lDomains = new FastList();
+		List lDomains = new FastList();
 		lDomains.add("http://jwebsocket.org");
-		EngineConfiguration engineConfig = new EngineConfig(
+		EngineConfiguration lEngineConfig = new EngineConfig(
 				"tcp0", // id
 				"org.jwebsocket.tcp.engines.TCPEngine", // name
 				"-", // jar, needs to be in classpath, i.e. embedded in .jar'/manifest
@@ -74,32 +75,30 @@ public class JWebSocketSubSystemSample {
 				JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE, // max framesize
 				lDomains // list of accepted domains
 				);
-		engine = new TCPEngine(engineConfig);
+		mEngine = new TCPEngine(lEngineConfig);
 
 		// if engine could be instantiated properly...
-		if (engine != null) {
+		if (mEngine != null) {
 			// initialize the server
-			ServerConfiguration serverConfig = new ServerConfig(
+			ServerConfiguration lServerConfig = new ServerConfig(
 					"ts0", // id
 					"org.jwebsocket.server.TokenServer", // name
 					"-" // jar, needs to be in classpath, i.e. embedded in .jar'/manifest
 					);
-			server = new TokenServer(serverConfig);
+			mServer = new TokenServer(lServerConfig);
 
 			// link server and engine
-			engine.addServer(server);
-			server.addEngine(engine);
+			mEngine.addServer(mServer);
+			mServer.addEngine(mEngine);
 
 			// add desired plug-ins
-			TokenPlugInChain plugInChain = server.getPlugInChain();
+			TokenPlugInChain lPlugInChain = mServer.getPlugInChain();
 			// the system plug-in is essential to process authentication
 			// send and broadcast
-			plugInChain.addPlugIn(new SystemPlugIn());
+			lPlugInChain.addPlugIn(new SystemPlugIn());
 			// the FlashBrigde plug-in is strongly recommended to also support
 			// non websocket compliant browsers
-			plugInChain.addPlugIn(new FlashBridgePlugIn());
-
-
+			lPlugInChain.addPlugIn(new FlashBridgePlugIn());
 
 		}
 	}
@@ -107,20 +106,21 @@ public class JWebSocketSubSystemSample {
 	public void start() {
 		// start the jWebsocket Server
 		try {
-			engine.startEngine();
+			mEngine.startEngine();
 		} catch (WebSocketException ex) {
-			log.error("Exception on starting jWebSocket engine: " + ex.getMessage());
+			mLog.error("Exception on starting jWebSocket engine: " + ex.getMessage());
 		}
 		try {
-			server.startServer();
+			mServer.startServer();
 		} catch (WebSocketException ex) {
-			log.error("Exception on starting jWebSocket server: " + ex.getMessage());
+			mLog.error("Exception on starting jWebSocket server: " + ex.getMessage());
 		}
 	}
 
 	public void run() {
 		// wait until engine has terminated (e.g. by "shutdown" command)
-		while (engine.isAlive()) {
+		// TODO: Use JWebSocketInstance getState here!
+		while (mEngine.isAlive()) {
 			try {
 				Thread.sleep(250);
 			} catch (InterruptedException ex) {
@@ -132,9 +132,9 @@ public class JWebSocketSubSystemSample {
 	public void stop() {
 		try {
 			// terminate all instances
-			engine.stopEngine(CloseReason.SERVER);
+			mEngine.stopEngine(CloseReason.SERVER);
 		} catch (WebSocketException ex) {
-			log.error("Exception on stopping jWebSocket subsystem: " + ex.getMessage());
+			mLog.error("Exception on stopping jWebSocket subsystem: " + ex.getMessage());
 		}
 	}
 
@@ -143,9 +143,9 @@ public class JWebSocketSubSystemSample {
 	 * @param aListener
 	 */
 	public void addListener(WebSocketServerListener aListener) {
-		if (aListener != null && server != null) {
+		if (aListener != null && mServer != null) {
 			// add listener to the server
-			server.addListener(aListener);
+			mServer.addListener(aListener);
 		}
 	}
 
@@ -154,9 +154,9 @@ public class JWebSocketSubSystemSample {
 	 * @param aListener
 	 */
 	public void removeListener(WebSocketServerListener aListener) {
-		if (aListener != null && server != null) {
+		if (aListener != null && mServer != null) {
 			// remove listener from the server
-			server.removeListener(aListener);
+			mServer.removeListener(aListener);
 		}
 	}
 }
