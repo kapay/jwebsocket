@@ -368,7 +368,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
         // Fill in the headers and contents depending on handshake method.
         if (req.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY1) && req.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY2)) {
             // New handshake method with a challenge:
-            res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
+            res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_ORIGIN, req.getHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN));
             res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_LOCATION, getWebSocketLocation(req));
             String protocol = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
             if (protocol != null) {
@@ -389,7 +389,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
             res.setContent(output);
         } else {
             // Old handshake method with no challenge:
-            res.addHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN, req.getHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN));
+            res.addHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
             res.addHeader(HttpHeaders.Names.WEBSOCKET_LOCATION, getWebSocketLocation(req));
             String protocol = req.getHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL);
             if (protocol != null) {
