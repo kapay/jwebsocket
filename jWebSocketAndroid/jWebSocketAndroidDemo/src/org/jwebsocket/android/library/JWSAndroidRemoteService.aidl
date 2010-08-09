@@ -8,8 +8,8 @@
 
 package org.jwebsocket.android.library;
 
-import org.jwebsocket.token.Token;
 import org.jwebsocket.android.library.JWSAndroidRemoteServiceCallback;
+import  org.jwebsocket.android.library.RemoteToken;
 
 // Declare the interface.
 interface JWSAndroidRemoteService {
@@ -24,7 +24,7 @@ interface JWSAndroidRemoteService {
 
 	void broadcastText(String data);
 	
-	void sendToken(in Token aToken);
+	void sendToken(in RemoteToken aToken);
 
     void saveFile(String fileName, String scope, boolean notify, in byte[] data);
     
@@ -33,6 +33,10 @@ interface JWSAndroidRemoteService {
     void login(String aUsername, String aPassword);
     
     void logout();
+    
+    void ping(boolean echo);
+    
+    int getConnections(); 
     
     /**
      * Register a service to call back to the clients using this remote service
