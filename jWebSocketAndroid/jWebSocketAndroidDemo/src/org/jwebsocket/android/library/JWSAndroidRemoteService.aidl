@@ -26,7 +26,7 @@ interface JWSAndroidRemoteService {
 
 	void broadcastText(in String data);
 	
-	void sendToken(in ParcelableToken aToken);
+	void sendToken(in ParcelableToken token);
 
     void saveFile(in String fileName, in String scope, in boolean notify, in byte[] data);
     
