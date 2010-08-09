@@ -40,9 +40,9 @@ import org.jwebsocket.token.Token;
  */
 public class RPCPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logging.getLogger(RPCPlugIn.class);
-	private Map<String, Object> grantedProcs = new FastMap<String, Object>();
-	private DemoRPCServer rpcServer = null;
+	private static Logger mLog = Logging.getLogger(RPCPlugIn.class);
+	private Map<String, Object> mGrantedProcs = new FastMap<String, Object>();
+	private DemoRPCServer mRpcServer = null;
 	// if namespace changed update client plug-in accordingly!
 	private String NS_RPC_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.rpc";
 
@@ -54,18 +54,18 @@ public class RPCPlugIn extends TokenPlugIn {
 	 *
 	 */
 	public RPCPlugIn() {
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating rpc plug-in...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating rpc plug-in...");
 		}
 		// specify default name space
 		this.setNamespace(NS_RPC_DEFAULT);
 
 		// specify granted remote procedure calls
 		// TODO: Use granted procs setting from plug-in config!
-		grantedProcs.put("org.jWebSocket.demo.DemoRPCServer.getMD5", null);
+		mGrantedProcs.put("org.jWebSocket.demo.DemoRPCServer.getMD5", null);
 
 		// currently this is the only supported RPCPlugIn server
-		rpcServer = new DemoRPCServer();
+		mRpcServer = new DemoRPCServer();
 	}
 
 	/*
@@ -109,15 +109,15 @@ public class RPCPlugIn extends TokenPlugIn {
 		String lArgs = aToken.getString("args");
 		String lMsg = null;
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing RPC to class '" + lClassName + "', method '" + lMethod + "', args: '" + lArgs + "'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing RPC to class '" + lClassName + "', method '" + lMethod + "', args: '" + lArgs + "'...");
 		}
 
 		String lKey = lClassName + "." + lMethod;
-		if (grantedProcs.containsKey(lKey)) {
+		if (mGrantedProcs.containsKey(lKey)) {
 			// class is ignored until security restrictions are finished.
 			try {
-				Object lObj = call(rpcServer, lMethod, lArgs);
+				Object lObj = call(mRpcServer, lMethod, lArgs);
 				lResponseToken.put("result", lObj.toString());
 			} catch (NoSuchMethodException ex) {
 				lMsg = "NoSuchMethodException calling '" + lMethod + "' for class " + lClassName + ": " + ex.getMessage();
@@ -171,8 +171,8 @@ public class RPCPlugIn extends TokenPlugIn {
 		WebSocketConnector lTargetConnector =
 				getServer().getConnector("tcp0", lTargetId);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'rrpc'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'rrpc'...");
 		}
 		if (lTargetConnector != null) {
 			Token lRRPC = new Token(lNS, "rrpc");
@@ -202,13 +202,13 @@ public class RPCPlugIn extends TokenPlugIn {
 			URLClassLoader lUCL = new URLClassLoader(new URL[]{new URL(aURL)});
 			// load class using previously defined class loader
 			lClass = Class.forName(aClassName, true, lUCL);
-			if (log.isDebugEnabled()) {
-				log.debug("Class '" + lClass.getName() + "' loaded!");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Class '" + lClass.getName() + "' loaded!");
 			}
 		} catch (ClassNotFoundException ex) {
-			log.error("Class not found exception: " + ex.getMessage());
+			mLog.error("Class not found exception: " + ex.getMessage());
 		} catch (MalformedURLException ex) {
-			log.error("MalformesURL exception: " + ex.getMessage());
+			mLog.error("MalformesURL exception: " + ex.getMessage());
 		}
 		return lClass;
 	}
@@ -238,11 +238,11 @@ public class RPCPlugIn extends TokenPlugIn {
 			}
 			Constructor lConstructor = aClass.getConstructor(lCA);
 			lObj = lConstructor.newInstance(aArgs);
-			if (log.isDebugEnabled()) {
-				log.debug("Object '" + aClass.getName() + "' instantiated!");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Object '" + aClass.getName() + "' instantiated!");
 			}
 		} catch (Exception ex) {
-			log.error("Exception instantiating class " + aClass.getName() + ": " + ex.getMessage());
+			mLog.error("Exception instantiating class " + aClass.getName() + ": " + ex.getMessage());
 		}
 		return lObj;
 	}

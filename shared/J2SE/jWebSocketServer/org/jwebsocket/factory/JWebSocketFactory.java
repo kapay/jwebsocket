@@ -38,7 +38,8 @@ public class JWebSocketFactory {
 		try {
 			WebSocketInitializer lInitializer = loader.initialize();
 			if (lInitializer == null) {
-				System.err.println("ERROR:jWebSocket Server sub system could not be initialized.");
+				// System.err.println("ERROR:jWebSocket Server sub system could not be initialized.");
+				JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
 				return;
 			}
 			lInitializer.initializeLogging();
@@ -50,6 +51,7 @@ public class JWebSocketFactory {
 			mEngine = lInitializer.initializeEngine();
 			if (mEngine == null) {
 				// the loader already logs an error!
+				JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
 				return;
 			}
 
@@ -124,9 +126,15 @@ public class JWebSocketFactory {
 				if (mLog.isInfoEnabled()) {
 					mLog.info("jWebSocket server startup complete");
 				}
+
+				// if everything went fine...
+				JWebSocketInstance.setStatus(JWebSocketInstance.STARTED);
+			} else {
+
+				// if engine couldn't be started due to whatever reasons...
+				JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
 			}
 
-			JWebSocketInstance.setStatus(JWebSocketInstance.STARTED);
 
 		} catch (WebSocketException ex) {
 			if (mLog != null) {
@@ -134,7 +142,9 @@ public class JWebSocketFactory {
 					mLog.debug("Exception during startup", ex);
 				}
 			} else {
-				System.out.println(ex.getClass().getSimpleName() + " during jWebSocket Server startup: " + ex.getMessage());
+				System.out.println(ex.getClass().getSimpleName() 
+						+ " during jWebSocket Server startup: "
+						+ ex.getMessage());
 			}
 			if (mLog != null && mLog.isInfoEnabled()) {
 				mLog.info("jWebSocketServer failed to start.");

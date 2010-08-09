@@ -42,96 +42,103 @@ import org.jwebsocket.logging.Logging;
  */
 public class NettyEngine extends BaseEngine {
 
-    private static Logger log = Logging.getLogger(NettyEngine.class);
-    private volatile boolean isRunning = false;
-    private static final ChannelGroup allChannels = new DefaultChannelGroup("jWebSocket-NettyEngine");
+	private static Logger log = Logging.getLogger(NettyEngine.class);
+	private volatile boolean isRunning = false;
+	private static final ChannelGroup allChannels = new DefaultChannelGroup("jWebSocket-NettyEngine");
+	private Channel channel = null;
 
-    /**
-     * constructor
-     * @param config
-     */
-    public NettyEngine(EngineConfiguration configuration) {
-        super(configuration);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void startEngine() throws WebSocketException {
-        if (log.isDebugEnabled()) {
-            log.debug("Starting Netty engine (" + getId() + ")...");
-        }
-        // Configure the server.
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors
-                        .newCachedThreadPool(), Executors.newCachedThreadPool()));
-        // Set up the event pipeline factory.
-        bootstrap.setPipelineFactory(new NettyEnginePipeLineFactory(this));
-        // Bind and start to accept incoming connections.
-        Channel channel = bootstrap.bind(new InetSocketAddress(getConfiguration().getPort()));
+	/**
+	 * constructor
+	 * @param config
+	 */
+	public NettyEngine(EngineConfiguration configuration) {
+		super(configuration);
+	}
 
-        //set the timeout value if only it's greater than 0 in configuration
-        if (getConfiguration().getTimeout() > 0) {
-            channel.getConfig().setConnectTimeoutMillis(getConfiguration().getTimeout());
-         }
-     
-        // fire the engine start event
-        engineStarted();
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void startEngine() throws WebSocketException {
+		if (log.isDebugEnabled()) {
+			log.debug("Starting Netty engine (" + getId() + ")...");
+		}
+		// Configure the server.
+		ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
+		// Set up the event pipeline factory.
+		bootstrap.setPipelineFactory(new NettyEnginePipeLineFactory(this));
+		// Bind and start to accept incoming connections.
+		channel = bootstrap.bind(new InetSocketAddress(getConfiguration().getPort()));
 
-        allChannels.add(channel);
+		//set the timeout value if only it's greater than 0 in configuration
+		if (getConfiguration().getTimeout() > 0) {
+			channel.getConfig().setConnectTimeoutMillis(getConfiguration().getTimeout());
+		}
 
-        isRunning = true;
+		// fire the engine start event
+		engineStarted();
 
-        if (log.isInfoEnabled()) {
-            log.info("Netty engine (" + getId() + ") started.");
-        }
-        // close the engine
-        if (!isRunning) {
-            ChannelGroupFuture future = allChannels.close();
-            future.awaitUninterruptibly();
-            channel.getFactory().releaseExternalResources();
-            engineStopped();
-        }
-    }
+		allChannels.add(channel);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
-        log.debug("Stopping Netty engine (" + getId() + ")...");
-        isRunning = false;
-        super.stopEngine(aCloseReason);
-    }
+		isRunning = true;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void connectorStarted(WebSocketConnector aConnector) {
-        log.debug("Detected new connector at port "+ aConnector.getRemotePort() + ".");
-        super.connectorStarted(aConnector);
-    }
+		if (log.isInfoEnabled()) {
+			log.info("Netty engine '" + getId() + "' started.");
+		}
+		// close the engine
+		if (!isRunning) {
+			ChannelGroupFuture future = allChannels.close();
+			future.awaitUninterruptibly();
+			channel.getFactory().releaseExternalResources();
+			engineStopped();
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-        log.debug("Detected stopped connector at port "+ aConnector.getRemotePort() + ".");
-        super.connectorStopped(aConnector, aCloseReason);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
+		log.debug("Stopping Netty engine '" + getId() + "'...");
+		isRunning = false;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isAlive() {
-        if (isRunning) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+		super.stopEngine(aCloseReason);
 
+		// Added by Alex 2010-08-09
+		if (channel != null) {
+			channel.close();
+		}
+		allChannels.close();
+		engineStopped();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void connectorStarted(WebSocketConnector aConnector) {
+		log.debug("Detected new connector at port " + aConnector.getRemotePort() + ".");
+		super.connectorStarted(aConnector);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
+		log.debug("Detected stopped connector at port " + aConnector.getRemotePort() + ".");
+		super.connectorStopped(aConnector, aCloseReason);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isAlive() {
+		if (isRunning) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
