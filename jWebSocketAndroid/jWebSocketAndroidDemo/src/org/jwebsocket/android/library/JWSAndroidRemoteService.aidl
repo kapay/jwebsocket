@@ -18,34 +18,34 @@ interface JWSAndroidRemoteService {
 
     void close();
  
-    void send(String data);
+    void send(in String data);
     
-    void sendText(String target, String data);
+    void sendText(in String target, in String data);
 
-	void broadcastText(String data);
+	void broadcastText(in String data);
 	
 	void sendToken(in RemoteToken aToken);
 
-    void saveFile(String fileName, String scope, boolean notify, in byte[] data);
+    void saveFile(in String fileName, in String scope, in boolean notify, in byte[] data);
     
     String getUsername();
     
-    void login(String aUsername, String aPassword);
+    void login(in String aUsername, in String aPassword);
     
     void logout();
     
-    void ping(boolean echo);
+    void ping(in boolean echo);
     
     int getConnections(); 
     
     /**
      * Register a service to call back to the clients using this remote service
      */
-    void registerCallback(JWSAndroidRemoteServiceCallback cb);
+    void registerCallback(in JWSAndroidRemoteServiceCallback cb);
     
     /**
      * Remove a previously registered callback interface.
      */
-    void unregisterCallback(JWSAndroidRemoteServiceCallback cb);
+    void unregisterCallback(in JWSAndroidRemoteServiceCallback cb);
 
 }
