@@ -9,7 +9,7 @@
 package org.jwebsocket.android.library;
 
 import org.jwebsocket.android.library.JWSAndroidRemoteServiceCallback;
-import  org.jwebsocket.android.library.RemoteToken;
+import org.jwebsocket.android.library.RemoteToken;
 
 // Declare the interface.
 interface JWSAndroidRemoteService {
