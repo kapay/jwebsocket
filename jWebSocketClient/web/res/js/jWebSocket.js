@@ -168,6 +168,65 @@ jws.events = {
 
 };
 
+//:package:*:jws.tools
+//:class:*:jws.tools
+//:ancestor:*:-
+//:d:en:Implements some required JavaScript tools.
+jws.tools = {
+
+	//:m:*:zerofill
+	//:d:en:Fills up an integer value with the given number of zero characters
+	//:d:en:to support a date time exchange according to ISO 8601
+	//:a:en::aInt:Number:Number to be formatted.
+	//:a:en::aDigits:Number:Nu,ber of digits for the result.
+	//:r:*:::String:String with the exact number of digits filled with 0.
+	zerofill : function(aInt, aDigits) {
+		var lRes = aInt.toFixed(0);
+		if( lRes.length > aDigits ) {
+			lRes = lRes.substring( )
+		} else {
+			while( lRes.length < aDigits ) {
+				lRes = "0" + lRes;
+			}
+		}
+        return lRes;
+    },
+
+	date2ISO: function( aDate ) {
+		// JavaScript returns negative values for +GMT
+		var lTZO = -aDate.getTimezoneOffset();
+		var lAbsTZO = Math.abs( lTZO );
+		var lRes =
+			aDate.getUTCFullYear()
+			+ this.zerofill( aDate.getUTCMonth() + 1, 2 )
+			+ this.zerofill( aDate.getUTCDate(), 2 )
+			+ this.zerofill( aDate.getUTCHours(), 2 )
+			+ this.zerofill( aDate.getUTCMinutes(), 2 )
+			+ this.zerofill( aDate.getUTCSeconds(), 2 )
+			+ this.zerofill( aDate.getUTCMilliseconds(), 2 )
+			+ ( lTZO >= 0 ? "+" : "-" )
+			+ this.zerofill( lAbsTZO / 60, 2 )
+			+ this.zerofill( lAbsTZO % 60, 2 )
+			// trailing Z means it's UTC
+			+ "Z";
+		return lRes;
+	},
+
+	ISO2Date: function( aISO, aTimezone ) {
+		var lDate = new Date();
+		lDate.setUTCFullYear( aISO.substr( 0, 4 ) );
+		lDate.setUTCMonth( aISO.substr( 4, 2 ) - 1 );
+		lDate.setUTCDate( aISO.substr( 6, 2 ) );
+		lDate.setUTCHours( aISO.substr( 8, 2 ) );
+		lDate.setUTCMinutes( aISO.substr( 10, 2 ) );
+		lDate.setUTCSeconds( aISO.substr( 12, 2 ) );
+		lDate.setUTCMilliseconds( aISO.substr( 14, 3 ) );
+		return lDate;
+	}
+
+};
+
+
 if( !jws.browserSupportsNativeWebSockets ) {
 
 	//	<JasobNoObfs>

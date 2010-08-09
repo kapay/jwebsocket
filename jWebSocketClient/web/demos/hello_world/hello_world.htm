@@ -67,7 +67,11 @@
 					},
 					// OnMessage callback
 					OnMessage: function( aEvent, aToken ) {
-						log( "<font style='color:#888'>jWebSocket '" + aToken.type + "' token received, full message: '" + aEvent.data + "'</font>" );
+						var lDate = "";
+						if( aToken.date_val ) {
+							lDate = jws.tools.ISO2Date( aToken.date_val );
+						}
+						log( "<font style='color:#888'>jWebSocket '" + aToken.type + "' token received, full message: '" + aEvent.data + "' " + lDate + "</font>" );
 					},
 					// OnClose callback
 					OnClose: function( aEvent ) {
@@ -109,6 +113,10 @@
 					var lToken = {
 						ns: jws.SamplesPlugIn.NS,
 						type: "processComplexObject",
+						int_val: 1234,
+						float_val: 1234.5678,
+						bool_val: true,
+						date_val: jws.tools.date2ISO( new Date() ),
 						object: {
 							field1: "value1",
 							field2: "value2",
