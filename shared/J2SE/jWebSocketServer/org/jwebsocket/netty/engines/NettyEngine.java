@@ -85,13 +85,6 @@ public class NettyEngine extends BaseEngine {
 		if (log.isInfoEnabled()) {
 			log.info("Netty engine '" + getId() + "' started.");
 		}
-		// close the engine
-		if (!isRunning) {
-			ChannelGroupFuture future = allChannels.close();
-			future.awaitUninterruptibly();
-			channel.getFactory().releaseExternalResources();
-			engineStopped();
-		}
 	}
 
 	/**
@@ -103,13 +96,16 @@ public class NettyEngine extends BaseEngine {
 		isRunning = false;
 
 		super.stopEngine(aCloseReason);
+		engineStopped();
 
 		// Added by Alex 2010-08-09
 		if (channel != null) {
 			channel.close();
 		}
-		allChannels.close();
-		engineStopped();
+		ChannelGroupFuture future = allChannels.close();
+		future.awaitUninterruptibly();
+		channel.getFactory().releaseExternalResources();
+		
 	}
 
 	/**
