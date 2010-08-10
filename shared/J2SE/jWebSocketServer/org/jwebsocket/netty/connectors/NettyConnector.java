@@ -121,7 +121,7 @@ public class NettyConnector extends BaseConnector {
 	 */
 	@Override
 	public void sendPacket(WebSocketPacket aDataPacket) {
-		if (handler.getChannelHandlerContext().getChannel().isConnected()) {
+		if (handler.getChannelHandlerContext().getChannel().isConnected() && getEngine().isAlive()) {
 			handler.getChannelHandlerContext().getChannel().write(
 					new DefaultWebSocketFrame(aDataPacket.getString()));
 		}
