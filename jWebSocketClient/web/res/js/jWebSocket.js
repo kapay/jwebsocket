@@ -659,7 +659,6 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::::none
 	//:r:*:::void:none
 	createDefaultResult: function() {
-		// jws.CUR_TOKEN_ID++;
 		return{
 			code: 0,
 			msg: "Ok",
@@ -679,7 +678,6 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::::none
 	//:r:*:::void:none
 	checkConnected: function() {
-		// jws.CUR_TOKEN_ID++;
 		var lRes = this.createDefaultResult();
 		if( !this.isConnected() ) {
 			lRes.code = -1;
@@ -700,7 +698,6 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::::none
 	//:r:*:::void:none
 	checkLoggedIn: function() {
-		// jws.CUR_TOKEN_ID++;
 		var lRes = this.createDefaultResult();
 		if( !this.isLoggedIn() ) {
 			lRes.code = -1;
@@ -717,7 +714,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:r:*:::String:The human readable string output of the result token.
 	resultToString: function( aResToken ) {
 		return(
-			aResToken.msg
+			( aResToken && typeof aResToken == "object" && aResToken.msg ? 
+				aResToken.msg : "invalid response token" )
 			// + " (code: " + aRes.code + ", tid: " + aRes.tid + ")"
 		);
 	},
@@ -924,30 +922,34 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
 	//:r:*:::void:none
 	sendToken: function( aToken, aOptions ) {
-		var lOnResponse = null;
-		var lSpawnThread = false;
-		if( aOptions ) {
-			if( aOptions.OnResponse ) {
-				lOnResponse = aOptions.OnResponse;
+		var lRes = this.checkConnected();
+		if( lRes.code == 0 ) {
+			var lOnResponse = null;
+			var lSpawnThread = false;
+			if( aOptions ) {
+				if( aOptions.OnResponse ) {
+					lOnResponse = aOptions.OnResponse;
+				}
+				if( aOptions.spawnThread ) {
+					lSpawnThread  = aOptions.spawnThread;
+				}
 			}
-			if( aOptions.spawnThread ) {
-				lSpawnThread  = aOptions.spawnThread;
+			jws.CUR_TOKEN_ID++;
+			if( lOnResponse ) {
+				this.fRequestCallbacks[ "utid" + jws.CUR_TOKEN_ID ] = {
+					request: new Date().getTime(),
+					callback: lOnResponse
+				}
 			}
-		}
-		jws.CUR_TOKEN_ID++;
-		if( lOnResponse ) {
-			this.fRequestCallbacks[ "utid" + jws.CUR_TOKEN_ID ] = {
-				request: new Date().getTime(),
-				callback: lOnResponse
+			if( lSpawnThread ) {
+				aToken.spawnThread = true;
 			}
-		}
-		if( lSpawnThread ) {
-			aToken.spawnThread = true;
-		}
-		var lStream = this.tokenToStream( aToken );
+			var lStream = this.tokenToStream( aToken );
 
-		// console.log("sending" + lStream + "...");
-		this.sendStream( lStream );
+			// console.log("sending" + lStream + "...");
+			this.sendStream( lStream );
+		}
+		return lRes;
 	},
 
 	//:m:*:getLastTokenId
@@ -1092,11 +1094,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				lTimeout = aOptions.timeout;
 			}
 		}
-		var lRes = this.createDefaultResult();
+		var lRes = this.checkConnected();
 		try {
 			// if connected and timeout is passed give server a chance to
 			// register the disconnect properly and send a good bye response.
-			if( this.fConn ) {
+			if( lRes.code == 0 ) {
 				// TODO: Work-around for Safari 5! Check in versions after 5.0.7533.16!
 				if( !(	/* lTimeout > 0 && */
 						navigator.userAgent.indexOf( "Safari" ) >= 0 &&
@@ -1246,6 +1248,13 @@ jws.SystemClientPlugIn = {
 	//:a:en::::none
 	//:r:*:::void:none
 	logout: function() {
+		var lRes = this.checkConnected();
+		if( lRes.code == 0 ) {
+			this.sendToken({
+				type: "logout"
+			});
+		}
+/*
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
@@ -1256,6 +1265,7 @@ jws.SystemClientPlugIn = {
 			lRes.localeKey = "jws.jsc.res.notConnected";
 			lRes.msg = "Not logged in.";
 		}
+*/
 		return lRes;
 	},
 
@@ -1273,7 +1283,7 @@ jws.SystemClientPlugIn = {
 		aToken.type = "broadcast";
 		aToken.sourceId = this.fClientId;
 		aToken.sender = this.fUsername;
-		this.sendToken( aToken, aOptions );
+		return this.sendToken( aToken, aOptions );
 	},
 
 	//:m:*:getUsername

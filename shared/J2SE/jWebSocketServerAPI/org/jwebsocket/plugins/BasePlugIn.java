@@ -247,4 +247,9 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	public String getSetting(String aKey) {
 		return (aKey != null ? getSetting(aKey, null) : null);
 	}
+
+	@Override
+	public Map getSettings() {
+		return mSettings;
+	}
 }

@@ -53,18 +53,6 @@ public class JWebSocketServer {
 			// and add the sample listener to the server's listener chain
 			lCS0.addListener(new JWebSocketCustomListenerSample());
 		}
-		/*
-		WebSocketEngine engine = JWebSocketFactory.getEngine();
-		if (engine != null) {
-		while (engine.isAlive()) {
-		try {
-		Thread.sleep(250);
-		} catch (InterruptedException ex) {
-		// no handling required here
-		}
-		}
-		}
-		 */
 
 		// remain here until shut down request
 		while (JWebSocketInstance.getStatus() != JWebSocketInstance.SHUTTING_DOWN) {

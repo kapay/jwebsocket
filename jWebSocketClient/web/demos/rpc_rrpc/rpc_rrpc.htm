@@ -81,6 +81,7 @@
 			}
 
 			function rpc( aMethod ) {
+
 				var lArgs = eArgs.value;
 
 				// test server behaviour with \n and \r in JSON object
@@ -92,6 +93,37 @@
 				var lRes = lWSC.rpc(
 					// pass class, method and argument for server java method:
 					"org.jWebSocket.demo.DemoRPCServer", aMethod, lArgs, {
+					spawnThread: eSpawnThread.checked,
+					// new easy-to-use response callback
+					OnResponse: function( aToken ) {
+						if( aToken.code != 0 ) {
+							log( "RPC Error: " + aToken.msg );
+						} else {
+							log( "Received RPC result: " + aToken.result );
+						}
+					}
+				});
+
+				log( lWSC.resultToString( lRes ) );
+			}
+
+			function rpcTest() {
+
+				var lArgs = {
+					arg1: "1",
+					arg2: 2,
+					arg3: true,
+					arg4: [ "2", 3, false ],
+					arg5: { f1: "3", f2: 4, f3: new Date() }
+				};
+				var aMethod = "";
+
+				log( "Remote calling '" + aMethod + "' with args '" + lArgs + "'..." );
+
+				// perform the Remote Procedure Call...
+				var lRes = lWSC.rpc(
+					// pass class, method and argument for server java method:
+					"org.jwebsocket.rpc.sample.SampleRPCLibrary", "sampleTokenRPC", lArgs, {
 					spawnThread: eSpawnThread.checked,
 					// new easy-to-use response callback
 					OnResponse: function( aToken ) {
@@ -221,8 +253,7 @@
 					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfTarget" type="text" value="ID" style="width:100%"></td>
 					<td class="stdDlg" width=""><input class="schkThreaded" id="schkThreaded" type="checkbox" value="on" checked="checked" title="run remote procedure in separate thread on server"> spawn thread</td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRRPC" type="button" value="Call reverse" onclick="rrpcDemo();"></td>
-					<td class="stdDlg" width="5"></td>
-					
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="RPC Lib" onclick="rpcTest();"></td>
 				</tr>
 			</table>
 		</div>

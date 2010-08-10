@@ -80,6 +80,8 @@ public interface WebSocketPlugIn {
 
 	/**
 	 *
+	 *
+	 * @param aSettings
 	 */
 	void addAllSettings(Map aSettings);
 
@@ -109,4 +111,9 @@ public interface WebSocketPlugIn {
 	 */
 	String getSetting(String aKey);
 
+	/**
+	 *
+	 * @return
+	 */
+	Map getSettings();
 }

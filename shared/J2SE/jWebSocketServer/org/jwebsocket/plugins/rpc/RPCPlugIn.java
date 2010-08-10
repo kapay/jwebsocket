@@ -15,6 +15,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.rpc;
 
+import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
+import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
+
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,12 +26,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
+import java.util.Map.Entry;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketServerConstants;
+import org.jwebsocket.factory.JWebSocketJarClassLoader;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
+import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.token.Token;
@@ -42,9 +51,12 @@ public class RPCPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(RPCPlugIn.class);
 	private Map<String, Object> mGrantedProcs = new FastMap<String, Object>();
-	private DemoRPCServer mRpcServer = null;
+	// private DemoRPCServer mRpcServer = null;
 	// if namespace changed update client plug-in accordingly!
 	private String NS_RPC_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.rpc";
+	private Map<String, String> mJars = new FastMap<String, String>();
+	// TODO: use RpcCallable instead of Object here!
+	private Map<String, Object> mClasses = new FastMap<String, Object>();
 
 	// TODO: RRPC calls do not yet allow quotes in arguments
 	// TODO: We need simple unique IDs to address a certain target, session id not suitable here.
@@ -60,12 +72,140 @@ public class RPCPlugIn extends TokenPlugIn {
 		// specify default name space
 		this.setNamespace(NS_RPC_DEFAULT);
 
-		// specify granted remote procedure calls
-		// TODO: Use granted procs setting from plug-in config!
-		mGrantedProcs.put("org.jWebSocket.demo.DemoRPCServer.getMD5", null);
-
 		// currently this is the only supported RPCPlugIn server
-		mRpcServer = new DemoRPCServer();
+		// mRpcServer = new DemoRPCServer();
+
+	}
+
+	/**
+	 * private method that checks the path of the jWebSocket.xml file
+	 *
+	 * @return the path to jWebSocket.xml
+	 */
+	private String getLibraryFolderPath(String fileName) {
+		String lWebSocketLib = null;
+		String lWebSocketHome = null;
+		String lFileSep = null;
+		File lFile = null;
+
+		// try to load lib from %JWEBSOCKET_HOME%/libs folder
+		lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
+		lFileSep = System.getProperty("file.separator");
+		if (lWebSocketHome != null) {
+			// append trailing slash if needed
+			if (!lWebSocketHome.endsWith(lFileSep)) {
+				lWebSocketHome += lFileSep;
+			}
+			// jar can to be located in %JWEBSOCKET_HOME%/libs
+			lWebSocketLib = lWebSocketHome + "libs" + lFileSep + fileName;
+			lFile = new File(lWebSocketLib);
+			if (lFile.exists()) {
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Loading " + lWebSocketLib + "...");
+				}
+				return lWebSocketLib;
+			} else {
+				if (mLog.isDebugEnabled()) {
+					mLog.debug(fileName + " not found at %" + JWEBSOCKET_HOME + "%/libs.");
+				}
+			}
+		}
+
+		// try to load lib from %CATALINA_HOME%/libs folder
+		lWebSocketHome = System.getenv(CATALINA_HOME);
+		lFileSep = System.getProperty("file.separator");
+		if (lWebSocketHome != null) {
+			// append trailing slash if needed
+			if (!lWebSocketHome.endsWith(lFileSep)) {
+				lWebSocketHome += lFileSep;
+			}
+			// jars can to be located in %CATALINA_HOME%/lib
+			lWebSocketLib = lWebSocketHome + "lib" + lFileSep + fileName;
+			lFile = new File(lWebSocketLib);
+			if (lFile.exists()) {
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Loading " + lWebSocketLib + "...");
+				}
+				return lWebSocketLib;
+			} else {
+				if (mLog.isDebugEnabled()) {
+					mLog.debug(fileName + " not found at %" + CATALINA_HOME + "/lib%.");
+				}
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public void engineStarted(WebSocketEngine aEngine) {
+
+		// TODO: move JWebSocketJarClassLoader into ServerAPI module ?
+		JWebSocketJarClassLoader lClassLoader = new JWebSocketJarClassLoader();
+		Class lClass;
+
+		// load map of RPC libraries first
+		// also load map of granted procs
+		Map<String, String> lSettings = getSettings();
+		String lKey;
+		String lValue;
+		for (Entry<String, String> lSetting : lSettings.entrySet()) {
+			lKey = lSetting.getKey();
+			lValue = lSetting.getValue();
+			if (lKey.startsWith("jar:")) {
+				lKey = lKey.substring(4);
+				mJars.put(lKey, lValue);
+				try {
+					String lJarFilePath = getLibraryFolderPath(lValue);
+					lClassLoader.addFile(lJarFilePath);
+					lClass = lClassLoader.loadClass(lKey);
+					mClasses.put(lKey, lClass);
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("Class '" + lKey + "' successfully loaded from '" + lJarFilePath + "'.");
+					}
+				} catch (Exception ex) {
+					mLog.error(ex.getClass().getSimpleName() + " loading jar: " + ex.getMessage());
+				}
+			}
+		}
+		for (Entry<String, String> lSetting : lSettings.entrySet()) {
+			lKey = lSetting.getKey();
+			lValue = lSetting.getValue();
+			if (lKey.startsWith("roles:")) {
+				lKey = lKey.substring(6);
+				mGrantedProcs.put(lKey, lValue);
+				// extract class name
+				int lIdx = lKey.lastIndexOf('.');
+				if (lIdx >= 0) {
+					String lClassName = lKey.substring(0, lIdx);
+					try {
+						lClass = (Class)mClasses.get(lClassName);
+						if( lClass != null ) {
+							Object lInstance = lClass.newInstance();
+							/*
+							lClass = Class.forName(lClassName);
+							Constructor<WebSocketEngine> lConstr = lClass.getDeclaredConstructor();
+							lConstr.setAccessible(true);
+							Object lInstance = lConstr.newInstance(new Object[]{});
+							 */
+							mClasses.put(lClassName, lInstance);
+							if (mLog.isDebugEnabled()) {
+								mLog.debug("Instance of '" + lClassName + "' successfully created.");
+							}
+						} else {
+							mLog.debug("Class '" + lClassName + "' not loaded.");
+						}
+					} catch (Exception ex) {
+						mLog.error(ex.getClass().getSimpleName() + " creating instance: " + ex.getMessage());
+					}
+				}
+			}
+		}
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("jars to be loaded: " + mJars.toString());
+			mLog.debug("classes loaded: " + mClasses.toString());
+			mLog.debug("granted procs: " + mGrantedProcs.toString());
+		}
 	}
 
 	/*
@@ -103,10 +243,14 @@ public class RPCPlugIn extends TokenPlugIn {
 
 		Token lResponseToken = createResponse(aToken);
 
-		// currently rpcServer is the only supported RPCPlugIn server!
 		String lClassName = aToken.getString("classname");
 		String lMethod = aToken.getString("method");
-		String lArgs = aToken.getString("args");
+		Object lArgs = aToken.get("args");
+		// TODO: Tokens should always be a map of maps
+		if (lArgs instanceof JSONObject) {
+			lArgs = JSONProcessor.JSON2Token((JSONObject) lArgs);
+		}
+
 		String lMsg = null;
 
 		if (mLog.isDebugEnabled()) {
@@ -117,7 +261,9 @@ public class RPCPlugIn extends TokenPlugIn {
 		if (mGrantedProcs.containsKey(lKey)) {
 			// class is ignored until security restrictions are finished.
 			try {
-				Object lObj = call(mRpcServer, lMethod, lArgs);
+				// TODO: use RpcCallable here!
+				Object lInstance = mClasses.get(lClassName);
+				Object lObj = call(lInstance, lMethod, lArgs);
 				lResponseToken.put("result", lObj.toString());
 			} catch (NoSuchMethodException ex) {
 				lMsg = "NoSuchMethodException calling '" + lMethod + "' for class " + lClassName + ": " + ex.getMessage();
@@ -136,7 +282,7 @@ public class RPCPlugIn extends TokenPlugIn {
 
 		/* just for testing purposes of multi-threaded rpc's
 		try {
-			Thread.sleep(3000);
+		Thread.sleep(3000);
 		} catch (InterruptedException ex) {
 		}
 		 */

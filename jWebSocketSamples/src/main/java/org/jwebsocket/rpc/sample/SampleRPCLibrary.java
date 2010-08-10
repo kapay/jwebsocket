@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Server Configuration Constants
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	jWebSocket - jWebSocket Sample RPC-Library
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -13,22 +13,39 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config;
+package org.jwebsocket.rpc.sample;
+
+import org.jwebsocket.token.Token;
+import org.jwebsocket.util.Tools;
 
 /**
- * Provides a global shared container for the jWebSocket configuration settings.
  *
  * @author aschulze
- * @version $Id: JWebSocketServerConstants.java 624 2010-07-06 12:28:44Z fivefeetfurther $
  */
-public final class JWebSocketClientConstants {
+public class SampleRPCLibrary {
 
 	/**
-	 * Current version string of the jWebSocket package.
+	 * simply returns the MD5 sum of the given string.
+	 * @param aArg
+	 * @return MD5 sum of the given string.
 	 */
-	public static final String VERSION_STR = "0.10.0810 alpha";
+	public Object getMD5(String aArg) {
+		return (Tools.getMD5(aArg));
+	}
+
 	/**
-	 * Name space base for tokens and plug-ins.
+	 * usually protected (i.e. cannot be called from client
+	 * until explicitely granted).
+	 * @param aArg
+	 * @return MD5 sum of the given string.
 	 */
-	public static final String NS_BASE = "org.jWebSocket";
+	public Object getProtected(String aArg) {
+		return "Protected method has now been granted for RPC";
+	}
+
+	public Token sampleTokenRPC(Token aToken) {
+		// currently simply return the same token for test purposes
+		return aToken;
+	}
+
 }
