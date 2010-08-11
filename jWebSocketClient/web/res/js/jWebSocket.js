@@ -1733,6 +1733,7 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 	//:r:*:::String:The resulting JSON stream.
 	tokenToStream: function( aToken ) {
 		aToken.utid = jws.CUR_TOKEN_ID;
+		//:todo:en:Do we really want the session id per call? Alex: Don't think so! To be checked!
  		if( this.fSessionId ) {
 			aToken.usid = this.fSessionId;
  		}

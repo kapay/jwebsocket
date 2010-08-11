@@ -15,6 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.rpc.sample;
 
+import org.jwebsocket.plugins.rpc.BaseRPCCallable;
+import org.jwebsocket.plugins.rpc.RPCCallable;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
 
@@ -22,7 +24,7 @@ import org.jwebsocket.util.Tools;
  *
  * @author aschulze
  */
-public class SampleRPCLibrary {
+public class SampleRPCLibrary extends BaseRPCCallable implements RPCCallable {
 
 	/**
 	 * simply returns the MD5 sum of the given string.

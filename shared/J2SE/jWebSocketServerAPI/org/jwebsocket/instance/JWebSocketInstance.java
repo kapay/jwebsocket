@@ -47,4 +47,5 @@ public class JWebSocketInstance {
 	public static void setStatus(int aStatus) {
 		mStatus = aStatus;
 	}
+
 }

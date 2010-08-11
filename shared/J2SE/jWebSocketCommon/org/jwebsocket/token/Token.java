@@ -15,9 +15,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.token;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import javolution.util.FastMap;
+import java.util.Map.Entry;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A token is ...
@@ -25,7 +29,7 @@ import javolution.util.FastMap;
  */
 public class Token {
 
-	private Map<String, Object> items = new FastMap<String, Object>();
+	private JSONObject mData = new JSONObject();
 	/**
 	 *
 	 */
@@ -48,6 +52,14 @@ public class Token {
 
 	/**
 	 *
+	 * @param aJSON
+	 */
+	public Token(JSONObject aJSON) {
+		mData = aJSON;
+	}
+
+	/**
+	 *
 	 * @param aNS
 	 * @param aType
 	 */
@@ -57,13 +69,63 @@ public class Token {
 	}
 
 	/**
+	 *
+	 * @param aJSON
+	 */
+	public void setJSONObject(JSONObject aJSON) {
+		mData = aJSON;
+	}
+
+	/**
+	 *
+	 *
+	 * @return
+	 */
+	public JSONObject getJSONObject() {
+		return mData;
+	}
+
+	private Object getValue(Object aValue) {
+		if (aValue instanceof Token) {
+			aValue = ((Token) aValue).getJSONObject();
+		} else if (aValue instanceof Collection) {
+			JSONArray lJA = new JSONArray();
+			for (Object lItem : (Collection) aValue) {
+				lJA.put(getValue(lItem));
+			}
+			aValue = lJA;
+		} else if (aValue instanceof Map) {
+			JSONObject lJO = new JSONObject();
+			for (Entry<Object, Object> lItem : ((Map<Object, Object>) aValue).entrySet()) {
+				try{
+					lJO.put(lItem.getKey().toString(), getValue(lItem.getValue()));
+				} catch(JSONException ex) {
+				}
+			}
+			aValue = lJO;
+		} else if (aValue instanceof Object[]) {
+			JSONArray lJA = new JSONArray();
+			Object[] lOA = (Object[]) aValue;
+			for (int i = 0; i < lOA.length; i++) {
+				lJA.put(getValue(lOA[i]));
+			}
+			aValue = lJA;
+		}
+		return aValue;
+	}
+
+	/**
 	 * puts a new key/value pair into the token, in other words it adds a
 	 * new item to the token.
 	 * @param aKey key of the the token item.
 	 * @param aValue value of the token item.
 	 */
 	public void put(String aKey, Object aValue) {
-		items.put(aKey, aValue);
+		try {
+			mData.put(aKey, getValue(aValue));
+		} catch (JSONException ex) {
+			// TODO: handle exception
+		}
 	}
 
 	/**
@@ -72,7 +134,11 @@ public class Token {
 	 * @return
 	 */
 	public Object get(String aKey) {
-		return items.get(aKey);
+		try {
+			return mData.get(aKey);
+		} catch (JSONException ex) {
+			return null;
+		}
 	}
 
 	/**
@@ -81,7 +147,7 @@ public class Token {
 	 * @return
 	 */
 	public Object remove(String aKey) {
-		return items.remove(aKey);
+		return mData.remove(aKey);
 	}
 
 	/**
@@ -89,67 +155,71 @@ public class Token {
 	 * @return
 	 */
 	public Iterator<String> getKeys() {
-		return items.keySet().iterator();
+		return mData.keys();
 	}
 
 	/**
 	 *
-	 * @param aArg
+	 * @param aKey
 	 * @param aDefault
 	 * @return
 	 */
-	public String getString(String aArg, String aDefault) {
-		Object lObj = items.get(aArg);
-		return (lObj == null ? aDefault : lObj.toString());
-	}
-
-	/**
-	 *
-	 * @param aArg
-	 * @return
-	 */
-	public String getString(String aArg) {
-		return getString(aArg, null);
-	}
-
-	/**
-	 *
-	 * @param aArg
-	 * @param aDefault
-	 * @return
-	 */
-	public Integer getInteger(String aArg, Integer aDefault) {
-		Object lObj = items.get(aArg);
-		Integer lResult = aDefault;
-		if (lObj != null) {
-			if (lObj instanceof Integer) {
-				lResult = (Integer) lObj;
-			} else if (lObj instanceof String) {
-				try {
-					lResult = Integer.parseInt((String) lObj);
-				} catch (NumberFormatException ex) {
-					// ignore exception here, return default
-				}
-			}
+	public String getString(String aKey, String aDefault) {
+		String lResult;
+		try {
+			lResult = mData.getString(aKey);
+		} catch (JSONException ex) {
+			lResult = aDefault;
 		}
 		return lResult;
 	}
 
 	/**
 	 *
-	 * @param aArg
+	 * @param aKey
+	 * @return
+	 */
+	public String getString(String aKey) {
+		return getString(aKey, null);
+	}
+
+	/**
+	 *
+	 * @param aKey
 	 * @param aDefault
 	 * @return
 	 */
-	public Boolean getBoolean(String aArg, Boolean aDefault) {
-		Object lObj = items.get(aArg);
-		Boolean lResult = aDefault;
-		if (lObj != null) {
-			if (lObj instanceof Boolean) {
-				lResult = (Boolean) lObj;
-			} else if (lObj instanceof String) {
-				lResult = Boolean.parseBoolean((String) lObj);
-			}
+	public Integer getInteger(String aKey, Integer aDefault) {
+		Integer lResult;
+		try {
+			lResult = mData.getInt(aKey);
+		} catch (JSONException ex) {
+			lResult = aDefault;
+		}
+		return lResult;
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	public Integer getInteger(String aKey) {
+		return getInteger(aKey, null);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	public Boolean getBoolean(String aKey, Boolean aDefault) {
+		Boolean lResult;
+		try {
+			lResult = mData.getBoolean(aKey);
+		} catch (JSONException ex) {
+			lResult = aDefault;
 		}
 		return lResult;
 	}
@@ -168,7 +238,7 @@ public class Token {
 	 * @return
 	 */
 	public final String getType() {
-		return (String) items.get("type");
+		return getString("type");
 	}
 
 	/**
@@ -176,17 +246,17 @@ public class Token {
 	 * @param aType
 	 */
 	public final void setType(String aType) {
-		items.put("type", aType);
+		put("type", aType);
 	}
 
 	/**
 	 * Returns the name space of the token. If you have the same token type
-	 * interpreted by multiple different plug-ins the namespace allows to
-	 * uniquely address a certain plug-in. Each plug-in has its own namespace.
-	 * @return the namespace.
+	 * interpreted by multiple different plug-ins the name space allows to
+	 * uniquely address a certain plug-in. Each plug-in has its own name space.
+	 * @return the name space.
 	 */
 	public final String getNS() {
-		return (String) items.get("ns");
+		return getString("ns");
 	}
 
 	/**
@@ -196,7 +266,7 @@ public class Token {
 	 * @param aNS the namespace to be set for the token.
 	 */
 	public final void setNS(String aNS) {
-		items.put("ns", aNS);
+		put("ns", aNS);
 	}
 
 	/**
@@ -205,11 +275,6 @@ public class Token {
 	 */
 	@Override
 	public String toString() {
-		String lRes = "{";
-		for (Iterator<String> i = items.keySet().iterator(); i.hasNext();) {
-			String lKey = i.next();
-			lRes += lKey + "=" + items.get(lKey) + (i.hasNext() ? "," : "");
-		}
-		return lRes + "}";
+		return mData.toString();
 	}
 }

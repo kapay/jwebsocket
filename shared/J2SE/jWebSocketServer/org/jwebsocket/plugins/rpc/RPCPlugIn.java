@@ -15,10 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.rpc;
 
-import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
-import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
-
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -32,11 +28,11 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.factory.JWebSocketJarClassLoader;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
-import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.token.Token;
@@ -54,7 +50,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	// private DemoRPCServer mRpcServer = null;
 	// if namespace changed update client plug-in accordingly!
 	private String NS_RPC_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.rpc";
-	private Map<String, String> mJars = new FastMap<String, String>();
+	// private Map<String, String> mJars = new FastMap<String, String>();
 	// TODO: use RpcCallable instead of Object here!
 	private Map<String, Object> mClasses = new FastMap<String, Object>();
 
@@ -77,72 +73,12 @@ public class RPCPlugIn extends TokenPlugIn {
 
 	}
 
-	/**
-	 * private method that checks the path of the jWebSocket.xml file
-	 *
-	 * @return the path to jWebSocket.xml
-	 */
-	private String getLibraryFolderPath(String fileName) {
-		String lWebSocketLib = null;
-		String lWebSocketHome = null;
-		String lFileSep = null;
-		File lFile = null;
-
-		// try to load lib from %JWEBSOCKET_HOME%/libs folder
-		lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
-		lFileSep = System.getProperty("file.separator");
-		if (lWebSocketHome != null) {
-			// append trailing slash if needed
-			if (!lWebSocketHome.endsWith(lFileSep)) {
-				lWebSocketHome += lFileSep;
-			}
-			// jar can to be located in %JWEBSOCKET_HOME%/libs
-			lWebSocketLib = lWebSocketHome + "libs" + lFileSep + fileName;
-			lFile = new File(lWebSocketLib);
-			if (lFile.exists()) {
-				if (mLog.isDebugEnabled()) {
-					mLog.debug("Loading " + lWebSocketLib + "...");
-				}
-				return lWebSocketLib;
-			} else {
-				if (mLog.isDebugEnabled()) {
-					mLog.debug(fileName + " not found at %" + JWEBSOCKET_HOME + "%/libs.");
-				}
-			}
-		}
-
-		// try to load lib from %CATALINA_HOME%/libs folder
-		lWebSocketHome = System.getenv(CATALINA_HOME);
-		lFileSep = System.getProperty("file.separator");
-		if (lWebSocketHome != null) {
-			// append trailing slash if needed
-			if (!lWebSocketHome.endsWith(lFileSep)) {
-				lWebSocketHome += lFileSep;
-			}
-			// jars can to be located in %CATALINA_HOME%/lib
-			lWebSocketLib = lWebSocketHome + "lib" + lFileSep + fileName;
-			lFile = new File(lWebSocketLib);
-			if (lFile.exists()) {
-				if (mLog.isDebugEnabled()) {
-					mLog.debug("Loading " + lWebSocketLib + "...");
-				}
-				return lWebSocketLib;
-			} else {
-				if (mLog.isDebugEnabled()) {
-					mLog.debug(fileName + " not found at %" + CATALINA_HOME + "/lib%.");
-				}
-			}
-		}
-
-		return null;
-	}
-
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 
 		// TODO: move JWebSocketJarClassLoader into ServerAPI module ?
 		JWebSocketJarClassLoader lClassLoader = new JWebSocketJarClassLoader();
-		Class lClass;
+		Class lClass = null;
 
 		// load map of RPC libraries first
 		// also load map of granted procs
@@ -152,19 +88,44 @@ public class RPCPlugIn extends TokenPlugIn {
 		for (Entry<String, String> lSetting : lSettings.entrySet()) {
 			lKey = lSetting.getKey();
 			lValue = lSetting.getValue();
-			if (lKey.startsWith("jar:")) {
-				lKey = lKey.substring(4);
-				mJars.put(lKey, lValue);
+			if (lKey.startsWith("class:")) {
+				String lClassName = lKey.substring(6);
 				try {
-					String lJarFilePath = getLibraryFolderPath(lValue);
-					lClassLoader.addFile(lJarFilePath);
-					lClass = lClassLoader.loadClass(lKey);
-					mClasses.put(lKey, lClass);
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Class '" + lKey + "' successfully loaded from '" + lJarFilePath + "'.");
+						mLog.debug("Trying to load class '" + lClassName + "' from classpath...");
 					}
+					lClass = Class.forName(lClassName);
 				} catch (Exception ex) {
-					mLog.error(ex.getClass().getSimpleName() + " loading jar: " + ex.getMessage());
+					mLog.error(ex.getClass().getSimpleName()
+							+ " loading class from classpath: "
+							+ ex.getMessage()
+							+ ", hence trying to load from jar.");
+				}
+				// if class could not be loaded from classpath...
+				if (lClass == null) {
+					String lJarFilePath = null;
+					try {
+						lJarFilePath = JWebSocketConfig.getLibraryFolderPath(lValue);
+						if (mLog.isDebugEnabled()) {
+							mLog.debug("Trying to load class '" + lClassName + "' from jar '" + lJarFilePath + "'...");
+						}
+						lClassLoader.addFile(lJarFilePath);
+						lClass = lClassLoader.loadClass(lClassName);
+						if (mLog.isDebugEnabled()) {
+							mLog.debug("Class '" + lClassName + "' successfully loaded from '" + lJarFilePath + "'.");
+						}
+					} catch (Exception ex) {
+						mLog.error(ex.getClass().getSimpleName() + " loading jar '" + lJarFilePath + "': " + ex.getMessage());
+					}
+				}
+				// could the class be loaded?
+				if (lClass != null) {
+					try {
+						Object lInstance = lClass.newInstance();
+						mClasses.put(lClassName, lInstance);
+					} catch (Exception ex) {
+						mLog.error(ex.getClass().getSimpleName() + " creating '" + lClassName + "' instance : " + ex.getMessage());
+					}
 				}
 			}
 		}
@@ -174,37 +135,11 @@ public class RPCPlugIn extends TokenPlugIn {
 			if (lKey.startsWith("roles:")) {
 				lKey = lKey.substring(6);
 				mGrantedProcs.put(lKey, lValue);
-				// extract class name
-				int lIdx = lKey.lastIndexOf('.');
-				if (lIdx >= 0) {
-					String lClassName = lKey.substring(0, lIdx);
-					try {
-						lClass = (Class)mClasses.get(lClassName);
-						if( lClass != null ) {
-							Object lInstance = lClass.newInstance();
-							/*
-							lClass = Class.forName(lClassName);
-							Constructor<WebSocketEngine> lConstr = lClass.getDeclaredConstructor();
-							lConstr.setAccessible(true);
-							Object lInstance = lConstr.newInstance(new Object[]{});
-							 */
-							mClasses.put(lClassName, lInstance);
-							if (mLog.isDebugEnabled()) {
-								mLog.debug("Instance of '" + lClassName + "' successfully created.");
-							}
-						} else {
-							mLog.debug("Class '" + lClassName + "' not loaded.");
-						}
-					} catch (Exception ex) {
-						mLog.error(ex.getClass().getSimpleName() + " creating instance: " + ex.getMessage());
-					}
-				}
 			}
 		}
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("jars to be loaded: " + mJars.toString());
-			mLog.debug("classes loaded: " + mClasses.toString());
-			mLog.debug("granted procs: " + mGrantedProcs.toString());
+			mLog.debug("Available RPC classes: " + mClasses.toString());
+			mLog.debug("Granted RPC methods: " + mGrantedProcs.toString());
 		}
 	}
 
@@ -248,7 +183,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		Object lArgs = aToken.get("args");
 		// TODO: Tokens should always be a map of maps
 		if (lArgs instanceof JSONObject) {
-			lArgs = JSONProcessor.JSON2Token((JSONObject) lArgs);
+			lArgs = new Token((JSONObject) lArgs);
 		}
 
 		String lMsg = null;
@@ -263,8 +198,12 @@ public class RPCPlugIn extends TokenPlugIn {
 			try {
 				// TODO: use RpcCallable here!
 				Object lInstance = mClasses.get(lClassName);
-				Object lObj = call(lInstance, lMethod, lArgs);
-				lResponseToken.put("result", lObj.toString());
+				if (lInstance != null) {
+					Object lObj = call(lInstance, lMethod, lArgs);
+					lResponseToken.put("result", lObj);
+				} else {
+					lMsg = "Class '" + lClassName + "' not found or not properly loaded.";
+				}
 			} catch (NoSuchMethodException ex) {
 				lMsg = "NoSuchMethodException calling '" + lMethod + "' for class " + lClassName + ": " + ex.getMessage();
 			} catch (IllegalAccessException ex) {

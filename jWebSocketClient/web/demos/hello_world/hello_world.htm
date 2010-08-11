@@ -221,7 +221,11 @@
 			function onFileLoadedObs( aToken ) {
 				log( "Loaded file: " + aToken.data );
 			}
-			
+
+			function onFileErrorObs( aToken ) {
+				log( "Error loading file: " + aToken.msg );
+			}
+
 			function onFileSavedObs( aToken ) {
 				var lHTML = "<img src=\"" + aToken.url + "\"/>";
 				log( lHTML );
@@ -242,7 +246,8 @@
 					});
 					jWebSocketClient.setFileSystemCallbacks({
 						OnFileLoaded: onFileLoadedObs,
-						OnFileSaved: onFileSavedObs
+						OnFileSaved: onFileSavedObs,
+						OnFileError: onFileErrorObs
 					});
 					eUsername.focus();
 				} else {

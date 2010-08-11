@@ -134,7 +134,7 @@ public final class JWebSocketXmlConfigInitializer implements
 			// if not in classpath...
 			// try to load engine from given .jar file
 			if (lEngineClass == null) {
-				jarFilePath = getLibraryFolderPath(engineConfig.getJar());
+				jarFilePath = JWebSocketConfig.getLibraryFolderPath(engineConfig.getJar());
 				// jarFilePath may be null if .jar is included in server bundle
 				if (jarFilePath != null) {
 					if (mLog.isDebugEnabled()) {
@@ -206,7 +206,7 @@ public final class JWebSocketXmlConfigInitializer implements
 				// if not in classpath...
 				// try to load server from given .jar file
 				if (lServerClass == null) {
-					lJarFilePath = getLibraryFolderPath(lServerConfig.getJar());
+					lJarFilePath = JWebSocketConfig.getLibraryFolderPath(lServerConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
 					if (lJarFilePath != null) {
 						if (mLog.isDebugEnabled()) {
@@ -290,7 +290,7 @@ public final class JWebSocketXmlConfigInitializer implements
 				// if not in classpath...
 				// try to load plug-in from given .jar file
 				if (lPluginClass == null) {
-					String jarFilePath = getLibraryFolderPath(lPluginConfig.getJar());
+					String jarFilePath = JWebSocketConfig.getLibraryFolderPath(lPluginConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
 					if (jarFilePath != null) {
 						mClassLoader.addFile(jarFilePath);
@@ -393,7 +393,7 @@ public final class JWebSocketXmlConfigInitializer implements
 				// if not in classpath...
 				// try to load plug-in from given .jar file
 				if (lFilterClass == null) {
-					String jarFilePath = getLibraryFolderPath(lFilterConfig.getJar());
+					String jarFilePath = JWebSocketConfig.getLibraryFolderPath(lFilterConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
 					if (jarFilePath != null) {
 						mClassLoader.addFile(jarFilePath);
@@ -450,63 +450,4 @@ public final class JWebSocketXmlConfigInitializer implements
 		return lFilterMap;
 	}
 
-	/**
-	 * private method that checks the path of the jWebSocket.xml file
-	 * 
-	 * @return the path to jWebSocket.xml
-	 */
-	private String getLibraryFolderPath(String fileName) {
-		String lWebSocketLib = null;
-		String lWebSocketHome = null;
-		String lFileSep = null;
-		File lFile = null;
-
-		// try to load lib from %JWEBSOCKET_HOME%/libs folder
-		lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
-		lFileSep = System.getProperty("file.separator");
-		if (lWebSocketHome != null) {
-			// append trailing slash if needed
-			if (!lWebSocketHome.endsWith(lFileSep)) {
-				lWebSocketHome += lFileSep;
-			}
-			// jar can to be located in %JWEBSOCKET_HOME%/libs
-			lWebSocketLib = lWebSocketHome + "libs" + lFileSep + fileName;
-			lFile = new File(lWebSocketLib);
-			if (lFile.exists()) {
-				if (mLog.isDebugEnabled()) {
-					mLog.debug("Loading " + lWebSocketLib + "...");
-				}
-				return lWebSocketLib;
-			} else {
-				if (mLog.isDebugEnabled()) {
-					mLog.debug(fileName + " not found at %" + JWEBSOCKET_HOME + "%/libs.");
-				}
-			}
-		}
-
-		// try to load lib from %CATALINA_HOME%/libs folder
-		lWebSocketHome = System.getenv(CATALINA_HOME);
-		lFileSep = System.getProperty("file.separator");
-		if (lWebSocketHome != null) {
-			// append trailing slash if needed
-			if (!lWebSocketHome.endsWith(lFileSep)) {
-				lWebSocketHome += lFileSep;
-			}
-			// jars can to be located in %CATALINA_HOME%/lib
-			lWebSocketLib = lWebSocketHome + "lib" + lFileSep + fileName;
-			lFile = new File(lWebSocketLib);
-			if (lFile.exists()) {
-				if (mLog.isDebugEnabled()) {
-					mLog.debug("Loading " + lWebSocketLib + "...");
-				}
-				return lWebSocketLib;
-			} else {
-				if (mLog.isDebugEnabled()) {
-					mLog.debug(fileName + " not found at %" + CATALINA_HOME + "/lib%.");
-				}
-			}
-		}
-
-		return null;
-	}
 }

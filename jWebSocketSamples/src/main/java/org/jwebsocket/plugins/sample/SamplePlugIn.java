@@ -16,6 +16,10 @@
 package org.jwebsocket.plugins.sample;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import javolution.util.FastList;
+import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
@@ -99,6 +103,17 @@ public class SamplePlugIn extends TokenPlugIn {
 
 				// put an array into the token
 				lResponse.put("array", new Object[]{1, 2, 3, 'a', 'b', 'c', "ABC", "XYZ", true, false});
+
+				// put a map into the token
+				Map lMap = new FastMap();
+				lMap.put("MapItem1", 1);
+				lMap.put("MapItem2", 2);
+				lResponse.put("map", lMap);
+
+				List lList = new FastList();
+				lList.add("ListItem1");
+				lList.add("ListItem2");
+				lResponse.put("list", lList);
 
 				// put a token into a token
 				Token lToken = new Token();

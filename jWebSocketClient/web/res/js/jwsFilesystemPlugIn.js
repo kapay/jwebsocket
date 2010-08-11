@@ -31,9 +31,15 @@ jws.FileSystemPlugIn = {
 			// here you can handle incomimng tokens from the server
 			// directy in the plug-in if desired.
 			if( "load" == aToken.reqType ) {
-				aToken.data = Base64.decode( aToken.data );
-				if( this.OnFileLoaded ) {
-					this.OnFileLoaded( aToken );
+				if( aToken.code == 0 ) {
+					aToken.data = Base64.decode( aToken.data );
+					if( this.OnFileLoaded ) {
+						this.OnFileLoaded( aToken );
+					}
+				} else {
+					if( this.OnFileError ) {
+						this.OnFileError( aToken );
+					}
 				}
 			} else if( "event" == aToken.type ) {
 				if( "filesaved" == aToken.name ) {
@@ -89,6 +95,9 @@ jws.FileSystemPlugIn = {
 		}
 		if( aListeners.OnFileSaved !== undefined ) {
 			this.OnFileSaved = aListeners.OnFileSaved;
+		}
+		if( aListeners.OnFileError !== undefined ) {
+			this.OnFileError = aListeners.OnFileError;
 		}
 	}
 

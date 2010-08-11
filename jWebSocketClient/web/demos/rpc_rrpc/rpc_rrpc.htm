@@ -92,17 +92,25 @@
 				// perform the Remote Procedure Call...
 				var lRes = lWSC.rpc(
 					// pass class, method and argument for server java method:
-					"org.jWebSocket.demo.DemoRPCServer", aMethod, lArgs, {
-					spawnThread: eSpawnThread.checked,
-					// new easy-to-use response callback
-					OnResponse: function( aToken ) {
-						if( aToken.code != 0 ) {
-							log( "RPC Error: " + aToken.msg );
-						} else {
-							log( "Received RPC result: " + aToken.result );
+					"org.jwebsocket.rpc.sample.SampleRPCLibrary",
+					aMethod,
+					lArgs, 
+					{	spawnThread: eSpawnThread.checked,
+						// new easy-to-use response callback
+						OnResponse: function( aToken ) {
+							if( aToken.code != 0 ) {
+								log( "RPC Error: " + aToken.msg );
+							} else {
+								var lRes = aToken.result;
+								debugger;
+								if( typeof lRes == "object") {
+									lRes = JSON.stringify( lRes );
+								}
+								log( "Received RPC result: " + lRes );
+							}
 						}
 					}
-				});
+				);
 
 				log( lWSC.resultToString( lRes ) );
 			}
@@ -123,17 +131,26 @@
 				// perform the Remote Procedure Call...
 				var lRes = lWSC.rpc(
 					// pass class, method and argument for server java method:
-					"org.jwebsocket.rpc.sample.SampleRPCLibrary", "sampleTokenRPC", lArgs, {
-					spawnThread: eSpawnThread.checked,
-					// new easy-to-use response callback
-					OnResponse: function( aToken ) {
-						if( aToken.code != 0 ) {
-							log( "RPC Error: " + aToken.msg );
-						} else {
-							log( "Received RPC result: " + aToken.result );
+					"org.jwebsocket.rpc.sample.SampleRPCLibrary", 
+					"sampleTokenRPC",
+					lArgs,
+					// pass option to spawn thread and response call back
+					{	spawnThread: eSpawnThread.checked,
+						// new easy-to-use response callback
+						OnResponse: function( aToken ) {
+							if( aToken.code != 0 ) {
+								log( "RPC Error: " + aToken.msg );
+							} else {
+								var lRes = aToken.result;
+								// if an object is returned convert it into a human readable format
+								if( typeof lRes == "object") {
+									lRes = JSON.stringify( lRes );
+								}
+								log( "Received RPC result: " + lRes );
+							}
 						}
 					}
-				});
+				);
 
 				log( lWSC.resultToString( lRes ) );
 			}
