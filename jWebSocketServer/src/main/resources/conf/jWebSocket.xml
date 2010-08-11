@@ -10,7 +10,6 @@
 
 <!-- jWebSocket server configuration -->
 <jWebSocket>
-
 	<!--
 		installation can be prod or dev.
 		  'prod'- installation means all the classes will be loaded
@@ -31,7 +30,7 @@
 	<logging>
 		<log4j>
 			<!-- log4j appender, one of the following options [console|singlefile|rollingfile] -->
-			<appender>rollingfile</appender>
+			<appender>console</appender>
 			<!-- layout, please refer to http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html -->
 			<pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n</pattern>
 			<!-- log-level, one of the following options: [all|debug|info|warn|error|fatal|off] -->
@@ -92,7 +91,7 @@
 				maximum size of the data packet that the engine will read,
 				if the frame size is larger than this the connection will be closed.
 			-->
-			<maxframesize>16384</maxframesize>
+			<maxframesize>1048840</maxframesize>
 		</engine>
 	</engines>
 
@@ -223,35 +222,17 @@
 				<server-assignment>ts0</server-assignment>
 			</server-assignments>
 		</plugin>
-
 		<plugin>
-			<name>org.jwebsocket.plugins.rpc.RPCPlugIn</name>
-			<id>jws.rpc</id>
-			<ns>org.jWebSocket.plugins.rpc</ns>
+			<name>org.jwebsocket.plugins.admin.AdminPlugIn</name>
+			<id>jws.admin</id>
+			<ns>org.jWebSocket.plugins.admin</ns>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>
 			</server-assignments>
-		</plugin>
-
-		<plugin>
-			<name>org.jwebsocket.plugins.streaming.StreamingPlugIn</name>
-			<id>jws.streaming</id>
-			<ns>org.jWebSocket.plugins.streaming</ns>
-			<jar>jWebSocketServer-0.10.jar</jar>
-			<server-assignments>
-				<server-assignment>ts0</server-assignment>
-			</server-assignments>
-		</plugin>
-
-		<plugin>
-			<name>org.jwebsocket.plugins.sharedobjects.SharedObjectsPlugIn</name>
-			<id>jws.sharedObjects</id>
-			<ns>org.jWebSocket.plugins.sharedobjects</ns>
-			<jar>jWebSocketServer-0.10.jar</jar>
-			<server-assignments>
-				<server-assignment>ts0</server-assignment>
-			</server-assignments>
+			<settings>
+				<setting key="allowShutdown">true</setting>
+			</settings>
 		</plugin>
 		<plugin>
 			<name>org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn</name>
@@ -273,6 +254,26 @@
 			</server-assignments>
 		</plugin>
 		-->
+		<plugin>
+			<name>org.jwebsocket.plugins.sharedobjects.SharedObjectsPlugIn</name>
+			<id>jws.sharedObjects</id>
+			<ns>org.jWebSocket.plugins.sharedobjects</ns>
+			<jar>jWebSocketServer-0.10.jar</jar>
+			<server-assignments>
+				<server-assignment>ts0</server-assignment>
+			</server-assignments>
+		</plugin>
+<!--
+		<plugin>
+			<name>org.jwebsocket.plugins.streaming.StreamingPlugIn</name>
+			<id>jws.streaming</id>
+			<ns>org.jWebSocket.plugins.streaming</ns>
+			<jar>jWebSocketServer-0.10.jar</jar>
+			<server-assignments>
+				<server-assignment>ts0</server-assignment>
+			</server-assignments>
+		</plugin>
+-->
 		<plugin>
 			<name>org.jwebsocket.plugins.jdbc.JDBCPlugIn</name>
 			<id>jws.jdbc</id>
@@ -319,20 +320,8 @@
 				<server-assignment>ts0</server-assignment>
 			</server-assignments>
 		</plugin>
-		<plugin>
-			<name>org.jwebsocket.plugins.admin.AdminPlugIn</name>
-			<id>jws.admin</id>
-			<ns>org.jWebSocket.plugins.admin</ns>
-			<jar>jWebSocketServer-0.10.jar</jar>
-			<server-assignments>
-				<server-assignment>ts0</server-assignment>
-			</server-assignments>
-			<settings>
-				<setting key="allowShutdown">true</setting>
-			</settings>
-		</plugin>
+
 		<!-- this is a sample for a user plug-in -->
-		<!--
 		<plugin>
 			<name>org.jwebsocket.plugins.sample.SamplePlugIn</name>
 			<id>jws.sample</id>
@@ -342,7 +331,32 @@
 				<server-assignment>ts0</server-assignment>
 			</server-assignments>
 		</plugin>
-		-->
+		<plugin>
+			<name>org.jwebsocket.plugins.rpc.RPCPlugIn</name>
+			<id>jws.rpc</id>
+			<ns>org.jWebSocket.plugins.rpc</ns>
+			<jar>jWebSocketServer-0.10.jar</jar>
+			<server-assignments>
+				<server-assignment>ts0</server-assignment>
+			</server-assignments>
+			<settings>
+				<!-- list all jars from %JWEBSOCKET_HOME%/libs or %CLASSPATH% path -->
+				<setting key="jar:org.jwebsocket.rpc.sample.SampleRPCLibrary">jWebSocketSamples-0.10.jar</setting>
+				<!--
+				<setting key="jar:MyOwnRPCLibrary">MyOwnRPCLibrary.jar</setting>
+				<setting key="jar:AnyThirdPartyRPCLibrary">AnyThirdPartyRPCLibrary.jar</setting>
+				-->
+
+				<!-- list all granted methods for RPC, users need to be authorized individually and
+					assign granted RPC methods to certain roles -->
+				<!-- new RPC library -->
+				<setting key="roles:org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC">Administrator, User, Guest</setting>
+				<!--
+				<setting key="roles:org.jwebsocket.demo.DemoRPCServer.getMD5">Administrator, User, Guest</setting>
+				<setting key="roles:org.jWebSocket.demo.DemoRPCServer.getProtected">Administrator</setting>
+				-->
+			</settings>
+		</plugin>
 	</plugins>
 
 	<!-- filters to be instantiated for jWebSocket -->
@@ -430,5 +444,4 @@
 			</roles>
 		</user>
 	</users>
-
 </jWebSocket>

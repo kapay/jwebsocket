@@ -200,11 +200,9 @@ public final class JWebSocketLoader {
 		URL lURL = Thread.currentThread().getContextClassLoader().getResource("conf/" + JWEBSOCKET_XML);
 		if (lURL != null) {
 			try {
-				//this will give problem if file path contains directory with space on its name
-				//lWebSocketXML = lURL.getFile();			
-				
-				lFile = new File(lURL.toURI());			
+				lFile = new File(lURL.toURI());
 				if (lFile.exists()) {
+					lWebSocketXML = lFile.getPath();
 					return lWebSocketXML;
 				}
 			} catch (URISyntaxException e) {
