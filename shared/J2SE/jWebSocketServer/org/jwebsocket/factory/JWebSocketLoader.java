@@ -21,7 +21,9 @@ import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_XML;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -197,10 +199,16 @@ public final class JWebSocketLoader {
 		// finally try to find config file at %CLASSPATH%/conf/
 		URL lURL = Thread.currentThread().getContextClassLoader().getResource("conf/" + JWEBSOCKET_XML);
 		if (lURL != null) {
-			lWebSocketXML = lURL.getFile();
-			lFile = new File(lWebSocketXML);
-			if (lFile.exists()) {
-				return lWebSocketXML;
+			try {
+				//this will give problem if file path contains directory with space on its name
+				//lWebSocketXML = lURL.getFile();			
+				
+				lFile = new File(lURL.toURI());			
+				if (lFile.exists()) {
+					return lWebSocketXML;
+				}
+			} catch (URISyntaxException e) {
+				//TODO: log exception
 			}
 		}
 
