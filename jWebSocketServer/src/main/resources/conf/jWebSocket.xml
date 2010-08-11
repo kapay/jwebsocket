@@ -263,7 +263,6 @@
 				<server-assignment>ts0</server-assignment>
 			</server-assignments>
 		</plugin>
-<!--
 		<plugin>
 			<name>org.jwebsocket.plugins.streaming.StreamingPlugIn</name>
 			<id>jws.streaming</id>
@@ -273,7 +272,6 @@
 				<server-assignment>ts0</server-assignment>
 			</server-assignments>
 		</plugin>
--->
 		<plugin>
 			<name>org.jwebsocket.plugins.jdbc.JDBCPlugIn</name>
 			<id>jws.jdbc</id>
@@ -341,19 +339,19 @@
 			</server-assignments>
 			<settings>
 				<!-- list all jars from %JWEBSOCKET_HOME%/libs or %CLASSPATH% path -->
-				<setting key="jar:org.jwebsocket.rpc.sample.SampleRPCLibrary">jWebSocketSamples-0.10.jar</setting>
+				<setting key="class:org.jwebsocket.rpc.sample.SampleRPCLibrary">jWebSocketSamples-0.10.jar</setting>
 				<!--
-				<setting key="jar:MyOwnRPCLibrary">MyOwnRPCLibrary.jar</setting>
-				<setting key="jar:AnyThirdPartyRPCLibrary">AnyThirdPartyRPCLibrary.jar</setting>
+				<setting key="class:MyOwnRPCLibrary">MyOwnRPCLibrary.jar</setting>
+				<setting key="class:AnyThirdPartyRPCLibrary">AnyThirdPartyRPCLibrary.jar</setting>
 				-->
 
 				<!-- list all granted methods for RPC, users need to be authorized individually and
 					assign granted RPC methods to certain roles -->
 				<!-- new RPC library -->
 				<setting key="roles:org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC">Administrator, User, Guest</setting>
+				<setting key="roles:org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5">Administrator, User, Guest</setting>
 				<!--
-				<setting key="roles:org.jwebsocket.demo.DemoRPCServer.getMD5">Administrator, User, Guest</setting>
-				<setting key="roles:org.jWebSocket.demo.DemoRPCServer.getProtected">Administrator</setting>
+				<setting key="roles:org.jwebsocket.rpc.sample.SampleRPCLibrary.getProtected">Administrator, User, Guest</setting>
 				-->
 			</settings>
 		</plugin>
