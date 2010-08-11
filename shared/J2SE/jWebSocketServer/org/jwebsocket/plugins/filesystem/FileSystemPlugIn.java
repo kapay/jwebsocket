@@ -199,8 +199,31 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
 
+		String lBaseDir;
+		if (JWebSocketCommonConstants.SCOPE_PRIVATE.equals(lScope)) {
+			String lUsername = getUsername(aConnector);
+			lBaseDir = getSetting(PRIVATE_DIR_KEY, PRIVATE_DIR_DEF);
+			if (lUsername != null) {
+				lBaseDir = lBaseDir.replace("{username}", lUsername);
+			} else {
+				lResponse.put("code", -1);
+				lResponse.put("msg", "not authenticated to save private file");
+				// send error response to requester
+				lServer.sendToken(aConnector, lResponse);
+				return;
+			}
+		} else if (JWebSocketCommonConstants.SCOPE_PUBLIC.equals(lScope)) {
+			lBaseDir = getSetting(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
+		} else {
+			lResponse.put("code", -1);
+			lResponse.put("msg", "invalid scope");
+			// send error response to requester
+			lServer.sendToken(aConnector, lResponse);
+			return;
+		}
+
 		// complete the response token
-		File lFile = new File(PUBLIC_DIR_DEF + lFilename);
+		File lFile = new File(lBaseDir + lFilename);
 		byte[] lBA = null;
 		try {
 			lBA = FileUtils.readFileToByteArray(lFile);
