@@ -270,6 +270,7 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 		lToken.put("sourceId", getClientId());
 		lToken.put("sender", getUsername());
 		lToken.put("filename", aFilename);
+		lToken.put("mimetype", aFilename);
 		lToken.put("scope", aScope);
 		lToken.put("notify", aNotify);
 

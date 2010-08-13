@@ -6,7 +6,7 @@
 		<!-- Comment needs to be BELOW this meta tag! -->
 <!--
 //	****************************************************************************
-//	jWebSocket Base Demo (uses jWebSocket Client and Server)
+//	jWebSocket RPC Demo (uses jWebSocket Client and Server)
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	****************************************************************************
 //	This program is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
 -->
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-		<title>jWebSocket Base Demo</title>
+		<title>jWebSocket Snapshot Demo</title>
 		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
 		<script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
 		<script type="text/javascript" language="JavaScript">
@@ -43,78 +43,59 @@
 				eLog.scrollTop = 0;
 			}
 
-
 			var lWSC = null;
 
 			function connect() {
-				var lURL = jws.JWS_SERVER_URL + "/;prot=custom";
+				var lURL = jws.JWS_SERVER_URL;
 
 				log( "Connecting to " + lURL + " ..." );
-				try {
-					lWSC.open( lURL, {
+				var lRes = lWSC.open( lURL, {
 
-						// OnOpen callback
-						OnOpen: function( aEvent ) {
-							log( "jWebSocket connection established." );
-						},
+					// OnOpen callback
+					OnOpen: function( aEvent ) {
+						log( "<font style='color:#888'>jWebSocket connection established.</font>" );
+					},
 
-						// OnMessage callback
-						OnMessage: function( aEvent ) {
-							log( "jWebSocket message received: '" + aEvent.data + "'" );
-						},
+					// OnMessage callback
+					OnMessage: function( aEvent ) {
+						log( "<font style='color:#888'>jWebSocket message received: '" + aEvent.data + "'</font>" );
+					},
 
-						// OnClose callback
-						OnClose: function( aEvent ) {
-							log( "jWebSocket connection closed." );
-						}
+					// OnClose callback
+					OnClose: function( aEvent ) {
+						log( "<font style='color:#888'>jWebSocket connection closed.</font>" );
+					}
 
-					});
-				} catch( ex ) {
-					log( "Exception: " + ex.message );
-				}
+				});
+
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function disconnect() {
 				if( lWSC ) {
 					log( "Disconnecting..." );
-					try {
-						lWSC.close();
-						log( "Disconnected." );
-					} catch( ex ) {
-						log( "Exception: " + ex.message );
-					}
-				}
-			}
-
-			function send() {
-				var lMsg = eMessage.value;
-				log( "Sending '" + lMsg + "'..." );
-				try {
-					/*
-					lMsg = "";
-					for (var i = 0; i < 1000; i++) {
-						lMsg += "<br>" + i + ": 1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<br>";
-					}
-					*/
-					lWSC.sendStream( lMsg );
-					log( "Message sent." );
-				} catch( ex ) {
-					log( "Exception: " + ex.message );
+					var lRes = lWSC.close();
+					log( lWSC.resultToString( lRes ) );
 				}
 			}
 
 			function initPage() {
-				eLog = jws.$( "sdivChat" );
-				eMessage = jws.$( "stxfMsg" );
+				eLog = jws.$( "sdivLog" );
+				eArgs = jws.$( "stxfMsg" );
+				eTarget = jws.$( "stxfTarget" );
+				eSpawnThread = jws.$( "schkThreaded" );
 
-				if( window.WebSocket ) {
-					lWSC = new jws.jWebSocketBaseClient();
+				if( jws.browserSupportsWebSockets() ) {
+					lWSC = new jws.jWebSocketJSONClient();
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnDisconnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnClear" ).setAttribute( "disabled", "disabled" );
 					jws.$( "stxfMsg" ).setAttribute( "disabled", "disabled" );
-					jws.$( "sbtnSend" ).setAttribute( "disabled", "disabled" );
+					jws.$( "stxfTarget" ).setAttribute( "disabled", "disabled" );
+					jws.$( "sbtnGranted" ).setAttribute( "disabled", "disabled" );
+					jws.$( "sbtnProtected" ).setAttribute( "disabled", "disabled" );
+					jws.$( "sbtnRRPC" ).setAttribute( "disabled", "disabled" );
 
 					var lMsg = jws.MSG_WS_NOT_SUPPORTED;
 					alert( lMsg );
@@ -137,18 +118,13 @@
 		<script type="text/javascript">
 			var lFrameElem = this.frameElement;
 			if( !lFrameElem ) {
-				location.replace( "../../index.htm?page=demos/fundamentals/fundamentals.htm" );
+				location.replace( "../../index.htm?page=demos/rpc_rrpc/rpc_rrpc.htm" );
 			}
 		</script>
 -->		
-		<h1>jWebSocket Base Demo</h1>
-		<p>This demo shows how to easily set up a minimum communication w/o any protocol between a jWebSocket client and a jWebSocket server.
-		This example is based on the class <code>org.jWebSocket.connectors.UserConnector</code> 
-		which simply echos the text/plain request back to the client. If you are 
-		not sure whether your favorite browser supports WebSockets please refer 
-		to our <a target="_top" href="http://jwebsocket.org/jws_for_all.htm">jWebSocket Cross-Browser
-		Compatibility</a> page.</p>
-		<div id="sdivChat" class="sdivContainer"
+		<h1>jWebSocket Snapshot Demo</h1>
+		<p>This demo shows....</p>
+		<div id="sdivLog" class="sdivContainer"
 			 style="position:relative; height:300px; overflow:auto;">
 		</div>
 		<div class="sdivContainer">
@@ -157,9 +133,20 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnect" type="button" value="Connect" onclick="connect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Disconnect" onclick="disconnect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
-					<td class="stdDlg" width="5">Message</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSend" type="button" value="Echo" onclick="send();"></td>
+					<td class="stdDlg" width="5">Arguments</td>
+					<td class="stdDlg" width="" colspan="2"><input class="stxfDlg" id="stxfMsg" type="text" value="My Remote Procedure Arguments" style="width:100%"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGranted" type="button" value="Call granted" onclick="rpcGrantedDemo();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnProtected" type="button" value="Call protect." onclick="rpcProtectedDemo();"></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5">Target&nbsp;Id</td>
+					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfTarget" type="text" value="ID" style="width:100%"></td>
+					<td class="stdDlg" width=""><input class="schkThreaded" id="schkThreaded" type="checkbox" value="on" checked="checked" title="run remote procedure in separate thread on server"> spawn thread</td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRRPC" type="button" value="Call reverse" onclick="rrpcDemo();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="RPC Lib" onclick="rpcTest();"></td>
 				</tr>
 			</table>
 		</div>
