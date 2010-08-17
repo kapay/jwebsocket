@@ -111,8 +111,7 @@ public class AdminPlugIn extends TokenPlugIn {
 		// check if user is allowed to run 'getConnections' command
 		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_ADMIN + ".getConnections")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// TODO: consider security settings
-			// return;
+			return;
 		}
 
 		Token lResponse = lServer.createResponse(aToken);

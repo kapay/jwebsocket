@@ -270,7 +270,8 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 		lToken.put("sourceId", getClientId());
 		lToken.put("sender", getUsername());
 		lToken.put("filename", aFilename);
-		lToken.put("mimetype", aFilename);
+		// TODO: set mimetype correctly according to file extension based on configuration in jWebSocket.xml
+		lToken.put("mimetype", "image/jpeg");
 		lToken.put("scope", aScope);
 		lToken.put("notify", aNotify);
 

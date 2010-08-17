@@ -23,19 +23,25 @@
 -->
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-		<title>jWebSocket Snapshot Demo</title>
+		<title>jWebSocket Mobile Snapshot Demo</title>
 		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
+		<!-- load the jWebSocket JavaScript client library -->
 		<script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
+		<!-- this one imports the client side file system plug-in -->
+		<script type="text/javascript" src="../../res/js/jwsFilesystemPlugIn.js"></script>
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
 
-			function log( aString ) {
-				eLog.innerHTML +=
-					aString + "<br>";
+			function scrollLogToBottom() {
 				if( eLog.scrollHeight > eLog.clientHeight ) {
 					eLog.scrollTop = eLog.scrollHeight - eLog.clientHeight;
 				}
+			}
+
+			function log( aString ) {
+				eLog.innerHTML +=
+					aString + "<br>";
 			}
 
 			function clearLog() {
@@ -58,7 +64,7 @@
 
 					// OnMessage callback
 					OnMessage: function( aEvent ) {
-						log( "<font style='color:#888'>jWebSocket message received: '" + aEvent.data + "'</font>" );
+						// log( "<font style='color:#888'>jWebSocket message received: '" + aEvent.data + "'</font>" );
 					},
 
 					// OnClose callback
@@ -74,28 +80,50 @@
 			function disconnect() {
 				if( lWSC ) {
 					log( "Disconnecting..." );
-					var lRes = lWSC.close();
+					var lRes = lWSC.close({ timeout: 3000 });
 					log( lWSC.resultToString( lRes ) );
 				}
 			}
 
+			function checkImageSize( aEvent ) {
+				var TARGET_WIDTH = 320;
+				var lImg = null;
+				if( !aEvent ) {
+					aEvent = window.event;
+					if( aEvent ) {
+						lImg = aEvent.srcElement;
+					}
+				} else {
+					lImg = aEvent.target;
+				}
+				if( lImg ) {
+					var lAspect = lImg.offsetWidth / lImg.offsetHeight;
+					if( lImg.offsetWidth != TARGET_WIDTH ) {
+						lImg.style.width = TARGET_WIDTH + "px";
+						lImg.style.height = ( lImg.offsetWidth / lAspect ) + "px";
+					}
+				}
+				scrollLogToBottom();
+			}
+
+			function onFileSavedObs( aToken ) {
+				log( "Picture received: '" + aToken.filename + "':" );
+				var lHTML = "<img onload=\"checkImageSize()\" src=\"" + aToken.url + "\"/>";
+				log( lHTML );
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
-				eArgs = jws.$( "stxfMsg" );
-				eTarget = jws.$( "stxfTarget" );
-				eSpawnThread = jws.$( "schkThreaded" );
 
 				if( jws.browserSupportsWebSockets() ) {
 					lWSC = new jws.jWebSocketJSONClient();
+					lWSC.setFileSystemCallbacks({
+						OnFileSaved: onFileSavedObs
+					});
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnDisconnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnClear" ).setAttribute( "disabled", "disabled" );
-					jws.$( "stxfMsg" ).setAttribute( "disabled", "disabled" );
-					jws.$( "stxfTarget" ).setAttribute( "disabled", "disabled" );
-					jws.$( "sbtnGranted" ).setAttribute( "disabled", "disabled" );
-					jws.$( "sbtnProtected" ).setAttribute( "disabled", "disabled" );
-					jws.$( "sbtnRRPC" ).setAttribute( "disabled", "disabled" );
 
 					var lMsg = jws.MSG_WS_NOT_SUPPORTED;
 					alert( lMsg );
@@ -122,8 +150,10 @@
 			}
 		</script>
 -->		
-		<h1>jWebSocket Snapshot Demo</h1>
-		<p>This demo shows....</p>
+		<h1>jWebSocket Mobile Snapshot Demo</h1>
+		<p>This demo shows how to take a picture from a jWebSocket enabled Android or Java ME application and send it to a browser.
+		Please connect both this dialog and your Android or Java ME mobile device (also working with the corresponding emulators)
+		to the same server and run the Camera Demo on the mobile device and view the incoming images.</p>
 		<div id="sdivLog" class="sdivContainer"
 			 style="position:relative; height:300px; overflow:auto;">
 		</div>
@@ -132,21 +162,7 @@
 				<tr class="strDlg">
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnect" type="button" value="Connect" onclick="connect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Disconnect" onclick="disconnect();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
-					<td class="stdDlg" width="5">Arguments</td>
-					<td class="stdDlg" width="" colspan="2"><input class="stxfDlg" id="stxfMsg" type="text" value="My Remote Procedure Arguments" style="width:100%"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGranted" type="button" value="Call granted" onclick="rpcGrantedDemo();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnProtected" type="button" value="Call protect." onclick="rpcProtectedDemo();"></td>
-				</tr>
-				<tr class="strDlg">
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5">Target&nbsp;Id</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfTarget" type="text" value="ID" style="width:100%"></td>
-					<td class="stdDlg" width=""><input class="schkThreaded" id="schkThreaded" type="checkbox" value="on" checked="checked" title="run remote procedure in separate thread on server"> spawn thread</td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRRPC" type="button" value="Call reverse" onclick="rrpcDemo();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="RPC Lib" onclick="rpcTest();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
 				</tr>
 			</table>
 		</div>

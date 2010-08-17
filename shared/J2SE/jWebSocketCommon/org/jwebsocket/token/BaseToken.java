@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Server Configuration Constants
+//	jWebSocket - Basic Token Implementation
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -13,22 +13,17 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config;
+package org.jwebsocket.token;
 
 /**
- * Provides a global shared container for the jWebSocket configuration settings.
  *
  * @author aschulze
- * @version $Id: JWebSocketServerConstants.java 624 2010-07-06 12:28:44Z fivefeetfurther $
  */
-public final class JWebSocketClientConstants {
+public class BaseToken {
 
 	/**
-	 * Current version string of the jWebSocket package.
+	 *
 	 */
-	public static final String VERSION_STR = "0.10.0817 beta";
-	/**
-	 * Name space base for tokens and plug-ins.
-	 */
-	public static final String NS_BASE = "org.jWebSocket";
+	public static final String TT_EVENT = "event";
+
 }

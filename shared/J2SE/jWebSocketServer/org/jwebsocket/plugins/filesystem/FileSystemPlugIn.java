@@ -45,9 +45,9 @@ public class FileSystemPlugIn extends TokenPlugIn {
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_FILESYSTEM = JWebSocketServerConstants.NS_BASE + ".plugins.filesystem";
 	// TODO: make these settings configurable
-	private static String PRIVATE_DIR_KEY = "privateDir";
-	private static String PUBLIC_DIR_KEY = "publicDir";
-	private static String WEB_ROOT_KEY = "webroot";
+	private static String PRIVATE_DIR_KEY = "alias:privateDir";
+	private static String PUBLIC_DIR_KEY = "alias:publicDir";
+	private static String WEB_ROOT_KEY = "alias:webroot";
 	private static String PRIVATE_DIR_DEF = "%JWEBSOCKET_HOME%/private/{username}/";
 	private static String PUBLIC_DIR_DEF = "%JWEBSOCKET_HOME%/public/";
 	private static String WEB_ROOT_DEF = "http://jwebsocket.org/";
@@ -85,6 +85,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 	 */
 	public void save(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
+		String lMsg;
 
 		if (log.isDebugEnabled()) {
 			log.debug("Processing 'save'...");
@@ -92,9 +93,11 @@ public class FileSystemPlugIn extends TokenPlugIn {
 
 		// check if user is allowed to run 'save' command
 		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".save")) {
+			if (log.isDebugEnabled()) {
+				log.debug("Returning 'Access denied'...");
+			}
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// TODO: uncomment this return to apply security settings once available
-			// return;
+			return;
 		}
 
 		// instantiate response token
@@ -103,7 +106,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		// obtain required parameters for file load operation
 		String lFilename = aToken.getString("filename");
 		String lScope = aToken.getString("scope", JWebSocketCommonConstants.SCOPE_PRIVATE);
-		
+
 		// TODO: Replace optional variables in path like %JWEBSOCKET_HOME% by env var values!
 
 		// scope may be "private" or "public"
@@ -114,8 +117,12 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			if (lUsername != null) {
 				lBaseDir = lBaseDir.replace("{username}", lUsername);
 			} else {
+				lMsg = "not authenticated to save private file";
+				if (log.isDebugEnabled()) {
+					log.debug(lMsg);
+				}
 				lResponse.put("code", -1);
-				lResponse.put("msg", "not authenticated to save private file");
+				lResponse.put("msg", lMsg);
 				// send error response to requester
 				lServer.sendToken(aConnector, lResponse);
 				return;
@@ -123,8 +130,12 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		} else if (JWebSocketCommonConstants.SCOPE_PUBLIC.equals(lScope)) {
 			lBaseDir = getSetting(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
 		} else {
+			lMsg = "invalid scope";
+			if (log.isDebugEnabled()) {
+				log.debug(lMsg);
+			}
 			lResponse.put("code", -1);
-			lResponse.put("msg", "invalid scope");
+			lResponse.put("msg", lMsg);
 			// send error response to requester
 			lServer.sendToken(aConnector, lResponse);
 			return;
@@ -179,6 +190,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 	 */
 	public void load(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
+		String lMsg;
 
 		if (log.isDebugEnabled()) {
 			log.debug("Processing 'load'...");
@@ -186,9 +198,11 @@ public class FileSystemPlugIn extends TokenPlugIn {
 
 		// check if user is allowed to run 'load' command
 		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".load")) {
+			if (log.isDebugEnabled()) {
+				log.debug("Returning 'Access denied'...");
+			}
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// TODO: uncomment this return to apply security settings once available
-			//return;
+			return;
 		}
 
 		// obtain required parameters for file load operation
@@ -206,8 +220,12 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			if (lUsername != null) {
 				lBaseDir = lBaseDir.replace("{username}", lUsername);
 			} else {
+				lMsg = "not authenticated to load private file";
+				if (log.isDebugEnabled()) {
+					log.debug(lMsg);
+				}
 				lResponse.put("code", -1);
-				lResponse.put("msg", "not authenticated to save private file");
+				lResponse.put("msg", lMsg);
 				// send error response to requester
 				lServer.sendToken(aConnector, lResponse);
 				return;
@@ -215,8 +233,12 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		} else if (JWebSocketCommonConstants.SCOPE_PUBLIC.equals(lScope)) {
 			lBaseDir = getSetting(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
 		} else {
+			lMsg = "invalid scope";
+			if (log.isDebugEnabled()) {
+				log.debug(lMsg);
+			}
 			lResponse.put("code", -1);
-			lResponse.put("msg", "invalid scope");
+			lResponse.put("msg", lMsg);
 			// send error response to requester
 			lServer.sendToken(aConnector, lResponse);
 			return;

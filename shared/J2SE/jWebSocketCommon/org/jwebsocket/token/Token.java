@@ -17,23 +17,21 @@ package org.jwebsocket.token;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jwebsocket.api.WebSocketToken;
 
 /**
  * A token is ...
  * @author aschulze
  */
-public class Token {
+public class Token extends BaseToken implements WebSocketToken {
 
 	private JSONObject mData = new JSONObject();
-	/**
-	 *
-	 */
-	public static final String TT_EVENT = "event";
 
 	/**
 	 * Creates a new empty instance of a token.
@@ -97,9 +95,9 @@ public class Token {
 		} else if (aValue instanceof Map) {
 			JSONObject lJO = new JSONObject();
 			for (Entry<Object, Object> lItem : ((Map<Object, Object>) aValue).entrySet()) {
-				try{
+				try {
 					lJO.put(lItem.getKey().toString(), getValue(lItem.getValue()));
-				} catch(JSONException ex) {
+				} catch (JSONException ex) {
 				}
 			}
 			aValue = lJO;
@@ -146,8 +144,9 @@ public class Token {
 	 * @param aKey
 	 * @return
 	 */
-	public Object remove(String aKey) {
-		return mData.remove(aKey);
+	@Override
+	public void remove(String aKey) {
+		mData.remove(aKey);
 	}
 
 	/**
@@ -164,6 +163,7 @@ public class Token {
 	 * @param aDefault
 	 * @return
 	 */
+	@Override
 	public String getString(String aKey, String aDefault) {
 		String lResult;
 		try {
@@ -177,8 +177,22 @@ public class Token {
 	/**
 	 *
 	 * @param aKey
+	 */
+	@Override
+	public void setString(String aKey, String aValue) {
+		try {
+			mData.put(aKey, aValue);
+		} catch (JSONException ex) {
+			// TODO: handle exception
+		}
+	}
+
+	/**
+	 *
+	 * @param aKey
 	 * @return
 	 */
+	@Override
 	public String getString(String aKey) {
 		return getString(aKey, null);
 	}
@@ -189,6 +203,7 @@ public class Token {
 	 * @param aDefault
 	 * @return
 	 */
+	@Override
 	public Integer getInteger(String aKey, Integer aDefault) {
 		Integer lResult;
 		try {
@@ -204,8 +219,18 @@ public class Token {
 	 * @param aKey
 	 * @return
 	 */
+	@Override
 	public Integer getInteger(String aKey) {
 		return getInteger(aKey, null);
+	}
+
+	@Override
+	public void setInteger(String aKey, Integer aValue) {
+		try {
+			mData.put(aKey, aValue);
+		} catch (JSONException ex) {
+			// TODO: handle exception
+		}
 	}
 
 	/**
@@ -214,6 +239,7 @@ public class Token {
 	 * @param aDefault
 	 * @return
 	 */
+	@Override
 	public Boolean getBoolean(String aKey, Boolean aDefault) {
 		Boolean lResult;
 		try {
@@ -229,8 +255,68 @@ public class Token {
 	 * @param aArg
 	 * @return
 	 */
+	@Override
 	public Boolean getBoolean(String aArg) {
 		return getBoolean(aArg, null);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 */
+	@Override
+	public void setBoolean(String aKey, Boolean aValue) {
+		try {
+			mData.put(aKey, aValue);
+		} catch (JSONException ex) {
+			// TODO: handle exception
+		}
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public List getList(String aKey, Boolean aDefault) {
+		// TODO: Implement this
+		return null;
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public List getList(String aKey) {
+		// TODO: Implement this
+		return null;
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public Map getMap(String aKey, Boolean aDefault) {
+		// TODO: Implement this
+		return null;
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public Map getMap(String aKey) {
+		// TODO: Implement this
+		return null;
 	}
 
 	/**

@@ -28,6 +28,7 @@ import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.client.token.BaseTokenClient;
+import org.jwebsocket.config.JWebSocketClientConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.token.Token;
 
@@ -49,6 +50,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 	public TestDialog() {
 		initComponents();
 		try {
+			lblTitle.setText(lblTitle.getText().replace("{ver}", JWebSocketClientConstants.VERSION_STR));
 			client = new BaseTokenClient();
 			client.addListener(this);
 			icoDisconnected = new ImageIcon(getClass().getResource("/images/disconnected.png"));
@@ -155,9 +157,9 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        lblTitle.setFont(new java.awt.Font("Arial", 1, 16));
+        lblTitle.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         lblTitle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Synapso32x32.png"))); // NOI18N
-        lblTitle.setText("jWebSocket Java Client Tester 0.1");
+        lblTitle.setText("jWebSocket Java Client Tester {ver}");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
@@ -318,6 +320,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(btnLogin, gridBagConstraints);
 
         btnLogout.setText("Logout");
@@ -332,6 +335,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         getContentPane().add(btnLogout, gridBagConstraints);
 
         txfTarget.setText("*");

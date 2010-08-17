@@ -25,6 +25,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket Hello World</title>
 		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
+		<!-- load the jWebSocket JavaScript client library -->
 		<script type="text/javascript" src="../../res/js/jWebSocket.js"></script>
 		<!-- this one imports the client side sample plug-in -->
 		<script type="text/javascript" src="../../res/js/jwsSamplesPlugIn.js"></script>
@@ -85,7 +86,8 @@
 			function logoff() {
 				if( jWebSocketClient ) {
 					log( "Logging off " + ( gUsername != null ? "'" + gUsername + "'" : "" ) + " and disconnecting..." );
-					var lRes = jWebSocketClient.close();
+					// the timeout below  is optional, if you use it you'll get a good-bye message.
+					var lRes = jWebSocketClient.close({ timeout: 3000 });
 					log( jWebSocketClient.resultToString( lRes ) );
 				}
 			}
@@ -302,7 +304,7 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();"></td>
 					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSaveFile" type="button" value="Save File" onclick="saveFile();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnCGITest" type="button" value="CGI Test" onclick="cgiTest();"></td>
+					<td class="stdDlg" width=""><!--<input class="sbtnDlg" id="sbtnCGITest" type="button" value="CGI Test" onclick="cgiTest();">--></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Password</td>
