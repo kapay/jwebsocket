@@ -22,7 +22,6 @@ import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATI
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import org.jwebsocket.config.xml.*;
 import org.jwebsocket.kit.WebSocketRuntimeException;
@@ -41,7 +40,9 @@ import org.jwebsocket.logging.Logging;
  */
 public final class JWebSocketConfig implements Config {
 
-	private static Logger mLog = Logging.getLogger(JWebSocketConfig.class);
+	// DON'T SET LOGGER HERE! NEEDS TO BE INITIALIZED FIRST!
+	private static Logger mLog = null;
+
 	private final String mInstallation;
 	private final String mProtocol;
 	private final String jWebSocketHome;
