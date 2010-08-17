@@ -14,11 +14,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
-import java.io.File;
 import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
-import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
-import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

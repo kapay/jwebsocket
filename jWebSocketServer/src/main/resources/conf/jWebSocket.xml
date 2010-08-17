@@ -146,6 +146,19 @@
 			<id>select</id>
 			<description>Allow to select from jdbc resources</description>
 		</right>
+
+		<!-- configuration of filesystem plug-in specific rights -->
+		<right>
+			<ns>org.jWebSocket.plugins.filesystem</ns>
+			<id>load</id>
+			<description>Allow to load files from file system (public area)</description>
+		</right>
+		<right>
+			<ns>org.jWebSocket.plugins.filesystem</ns>
+			<id>save</id>
+			<description>Allow to save files to file system (public area)</description>
+		</right>
+
 		<!-- Caution! Be careful with this right!
 				Unauthorized use could stop your server from
 				providing its services! -->
@@ -153,6 +166,11 @@
 			<ns>org.jWebSocket.plugins.admin</ns>
 			<id>shutdown</id>
 			<description>Allow to shutdown the server</description>
+		</right>
+		<right>
+			<ns>org.jWebSocket.plugins.admin</ns>
+			<id>getConnections</id>
+			<description>Allow to retreive current connections</description>
 		</right>
 	</rights>
 
@@ -169,10 +187,14 @@
 				<right>org.jWebSocket.plugins.rpc.rpc</right>
 				<right>org.jWebSocket.plugins.rpc.rrpc</right>
 				<right>org.jWebSocket.plugins.jdbc.select</right>
+				<right>org.jWebSocket.plugins.filesystem.load</right>
+				<right>org.jWebSocket.plugins.filesystem.save</right>
+
 				<!-- Caution! Be careful with this right!
 						Unauthorized use could stop your server from
 						providing its services! -->
 				<right>org.jWebSocket.plugins.admin.shutdown</right>
+				<right>org.jWebSocket.plugins.admin.getConnections</right>
 			</rights>
 		</role>
 		<role>
@@ -186,6 +208,8 @@
 				<right>org.jWebSocket.plugins.rpc.rpc</right>
 				<right>org.jWebSocket.plugins.rpc.rrpc</right>
 				<right>org.jWebSocket.plugins.jdbc.select</right>
+				<right>org.jWebSocket.plugins.filesystem.load</right>
+				<right>org.jWebSocket.plugins.filesystem.save</right>
 			</rights>
 		</role>
 		<role>
@@ -197,8 +221,8 @@
 				<right>org.jWebSocket.plugins.system.send</right>
 				<right>org.jWebSocket.plugins.chat.broadcast</right>
 				<right>org.jWebSocket.plugins.rpc.rpc</right>
-				<right>org.jWebSocket.plugins.rpc.rrpc</right>
 				<right>org.jWebSocket.plugins.jdbc.select</right>
+				<right>org.jWebSocket.plugins.filesystem.load</right>
 			</rights>
 		</role>
 	</roles>
@@ -298,7 +322,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.filesystem.FileSystemPlugIn</name>
 			<id>jws.filesystem</id>
-			<ns>org.jWebSocket.plugins.jdbc</ns>
+			<ns>org.jWebSocket.plugins.filesystem</ns>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<!-- plug-in specific settings -->
 			<settings>
@@ -309,10 +333,15 @@
 				<setting key="privateDir">%JWEBSOCKET_HOME%/private/</setting>
 				<setting key="webroot">http://jwebsocket.org/</setting>
 				-->
-				<!-- examples for windwos based websocket servers -->
-				<setting key="privateDir">c:/svn/jWebSocket/trunk/jWebSocketClient/web/users/{username}/</setting>
-				<setting key="publicDir">c:/svn/jWebSocket/trunk/jWebSocketClient/web/public/</setting>
-				<setting key="webroot">http://localhost/jwc/public/</setting>
+				<!-- examples for windows based websocket servers -->
+				<setting key="alias:privateDir">c:/svn/jWebSocket/trunk/jWebSocketClient/web/users/{username}/</setting>
+				<setting key="alias:publicDir">c:/svn/jWebSocket/trunk/jWebSocketClient/web/public/</setting>
+				<setting key="alias:webroot">http://localhost/jwc/public/</setting>
+				<!-- MIME Types -->
+				<setting key="mimetype:image/gif">.gif</setting>
+				<setting key="mimetype:image/png">.png</setting>
+				<setting key="mimetype:image/jpeg">.jpg .jpeg .jpe</setting>
+				<setting key="mimetype:image/tiff">.tif .tiff</setting>
 			</settings>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>

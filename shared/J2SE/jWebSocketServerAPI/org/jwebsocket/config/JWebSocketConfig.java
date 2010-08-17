@@ -21,6 +21,7 @@ import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_XML;
 import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATION;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import org.jwebsocket.config.xml.*;
@@ -351,14 +352,25 @@ public final class JWebSocketConfig implements Config {
 		// finally try to find config file at %CLASSPATH%/conf/
 		URL lURL = Thread.currentThread().getContextClassLoader().getResource("conf/" + JWEBSOCKET_XML);
 		if (lURL != null) {
+/*
+			lWebSocketXML = lURL.getFile();
+			System.out.println("WebSocketXML - Filename: " + lWebSocketXML);
+			lFile = new File(lWebSocketXML);
+			if (lFile.exists()) {
+				return lWebSocketXML;
+			}
+*/
 			try {
-				lFile = new File(lURL.toURI());
+				URI lFilename = lURL.toURI();
+				// System.out.println("URI Filename: " + lFilename);
+				lFile = new File(lFilename);
 				if (lFile.exists()) {
 					lWebSocketXML = lFile.getPath();
 					return lWebSocketXML;
 				}
-			} catch (URISyntaxException e) {
+			} catch (Exception ex) {
 				//TODO: log exception
+				// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			}
 		}
 
