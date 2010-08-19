@@ -190,7 +190,6 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        e.getCause().printStackTrace();
         this.context = ctx;
         if (log.isDebugEnabled()) {
             log.debug("Channel is disconnected:" + e.getCause().getLocalizedMessage());
