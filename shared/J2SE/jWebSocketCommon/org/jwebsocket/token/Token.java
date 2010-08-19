@@ -299,6 +299,20 @@ public class Token extends BaseToken implements WebSocketToken {
 	/**
 	 *
 	 * @param aKey
+	 * @param aList
+	 */
+	@Override
+	public void setList(String aKey, List aList) {
+		try {
+			mData.put(aKey, aList);
+		} catch (JSONException ex) {
+			// TODO: handle exception
+		}
+	}
+
+	/**
+	 *
+	 * @param aKey
 	 * @param aDefault
 	 * @return
 	 */
@@ -317,6 +331,20 @@ public class Token extends BaseToken implements WebSocketToken {
 	public Map getMap(String aKey) {
 		// TODO: Implement this
 		return null;
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aList
+	 */
+	@Override
+	public void setMap(String aKey, Map aMap) {
+		try {
+			mData.put(aKey, aMap);
+		} catch (JSONException ex) {
+			// TODO: handle exception
+		}
 	}
 
 	/**

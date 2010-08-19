@@ -15,15 +15,17 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.security;
 
+import java.util.Collection;
+
 /**
  * implements a role which contains a set of rights.
  * @author aschulze
  */
 public class Role {
 
-	private String key = null;
-	private String description = null;
-	private Rights rights = new Rights();
+	private String mId = null;
+	private String mDescription = null;
+	private Rights mRights = new Rights();
 
 	/**
 	 * creates a new empty Role object.
@@ -33,24 +35,24 @@ public class Role {
 
 	/**
 	 * creates a new Role object and initializes its key and description.
-	 * @param aKey
+	 * @param aId
 	 * @param aDescription
 	 */
-	public Role(String aKey, String aDescription) {
-		key = aKey;
-		description = aDescription;
+	public Role(String aId, String aDescription) {
+		mId = aId;
+		mDescription = aDescription;
 	}
 
 	/**
 	 * creates a new Role object and initializes its key, description and
 	 * rights.
-	 * @param aKey
+	 * @param aId
 	 * @param aDescription
 	 * @param aRights
 	 */
-	public Role(String aKey, String aDescription, Right... aRights) {
-		key = aKey;
-		description = aDescription;
+	public Role(String aId, String aDescription, Right... aRights) {
+		mId = aId;
+		mDescription = aDescription;
 		if (aRights != null) {
 			for (int i = 0; i < aRights.length; i++) {
 				addRight(aRights[i]);
@@ -61,30 +63,30 @@ public class Role {
 	/**
 	 * creates a new Role object and initializes its key, description and
 	 * rights.
-	 * @param aKey
+	 * @param aId
 	 * @param aDescription
 	 * @param aRights
 	 */
-	public Role(String aKey, String aDescription, Rights aRights) {
-		key = aKey;
-		description = aDescription;
-		rights = aRights;
+	public Role(String aId, String aDescription, Rights aRights) {
+		mId = aId;
+		mDescription = aDescription;
+		mRights = aRights;
 	}
 
 	/**
 	 *
 	 * @return
 	 */
-	public String getKey() {
-		return key;
+	public String getId() {
+		return mId;
 	}
 
 	/**
 	 *
-	 * @param key
+	 * @param aId
 	 */
-	public void setKey(String key) {
-		this.key = key;
+	public void setKey(String aId) {
+		this.mId = aId;
 	}
 
 	/**
@@ -92,7 +94,7 @@ public class Role {
 	 * @return
 	 */
 	public String getDescription() {
-		return description;
+		return mDescription;
 	}
 
 	/**
@@ -100,7 +102,7 @@ public class Role {
 	 * @param description
 	 */
 	public void setDescription(String description) {
-		this.description = description;
+		this.mDescription = description;
 	}
 
 	/**
@@ -108,7 +110,7 @@ public class Role {
 	 * @param aRight
 	 */
 	public void addRight(Right aRight) {
-		rights.addRight(aRight);
+		mRights.addRight(aRight);
 	}
 
 	/**
@@ -117,7 +119,7 @@ public class Role {
 	 * @return
 	 */
 	public boolean hasRight(Right aRight) {
-		return rights.hasRight(aRight);
+		return mRights.hasRight(aRight);
 	}
 
 	/**
@@ -126,6 +128,15 @@ public class Role {
 	 * @return
 	 */
 	public boolean hasRight(String aRight) {
-		return rights.hasRight(aRight);
+		return mRights.hasRight(aRight);
+	}
+
+	/**
+	 * returns all rights of this role instance
+	 * @return
+	 */
+	public Collection<Right> getRights() {
+		// getRights already returns an unmodifiable collection
+		return mRights.getRights();
 	}
 }

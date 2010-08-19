@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.system;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import javolution.util.FastList;
@@ -31,6 +32,7 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
+import org.jwebsocket.security.User;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
 
@@ -285,18 +287,34 @@ public class SystemPlugIn extends TokenPlugIn {
 		// TODO: Add authentication and password check
 		String lPassword = aToken.getString("password");
 		String lGroup = aToken.getString("group");
+		Boolean lReturnRoles = aToken.getBoolean("getRoles", Boolean.FALSE);
+		Boolean lReturnRights = aToken.getBoolean("getRights", Boolean.FALSE);
 
 		if (log.isDebugEnabled()) {
 			log.debug("Processing 'login' (username='" + lUsername + "', group='" + lGroup + "') from '" + aConnector + "'...");
 		}
 
 		if (lUsername != null) {
-			lResponse.put("username", lUsername);
+
+			User lUser = SecurityFactory.getUser(lUsername);
+
+			// TODO: Here we need to check if the user is in the user data base at all.
+
+			lResponse.setString("username", lUsername);
 			// lResponse.put("usid", getSessionId(aConnector));
-			lResponse.put("sourceId", aConnector.getId());
+			lResponse.setString("sourceId", aConnector.getId());
 			// set shared variables
 			setUsername(aConnector, lUsername);
 			setGroup(aConnector, lGroup);
+
+			if (lUser != null) {
+				if (lReturnRoles) {
+					lResponse.setList("roles", new FastList(lUser.getRoleIdSet()));
+				}
+				if (lReturnRights) {
+					lResponse.setList("rights", new FastList(lUser.getRightIdSet()));
+				}
+			}
 		} else {
 			lResponse.put("code", -1);
 			lResponse.put("msg", "missing arguments for 'login' command");

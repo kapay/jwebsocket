@@ -97,7 +97,7 @@ public class AdminPlugIn extends TokenPlugIn {
 	}
 
 	/**
-	 * return all session
+	 * return all sessions
 	 * @param aConnector
 	 * @param aToken
 	 */
@@ -132,7 +132,7 @@ public class AdminPlugIn extends TokenPlugIn {
 			log.error(ex.getClass().getSimpleName()
 					+ " on getConnections: " + ex.getMessage());
 		}
-
 		lServer.sendToken(aConnector, lResponse);
 	}
+
 }

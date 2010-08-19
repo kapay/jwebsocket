@@ -106,6 +106,13 @@ public interface WebSocketToken {
 	 */
 	List getList(String aKey);
 
+	/**
+	 *
+	 * @param aKey
+	 * @param aList
+	 */
+	void setList(String aKey, List aList);
+
 	// TODO: Add list access methods
 
 	/**
@@ -122,6 +129,13 @@ public interface WebSocketToken {
 	 * @return
 	 */
 	Map getMap(String aKey);
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aList
+	 */
+	void setMap(String aKey, Map aMap);
 
 	// TODO: Add map access methods
 

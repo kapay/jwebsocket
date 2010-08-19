@@ -21,17 +21,17 @@ package org.jwebsocket.security;
  */
 public class Right {
 
-	private String key = null;
-	private String description = null;
+	private String mId = null;
+	private String mDescription = null;
 
 	/**
 	 * creates a new default right with a key and a description.
-	 * @param aKey
+	 * @param aId
 	 * @param aDescription
 	 */
-	public Right(String aKey, String aDescription) {
-		key = aKey;
-		description = aDescription;
+	public Right(String aId, String aDescription) {
+		mId = aId;
+		mDescription = aDescription;
 	}
 
 	/**
@@ -41,8 +41,8 @@ public class Right {
 	 * The key is case-sensitve.
 	 * @return
 	 */
-	public String getKey() {
-		return key;
+	public String getId() {
+		return mId;
 	}
 
 	/**
@@ -50,10 +50,10 @@ public class Right {
 	 * right and should contain the entire name space
 	 * e.g. <tt>org.jwebsocket.plugins.chat.broadcast</tt>.
 	 * The key is case-sensitve.
-	 * @param key
+	 * @param aId
 	 */
-	public void setKey(String key) {
-		this.key = key;
+	public void setId(String aId) {
+		this.mId = aId;
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class Right {
 	 * @return
 	 */
 	public String getDescription() {
-		return description;
+		return mDescription;
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class Right {
 	 * @param description
 	 */
 	public void setDescription(String description) {
-		this.description = description;
+		this.mDescription = description;
 	}
 
 }

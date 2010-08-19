@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.security;
 
+import java.util.Set;
 import org.apache.log4j.Logger;
 
 /**
@@ -79,7 +80,7 @@ public class User {
 	private String phone = null;
 	private String fax = null;
 	private int sessionTimeout = 0;
-	private Roles roles = new Roles();
+	private Roles mRoles = new Roles();
 
 	/**
 	 * creates a new user instance by loginname, firstname, lastname, password
@@ -95,7 +96,7 @@ public class User {
 		firstname = aFirstname;
 		lastname = aLastname;
 		password = aPassword;
-		roles = aRoles;
+		mRoles = aRoles;
 	}
 
 	/**
@@ -209,7 +210,7 @@ public class User {
 	 */
 	public boolean checkPassword(String aPassword) {
 		boolean lOk = (aPassword != null && aPassword.equals(password));
-		if( lOk ) {
+		if (lOk) {
 			resetPwdFailCount();
 		} else {
 			incPwdFailCount();
@@ -229,8 +230,8 @@ public class User {
 	 */
 	public boolean changePassword(String aOldPW, String aNewPW) {
 		if (aOldPW != null
-			&& aNewPW != null
-			&& password.equals(aOldPW)) {
+				&& aNewPW != null
+				&& password.equals(aOldPW)) {
 			password = aNewPW;
 			return true;
 		}
@@ -242,21 +243,13 @@ public class User {
 		return loginname + ": " + firstname + " " + lastname;
 	}
 
-	/**
-	 * returns the roles of the user.
-	 * @return
-	 */
-	public Roles getRoles() {
-		return roles;
-	}
-
 	// TODO: potential security hole: don't allow to change roles w/o a special permission!
 	/**
 	 * specifies the roles of the user.
 	 * @param aRoles
 	 */
 	public void setRoles(Roles aRoles) {
-		this.roles = aRoles;
+		this.mRoles = aRoles;
 	}
 
 	/**
@@ -492,6 +485,54 @@ public class User {
 	 * @return
 	 */
 	public boolean hasRight(String aRight) {
-		return roles.hasRight(aRight);
+		return mRoles.hasRight(aRight);
+	}
+
+	/**
+	 * checks if the user has a certain role. The role is passed as a string
+	 * which associates the key of the role.
+	 * @param aRole
+	 * @return
+	 */
+	public boolean hasRole(String aRole) {
+		return mRoles.hasRole(aRole);
+	}
+
+	/**
+	 * returns the roles of the user.
+	 * @return
+	 */
+	public Roles getRoles() {
+		return mRoles;
+	}
+
+	/**
+	 * returns an unmodifiable set of rights for this user instance.
+	 * @return
+	 */
+	public Rights getRights() {
+		// the getRights method of the Roles class already delivers an
+		// unmodifiable set of rights
+		Rights lRights = new Rights();
+		for (Right lRight : mRoles.getRights()) {
+			lRights.addRight(lRight);
+		}
+		return lRights;
+	}
+
+	/**
+	 * returns an unmodifiable set of role ids for this user instance.
+	 * @return
+	 */
+	public Set<String> getRoleIdSet() {
+		return mRoles.getRoleIdSet();
+	}
+
+	/**
+	 * returns an unmodifiable set of right ids for this user instance.
+	 * @return
+	 */
+	public Set<String> getRightIdSet() {
+		return getRights().getRightIdSet();
 	}
 }

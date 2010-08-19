@@ -15,8 +15,11 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.security;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import javolution.util.FastMap;
+import javolution.util.FastSet;
 import org.apache.log4j.Logger;
 
 /**
@@ -52,7 +55,7 @@ public class Roles {
 	 */
 	public void addRole(Role aRole) {
 		if (aRole != null) {
-			mRoles.put(aRole.getKey(), aRole);
+			mRoles.put(aRole.getId(), aRole);
 		}
 	}
 
@@ -60,6 +63,7 @@ public class Roles {
 	 * Returns a certain role from the FastMap of roles identified by its key or
 	 * <tt>null</tt> if no role with the given exists in the FastMap of roles.
 	 * @param aKey
+	 * @return
 	 */
 	public Role getRole(String aKey) {
 		return mRoles.get(aKey);
@@ -79,7 +83,7 @@ public class Roles {
 	 */
 	public void removeRole(Role aRole) {
 		if (aRole != null) {
-			mRoles.remove(aRole.getKey());
+			mRoles.remove(aRole.getId());
 		}
 	}
 
@@ -89,11 +93,58 @@ public class Roles {
 	 * @return
 	 */
 	public boolean hasRight(String aRight) {
-		for(Role lRole : mRoles.values() ) {
-			if( lRole.hasRight(aRight))
+		for (Role lRole : mRoles.values()) {
+			if (lRole.hasRight(aRight)) {
 				return true;
+			}
 		}
 		return false;
 	}
 
+	/**
+	 * returns an unmodifiable set of all rights of this role instance.
+	 * @return
+	 */
+	public Set<Right> getRights() {
+		Set lSet = new FastSet();
+		for (Role lRole : mRoles.values()) {
+			for (Right lRight : lRole.getRights()) {
+				lSet.add(lRight);
+			}
+		}
+		return Collections.unmodifiableSet(lSet);
+	}
+
+	/**
+	 * returns an unmodifiable set of all rights of this role instance.
+	 * @return
+	 */
+	public Set<String> getRightIdSet() {
+		Set lSet = new FastSet();
+		for (Role lRole : mRoles.values()) {
+			for (Right lRight : lRole.getRights()) {
+				lSet.add(lRight.getId());
+			}
+		}
+		return Collections.unmodifiableSet(lSet);
+	}
+
+
+	/**
+	 * checks if the roles contain a certain role . The role is passed as a
+	 * string which associates the key of the role.
+	 * @param aRole
+	 * @return
+	 */
+	public boolean hasRole(String aRole) {
+		return mRoles.containsKey(aRole);
+	}
+
+	/**
+	 * returns an unmodifiable set of the ids of all roles in the role map.
+	 * @return
+	 */
+	public Set<String> getRoleIdSet() {
+		return Collections.unmodifiableSet(mRoles.keySet());
+	}
 }

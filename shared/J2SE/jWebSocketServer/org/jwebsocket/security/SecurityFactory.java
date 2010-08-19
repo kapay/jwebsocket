@@ -45,7 +45,7 @@ public class SecurityFactory {
 	public static void initDefault() {
 		/*
 		if (log.isDebugEnabled()) {
-			log.debug("Initializing demo rights, roles and users...");
+		log.debug("Initializing demo rights, roles and users...");
 		}
 		 */
 		Rights rights = new Rights();
@@ -149,13 +149,12 @@ public class SecurityFactory {
 	}
 
 	/**
-	 * checks if a user identified by it login name has a certain right.
+	 * Returns a user by its loginname or <tt>null</tt> if no user with the
+	 * given loginname could be found.
 	 * @param aLoginname
-	 * @param aRight
 	 * @return
 	 */
-	public static boolean checkRight(String aLoginname, String aRight) {
-		boolean lHasRight = false;
+	public static User getUser(String aLoginname) {
 		// if user is not logged in use configured "anonymous" account
 		if (aLoginname == null) {
 			aLoginname = SecurityFactory.USER_ANONYMOUS;
@@ -167,9 +166,37 @@ public class SecurityFactory {
 			aLoginname = SecurityFactory.USER_ANONYMOUS;
 			lUser = users.getUserByLoginName(aLoginname);
 		}
+		return lUser;
+	}
+
+	/**
+	 * checks if a user identified by its login name has a certain right.
+	 * @param aLoginname
+	 * @param aRight
+	 * @return
+	 */
+	public static boolean checkRight(String aLoginname, String aRight) {
+		boolean lHasRight = false;
+		User lUser = getUser(aLoginname);
 		if (lUser != null) {
 			return lUser.hasRight(aRight);
 		}
 		return lHasRight;
+	}
+
+	/**
+	 * checks if a user identified by its login name has a certain role.
+	 * @param aLoginname
+	 * @param aRole
+	 * @return
+	 */
+	public static boolean checkRole(String aLoginname, String aRole) {
+		boolean lHasRole = false;
+		// if user is not logged in use configured "anonymous" account
+		User lUser = getUser(aLoginname);
+		if (lUser != null) {
+			return lUser.hasRole(aRole);
+		}
+		return lHasRole;
 	}
 }

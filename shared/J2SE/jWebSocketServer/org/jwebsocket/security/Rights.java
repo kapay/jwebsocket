@@ -15,7 +15,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.security;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 
@@ -25,7 +28,7 @@ import org.apache.log4j.Logger;
  */
 public class Rights {
 
-	private static Logger log = Logger.getLogger(Rights.class);
+	private static Logger mLog = Logger.getLogger(Rights.class);
 	private Map<String, Right> mRights = new FastMap<String, Right>();
 
 	/**
@@ -35,8 +38,8 @@ public class Rights {
 	 * @param aRight
 	 */
 	public void addRight(Right aRight) {
-		if (aRight != null && aRight.getKey() != null) {
-			mRights.put(aRight.getKey(), aRight);
+		if (aRight != null && aRight.getId() != null) {
+			mRights.put(aRight.getId(), aRight);
 		}
 	}
 
@@ -73,7 +76,7 @@ public class Rights {
 	 */
 	public void removeRight(Right aRight) {
 		if (aRight != null) {
-			mRights.remove(aRight.getKey());
+			mRights.remove(aRight.getId());
 		}
 	}
 
@@ -84,8 +87,8 @@ public class Rights {
 	 * @return
 	 */
 	public boolean hasRight(Right aRight) {
-		if (aRight != null && aRight.getKey() != null) {
-			return mRights.containsKey(aRight.getKey());
+		if (aRight != null && aRight.getId() != null) {
+			return mRights.containsKey(aRight.getId());
 		} else {
 			return false;
 		}
@@ -103,5 +106,21 @@ public class Rights {
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * returns an unmodifiable collection of rights.
+	 * @return
+	 */
+	public Collection<Right> getRights() {
+		return Collections.unmodifiableCollection(mRights.values());
+	}
+
+	/**
+	 * returns an unmodifiable set of the ids of all rights.
+	 * @return
+	 */
+	public Set<String> getRightIdSet() {
+		return Collections.unmodifiableSet(mRights.keySet());
 	}
 }
