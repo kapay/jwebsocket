@@ -31,14 +31,24 @@ import android.view.Window;
 import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jwebsocket.api.WebSocketClientEvent;
+import org.jwebsocket.api.WebSocketClientTokenListener;
+import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.token.Token;
 
 /**
  *
  * @author aschulze
  */
-public class CanvasActivity extends Activity {
+public class CanvasActivity extends Activity implements WebSocketClientTokenListener {
 
+    
     LinearLayout mLinearLayout;
+    Canvas lCanvas;
+    Paint p;
 
     /** Called when the activity is first created. */
     @Override
@@ -55,7 +65,7 @@ public class CanvasActivity extends Activity {
         final int height = metrics.heightPixels;
 
         final Bitmap lBmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        final Canvas lCanvas = new Canvas(lBmp);
+        lCanvas = new Canvas(lBmp);
         final ImageView lImgView = new ImageView(this);
 
         lImgView.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
@@ -67,7 +77,7 @@ public class CanvasActivity extends Activity {
         bck.setARGB(0xff, 0x80, 0x80, 0x80);
         lCanvas.drawRect(0, 0, width, height, bck);
 
-        final Paint p = new Paint();
+        p = new Paint();
         p.setARGB(0xff, 0xff, 0x00, 0xff);
   
         mLinearLayout.addView(lImgView);
@@ -104,6 +114,7 @@ public class CanvasActivity extends Activity {
                         ex = lX;
                         ey = lY + lTitleBarHeight;
                         lCanvas.drawLine(sx, sy, ex, ey, p);
+                        sendToken(sx, sy, ex, ey);
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
@@ -116,10 +127,79 @@ public class CanvasActivity extends Activity {
 
     }
 
+    public void sendToken(float sx, float sy, float ex, float ey)
+    {
+        Token canvasToken = new Token();
+        canvasToken.put("sx", sx);
+        canvasToken.put("sy", sy);
+        canvasToken.put("ex", sy);
+        canvasToken.put("ey", sy);
+        canvasToken.put("target", "android");
+        canvasToken.put("identifier",getTaskId());//used to prevent the canvas being drawn from responding the request
+        try {
+            JWC.sendToken(canvasToken);
+        } catch (WebSocketException ex1) {
+            //TODO: log exception
+        }
+
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu aMenu) {
         MenuInflater lMenInfl = getMenuInflater();
         lMenInfl.inflate(R.menu.canvas_menu, aMenu);
         return true;
+    }
+
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        try {
+
+            JWC.addListener(this);
+            JWC.open();
+        } catch (WebSocketException ex) {
+           //TODO: log exception
+        }
+    }
+
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        try {
+            JWC.removeListener(this);
+            JWC.close();
+        } catch (WebSocketException ex) {
+            //TODO: log exception
+        }
+
+    }
+
+    public void processToken(WebSocketClientEvent aEvent, Token aToken) {
+        if("android".equals(aToken.getString("target"))){
+            int id = aToken.getInteger("identifier");
+            if(id != getTaskId())
+            {
+                lCanvas.drawLine(Float.parseFloat(aToken.getString("sx")), Float.parseFloat(aToken.getString("sy")), Float.parseFloat(aToken.getString("ex")), Float.parseFloat(aToken.getString("ey")), p);
+            }
+         }
+        
+    }
+
+    public void processOpened(WebSocketClientEvent aEvent) {
+        
+    }
+
+    public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+        
+    }
+
+    public void processClosed(WebSocketClientEvent aEvent) {
+        
     }
 }
