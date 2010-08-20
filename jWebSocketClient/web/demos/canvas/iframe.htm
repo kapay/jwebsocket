@@ -33,7 +33,7 @@
 			eCanvas = null;
 			eStatus = null;
 			lIsConnected = false;
-			lCID = "c1";
+			CANVAS_ID = "c1";
 
 			var IN = 0;
 			var OUT = 1;
@@ -90,8 +90,8 @@
 					lPainting = true;
 					lX = aEvent.clientX - eCanvas.offsetLeft;
 					lY = aEvent.clientY - eCanvas.offsetTop;
-					lWSC.canvasBeginPath( lCID );
-					lWSC.canvasMoveTo( lCID, lX, lY );
+					lWSC.canvasBeginPath( CANVAS_ID );
+					lWSC.canvasMoveTo( CANVAS_ID, lX, lY );
 					// console.log( "Start x: " + lX + ", y: " + lY );
 				}
 			}
@@ -110,8 +110,8 @@
 					loops++;
 					start = new Date().getTime();
 
-					lWSC.canvasLineTo( lCID, lX, lY );
-					// lWSC.canvasStroke( lCID );
+					lWSC.canvasLineTo( CANVAS_ID, lX, lY );
+					// lWSC.canvasStroke( CANVAS_ID );
 
 					total += ( new Date().getTime() - start );
 					eAvg.innerHTML = ( total / loops + "ms" );
@@ -124,7 +124,7 @@
 					lX = aEvent.clientX - eCanvas.offsetLeft;
 					lY = aEvent.clientY - eCanvas.offsetTop;
 					lWSC.canvasLineTo( lX, lY );
-					lWSC.canvasClosePath( lCID );
+					lWSC.canvasClosePath( CANVAS_ID );
 					// console.log( "Stop x: " + lX + ", y: " + lY );
 					lPainting = false;
 				}
@@ -136,7 +136,7 @@
 
 			function doClear() {
 				if( lIsConnected ) {
-					lWSC.canvasClear( lCID );
+					lWSC.canvasClear( CANVAS_ID );
 				}
 			}
 
@@ -163,11 +163,11 @@
 					// instaniate new TokenClient, either JSON, CSV or XML
 					lWSC = new jws.jWebSocketJSONClient();
 
-					lWSC.canvasOpen( lCID, "cnvDemo" );
+					lWSC.canvasOpen( CANVAS_ID, "cnvDemo" );
 /*
-					lWSC.canvasBeginPath( lCID );
-					lWSC.canvasMoveTo( lCID, 10, 10 );
-					lWSC.canvasLineTo( lCID, 20, 20 );
+					lWSC.canvasBeginPath( CANVAS_ID );
+					lWSC.canvasMoveTo( CANVAS_ID, 10, 10 );
+					lWSC.canvasLineTo( CANVAS_ID, 20, 20 );
 */
 					doOpen();
 
@@ -188,7 +188,7 @@
 						timeout: 0
 					});
 				}
-				lWSC.canvasClose( lCID );
+				lWSC.canvasClose( CANVAS_ID );
 			}
 
 		</script>

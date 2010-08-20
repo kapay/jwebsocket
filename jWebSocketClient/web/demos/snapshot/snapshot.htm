@@ -108,6 +108,7 @@
 
 			function onFileSavedObs( aToken ) {
 				log( "Picture received: '" + aToken.filename + "':" );
+				// aToken.url = aToken.url.replace("foto.jpg", "flowers_1280x1024.jpg");
 				var lHTML = "<img onload=\"checkImageSize()\" src=\"" + aToken.url + "\"/>";
 				log( lHTML );
 			}
@@ -150,7 +151,8 @@
 			}
 		</script>
 -->		
-		<h1>jWebSocket Mobile Snapshot Demo</h1>
+		
+		<h1>jWebSocket Mobile Snapshot Demo<img src="images/phone.png" align="right"/></h1>
 		<p>This demo shows how to take a picture from a jWebSocket enabled Android or Java ME application and send it to a browser.
 		Please connect both this dialog and your Android or Java ME mobile device (also working with the corresponding emulators)
 		to the same server (e.g. ws://jwebsocket.org:8787) and run the Camera Demo on the mobile device and view the incoming images.</p>

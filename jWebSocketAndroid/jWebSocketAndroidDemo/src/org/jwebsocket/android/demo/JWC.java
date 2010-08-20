@@ -42,14 +42,14 @@ public class JWC {
     private final static int MT_TOKEN = 3;
 
     private final static String CONFIG_FILE = "jWebSocket";
-    private static String URL = "ws://jwebsocket.org:8787";
-    private static BaseTokenClient jwc;
-    private static List<WebSocketClientTokenListener> listeners = new FastList<WebSocketClientTokenListener>();
+    private static String mURL = "ws://jwebsocket.org:8787";
+    private static BaseTokenClient mJWC;
+    private static List<WebSocketClientTokenListener> mListeners = new FastList<WebSocketClientTokenListener>();
     private static String DEF_ENCODING = "UTF-8";
 
     public static void init() {
-        jwc = new BaseTokenClient();
-        jwc.addListener(new Listener());
+        mJWC = new BaseTokenClient();
+        mJWC.addListener(new Listener());
     }
 
     public static void loadSettings(Activity aActivity) {
@@ -60,13 +60,13 @@ public class JWC {
             Toast.makeText(aActivity.getApplicationContext(), ex.getClass().getSimpleName() + ":" + ex.getMessage(),
                     Toast.LENGTH_SHORT).show();
         }
-        URL = (String) lProps.getProperty("url", "http://jwebsocket.org:8787/");
+        mURL = (String) lProps.getProperty("url", "http://jwebsocket.org:8787/");
     }
 
     public static void saveSettings(Activity aActivity) {
         Properties lProps = new Properties();
         try {
-            lProps.put("url", URL);
+            lProps.put("url", mURL);
             lProps.save(aActivity.openFileOutput(CONFIG_FILE, Context.MODE_PRIVATE), "jWebSocketClient Configuration");
         } catch (Exception ex) {
             Toast.makeText(aActivity.getApplicationContext(), ex.getClass().getSimpleName() + ":" + ex.getMessage(),
@@ -75,40 +75,40 @@ public class JWC {
     }
 
     public static void open() throws WebSocketException {
-        jwc.open(URL);
+        mJWC.open(mURL);
     }
 
     public static void close() throws WebSocketException {
-        jwc.close();
+        mJWC.close();
     }
 
     public static void send(String aString) throws WebSocketException {
-        jwc.send(URL, DEF_ENCODING);
+        mJWC.send(mURL, DEF_ENCODING);
     }
 
     public static void sendToken(Token aToken) throws WebSocketException {
-        jwc.sendToken(aToken);
+        mJWC.sendToken(aToken);
     }
 
     public static void sendText(String aTarget, String aData) throws WebSocketException {
-        jwc.sendText(aTarget, aData);
+        mJWC.sendText(aTarget, aData);
 
     }
 
     public static void broadcastText(String aData) throws WebSocketException {
-        jwc.broadcastText(aData);
+        mJWC.broadcastText(aData);
     }
 
     public static void saveFile(byte[] aData, String aFilename, String aScope, Boolean aNotify) throws WebSocketException {
-        jwc.saveFile(aData, aFilename, aScope, aNotify);
+        mJWC.saveFile(aData, aFilename, aScope, aNotify);
     }
 
     public static void addListener(WebSocketClientTokenListener aListener) {
-        listeners.add(aListener);
+        mListeners.add(aListener);
     }
 
     public static void removeListener(WebSocketClientTokenListener aListener) {
-        listeners.remove(aListener);
+        mListeners.remove(aListener);
     }
     private static Handler messageHandler = new Handler() {
 
@@ -133,25 +133,25 @@ public class JWC {
     };
 
     public static void notifyOpened(WebSocketClientEvent aEvent) {
-        for (WebSocketClientTokenListener lListener : listeners) {
+        for (WebSocketClientTokenListener lListener : mListeners) {
             lListener.processOpened(aEvent);
         }
     }
 
     public static void notifyPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
-        for (WebSocketClientTokenListener lListener : listeners) {
+        for (WebSocketClientTokenListener lListener : mListeners) {
             lListener.processPacket(aEvent, aPacket);
         }
     }
 
     public static void notifyToken(WebSocketClientEvent aEvent, Token aToken) {
-        for (WebSocketClientTokenListener lListener : listeners) {
+        for (WebSocketClientTokenListener lListener : mListeners) {
             lListener.processToken(aEvent, aToken);
         }
     }
 
     public static void notifyClosed(WebSocketClientEvent aEvent) {
-        for (WebSocketClientTokenListener lListener : listeners) {
+        for (WebSocketClientTokenListener lListener : mListeners) {
             lListener.processClosed(aEvent);
         }
     }
@@ -160,14 +160,14 @@ public class JWC {
      * @return the URL
      */
     public static String getURL() {
-        return URL;
+        return mURL;
     }
 
     /**
      * @param aURL the URL to set
      */
     public static void setURL(String aURL) {
-        URL = aURL;
+        mURL = aURL;
     }
 
     static class Listener implements WebSocketClientTokenListener {

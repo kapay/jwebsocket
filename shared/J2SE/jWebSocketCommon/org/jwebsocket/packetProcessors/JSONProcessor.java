@@ -37,17 +37,24 @@ public class JSONProcessor {
 	 * @return
 	 */
 	public static Token packetToToken(WebSocketPacket aDataPacket) {
-		Token lToken = new Token();
+		Token lToken = null;
 		try {
+			lToken = new Token();
 			String lStr = aDataPacket.getString("UTF-8");
 			JSONTokener lJSONTokener = new JSONTokener(lStr);
 			lToken.setJSONObject(new JSONObject(lJSONTokener));
 		} catch (UnsupportedEncodingException ex) {
 			// TODO: handle exception
 			// log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			lToken = null;
 		} catch (JSONException ex) {
 			// // TODO: handle exception
 			// log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			lToken = null;
+		} catch (Exception ex) {
+			// TODO: handle exception
+			// log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			lToken = null;
 		}
 		return lToken;
 	}
@@ -64,6 +71,4 @@ public class JSONProcessor {
 		}
 		return lPacket;
 	}
-
-
 }

@@ -75,6 +75,28 @@ public interface WebSocketToken {
 	 * @param aDefault
 	 * @return
 	 */
+	Double getDouble(String aKey, Double aDefault);
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	Double getDouble(String aKey);
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aValue
+	 */
+	void setDouble(String aKey, Double aValue);
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
 	Boolean getBoolean(String aKey, Boolean aDefault);
 
 	/**

@@ -31,13 +31,14 @@ import org.jwebsocket.api.WebSocketToken;
  */
 public class Token extends BaseToken implements WebSocketToken {
 
-	private JSONObject mData = new JSONObject();
+	private JSONObject mData = null;
 
 	/**
 	 * Creates a new empty instance of a token.
 	 * The token does not contain any items.
 	 */
 	public Token() {
+		mData = new JSONObject();
 	}
 
 	/**
@@ -45,6 +46,7 @@ public class Token extends BaseToken implements WebSocketToken {
 	 * @param aType
 	 */
 	public Token(String aType) {
+		mData = new JSONObject();
 		setType(aType);
 	}
 
@@ -62,6 +64,7 @@ public class Token extends BaseToken implements WebSocketToken {
 	 * @param aType
 	 */
 	public Token(String aNS, String aType) {
+		mData = new JSONObject();
 		setNS(aNS);
 		setType(aType);
 	}
@@ -226,6 +229,42 @@ public class Token extends BaseToken implements WebSocketToken {
 
 	@Override
 	public void setInteger(String aKey, Integer aValue) {
+		try {
+			mData.put(aKey, aValue);
+		} catch (JSONException ex) {
+			// TODO: handle exception
+		}
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public Double getDouble(String aKey, Double aDefault) {
+		Double lResult;
+		try {
+			lResult = mData.getDouble(aKey);
+		} catch (JSONException ex) {
+			lResult = aDefault;
+		}
+		return lResult;
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public Double getDouble(String aKey) {
+		return getDouble(aKey, null);
+	}
+
+	@Override
+	public void setDouble(String aKey, Double aValue) {
 		try {
 			mData.put(aKey, aValue);
 		} catch (JSONException ex) {

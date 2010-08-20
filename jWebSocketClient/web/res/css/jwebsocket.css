@@ -1,6 +1,6 @@
-﻿td {
+td {
 	border:none;
-	background: #fff;
+	/* background: #fff; */
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 10pt;
 	color: #202020;
@@ -8,7 +8,7 @@
 
 b {
 	border:none;
-	background: #fff;
+	/* background: #fff; */
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 10pt;
 	color: #202020;
@@ -16,7 +16,7 @@ b {
 
 i {
 	border:none;
-	background: #fff;
+	/* background: #fff; */
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 10pt;
 	color: #202020;
@@ -27,14 +27,14 @@ ul {
 	margin-top: 0;
 	margin-bottom: 12pt;
 	border: 0;
-	background: #fff;
+	/* background: #fff; */
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 10pt;
 	color: #202020;
 }
 li {
 	border:none;
-	background: #fff;
+	/* background: #fff; */
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 10pt;
 	color: #202020;
@@ -44,7 +44,7 @@ li {
 
 a {
 	border:none;
-	background: #fff;
+	/* background: #fff; */
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 10pt;
 	color: #202020;
@@ -54,7 +54,7 @@ p {
 	padding: 0 0 6pt 0;
 	margin: 0px;
 	border:none;
-	background: #fff;
+	/* background: #fff; */
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 10pt;
 	color: #202020;
