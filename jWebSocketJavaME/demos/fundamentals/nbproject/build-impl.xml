@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *** GENERATED FROM project.xml - DO NOT EDIT *** -->
-<project name="jWebSocketJavaME_Demo1-impl" default="jar" basedir="..">
+<project name="jWebSocketJavaMEDemo1-impl" default="jar" basedir="..">
     <!--load-properties-->
     <target name="pre-load-properties">
         <property file="nbproject/private/private.properties"/>
@@ -351,10 +351,10 @@
     </target>
     <!--deps-jar-->
     <target name="deps-jar" depends="conditional-clean" unless="no.deps">
-        <ant target="jar" inheritall="false" antfile="${project.jWebSocketJavaME}/build.xml">
+        <ant target="jar" inheritall="false" antfile="${project.jWebSocketJavaMEDemo}/build.xml">
             <property name="config.active" value="DefaultCldcJtwiPhone1"/>
         </ant>
-        <ant target="jar" inheritall="false" antfile="${project.javalution}/build.xml">
+        <ant target="jar" inheritall="false" antfile="${project.javolution}/build.xml">
             <property name="config.active" value="DefaultCldcJtwiPhone1"/>
         </ant>
         <ant target="jar" inheritall="false" antfile="${project.json}/build.xml">
