@@ -1,9 +1,0 @@
-MIDlet-1: HelloMIDlet, ,org.jwebsocket.midlets.Fundamentals
-MIDlet-Jar-Size: 538265
-MIDlet-Jar-URL: d1.jar
-MIDlet-Name: jWebSocket ME fundamentals
-MIDlet-Permissions: javax.microedition.io.Connector.socket
-MIDlet-Vendor: jWebSocket.org
-MIDlet-Version: 0.10
-MicroEdition-Configuration: CLDC-1.1
-MicroEdition-Profile: MIDP-2.0
