@@ -20,11 +20,9 @@ import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.client.token.BaseTokenClient;
-import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.token.Token;
 
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -32,8 +30,8 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.widget.Toast;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * jWebSocket android service that runs in a different process than the
@@ -77,8 +75,7 @@ public class JWSAndroidRemoteService extends Service {
   }
 
   /**
-   * Handler used to execute operations on the main thread. This is used to
-   * schedule increments of our value.
+   * Handler used to invoke the callback methods based on the remote interface operations. 
    */
   private final Handler jwsHandler = new Handler() {
     @Override
