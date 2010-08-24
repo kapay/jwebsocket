@@ -13,36 +13,42 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
+
 package org.jwebsocket.plugins.rpc;
 
-import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.kit.CloseReason;
+import org.apache.log4j.Logger;
+import org.jwebsocket.logging.Logging;
 
 /**
- * Base RPCCallable class.
- * Everytime a method from this class will be called by a client, the same instance of the class will used
- * Extends this class if you want a unique object for all the rpc call.
+ * Abstract RPCCallable class.
+ * Add a method to get an instance of the rpcCallable class created.
  * @author Quentin Ambard
  */
-public class BaseRPCCallable extends AbstractRPCCallable implements RPCCallable {
-
-	protected BaseRPCCallable() {
+public abstract class AbstractRPCCallable {	
+	private static Logger mLog = Logging.getLogger(AbstractRPCCallable.class);
+		
+	public RPCCallable getInstanceOfRpcCallableClass() {
+		return getInstanceOfRpcCallableClass(null, null);
 	}
-	private static volatile BaseRPCCallable mInstance = null;
-
-	@Override
-	public RPCCallable getInstance(WebSocketConnector aConnector) {
-		if (mInstance == null) {
-			synchronized (this) {
-				if (mInstance == null) {
-					mInstance = (BaseRPCCallable) getInstanceOfRpcCallableClass();
-				}
+	
+	public RPCCallable getInstanceOfRpcCallableClass(Object[] aListOfParameter, Class[] aListOfClass) {
+		RPCCallable lNewInstance = null ;
+		//We get the class of E
+		Class lClass = this.getClass();
+		//Get the constructor of this class
+		try {
+			if (aListOfClass == null) {
+			lNewInstance = (RPCCallable) lClass.getConstructor().newInstance() ;
+			} else  {
+				lNewInstance = (RPCCallable) lClass.getConstructor(aListOfClass).newInstance(aListOfParameter) ;
 			}
-		}
-		return mInstance;
-	}
+		} catch (Exception e) {
 
-	@Override
-	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
+			// Alex: comment
+			// TODO: we shouldn't put anything to system.out but log it properly
+			e.printStackTrace();
+			return null ;					
+		}
+		return  lNewInstance ;
 	}
 }

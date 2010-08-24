@@ -13,13 +13,19 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-
 package org.jwebsocket.plugins.rpc;
 
+import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.kit.CloseReason;
+
 /**
- *
+ * ...
  * @author aschulze
+ * @author Quentin Ambard
  */
 public interface RPCCallable {
 
+	public RPCCallable getInstance(WebSocketConnector aConnector);
+
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 }
