@@ -8,11 +8,11 @@
 
 package org.jwebsocket.android.library;
 
-import org.jwebsocket.android.library.JWSAndroidRemoteServiceCallback;
+import org.jwebsocket.android.library.IJWSAndroidRemoteServiceCallback;
 import org.jwebsocket.android.library.ParcelableToken;
 
 // Declare the interface.
-interface JWSAndroidRemoteService {
+interface IJWSAndroidRemoteService {
 
 	void open();
 
@@ -45,11 +45,11 @@ interface JWSAndroidRemoteService {
     /**
      * Register a service to call back to the clients using this remote service
      */
-    void registerCallback(in JWSAndroidRemoteServiceCallback cb);
+    void registerCallback(in IJWSAndroidRemoteServiceCallback cb);
     
     /**
      * Remove a previously registered callback interface.
      */
-    void unregisterCallback(in JWSAndroidRemoteServiceCallback cb);
+    void unregisterCallback(in IJWSAndroidRemoteServiceCallback cb);
 
 }
