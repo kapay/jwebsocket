@@ -200,7 +200,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 */
 	public void rpc(WebSocketConnector aConnector, Token aToken) {
 		// check if user is allowed to run 'rpc' command
-		if (!SecurityFactory.checkRight(getUsername(aConnector), NS_RPC_DEFAULT + ".rpc")) {
+		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_RPC_DEFAULT + ".rpc")) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
@@ -294,7 +294,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 */
 	public void rrpc(WebSocketConnector aConnector, Token aToken) {
 		// check if user is allowed to run 'rrpc' command
-		if (!SecurityFactory.checkRight(getUsername(aConnector), NS_RPC_DEFAULT + ".rrpc")) {
+		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_RPC_DEFAULT + ".rrpc")) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}

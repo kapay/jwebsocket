@@ -127,6 +127,16 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 		}
 	}
 
+	@Override
+	public void addTokenClientListener(WebSocketClientTokenListener tokenListener) {
+		super.addListener(tokenListener);
+	}
+
+	@Override
+	public void removeTokenClientListener(WebSocketClientTokenListener tokenListener) {
+		super.removeListener(tokenListener);
+	}
+
 	/**
 	 * {@
 	 */
@@ -301,13 +311,20 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 		sendToken(lToken);
 	}
 
-	@Override
-	public void addTokenClientListener(WebSocketClientTokenListener tokenListener) {
-		super.addListener(tokenListener);
+	public void getUserRights(String aUsername) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "getUserRights");
+		lToken.put("ns", NS_ADMIN_PLUGIN);
+		lToken.put("username", aUsername);
+		sendToken(lToken);
 	}
 
-	@Override
-	public void removeTokenClientListener(WebSocketClientTokenListener tokenListener) {
-		super.removeListener(tokenListener);
+	public void getUserRoles(String aUsername) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "getUserRoles");
+		lToken.put("ns", NS_ADMIN_PLUGIN);
+		lToken.put("username", aUsername);
+		sendToken(lToken);
 	}
+
 }

@@ -1556,50 +1556,51 @@ jws.StreamingPlugIn = {
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StreamingPlugIn );
 
 
-//	---------------------------------------------------------------------------
-//  jWebSocket RPC Client Plug-In
-//	---------------------------------------------------------------------------
-
-//:package:*:jws
-//:class:*:jws.RRPCServer
-//:ancestor:*:-
-//:d:en:The RRPCServer server provides the methods which are granted to be _
-//:d:en:called by the server and thus from the "outside". This class is used _
-//:d:en:by the [tt]jws.RPCClientPlugIn[/tt] class.
-jws.RRPCServer = {
-
-	//:m:*:demo
-	//:d:en:description pending...
-	//:a:en::aArgs:Array:Array of arguments to the remote procedure.
-	//:r:*:::void:none
-	demo: function( aArgs ) {
-		return(
-			confirm(
-				"Arguments received: '" + aArgs + "'\n" +
-				"'true' or 'false' will be returned to requester."
-				)
-			);
-	}
-
-};
-
-
 //:package:*:jws
 //:class:*:jws.RPCClientPlugIn
 //:ancestor:*:-
 //:d:en:Implementation of the [tt]jws.RPCClientPlugIn[/tt] class.
 jws.RPCClientPlugIn = {
 
+	// granted rrpc's
+	grantedProcs: [],
+	
+	// granted rrpc's
+	spawnThreadDefault: false,
+
 	//:const:*:NS:String:org.jWebSocket.plugins.rpc (jws.NS_BASE + ".plugins.rpc")
 	//:d:en:Namespace for the [tt]RPCClientPlugIn[/tt] class.
 	// if namespace changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.rpc",
-
-	// granted rrpc's
-	grantedProcs: [
-		"jws.RRPCServer.demo"
-	],
-
+	
+	//:m:*:setSpawnThreadDefault
+	//:d:en:set the default value of the spawnThread option 
+	//:a:en::aDefault:Boolean.
+	//:r:*:::void:none
+	setSpawnThreadDefault: function (aDefault) {
+		this.spawnThreadDefault = aDefault;
+	},
+	
+	//:m:*:addGrantedProcedure
+	//:d:en:grant the access to a rrpc procedure
+	//:a:en::aProcedure:String procedure name (including name space).
+	//:r:*:::void:none
+	addGrantedProcedure: function (aProcedure) {
+		jws.RPCClientPlugIn.grantedProcs[ jws.RPCClientPlugIn.grantedProcs.length ] = aProcedure;
+	},
+	
+	//:m:*:removeGrantedProcedure
+	//:d:en:remove the access to a rrpc procedure
+	//:a:en::aProcedure:String procedure name (including name space).
+	//:r:*:::void:none
+	removeGrantedProcedure: function (aProcedure) {
+		// var numberOfProcedures = jws.RPCClientPlugIn.grantedProcs.length;
+		var lIdx = jws.RPCClientPlugIn.grantedProcs.indexOf( aProcedure );
+		if( lIdx >= 0 ) {
+			jws.RPCClientPlugIn.grantedProcs.splice( lIdx, 1 );
+		}
+	},
+	
 	//:m:*:processToken
 	//:d:en:Processes an incoming token from the server or a remote client. _
 	//:d:en:Here the token is checked for type [tt]rrpc[/tt]. If such is _
@@ -1624,7 +1625,8 @@ jws.RPCClientPlugIn = {
 	//:a:en::aArgs:Array:Arguments for method that is supposed to be called.
 	//:a:en::aOptions:Object:Optional arguments. For details please refer to the [tt]sendToken[/tt] method.
 	//:r:*:::void:none
-	rpc: function( aClass, aMthd, aArgs, aOptions ) {
+	rpc: function( aClass, aMthd, aArgs, aOptions) {
+		aOptions = this.setDefaultOption (aOptions) ;
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
@@ -1644,6 +1646,16 @@ jws.RPCClientPlugIn = {
 		return lRes;
 	},
 
+	setDefaultOption: function( aOptions ) {
+		if (aOptions === undefined) {
+			aOptions = {} ;
+		}
+		if (aOptions.spawnThread === undefined) {
+			aOptions.spawnThread = this.spawnThreadDefault;
+		}
+		return aOptions ;
+	},
+
 	//:m:*:rrpc
 	//:d:en:Runs a reverse remote procedure call (RRPC) on another client.
 	//:a:en::aTarget:String:Id of the target remote client.
@@ -1653,6 +1665,7 @@ jws.RPCClientPlugIn = {
 	//:a:en::aOptions:Object:Optional arguments. For details please refer to the [tt]sendToken[/tt] method.
 	//:r:*:::void:none
 	rrpc: function( aTarget, aClass, aMthd, aArgs, aOptions ) {
+		aOptions = this.setDefaultOption (aOptions) ;
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
@@ -1684,14 +1697,28 @@ jws.RPCClientPlugIn = {
 		var lMethod = aToken.method;
 		var lArgs = aToken.args;
 		var lPath = lClassname + "." + lMethod;
-		
 		// check if the call is granted on this client
 		if( jws.RPCClientPlugIn.grantedProcs.indexOf( lPath ) >= 0 ) {
-			var lEvalStr = lPath + "(" + lArgs + ")";
-			// console.log( "Reverse RPC request '" + lPath + "(" + lArgs + ")' granted, running '" + lEvalStr + "'...");
+			var lFunctionSplit = lClassname.split( '.' );
+			var lFunctionSplitSize = lFunctionSplit.length;
+			var lTheFunction = window[ lFunctionSplit[ 0 ] ] ;
+			for( var j = 1; j < lFunctionSplitSize; j++ ) {
+				lTheFunction = lTheFunction[ lFunctionSplit[ j ] ];
+			}
 			var lRes;
-			eval( "lRes=" + lEvalStr );
-			// send result back to requester
+			try {
+				// You could even bind the function with something else,
+				// like a customPlugin, if needed.
+				lRes = lTheFunction[ lMethod ].call( null, lArgs );
+			} catch (ex) {
+				//TODO: send back the error under a better format
+				lRes = ex 
+					+ "\nProbably a typo error (method called="
+					+ lMethod
+					+ ") or wrong number of arguments (args: "
+					+ JSON.stringify(lArgs)
+					+ ")";
+			}
 
 			this.sendToken({
 				// ns: jws.SystemPlugIn.NS,

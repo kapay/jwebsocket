@@ -16,6 +16,7 @@
 package org.jwebsocket.security;
 
 import java.util.List;
+import java.util.Set;
 
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.RightConfig;
@@ -175,7 +176,7 @@ public class SecurityFactory {
 	 * @param aRight
 	 * @return
 	 */
-	public static boolean checkRight(String aLoginname, String aRight) {
+	public static boolean hasRight(String aLoginname, String aRight) {
 		boolean lHasRight = false;
 		User lUser = getUser(aLoginname);
 		if (lUser != null) {
@@ -190,7 +191,7 @@ public class SecurityFactory {
 	 * @param aRole
 	 * @return
 	 */
-	public static boolean checkRole(String aLoginname, String aRole) {
+	public static boolean hasRole(String aLoginname, String aRole) {
 		boolean lHasRole = false;
 		// if user is not logged in use configured "anonymous" account
 		User lUser = getUser(aLoginname);
@@ -199,4 +200,54 @@ public class SecurityFactory {
 		}
 		return lHasRole;
 	}
+
+	/**
+	 * returns an unmodifiable set of role ids for a user instance.
+	 * @return
+	 */
+	public static Set<String> getRoleIdSet(String aUsername) {
+		User lUser = getUser(aUsername);
+		if( lUser != null ) {
+			return lUser.getRoleIdSet();
+		}
+		return null;
+	}
+
+	/**
+	 * returns an unmodifiable set of right ids for a given user instance.
+	 * @return
+	 */
+	public static Set<String> getRightIdSet(String aUsername) {
+		User lUser = getUser(aUsername);
+		if( lUser != null ) {
+			return lUser.getRightIdSet();
+		}
+		return null;
+	}
+
+	/**
+	 * returns an unmodifiable set of roles for a given user instance.
+	 * @return
+	 */
+	public static Roles getRoles(String aUsername) {
+		User lUser = getUser(aUsername);
+		if( lUser != null ) {
+			return lUser.getRoles();
+		}
+		return null;
+	}
+
+	/**
+	 * returns an unmodifiable set of rights for a given user instance.
+	 * @return
+	 */
+	public static Rights getRights(String aUsername) {
+		User lUser = getUser(aUsername);
+		if( lUser != null ) {
+			return lUser.getRights();
+		}
+		return null;
+	}
+
+
 }

@@ -92,7 +92,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		}
 
 		// check if user is allowed to run 'save' command
-		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".save")) {
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".save")) {
 			if (log.isDebugEnabled()) {
 				log.debug("Returning 'Access denied'...");
 			}
@@ -197,7 +197,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		}
 
 		// check if user is allowed to run 'load' command
-		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".load")) {
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".load")) {
 			if (log.isDebugEnabled()) {
 				log.debug("Returning 'Access denied'...");
 			}

@@ -28,6 +28,7 @@ import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
+import org.jwebsocket.security.User;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
@@ -63,6 +64,10 @@ public class AdminPlugIn extends TokenPlugIn {
 				shutdown(aConnector, aToken);
 			} else if (lType.equals("getConnections")) {
 				getConnections(aConnector, aToken);
+			} else if (lType.equals("getUserRights")) {
+				getUserRights(aConnector, aToken);
+			} else if (lType.equals("getUserRoles")) {
+				getUserRoles(aConnector, aToken);
 			}
 		}
 	}
@@ -82,7 +87,7 @@ public class AdminPlugIn extends TokenPlugIn {
 		// TODO: check for allowShutdown setting, irrespective of user right!
 
 		// check if user is allowed to run 'shutdown' command
-		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_ADMIN + ".shutdown")) {
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".shutdown")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			return;
 		}
@@ -109,7 +114,7 @@ public class AdminPlugIn extends TokenPlugIn {
 		}
 
 		// check if user is allowed to run 'getConnections' command
-		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_ADMIN + ".getConnections")) {
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".getConnections")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			return;
 		}
@@ -120,7 +125,7 @@ public class AdminPlugIn extends TokenPlugIn {
 			Map lConnectorMap = lServer.getAllConnectors();
 			Collection<WebSocketConnector> lConnectors = lConnectorMap.values();
 			for (WebSocketConnector lConnector : lConnectors) {
-				Map lResultItem = new FastMap<String,Object>();
+				Map lResultItem = new FastMap<String, Object>();
 				lResultItem.put("port", lConnector.getRemotePort());
 				lResultItem.put("usid", lConnector.getSession().getSessionId());
 				lResultItem.put("username", lConnector.getUsername());
@@ -135,4 +140,74 @@ public class AdminPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
+	public void getUserRights(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'getUserRights'...");
+		}
+
+		// check if user is allowed to run 'getUserRights' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".getUserRights")) {
+			// TODO: create right in jWebSocket.xml!
+			// lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		String lUsername = aToken.getString("username");
+		if (lUsername == null || lUsername.isEmpty()) {
+			lUsername = aConnector.getUsername();
+		}
+		Token lResponse = lServer.createResponse(aToken);
+		try {
+			User lUser = SecurityFactory.getUser(lUsername);
+			if (lUser != null) {
+				FastList<String> lRightIds = new FastList(lUser.getRightIdSet());
+				lResponse.put("rights", lRightIds);
+			} else {
+				lResponse.put("code", -1);
+				lResponse.put("msg", "invalid user");
+			}
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName()
+					+ " on getUserRights: " + ex.getMessage());
+		}
+
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	public void getUserRoles(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'getUserRoles'...");
+		}
+
+		// check if user is allowed to run 'getUserRoles' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".getUserRoles")) {
+			// TODO: create right in jWebSocket.xml!
+			// lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		String lUsername = aToken.getString("username");
+		if (lUsername == null || lUsername.isEmpty()) {
+			lUsername = aConnector.getUsername();
+		}
+		Token lResponse = lServer.createResponse(aToken);
+		try {
+			FastList<String> lRoleIds = new FastList(SecurityFactory.getRoleIdSet(lUsername));
+			if (lRoleIds != null) {
+				lResponse.put("roles", lRoleIds);
+			} else {
+				lResponse.put("code", -1);
+				lResponse.put("msg", "invalid user");
+			}
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName()
+					+ " on getUserRoles: " + ex.getMessage());
+		}
+
+		lServer.sendToken(aConnector, lResponse);
+	}
 }

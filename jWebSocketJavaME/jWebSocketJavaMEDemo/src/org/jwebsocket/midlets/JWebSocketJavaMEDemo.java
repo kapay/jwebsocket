@@ -17,7 +17,7 @@ import org.jwebsocket.token.TokenClient;
 /**
  * @author aschulze
  */
-public class Fundamentals extends MIDlet implements CommandListener, WebSocketClientTokenListener {
+public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, WebSocketClientTokenListener {
 
 	private boolean midletPaused = false;
 	public TokenClient client = null;
@@ -44,9 +44,9 @@ public class Fundamentals extends MIDlet implements CommandListener, WebSocketCl
 	//</editor-fold>//GEN-END:|fields|0|
 
 	/**
-	 * The Fundamentals constructor.
+	 * The JWebSocketJavaMEDemo constructor.
 	 */
-	public Fundamentals() {
+	public JWebSocketJavaMEDemo() {
 	}
 
 	private void checkStatusIcon() {

@@ -127,7 +127,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		}
 
 		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.checkRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			// return;
 		}

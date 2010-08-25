@@ -136,6 +136,8 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         lblMessage = new javax.swing.JLabel();
         lblStatus = new javax.swing.JLabel();
         btnGetSessions = new javax.swing.JButton();
+        btnGetUserRights = new javax.swing.JButton();
+        btnGetUserRoles = new javax.swing.JButton();
         mnbMain = new javax.swing.JMenuBar();
         pmnFile = new javax.swing.JMenu();
         mniExit = new javax.swing.JMenuItem();
@@ -157,7 +159,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        lblTitle.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        lblTitle.setFont(new java.awt.Font("Arial", 1, 16));
         lblTitle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Synapso32x32.png"))); // NOI18N
         lblTitle.setText("jWebSocket Java Client Tester {ver}");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -173,7 +175,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         bntSend.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(bntSend, gridBagConstraints);
 
@@ -203,7 +205,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridy = 8;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(btnClearLog, gridBagConstraints);
@@ -211,7 +213,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         txfMessage.setText("Message");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -338,26 +340,25 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         getContentPane().add(btnLogout, gridBagConstraints);
 
-        txfTarget.setText("*");
         txfTarget.setMinimumSize(new java.awt.Dimension(100, 20));
         txfTarget.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(txfTarget, gridBagConstraints);
 
         lblTarget.setText("Target");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 0);
         getContentPane().add(lblTarget, gridBagConstraints);
 
         lblMessage.setText("Message");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 0);
         getContentPane().add(lblMessage, gridBagConstraints);
 
@@ -384,6 +385,38 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints.gridy = 4;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         getContentPane().add(btnGetSessions, gridBagConstraints);
+
+        btnGetUserRights.setText("User Rights");
+        btnGetUserRights.setMaximumSize(new java.awt.Dimension(100, 20));
+        btnGetUserRights.setMinimumSize(new java.awt.Dimension(100, 20));
+        btnGetUserRights.setPreferredSize(new java.awt.Dimension(100, 20));
+        btnGetUserRights.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetUserRightsActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        getContentPane().add(btnGetUserRights, gridBagConstraints);
+
+        btnGetUserRoles.setText("User Roles");
+        btnGetUserRoles.setMaximumSize(new java.awt.Dimension(100, 20));
+        btnGetUserRoles.setMinimumSize(new java.awt.Dimension(100, 20));
+        btnGetUserRoles.setPreferredSize(new java.awt.Dimension(100, 20));
+        btnGetUserRoles.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetUserRolesActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        getContentPane().add(btnGetUserRoles, gridBagConstraints);
 
         pmnFile.setText("File");
 
@@ -452,6 +485,22 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 	private void mniPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniPreferencesActionPerformed
 		// open preferences dialog
 	}//GEN-LAST:event_mniPreferencesActionPerformed
+
+	private void btnGetUserRightsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetUserRightsActionPerformed
+		try {
+			client.getUserRights(txfTarget.getText());
+		} catch (WebSocketException ex) {
+			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+		}
+	}//GEN-LAST:event_btnGetUserRightsActionPerformed
+
+	private void btnGetUserRolesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetUserRolesActionPerformed
+		try {
+			client.getUserRoles(txfTarget.getText());
+		} catch (WebSocketException ex) {
+			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+		}
+	}//GEN-LAST:event_btnGetUserRolesActionPerformed
 
 	private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnConnectActionPerformed
 		try {
@@ -550,6 +599,8 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
     private javax.swing.JButton btnConnect;
     private javax.swing.JButton btnDisconnect;
     private javax.swing.JButton btnGetSessions;
+    private javax.swing.JButton btnGetUserRights;
+    private javax.swing.JButton btnGetUserRoles;
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnPing;
