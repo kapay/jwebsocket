@@ -85,6 +85,12 @@ public class RPCPlugIn extends TokenPlugIn {
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Roles: " + SecurityFactory.getGlobalRoles().getRoleIdSet().toString());
+			mLog.debug("Rights: " + SecurityFactory.getGlobalRights().getRightIdSet().toString());
+			mLog.debug("Rights (name space filtered): " + SecurityFactory.getGlobalRights("org.jWebSocket.plugins.rpc").getRightIdSet().toString());
+		}
+
 		// TODO: move JWebSocketJarClassLoader into ServerAPI module ?
 		JWebSocketJarClassLoader lClassLoader = new JWebSocketJarClassLoader();
 		Class lClass = null;
@@ -160,8 +166,8 @@ public class RPCPlugIn extends TokenPlugIn {
 
 				Method lMethod = getValidMethod(lClassName, lMethodName, lParameterType);
 				if (lMethod != null) {
-					//We create the right to access to this method.
-					new Right("rpc:" + lFullMethodName + ":" + lParameterType, "give the right to execute the rpc method " + lFullMethodName + "(" + lParameterType + ")");
+					// We create the right to access to this method.
+					// new Right("rpc:" + lFullMethodName + ":" + lParameterType, "give the right to execute the rpc method " + lFullMethodName + "(" + lParameterType + ")");
 					// TODO: implement Rights here
 					mRpcCallableClassLoader.get(lClassName).addMethod(lMethodName, lMethod);
 				}
@@ -231,12 +237,12 @@ public class RPCPlugIn extends TokenPlugIn {
 						Object lObj = call(lRpcClassLoader, lInstance, lMethod, lArgs);
 						lResponseToken.put("result", lObj);
 					} else {
-						lMsg = "Class '" 
+						lMsg = "Class '"
 								+ lClassName
 								+ "' found but get a null instance when calling the RPCCallable getInstance() method.";
 					}
 				} else {
-					lMsg = "Class '" 
+					lMsg = "Class '"
 							+ lClassName
 							+ "' found but the method "
 							+ lMethod
@@ -535,7 +541,7 @@ public class RPCPlugIn extends TokenPlugIn {
 				}
 			}
 		}
-		mLog.error("The method " 
+		mLog.error("The method "
 				+ aMethodName
 				+ " could not be loaded. "
 				+ "Probably a typo or invalid parameter (check previous error).");

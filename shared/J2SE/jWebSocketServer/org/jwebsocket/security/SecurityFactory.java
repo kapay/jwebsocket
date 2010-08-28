@@ -30,7 +30,10 @@ import org.jwebsocket.config.xml.UserConfig;
 public class SecurityFactory {
 
 	// private static Logger log = Logging.getLogger(SecurityFactory.class);
-	private static Users users = new Users();
+	private static Users mUsers = null;
+	private static Rights mRights = null;
+	private static Roles mRoles = null;
+
 	/**
 	 *
 	 */
@@ -49,12 +52,12 @@ public class SecurityFactory {
 		log.debug("Initializing demo rights, roles and users...");
 		}
 		 */
-		Rights rights = new Rights();
+		mRights = new Rights();
 		// specify rights
-		Right lRPC = new Right("org.jWebSocket.plugins.rpc.rpc", "Allow Remote Procedure Calls (RPC) to server");
-		Right lRRPC = new Right("org.jWebSocket.plugins.rpc.rrpc", "Allow Reverse Remote Procedure Calls (RRPC) to other clients");
-		rights.addRight(lRPC);
-		rights.addRight(lRRPC);
+		Right lRPC = new Right("org.jWebSocket.plugins.rpc", "rpc", "Allow Remote Procedure Calls (RPC) to server");
+		Right lRRPC = new Right("org.jWebSocket.plugins.rpc", "rrpc", "Allow Reverse Remote Procedure Calls (RRPC) to other clients");
+		mRights.addRight(lRPC);
+		mRights.addRight(lRRPC);
 
 		// specify roles and assign rights to roles
 		// TODO: needs to be removed in final release!
@@ -74,10 +77,11 @@ public class SecurityFactory {
 		User lLockedUser = new User(USER_LOCKED, "Locked", "Locked", "locked", lGuestRoles);
 		lLockedUser.setStatus(User.ST_LOCKED);
 
-		users.addUser(lGuestUser);
-		users.addUser(lRegUser);
-		users.addUser(lAdminUser);
-		users.addUser(lLockedUser);
+		mUsers = new Users();
+		mUsers.addUser(lGuestUser);
+		mUsers.addUser(lRegUser);
+		mUsers.addUser(lAdminUser);
+		mUsers.addUser(lLockedUser);
 
 		// log.info("Default rights, roles and users initialized.");
 	}
@@ -91,21 +95,22 @@ public class SecurityFactory {
 
 		// build list of rights
 		List<RightConfig> globalRights = aConfig.getGlobalRights();
-		Rights rights = new Rights();
+		mRights = new Rights();
 		for (RightConfig lRightConfig : globalRights) {
 			Right lRight = new Right(
-					lRightConfig.getNamespace() + "." + lRightConfig.getId(),
+					lRightConfig.getNamespace(),
+					lRightConfig.getId(),
 					lRightConfig.getDescription());
-			rights.addRight(lRight);
+			mRights.addRight(lRight);
 		}
 
 		// build list of roles
 		List<RoleConfig> globalRoles = aConfig.getGlobalRoles();
-		Roles roles = new Roles();
+		mRoles = new Roles();
 		for (RoleConfig lRoleConfig : globalRoles) {
 			Rights lRights = new Rights();
 			for (String lRightId : lRoleConfig.getRights()) {
-				Right lRight = rights.get(lRightId);
+				Right lRight = mRights.get(lRightId);
 				if (lRight != null) {
 					lRights.addRight(lRight);
 				}
@@ -114,15 +119,16 @@ public class SecurityFactory {
 					lRoleConfig.getId(),
 					lRoleConfig.getDescription(),
 					lRights);
-			roles.addRole(lRole);
+			mRoles.addRole(lRole);
 		}
 
 		// build list of users
 		List<UserConfig> globalUsers = aConfig.getUsers();
+		mUsers = new Users();
 		for (UserConfig lUserConfig : globalUsers) {
 			Roles lRoles = new Roles();
 			for (String lRoleId : lUserConfig.getRoles()) {
-				Role lRole = roles.getRole(lRoleId);
+				Role lRole = mRoles.getRole(lRoleId);
 				if (lRole != null) {
 					lRoles.addRole(lRole);
 				}
@@ -134,7 +140,7 @@ public class SecurityFactory {
 					lUserConfig.getPassword(),
 					lRoles);
 
-			users.addUser(lUser);
+			mUsers.addUser(lUser);
 		}
 
 		// log.info("Rights, roles and users successfully initialized.");
@@ -160,12 +166,12 @@ public class SecurityFactory {
 		if (aLoginname == null) {
 			aLoginname = SecurityFactory.USER_ANONYMOUS;
 		}
-		User lUser = users.getUserByLoginName(aLoginname);
+		User lUser = mUsers.getUserByLoginName(aLoginname);
 		// if the user is not found use the "anonymous" account
 		// TODO: this process needs to be changed in the final release!
 		if (lUser == null && !SecurityFactory.USER_ANONYMOUS.equals(aLoginname)) {
 			aLoginname = SecurityFactory.USER_ANONYMOUS;
-			lUser = users.getUserByLoginName(aLoginname);
+			lUser = mUsers.getUserByLoginName(aLoginname);
 		}
 		return lUser;
 	}
@@ -229,7 +235,7 @@ public class SecurityFactory {
 	 * returns an unmodifiable set of roles for a given user instance.
 	 * @return
 	 */
-	public static Roles getRoles(String aUsername) {
+	public static Roles getUserRoles(String aUsername) {
 		User lUser = getUser(aUsername);
 		if( lUser != null ) {
 			return lUser.getRoles();
@@ -238,15 +244,49 @@ public class SecurityFactory {
 	}
 
 	/**
+	 * returns an unmodifiable set of global roles.
+	 * @return
+	 */
+	public static Roles getGlobalRoles() {
+		return mRoles;
+	}
+
+	/**
 	 * returns an unmodifiable set of rights for a given user instance.
 	 * @return
 	 */
-	public static Rights getRights(String aUsername) {
+	public static Rights getUserRights(String aUsername) {
 		User lUser = getUser(aUsername);
 		if( lUser != null ) {
 			return lUser.getRights();
 		}
 		return null;
+	}
+
+	/**
+	 * returns an unmodifiable set of global rights.
+	 * @return
+	 */
+	public static Rights getGlobalRights() {
+		return mRights;
+	}
+
+	/**
+	 * returns an unmodifiable set of rights for this user instance.
+	 * @return
+	 */
+	public static Rights getGlobalRights(String aNamespace) {
+		// the getRights method of the Roles class already delivers an
+		// unmodifiable set of rights
+		Rights lRights = new Rights();
+		if (aNamespace != null) {
+			for (Right lRight : mRights.getRights()) {
+				if (aNamespace == null || lRight.getId().startsWith(aNamespace)) {
+					lRights.addRight(lRight);
+				}
+			}
+		}
+		return lRights;
 	}
 
 

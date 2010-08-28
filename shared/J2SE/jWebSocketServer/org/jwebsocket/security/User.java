@@ -510,14 +510,26 @@ public class User {
 	 * returns an unmodifiable set of rights for this user instance.
 	 * @return
 	 */
-	public Rights getRights() {
+	public Rights getRights(String aNamespace) {
 		// the getRights method of the Roles class already delivers an
 		// unmodifiable set of rights
 		Rights lRights = new Rights();
-		for (Right lRight : mRoles.getRights()) {
-			lRights.addRight(lRight);
+		if (aNamespace != null) {
+			for (Right lRight : mRoles.getRights()) {
+				if (aNamespace == null || lRight.getId().startsWith(aNamespace)) {
+					lRights.addRight(lRight);
+				}
+			}
 		}
 		return lRights;
+	}
+
+	/**
+	 * returns an unmodifiable set of rights for this user instance.
+	 * @return
+	 */
+	public Rights getRights() {
+		return getRights(null);
 	}
 
 	/**

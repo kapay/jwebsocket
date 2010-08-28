@@ -25,7 +25,17 @@ public class Right {
 	private String mDescription = null;
 
 	/**
-	 * creates a new default right with a key and a description.
+	 * creates a new default right with a name space, an id and a description.
+	 * @param aId
+	 * @param aDescription
+	 */
+	public Right(String aNS, String aId, String aDescription) {
+		mId = aNS + "." + aId;
+		mDescription = aDescription;
+	}
+
+	/**
+	 * creates a new default right with a id and a description.
 	 * @param aId
 	 * @param aDescription
 	 */
@@ -33,9 +43,8 @@ public class Right {
 		mId = aId;
 		mDescription = aDescription;
 	}
-
 	/**
-	 * returns the key of the right. The key is the unique identifier of the
+	 * returns the id of the right. The key is the unique identifier of the
 	 * right and should contain the entire name space 
 	 * e.g. <tt>org.jwebsocket.plugins.chat.broadcast</tt>.
 	 * The key is case-sensitve.
@@ -46,7 +55,7 @@ public class Right {
 	}
 
 	/**
-	 * specifies the key of the right. The key is the unique identifier of the
+	 * specifies the id of the right. The key is the unique identifier of the
 	 * right and should contain the entire name space
 	 * e.g. <tt>org.jwebsocket.plugins.chat.broadcast</tt>.
 	 * The key is case-sensitve.
