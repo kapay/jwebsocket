@@ -321,6 +321,54 @@ public class TokenServer extends BaseServer {
 	}
 
 	/**
+	 * Broadcasts the passed token to all token based connectors of the underlying
+	 * engines.
+	 * @param aToken
+	 */
+	public void broadcastToken(Token aToken) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		}
+
+		// before sending the token push it through filter chain
+		FilterResponse filterResponse = getFilterChain().processTokenOut(null, null, aToken);
+
+		FastMap<String, Object> lFilter = new FastMap<String, Object>();
+		lFilter.put(VAR_IS_TOKENSERVER, true);
+		// TODO: converting the token within the loop is not that efficient!
+		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
+			sendPacket(lConnector, tokenToPacket(lConnector, aToken));
+		}
+	}
+
+	/**
+	 * iterates through all connectors of all engines and sends the token to
+	 * each connector. The token format is considered for each connection
+	 * individually so that the application can broadcast a token to all kinds
+	 * of clients.
+	 * @param aToken
+	 * @param aBroadcastOptions
+	 */
+	public void broadcastToken(Token aToken, BroadcastOptions aBroadcastOptions) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Broadcasting token '" + aToken + " to all token based connectors...");
+		}
+
+		// before sending the token push it through filter chain
+		FilterResponse filterResponse = getFilterChain().processTokenOut(null, null, aToken);
+
+		FastMap<String, Object> lFilter = new FastMap<String, Object>();
+		lFilter.put(VAR_IS_TOKENSERVER, true);
+		// TODO: converting the token within the loop is not that efficient!
+		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
+			if (aBroadcastOptions.isSenderIncluded()) {
+				// every connector could have it's own sub protocol
+				sendPacket(lConnector, tokenToPacket(lConnector, aToken));
+			}
+		}
+	}
+
+	/**
 	 * iterates through all connectors of all engines and sends the token to
 	 * each connector. The token format is considered for each connection
 	 * individually so that the application can broadcast a token to all kinds
@@ -369,27 +417,6 @@ public class TokenServer extends BaseServer {
 			if (!aSource.equals(lConnector)) {
 				sendPacket(lConnector, tokenToPacket(lConnector, aToken));
 			}
-		}
-	}
-
-	/**
-	 * Broadcasts the passed token to all token based connectors of the underlying
-	 * engines.
-	 * @param aToken
-	 */
-	public void broadcastToken(Token aToken) {
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Broadcasting token '" + aToken + " to all token based connectors...");
-		}
-
-		// before sending the token push it through filter chain
-		FilterResponse filterResponse = getFilterChain().processTokenOut(null, null, aToken);
-
-		FastMap<String, Object> lFilter = new FastMap<String, Object>();
-		lFilter.put(VAR_IS_TOKENSERVER, true);
-		// TODO: converting the token within the loop is not that efficient!
-		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
-			sendPacket(lConnector, tokenToPacket(lConnector, aToken));
 		}
 	}
 
