@@ -521,8 +521,9 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 	private void btnShutdownActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnShutdownActionPerformed
 		try {
 			client.shutdown();
+			Thread.sleep(500);
 			client.close();
-		} catch (WebSocketException ex) {
+		} catch (Exception ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}// GEN-LAST:event_btnShutdownActionPerformed
