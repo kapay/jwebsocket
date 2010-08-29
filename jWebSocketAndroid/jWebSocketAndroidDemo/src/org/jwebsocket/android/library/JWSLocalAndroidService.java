@@ -92,7 +92,10 @@ import android.widget.Toast;
  *    @Override
  *    protected void onCreate(Bundle savedInstanceState) {
  *       super.onCreate(savedInstanceState);
- *       doUnbindService();
+ *       doBindService();
+ *       
+ *       //open the connection using default conf
+ *       mBoundService.open();
  *    }
  * </pre>
  * @author aschulze 
@@ -171,7 +174,7 @@ public class JWSLocalAndroidService extends Service {
     }
   }
 
-  public static void open() throws WebSocketException {
+  public void open() throws WebSocketException {
     baseTokenClient.open(baseJWSUrl);
   }
 
