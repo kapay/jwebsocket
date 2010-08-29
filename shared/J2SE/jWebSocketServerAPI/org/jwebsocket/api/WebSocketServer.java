@@ -194,6 +194,8 @@ public interface WebSocketServer {
 
 	WebSocketConnector getConnector(String aId);
 
+	WebSocketConnector getConnector(String aFilterId, Object aFilterValue);
+
 	WebSocketConnector getNode(String aNodeId);
 
 	Map<String, WebSocketConnector> getConnectors(WebSocketEngine aEngine);

@@ -34,26 +34,26 @@ import org.jwebsocket.kit.WebSocketServerEvent;
 import org.jwebsocket.kit.WebSocketException;
 
 /**
- * The implementation of the basic websocket server. A server is the central
- * instance which either processes incoming data from the engines directly or
- * routes it to the chain of plug-ins. Each server maintains a FastMap of underlying
- * engines. An application can instantiate multiple servers to process different
- * kinds of data packets.
+ * The implementation of the basic websocket server. A server is the central instance which either processes incoming data from the engines
+ * directly or routes it to the chain of plug-ins. Each server maintains a FastMap of underlying engines. An application can instantiate
+ * multiple servers to process different kinds of data packets.
+ * 
  * @author aschulze
  */
 public class BaseServer implements WebSocketServer {
 
-	private Map<String, WebSocketEngine> mEngines = null;
-	private String mId = null;
-	protected WebSocketPlugInChain plugInChain = null;
-	protected WebSocketFilterChain filterChain = null;
-	private List<WebSocketServerListener> mListeners = new FastList<WebSocketServerListener>();
+	private Map<String, WebSocketEngine>	mEngines	= null;
+	private String							mId			= null;
+	protected WebSocketPlugInChain			plugInChain	= null;
+	protected WebSocketFilterChain			filterChain	= null;
+	private List<WebSocketServerListener>	mListeners	= new FastList<WebSocketServerListener>();
 
 	/**
-	 * Create a new instance of the Base Server. Each BaseServer maintains a
-	 * FastMap of all its underlying engines. Each Server has an Id whioch can be
-	 * used to easily address a certain server.
-	 * @param aId Id for the new server.
+	 * Create a new instance of the Base Server. Each BaseServer maintains a FastMap of all its underlying engines. Each Server has an Id
+	 * whioch can be used to easily address a certain server.
+	 * 
+	 * @param aId
+	 *            Id for the new server.
 	 */
 	public BaseServer(ServerConfiguration aServerConfig) {
 		mId = aServerConfig.getId();
@@ -82,9 +82,8 @@ public class BaseServer implements WebSocketServer {
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void startServer()
-			throws WebSocketException {
-		// this method is supposed to be overwritten by descending classes.
+	public void startServer() throws WebSocketException {
+	// this method is supposed to be overwritten by descending classes.
 	}
 
 	/**
@@ -100,9 +99,8 @@ public class BaseServer implements WebSocketServer {
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void stopServer()
-			throws WebSocketException {
-		// this method is supposed to be overwritten by descending classes.
+	public void stopServer() throws WebSocketException {
+	// this method is supposed to be overwritten by descending classes.
 	}
 
 	/**
@@ -110,9 +108,9 @@ public class BaseServer implements WebSocketServer {
 	 */
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-		// this method is supposed to be overwritten by descending classes.
-		// e.g. to notify the overlying appplications or plug-ins
-		// about the engineStarted event
+	// this method is supposed to be overwritten by descending classes.
+	// e.g. to notify the overlying appplications or plug-ins
+	// about the engineStarted event
 	}
 
 	/**
@@ -120,9 +118,9 @@ public class BaseServer implements WebSocketServer {
 	 */
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
-		// this method is supposed to be overwritten by descending classes.
-		// e.g. to notify the overlying appplications or plug-ins
-		// about the engineStopped event
+	// this method is supposed to be overwritten by descending classes.
+	// e.g. to notify the overlying appplications or plug-ins
+	// about the engineStopped event
 	}
 
 	/**
@@ -184,8 +182,7 @@ public class BaseServer implements WebSocketServer {
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void broadcastPacket(WebSocketConnector aSource, WebSocketPacket aDataPacket,
-			BroadcastOptions aBroadcastOptions) {
+	public void broadcastPacket(WebSocketConnector aSource, WebSocketPacket aDataPacket, BroadcastOptions aBroadcastOptions) {
 		for (WebSocketConnector lConnector : getAllConnectors().values()) {
 			if (!aSource.equals(lConnector) || aBroadcastOptions.isSenderIncluded()) {
 				sendPacket(lConnector, aDataPacket);
@@ -194,8 +191,8 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 * returns the FastMap of all underlying engines. Each engine has its own unique
-	 * id which is used as key in the FastMap.
+	 * returns the FastMap of all underlying engines. Each engine has its own unique id which is used as key in the FastMap.
+	 * 
 	 * @return FastMap with the underlying engines.
 	 */
 	public Map<String, WebSocketEngine> getEngines() {
@@ -204,8 +201,9 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 * returns all connectors of the passed engine as a FastMap. Each connector has
-	 * its own unique id which is used as key in the connectors FastMap.
+	 * returns all connectors of the passed engine as a FastMap. Each connector has its own unique id which is used as key in the connectors
+	 * FastMap.
+	 * 
 	 * @param aEngine
 	 * @return the engines
 	 */
@@ -217,9 +215,9 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 * returns all connectors of all engines connected to the server. Each
-	 * connector has its own unique id which is used as key in the connectors
-	 * FastMap.
+	 * returns all connectors of all engines connected to the server. Each connector has its own unique id which is used as key in the
+	 * connectors FastMap.
+	 * 
 	 * @return the engines
 	 */
 	@Override
@@ -232,14 +230,13 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 * returns only those connectors that match the passed shared variables.
-	 * The search criteria is passed as a FastMap with key/value pairs. The key
-	 * represents the name of the shared custom variable for the connector and
-	 * the value the value for that variable. If multiple key/value pairs are
-	 * passed they are combined by a logical 'and'.
-	 * Each connector has its own unique id which is used as key in the
-	 * connectors FastMap.
-	 * @param aFilter FastMap of key/values pairs as search criteria.
+	 * returns only those connectors that match the passed shared variables. The search criteria is passed as a FastMap with key/value
+	 * pairs. The key represents the name of the shared custom variable for the connector and the value the value for that variable. If
+	 * multiple key/value pairs are passed they are combined by a logical 'and'. Each connector has its own unique id which is used as key
+	 * in the connectors FastMap.
+	 * 
+	 * @param aFilter
+	 *            FastMap of key/values pairs as search criteria.
 	 * @return FastMap with the selected connector or empty FastMap if no connector matches the search criteria.
 	 */
 	@Override
@@ -275,38 +272,24 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 * Returns the connector identified by it's connector-id or <tt>null</tt>
-	 * if no connector with that id could be found. This method iterates
-	 * through all embedded engines.
-	 * @param aId id of the connector to be returned.
+	 * Returns the connector identified by it's connector-id or <tt>null</tt> if no connector with that id could be found. This method
+	 * iterates through all embedded engines.
+	 * 
+	 * @param aId
+	 *            id of the connector to be returned.
 	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
 	 */
 	@Override
-	public WebSocketConnector getConnector(String aId) {
+	public WebSocketConnector getConnector(String aFilterId, Object aFilterValue) {
 		for (WebSocketEngine lEngine : mEngines.values()) {
-			WebSocketConnector lConnector = lEngine.getConnectors().get(aId);
-			if (lConnector != null) {
-				return lConnector;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Returns the connector identified by it's node-id or <tt>null</tt>
-	 * if no connector with that id could be found. This method iterates
-	 * through all embedded engines.
-	 * @param aId id of the connector to be returned.
-	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
-	 */
-	@Override
-	public WebSocketConnector getNode(String aNodeId) {
-		if (aNodeId != null) {
-			for (WebSocketEngine lEngine : mEngines.values()) {
-				for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
-					if (aNodeId.equals(lConnector.getString(BaseConnector.VAR_NODEID))) {
-						return lConnector;
-					}
+			for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
+				Object lVarVal = lConnector.getVar(aFilterId);
+				if (lVarVal instanceof String && aFilterValue instanceof String) {
+					if (((String) lVarVal).matches((String) aFilterValue)) { return lConnector; }
+				} else if (lVarVal instanceof Boolean) {
+					if (((Boolean) lVarVal).equals((Boolean) aFilterValue)) { return lConnector; }
+				} else {
+					if (lVarVal.equals(aFilterValue)) { return lConnector; }
 				}
 			}
 		}
@@ -314,41 +297,77 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 * Returns the connector identified by it's connector-id or <tt>null</tt> if
-	 * no connector with that id could be found. Only the connectors of the
-	 * engine identified by the passed engine are considered. If not engine
-	 * with that id could be found <tt>null</tt> is returned.
-	 * @param aEngine id of the engine of the connector.
-	 * @param aId id of the connector to be returned
+	 * Returns the connector identified by it's connector-id or <tt>null</tt> if no connector with that id could be found. This method
+	 * iterates through all embedded engines.
+	 * 
+	 * @param aId
+	 *            id of the connector to be returned.
+	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
+	 */
+	@Override
+	public WebSocketConnector getConnector(String aId) {
+		for (WebSocketEngine lEngine : mEngines.values()) {
+			WebSocketConnector lConnector = lEngine.getConnectors().get(aId);
+			if (lConnector != null) { return lConnector; }
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the connector identified by it's node-id or <tt>null</tt> if no connector with that id could be found. This method iterates
+	 * through all embedded engines.
+	 * 
+	 * @param aId
+	 *            id of the connector to be returned.
+	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
+	 */
+	@Override
+	public WebSocketConnector getNode(String aNodeId) {
+		if (aNodeId != null) {
+			for (WebSocketEngine lEngine : mEngines.values()) {
+				for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
+					if (aNodeId.equals(lConnector.getString(BaseConnector.VAR_NODEID))) { return lConnector; }
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the connector identified by it's connector-id or <tt>null</tt> if no connector with that id could be found. Only the
+	 * connectors of the engine identified by the passed engine are considered. If not engine with that id could be found <tt>null</tt> is
+	 * returned.
+	 * 
+	 * @param aEngine
+	 *            id of the engine of the connector.
+	 * @param aId
+	 *            id of the connector to be returned
 	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
 	 */
 	public WebSocketConnector getConnector(String aEngine, String aId) {
 		WebSocketEngine lEngine = mEngines.get(aEngine);
-		if (lEngine != null) {
-			return lEngine.getConnectors().get(aId);
-		}
+		if (lEngine != null) { return lEngine.getConnectors().get(aId); }
 		return null;
 	}
 
 	/**
-	 * Returns the connector identified by it's connector-id or <tt>null</tt> if
-	 * no connector with that id could be found. Only the connectors of the
-	 * passed engine are considered. If no engine is passed <tt>null</tt> is
-	 * returned.
-	 * @param aEngine reference to the engine of the connector.
-	 * @param aId id of the connector to be returned
+	 * Returns the connector identified by it's connector-id or <tt>null</tt> if no connector with that id could be found. Only the
+	 * connectors of the passed engine are considered. If no engine is passed <tt>null</tt> is returned.
+	 * 
+	 * @param aEngine
+	 *            reference to the engine of the connector.
+	 * @param aId
+	 *            id of the connector to be returned
 	 * @return WebSocketConnector with the given id or <tt>null</tt> if not found.
 	 */
 	public WebSocketConnector getConnector(WebSocketEngine aEngine, String aId) {
-		if (aEngine != null) {
-			return aEngine.getConnectors().get(aId);
-		}
+		if (aEngine != null) { return aEngine.getConnectors().get(aId); }
 		return null;
 	}
 
 	/**
-	 * Returns the unique id of the server. Once set by the constructor the id
-	 * cannot be changed anymore by the application.
+	 * Returns the unique id of the server. Once set by the constructor the id cannot be changed anymore by the application.
+	 * 
 	 * @return Id of this server instance.
 	 */
 	@Override
@@ -386,7 +405,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param aConnector
 	 * @return
 	 */
@@ -396,7 +415,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param aConnector
 	 * @param aUsername
 	 */
@@ -406,7 +425,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param aConnector
 	 */
 	@Override
@@ -415,7 +434,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param aConnector
 	 * @return
 	 */
@@ -425,7 +444,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param aConnector
 	 * @param aNodeId
 	 */
@@ -435,7 +454,7 @@ public class BaseServer implements WebSocketServer {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param aConnector
 	 */
 	@Override
