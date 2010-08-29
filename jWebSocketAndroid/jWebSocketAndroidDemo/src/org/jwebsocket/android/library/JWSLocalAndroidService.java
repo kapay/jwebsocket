@@ -28,6 +28,7 @@ import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.token.Token;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -110,6 +111,8 @@ public class JWSLocalAndroidService extends Service {
 
   private static BaseTokenClient baseTokenClient;
   
+  protected NotificationManager jwsNotification;
+  
   /**
    * Each client activity or service can be a listener to receives event notification of jwebsocket events.
    */
@@ -136,6 +139,10 @@ public class JWSLocalAndroidService extends Service {
 
   @Override
   public void onCreate() {
+    jwsNotification = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+    // Display a notification about us starting. 
+    showStartingNotification();
+
     baseTokenClient = new BaseTokenClient();
     baseTokenClient.addListener(new Listener());
   }
@@ -286,5 +293,12 @@ public class JWSLocalAndroidService extends Service {
       messageHandler.sendMessage(lMsg);
     }
   }
+  /**
+   * client should override this method to show notification
+   */
+  public void showStartingNotification() {
+    
+  }
+
 
 }
