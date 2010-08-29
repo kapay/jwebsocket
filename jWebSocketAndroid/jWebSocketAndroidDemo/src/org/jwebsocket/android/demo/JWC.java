@@ -15,11 +15,8 @@
 package org.jwebsocket.android.demo;
 
 import android.app.Activity;
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.widget.Toast;
 import java.util.List;
@@ -34,13 +31,10 @@ import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.token.Token;
 
 /**
- * jWebSocket android service that uses the {@link Messenger} class for 
- * communicating with clients.  This allows for remote interaction with a service, 
- * without needing to define an AIDL interface.
- * 
+ *
  * @author aschulze
  */
-public class JWC extends Service {
+public class JWC {
 
     private final static int MT_OPENED = 0;
     private final static int MT_PACKET = 1;
@@ -203,10 +197,5 @@ public class JWC extends Service {
             lMsg.what = MT_CLOSED;
             messageHandler.sendMessage(lMsg);
         }
-    }
-
-    @Override
-    public IBinder onBind(Intent arg0) {
-      return null;
     }
 }
