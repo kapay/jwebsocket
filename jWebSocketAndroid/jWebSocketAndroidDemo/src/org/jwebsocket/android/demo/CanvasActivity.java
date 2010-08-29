@@ -221,16 +221,20 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
         public boolean onOptionsItemSelected(MenuItem item) {
             // Handle item selection
             switch (item.getItemId()) {
-            case R.id.mniCanvasClear:
-                final Paint lBck = new Paint();
-		lBck.setARGB(0xff, 0x80, 0x80, 0x80);
-                lCanvas.drawRect(0, 0, lWidth, lHeight, lBck);
-                lImgView.invalidate();
+            case R.id.mniCanvasClear:                
+		clearCanvas();
                 sendClear();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
             }
+        }
+
+        private void clearCanvas() {
+            final Paint lBck = new Paint();
+            lBck.setARGB(0xff, 0x80, 0x80, 0x80);
+            lCanvas.drawRect(0, 0, lWidth, lHeight, lBck);
+            lImgView.invalidate();
         }
 
         private void sendClear() {
@@ -304,8 +308,10 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 				// check "closePath" request
 			} else if ("closePath".equals(aToken.getString("reqType"))) {
 				// nothing to do here
-			}
-			// TODO: implement clear (still missing)
+			}else if("clear".equals(aToken.getString("reqType"))) {
+                            clearCanvas();
+                        }
+			
 		}
 	}
 
