@@ -45,6 +45,7 @@ public final class R {
         public static final int lblFundTarget=0x7f06000d;
         public static final int lblUsername=0x7f060017;
         public static final int lytFund=0x7f06000a;
+        public static final int mniCanvasClear=0x7f06001f;
         public static final int mniCanvasConnect=0x7f06001c;
         public static final int mniCanvasDisconnect=0x7f06001d;
         public static final int mniCanvasExit=0x7f06001e;
@@ -68,7 +69,8 @@ public final class R {
         public static final int canvas_menu=0x7f050000;
     }
     public static final class string {
-        public static final int app_name=0x7f040003;
+        public static final int app_name=0x7f040004;
+        public static final int mniCanvasClear=0x7f040003;
         public static final int mniCanvasConnect=0x7f040000;
         public static final int mniCanvasDisconnect=0x7f040001;
         public static final int mniCanvasExit=0x7f040002;

@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -49,6 +50,8 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 	private String CANVAS_ID = "c1";
 	private float lSX = 0, lSY = 0;
 	private ImageView lImgView = null;
+        int lWidth;
+	int lHeight;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -61,8 +64,8 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		// get the display metric (width and height)
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		final int lWidth = metrics.widthPixels;
-		final int lHeight = metrics.heightPixels;
+		lWidth = metrics.widthPixels;
+		lHeight = metrics.heightPixels;
 
 		final Bitmap lBmp = Bitmap.createBitmap(lWidth, lHeight, Bitmap.Config.ARGB_8888);
 		lCanvas = new Canvas(lBmp);
@@ -214,6 +217,41 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		return true;
 	}
 
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            // Handle item selection
+            switch (item.getItemId()) {
+            case R.id.mniCanvasClear:
+                final Paint lBck = new Paint();
+		lBck.setARGB(0xff, 0x80, 0x80, 0x80);
+                lCanvas.drawRect(0, 0, lWidth, lHeight, lBck);
+                lImgView.invalidate();
+                sendClear();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+            }
+        }
+
+        private void sendClear() {
+            Token lCanvasToken = new Token();
+            lCanvasToken.put("ns", "org.jWebSocket.plugins.system");
+            lCanvasToken.put("type", "broadcast");
+            lCanvasToken.put("id", CANVAS_ID);
+
+            // pass namespace and type
+            // for client's canvas "command"
+            lCanvasToken.put("reqNS", "org.jWebSocket.plugins.canvas");
+            lCanvasToken.put("reqType", "clear");
+
+            try {
+                    JWC.sendToken(lCanvasToken);
+            } catch (WebSocketException e) {
+                    //TODO: log exception
+            }
+        }
+
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -224,6 +262,8 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 			//TODO: log exception
 		}
 	}
+
+        
 
 	@Override
 	protected void onPause() {
