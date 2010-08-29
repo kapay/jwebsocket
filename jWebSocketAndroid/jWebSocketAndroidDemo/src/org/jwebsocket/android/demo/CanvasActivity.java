@@ -32,6 +32,8 @@ import android.view.Window;
 import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
@@ -52,6 +54,8 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 	private ImageView lImgView = null;
         int lWidth;
 	int lHeight;
+        Timer timer;
+        private boolean isDirty = false;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -131,6 +135,16 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 				return true;
 			}
 		});
+
+                timer = new Timer();
+                timer.scheduleAtFixedRate(new TimerTask(){
+                    public void run(){
+                        if(isDirty) {
+                            lImgView.postInvalidate();
+                        }
+                    }
+                }, 0 , 10);
+                
 
 	}
 
@@ -292,7 +306,7 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 				lCanvas.drawLine(lSX, lSY, lEX, lEY, lPaint);
 				// invalidate image view to re-draw the canvas
                                                                
-				lImgView.invalidate();
+				isDirty = true;
 
 				lSX = lEX;
 				lSY = lEY;
