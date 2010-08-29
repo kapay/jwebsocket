@@ -78,11 +78,11 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		lImgView.setPadding(0, 0, 0, 0);
 
 		final Paint lBck = new Paint();
-		lBck.setARGB(0xff, 0x80, 0x80, 0x80);
+		lBck.setARGB(0xff, 0xff, 0xff, 0xff);
 		lCanvas.drawRect(0, 0, lWidth, lHeight, lBck);
 
 		lPaint = new Paint();
-		lPaint.setARGB(0xff, 0xff, 0x00, 0xff);
+		lPaint.setARGB(0xff, 0x00, 0x00, 0x00);
 
 		mLinearLayout.addView(lImgView);
 		setContentView(mLinearLayout);
@@ -170,17 +170,7 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		lCanvasToken.put("reqType", "lineTo");
 		lCanvasToken.put("x", aX);
 		lCanvasToken.put("y", aY);
-		lCanvasToken.put("id", CANVAS_ID);
-
-		// commented out by Alex: 2010-08-20
-		/*
-		lCanvasToken.put("lSX", lSX);
-		lCanvasToken.put("lSY", lSY);
-		lCanvasToken.put("lEX", lSY);
-		lCanvasToken.put("lEY", lSY);
-		lCanvasToken.put("target", "android");
-		lCanvasToken.put("identifier", getTaskId());//used to prevent the canvas being drawn from responding the request
-		 */
+		lCanvasToken.put("id", CANVAS_ID);		
 		try {
 			JWC.sendToken(lCanvasToken);
 		} catch (WebSocketException ex) {
@@ -232,7 +222,7 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 
         private void clearCanvas() {
             final Paint lBck = new Paint();
-            lBck.setARGB(0xff, 0x80, 0x80, 0x80);
+            lBck.setARGB(0xff, 0xff, 0xff, 0xff);
             lCanvas.drawRect(0, 0, lWidth, lHeight, lBck);
             lImgView.invalidate();
         }
@@ -301,7 +291,9 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 				// draw the line
 				lCanvas.drawLine(lSX, lSY, lEX, lEY, lPaint);
 				// invalidate image view to re-draw the canvas
+                                                               
 				lImgView.invalidate();
+
 				lSX = lEX;
 				lSY = lEY;
 				// }
