@@ -137,6 +137,11 @@
             <include name="${dist.jar}"/>
         </patternset>
     </target>
+    <!--blackberry-init-->
+    <target name="blackberry-init">
+        <available file="${platform.home}/bin/rapc.jar" property="blackberry.trigger"/>
+        <available file="${platform.home}/bin/Settings.rc" property="blackberry.settings.trigger"/>
+    </target>
     <!--cdc-init-->
     <target name="cdc-init">
         <condition property="cdc-platform.trigger">
@@ -173,11 +178,6 @@
             <equals arg1="${deployment.number}" arg2="" trim="true"/>
         </condition>
         <fail if="application.version.invalid" message="Property deployment.number must not be empty and must contain version in format %d.%d.%d!"/>
-    </target>
-    <!--blackberry-init-->
-    <target name="blackberry-init">
-        <available file="${platform.home}/bin/rapc.jar" property="blackberry.trigger"/>
-        <available file="${platform.home}/bin/Settings.rc" property="blackberry.settings.trigger"/>
     </target>
     <!--ricoh-init-->
     <target name="ricoh-pre-init" if="cdc-platform.trigger">
@@ -341,7 +341,7 @@
     <!--init-->
     <target name="pre-init"/>
     <target name="post-init"/>
-    <target name="init" depends="pre-init,load-properties,basic-init,cldc-init,cdc-init,blackberry-init,ricoh-init,semc-init,savaje-init,sjmc-init,cdc-hi-init,nokiaS80-init,nsicom-init,post-init"/>
+    <target name="init" depends="pre-init,load-properties,basic-init,cldc-init,blackberry-init,cdc-init,ricoh-init,semc-init,savaje-init,sjmc-init,cdc-hi-init,nokiaS80-init,nsicom-init,post-init"/>
     <!--conditional clean-->
     <target name="conditional-clean-init">
         <uptodate property="no.clean.before.build" targetfile="${build.dir}/.timestamp">
@@ -674,6 +674,45 @@
     <target name="update-jad" if="cldc-platform.trigger">
         <nb-jad jadfile="${dist.dir}/${dist.jad}" jarfile="${dist.dir}/${dist.jar}" url="${dist.jar}" sign="${sign.enabled}" keystore="${sign.keystore}" keystorepassword="${sign.keystore.password}" alias="${sign.alias}" aliaspassword="${sign.alias.password}" encoding="UTF-8"/>
     </target>
+    <!--create-cod-->
+    <target name="create-cod" if="blackberry.trigger">
+        <exec dir="${dist.dir}" executable="java" failonerror="true">
+            <arg value="-cp"/>
+            <arg value="${platform.home}/bin/rapc.jar"/>
+            <arg value="net.rim.tools.compiler.Compiler"/>
+            <arg value="import=${platform.bootclasspath}"/>
+            <arg value="codename=${name}"/>
+            <arg value="-midlet"/>
+            <arg value="jad=${basedir}/${dist.dir}/${dist.jad}"/>
+            <arg value="${basedir}/${dist.dir}/${dist.jar}"/>
+        </exec>
+        <property file="${dist.dir}/${dist.jad}"/>
+        <echo file="${basedir}/${dist.dir}/${name}.alx">
+&lt;loader version="1.0"&gt;
+    &lt;application id="${name}"&gt;
+        &lt;name&gt;
+            ${MIDlet-Name}
+        &lt;/name&gt;
+        &lt;description&gt;
+            ${MIDlet-Description}
+        &lt;/description&gt;
+        &lt;version&gt;
+            ${MIDlet-Version}
+        &lt;/version&gt;
+        &lt;vendor&gt;
+            ${MIDlet-Vendor}
+        &lt;/vendor&gt;
+        &lt;copyright&gt;
+            ${MIDlet-Copyright}
+        &lt;/copyright&gt;
+        &lt;fileset Java="1.0"&gt;
+            &lt;directory/&gt;
+            &lt;files&gt;${name}.cod&lt;/files&gt;
+        &lt;/fileset&gt;
+    &lt;/application&gt;
+&lt;/loader&gt;
+        </echo>
+    </target>
     <!--ricoh-init-dalp-->
     <target name="ricoh-init-dalp" if="ricoh-platform.trigger">
         <property name="ricoh.application.telephone" value=""/>
@@ -777,49 +816,10 @@
             <fileset dir="${resources.dir}"/>
         </copy>
     </target>
-    <!--create-cod-->
-    <target name="create-cod" if="blackberry.trigger">
-        <exec dir="${dist.dir}" executable="java" failonerror="true">
-            <arg value="-cp"/>
-            <arg value="${platform.home}/bin/rapc.jar"/>
-            <arg value="net.rim.tools.compiler.Compiler"/>
-            <!-- <arg value="import=${platform.bootclasspath}"/> -->
-            <arg value="codename=${name}"/>
-            <arg value="-midlet"/>
-            <arg value="jad=${basedir}/${dist.dir}/${dist.jad}"/>
-            <arg value="${basedir}/${dist.dir}/${dist.jar}"/>
-        </exec>
-        <property file="${dist.dir}/${dist.jad}"/>
-        <echo file="${basedir}/${dist.dir}/${name}.alx">
-&lt;loader version="1.0"&gt;
-    &lt;application id="${name}"&gt;
-        &lt;name&gt;
-            ${MIDlet-Name}
-        &lt;/name&gt;
-        &lt;description&gt;
-            ${MIDlet-Description}
-        &lt;/description&gt;
-        &lt;version&gt;
-            ${MIDlet-Version}
-        &lt;/version&gt;
-        &lt;vendor&gt;
-            ${MIDlet-Vendor}
-        &lt;/vendor&gt;
-        &lt;copyright&gt;
-            ${MIDlet-Copyright}
-        &lt;/copyright&gt;
-        &lt;fileset Java="1.0"&gt;
-            &lt;directory/&gt;
-            &lt;files&gt;${name}.cod&lt;/files&gt;
-        &lt;/fileset&gt;
-    &lt;/application&gt;
-&lt;/loader&gt;
-        </echo>
-    </target>
     <!--jar-->
     <target name="pre-jar"/>
     <target name="post-jar"/>
-    <target name="jar" depends="preverify,pre-jar,set-password,create-jad,do-extra-libs,nokiaS80-create-manifest,jad-jsr211-properties,semc-build-j9,do-jar,nsicom-create-manifest,do-jar-no-manifest,update-jad,ricoh-build-dalp,savaje-build-jnlp,create-cod,post-jar" description="Build jar and application descriptor."/>
+    <target name="jar" depends="preverify,pre-jar,set-password,create-jad,do-extra-libs,nokiaS80-create-manifest,jad-jsr211-properties,semc-build-j9,do-jar,nsicom-create-manifest,do-jar-no-manifest,update-jad,create-cod,ricoh-build-dalp,savaje-build-jnlp,post-jar" description="Build jar and application descriptor."/>
     <!--override-jad-->
     <target name="override-jad" if="override.jarurl.trigger">
         <property name="deployment.jarurl" value="${dist.jar}"/>
@@ -1287,6 +1287,17 @@
     <target name="clean-javadoc">
         <delete dir="${dist.javadoc.dir}"/>
     </target>
+    <!--clean-blackberry-->
+    <target name="clean-blackberry" if="blackberry.trigger">
+        <delete file="${dist.dir}/${name}.cod" failonerror="false"/>
+        <delete file="${dist.dir}/${name}.cso" failonerror="false"/>
+        <delete file="${dist.dir}/${name}.debug" failonerror="false"/>
+        <delete failonerror="false">
+            <fileset dir="${platform.home}/simulator">
+                <include name="**/${name}.*"/>
+            </fileset>
+        </delete>
+    </target>
     <target name="clean-j9" if="j9.dist">
         <delete file="${j9.dist}"/>
     </target>
@@ -1318,17 +1329,6 @@
     </target>
     <target name="clean-sjmc" if="sjmc-platform.trigger">
         <delete dir="${dist.dir}/lib"/>
-    </target>
-    <!--clean-blackberry-->
-    <target name="clean-blackberry" if="blackberry.trigger">
-        <delete file="${dist.dir}/${name}.cod" failonerror="false"/>
-        <delete file="${dist.dir}/${name}.cso" failonerror="false"/>
-        <delete file="${dist.dir}/${name}.debug" failonerror="false"/>
-        <delete failonerror="false">
-            <fileset dir="${platform.home}/simulator">
-                <include name="**/${name}.*"/>
-            </fileset>
-        </delete>
     </target>
     <!--clean-->
     <target name="pre-clean"/>
@@ -1382,7 +1382,7 @@
         <delete dir="build" quiet="true"/>
         <delete dir="dist" quiet="true"/>
     </target>
-    <target name="do-clean" depends="pre-clean,clean-timestamp,clean-preprocessed,clean-classes,clean-obfuscated,clean-preverified,clean-manifest,clean-jar,clean-jad,clean-javadoc,clean-j9,clean-ricoh,clean-semc,clean-savaje,clean-sjmc,clean-blackberry,-clean-default-configuration-root,-clean-configuration-root,-clean-completely,post-clean"/>
+    <target name="do-clean" depends="pre-clean,clean-timestamp,clean-preprocessed,clean-classes,clean-obfuscated,clean-preverified,clean-manifest,clean-jar,clean-jad,clean-javadoc,clean-blackberry,clean-j9,clean-ricoh,clean-semc,clean-savaje,clean-sjmc,-clean-default-configuration-root,-clean-configuration-root,-clean-completely,post-clean"/>
     <target name="clean" depends="conditional-clean" if="no.clean.before.build" description="Clean build products.">
         <antcall target="do-clean" inheritall="true" inheritrefs="true"/>
     </target>
