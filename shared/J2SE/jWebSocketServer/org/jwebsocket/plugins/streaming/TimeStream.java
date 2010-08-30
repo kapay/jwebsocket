@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * implements the TimeStream, primarily for demonstration purposes but it can
@@ -101,10 +102,10 @@ public class TimeStream extends TokenStream {
 				try {
 					Thread.sleep(1000);
 
-					Token lToken = new Token("event");
-					lToken.put("name", "stream");
-					lToken.put("msg", new Date().toString());
-					lToken.put("streamID", getStreamID());
+					Token lToken = TokenFactory.createToken("event");
+					lToken.setString("name", "stream");
+					lToken.setString("msg", new Date().toString());
+					lToken.setString("streamID", getStreamID());
 
 					// log.debug("Time streamer queues '" + lData + "'...");
 					put(lToken);

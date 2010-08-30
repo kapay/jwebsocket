@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import javolution.util.FastMap;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * demonstrates how to communicate between servlets and web sockets.
@@ -65,11 +66,11 @@ public class ServletBridge extends HttpServlet {
 			if (server != null) {
 				// convert request arguments to token
 				FastMap<String, String[]> lParms = new FastMap(request.getParameterMap());
-				Token lToken = new Token();
+				Token lToken = TokenFactory.createToken();
 				for (String lParm : lParms.keySet()) {
 					String[] lValues = lParms.get(lParm);
 					if (lValues != null && lValues.length > 0) {
-						lToken.put(lParm, lValues[0]);
+						lToken.setValidated(lParm, lValues[0]);
 					}
 				}
 				ServletConnector lConn = new ServletConnector(request, response);

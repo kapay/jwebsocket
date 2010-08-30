@@ -82,7 +82,7 @@ public class Tools {
 			lRes = lRes.substring(0, aLen);
 		} else {
 			while(lRes.length() < aLen) {
-				lRes = "0" + lRes.substring(0, aLen);
+				lRes = "0" + lRes;
 			}
 		}
 		return lRes;

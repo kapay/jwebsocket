@@ -20,7 +20,9 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * implements the stressStream, primarily for demonstration purposes but it can
@@ -101,9 +103,9 @@ public class StressStream extends TokenStream {
 				try {
 					Thread.sleep(50);
 
-					Token lToken = new Token("event");
-					lToken.put("name", "stream");
-					lToken.put("msg", new Date().getTime());
+					Token lToken = TokenFactory.createToken(BaseToken.TT_EVENT);
+					lToken.setString("name", "stream");
+					lToken.setString("msg", String.valueOf(new Date().getTime()));
 
 					put(lToken);
 				} catch (InterruptedException ex) {

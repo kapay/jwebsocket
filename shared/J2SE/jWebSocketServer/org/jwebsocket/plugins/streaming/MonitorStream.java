@@ -20,7 +20,9 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * implements the jWebSocket monitor stream for demonstration purposes.
@@ -100,22 +102,22 @@ public class MonitorStream extends TokenStream {
 				try {
 					Thread.sleep(1000);
 
-					Token lToken = new Token("event");
-					lToken.put("name", "stream");
-					lToken.put("streamID", getStreamID());
+					Token lToken = TokenFactory.createToken(BaseToken.TT_EVENT);
+					lToken.setString("name", "stream");
+					lToken.setString("streamID", getStreamID());
 
 					// collect some data to monitor
 					Runtime lRT = Runtime.getRuntime();
-					lToken.put("totalMem", lRT.totalMemory());
-					lToken.put("freeMem", lRT.freeMemory());
+					lToken.setInteger("totalMem", (int)(lRT.totalMemory() >> 10));
+					lToken.setInteger("freeMem", (int)(lRT.totalMemory() >> 10));
 
 					TokenServer lServer = getServer();
-					lToken.put("clientCount", lServer.getAllConnectors().size());
+					lToken.setInteger("clientCount", lServer.getAllConnectors().size());
 
 					File lFile = new File(".");
-					lToken.put("freeDisk", lFile.getFreeSpace());
-					lToken.put("totalDisk", lFile.getTotalSpace());
-					lToken.put("usableDisk", lFile.getUsableSpace());
+					lToken.setInteger("freeDisk", (int)(lFile.getFreeSpace() >> 10));
+					lToken.setInteger("totalDisk", (int)(lFile.getTotalSpace() >> 10));
+					lToken.setInteger("usableDisk", (int)(lFile.getUsableSpace() >> 10));
 
 					// : further tags to be continued....
 

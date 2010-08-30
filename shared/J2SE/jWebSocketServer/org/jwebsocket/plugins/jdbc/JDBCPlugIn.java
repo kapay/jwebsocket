@@ -167,7 +167,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 			// TODO: metadata should be optional to save bandwidth!
 			// generate the meta data for the response
 			lColCount = lRes.metaData.getColumnCount();
-			lResponse.put("colcount", lColCount);
+			lResponse.setInteger("colcount", lColCount);
 
 			for (int i = 1; i <= lColCount; i++) {
 				// get name of colmuns
@@ -194,9 +194,9 @@ public class JDBCPlugIn extends TokenPlugIn {
 		}
 
 		// complete the response token
-		lResponse.put("rowcount", lRowCount);
-		lResponse.put("columns", lColumns);
-		lResponse.put("data", lData);
+		lResponse.setInteger("rowcount", lRowCount);
+		lResponse.setList("columns", lColumns);
+		lResponse.setList("data", lData);
 
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);

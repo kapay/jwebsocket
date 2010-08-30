@@ -24,7 +24,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jwebsocket.token.Token;
+import org.jwebsocket.token.JSONToken;
 
 /**
  * methods to handle JsonArray objects
@@ -70,7 +70,7 @@ public class JSONArrayHandler {
 				for (int i = 0; i < aJsonArray.length(); i++) {
 					Object o = lMetod.invoke(null, aJsonArray, i);
 					if (parameterArgClass == JSONObject.class) {
-						o = new Token((JSONObject) o);
+						o = new JSONToken((JSONObject) o);
 					} //if we have an array in an array...
 					else if (parameterArgClass == JSONArray.class) {
 						JSONArrayToList((JSONArray) o, ((ParameterizedType) parameterArgTypes[0]));

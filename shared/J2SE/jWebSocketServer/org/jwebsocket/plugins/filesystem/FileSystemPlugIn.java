@@ -33,7 +33,9 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  *
@@ -121,8 +123,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				if (log.isDebugEnabled()) {
 					log.debug(lMsg);
 				}
-				lResponse.put("code", -1);
-				lResponse.put("msg", lMsg);
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", lMsg);
 				// send error response to requester
 				lServer.sendToken(aConnector, lResponse);
 				return;
@@ -134,8 +136,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			if (log.isDebugEnabled()) {
 				log.debug(lMsg);
 			}
-			lResponse.put("code", -1);
-			lResponse.put("msg", lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
 			// send error response to requester
 			lServer.sendToken(aConnector, lResponse);
 			return;
@@ -160,8 +162,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				FileUtils.writeByteArrayToFile(lFile, lBA);
 			}
 		} catch (IOException ex) {
-			lResponse.put("code", -1);
-			lResponse.put("msg", ex.getMessage());
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", ex.getMessage());
 		}
 
 		// send response to requester
@@ -171,13 +173,13 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		// to allow to update their content (if desired)
 		if (lNotify) {
 			// create token of type "event"
-			Token lEvent = new Token(Token.TT_EVENT);
+			Token lEvent = TokenFactory.createToken(BaseToken.TT_EVENT);
 			// include name space of this plug-in
 			lEvent.setNS(NS_FILESYSTEM);
-			lEvent.put("name", "filesaved");
-			lEvent.put("filename", lFilename);
-			lEvent.put("sourceId", aConnector.getId());
-			lEvent.put("url", getSetting(WEB_ROOT_KEY, WEB_ROOT_DEF) + lFilename);
+			lEvent.setString("name", "filesaved");
+			lEvent.setString("filename", lFilename);
+			lEvent.setString("sourceId", aConnector.getId());
+			lEvent.setString("url", getSetting(WEB_ROOT_KEY, WEB_ROOT_DEF) + lFilename);
 			// TODO: Limit notification to desired scope
 			lServer.broadcastToken(lEvent);
 		}
@@ -224,8 +226,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				if (log.isDebugEnabled()) {
 					log.debug(lMsg);
 				}
-				lResponse.put("code", -1);
-				lResponse.put("msg", lMsg);
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", lMsg);
 				// send error response to requester
 				lServer.sendToken(aConnector, lResponse);
 				return;
@@ -237,8 +239,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			if (log.isDebugEnabled()) {
 				log.debug(lMsg);
 			}
-			lResponse.put("code", -1);
-			lResponse.put("msg", lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
 			// send error response to requester
 			lServer.sendToken(aConnector, lResponse);
 			return;
@@ -252,10 +254,10 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			if (lBA != null && lBA.length > 0) {
 				lData = new String(Base64.encodeBase64(lBA), "UTF-8");
 			}
-			lResponse.put("data", lData);
+			lResponse.setString("data", lData);
 		} catch (IOException ex) {
-			lResponse.put("code", -1);
-			lResponse.put("msg", ex.getMessage());
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", ex.getMessage());
 		}
 
 		// send response to requester

@@ -142,7 +142,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 		}
 
 		BaseStream lStream = null;
-		String lStreamID = (String) aToken.get("stream");
+		String lStreamID = aToken.getString("stream");
 		if (lStreamID != null) {
 			lStream = streams.get(lStreamID);
 		}
@@ -172,7 +172,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 		}
 
 		BaseStream lStream = null;
-		String lStreamID = (String) aToken.get("stream");
+		String lStreamID = aToken.getString("stream");
 		if (lStreamID != null) {
 			lStream = streams.get(lStreamID);
 		}

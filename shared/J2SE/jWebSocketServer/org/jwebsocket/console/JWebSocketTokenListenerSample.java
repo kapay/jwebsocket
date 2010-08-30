@@ -80,14 +80,14 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 			// if type is "getInfo" return some server information
 			Token lResponse = aEvent.createResponse(aToken);
 			if ("getInfo".equals(lType)) {
-				lResponse.put("vendor", JWebSocketCommonConstants.VENDOR);
-				lResponse.put("version", JWebSocketServerConstants.VERSION_STR);
-				lResponse.put("copyright", JWebSocketCommonConstants.COPYRIGHT);
-				lResponse.put("license", JWebSocketCommonConstants.LICENSE);
+				lResponse.setString("vendor", JWebSocketCommonConstants.VENDOR);
+				lResponse.setString("version", JWebSocketServerConstants.VERSION_STR);
+				lResponse.setString("copyright", JWebSocketCommonConstants.COPYRIGHT);
+				lResponse.setString("license", JWebSocketCommonConstants.LICENSE);
 			} else {
 				// if unknown type in this namespace, return corresponding error message
-				lResponse.put("code", -1);
-				lResponse.put("msg", "Token type '" + lType + "' not supported in namespace '" + lNS + "'.");
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "Token type '" + lType + "' not supported in namespace '" + lNS + "'.");
 			}
 			aEvent.sendToken(lResponse);
 		}

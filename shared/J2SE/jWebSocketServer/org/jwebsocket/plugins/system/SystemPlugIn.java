@@ -15,7 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.system;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import javolution.util.FastList;
@@ -33,7 +32,9 @@ import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.security.User;
+import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 import org.jwebsocket.util.Tools;
 
 /**
@@ -151,16 +152,16 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Broadcasting connect...");
 		}
 		// broadcast connect event to other clients of the jWebSocket network
-		Token lConnect = new Token(Token.TT_EVENT);
-		lConnect.put("name", "connect");
+		Token lConnect = TokenFactory.createToken(BaseToken.TT_EVENT);
+		lConnect.setString("name", "connect");
 		// lConnect.put("usid", getSessionId(aConnector));
-		lConnect.put("sourceId", aConnector.getId());
+		lConnect.setString("sourceId", aConnector.getId());
 		// if a unique node id is specified for the client include that
 		String lNodeId = aConnector.getNodeId();
 		if (lNodeId != null) {
-			lConnect.put("unid", lNodeId);
+			lConnect.setString("unid", lNodeId);
 		}
-		lConnect.put("clientCount", getConnectorCount());
+		lConnect.setInteger("clientCount", getConnectorCount());
 
 		// broadcast to all except source
 		broadcastToken(aConnector, lConnect);
@@ -176,16 +177,16 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Broadcasting disconnect...");
 		}
 		// broadcast connect event to other clients of the jWebSocket network
-		Token lDisconnect = new Token(Token.TT_EVENT);
-		lDisconnect.put("name", "disconnect");
+		Token lDisconnect = TokenFactory.createToken(BaseToken.TT_EVENT);
+		lDisconnect.setString("name", "disconnect");
 		// lDisconnect.put("usid", getSessionId(aConnector));
-		lDisconnect.put("sourceId", aConnector.getId());
+		lDisconnect.setString("sourceId", aConnector.getId());
 		// if a unique node id is specified for the client include that
 		String lNodeId = aConnector.getNodeId();
 		if (lNodeId != null) {
-			lDisconnect.put("unid", lNodeId);
+			lDisconnect.setString("unid", lNodeId);
 		}
-		lDisconnect.put("clientCount", getConnectorCount());
+		lDisconnect.setInteger("clientCount", getConnectorCount());
 
 		// broadcast to all except source
 		broadcastToken(aConnector, lDisconnect);
@@ -196,18 +197,18 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Sending welcome...");
 		}
 		// send "welcome" token to client
-		Token lWelcome = new Token(TT_WELCOME);
-		lWelcome.put("vendor", JWebSocketCommonConstants.VENDOR);
-		lWelcome.put("version", JWebSocketServerConstants.VERSION_STR);
+		Token lWelcome = TokenFactory.createToken(TT_WELCOME);
+		lWelcome.setString("vendor", JWebSocketCommonConstants.VENDOR);
+		lWelcome.setString("version", JWebSocketServerConstants.VERSION_STR);
 		// here the session id is MANDATORY! to pass to the client!
-		lWelcome.put("usid", aConnector.getSession().getSessionId());
-		lWelcome.put("sourceId", aConnector.getId());
+		lWelcome.setString("usid", aConnector.getSession().getSessionId());
+		lWelcome.setString("sourceId", aConnector.getId());
 		// if a unique node id is specified for the client include that
 		String lNodeId = aConnector.getNodeId();
 		if (lNodeId != null) {
-			lWelcome.put("unid", lNodeId);
+			lWelcome.setString("unid", lNodeId);
 		}
-		lWelcome.put("timeout", aConnector.getEngine().getConfiguration().getTimeout());
+		lWelcome.setInteger("timeout", aConnector.getEngine().getConfiguration().getTimeout());
 
 		sendToken(aConnector, aConnector, lWelcome);
 	}
@@ -220,16 +221,16 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Broadcasting login event...");
 		}
 		// broadcast login event to other clients of the jWebSocket network
-		Token lLogin = new Token(Token.TT_EVENT);
-		lLogin.put("name", "login");
-		lLogin.put("username", getUsername(aConnector));
-		lLogin.put("clientCount", getConnectorCount());
+		Token lLogin = TokenFactory.createToken(BaseToken.TT_EVENT);
+		lLogin.setString("name", "login");
+		lLogin.setString("username", getUsername(aConnector));
+		lLogin.setInteger("clientCount", getConnectorCount());
 		// lLogin.put("usid", getSessionId(aConnector));
-		lLogin.put("sourceId", aConnector.getId());
+		lLogin.setString("sourceId", aConnector.getId());
 		// if a unique node id is specified for the client include that
 		String lNodeId = aConnector.getNodeId();
 		if (lNodeId != null) {
-			lLogin.put("unid", lNodeId);
+			lLogin.setString("unid", lNodeId);
 		}
 		// broadcast to all except source
 		broadcastToken(aConnector, lLogin);
@@ -243,16 +244,16 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Broadcasting logout event...");
 		}
 		// broadcast login event to other clients of the jWebSocket network
-		Token lLogout = new Token(Token.TT_EVENT);
-		lLogout.put("name", "logout");
-		lLogout.put("username", getUsername(aConnector));
-		lLogout.put("clientCount", getConnectorCount());
+		Token lLogout = TokenFactory.createToken(BaseToken.TT_EVENT);
+		lLogout.setString("name", "logout");
+		lLogout.setString("username", getUsername(aConnector));
+		lLogout.setInteger("clientCount", getConnectorCount());
 		// lLogout.put("usid", getSessionId(aConnector));
-		lLogout.put("sourceId", aConnector.getId());
+		lLogout.setString("sourceId", aConnector.getId());
 		// if a unique node id is specified for the client include that
 		String lNodeId = aConnector.getNodeId();
 		if (lNodeId != null) {
-			lLogout.put("unid", lNodeId);
+			lLogout.setString("unid", lNodeId);
 		}
 		// broadcast to all except source
 		broadcastToken(aConnector, lLogout);
@@ -268,12 +269,12 @@ public class SystemPlugIn extends TokenPlugIn {
 			log.debug("Sending good bye...");
 		}
 		// send "goodBye" token to client
-		Token lGoodBye = new Token(TT_GOODBYE);
-		lGoodBye.put("vendor", JWebSocketCommonConstants.VENDOR);
-		lGoodBye.put("version", JWebSocketServerConstants.VERSION_STR);
-		lGoodBye.put("sourceId", aConnector.getId());
+		Token lGoodBye = TokenFactory.createToken(TT_GOODBYE);
+		lGoodBye.setString("vendor", JWebSocketCommonConstants.VENDOR);
+		lGoodBye.setString("version", JWebSocketServerConstants.VERSION_STR);
+		lGoodBye.setString("sourceId", aConnector.getId());
 		if (aCloseReason != null) {
-			lGoodBye.put("reason", aCloseReason.toString().toLowerCase());
+			lGoodBye.setString("reason", aCloseReason.toString().toLowerCase());
 		}
 
 		// don't send session-id on good bye, neither required nor desired
@@ -316,8 +317,8 @@ public class SystemPlugIn extends TokenPlugIn {
 				}
 			}
 		} else {
-			lResponse.put("code", -1);
-			lResponse.put("msg", "missing arguments for 'login' command");
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "missing arguments for 'login' command");
 		}
 
 		// send response to client
@@ -344,12 +345,12 @@ public class SystemPlugIn extends TokenPlugIn {
 			broadcastLogoutEvent(aConnector);
 			// resetting the username is the only required signal for logout
 			// lResponse.put("usid", getSessionId(aConnector));
-			lResponse.put("sourceId", aConnector.getId());
+			lResponse.setString("sourceId", aConnector.getId());
 			removeUsername(aConnector);
 			removeGroup(aConnector);
 		} else {
-			lResponse.put("code", -1);
-			lResponse.put("msg", "not logged in");
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "not logged in");
 			sendToken(aConnector, aConnector, lResponse);
 		}
 	}
@@ -383,7 +384,7 @@ public class SystemPlugIn extends TokenPlugIn {
 						+ getUsername(aConnector) + "') from '"
 						+ aConnector + "' to " + lTargetId + "...");
 			}
-			aToken.put("sourceId", aConnector.getId());
+			aToken.setString("sourceId", aConnector.getId());
 			sendToken(aConnector, lTargetConnector, aToken);
 		} else {
 			log.warn("Target connector '" + lTargetId + "' not found.");
@@ -416,7 +417,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		if (getUsername(aConnector) != null)
 		{
 		 */
-		aToken.put("sourceId", aConnector.getId());
+		aToken.setString("sourceId", aConnector.getId());
 		// don't distribute session id here!
 		aToken.remove("usid");
 		String lSenderIncluded = aToken.getString("senderIncluded");
@@ -481,8 +482,8 @@ public class SystemPlugIn extends TokenPlugIn {
 				log.debug("echo " + lData);
 			}
 		} else {
-			lResponseToken.put("code", -1);
-			lResponseToken.put("msg", "missing 'data' argument for 'echo' command");
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", "missing 'data' argument for 'echo' command");
 		}
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
@@ -532,11 +533,11 @@ public class SystemPlugIn extends TokenPlugIn {
 				listOut.add(getUsername(lConnector) + "@"
 						+ lConnector.getRemotePort());
 			}
-			lResponseToken.put("clients", listOut);
-			lResponseToken.put("count", listOut.size());
+			lResponseToken.setList("clients", listOut);
+			lResponseToken.setInteger("count", listOut.size());
 		} else {
-			lResponseToken.put("code", -1);
-			lResponseToken.put("msg", "not logged in");
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", "not logged in");
 		}
 
 		sendToken(aConnector, aConnector, lResponseToken);

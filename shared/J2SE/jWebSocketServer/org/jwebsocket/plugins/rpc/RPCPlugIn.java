@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import javolution.util.FastList;
 
 import javolution.util.FastMap;
 
@@ -44,9 +45,10 @@ import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.plugins.rpc.util.JSONArrayHandler;
 import org.jwebsocket.plugins.rpc.util.RPCRightNotGrantedException;
 import org.jwebsocket.plugins.rpc.util.TypeConverter;
-import org.jwebsocket.security.Right;
 import org.jwebsocket.security.SecurityFactory;
+import org.jwebsocket.token.JSONToken;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * This plug-in provides all the functionality for remote procedure calls
@@ -215,7 +217,7 @@ public class RPCPlugIn extends TokenPlugIn {
 
 		String lClassName = aToken.getString("classname");
 		String lMethod = aToken.getString("method");
-		Object lArgs = aToken.get("args");
+		List lArgs = aToken.getList("args");
 
 		String lMsg = null;
 
@@ -235,7 +237,7 @@ public class RPCPlugIn extends TokenPlugIn {
 					RPCCallable lInstance = lInstanceGenerator.getInstance(aConnector);
 					if (lInstance != null) {
 						Object lObj = call(lRpcClassLoader, lInstance, lMethod, lArgs);
-						lResponseToken.put("result", lObj);
+						lResponseToken.setValidated("result", lObj);
 					} else {
 						lMsg = "Class '"
 								+ lClassName
@@ -279,8 +281,8 @@ public class RPCPlugIn extends TokenPlugIn {
 					+ ex.getMessage();
 		}
 		if (lMsg != null) {
-			lResponseToken.put("code", -1);
-			lResponseToken.put("msg", lMsg);
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", lMsg);
 		}
 
 		/* just for testing purposes of multi-threaded rpc's
@@ -316,9 +318,10 @@ public class RPCPlugIn extends TokenPlugIn {
 		// get the remote arguments
 		//arguments could be a token or an array of token
 		//for safety reason, client except an array (even if it's an array with 1 token)
-		Object lArgs = aToken.get("args");
+		List lArgs = aToken.getList("args");
 		if (!(lArgs instanceof JSONArray)) {
-			lArgs = new JSONArray().put(lArgs);
+			lArgs = new FastList();
+			lArgs.add(lArgs);
 		}
 
 		// TODO: find solutions for hardcoded engine id
@@ -328,17 +331,17 @@ public class RPCPlugIn extends TokenPlugIn {
 			mLog.debug("Processing 'rrpc'...");
 		}
 		if (lTargetConnector != null) {
-			Token lRRPC = new Token(lNS, "rrpc");
-			lRRPC.put("classname", lClassname);
-			lRRPC.put("method", lMethod);
-			lRRPC.put("args", lArgs);
-			lRRPC.put("sourceId", aConnector.getRemotePort());
+			Token lRRPC = TokenFactory.createToken(lNS, "rrpc");
+			lRRPC.setString("classname", lClassname);
+			lRRPC.setString("method", lMethod);
+			lRRPC.setList("args", lArgs);
+			lRRPC.setString("sourceId", aConnector.getId());
 
 			sendToken(aConnector, lTargetConnector, lRRPC);
 		} else {
 			Token lResponse = createResponse(aToken);
-			lResponse.put("code", -1);
-			lResponse.put("error", "Target " + lTargetId + " not found.");
+			lResponse.setInteger("code", -1);
+			lResponse.setString("error", "Target " + lTargetId + " not found.");
 			sendToken(aConnector, aConnector, lResponse);
 		}
 	}
@@ -440,8 +443,10 @@ public class RPCPlugIn extends TokenPlugIn {
 							if (lParameterType == String.class) {
 								lArg[j] = lJsonArrayArgs.getString(j);
 							} else if (lParameterType == Token.class) {
-								//All other objects should be Token.
-								lArg[j] = new Token(lJsonArrayArgs.getJSONObject(j));
+								// Alex:
+								// TODO: here we need to re-think
+								// All other objects should be Token.
+								lArg[j] = new JSONToken(lJsonArrayArgs.getJSONObject(j));
 							} //Special support for primitive type
 							else if (lParameterType == int.class) {
 								lArg[j] = lJsonArrayArgs.getInt(j);
@@ -459,6 +464,8 @@ public class RPCPlugIn extends TokenPlugIn {
 							} else if (lParameterType == List.class) {
 								//try to guess which type of object should be on the List:
 								Type[] genericParameterTypes = lMethod.getGenericParameterTypes();
+								// Alex:
+								// TODO: do we still need the JSONArrayHandler?
 								lArg[j] = JSONArrayHandler.JSONArrayToList(lJsonArrayArgs.getJSONArray(j), genericParameterTypes[j]);
 							} //any other object are *not* supported !
 							else {

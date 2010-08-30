@@ -19,6 +19,7 @@ import java.util.Collection;
 
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * converts XML formatted data packets into tokens and vice versa.
@@ -35,7 +36,7 @@ public class XMLProcessor {
      */
     public static Token packetToToken(WebSocketPacket aDataPacket) {
         // todo: implement!
-        Token lArgs = new Token();
+        Token lArgs = TokenFactory.createToken();
         return lArgs;
     }
 

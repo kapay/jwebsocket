@@ -37,8 +37,9 @@ import org.jwebsocket.listener.WebSocketServerTokenListener;
 import org.jwebsocket.packetProcessors.CSVProcessor;
 import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.plugins.TokenPlugInChain;
-import org.jwebsocket.token.Token;
 import org.jwebsocket.packetProcessors.XMLProcessor;
+import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * 
@@ -46,12 +47,12 @@ import org.jwebsocket.packetProcessors.XMLProcessor;
  */
 public class TokenServer extends BaseServer {
 
-	private static Logger		mLog				= Logging.getLogger(TokenServer.class);
+	private static Logger mLog = Logging.getLogger(TokenServer.class);
 	// specify name space for token server
-	private static final String	NS_TOKENSERVER		= JWebSocketServerConstants.NS_BASE + ".tokenserver";
+	private static final String NS_TOKENSERVER = JWebSocketServerConstants.NS_BASE + ".tokenserver";
 	// specify shared connector variables
-	public static final String	VAR_IS_TOKENSERVER	= NS_TOKENSERVER + ".isTS";
-	private volatile boolean	mIsAlive			= false;
+	public static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
+	private volatile boolean mIsAlive = false;
 
 	/**
 	 * 
@@ -120,8 +121,7 @@ public class TokenServer extends BaseServer {
 	public void connectorStarted(WebSocketConnector aConnector) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(null);
 		if ((lSubProt != null)
-				&& (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON) || lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV) || lSubProt
-						.equals(JWebSocketCommonConstants.SUB_PROT_XML))) {
+				&& (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON) || lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV) || lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML))) {
 
 			aConnector.setBoolean(VAR_IS_TOKENSERVER, true);
 
@@ -318,7 +318,7 @@ public class TokenServer extends BaseServer {
 	 * @param aToken - token to broadcast
 	 */
 	public void broadcastGroup(Token aToken) {
-		String lGroup = (String) aToken.get("group");
+		String lGroup = aToken.getString("group");
 		// if the group is not specified in the token then noone gets the message:
 		if (lGroup == null || lGroup.length() <= 0) {
 			mLog.debug("Token '" + aToken + "' has no group specified...");
@@ -495,17 +495,17 @@ public class TokenServer extends BaseServer {
 		Integer lTokenId = aInToken.getInteger("utid", -1);
 		String lType = aInToken.getString("type");
 		String lNS = aInToken.getString("ns");
-		Token lResToken = new Token("response");
-		lResToken.put("code", 0);
-		lResToken.put("msg", "ok");
+		Token lResToken = TokenFactory.createToken("response");
+		lResToken.setInteger("code", 0);
+		lResToken.setString("msg", "ok");
 		if (lTokenId != null) {
-			lResToken.put("utid", lTokenId);
+			lResToken.setInteger("utid", lTokenId);
 		}
 		if (lNS != null) {
-			lResToken.put("ns", lNS);
+			lResToken.setString("ns", lNS);
 		}
 		if (lType != null) {
-			lResToken.put("reqType", lType);
+			lResToken.setString("reqType", lType);
 		}
 		return lResToken;
 	}
@@ -518,8 +518,8 @@ public class TokenServer extends BaseServer {
 	 */
 	public Token createNotAuthToken(Token aInToken) {
 		Token lResToken = createResponse(aInToken);
-		lResToken.put("code", -1);
-		lResToken.put("msg", "not authenticated");
+		lResToken.setInteger("code", -1);
+		lResToken.setString("msg", "not authenticated");
 		return lResToken;
 	}
 
@@ -531,8 +531,8 @@ public class TokenServer extends BaseServer {
 	 */
 	public Token createAccessDenied(Token aInToken) {
 		Token lResToken = createResponse(aInToken);
-		lResToken.put("code", -1);
-		lResToken.put("msg", "access denied");
+		lResToken.setInteger("code", -1);
+		lResToken.setString("msg", "access denied");
 		return lResToken;
 	}
 

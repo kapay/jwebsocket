@@ -15,15 +15,78 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.token;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  *
  * @author aschulze
  */
-public class BaseToken {
+public abstract class BaseToken implements Token {
 
 	/**
 	 *
 	 */
 	public static final String TT_EVENT = "event";
+
+	public void setDouble(String aKey, Float aValue) {
+		setDouble(aKey, Double.valueOf(aValue));
+	}
+
+	public boolean setValidated(String aKey, Object aObj) {
+		boolean lRes = true;
+		if( aObj instanceof Boolean) {
+			setBoolean(aKey, (Boolean)aObj);
+		} else if( aObj instanceof Integer) {
+			setInteger(aKey, (Integer)aObj);
+		} else if( aObj instanceof Double) {
+			setDouble(aKey, (Double)aObj);
+		} else if( aObj instanceof String) {
+			setString(aKey, (String)aObj);
+		} else if( aObj instanceof List) {
+			setList(aKey, (List)aObj);
+		} else if( aObj instanceof Map) {
+			setMap(aKey, (Map)aObj);
+		} else {
+			lRes = false;
+		}
+		return lRes;
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public final String getType() {
+		return getString("type");
+	}
+
+	/**
+	 *
+	 * @param aType
+	 */
+	public final void setType(String aType) {
+		setString("type", aType);
+	}
+
+	/**
+	 * Returns the name space of the token. If you have the same token type
+	 * interpreted by multiple different plug-ins the name space allows to
+	 * uniquely address a certain plug-in. Each plug-in has its own name space.
+	 * @return the name space.
+	 */
+	public final String getNS() {
+		return getString("ns");
+	}
+
+	/**
+	 * Sets the name space of the token. If you have the same token type
+	 * interpreted by multiple different plug-ins the namespace allows to
+	 * uniquely address a certain plug-in. Each plug-in has its own namespace.
+	 * @param aNS the namespace to be set for the token.
+	 */
+	public final void setNS(String aNS) {
+		setString("ns", aNS);
+	}
 
 }

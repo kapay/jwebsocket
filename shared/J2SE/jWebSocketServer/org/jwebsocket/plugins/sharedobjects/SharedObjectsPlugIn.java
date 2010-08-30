@@ -29,6 +29,7 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * Pending...
@@ -56,8 +57,8 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 	private boolean isDataTypeValid(String aDataType, WebSocketConnector aConnector, Token aResponse) {
 		boolean isValid = ((aDataType != null && DATA_TYPES.contains(aDataType)));
 		if (!isValid) {
-			aResponse.put("code", -1);
-			aResponse.put("msg", "invalid datatype '" + aDataType + "'");
+			aResponse.setInteger("code", -1);
+			aResponse.setString("msg", "invalid datatype '" + aDataType + "'");
 			getServer().sendToken(aConnector, aResponse);
 		}
 		return isValid;
@@ -66,8 +67,8 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 	private boolean doesContain(String aID, WebSocketConnector aConnector, Token aResponse) {
 		boolean isValid = ((aID != null && sharedObjects.contains(aID)));
 		if (!isValid) {
-			aResponse.put("code", -1);
-			aResponse.put("msg", "object '" + aID + "' not found");
+			aResponse.setInteger("code", -1);
+			aResponse.setString("msg", "object '" + aID + "' not found");
 			getServer().sendToken(aConnector, aResponse);
 		}
 		return isValid;
@@ -76,8 +77,8 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 	private boolean alreadyExists(String aID, WebSocketConnector aConnector, Token aResponse) {
 		boolean isValid = ((aID != null && sharedObjects.contains(aID)));
 		if (isValid) {
-			aResponse.put("code", -1);
-			aResponse.put("msg", "object '" + aID + "' already exists");
+			aResponse.setInteger("code", -1);
+			aResponse.setString("msg", "object '" + aID + "' already exists");
 			getServer().sendToken(aConnector, aResponse);
 		}
 		return isValid;
@@ -131,11 +132,11 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 				}
 				sharedObjects.put(lID, string2Object(lDataType, lValue));
 
-				Token lBCT = new Token(lNS, "event");
-				lBCT.put("name", "created");
-				lBCT.put("id", lID);
-				lBCT.put("datatype", lDataType);
-				lBCT.put("value", lValue);
+				Token lBCT = TokenFactory.createToken(lNS, "event");
+				lBCT.setString("name", "created");
+				lBCT.setString("id", lID);
+				lBCT.setString("datatype", lDataType);
+				lBCT.setString("value", lValue);
 				getServer().broadcastToken(aConnector, lBCT);
 
 				// destroy
@@ -148,9 +149,9 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 				}
 				sharedObjects.remove(lID);
 
-				Token lBCT = new Token(lNS, "event");
-				lBCT.put("name", "destroyed");
-				lBCT.put("id", lID);
+				Token lBCT = TokenFactory.createToken(lNS, "event");
+				lBCT.setString("name", "destroyed");
+				lBCT.setString("id", lID);
 				getServer().broadcastToken(aConnector, lBCT);
 
 				// get
@@ -162,8 +163,8 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 					return;
 				}
 				Object lObj = sharedObjects.get(lID);
-				lResponse.put("id", lID);
-				lResponse.put("result", lObj.toString());
+				lResponse.setString("id", lID);
+				lResponse.setString("result", lObj.toString());
 
 				// put
 			} else if (lType.equals("update")) {
@@ -174,11 +175,11 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 					return;
 				}
 				sharedObjects.put(lID, string2Object(lDataType, lValue));
-				Token lBCT = new Token(lNS, "event");
-				lBCT.put("name", "updated");
-				lBCT.put("id", lID);
-				lBCT.put("datatype", lDataType);
-				lBCT.put("value", lValue);
+				Token lBCT = TokenFactory.createToken(lNS, "event");
+				lBCT.setString("name", "updated");
+				lBCT.setString("id", lID);
+				lBCT.setString("datatype", lDataType);
+				lBCT.setString("value", lValue);
 				getServer().broadcastToken(aConnector, lBCT);
 
 				// init
@@ -186,8 +187,8 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 				if (log.isDebugEnabled()) {
 					log.debug("Processing 'init'...");
 				}
-				Token lBCT = new Token(lNS, "event");
-				lBCT.put("name", "init");
+				Token lBCT = TokenFactory.createToken(lNS, "event");
+				lBCT.setString("name", "init");
 
 				String lData = null;
 				try {
@@ -215,13 +216,13 @@ public class SharedObjectsPlugIn extends TokenPlugIn {
 				} catch (JSONException ex) {
 					log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
-				lBCT.put("value", lData);
+				lBCT.setString("value", lData);
 				getServer().sendToken(aConnector, lBCT);
 
 			} else {
 				log.warn("Invalid command " + lType + " received...");
-				lResponse.put("code", -1);
-				lResponse.put("msg", "invalid type '" + lType + "'");
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "invalid type '" + lType + "'");
 			}
 
 			getServer().sendToken(aConnector, lResponse);

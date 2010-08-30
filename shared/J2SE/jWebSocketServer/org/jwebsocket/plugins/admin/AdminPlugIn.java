@@ -94,7 +94,7 @@ public class AdminPlugIn extends TokenPlugIn {
 
 		// notify clients about shutdown
 		Token lResponseToken = lServer.createResponse(aToken);
-		lResponseToken.put("msg", "Shutdown in progress...");
+		lResponseToken.setString("msg", "Shutdown in progress...");
 		lServer.broadcastToken(lResponseToken);
 
 		JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
@@ -132,7 +132,7 @@ public class AdminPlugIn extends TokenPlugIn {
 				lResultItem.put("isToken", lConnector.getBoolean(TokenServer.VAR_IS_TOKENSERVER));
 				lResultList.add(lResultItem);
 			}
-			lResponse.put("connections", lResultList);
+			lResponse.setList("connections", lResultList);
 		} catch (Exception ex) {
 			log.error(ex.getClass().getSimpleName()
 					+ " on getConnections: " + ex.getMessage());
@@ -162,11 +162,11 @@ public class AdminPlugIn extends TokenPlugIn {
 		try {
 			User lUser = SecurityFactory.getUser(lUsername);
 			if (lUser != null) {
-				FastList<String> lRightIds = new FastList(lUser.getRightIdSet());
-				lResponse.put("rights", lRightIds);
+				List<String> lRightIds = new FastList(lUser.getRightIdSet());
+				lResponse.setList("rights", lRightIds);
 			} else {
-				lResponse.put("code", -1);
-				lResponse.put("msg", "invalid user");
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "invalid user");
 			}
 		} catch (Exception ex) {
 			log.error(ex.getClass().getSimpleName()
@@ -196,12 +196,12 @@ public class AdminPlugIn extends TokenPlugIn {
 		}
 		Token lResponse = lServer.createResponse(aToken);
 		try {
-			FastList<String> lRoleIds = new FastList(SecurityFactory.getRoleIdSet(lUsername));
+			List<String> lRoleIds = new FastList(SecurityFactory.getRoleIdSet(lUsername));
 			if (lRoleIds != null) {
-				lResponse.put("roles", lRoleIds);
+				lResponse.setList("roles", lRoleIds);
 			} else {
-				lResponse.put("code", -1);
-				lResponse.put("msg", "invalid user");
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "invalid user");
 			}
 		} catch (Exception ex) {
 			log.error(ex.getClass().getSimpleName()

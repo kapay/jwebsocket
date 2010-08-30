@@ -213,7 +213,7 @@ public class BaseWebSocket implements WebSocketClient {
             }
         } catch (WebSocketException wse) {
             // TODO: don't use printStackTrace
-            wse.printStackTrace();
+            // wse.printStackTrace();
         }
     }
 

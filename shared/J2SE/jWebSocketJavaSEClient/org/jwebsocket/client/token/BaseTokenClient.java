@@ -27,6 +27,7 @@ import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.packetProcessors.XMLProcessor;
 import org.jwebsocket.token.Token;
 import org.apache.commons.codec.binary.Base64;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * Token based implementation of {@code JWebSocketClient}
@@ -214,78 +215,68 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 
 	public void sendToken(Token aToken) throws WebSocketException {
 		CUR_TOKEN_ID++;
-		aToken.put("utid", CUR_TOKEN_ID);
+		aToken.setInteger("utid", CUR_TOKEN_ID);
 		super.send(tokenToPacket(aToken));
 	}
 	private final static String NS_SYSTEM_PLUGIN = NS_BASE + ".plugins.system";
 
 	@Override
 	public void login(String aUsername, String aPassword) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("type", "login");
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
-		lToken.put("username", aUsername);
-		lToken.put("password", aPassword);
+		Token lToken = TokenFactory.createToken(NS_SYSTEM_PLUGIN, "login");
+		lToken.setString("username", aUsername);
+		lToken.setString("password", aPassword);
 		sendToken(lToken);
 	}
 
 	@Override
 	public void logout() throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("type", "logout");
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
+		Token lToken = TokenFactory.createToken(NS_SYSTEM_PLUGIN, "logout");
 		sendToken(lToken);
 	}
 
 	@Override
 	public void ping(boolean aEcho) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
-		lToken.put("type", "ping");
-		lToken.put("echo", aEcho);
+		Token lToken = TokenFactory.createToken(NS_SYSTEM_PLUGIN, "ping");
+		lToken.setBoolean("echo", aEcho);
 		sendToken(lToken);
 	}
 
 	@Override
 	public void sendText(String aTarget, String aData) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
-		lToken.put("type", "send");
-		lToken.put("targetId", aTarget);
-		lToken.put("sourceId", getClientId());
-		lToken.put("sender", getUsername());
-		lToken.put("data", aData);
+		Token lToken = TokenFactory.createToken(NS_SYSTEM_PLUGIN, "send");
+		lToken.setString("targetId", aTarget);
+		lToken.setString("sourceId", getClientId());
+		lToken.setString("sender", getUsername());
+		lToken.setString("data", aData);
 		sendToken(lToken);
 	}
 
 	@Override
 	public void broadcastText(String aData) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("ns", NS_SYSTEM_PLUGIN);
-		lToken.put("type", "broadcast");
-		lToken.put("sourceId", getClientId());
-		lToken.put("sender", getUsername());
-		lToken.put("data", aData);
-		lToken.put("senderIncluded", false);
-		lToken.put("responseRequested", true);
+		Token lToken = TokenFactory.createToken(NS_SYSTEM_PLUGIN, "broadcast");
+		lToken.setString("sourceId", getClientId());
+		lToken.setString("sender", getUsername());
+		lToken.setString("data", aData);
+		lToken.setBoolean("senderIncluded", false);
+		lToken.setBoolean("responseRequested", true);
 		sendToken(lToken);
 	}
+
+
 	private final static String NS_FILESYSTEM_PLUGIN = NS_BASE + ".plugins.filesystem";
 
 	// @Override
 	public void saveFile(byte[] aData, String aFilename, String aScope, Boolean aNotify) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("ns", NS_FILESYSTEM_PLUGIN);
-		lToken.put("type", "save");
-		lToken.put("sourceId", getClientId());
-		lToken.put("sender", getUsername());
-		lToken.put("filename", aFilename);
+		Token lToken = TokenFactory.createToken(NS_FILESYSTEM_PLUGIN, "save");
+		lToken.setString("sourceId", getClientId());
+		lToken.setString("sender", getUsername());
+		lToken.setString("filename", aFilename);
 		// TODO: set mimetype correctly according to file extension based on configuration in jWebSocket.xml
-		lToken.put("mimetype", "image/jpeg");
-		lToken.put("scope", aScope);
-		lToken.put("notify", aNotify);
+		lToken.setString("mimetype", "image/jpeg");
+		lToken.setString("scope", aScope);
+		lToken.setBoolean("notify", aNotify);
 
-		lToken.put("data", new String(Base64.encodeBase64(aData)));
+		lToken.setString("data", new String(Base64.encodeBase64(aData)));
 		sendToken(lToken);
 	}
 
@@ -297,34 +288,25 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	}
 
 	public void shutdown() throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("type", "shutdown");
-		lToken.put("ns", NS_ADMIN_PLUGIN);
+		Token lToken = TokenFactory.createToken(NS_ADMIN_PLUGIN, "shutdown");
 		sendToken(lToken);
 	}
 
 	@Override
 	public void getConnections() throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("type", "getConnections");
-		lToken.put("ns", NS_ADMIN_PLUGIN);
+		Token lToken = TokenFactory.createToken(NS_ADMIN_PLUGIN, "getConnections");
 		sendToken(lToken);
 	}
 
 	public void getUserRights(String aUsername) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("type", "getUserRights");
-		lToken.put("ns", NS_ADMIN_PLUGIN);
-		lToken.put("username", aUsername);
+		Token lToken = TokenFactory.createToken(NS_ADMIN_PLUGIN, "getUserRights");
+		lToken.setString("username", aUsername);
 		sendToken(lToken);
 	}
 
 	public void getUserRoles(String aUsername) throws WebSocketException {
-		Token lToken = new Token();
-		lToken.put("type", "getUserRoles");
-		lToken.put("ns", NS_ADMIN_PLUGIN);
-		lToken.put("username", aUsername);
+		Token lToken = TokenFactory.createToken(NS_ADMIN_PLUGIN, "getUserRoles");
+		lToken.setString("username", aUsername);
 		sendToken(lToken);
 	}
-
 }
