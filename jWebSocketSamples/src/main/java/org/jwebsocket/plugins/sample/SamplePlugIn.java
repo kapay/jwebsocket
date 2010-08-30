@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.sample;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  *
@@ -98,42 +100,43 @@ public class SamplePlugIn extends TokenPlugIn {
 				Token lResponse = createResponse(aToken);
 
 				// add the "time" and "started" field
-				lResponse.put("time", new Date().toString());
-				lResponse.put("started", aConnector.getVar(SAMPLE_VAR));
+				lResponse.setString("time", new Date().toString());
+				lResponse.setString("started", (String)aConnector.getVar(SAMPLE_VAR));
 
 				// put an array into the token
-				lResponse.put("array", new Object[]{1, 2, 3, 'a', 'b', 'c', "ABC", "XYZ", true, false});
+				Object[] lObjs = new Object[]{1, 2, 3, 'a', 'b', 'c', "ABC", "XYZ", true, false};
+				lResponse.setList("array", Arrays.asList(lObjs));
 
 				// put a map into the token
 				Map lMap = new FastMap();
 				lMap.put("MapItem1", 1);
 				lMap.put("MapItem2", 2);
-				lResponse.put("map", lMap);
+				lResponse.setMap("map", lMap);
 
 				List lList = new FastList();
 				lList.add("ListItem1");
 				lList.add("ListItem2");
-				lResponse.put("list", lList);
+				lResponse.setList("list", lList);
 
 				// put a token into a token
-				Token lToken = new Token();
-				lToken.put("number", 1);
-				lToken.put("string", "test");
-				lToken.put("float", 1.23456);
-				lToken.put("boolean", false);
-				lToken.put("array", new Object[]{4, 5, 6, 'd', 'e', 'f', "DEF", "UVW", false, true});
+				Token lToken = TokenFactory.createToken();
+				lToken.setInteger("number", 1);
+				lToken.setString("string", "test");
+				lToken.setDouble("float", 1.23456);
+				lToken.setBoolean("boolean", false);
+				lToken.setList("array", Arrays.asList(new Object[]{4, 5, 6, 'd', 'e', 'f', "DEF", "UVW", false, true}));
 
 				// insert subtoken, another level in object's hierarchy...
-				Token lSubToken = new Token();
-				lSubToken.put("number", 2);
-				lSubToken.put("string", "demo");
-				lSubToken.put("float", 2.34567);
-				lSubToken.put("boolean", true);
-				lSubToken.put("array", new Object[]{7, 8, 9, 'g', 'h', 'i', "GHI", "RST", true, false});
-				lToken.put("subtoken", lSubToken);
+				Token lSubToken = TokenFactory.createToken();
+				lSubToken.setInteger("number", 2);
+				lSubToken.setString("string", "demo");
+				lSubToken.setDouble("float", 2.34567);
+				lSubToken.setBoolean("boolean", true);
+				lSubToken.setList("array", Arrays.asList(new Object[]{7, 8, 9, 'g', 'h', 'i', "GHI", "RST", true, false}));
+				lToken.setMap("subtoken", lSubToken.asMap());
 
 				// put the token incl. its subtoken into the response
-				lResponse.put("token", lToken);
+				lResponse.setMap("token", lToken.asMap());
 
 				// send the response token back to the client
 				sendToken(aConnector, aConnector, lResponse);
