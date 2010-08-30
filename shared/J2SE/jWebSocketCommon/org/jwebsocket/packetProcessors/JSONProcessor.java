@@ -37,12 +37,12 @@ public class JSONProcessor {
 	 * @return
 	 */
 	public static Token packetToToken(WebSocketPacket aDataPacket) {
-		Token lToken = null;
+		Token lToken;
 		try {
-			lToken = new Token();
 			String lStr = aDataPacket.getString("UTF-8");
 			JSONTokener lJSONTokener = new JSONTokener(lStr);
-			lToken.setJSONObject(new JSONObject(lJSONTokener));
+			JSONObject lJO = new JSONObject(lJSONTokener);
+			lToken = new Token(lJO);
 		} catch (UnsupportedEncodingException ex) {
 			// TODO: handle exception
 			// log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());

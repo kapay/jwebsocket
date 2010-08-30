@@ -28,6 +28,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.util.Tools;
 
 /**
  *
@@ -40,6 +41,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private Camera mCamera = null;
     private boolean mPreviewRunning = false;
     private Camera.PictureCallback mPictureCallback;
+	private static int mImgId = 1;
 
     /** Called when the activity is first created. */
     @Override
@@ -67,7 +69,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             public void onPictureTaken(byte[] imageData, Camera aCamera) {
                 try {
                     // save file in public area and send notification
-					JWC.saveFile(imageData, "foto.jpg", JWebSocketCommonConstants.SCOPE_PUBLIC, true);
+					JWC.saveFile(imageData, "img_" + Tools.intToString(mImgId, 4)+ ".jpg", JWebSocketCommonConstants.SCOPE_PUBLIC, true);
+					mImgId++;
                 } catch (WebSocketException ex) {
                     // TODO: handle exception
                 }

@@ -312,7 +312,8 @@ public class TokenServer extends BaseServer {
 	}
 
 	/**
-	 * Broadcasts the passed token to all token based connectors of the underlying engines that belong to the specified group.
+	 * Broadcasts the passed token to all token based connectors of the
+	 * underlying engines that belong to the specified group.
 	 * 
 	 * @param aToken - token to broadcast
 	 */
@@ -327,7 +328,8 @@ public class TokenServer extends BaseServer {
 	}
 
 	/**
-	 * Broadcasts the passed token to all token based connectors of the underlying engines that belong to the specified filter and its name.
+	 * Broadcasts the passed token to all token based connectors of the
+	 * underlying engines that belong to the specified filter and its name.
 	 * 
 	 * @param aToken
 	 * @param aFilterID

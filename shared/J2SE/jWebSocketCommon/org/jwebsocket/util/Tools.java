@@ -67,4 +67,24 @@ public class Tools {
 		}
 		return lRes;
 	}
+
+	/**
+	 * Returns the hex value of the given int as a string. If {@code aLen} is
+	 * greater than zero the output is cut or filled to the given length
+	 * otherwise the exact number of digits is returned.
+	 * @param aInt Integer to be converted into a string.
+	 * @param aLen Number of digits (optionally filled or cut if needed)
+	 * @return String of the given integer.
+	 */
+	public static String intToString(int aInt, int aLen) {
+		String lRes = Integer.toString(aInt);
+		if (aLen > 0 && lRes.length() > aLen ) {
+			lRes = lRes.substring(0, aLen);
+		} else {
+			while(lRes.length() < aLen) {
+				lRes = "0" + lRes.substring(0, aLen);
+			}
+		}
+		return lRes;
+	}
 }
