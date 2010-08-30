@@ -39,6 +39,7 @@ import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  *
@@ -52,10 +53,10 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 	private String CANVAS_ID = "c1";
 	private float lSX = 0, lSY = 0;
 	private ImageView lImgView = null;
-        int lWidth;
+	int lWidth;
 	int lHeight;
-        Timer timer;
-        private boolean isDirty = false;
+	Timer timer;
+	private boolean isDirty = false;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -136,34 +137,34 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 			}
 		});
 
-                timer = new Timer();
-                timer.scheduleAtFixedRate(new TimerTask(){
-                    public void run(){
-                        if(isDirty) {
-                            lImgView.postInvalidate();
-                        }
-                    }
-                }, 0 , 10);
-                
+		timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
+
+			public void run() {
+				if (isDirty) {
+					lImgView.postInvalidate();
+				}
+			}
+		}, 0, 10);
+
 
 	}
 
 	// added by Alex: 2010-08-20
 	public void sendBeginPath(float ax, float ay) {
-		Token lCanvasToken = new Token();
-
 		// use broadcast of system plug-in
 		// use namespace and type for server's broadcast "command"
-		lCanvasToken.put("ns", "org.jWebSocket.plugins.system");
-		lCanvasToken.put("type", "broadcast");
+		Token lCanvasToken = TokenFactory.createToken(
+				"org.jWebSocket.plugins.system",
+				"broadcast");
 
 		// pass namespace and type
 		// for client's canvas "command"
-		lCanvasToken.put("reqNS", "org.jWebSocket.plugins.canvas");
-		lCanvasToken.put("reqType", "beginPath");
-		lCanvasToken.put("x", ax);
-		lCanvasToken.put("y", ay);
-		lCanvasToken.put("id", CANVAS_ID);
+		lCanvasToken.setString("reqNS", "org.jWebSocket.plugins.canvas");
+		lCanvasToken.setString("reqType", "beginPath");
+		lCanvasToken.setDouble("x", ax);
+		lCanvasToken.setDouble("y", ay);
+		lCanvasToken.setString("id", CANVAS_ID);
 
 		try {
 			JWC.sendToken(lCanvasToken);
@@ -173,18 +174,17 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 	}
 
 	public void sendLineTo(float aX, float aY) {
-		Token lCanvasToken = new Token();
-
 		// added by Alex: 2010-08-20
 		// use broadcast of system plug-in
-		lCanvasToken.put("ns", "org.jWebSocket.plugins.system");
-		lCanvasToken.put("type", "broadcast");
+		Token lCanvasToken = TokenFactory.createToken(
+				"org.jWebSocket.plugins.system",
+				"broadcast");
 
-		lCanvasToken.put("reqNS", "org.jWebSocket.plugins.canvas");
-		lCanvasToken.put("reqType", "lineTo");
-		lCanvasToken.put("x", aX);
-		lCanvasToken.put("y", aY);
-		lCanvasToken.put("id", CANVAS_ID);		
+		lCanvasToken.setString("reqNS", "org.jWebSocket.plugins.canvas");
+		lCanvasToken.setString("reqType", "lineTo");
+		lCanvasToken.setDouble("x", aX);
+		lCanvasToken.setDouble("y", aY);
+		lCanvasToken.setString("id", CANVAS_ID);
 		try {
 			JWC.sendToken(lCanvasToken);
 		} catch (WebSocketException ex) {
@@ -194,18 +194,17 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 
 	// added by Alex: 2010-08-20
 	public void sendClosePath() {
-		Token lCanvasToken = new Token();
-
 		// use broadcast of system plug-in
 		// use namespace and type for server's broadcast "command"
-		lCanvasToken.put("ns", "org.jWebSocket.plugins.system");
-		lCanvasToken.put("type", "broadcast");
-		lCanvasToken.put("id", CANVAS_ID);
+		Token lCanvasToken = TokenFactory.createToken(
+				"org.jWebSocket.plugins.system",
+				"broadcast");
+		lCanvasToken.setString("id", CANVAS_ID);
 
 		// pass namespace and type
 		// for client's canvas "command"
-		lCanvasToken.put("reqNS", "org.jWebSocket.plugins.canvas");
-		lCanvasToken.put("reqType", "closePath");
+		lCanvasToken.setString("reqNS", "org.jWebSocket.plugins.canvas");
+		lCanvasToken.setString("reqType", "closePath");
 
 		try {
 			JWC.sendToken(lCanvasToken);
@@ -221,44 +220,43 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		return true;
 	}
 
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            // Handle item selection
-            switch (item.getItemId()) {
-            case R.id.mniCanvasClear:                
-		clearCanvas();
-                sendClear();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-            }
-        }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+			case R.id.mniCanvasClear:
+				clearCanvas();
+				sendClear();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
 
-        private void clearCanvas() {
-            final Paint lBck = new Paint();
-            lBck.setARGB(0xff, 0xff, 0xff, 0xff);
-            lCanvas.drawRect(0, 0, lWidth, lHeight, lBck);
-            lImgView.invalidate();
-        }
+	private void clearCanvas() {
+		final Paint lBck = new Paint();
+		lBck.setARGB(0xff, 0xff, 0xff, 0xff);
+		lCanvas.drawRect(0, 0, lWidth, lHeight, lBck);
+		lImgView.invalidate();
+	}
 
-        private void sendClear() {
-            Token lCanvasToken = new Token();
-            lCanvasToken.put("ns", "org.jWebSocket.plugins.system");
-            lCanvasToken.put("type", "broadcast");
-            lCanvasToken.put("id", CANVAS_ID);
+	private void sendClear() {
+		Token lCanvasToken = TokenFactory.createToken(
+				"org.jWebSocket.plugins.system",
+				"broadcast");
+		lCanvasToken.setString("id", CANVAS_ID);
 
-            // pass namespace and type
-            // for client's canvas "command"
-            lCanvasToken.put("reqNS", "org.jWebSocket.plugins.canvas");
-            lCanvasToken.put("reqType", "clear");
+		// pass namespace and type
+		// for client's canvas "command"
+		lCanvasToken.setString("reqNS", "org.jWebSocket.plugins.canvas");
+		lCanvasToken.setString("reqType", "clear");
 
-            try {
-                    JWC.sendToken(lCanvasToken);
-            } catch (WebSocketException e) {
-                    //TODO: log exception
-            }
-        }
-
+		try {
+			JWC.sendToken(lCanvasToken);
+		} catch (WebSocketException e) {
+			//TODO: log exception
+		}
+	}
 
 	@Override
 	protected void onResume() {
@@ -270,8 +268,6 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 			//TODO: log exception
 		}
 	}
-
-        
 
 	@Override
 	protected void onPause() {
@@ -305,7 +301,7 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 				// draw the line
 				lCanvas.drawLine(lSX, lSY, lEX, lEY, lPaint);
 				// invalidate image view to re-draw the canvas
-                                                               
+
 				isDirty = true;
 
 				lSX = lEX;
@@ -314,10 +310,10 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 				// check "closePath" request
 			} else if ("closePath".equals(aToken.getString("reqType"))) {
 				// nothing to do here
-			}else if("clear".equals(aToken.getString("reqType"))) {
-                            clearCanvas();
-                        }
-			
+			} else if ("clear".equals(aToken.getString("reqType"))) {
+				clearCanvas();
+			}
+
 		}
 	}
 
