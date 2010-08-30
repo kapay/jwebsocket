@@ -231,7 +231,14 @@ public class MapToken extends BaseToken implements Token {
 	public Double getDouble(String aKey, Double aDefault) {
 		Double lResult;
 		try {
-			lResult = (Double) mData.get(aKey);
+			Object lObj = mData.get(aKey);
+			if (lObj instanceof String) {
+				lResult = Double.parseDouble((String) lObj);
+			} else if (lObj instanceof Integer) {
+				lResult = (Integer)lObj / 1.0;
+			} else {
+				lResult = (Double) lObj;
+			}
 			if (lResult == null) {
 				lResult = aDefault;
 			}

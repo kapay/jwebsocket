@@ -35,6 +35,7 @@ public class MainActivity extends ListActivity {
         super.onCreate(icicle);
 
         JWC.init();
+        JWC.loadSettings(this);
 
         String[] lItems = {"Fundamentals", "Canvas Demo", "Camera Demo", "Setup"};
 

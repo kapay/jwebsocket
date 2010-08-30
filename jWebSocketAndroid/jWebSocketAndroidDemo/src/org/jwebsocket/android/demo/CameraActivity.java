@@ -17,6 +17,7 @@ package org.jwebsocket.android.demo;
 import android.app.Activity;
 import android.hardware.Camera;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -24,125 +25,166 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.Toast;
 import java.io.IOException;
+import org.jwebsocket.api.WebSocketClientEvent;
+import org.jwebsocket.api.WebSocketClientTokenListener;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
 
 /**
  *
  * @author aschulze
  */
-public class CameraActivity extends Activity implements SurfaceHolder.Callback {
+public class CameraActivity extends Activity implements WebSocketClientTokenListener, SurfaceHolder.Callback {
 
-    private SurfaceView mSurfaceView;
-    private SurfaceHolder mSurfaceHolder;
-    private Camera mCamera = null;
-    private boolean mPreviewRunning = false;
-    private Camera.PictureCallback mPictureCallback;
+	private SurfaceView mSurfaceView;
+	private SurfaceHolder mSurfaceHolder;
+	private Camera mCamera = null;
+	private boolean mPreviewRunning = false;
+	private Camera.PictureCallback mPictureCallback;
 	private static int mImgId = 1;
 
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
 
-        Window lWin = getWindow();
-        lWin.setFormat(PixelFormat.TRANSLUCENT);
+		Window lWin = getWindow();
+		lWin.setFormat(PixelFormat.TRANSLUCENT);
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        // needs to be called before setContentView to be applied
-        lWin.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		// needs to be called before setContentView to be applied
+		lWin.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.camera_hvga_p);
+		/*
+		ImageView i = new ImageView(this);
+		i.setImageResource(R.drawable.disconnected);
+		i.setAdjustViewBounds(true); // set the ImageView bounds to match the Drawable's dimensions
+		i.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 
-        mSurfaceView = (SurfaceView) findViewById(R.id.sfvCamera);
-        mSurfaceHolder = mSurfaceView.getHolder();
-        mSurfaceHolder.addCallback(this);
-        mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		// Add the ImageView to the layout and set the layout as the content view
+		Layout lLayout = (Layout) getfindViewById(R.id.cameraLyt);
+		 */
+		setContentView(R.layout.camera_hvga_p);
 
-        mPictureCallback = new Camera.PictureCallback() {
+		mSurfaceView = (SurfaceView) findViewById(R.id.sfvCamera);
+		mSurfaceHolder = mSurfaceView.getHolder();
+		mSurfaceHolder.addCallback(this);
+		mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-            public void onPictureTaken(byte[] imageData, Camera aCamera) {
-                try {
-                    // save file in public area and send notification
-					JWC.saveFile(imageData, "img_" + Tools.intToString(mImgId, 4)+ ".jpg", JWebSocketCommonConstants.SCOPE_PUBLIC, true);
+		// Instantiate an ImageView and define its properties
+		ImageView lImgView = (ImageView) findViewById(R.id.cameraImgStatus);
+		if (lImgView != null) {
+			lImgView.bringToFront();
+		}
+		mPictureCallback = new Camera.PictureCallback() {
+
+			public void onPictureTaken(byte[] imageData, Camera aCamera) {
+				try {
+					// save file in public area and send notification
+					JWC.saveFile(imageData, "img_" + Tools.intToString(mImgId, 4) + ".jpg", JWebSocketCommonConstants.SCOPE_PUBLIC, true);
 					mImgId++;
-                } catch (WebSocketException ex) {
-                    // TODO: handle exception
-                }
-                Toast.makeText(getApplicationContext(), "Photo has been taken!",
-                        Toast.LENGTH_SHORT).show();
-            }
-        };
+				} catch (WebSocketException ex) {
+					// TODO: handle exception
+				}
+				Toast.makeText(getApplicationContext(), "Photo has been taken!",
+						Toast.LENGTH_SHORT).show();
+			}
+		};
 
-        mSurfaceView.setOnClickListener(new OnClickListener() {
+		mSurfaceView.setOnClickListener(new OnClickListener() {
 
-            public void onClick(View aView) {
-                mCamera.autoFocus(new Camera.AutoFocusCallback() {
+			public void onClick(View aView) {
+				mCamera.autoFocus(new Camera.AutoFocusCallback() {
 
-                    public void onAutoFocus(boolean arg0, Camera arg1) {
-                        mCamera.takePicture(null, null, mPictureCallback);
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException ex) {
-                        }
-                        mCamera.startPreview();
-                        mPreviewRunning = true;
-                    }
-                });
+					public void onAutoFocus(boolean arg0, Camera arg1) {
+						mCamera.takePicture(null, null, mPictureCallback);
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException ex) {
+						}
+						mCamera.startPreview();
+						mPreviewRunning = true;
+					}
+				});
 
-            }
-        });
-    }
+			}
+		});
+	}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        try {
-            // JWC.addListener(this);
-            JWC.open();
-        } catch (WebSocketException ex) {
-        }
-    }
+	@Override
+	protected void onResume() {
+		super.onResume();
 
-    @Override
-    protected void onPause() {
-        try {
-            JWC.close();
-            // JWC.removeListener(this);
-        } catch (WebSocketException ex) {
-        }
-        super.onPause();
-    }
+		try {
+			JWC.addListener(this);
+			JWC.open();
+		} catch (WebSocketException ex) {
+		}
+	}
 
-    public void surfaceCreated(SurfaceHolder aSurfaceHolder) {
-        mCamera = Camera.open();
-    }
+	@Override
+	protected void onPause() {
+		try {
+			JWC.close();
+			JWC.removeListener(this);
+		} catch (WebSocketException ex) {
+		}
+		super.onPause();
+	}
 
-    public void surfaceChanged(SurfaceHolder aSurfaceHolder, int aFormat, int aWidth, int aHeight) {
-        if (mPreviewRunning) {
-            mCamera.stopPreview();
-        }
-        Camera.Parameters lParms = mCamera.getParameters();
-        lParms.setPreviewSize(aWidth, aHeight);
-        mCamera.setParameters(lParms);
-        try {
-            mCamera.setPreviewDisplay(aSurfaceHolder);
-        } catch (IOException e) {
-            // TODO: exception handling
-        }
-        mCamera.startPreview();
-        mPreviewRunning = true;
-    }
+	public void surfaceCreated(SurfaceHolder aSurfaceHolder) {
+		mCamera = Camera.open();
+	}
 
-    public void surfaceDestroyed(SurfaceHolder aSurfaceHolder) {
-        mCamera.stopPreview();
-        mPreviewRunning = false;
-        mCamera.release();
+	public void surfaceChanged(SurfaceHolder aSurfaceHolder, int aFormat, int aWidth, int aHeight) {
+		if (mPreviewRunning) {
+			mCamera.stopPreview();
+		}
+		Camera.Parameters lParms = mCamera.getParameters();
+		lParms.setPreviewSize(aWidth, aHeight);
+		mCamera.setParameters(lParms);
+		try {
+			mCamera.setPreviewDisplay(aSurfaceHolder);
+		} catch (IOException e) {
+			// TODO: exception handling
+		}
+		mCamera.startPreview();
+		mPreviewRunning = true;
+	}
 
-    }
+	public void surfaceDestroyed(SurfaceHolder aSurfaceHolder) {
+		mCamera.stopPreview();
+		mPreviewRunning = false;
+		mCamera.release();
+
+	}
+
+	public void processToken(WebSocketClientEvent aEvent, Token aToken) {
+	}
+
+	public void processOpened(WebSocketClientEvent aEvent) {
+		ImageView lImgView = (ImageView) findViewById(R.id.cameraImgStatus);
+		if (lImgView != null) {
+			// TODO: in fact it is only connected, not yet authenticated!
+			lImgView.setImageResource(R.drawable.authenticated);
+		}
+	}
+
+	public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+	}
+
+	public void processClosed(WebSocketClientEvent aEvent) {
+		ImageView lImgView = (ImageView) findViewById(R.id.cameraImgStatus);
+		if (lImgView != null) {
+			lImgView.setImageResource(R.drawable.disconnected);
+		}
+	}
 }

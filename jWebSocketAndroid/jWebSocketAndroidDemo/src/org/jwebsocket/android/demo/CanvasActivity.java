@@ -145,7 +145,7 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 					lImgView.postInvalidate();
 				}
 			}
-		}, 0, 10);
+		}, 0, 200);
 
 
 	}
