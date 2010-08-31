@@ -29,18 +29,18 @@ public class RPCCallableClassLoader {
 
 	private Class mRpcCallableClass;
 	private RPCCallable mRpcCallableInstance;
-	private Map<String, List<Method>> mMethods = new FastMap<String, List<Method>>();
+	private Map<String, List<MethodRightLink>> mMethods = new FastMap<String, List<MethodRightLink>>();
 
 	public RPCCallableClassLoader(Class aRpcCallableClass, RPCCallable aRpcCallableInstance) {
 		this.mRpcCallableClass = aRpcCallableClass;
 		this.mRpcCallableInstance = aRpcCallableInstance;
 	}
 
-	public void addMethod(String aMethodName, Method aMethod) {
+	public void addMethod(String aMethodName, Method aMethod, String aRightId) {
 		if (!mMethods.containsKey(aMethodName)) {
-			mMethods.put(aMethodName, new ArrayList<Method>());
+			mMethods.put(aMethodName, new ArrayList<MethodRightLink>());
 		}
-		mMethods.get(aMethodName).add(aMethod);
+		mMethods.get(aMethodName).add(new MethodRightLink(aMethod, aRightId));
 	}
 
 	public Class getRpcCallableClass() {
@@ -55,7 +55,23 @@ public class RPCCallableClassLoader {
 		return mMethods.containsKey(aMethod);
 	}
 
-	public List<Method> getMethods(String aMethodName) {
+	public List<MethodRightLink> getMethods(String aMethodName) {
 		return mMethods.get(aMethodName);
+	}
+	
+	
+	public class MethodRightLink {
+		private String mRightId ;
+		private Method mMethod;
+		public MethodRightLink (Method aMethod, String aRightId) {
+			mMethod = aMethod;
+			mRightId = aRightId;
+		}
+		public String getRightId() {
+			return mRightId;
+		}
+		public Method getMethod() {
+			return mMethod;
+		}		
 	}
 }

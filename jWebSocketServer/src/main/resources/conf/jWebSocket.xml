@@ -141,12 +141,31 @@
 			<id>rrpc</id>
 			<description>Allow Reverse Remote Procedure Calls (RRPC) to other clients</description>
 		</right>
+		
+		<!-- list all granted methods for RPC -->
+		<right>
+			<ns>org.jWebSocket.plugins.rpc</ns>
+			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</id>
+			<description>A sample Rpc demo</description>
+		</right>
+		<right>
+			<ns>org.jWebSocket.plugins.rpc</ns>
+			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</id>
+			<description>A sample Rpc demo</description>
+		</right>
+		<right>
+			<ns>org.jWebSocket.plugins.rpc</ns>
+			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</id>
+			<description>A sample Rpc demo</description>
+		</right>
+
+		<!-- jdbc -->
 		<right>
 			<ns>org.jWebSocket.plugins.jdbc</ns>
 			<id>select</id>
 			<description>Allow to select from jdbc resources</description>
 		</right>
-
+		
 		<!-- configuration of filesystem plug-in specific rights -->
 		<right>
 			<ns>org.jWebSocket.plugins.filesystem</ns>
@@ -186,6 +205,9 @@
 				<right>org.jWebSocket.plugins.chat.broadcast</right>
 				<right>org.jWebSocket.plugins.rpc.rpc</right>
 				<right>org.jWebSocket.plugins.rpc.rrpc</right>
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>								
 				<right>org.jWebSocket.plugins.jdbc.select</right>
 				<right>org.jWebSocket.plugins.filesystem.load</right>
 				<right>org.jWebSocket.plugins.filesystem.save</right>
@@ -207,6 +229,11 @@
 				<right>org.jWebSocket.plugins.chat.broadcast</right>
 				<right>org.jWebSocket.plugins.rpc.rpc</right>
 				<right>org.jWebSocket.plugins.rpc.rrpc</right>
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>		
 				<right>org.jWebSocket.plugins.jdbc.select</right>
 				<right>org.jWebSocket.plugins.filesystem.load</right>
 				<right>org.jWebSocket.plugins.filesystem.save</right>
@@ -221,6 +248,11 @@
 				<right>org.jWebSocket.plugins.system.send</right>
 				<right>org.jWebSocket.plugins.chat.broadcast</right>
 				<right>org.jWebSocket.plugins.rpc.rpc</right>
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>		
 				<right>org.jWebSocket.plugins.jdbc.select</right>
 				<right>org.jWebSocket.plugins.filesystem.load</right>
 			</rights>
@@ -372,15 +404,6 @@
 				<!--
 				<setting key="class:MyOwnRPCLibrary">MyOwnRPCLibrary.jar</setting>
 				<setting key="class:AnyThirdPartyRPCLibrary">AnyThirdPartyRPCLibrary.jar</setting>
-				-->
-
-				<!-- list all granted methods for RPC, users need to be authorized individually and
-					assign granted RPC methods to certain roles -->
-				<!-- new RPC library -->
-				<setting key="roles:org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC">Administrator, User, Guest</setting>
-				<setting key="roles:org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5">Administrator, User, Guest</setting>
-				<!--
-				<setting key="roles:org.jwebsocket.rpc.sample.SampleRPCLibrary.getProtected">Administrator, User, Guest</setting>
 				-->
 			</settings>
 		</plugin>

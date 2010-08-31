@@ -1594,7 +1594,6 @@ jws.RPCClientPlugIn = {
 	//:a:en::aProcedure:String procedure name (including name space).
 	//:r:*:::void:none
 	removeGrantedProcedure: function (aProcedure) {
-		// var numberOfProcedures = jws.RPCClientPlugIn.grantedProcs.length;
 		var lIdx = jws.RPCClientPlugIn.grantedProcs.indexOf( aProcedure );
 		if( lIdx >= 0 ) {
 			jws.RPCClientPlugIn.grantedProcs.splice( lIdx, 1 );
@@ -1626,6 +1625,7 @@ jws.RPCClientPlugIn = {
 	//:a:en::aOptions:Object:Optional arguments. For details please refer to the [tt]sendToken[/tt] method.
 	//:r:*:::void:none
 	rpc: function( aClass, aMthd, aArgs, aOptions) {
+		console.log(aArgs);
 		aOptions = this.setDefaultOption (aOptions) ;
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {

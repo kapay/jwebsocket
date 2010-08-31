@@ -27,13 +27,25 @@ import org.jwebsocket.logging.Logging;
 public abstract class AbstractRPCCallable {	
 	private static Logger mLog = Logging.getLogger(AbstractRPCCallable.class);
 		
+	/**
+	 * Return an instance of the RpcCallableClass which extends this AbstractRPCCallable class using the default constructor. 
+	 * (call the method getInstanceOfRpcCallableClass(null, null))
+	 * @return instance of the RPCCallable class
+	 */
 	public RPCCallable getInstanceOfRpcCallableClass() {
 		return getInstanceOfRpcCallableClass(null, null);
 	}
 	
+	/**
+	 * return an instance of the RpcCallableClass which extends this AbstractRPCCallable class.
+	 * Usually called with a WebSocketConnector as parameter (or null if no parameters)
+	 * @param aListOfParameter
+	 * @param aListOfClass
+	 * @return instance of the RPCCallable class
+	 */
 	public RPCCallable getInstanceOfRpcCallableClass(Object[] aListOfParameter, Class[] aListOfClass) {
 		RPCCallable lNewInstance = null ;
-		//We get the class of E
+		//We get the class of the instance
 		Class lClass = this.getClass();
 		//Get the constructor of this class
 		try {
@@ -43,11 +55,10 @@ public abstract class AbstractRPCCallable {
 				lNewInstance = (RPCCallable) lClass.getConstructor(aListOfClass).newInstance(aListOfParameter) ;
 			}
 		} catch (Exception e) {
-
-			// Alex: comment
-			// TODO: we shouldn't put anything to system.out but log it properly
-			e.printStackTrace();
-			return null ;					
+			mLog.error("Can't build an instance of the RPCCallable class" + lClass.getName() +". " +
+						"classes: " + aListOfClass +" - parameters: "+aListOfParameter+"." +
+						e.getMessage());
+			return null ;
 		}
 		return  lNewInstance ;
 	}

@@ -28,9 +28,7 @@ import org.jwebsocket.kit.CloseReason;
  */
 public class BaseConnectorRPCCallable extends AbstractRPCCallable implements RPCCallable {
 
-	private static Map<String, BaseConnectorRPCCallable> mInstances = new FastMap(); //.shared()
-//	private static Map<String, ? extends RPCCallable> instances = new FastMap(); //.shared()
-//	private static InstanceContainer<? extends RPCCallable> container = new InstanceContainer();
+	private static Map<String, BaseConnectorRPCCallable> mInstances = new FastMap<String, BaseConnectorRPCCallable>();
 	private WebSocketConnector mConnector;
 
 	public BaseConnectorRPCCallable(WebSocketConnector aConnector) {

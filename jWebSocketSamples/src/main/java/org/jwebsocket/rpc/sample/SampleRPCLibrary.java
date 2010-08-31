@@ -49,5 +49,26 @@ public class SampleRPCLibrary extends BaseRPCCallable implements RPCCallable {
 		// currently simply return the same token for test purposes
 		return aToken;
 	}
+	
+	/**
+	 * Exemple of 2 overloaded methods 
+	 * org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)
+	 * @param aString
+	 * @return aString
+	 */
+	public String sampleOverloadRPC(String aString) {
+		// currently simply return the same string for test purposes
+		return aString+" the String method has been called";
+	}
+	/**
+	 * Exemple of 2 overloaded methods 
+	 * org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)
+	 * @param aInt
+	 * @return aInt
+	 */
+	public int sampleOverloadRPC(int aInt) {
+		// currently simply return the same string for test purposes
+		return aInt;
+	}
 
 }

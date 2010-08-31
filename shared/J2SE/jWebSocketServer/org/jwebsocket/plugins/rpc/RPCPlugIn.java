@@ -18,6 +18,7 @@ package org.jwebsocket.plugins.rpc;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,14 +26,13 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
-import javolution.util.FastList;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConfig;
@@ -42,11 +42,11 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
-import org.jwebsocket.plugins.rpc.util.JSONArrayHandler;
+import org.jwebsocket.plugins.rpc.RPCCallableClassLoader.MethodRightLink;
+import org.jwebsocket.plugins.rpc.util.ListConverter;
 import org.jwebsocket.plugins.rpc.util.RPCRightNotGrantedException;
 import org.jwebsocket.plugins.rpc.util.TypeConverter;
 import org.jwebsocket.security.SecurityFactory;
-import org.jwebsocket.token.JSONToken;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 
@@ -59,6 +59,9 @@ import org.jwebsocket.token.TokenFactory;
  */
 public class RPCPlugIn extends TokenPlugIn {
 
+	private static final String RPC_RIGHT_ID = "rpc";
+	private static final String RRPC_RIGHT_ID = "rrpc";
+	
 	private static Logger mLog = Logging.getLogger(RPCPlugIn.class);
 	//Store the parameters type allowed for rpc method.
 	private Map<String, RPCCallableClassLoader> mRpcCallableClassLoader = new FastMap<String, RPCCallableClassLoader>();
@@ -86,24 +89,19 @@ public class RPCPlugIn extends TokenPlugIn {
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Roles: " + SecurityFactory.getGlobalRoles().getRoleIdSet().toString());
-			mLog.debug("Rights: " + SecurityFactory.getGlobalRights().getRightIdSet().toString());
-			mLog.debug("Rights (name space filtered): " + SecurityFactory.getGlobalRights("org.jWebSocket.plugins.rpc").getRightIdSet().toString());
-		}
-
 		// TODO: move JWebSocketJarClassLoader into ServerAPI module ?
 		JWebSocketJarClassLoader lClassLoader = new JWebSocketJarClassLoader();
 		Class lClass = null;
+		
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("RPC Rights found in xml file: " + SecurityFactory.getGlobalRights(getNamespace()).getRightIdSet().toString());
+		}
 
 		Map<String, String> lSettings = getSettings();
-		String lKey;
-		String lValue;
 		// load map of RPC libraries first
 		for (Entry<String, String> lSetting : lSettings.entrySet()) {
-			lKey = lSetting.getKey();
-			lValue = lSetting.getValue();
+			String lKey = lSetting.getKey();
+			String lValue = lSetting.getValue();
 			if (lKey.startsWith("class:")) {
 				String lClassName = lKey.substring(6);
 				try {
@@ -151,12 +149,14 @@ public class RPCPlugIn extends TokenPlugIn {
 				}
 			}
 		}
+		
 		// Load map of granted procs
-		for (Entry<String, String> lSetting : lSettings.entrySet()) {
-			String lFullMethodName = lSetting.getKey();
-			lValue = lSetting.getValue();
-			if (lFullMethodName.startsWith("roles:")) {
-				lFullMethodName = lFullMethodName.substring(6);
+		Set<String> lPluginRights = SecurityFactory.getGlobalRights(getNamespace()).getRightIdSet();
+		for (String lRightId : lPluginRights) {
+			//We remove the pluginId because we just want the name of the method:
+			String lFullMethodName = lRightId.substring(getNamespace().length()+1);
+			//We don't care about global rpc and rrpc rights in this section.
+			if (!lFullMethodName.equals(RPC_RIGHT_ID) && !lFullMethodName.equals(RRPC_RIGHT_ID)) {
 				//setting with parameters type to handle java method overload
 				String lParameterType = null;
 				if (lFullMethodName.indexOf("(") != -1 && lFullMethodName.indexOf(")") != -1) {
@@ -165,18 +165,13 @@ public class RPCPlugIn extends TokenPlugIn {
 				}
 				String lClassName = lFullMethodName.substring(0, lFullMethodName.lastIndexOf("."));
 				String lMethodName = lFullMethodName.substring(lFullMethodName.lastIndexOf(".") + 1);
-
+	
 				Method lMethod = getValidMethod(lClassName, lMethodName, lParameterType);
 				if (lMethod != null) {
-					// We create the right to access to this method.
-					// new Right("rpc:" + lFullMethodName + ":" + lParameterType, "give the right to execute the rpc method " + lFullMethodName + "(" + lParameterType + ")");
-					// TODO: implement Rights here
-					mRpcCallableClassLoader.get(lClassName).addMethod(lMethodName, lMethod);
+					//Add this method as a RPCCallable method.
+					mRpcCallableClassLoader.get(lClassName).addMethod(lMethodName, lMethod, lRightId);
 				}
 			}
-		}
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("RPC methods avaible: " + mRpcCallableClassLoader.toString());
 		}
 	}
 
@@ -208,7 +203,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 */
 	public void rpc(WebSocketConnector aConnector, Token aToken) {
 		// check if user is allowed to run 'rpc' command
-		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_RPC_DEFAULT + ".rpc")) {
+		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_RPC_DEFAULT + "." + RPC_RIGHT_ID)) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
@@ -217,8 +212,13 @@ public class RPCPlugIn extends TokenPlugIn {
 
 		String lClassName = aToken.getString("classname");
 		String lMethod = aToken.getString("method");
+		//TODO: getList not implemented yet...
 		List lArgs = aToken.getList("args");
-
+		//if it's not a List, but just a simple arg
+		if (lArgs == null) {
+			lArgs = new FastList();
+			lArgs.add(aToken.getObject("args"));
+		}
 		String lMsg = null;
 
 		if (mLog.isDebugEnabled()) {
@@ -229,6 +229,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		try {
 			//The class we try to call is not loaded
 			if (mRpcCallableClassLoader.containsKey(lClassName)) {
+				//the called method name is unexisting
 				if (mRpcCallableClassLoader.get(lClassName).hasMethod(lMethod)) {
 					RPCCallableClassLoader lRpcClassLoader = mRpcCallableClassLoader.get(lClassName);
 					//We get the instance of the generator
@@ -236,15 +237,15 @@ public class RPCPlugIn extends TokenPlugIn {
 					//from this generator, we get an instance of the class we want to call. This part is in the charge of the developper throw the RPCCallable interface.
 					RPCCallable lInstance = lInstanceGenerator.getInstance(aConnector);
 					if (lInstance != null) {
-						Object lObj = call(lRpcClassLoader, lInstance, lMethod, lArgs);
+						Object lObj = call(aConnector, lRpcClassLoader, lInstance, lMethod, lArgs);
 						lResponseToken.setValidated("result", lObj);
 					} else {
-						lMsg = "Class '"
+						lMsg = "Class '" 
 								+ lClassName
 								+ "' found but get a null instance when calling the RPCCallable getInstance() method.";
 					}
 				} else {
-					lMsg = "Class '"
+					lMsg = "Class '" 
 							+ lClassName
 							+ "' found but the method "
 							+ lMethod
@@ -302,7 +303,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 */
 	public void rrpc(WebSocketConnector aConnector, Token aToken) {
 		// check if user is allowed to run 'rrpc' command
-		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_RPC_DEFAULT + ".rrpc")) {
+		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_RPC_DEFAULT + "." + RRPC_RIGHT_ID)) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
@@ -319,9 +320,9 @@ public class RPCPlugIn extends TokenPlugIn {
 		//arguments could be a token or an array of token
 		//for safety reason, client except an array (even if it's an array with 1 token)
 		List lArgs = aToken.getList("args");
-		if (!(lArgs instanceof JSONArray)) {
+		if (lArgs == null) {
 			lArgs = new FastList();
-			lArgs.add(lArgs);
+			lArgs.add(aToken.getObject("args"));
 		}
 
 		// TODO: find solutions for hardcoded engine id
@@ -405,34 +406,30 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @throws RPCRightNotGrantedException 
 	 * @throws ClassNotFoundException 
 	 */
-	public Object call(RPCCallableClassLoader aRpcClassLoader, Object aInstance, String aMethodName, Object aArgs)
+	public Object call(WebSocketConnector aConnector, RPCCallableClassLoader aRpcClassLoader, Object aInstance, String aMethodName, List aArgs)
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, RPCRightNotGrantedException, ClassNotFoundException {
-		Object lObj = null;
-
 		Class lClass = aRpcClassLoader.getRpcCallableClass();
-		Class[] lCA = null;
 		Object[] lArg = null;
-		JSONArray lJsonArrayArgs = null;
+//		JSONArray lJsonArrayArgs = null;
 		Method lMethodToInvoke = null;
 		if (aArgs != null) {
 			//convert aArgs as a JSONArray
-			if (!(aArgs instanceof JSONArray)) {
-				lJsonArrayArgs = new JSONArray().put(aArgs);
-			} else {
-				lJsonArrayArgs = (JSONArray) aArgs;
-			}
+//			if (!(aArgs instanceof JSONArray)) {
+//				lJsonArrayArgs = new JSONArray().put(aArgs);
+//			} else {
+//				lJsonArrayArgs = (JSONArray) aArgs;
+//			}
 			//a JSON Array is passed as parameter => we look for the method which match with same parameters
 			//initialization
-			lArg = new Object[lJsonArrayArgs.length()];
-			lCA = new Class[lJsonArrayArgs.length()];
-			boolean lMethodFound = false;
+			lArg = new Object[aArgs.size()];
 
 			//We look if one of the method we have loaded match
-			List<Method> lListMethod = aRpcClassLoader.getMethods(aMethodName);
-			for (Method lMethod : lListMethod) {
+			List<MethodRightLink> lListMethod = aRpcClassLoader.getMethods(aMethodName);
+			for (MethodRightLink lMethodRight : lListMethod) {
+				Method lMethod = lMethodRight.getMethod();
 				Class[] lParametersType = lMethod.getParameterTypes();
 				//We are looking for a method with the same number of parameters
-				if (lParametersType.length == lJsonArrayArgs.length()) {
+				if (lParametersType.length == aArgs.size()) {
 					//We make sure the types of the method match
 					try {
 						for (int j = 0; j < lParametersType.length; j++) {
@@ -441,50 +438,44 @@ public class RPCPlugIn extends TokenPlugIn {
 							//Only support primitive type+wrapper, String, List and Token.
 							//String and Token
 							if (lParameterType == String.class) {
-								lArg[j] = lJsonArrayArgs.getString(j);
+								lArg[j] = (String) aArgs.get(j);
 							} else if (lParameterType == Token.class) {
-								// Alex:
-								// TODO: here we need to re-think
-								// All other objects should be Token.
-								lArg[j] = new JSONToken(lJsonArrayArgs.getJSONObject(j));
+								lArg[j] = (Token) aArgs.get(j);
 							} //Special support for primitive type
 							else if (lParameterType == int.class) {
-								lArg[j] = lJsonArrayArgs.getInt(j);
+								lArg[j] = (Integer) aArgs.get(j);
 							} else if (lParameterType == boolean.class) {
-								lArg[j] = lJsonArrayArgs.getBoolean(j);
+								lArg[j] = (Boolean) aArgs.get(j);
 							} else if (lParameterType == double.class) {
-								lArg[j] = lJsonArrayArgs.getDouble(j);
+								lArg[j] = (Double) aArgs.get(j);
 							} //Wrappers of primitive types
 							else if (lParameterType == Integer.class) {
-								lArg[j] = lJsonArrayArgs.getInt(j);
+								lArg[j] = (Integer) aArgs.get(j);
 							} else if (lParameterType == Boolean.class) {
-								lArg[j] = lJsonArrayArgs.getBoolean(j);
+								lArg[j] = (Boolean) aArgs.get(j);
 							} else if (lParameterType == Double.class) {
-								lArg[j] = lJsonArrayArgs.getDouble(j);
+								lArg[j] = (Double) aArgs.get(j);
 							} else if (lParameterType == List.class) {
 								//try to guess which type of object should be on the List:
-								Type[] genericParameterTypes = lMethod.getGenericParameterTypes();
-								// Alex:
-								// TODO: do we still need the JSONArrayHandler?
-								lArg[j] = JSONArrayHandler.JSONArrayToList(lJsonArrayArgs.getJSONArray(j), genericParameterTypes[j]);
+								Type genericParameterType = lMethod.getGenericParameterTypes()[j];
+								lArg[j] = ListConverter.convert((List)aArgs.get(j), genericParameterType);								
 							} //any other object are *not* supported !
 							else {
 								if (mLog.isDebugEnabled()) {
-									mLog.debug("Can't extract an object with type '" + lParameterType.getName() + "' in a JSONArray Object");
+									mLog.debug("Can't extract an object with type '" + lParameterType.getName() + "' in a Token Object");
 								}
-								throw new JSONException("Can't extract an object whith type '" + lParameterType.getName() + "' in a JSONArray Object");
+								throw new Exception("Can't extract an object whith type '" + lParameterType.getName() + "' in a Token Object");
 							}
 						}
 						//The method is found, all parameters match
 						//check if the user has the role to call this method
-						//TODO: remplace this verification by something like: aConnector.hasRight("rpc:methodName:methodArguments")
-						if (true) {
+						if (SecurityFactory.hasRight(aConnector.getUsername(), lMethodRight.getRightId())) {
 							lMethodToInvoke = lMethod;
 							break;
 						} else {
 							throw new RPCRightNotGrantedException(lMethod.getName(), aArgs.toString());
 						}
-					} catch (JSONException e) {
+					} catch (Exception e) {
 						//That's the wrong method. Do nothing, just pass to the next one. Any idea to do it in a cleaner way ?
 					}
 				}
@@ -493,11 +484,10 @@ public class RPCPlugIn extends TokenPlugIn {
 				throw new NoSuchMethodException();
 			}
 		} else {
-			lCA = new Class[0];
-			lMethodToInvoke = lClass.getMethod(aMethodName, lCA);
+			lMethodToInvoke = lClass.getMethod(aMethodName, new Class[0]);
 		}
 		aInstance = lClass.cast(aInstance);
-		lObj = lMethodToInvoke.invoke(aInstance, lArg);
+		Object lObj = lMethodToInvoke.invoke(aInstance, lArg);
 
 		return lObj;
 	}
@@ -548,7 +538,7 @@ public class RPCPlugIn extends TokenPlugIn {
 				}
 			}
 		}
-		mLog.error("The method "
+		mLog.error("The method " 
 				+ aMethodName
 				+ " could not be loaded. "
 				+ "Probably a typo or invalid parameter (check previous error).");
@@ -589,29 +579,20 @@ public class RPCPlugIn extends TokenPlugIn {
 			return true;
 		}
 
-		// Alex: comment
-		// TODO: getName().equals(Token.class) are incompatible! see below! use .class.get[Simple]Name ?
-
-		//if not defined in the setting, we only save method with many parameters or a single parameter which is not a Token.
-		if (lParametersType.length > 0 && !(lParametersType.length == 1 && lParametersType[0].getName().equals(Token.class))) {
-			for (int j = 0; j < lParametersType.length; j++) {
-				Class lParameterType = lParametersType[j];
-				String lParameterTypeName = lParameterType.getName();
-				if (!TypeConverter.isValidProtocolType(lParameterTypeName)) {
-					mLog.error("The method " + aMethod.getName() + " has an invalid parameter: " + lParameterTypeName + ". "
-							+ "This method will *not* be load."
-							+ "Suported parameters type are primitive, primitive's wrapper and Token.");
-					return false;
-				}
+		//if parameters are not defined in the setting, means that we have a unique method with this name.
+		for (int j = 0; j < lParametersType.length; j++) {
+			Class lParameterType = lParametersType[j];
+			if (!TypeConverter.isValidProtocolType(lParameterType)) {
+				mLog.error("The method " + aMethod.getName() + " has an invalid parameter: " + lParameterType.getName() + ". "
+						+ "This method will *not* be load."
+						+ "Suported parameters type are primitive, primitive's wrapper, List and Token.");
+				return false;
 			}
-			if (mLog.isDebugEnabled()) {
-				mLog.debug("Complex method " + aMethod.getName() + " loaded (expect " + lParametersType.length + " parameters).");
-			}
-			//store the "complex" method in the Map.
-			return true;
 		}
-		//last option: 1 parameter and it's a Token
-		mLog.debug("Simple method " + aMethod.getName() + " loaded (expect a single Token as parameter).");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Method " + aMethod.getName() + " loaded (expect " + lParametersType.length + " parameters).");
+		}
+		//store the "complex" method in the Map.
 		return true;
 	}
 
