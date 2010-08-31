@@ -32,6 +32,7 @@ import android.view.Window;
 import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.jwebsocket.api.WebSocketClientEvent;
@@ -47,12 +48,13 @@ import org.jwebsocket.token.TokenFactory;
  */
 public class CanvasActivity extends Activity implements WebSocketClientTokenListener {
 
-	private LinearLayout mLinearLayout = null;
+	private RelativeLayout mLayout = null;
 	private Canvas lCanvas = null;
 	private Paint lPaint = null;
 	private String CANVAS_ID = "c1";
 	private float lSX = 0, lSY = 0;
 	private ImageView lImgView = null;
+	private ImageView lImgStatus = null;
 	int lWidth;
 	int lHeight;
 	Timer timer;
@@ -64,7 +66,7 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		super.onCreate(icicle);
 
 		// Create a LinearLayout in which to add the ImageView
-		mLinearLayout = new LinearLayout(this);
+		mLayout = new RelativeLayout(this);
 
 		// get the display metric (width and height)
 		DisplayMetrics metrics = new DisplayMetrics();
@@ -82,6 +84,11 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		lImgView.setScaleType(ImageView.ScaleType.CENTER);
 		lImgView.setPadding(0, 0, 0, 0);
 
+		lImgStatus = new ImageView(this);
+		lImgStatus.setAdjustViewBounds(true); // set the ImageView bounds to match the Drawable's dimensions
+		lImgStatus.setImageResource(R.drawable.disconnected);
+		// lImgStatus.setAlpha(128);
+
 		final Paint lBck = new Paint();
 		lBck.setARGB(0xff, 0xff, 0xff, 0xff);
 		lCanvas.drawRect(0, 0, lWidth, lHeight, lBck);
@@ -89,8 +96,9 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		lPaint = new Paint();
 		lPaint.setARGB(0xff, 0x00, 0x00, 0x00);
 
-		mLinearLayout.addView(lImgView);
-		setContentView(mLinearLayout);
+		mLayout.addView(lImgView);
+		mLayout.addView(lImgStatus);
+		setContentView(mLayout);
 
 		lImgView.setOnTouchListener(new OnTouchListener() {
 
@@ -262,6 +270,17 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 	protected void onResume() {
 		super.onResume();
 		try {
+			// get the display metric (width and height)
+			DisplayMetrics metrics = new DisplayMetrics();
+			getWindowManager().getDefaultDisplay().getMetrics(metrics);
+			lWidth = metrics.widthPixels;
+			lHeight = metrics.heightPixels;
+
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			lp.setMargins(lWidth - 18, 2, 0, 0);
+			lImgStatus.setLayoutParams(lp);
+
 			JWC.addListener(this);
 			JWC.open();
 		} catch (WebSocketException ex) {
@@ -318,11 +337,20 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 	}
 
 	public void processOpened(WebSocketClientEvent aEvent) {
+		// lImgStatus = (ImageView) findViewById(R.id.cameraImgStatus);
+		if (lImgStatus != null) {
+			// TODO: in fact it is only connected, not yet authenticated!
+			lImgStatus.setImageResource(R.drawable.authenticated);
+		}
 	}
 
 	public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
 	}
 
 	public void processClosed(WebSocketClientEvent aEvent) {
+		// lImgStatus = (ImageView) findViewById(R.id.cameraImgStatus);
+		if (lImgStatus != null) {
+			lImgStatus.setImageResource(R.drawable.disconnected);
+		}
 	}
 }

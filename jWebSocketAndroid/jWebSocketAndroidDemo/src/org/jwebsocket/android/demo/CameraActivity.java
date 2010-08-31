@@ -17,7 +17,6 @@ package org.jwebsocket.android.demo;
 import android.app.Activity;
 import android.hardware.Camera;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -63,15 +62,6 @@ public class CameraActivity extends Activity implements WebSocketClientTokenList
 		lWin.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		/*
-		ImageView i = new ImageView(this);
-		i.setImageResource(R.drawable.disconnected);
-		i.setAdjustViewBounds(true); // set the ImageView bounds to match the Drawable's dimensions
-		i.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-
-		// Add the ImageView to the layout and set the layout as the content view
-		Layout lLayout = (Layout) getfindViewById(R.id.cameraLyt);
-		 */
 		setContentView(R.layout.camera_hvga_p);
 
 		mSurfaceView = (SurfaceView) findViewById(R.id.sfvCamera);
@@ -80,9 +70,9 @@ public class CameraActivity extends Activity implements WebSocketClientTokenList
 		mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		// Instantiate an ImageView and define its properties
-		ImageView lImgView = (ImageView) findViewById(R.id.cameraImgStatus);
-		if (lImgView != null) {
-			lImgView.bringToFront();
+		ImageView lImgStatus = (ImageView) findViewById(R.id.cameraImgStatus);
+		if (lImgStatus != null) {
+			lImgStatus.bringToFront();
 		}
 		mPictureCallback = new Camera.PictureCallback() {
 
@@ -171,10 +161,10 @@ public class CameraActivity extends Activity implements WebSocketClientTokenList
 	}
 
 	public void processOpened(WebSocketClientEvent aEvent) {
-		ImageView lImgView = (ImageView) findViewById(R.id.cameraImgStatus);
-		if (lImgView != null) {
+		ImageView lImgStatus = (ImageView) findViewById(R.id.cameraImgStatus);
+		if (lImgStatus != null) {
 			// TODO: in fact it is only connected, not yet authenticated!
-			lImgView.setImageResource(R.drawable.authenticated);
+			lImgStatus.setImageResource(R.drawable.authenticated);
 		}
 	}
 
@@ -182,9 +172,9 @@ public class CameraActivity extends Activity implements WebSocketClientTokenList
 	}
 
 	public void processClosed(WebSocketClientEvent aEvent) {
-		ImageView lImgView = (ImageView) findViewById(R.id.cameraImgStatus);
-		if (lImgView != null) {
-			lImgView.setImageResource(R.drawable.disconnected);
+		ImageView lImgStatus = (ImageView) findViewById(R.id.cameraImgStatus);
+		if (lImgStatus != null) {
+			lImgStatus.setImageResource(R.drawable.disconnected);
 		}
 	}
 }

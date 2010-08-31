@@ -1,7 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - WebSoocket Demo MIDlet
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
 package org.jwebsocket.midlets;
 
 import javax.microedition.midlet.*;
@@ -20,7 +31,7 @@ import org.jwebsocket.token.TokenClient;
 public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, WebSocketClientTokenListener {
 
 	private boolean midletPaused = false;
-	public TokenClient client = null;
+	private TokenClient mJWC = null;
 	private int prevStatus = TokenClient.DISCONNECTED;
 	//<editor-fold defaultstate="collapsed" desc=" Generated Fields ">//GEN-BEGIN:|fields|0|
 	private Command cmdExit;
@@ -32,6 +43,7 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 	private Command cmdBroadcast;
 	private Command cmdSetup;
 	private Command cmdOk;
+	private Command cmdCamera;
 	private Form frmDemo;
 	private StringItem stiLog;
 	private TextField txfTarget;
@@ -51,9 +63,9 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 
 	private void checkStatusIcon() {
 		int lStatus = TokenClient.DISCONNECTED;
-		if (client.getUsername() != null) {
+		if (mJWC.getUsername() != null) {
 			lStatus = TokenClient.AUTHENTICATED;
-		} else if (client.isConnected()) {
+		} else if (mJWC.isConnected()) {
 			lStatus = TokenClient.CONNECTED;
 		}
 		if (lStatus != prevStatus) {
@@ -98,8 +110,8 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 		// write pre-initialize user code here
 //GEN-LINE:|0-initialize|1|0-postInitialize
 		// write post-initialize user code here
-		client = new TokenClient(new BaseClientJ2ME());
-		client.addListener(this);
+		mJWC = new TokenClient(new BaseClientJ2ME());
+		mJWC.addListener(this);
 	}//GEN-BEGIN:|0-initialize|2|
 	//</editor-fold>//GEN-END:|0-initialize|2|
 
@@ -157,68 +169,74 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 //GEN-LINE:|7-commandAction|2|33-postAction
 				// write post-action user code here
 				try {
-					client.broadcastText(txfMessage.getString());
+					mJWC.broadcastText(txfMessage.getString());
 				} catch (WebSocketException ex) {
 					stiLog.setText(ex.getMessage());
 				}
-			} else if (command == cmdConnect) {//GEN-LINE:|7-commandAction|3|23-preAction
+			} else if (command == cmdCamera) {//GEN-LINE:|7-commandAction|3|53-preAction
 				// write pre-action user code here
-//GEN-LINE:|7-commandAction|4|23-postAction
+//GEN-LINE:|7-commandAction|4|53-postAction
+				// write post-action user code here
+				Camera lCamera = new Camera(mJWC, this, frmDemo);
+
+			} else if (command == cmdConnect) {//GEN-LINE:|7-commandAction|5|23-preAction
+				// write pre-action user code here
+//GEN-LINE:|7-commandAction|6|23-postAction
 				// write post-action user code here
 				try {
-					client.open(txfURL.getString());
+					mJWC.open(txfURL.getString());
 				} catch (WebSocketException ex) {
 					stiLog.setText(ex.getMessage());
 				}
-			} else if (command == cmdDisconnect) {//GEN-LINE:|7-commandAction|5|25-preAction
+			} else if (command == cmdDisconnect) {//GEN-LINE:|7-commandAction|7|25-preAction
 				// write pre-action user code here
-//GEN-LINE:|7-commandAction|6|25-postAction
+//GEN-LINE:|7-commandAction|8|25-postAction
 				// write post-action user code here
 				try {
-					client.close();
+					mJWC.close();
 				} catch (WebSocketException ex) {
 					stiLog.setText(ex.getMessage());
 				}
-			} else if (command == cmdExit) {//GEN-LINE:|7-commandAction|7|19-preAction
+			} else if (command == cmdExit) {//GEN-LINE:|7-commandAction|9|19-preAction
 				// write pre-action user code here
 				try {
-					client.close();
+					mJWC.close();
 				} catch (WebSocketException ex) {
 					stiLog.setText(ex.getMessage());
 				}
-				exitMIDlet();//GEN-LINE:|7-commandAction|8|19-postAction
+				exitMIDlet();//GEN-LINE:|7-commandAction|10|19-postAction
 				// write post-action user code here
-			} else if (command == cmdLogin) {//GEN-LINE:|7-commandAction|9|27-preAction
+			} else if (command == cmdLogin) {//GEN-LINE:|7-commandAction|11|27-preAction
 				// write pre-action user code here
-//GEN-LINE:|7-commandAction|10|27-postAction
+//GEN-LINE:|7-commandAction|12|27-postAction
 				// write post-action user code here
 				try {
-					client.login("guest", "guest");
+					mJWC.login("guest", "guest");
 				} catch (WebSocketException ex) {
 					stiLog.setText(ex.getMessage());
 				}
-			} else if (command == cmdLogout) {//GEN-LINE:|7-commandAction|11|29-preAction
+			} else if (command == cmdLogout) {//GEN-LINE:|7-commandAction|13|29-preAction
 				// write pre-action user code here
-//GEN-LINE:|7-commandAction|12|29-postAction
+//GEN-LINE:|7-commandAction|14|29-postAction
 				// write post-action user code here
 				try {
-					client.logout();
+					mJWC.logout();
 				} catch (WebSocketException ex) {
 					stiLog.setText(ex.getMessage());
 				}
-			} else if (command == cmdSend) {//GEN-LINE:|7-commandAction|13|31-preAction
+			} else if (command == cmdSend) {//GEN-LINE:|7-commandAction|15|31-preAction
 				// write pre-action user code here
-//GEN-LINE:|7-commandAction|14|31-postAction
+//GEN-LINE:|7-commandAction|16|31-postAction
 				// write post-action user code here
-			} else if (command == cmdSetup) {//GEN-LINE:|7-commandAction|15|38-preAction
+			} else if (command == cmdSetup) {//GEN-LINE:|7-commandAction|17|38-preAction
 				// write pre-action user code here
-//GEN-LINE:|7-commandAction|16|38-postAction
+//GEN-LINE:|7-commandAction|18|38-postAction
 				// write post-action user code here
-			}//GEN-BEGIN:|7-commandAction|17|7-postCommandAction
-		}//GEN-END:|7-commandAction|17|7-postCommandAction
+			}//GEN-BEGIN:|7-commandAction|19|7-postCommandAction
+		}//GEN-END:|7-commandAction|19|7-postCommandAction
 		// write post-action user code here
-	}//GEN-BEGIN:|7-commandAction|18|
-	//</editor-fold>//GEN-END:|7-commandAction|18|
+	}//GEN-BEGIN:|7-commandAction|20|
+	//</editor-fold>//GEN-END:|7-commandAction|20|
 
 	//</editor-fold>
 	//<editor-fold defaultstate="collapsed" desc=" Generated Getter: cmdExit ">//GEN-BEGIN:|18-getter|0|18-preInit
@@ -253,6 +271,7 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 			frmDemo.addCommand(getCmdSend());
 			frmDemo.addCommand(getCmdBroadcast());
 			frmDemo.addCommand(getCmdSetup());
+			frmDemo.addCommand(getCmdCamera());
 			frmDemo.setCommandListener(this);//GEN-END:|14-getter|1|14-postInit
 			// write post-init user code here
 		}//GEN-BEGIN:|14-getter|2|
@@ -440,7 +459,7 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 	public TextField getTxfURL() {
 		if (txfURL == null) {//GEN-END:|47-getter|0|47-preInit
 			// write pre-init user code here
-			txfURL = new TextField("URL", "socket://jwebsocket.org:8787", 32, TextField.ANY);//GEN-BEGIN:|47-getter|1|47-postInit
+			txfURL = new TextField("URL", "socket://10.21.68.117:8787", 32, TextField.ANY);//GEN-BEGIN:|47-getter|1|47-postInit
 			txfURL.setLayout(ImageItem.LAYOUT_DEFAULT | Item.LAYOUT_SHRINK | Item.LAYOUT_VSHRINK | Item.LAYOUT_2);
 			txfURL.setPreferredSize(50, -1);//GEN-END:|47-getter|1|47-postInit
 			// write post-init user code here
@@ -520,6 +539,21 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 		return imgDisconnected;
 	}
 	//</editor-fold>//GEN-END:|51-getter|3|
+
+	//<editor-fold defaultstate="collapsed" desc=" Generated Getter: cmdCamera ">//GEN-BEGIN:|52-getter|0|52-preInit
+	/**
+	 * Returns an initiliazed instance of cmdCamera component.
+	 * @return the initialized component instance
+	 */
+	public Command getCmdCamera() {
+		if (cmdCamera == null) {//GEN-END:|52-getter|0|52-preInit
+			// write pre-init user code here
+			cmdCamera = new Command("Camera", Command.ITEM, 0);//GEN-LINE:|52-getter|1|52-postInit
+			// write post-init user code here
+		}//GEN-BEGIN:|52-getter|2|
+		return cmdCamera;
+	}
+	//</editor-fold>//GEN-END:|52-getter|2|
 
 	/**
 	 * Returns a display instance.

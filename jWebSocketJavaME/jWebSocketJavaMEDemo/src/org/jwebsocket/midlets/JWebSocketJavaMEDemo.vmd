@@ -78,12 +78,18 @@
                     <Property name="label" typeID="Pjava.lang.String" value="VSave"/>
                     <Property name="type" typeID="Pint" value="V4"/>
                 </Component>
+                <Component componentID="52" typeID="Cjavax.microedition.lcdui.Command">
+                    <Property name="instanceName" typeID="Pjava.lang.String" value="VcmdCamera"/>
+                    <Property name="codeGenerated" typeID="Pboolean" value="Vtrue"/>
+                    <Property name="label" typeID="Pjava.lang.String" value="VCamera"/>
+                    <Property name="type" typeID="Pint" value="V8"/>
+                </Component>
             </Component>
             <Component componentID="10" typeID="C#DisplayablesCategory">
                 <Component componentID="14" typeID="Cjavax.microedition.lcdui.Form">
                     <Property name="instanceName" typeID="Pjava.lang.String" value="VfrmDemo"/>
                     <Property name="codeGenerated" typeID="Pboolean" value="Vtrue"/>
-                    <Property name="commands" typeID="1C#CommandEventSource" value="A8:3_R193_R233_R253_R273_R293_R313_R333_R38"/>
+                    <Property name="commands" typeID="1C#CommandEventSource" value="A9:3_R193_R233_R253_R273_R293_R313_R333_R383_R53"/>
                     <Property name="title" typeID="Pjava.lang.String" value="VjWebSocket Fundamental Demo"/>
                     <Property name="commandListener" typeID="C#CommandListener" value="R7"/>
                     <Property name="items" typeID="1Cjavax.microedition.lcdui.Item" value="A5:3_R473_R353_R363_R483_R16"/>
@@ -162,7 +168,7 @@
                         <Property name="layout" typeID="Pint" value="V19456"/>
                         <Property name="preferredWidth" typeID="Pint" value="V50"/>
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
-                        <Property name="text" typeID="Pjava.lang.String" value="Vsocket://jwebsocket.org:8787"/>
+                        <Property name="text" typeID="Pjava.lang.String" value="Vsocket://10.21.68.117:8787"/>
                         <Property name="maxSize" typeID="Pint" value="V32"/>
                         <Property name="constraints" typeID="Pint" value="V0"/>
                     </Component>
@@ -174,6 +180,10 @@
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
                         <Property name="image" typeID="Cjavax.microedition.lcdui.Image" value="R51"/>
                         <Property name="altText" typeID="Pjava.lang.String" value="V&lt;Missing Image&gt;"/>
+                    </Component>
+                    <Component componentID="53" typeID="C#CommandEventSource">
+                        <Property name="displayable" typeID="Cjavax.microedition.lcdui.Displayable" value="R14"/>
+                        <Property name="command" typeID="Cjavax.microedition.lcdui.Command" value="R52"/>
                     </Component>
                 </Component>
             </Component>
@@ -197,8 +207,5 @@
             <Component componentID="21" typeID="C#DatabindingCategory"/>
         </Component>
     </Document>
-    <FlowScene version="1">
-        <Node componentID="14" descriptorID="componentNode14" x="191" y="165"/>
-        <Node componentID="2" descriptorID="componentNode2" x="24" y="26"/>
-    </FlowScene>
+    <FlowScene version="1"/>
 </VisualDesign>

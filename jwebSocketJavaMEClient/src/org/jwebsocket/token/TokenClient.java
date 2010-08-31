@@ -19,6 +19,7 @@ import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.client.me.BaseClientJ2ME;
+import org.jwebsocket.client.me.Tools;
 import org.jwebsocket.listener.WebSocketClientEvent;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.packetProcessors.JSONProcessor;
@@ -327,4 +328,26 @@ public class TokenClient {
 			fSessionId = null;
 		}
 	}
+
+	private final static String NS_FILESYSTEM_PLUGIN = NS_BASE + ".plugins.filesystem";
+
+	// @Override
+	public void saveFile(byte[] aData, String aFilename, String aScope, Boolean aNotify) throws WebSocketException {
+		Token lToken = new Token();
+		lToken.put("type", "save");
+		lToken.put("ns", NS_FILESYSTEM_PLUGIN);
+
+		lToken.put("sourceId", getClientId());
+		lToken.put("sender", getUsername());
+		lToken.put("filename", aFilename);
+		// TODO: set mimetype correctly according to file extension based on configuration in jWebSocket.xml
+		lToken.put("mimetype", "image/jpeg");
+		lToken.put("scope", aScope);
+		lToken.put("notify", aNotify);
+
+		lToken.put("data", String.valueOf(Tools.base64Encode(aData)));
+		sendToken(lToken);
+	}
+
+
 }

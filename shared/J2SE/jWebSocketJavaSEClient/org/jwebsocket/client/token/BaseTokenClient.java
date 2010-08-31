@@ -276,7 +276,7 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 		lToken.setString("scope", aScope);
 		lToken.setBoolean("notify", aNotify);
 
-		lToken.setString("data", new String(Base64.encodeBase64(aData)));
+		lToken.setString("data", String.valueOf(Base64.encodeBase64(aData)));
 		sendToken(lToken);
 	}
 

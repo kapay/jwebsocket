@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.jwebsocket.api.WebSocketClientEvent;
@@ -117,6 +118,11 @@ public class Fundamentals extends Activity implements WebSocketClientTokenListen
 
     public void processOpened(WebSocketClientEvent aEvent) {
         log("opened\n");
+		ImageView lImgView = (ImageView) findViewById(R.id.fundImgStatus);
+		if (lImgView != null) {
+			// TODO: in fact it is only connected, not yet authenticated!
+			lImgView.setImageResource(R.drawable.authenticated);
+		}
     }
 
     public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
@@ -129,5 +135,9 @@ public class Fundamentals extends Activity implements WebSocketClientTokenListen
 
     public void processClosed(WebSocketClientEvent aEvent) {
         log("closed\n");
+		ImageView lImgView = (ImageView) findViewById(R.id.fundImgStatus);
+		if (lImgView != null) {
+			lImgView.setImageResource(R.drawable.disconnected);
+		}
     }
 }

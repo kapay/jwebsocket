@@ -388,7 +388,7 @@ public class BaseWebSocket implements WebSocketClient {
             while (!mStop) {
                 try {
                     int b = mIS.read();
-                    // TODO support binary frames
+                    // TODO: support binary frames
                     if (b == 0x00) {
                         lFrameStart = true;
                     } else if (b == 0xff && lFrameStart == true) {
@@ -400,7 +400,6 @@ public class BaseWebSocket implements WebSocketClient {
                         lOS.reset();
                         notifyPacket(lWSCE, lPacket);
                     } else if (lFrameStart == true) {
-                        // messageBytes.add((byte) b);
                         lOS.write(b);
                     } else if (b == -1) {
                         handleError();
