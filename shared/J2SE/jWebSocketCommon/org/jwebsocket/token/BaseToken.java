@@ -22,7 +22,6 @@ import javolution.util.FastList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.jwebsocket.plugins.rpc.util.JSONArrayHandler;
 
 /**
  *
