@@ -134,7 +134,7 @@ public interface Token {
 	 * @param aDefault
 	 * @return
 	 */
-	List getList(String aKey, Boolean aDefault);
+	List getList(String aKey, List aDefault);
 
 	/**
 	 *

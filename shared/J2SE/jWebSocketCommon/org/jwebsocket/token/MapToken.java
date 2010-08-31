@@ -313,24 +313,30 @@ public class MapToken extends BaseToken implements Token {
 	/**
 	 *
 	 * @param aKey
-	 * @param aDefault
-	 * @return
-	 */
-	@Override
-	public List getList(String aKey, Boolean aDefault) {
-		// TODO: Implement this
-		return null;
-	}
-
-	/**
-	 *
-	 * @param aKey
 	 * @return
 	 */
 	@Override
 	public List getList(String aKey) {
-		// TODO: Implement this
-		return null;
+		return getList(aKey, null);
+	}
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public List getList(String aKey, List aDefault) {
+		List lResult = null;
+		try {
+			lResult = (List) mData.get(aKey);
+			if (lResult == null) {
+				lResult = aDefault;
+			}
+		} catch (Exception ex) {
+			lResult = aDefault;
+		}
+		return lResult;
 	}
 
 	/**

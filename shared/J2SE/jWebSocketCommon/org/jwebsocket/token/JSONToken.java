@@ -311,7 +311,7 @@ public class JSONToken extends BaseToken implements Token {
 	 * @return
 	 */
 	@Override
-	public List getList(String aKey, Boolean aDefault) {
+	public List getList(String aKey, List aDefault) {
 		// TODO: Implement this
 		return null;
 	}
@@ -423,7 +423,7 @@ public class JSONToken extends BaseToken implements Token {
 	public Object getObject(String aKey) {
 		Object lObj = null;
 		try {
-			mData.get(aKey);
+			lObj = mData.get(aKey);
 		} catch (Exception ex) {
 			// 
 		}
