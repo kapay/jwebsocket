@@ -17,6 +17,12 @@ package org.jwebsocket.packetProcessors;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javolution.util.FastList;
+import javolution.util.FastMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,43 +39,52 @@ import org.jwebsocket.token.Token;
 public class JSONProcessor {
 
 	// TODO: Logging cannot be used in common module because not supported on all clients
-	// private static Logger log = Logging.getLogger(JSONProcessor.class);
+	@SuppressWarnings("unchecked")
+	public static List jsonArrayToList(JSONArray aJsonArray) {
+		List lList = new FastList();
+		for (int i = 0; i < aJsonArray.length(); i++) {
+			try {
+				Object lSubObject = aJsonArray.get(i) ;
+				if (lSubObject instanceof JSONArray) {
+					lList.add(jsonArrayToList((JSONArray)lSubObject));
+				} else if (lSubObject instanceof JSONObject) {
+					lList.add(jsonObjectToMap((JSONObject)lSubObject));
+				}else {
+					lList.add(aJsonArray.get(i));
+				}
+			} catch (JSONException e) { //Sould never happen: aJsonArray.get(i) will always exists
+			}
+		}
+		return lList ;
+	}
 	/**
-	 * converts a JSON formatted data packet into a token.
-	 * @param aDataPacket
-	 * @return
-	 */
-/*
-	public static Token packetToToken(WebSocketPacket aDataPacket) {
-		Token lToken;
-		try {
-			String lStr = aDataPacket.getString("UTF-8");
-			JSONTokener lJSONTokener = new JSONTokener(lStr);
-			JSONObject lJO = new JSONObject(lJSONTokener);
-			lToken = new Token(lJO);
-		} catch (Exception ex) {
-			// TODO: handle exception
-			// log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
-			lToken = null;
+	 * Quentin:
+	 * Recursivly convert a JSONObject to a Map of List, Map or Object. 
+	 * (also convert all the JSONArray to List)
+	 * @param aJsonArray
+	 * @return the list
+	 */	
+	@SuppressWarnings("unchecked")
+	public static Map jsonObjectToMap (JSONObject aJsonObject) {
+		FastMap lFastMap = new FastMap() ;
+		Iterator iterator = aJsonObject.keys();
+		while(iterator.hasNext()) {
+			try {
+				Object aKey = iterator.next();
+				Object aValue = aJsonObject.get(String.valueOf(aKey));
+			    if (aValue instanceof JSONArray) {
+			    	lFastMap.put(aKey, jsonArrayToList((JSONArray)aValue));
+			    } else if  (aValue instanceof JSONObject) {
+			    	lFastMap.put(aKey, jsonObjectToMap((JSONObject)aValue));
+			    } else {
+			    	lFastMap.put(aKey, aValue);
+			    }
+			} catch (JSONException e) { //Sould never happen: aJsonObject.get(String.valueOf(aKey)) will always exists
+			}
 		}
-		return lToken;
+		return lFastMap;
 	}
-*/
-/*
-	public static WebSocketPacket tokenToPacket(Token aToken) {
-		WebSocketPacket lPacket = null;
-		try {
-			JSONObject lJSON = aToken.getJSONObject();
-			String lData = lJSON.toString();
-			lPacket = new RawPacket(lData, "UTF-8");
-		} catch (Exception ex) {
-			// TODO: process exception
-			// log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
-		}
-		return lPacket;
-	}
-*/
-
+	
 	// TODO: Logging cannot be used in common module because not supported on all clients
 	// private static Logger log = Logging.getLogger(JSONProcessor.class);
 	/**
@@ -85,7 +100,17 @@ public class JSONProcessor {
 			JSONObject lJO = new JSONObject(lJT);
 			for (Iterator lIterator = lJO.keys(); lIterator.hasNext();) {
 				String lKey = (String) lIterator.next();
-				lToken.setValidated(lKey, lJO.get(lKey));
+				Object lValue = lJO.get(lKey) ;
+				//Quentin:
+				//Maybe we souldn't use the JSON api but directly re-write a "converter" from Json to Token... 
+				//User should always handle List and Map, never JSONObject or JSONArray, since we don't know if xml, csv or json is used as protocol.
+				if( lValue instanceof JSONArray) {
+					lToken.setValidated(lKey, jsonArrayToList((JSONArray) lValue));
+				} else if( lValue instanceof JSONObject) {
+					lToken.setValidated(lKey, jsonObjectToMap((JSONObject) lValue));
+				} else {
+					lToken.setValidated(lKey, lValue);
+				}
 			}
 		} catch (Exception ex) {
 			// // TODO: process exception

@@ -15,13 +15,16 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.token;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javolution.util.FastList;
+import javolution.util.FastMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
@@ -34,10 +37,11 @@ public abstract class BaseToken implements Token {
 	 */
 	public static final String TT_EVENT = "event";
 
+	
 	public void setDouble(String aKey, Float aValue) {
 		setDouble(aKey, Double.valueOf(aValue));
 	}
-
+		
 	public boolean setValidated(String aKey, Object aObj) {
 		boolean lRes = true;
 		if( aObj instanceof Boolean) {
@@ -48,19 +52,8 @@ public abstract class BaseToken implements Token {
 			setDouble(aKey, (Double)aObj);
 		} else if( aObj instanceof String) {
 			setString(aKey, (String)aObj);
-		} 
-		//TODO: check this modification
-		//Quentin:
-		//aObj is not a List, but a JSONArray. So we need to convert JSONArray to List here, or maybe add a setJSONArray(aKey, aJSONArray) method ?
-		else if( aObj instanceof JSONArray) {
-			List lList = new FastList();
-			for (int i = 0; i < ((JSONArray)aObj).length(); i++) {
-				try {
-					lList.add(((JSONArray)aObj).get(i));
-				} catch (JSONException e) {
-				}
-			}
-			setList(aKey, lList);
+		} else if( aObj instanceof List) {
+			setList(aKey, (List)aObj);
 		} else if( aObj instanceof Map) {
 			setMap(aKey, (Map)aObj);
 		} else {
