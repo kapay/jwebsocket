@@ -37,8 +37,53 @@ import org.jwebsocket.token.Token;
  * @author Alexander Schulze, Roderick Baier (improvements regarding JSON array).
  */
 public class JSONProcessor {
-
+	
 	// TODO: Logging cannot be used in common module because not supported on all clients
+	// private static Logger log = Logging.getLogger(JSONProcessor.class);
+	/**
+	 * converts a JSON formatted data packet into a token.
+	 * @param aDataPacket
+	 * @return
+	 */
+/*
+	public static Token packetToToken(WebSocketPacket aDataPacket) {
+		Token lToken;
+		try {
+			String lStr = aDataPacket.getString("UTF-8");
+			JSONTokener lJSONTokener = new JSONTokener(lStr);
+			JSONObject lJO = new JSONObject(lJSONTokener);
+			lToken = new Token(lJO);
+		} catch (Exception ex) {
+			// TODO: handle exception
+			// log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			lToken = null;
+		}
+		return lToken;
+	}
+*/
+/*
+	public static WebSocketPacket tokenToPacket(Token aToken) {
+		WebSocketPacket lPacket = null;
+		try {
+			JSONObject lJSON = aToken.getJSONObject();
+			String lData = lJSON.toString();
+			lPacket = new RawPacket(lData, "UTF-8");
+		} catch (Exception ex) {
+			// TODO: process exception
+			// log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
+		return lPacket;
+	}
+*/
+	/**
+	 * Quentin:
+	 * Recursivly convert a JSONArray to a List of List, Map or Object. 
+	 * (also convert all the JSONObject to Map)
+	 * Example: jsonArrayToList( JSONArray [[1,2,3],{"value": "a"}]) will retour a List{{1,2,3},{"value" => "b"}}
+	 * @param aJsonArray
+	 * @return the list
+	 */
+	
 	@SuppressWarnings("unchecked")
 	public static List jsonArrayToList(JSONArray aJsonArray) {
 		List lList = new FastList();
@@ -85,8 +130,6 @@ public class JSONProcessor {
 		return lFastMap;
 	}
 	
-	// TODO: Logging cannot be used in common module because not supported on all clients
-	// private static Logger log = Logging.getLogger(JSONProcessor.class);
 	/**
 	 * converts a JSON formatted data packet into a token.
 	 * @param aDataPacket
