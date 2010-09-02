@@ -1,5 +1,7 @@
 package org.jwebsocket.android.library;
 
+import org.jwebsocket.token.Token;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,4 +29,7 @@ public class ParcelableToken implements Parcelable {
 	public void writeToParcel(Parcel arg0, int arg1) {
 	}
 
+	public Token getToken() {
+	  return null;
+	}
 }
