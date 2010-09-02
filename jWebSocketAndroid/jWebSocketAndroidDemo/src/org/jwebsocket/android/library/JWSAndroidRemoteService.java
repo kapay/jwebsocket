@@ -81,26 +81,32 @@ public class JWSAndroidRemoteService extends Service {
     @Override
     public void handleMessage(Message msg) {
       switch (msg.what) {
-      case MT_ERROR: {
-        final int N = jwsCallbackList.beginBroadcast();
-        for (int i = 0; i < N; i++) {
-          try {
-            String error = (String) msg.obj;
-            jwsCallbackList.getBroadcastItem(i).onError(error);
-          } catch (RemoteException e) {
-            // The RemoteCallbackList will take care of removing
-            // the dead object for us.
-          }
-        }
-        jwsCallbackList.finishBroadcast();
-      }
-        break;
+      case MT_ERROR: broadCastMessageToCallback(msg); break;
+      case MT_OPENED: broadCastMessageToCallback(msg);
       
       default:
         super.handleMessage(msg);
       }
     }
   };
+  
+  /**
+   * Broadcast the given message to all the callback listeners
+   * @param message the message object
+   */
+  private void broadCastMessageToCallback(Message message) {
+    final int N = jwsCallbackList.beginBroadcast();
+    for (int i = 0; i < N; i++) {
+      try {
+        String error = (String) message.obj;
+        jwsCallbackList.getBroadcastItem(i).onError(error);
+      } catch (RemoteException e) {
+        // The RemoteCallbackList will take care of removing
+        // the dead object for us.
+      }
+    }
+    jwsCallbackList.finishBroadcast();
+  }
 
   /**
    * This is the actual <tt>jWebSocket</tt> {@code BaseTokenClient} based
@@ -109,123 +115,137 @@ public class JWSAndroidRemoteService extends Service {
    * client.
    */
   private final IJWSAndroidRemoteService.Stub mBinder = new IJWSAndroidRemoteService.Stub() {
+    
+    private void handleException(String tag, String error, Throwable e) {
+      Log.e(tag, error, e);
+      Message errorMsg = Message.obtain(jwsHandler, MT_ERROR, e.getMessage());
+      jwsHandler.sendMessage(errorMsg);
+    }
+    
     @Override
     public void open() throws RemoteException {
       try {
         tokenClient.open(jwsURL);
       } catch (WebSocketException e) {
-        Log.e("ERROR", "Error opening the jWebSocket connection", e);
-        Message errorMsg = Message.obtain(messageHandler, -1, e.getMessage());
-        jwsHandler.sendMessage(errorMsg);
+        handleException("OPEN", "Error opening jWebSocket connection", e);
       }
     }
 
     @Override
     public void close() throws RemoteException {
-      // TODO Auto-generated method stub
-
+      try {
+        tokenClient.close();
+      } catch (WebSocketException e) {
+        handleException("CLOSE", "Error closing jWebSocket connection", e);
+      }
     }
 
     @Override
     public void disconnect() throws RemoteException {
-      // TODO Auto-generated method stub
-
+      try {
+        tokenClient.disconnect();
+      } catch (WebSocketException e) {
+        handleException("DISCONNECT", "Error disconnecting from the jWebSocket server", e);
+      }
     }
 
     @Override
     public void send(String data) throws RemoteException {
-      // TODO Auto-generated method stub
-
+      try {
+        tokenClient.send(data, "UTF-8");
+      } catch (WebSocketException e) {
+        handleException("SEND", "Error sending data to the jWebSocket server", e);
+      }
     }
 
     @Override
     public void sendText(String target, String data) throws RemoteException {
-      // TODO Auto-generated method stub
-
+      try {
+        tokenClient.sendText(target, data);
+      } catch (WebSocketException e) {
+        handleException("SENDTEXT", "Error sending text data to the jWebSocket server", e);
+      }
     }
 
     @Override
     public void broadcastText(String data) throws RemoteException {
-      // TODO Auto-generated method stub
-
+      try {
+        tokenClient.broadcastText(data);
+      } catch (WebSocketException e) {
+        handleException("BROADCAST", "Error broadcasting data to the jWebSocket server", e);
+      }
     }
 
     @Override
     public void sendToken(ParcelableToken token) throws RemoteException {
-      // TODO Auto-generated method stub
-
+      try {
+        tokenClient.sendToken(token.getToken());
+      } catch (WebSocketException e) {
+        handleException("SENDTOKEN", "Error sending token data to the jWebSocket server", e);
+      }
     }
 
     @Override
     public void saveFile(String fileName, String scope, boolean notify, byte[] data) throws RemoteException {
-      // TODO Auto-generated method stub
-
+      try {
+        tokenClient.saveFile(data, fileName, scope, notify);
+      } catch (WebSocketException e) {
+        handleException("FILESAVE", "Error saving file to jWebSocket server", e);
+      }
     }
 
     @Override
     public String getUsername() throws RemoteException {
-      // TODO Auto-generated method stub
-      return null;
+      return tokenClient.getUsername();
     }
 
     @Override
     public void login(String aUsername, String aPassword) throws RemoteException {
-      // TODO Auto-generated method stub
-
+      try {
+        tokenClient.login(aUsername, aPassword);
+      } catch (WebSocketException e) {
+        handleException("LOGIN", "Error login to jWebSocket server", e);
+      }
     }
 
     @Override
     public void logout() throws RemoteException {
-      // TODO Auto-generated method stub
-
+      try {
+        tokenClient.logout();
+      } catch (WebSocketException e) {
+        handleException("LOGOUT", "Error logout from jWebSocket server", e);
+      }
     }
 
     @Override
     public void ping(boolean echo) throws RemoteException {
-      // TODO Auto-generated method stub
-
+      //TODO://fix this either display a notification or something visible to the user
+      try {
+        tokenClient.ping(echo);
+      } catch (WebSocketException e) {
+        handleException("PING", "Error ping operation to jWebSocket server", e);
+      }
     }
 
     @Override
     public void getConnections() throws RemoteException {
-      // TODO Auto-generated method stub
-
+      //TODO: implement this it should return something.. 
+      //need a fix in TokenClient itself
     }
 
     @Override
     public boolean isAuthenticated() throws RemoteException {
-      // TODO Auto-generated method stub
-      return false;
+      return tokenClient.isAuthenticated();
     }
 
     @Override
     public void registerCallback(IJWSAndroidRemoteServiceCallback cb) throws RemoteException {
-      // TODO Auto-generated method stub
-
+      jwsCallbackList.register(cb);
     }
 
     @Override
     public void unregisterCallback(IJWSAndroidRemoteServiceCallback cb) throws RemoteException {
-      // TODO Auto-generated method stub
-
-    }
-  };
-
-  private static Handler messageHandler = new Handler() {
-
-    @Override
-    public void handleMessage(Message message) {
-
-      switch (message.what) {
-      case MT_OPENED:
-        break;
-      case MT_PACKET:
-        break;
-      case MT_TOKEN:
-        break;
-      case MT_CLOSED:
-        break;
-      }
+      jwsCallbackList.unregister(cb);
     }
   };
 
@@ -241,32 +261,35 @@ public class JWSAndroidRemoteService extends Service {
     return null;
   }
 
-  static class Listener implements WebSocketClientTokenListener {
+  /**
+   * Token listener to receives the callback event from jWebSocket token client
+   */
+  class Listener implements WebSocketClientTokenListener {
 
     public void processOpened(WebSocketClientEvent aEvent) {
       Message lMsg = new Message();
       lMsg.what = MT_OPENED;
-      messageHandler.sendMessage(lMsg);
+      jwsHandler.sendMessage(lMsg);
     }
 
     public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
       Message lMsg = new Message();
       lMsg.what = MT_PACKET;
       lMsg.obj = aPacket;
-      messageHandler.sendMessage(lMsg);
+      jwsHandler.sendMessage(lMsg);
     }
 
     public void processToken(WebSocketClientEvent aEvent, Token aToken) {
       Message lMsg = new Message();
       lMsg.what = MT_TOKEN;
       lMsg.obj = aToken;
-      messageHandler.sendMessage(lMsg);
+      jwsHandler.sendMessage(lMsg);
     }
 
     public void processClosed(WebSocketClientEvent aEvent) {
       Message lMsg = new Message();
       lMsg.what = MT_CLOSED;
-      messageHandler.sendMessage(lMsg);
+      jwsHandler.sendMessage(lMsg);
     }
   }
 }
