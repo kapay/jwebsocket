@@ -27,8 +27,8 @@ import javolution.util.FastMap;
  */
 public final class RequestHeader {
 
-    private Map<String, Object> args = new FastMap<String, Object>();
-    private static final String ARGS = "args";
+    private Map<String, Object> mArgs = new FastMap<String, Object>();
+    private static final String URL_ARGS = "args";
     private static final String PROT = "prot";
     private static final String TIMEOUT = "timeout";
 
@@ -38,7 +38,7 @@ public final class RequestHeader {
      * @param aValue
      */
     public void put(String aKey, Object aValue) {
-        args.put(aKey, aValue);
+        mArgs.put(aKey, aValue);
     }
 
     /**
@@ -48,7 +48,7 @@ public final class RequestHeader {
      * @return object value for the given key or {@code null}.
      */
     public Object get(String aKey) {
-        return args.get(aKey);
+        return mArgs.get(aKey);
     }
 
     /**
@@ -58,15 +58,15 @@ public final class RequestHeader {
      * @return String value for the given key or {@code null}.
      */
     public String getString(String aKey) {
-        return (String) args.get(aKey);
+        return (String) mArgs.get(aKey);
     }
 
     /**
-     * Returns a FastMap of the optional URL arguments passed by the client.
-     * @return FastMap of the optional URL arguments.
+     * Returns a Map of the optional URL arguments passed by the client.
+     * @return Map of the optional URL arguments.
      */
     public Map getArgs() {
-        return (Map) args.get(ARGS);
+        return (Map) mArgs.get(URL_ARGS);
     }
 
     /**
