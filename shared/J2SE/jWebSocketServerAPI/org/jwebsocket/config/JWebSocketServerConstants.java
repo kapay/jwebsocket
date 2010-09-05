@@ -30,7 +30,7 @@ public final class JWebSocketServerConstants {
 	/**
 	 * Namespace base for tokens and plug-ins.
 	 */
-	public static final String NS_BASE = "org.jWebSocket";
+	public static final String NS_BASE = "org.jwebsocket";
 	/**
 	 * constant for default installation
 	 */

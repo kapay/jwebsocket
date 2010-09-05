@@ -24,9 +24,6 @@ import org.jwebsocket.kit.PlugInResponse;
  * @author aschulze
  */
 public interface WebSocketPlugIn {
-
-	// TODO: a plug-in should have a name and an id to be uniquely identified in the chain!
-
 	/**
 	 * is called by the server when the engine has been started.
 	 * @param aEngine
@@ -70,6 +67,12 @@ public interface WebSocketPlugIn {
 	 * @return the plugInChain
 	 */
 	WebSocketPlugInChain getPlugInChain();
+	
+	/**
+	 * Returns the plugin configuration object based on the configuration file values 
+	 * @return the plugin configuration object
+	 */
+	PluginConfiguration getPluginConfiguration();
 
 	/**
 	 *
@@ -83,7 +86,7 @@ public interface WebSocketPlugIn {
 	 *
 	 * @param aSettings
 	 */
-	void addAllSettings(Map aSettings);
+	void addAllSettings(Map<String, String> aSettings);
 
 	/**
 	 *
@@ -115,5 +118,5 @@ public interface WebSocketPlugIn {
 	 *
 	 * @return
 	 */
-	Map getSettings();
+	Map<String, String> getSettings();
 }

@@ -59,7 +59,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 		this.domains = domains;
 		validate();
 	}
-
+	
 	/**
 	 * @return the id
 	 */

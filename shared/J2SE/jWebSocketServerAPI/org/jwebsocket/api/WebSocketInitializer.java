@@ -17,6 +17,8 @@ package org.jwebsocket.api;
 import java.util.List;
 import java.util.Map;
 
+import org.jwebsocket.config.JWebSocketConfig;
+
 /**
  * Base interface that defines the methods to initialize jWebSocket engine, servers
  * and plugins. The implementation of this class can initialize in different way. 
@@ -61,4 +63,10 @@ public interface WebSocketInitializer {
 	 * with it.
 	 */
 	Map<String, List<WebSocketFilter>> initializeFilters();
+	
+	/**
+	 * Returns the config object 
+	 * @return the jwebsocket config object
+	 */
+	JWebSocketConfig getConfig();
 }

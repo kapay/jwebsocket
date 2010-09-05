@@ -34,7 +34,6 @@ import org.jwebsocket.kit.WebSocketException;
  * @version $Id: WebSocketServer.java 625 2010-07-06 17:33:33Z fivefeetfurther $
  */
 public interface WebSocketServer {
-
 	/**
 	 * Starts the server and all underlying engines.
 	 * @throws WebSocketException
@@ -126,7 +125,7 @@ public interface WebSocketServer {
 	 * Returns the plugin chain for the server .
 	 * @return the plugInChain
 	 */
-     WebSocketPlugInChain getPlugInChain();
+  WebSocketPlugInChain getPlugInChain();
 
 	/**
 	 * Returns the filter chain for the server.
