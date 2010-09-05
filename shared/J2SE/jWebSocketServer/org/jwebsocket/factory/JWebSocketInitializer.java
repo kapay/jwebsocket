@@ -18,15 +18,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javolution.util.FastList;
-import javolution.util.FastMap;
-
-import org.jwebsocket.api.EngineConfiguration;
+import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketConfig;
 
 /**
  * Class that performs the default servers and plugins initialization
@@ -35,99 +32,23 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
  * @version $Id: JWebSocketInitializer.java 399 2010-04-30 01:00:57Z mailtopuran$
  */
 public class JWebSocketInitializer extends AbstractJWebSocketInitializer {
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, List<WebSocketPlugIn>> initializeCustomPlugins() {
-        return new FastMap<String, List<WebSocketPlugIn>>();
+  
+    public JWebSocketInitializer(JWebSocketConfig theConfig) {
+      super(theConfig);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public List<WebSocketServer> initializeCustomServers() {
-        return Collections.emptyList();
+    public Map<String, List<WebSocketPlugIn>> initializeCustomPlugins(List<PluginConfiguration> configurations) {
+      return Collections.emptyMap();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Map<String, List<WebSocketFilter>> initializeCustomFilters() {
-        return new FastMap<String, List<WebSocketFilter>>();
+    public List<WebSocketServer> initializeCustomServers(List<ServerConfiguration> cfgs) {
+      return Collections.emptyList();
     }
 
     @Override
-    public EngineConfiguration getEngineConfiguration() {
-        return new DefaultEngineConfiguration();
+    public Map<String, List<WebSocketFilter>> initializeCustomFilters() {
+      return Collections.emptyMap();
     }
-
-    @Override
-    public ServerConfiguration getServerConfiguration() {
-        return new DefaultServerConfiguration();
-    }
-
-    private class DefaultEngineConfiguration implements EngineConfiguration {
-
-        @Override
-        public List<String> getDomains() {
-            List<String> domains =  new FastList<String>();
-            domains.add("localhost");
-            return domains;
-        }
-
-        @Override
-        public String getJar() {
-            return null;
-        }
-
-        @Override
-        public int getMaxFramesize() {
-            return JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE;
-        }
-
-        @Override
-        public int getPort() {
-            return JWebSocketCommonConstants.DEFAULT_PORT;
-        }
-
-        @Override
-        public int getTimeout() {
-            return JWebSocketCommonConstants.DEFAULT_TIMEOUT;
-        }
-
-        @Override
-        public String getId() {
-            return "netty0";
-        }
-
-        @Override
-        public String getName() {
-            return "Netty";
-        }
-        
-    }
-
-    private class DefaultServerConfiguration implements ServerConfiguration {
-
-        @Override
-        public String getJar() {
-            return null;
-        }
-
-        @Override
-        public String getId() {
-            return "ts0";
-        }
-
-        @Override
-        public String getName() {
-            return "Server";
-        }
-
-    }
-
 }
