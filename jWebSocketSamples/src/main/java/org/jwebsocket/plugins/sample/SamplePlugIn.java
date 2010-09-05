@@ -69,6 +69,8 @@ public class SamplePlugIn extends TokenPlugIn {
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
+	  RandomData data = new RandomData();
+	  System.out.println(data.getRandomText());
 		// this method is called when the engine has started
 		super.engineStarted(aEngine);
 	}
@@ -81,7 +83,6 @@ public class SamplePlugIn extends TokenPlugIn {
 
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-
 		// get the type of the token
 		// the type can be associated with a "command"
 		String lType = aToken.getType();

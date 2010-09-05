@@ -16,17 +16,15 @@
 
 package org.jwebsocket.plugins.sample;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import javolution.util.FastMap;
-
-import org.jwebsocket.api.EngineConfiguration;
+import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.factory.AbstractJWebSocketInitializer;
 
 /**
@@ -34,38 +32,30 @@ import org.jwebsocket.factory.AbstractJWebSocketInitializer;
  * plugins, servers and filters to jWebSocket infrastructure. This is for development mode
  * so that developers can debug their plugins, filters etc.. at compile time.
  * @author puran
- * @version $Id:$
+ * @version $Id$
  * 
  */
 public class CustomInitializer extends AbstractJWebSocketInitializer {
 
-    @Override
-    public FastMap<String, List<WebSocketPlugIn>> initializeCustomPlugins() {
-        FastMap<String, List<WebSocketPlugIn>> pluginMap = new FastMap<String, List<WebSocketPlugIn>>();
-        List<WebSocketPlugIn> plugins = new ArrayList<WebSocketPlugIn>();
-        plugins.add(new SamplePlugIn());
-        pluginMap.put("ts0", plugins);
-        return pluginMap;
-    }
+  public CustomInitializer(JWebSocketConfig theConfig) {
+    super(theConfig);
+  }
 
-    @Override
-    public List<WebSocketServer> initializeCustomServers() {
-        return Collections.emptyList();
-    }
+  @Override
+  public Map<String, List<WebSocketPlugIn>> initializeCustomPlugins(List<PluginConfiguration> configurations) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-    @Override
-    public EngineConfiguration getEngineConfiguration() {
-        return null;
-    }
+  @Override
+  public List<WebSocketServer> initializeCustomServers(List<ServerConfiguration> cfgs) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-    @Override
-    public ServerConfiguration getServerConfiguration() {
-        return null;
-    }
-
-    @Override
-    public FastMap<String, List<WebSocketFilter>> initializeCustomFilters() {
-        return null;
-    }
-
+  @Override
+  public Map<String, List<WebSocketFilter>> initializeCustomFilters() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }
