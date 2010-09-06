@@ -16,16 +16,6 @@
 
 package org.jwebsocket.plugins.sample;
 
-import java.util.List;
-import java.util.Map;
-
-import org.jwebsocket.api.PluginConfiguration;
-import org.jwebsocket.api.ServerConfiguration;
-import org.jwebsocket.api.WebSocketFilter;
-import org.jwebsocket.api.WebSocketPlugIn;
-import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.factory.AbstractJWebSocketInitializer;
 
 /**
  * Example of custom JWebSocket intializer to initalize and register the custom
@@ -35,27 +25,5 @@ import org.jwebsocket.factory.AbstractJWebSocketInitializer;
  * @version $Id$
  * 
  */
-public class CustomInitializer extends AbstractJWebSocketInitializer {
-
-  public CustomInitializer(JWebSocketConfig theConfig) {
-    super(theConfig);
-  }
-
-  @Override
-  public Map<String, List<WebSocketPlugIn>> initializeCustomPlugins(List<PluginConfiguration> configurations) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public List<WebSocketServer> initializeCustomServers(List<ServerConfiguration> cfgs) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Map<String, List<WebSocketFilter>> initializeCustomFilters() {
-    // TODO Auto-generated method stub
-    return null;
-  }
+public class CustomInitializer {
 }

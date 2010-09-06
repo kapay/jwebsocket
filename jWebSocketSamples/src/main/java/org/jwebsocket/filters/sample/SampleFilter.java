@@ -24,66 +24,59 @@ import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * 
  * @author aschulze
  */
 public class SampleFilter extends TokenFilter {
 
-	private static Logger log = Logging.getLogger(SampleFilter.class);
+  private static Logger log = Logging.getLogger(SampleFilter.class);
 
-	/**
-	 *
-	 * @param aId
-	 */
-	public SampleFilter(String aId) {
-		super(aId);
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating system filter...");
-		}
-	}
+  /**
+   * 
+   * @param aId
+   */
+  public SampleFilter(String aId) {
+    super(aId);
+    if (log.isDebugEnabled()) {
+      log.debug("Instantiating system filter...");
+    }
+  }
 
-	/**
-	 *
-	 * @param aResponse
-	 * @param aConnector
-	 * @param aToken
-	 */
-	@Override
-	public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-		if (log.isDebugEnabled()) {
-			log.debug("Checking incoming token from " + (aConnector != null ? aConnector.getId() : "[not given]")
-					+ ": " + aToken.toString() + "...");
-		}
+  /**
+   * 
+   * @param aResponse
+   * @param aConnector
+   * @param aToken
+   */
+  @Override
+  public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+    if (log.isDebugEnabled()) {
+      log.debug("Checking incoming token from " + (aConnector != null ? aConnector.getId() : "[not given]") + ": " + aToken.toString() + "...");
+    }
 
-		TokenServer lServer = getServer();
-		String lUsername = lServer.getUsername(aConnector);
+    TokenServer lServer = getServer();
+    String lUsername = lServer.getUsername(aConnector);
 
-		// TODO: very first security test, replace by user's locked state!
-		if ("locked".equals(lUsername)) {
-			Token lToken = lServer.createAccessDenied(aToken);
-			lServer.sendToken(aConnector, lToken);
-			aResponse.rejectMessage();
-			return;
-		}
-	}
+    // TODO: very first security test, replace by user's locked state!
+    if ("locked".equals(lUsername)) {
+      Token lToken = lServer.createAccessDenied(aToken);
+      lServer.sendToken(aConnector, lToken);
+      aResponse.rejectMessage();
+      return;
+    }
+  }
 
-	/**
-	 *
-	 * @param aResponse
-	 * @param aSource
-	 * @param aTarget
-	 * @param aToken
-	 */
-	@Override
-	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource,
-			WebSocketConnector aTarget, Token aToken) {
-		if (log.isDebugEnabled()) {
-			log.debug("Checking outgoing token from "
-					+ (aSource != null ? aSource.getId() : "[not given]")
-					+ " to "
-					+ (aTarget != null ? aTarget.getId() : "[not given]")
-					+ ": " + aToken.toString() + "...");
-		}
-	}
+  /**
+   * 
+   * @param aResponse
+   * @param aSource
+   * @param aTarget
+   * @param aToken
+   */
+  @Override
+  public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+    if (log.isDebugEnabled()) {
+      log.debug("Checking outgoing token from " + (aSource != null ? aSource.getId() : "[not given]") + " to " + (aTarget != null ? aTarget.getId() : "[not given]") + ": " + aToken.toString() + "...");
+    }
+  }
 }
-

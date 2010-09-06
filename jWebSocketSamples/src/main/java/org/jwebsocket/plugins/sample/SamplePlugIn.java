@@ -22,6 +22,7 @@ import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketServerConstants;
@@ -43,15 +44,17 @@ public class SamplePlugIn extends TokenPlugIn {
 	private final static String NS_SAMPLE = JWebSocketServerConstants.NS_BASE + ".plugins.samples";
 	private final static String SAMPLE_VAR = NS_SAMPLE + ".started";
 
-	/**
-	 *
-	 */
 	public SamplePlugIn() {
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating sample plug-in...");
-		}
-		// specify default name space for sample plugin
-		this.setNamespace(NS_SAMPLE);
+	  this(null);
+	}
+	
+	public SamplePlugIn(PluginConfiguration configuration) {
+	  super(configuration);
+	  if (mLog.isDebugEnabled()) {
+	    mLog.debug("Instantiating sample plug-in...");
+	   }
+	   // specify default name space for sample plugin
+	   this.setNamespace(NS_SAMPLE);
 	}
 
 	@Override
