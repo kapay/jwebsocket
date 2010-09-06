@@ -1,23 +1,24 @@
-//	---------------------------------------------------------------------------
-//	jWebSocket - Copyright (c) 2010 jwebsocket.org
-//	---------------------------------------------------------------------------
-//	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU Lesser General Public License as published by the
-//	Free Software Foundation; either version 3 of the License, or (at your
-//	option) any later version.
-//	This program is distributed in the hope that it will be useful, but WITHOUT
-//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-//	more details.
-//	You should have received a copy of the GNU Lesser General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
-//	---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// jWebSocket - Copyright (c) 2010 jwebsocket.org
+// ---------------------------------------------------------------------------
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU Lesser General Public License as published by the
+// Free Software Foundation; either version 3 of the License, or (at your
+// option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+// more details.
+// You should have received a copy of the GNU Lesser General Public License along
+// with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+// ---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jwebsocket.api.FilterConfiguration;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
@@ -27,7 +28,7 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  * @version $Id: FilterConfig.java 596 2010-06-22 17:09:54Z fivefeetfurther $
  * 
  */
-public final class FilterConfig implements Config {
+public final class FilterConfig implements Config, FilterConfiguration {
 	private final String id;
 	private final String name;
 	private final String jar;
@@ -117,6 +118,11 @@ public final class FilterConfig implements Config {
 		throw new WebSocketRuntimeException(
 				"Missing one of the filter configuration, please check your configuration file");
 	}
+
+  @Override
+  public String getPackageName() {
+    return packageName;
+  }
 
 }
 
