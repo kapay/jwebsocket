@@ -28,28 +28,22 @@ import java.net.URLClassLoader;
  */
 public class JWebSocketJarClassLoader extends URLClassLoader {
 
-	/**
-	 * constructor
-	 */
-	public JWebSocketJarClassLoader() {
-		super(new URL[]{});
-	}
+  /**
+   * constructor
+   */
+  public JWebSocketJarClassLoader() {
+    super(new URL[] {});
+  }
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @param path
-	 * @throws MalformedURLException
-	 */
-	public void addFile(String aPath) throws MalformedURLException {
-		// fixed by Alex 2010-06-07 to allow class loading from any .jar
-		// file at run-time w/o manipulating the manifest or classpath.
-		File file = new File(aPath);
-		URL url = file.toURI().toURL();
-		addURL(url);
-		/*
-		String urlPath = "jar:file://" + path + "!/";
-		addURL(new URL(urlPath));
-		 */
-	}
+  /**
+   * {@inheritDoc}
+   * 
+   * @param path
+   * @throws MalformedURLException
+   */
+  public void addFile(String aPath) throws MalformedURLException {
+    File file = new File(aPath);
+    URL url = file.toURI().toURL();
+    addURL(url);
+  }
 }

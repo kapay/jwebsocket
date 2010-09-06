@@ -16,6 +16,7 @@
 package org.jwebsocket.filters.custom;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.FilterConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.filter.TokenFilter;
 import org.jwebsocket.kit.FilterResponse;
@@ -23,27 +24,25 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * 
  * @author aschulze
  */
 public class CustomTokenFilter extends TokenFilter {
 
-	private static Logger log = Logging.getLogger(CustomTokenFilter.class);
+  private static Logger log = Logging.getLogger(CustomTokenFilter.class);
 
-	public CustomTokenFilter(String aId) {
-		super(aId);
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating custom token filter...");
-		}
-	}
+  public CustomTokenFilter(FilterConfiguration configuration) {
+    super(configuration);
+    if (log.isDebugEnabled()) {
+      log.debug("Instantiating custom token filter...");
+    }
+  }
 
-	@Override
-	public void processTokenIn(FilterResponse aResponse,
-			WebSocketConnector aConnector, Token aToken) {
-	}
+  @Override
+  public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+  }
 
-	@Override
-	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource,
-			WebSocketConnector aTarget, Token aToken) {
-	}
+  @Override
+  public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+  }
 }

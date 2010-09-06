@@ -25,6 +25,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketServerConstants;
@@ -54,15 +55,17 @@ public class FileSystemPlugIn extends TokenPlugIn {
 	private static String PUBLIC_DIR_DEF = "%JWEBSOCKET_HOME%/public/";
 	private static String WEB_ROOT_DEF = "http://jwebsocket.org/";
 
-	/**
-	 *
-	 */
 	public FileSystemPlugIn() {
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating file system plug-in...");
-		}
-		// specify default name space for admin plugin
-		this.setNamespace(NS_FILESYSTEM);
+	  this(null);
+	}
+	
+	public FileSystemPlugIn(PluginConfiguration configuration) {
+	  super(configuration);
+	  if (log.isDebugEnabled()) {
+	    log.debug("Instantiating file system plug-in...");
+	   }
+	   // specify default name space for admin plugin
+	   this.setNamespace(NS_FILESYSTEM);
 	}
 
 	@Override

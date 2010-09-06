@@ -15,54 +15,51 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.filter;
 
-import org.apache.log4j.Logger;
-import org.jwebsocket.kit.FilterResponse;
+import org.jwebsocket.api.FilterConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.logging.Logging;
+import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * 
  * @author aschulze
  */
 public class TokenFilter extends BaseFilter {
+  
+  public TokenFilter(String theId) {
+    super(theId);
+  }
 
-	private static Logger log = Logging.getLogger(TokenFilter.class);
+  public TokenFilter(FilterConfiguration configuration) {
+    super(configuration);
+  }
 
-	public TokenFilter(String aId) {
-		super(aId);
-	}
+  @Override
+  public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aPacket) {
+  }
 
-	@Override
-	public void processPacketIn(FilterResponse aResponse,
-			WebSocketConnector aConnector, WebSocketPacket aPacket) {
-	}
+  @Override
+  public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket) {
+  }
 
-	@Override
-	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource,
-			WebSocketConnector aTarget, WebSocketPacket aPacket) {
-	}
+  public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+  }
 
-	public void processTokenIn(FilterResponse aResponse,
-			WebSocketConnector aConnector, Token aToken) {
-	}
+  public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+  }
 
-	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource,
-			WebSocketConnector aTarget, Token aToken) {
-	}
-
-	/**
-	 *
-	 * @return
-	 */
-	public TokenServer getServer() {
-		TokenServer lServer = null;
-		TokenFilterChain filterChain = (TokenFilterChain) getFilterChain();
-		if (filterChain != null) {
-			lServer = (TokenServer) filterChain.getServer();
-		}
-		return lServer;
-	}
+  /**
+   * 
+   * @return
+   */
+  public TokenServer getServer() {
+    TokenServer lServer = null;
+    TokenFilterChain filterChain = (TokenFilterChain) getFilterChain();
+    if (filterChain != null) {
+      lServer = (TokenServer) filterChain.getServer();
+    }
+    return lServer;
+  }
 }

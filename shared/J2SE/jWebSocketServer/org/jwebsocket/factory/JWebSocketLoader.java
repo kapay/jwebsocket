@@ -17,8 +17,6 @@ package org.jwebsocket.factory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -47,8 +45,7 @@ public final class JWebSocketLoader {
    * Initialize the jWebSocket Server system
    * 
    * @return the initializer object
-   * @throws WebSocketException
-   *           if there's an exception while initialization
+   * @throws WebSocketException if there's an exception while initialization
    */
   public final WebSocketInitializer initialize() throws WebSocketException {
     String lConfigPath = JWebSocketConfig.getConfigurationPath();
@@ -61,58 +58,7 @@ public final class JWebSocketLoader {
 
     // initialize security by using config settings
     SecurityFactory.initFromConfig(lConfig);
-
-    WebSocketInitializer lInitializer = getInitializer(lConfig);
-    if (lInitializer == null) {
-      lInitializer = JWebSocketXmlConfigInitializer.getInitializer(lConfig);
-    }
-    return lInitializer;
-  }
-
-  /**
-   * Returns the appropriate {@code WebSocketInitializer} implementation
-   * 
-   * @param aConfig
-   *          the config object
-   * @return the {@code WebSocketInitializer} object
-   */
-  private WebSocketInitializer getInitializer(JWebSocketConfig aConfig) {
-    WebSocketInitializer lInitializer = null;
-    // if we are in development mode load the initializer class
-    if ("dev".equals(aConfig.getInstallation())) {
-      lInitializer = instantiateInitializer(aConfig);
-      // if we are in production mode use the
-      // JWebSocketXmlConfigInitializer class
-    } else if ("prod".equals(aConfig.getInstallation())) {
-      lInitializer = JWebSocketXmlConfigInitializer.getInitializer(aConfig);
-    } else {
-      // ignore
-    }
-    return lInitializer;
-  }
-
-  /**
-   * Instantiate the initializer custom initializer class if there's any
-   * configured via xml configuration, otherwise return the default
-   * {@code JWebSocketInitializer} class that initialize all the default engine,
-   * plugins and servers.
-   * 
-   * @param aInitializerClass
-   *          the class name to instantiate
-   * @return the instantiated initializer object
-   */
-  @SuppressWarnings("unchecked")
-  private WebSocketInitializer instantiateInitializer(JWebSocketConfig jWebSocketConfig) {
-    WebSocketInitializer lInitializer = null;
-    try {
-      Class<WebSocketInitializer> initializerClass = (Class<WebSocketInitializer>) Class.forName(jWebSocketConfig.getInitializer());
-      Constructor<WebSocketInitializer> constructor;
-      constructor = initializerClass.getDeclaredConstructor(JWebSocketConfig.class);
-      constructor.setAccessible(true);
-      lInitializer = constructor.newInstance(jWebSocketConfig);
-    } catch (Exception ex) {
-      System.err.println("ERROR:Error Initializing initializer class " + ex.getMessage());
-    }
+    WebSocketInitializer lInitializer = JWebSocketXmlConfigInitializer.getInitializer(lConfig);
     return lInitializer;
   }
 
@@ -120,11 +66,9 @@ public final class JWebSocketLoader {
    * Load all the configurations based on jWebSocket.xml file at the given
    * <tt>configFilePath</tt> location.
    * 
-   * @param aConfigFilePath
-   *          the path to jWebSocket.xml file
+   * @param aConfigFilePath the path to jWebSocket.xml file
    * @return the web socket config object with all the configuration
-   * @throws WebSocketException
-   *           if there's any while loading configuration
+   * @throws WebSocketException if there's any while loading configuration
    */
   private JWebSocketConfig loadConfiguration(final String aConfigFilePath) throws WebSocketException {
     JWebSocketConfig lConfig = null;

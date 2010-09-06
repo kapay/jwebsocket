@@ -25,6 +25,7 @@ import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
@@ -35,170 +36,140 @@ import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
- *
+ * 
  * @author aschulze
  */
 public class JDBCPlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(JDBCPlugIn.class);
-	// if namespace changed update client plug-in accordingly!
-	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
+  private static Logger mLog = Logging.getLogger(JDBCPlugIn.class);
+  // if namespace changed update client plug-in accordingly!
+  private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
 
-	/**
-	 *
-	 */
-	public JDBCPlugIn() {
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating JDBC plug-in...");
-		}
-		// specify default name space for admin plugin
-		this.setNamespace(NS_JDBC);
-	}
+  public JDBCPlugIn() {
+    super(null);
+  }
+  
+  public JDBCPlugIn(PluginConfiguration configuration) {
+    super(configuration);
+    if (mLog.isDebugEnabled()) {
+      mLog.debug("Instantiating JDBC plug-in...");
+    }
+    // specify default name space for admin plugin
+    this.setNamespace(NS_JDBC);
+  }
 
-	@Override
-	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-		String lType = aToken.getType();
-		String lNS = aToken.getNS();
+  @Override
+  public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+    String lType = aToken.getType();
+    String lNS = aToken.getNS();
 
-		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
-			// select from database
-			if (lType.equals("select")) {
-				select(aConnector, aToken);
-			}
-		}
-	}
+    if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+      // select from database
+      if (lType.equals("select")) {
+        select(aConnector, aToken);
+      }
+    }
+  }
 
-	public List getResultColumns(ResultSet aResultSet, int aColCount) {
-		// String blobStr = null;
+  public List<Object> getResultColumns(ResultSet aResultSet, int aColCount) {
+    // TODO: should work with usual arrays!
+    List<Object> lDataRow = new FastList<Object>();
+    Object lObj = null;
 
-		// TODO: should work with usual arrays!
-		List lDataRow = new FastList();
-		Object lObj = null;
+    try {
+      for (int i = 1; i <= aColCount; i++) {
+        lObj = aResultSet.getObject(i);
+        lDataRow.add(lObj);
+      }
 
-		try {
-			for (int i = 1; i <= aColCount; i++) {
-				lObj = aResultSet.getObject(i);
-				lDataRow.add(lObj);
-				/*
-				if (obj == null) {
-				// nothing todo
-				} else if (obj instanceof byte[]) {
-				blobStr = new String((byte[]) obj);
-				lDataRow.append(Tools.stringToJSON(blobStr));
+    } catch (Exception ex) {
+      System.out.println("EXCEPTION in getResultColumns");
+    }
 
-				} else if (obj instanceof java.sql.Date) {
-				lDataRow.append(
-				Tools.javaSqlDateToString((java.sql.Date) obj));
+    return lDataRow;
+  }
 
-				} else if (obj instanceof java.sql.Timestamp) {
-				lDataRow.append(
-				Tools.javaSqlTimestampToString(((java.sql.Timestamp) obj)));
+  /**
+   * shutdown server
+   * 
+   * @param aConnector
+   * @param aToken
+   */
+  public void select(WebSocketConnector aConnector, Token aToken) {
+    TokenServer lServer = getServer();
 
-				} else if (obj instanceof String) {
-				lDataRow.append(Tools.stringToJSON((String) obj));
+    if (mLog.isDebugEnabled()) {
+      mLog.debug("Processing 'select'...");
+    }
 
-				} else {
-				lDataRow.append(obj.toString());
-				}
+    // check if user is allowed to run 'select' command
+    if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
+      lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+      // return;
+    }
 
-				if (i < aColCount) {
-				lDataRow.append(Config.SIMPLE_RSP_FLD_SEP);
-				}
-				 */
-			}
+    // obtain required parameters for query
+    String lTable = aToken.getString("table");
+    String lFields = aToken.getString("fields");
+    String lOrder = aToken.getString("order");
+    String lWhere = aToken.getString("where");
+    String lGroup = aToken.getString("group");
+    String lHaving = aToken.getString("having");
 
-		} catch (Exception ex) {
-			System.out.println("EXCEPTION in getResultColumns");
-		}
+    // buld SQL string
+    String lSQL = "select " + lFields + " from " + lTable;
+    if (lWhere != null && lWhere.length() > 0) {
+      lSQL += " where " + lWhere;
+    }
+    if (lOrder != null && lOrder.length() > 0) {
+      lSQL += " order by " + lOrder;
+    }
 
-		return lDataRow;
-	}
+    // instantiate response token
+    Token lResponse = lServer.createResponse(aToken);
+    // TODO: should work with usual arrays as well!
+    // Object[] lColumns = null;
+    int lRowCount = 0;
+    int lColCount = 0;
+    List<Map> lColumns = new FastList<Map>();
+    List lData = new FastList<Map>();
+    try {
+      DBQueryResult lRes = DBConnectSingleton.querySQL(DBConnectSingleton.USR_SYSTEM, lSQL);
 
-	/**
-	 * shutdown server
-	 * @param aConnector
-	 * @param aToken
-	 */
-	public void select(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
+      // TODO: metadata should be optional to save bandwidth!
+      // generate the meta data for the response
+      lColCount = lRes.metaData.getColumnCount();
+      lResponse.setInteger("colcount", lColCount);
 
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'select'...");
-		}
+      for (int i = 1; i <= lColCount; i++) {
+        // get name of colmuns
+        String lSimpleClass = JDBCTools.extractSimpleClass(lRes.metaData.getColumnClassName(i));
+        // convert to json type
+        String lRIAType = JDBCTools.getJSONType(lSimpleClass, lRes.metaData);
 
-		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
-		}
+        Map lColHeader = new FastMap<String, Object>();
+        lColHeader.put("name", lRes.metaData.getColumnName(i));
+        lColHeader.put("jsontype", lRIAType);
+        lColHeader.put("jdbctype", lRes.metaData.getColumnTypeName(i));
 
-		// obtain required parameters for query
-		String lTable = aToken.getString("table");
-		String lFields = aToken.getString("fields");
-		String lOrder = aToken.getString("order");
-		String lWhere = aToken.getString("where");
-		String lGroup = aToken.getString("group");
-		String lHaving = aToken.getString("having");
+        lColumns.add(lColHeader);
+      }
 
-		// buld SQL string
-		String lSQL =
-				"select "
-				+ lFields
-				+ " from "
-				+ lTable;
-		if (lWhere != null && lWhere.length() > 0) {
-			lSQL += " where " + lWhere;
-		}
-		if (lOrder != null && lOrder.length() > 0) {
-			lSQL += " order by " + lOrder;
-		}
+      // generate the result data
+      while (lRes.resultSet.next()) {
+        lData.add(getResultColumns(lRes.resultSet, lColCount));
+        lRowCount++;
+      }
+    } catch (Exception ex) {
+      mLog.error(ex.getClass().getSimpleName() + " on query: " + ex.getMessage());
+    }
 
-		// instantiate response token
-		Token lResponse = lServer.createResponse(aToken);
-		// TODO: should work with usual arrays as well!
-		// Object[] lColumns = null;
-		int lRowCount = 0;
-		int lColCount = 0;
-		List<Map> lColumns = new FastList<Map>();
-		List lData = new FastList<Map>();
-		try {
-			DBQueryResult lRes = DBConnectSingleton.querySQL(DBConnectSingleton.USR_SYSTEM, lSQL);
+    // complete the response token
+    lResponse.setInteger("rowcount", lRowCount);
+    lResponse.setList("columns", lColumns);
+    lResponse.setList("data", lData);
 
-			// TODO: metadata should be optional to save bandwidth!
-			// generate the meta data for the response
-			lColCount = lRes.metaData.getColumnCount();
-			lResponse.setInteger("colcount", lColCount);
-
-			for (int i = 1; i <= lColCount; i++) {
-				// get name of colmuns
-				String lSimpleClass = JDBCTools.extractSimpleClass(
-						lRes.metaData.getColumnClassName(i));
-				// convert to json type
-				String lRIAType = JDBCTools.getJSONType(lSimpleClass, lRes.metaData);
-
-				Map lColHeader = new FastMap<String, Object>();
-				lColHeader.put("name", lRes.metaData.getColumnName(i));
-				lColHeader.put("jsontype", lRIAType);
-				lColHeader.put("jdbctype", lRes.metaData.getColumnTypeName(i));
-
-				lColumns.add(lColHeader);
-			}
-
-			// generate the result data
-			while (lRes.resultSet.next()) {
-				lData.add(getResultColumns(lRes.resultSet, lColCount));
-				lRowCount++;
-			}
-		} catch (Exception ex) {
-			mLog.error(ex.getClass().getSimpleName() + " on query: " + ex.getMessage());
-		}
-
-		// complete the response token
-		lResponse.setInteger("rowcount", lRowCount);
-		lResponse.setList("columns", lColumns);
-		lResponse.setList("data", lData);
-
-		// send response to requester
-		lServer.sendToken(aConnector, lResponse);
-	}
+    // send response to requester
+    lServer.sendToken(aConnector, lResponse);
+  }
 }
