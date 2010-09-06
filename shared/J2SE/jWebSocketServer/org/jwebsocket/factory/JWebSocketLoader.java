@@ -110,24 +110,8 @@ public final class JWebSocketLoader {
       constructor = initializerClass.getDeclaredConstructor(JWebSocketConfig.class);
       constructor.setAccessible(true);
       lInitializer = constructor.newInstance(jWebSocketConfig);
-    } catch (ClassNotFoundException ex) {
+    } catch (Exception ex) {
       System.err.println("ERROR:Error Initializing initializer class " + ex.getMessage());
-      ex.printStackTrace();
-    } catch (InstantiationException ex) {
-      System.err.println("ERROR:Error Initializing initializer class " + ex.getMessage());
-      ex.printStackTrace();
-    } catch (IllegalAccessException ex) {
-      System.err.println("ERROR:Error Initializing initializer class " + ex.getMessage());
-      ex.printStackTrace();
-    } catch (InvocationTargetException ex) {
-      System.err.println("ERROR:Error Initializing initializer class " + ex.getMessage());
-      ex.printStackTrace();
-    } catch (SecurityException ex) {
-      System.err.println("ERROR:Error Initializing initializer class " + ex.getMessage());
-      ex.printStackTrace();
-    } catch (NoSuchMethodException ex) {
-      System.err.println("ERROR:Error Initializing initializer class " + ex.getMessage());
-      ex.printStackTrace();
     }
     return lInitializer;
   }
