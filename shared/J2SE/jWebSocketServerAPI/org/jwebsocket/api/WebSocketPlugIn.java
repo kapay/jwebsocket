@@ -69,6 +69,12 @@ public interface WebSocketPlugIn {
 	WebSocketPlugInChain getPlugInChain();
 	
 	/**
+	 * Set the plugin configuration
+	 * @param configuration the plugin configuration object to set
+	 */
+	void setPluginConfiguration(PluginConfiguration configuration);
+	
+	/**
 	 * Returns the plugin configuration object based on the configuration file values 
 	 * @return the plugin configuration object
 	 */

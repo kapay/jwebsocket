@@ -202,4 +202,8 @@ public interface WebSocketServer {
 	Map<String, WebSocketConnector> selectConnectors(Map<String, Object> aFilter);
 
 	Map<String, WebSocketConnector> getAllConnectors();
+	
+	void setServerConfiguration(ServerConfiguration configuration);
+	
+	ServerConfiguration getServerConfiguration();
 }

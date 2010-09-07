@@ -53,7 +53,15 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
   public BasePlugIn(PluginConfiguration configuration) {
     this.configuration = configuration;
   }
-
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void setPluginConfiguration(PluginConfiguration theConfiguration) {
+    this.configuration = theConfiguration;
+  }
+ 
   /**
    * {@inheritDoc}
    */

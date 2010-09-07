@@ -222,10 +222,16 @@ public interface WebSocketEngine {
 	 */
 	@Deprecated
 	int getMaxFrameSize();
+	
+	/**
+	 * @param configuration the engine configuration to set
+	 */
+	void setEngineConfiguration(EngineConfiguration configuration);
 
 	/**
 	 * Returns the configuration for the engine.
 	 * @return the engine configuration object
 	 */
 	EngineConfiguration getConfiguration();
+	
 }

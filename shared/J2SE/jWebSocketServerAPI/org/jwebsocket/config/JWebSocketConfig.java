@@ -16,19 +16,26 @@ package org.jwebsocket.config;
 
 import static org.jwebsocket.config.JWebSocketCommonConstants.DEFAULT_PROTOCOL;
 import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
+import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATION;
 import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
 import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_XML;
-import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATION;
+import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_OVERRIDE_XML;
 
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
-import org.jwebsocket.config.xml.*;
-import org.jwebsocket.kit.WebSocketRuntimeException;
-
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.log4j.Logger;
+import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.config.xml.FilterConfig;
+import org.jwebsocket.config.xml.PluginConfig;
+import org.jwebsocket.config.xml.RightConfig;
+import org.jwebsocket.config.xml.RoleConfig;
+import org.jwebsocket.config.xml.ServerConfig;
+import org.jwebsocket.config.xml.UserConfig;
+import org.jwebsocket.kit.WebSocketRuntimeException;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -57,7 +64,7 @@ public final class JWebSocketConfig implements Config {
   private final List<RightConfig> mGlobalRights;
   private final List<RoleConfig> mGlobalRoles;
   private static JWebSocketConfig mConfig = null;
-
+  
   /**
    * @return the installation
    */
@@ -345,12 +352,6 @@ public final class JWebSocketConfig implements Config {
     // finally try to find config file at %CLASSPATH%/conf/
     URL lURL = Thread.currentThread().getContextClassLoader().getResource("conf/" + JWEBSOCKET_XML);
     if (lURL != null) {
-      /*
-       * lWebSocketXML = lURL.getFile();
-       * System.out.println("WebSocketXML - Filename: " + lWebSocketXML); lFile
-       * = new File(lWebSocketXML); if (lFile.exists()) { return lWebSocketXML;
-       * }
-       */
       try {
         URI lFilename = lURL.toURI();
         // System.out.println("URI Filename: " + lFilename);
@@ -361,11 +362,23 @@ public final class JWebSocketConfig implements Config {
         }
       } catch (Exception ex) {
         // TODO: log exception
-        // System.out.println(ex.getClass().getSimpleName() + ": " +
-        // ex.getMessage());
       }
     }
-
+    
+    URL overrideUrl = Thread.currentThread().getContextClassLoader().getResource(JWEBSOCKET_OVERRIDE_XML);
+    if (overrideUrl == null) {
+      return null;
+    }
+    try {
+      // System.out.println("URI Filename: " + lFilename);
+      lFile = new File(overrideUrl.getFile());
+      if (lFile.exists()) {
+        lWebSocketXML = lFile.getPath();
+        return lWebSocketXML;
+      }
+    } catch (Exception ex) {
+      // TODO: log exception
+    }
     return null;
   }
 
