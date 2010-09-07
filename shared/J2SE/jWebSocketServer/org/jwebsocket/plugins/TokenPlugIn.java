@@ -100,13 +100,7 @@ public class TokenPlugIn extends BasePlugIn {
    */
   @Override
   public TokenServer getServer() {
-    // TODO: obtaining server for a plug-in probably can be improved
     return (TokenServer) super.getServer();
-    /*
-     * TokenServer lServer = TokenPlugInChain plugInChain = (TokenPlugInChain)
-     * getPlugInChain(); if (plugInChain != null) { lServer = (TokenServer)
-     * plugInChain.getServer(); } return lServer;
-     */
   }
 
   /**
@@ -155,20 +149,6 @@ public class TokenPlugIn extends BasePlugIn {
       lServer.sendToken(aSource, aTarget, aToken);
     }
   }
-
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>sendToken</tt> to simplify token plug-in code.
-   * 
-   * @param aSource
-   * @param aTarget
-   * @param aToken
-   */
-  /*
-   * public void sendToken(WebSocketConnector aTarget, Token aToken) {
-   * TokenServer lServer = getServer(); if (lServer != null) {
-   * lServer.sendToken(aTarget, aToken); } }
-   */
   /**
    * Convenience method, just a wrapper for token server method
    * <tt>sendToken</tt> to simplify token plug-in code.

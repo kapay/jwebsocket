@@ -92,8 +92,13 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
       // if class found try to create an instance
       if (lEngineClass != null) {
         Constructor<WebSocketEngine> ctor = lEngineClass.getDeclaredConstructor(EngineConfiguration.class);
-        ctor.setAccessible(true);
-        newEngine = ctor.newInstance(new Object[] { engineConfig });
+        if (ctor != null) {
+          ctor.setAccessible(true);
+          newEngine = ctor.newInstance(new Object[] { engineConfig });
+        } else {
+          newEngine = lEngineClass.newInstance();
+          newEngine.setEngineConfiguration(engineConfig);
+        }
         if (mLog.isDebugEnabled()) {
           mLog.debug("Engine '" + engineConfig.getId() + "' successfully instantiated.");
         }
@@ -138,8 +143,13 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
         // if class found try to create an instance
         if (lServerClass != null) {
           Constructor<WebSocketServer> ctor = lServerClass.getDeclaredConstructor(ServerConfiguration.class);
-          ctor.setAccessible(true);
-          lServer = ctor.newInstance(new Object[] { lServerConfig });
+          if (ctor != null) {
+            ctor.setAccessible(true);
+            lServer = ctor.newInstance(new Object[] { lServerConfig });
+          } else {
+            lServer = lServerClass.newInstance();
+            lServer.setServerConfiguration(lServerConfig);
+          }
           if (mLog.isDebugEnabled()) {
             mLog.debug("Server '" + lServerConfig.getId() + "' successfully instantiated.");
           }
@@ -188,9 +198,15 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
         }
         // if class found try to create an instance
         if (lPluginClass != null) {
+          WebSocketPlugIn lPlugIn = null;
           Constructor<WebSocketPlugIn> pluginConstructor = lPluginClass.getConstructor(PluginConfiguration.class);
-          pluginConstructor.setAccessible(true);
-          WebSocketPlugIn lPlugIn = pluginConstructor.newInstance(pluginConfig);
+          if (pluginConstructor != null) {
+            pluginConstructor.setAccessible(true);
+            lPlugIn = pluginConstructor.newInstance(pluginConfig);
+          } else {
+            lPlugIn = lPluginClass.newInstance();
+            lPlugIn.setPluginConfiguration(pluginConfig);
+          }
           lPlugIn.addAllSettings(pluginConfig.getSettings());
           if (mLog.isDebugEnabled()) {
             mLog.debug("Plug-in '" + pluginConfig.getId() + "' successfully instantiated.");
