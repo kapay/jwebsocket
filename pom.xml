@@ -66,7 +66,7 @@
         <repository>
             <uniqueVersion>false</uniqueVersion>
             <id>googlecode</id>
-            <url>svn:https://jwebsocket.googlecode.com/svn/repo</url>
+            <url>svn:https://jwebsocket.googlecode.com/svn/repo/${project.version}</url>
         </repository>
     </distributionManagement>
 
