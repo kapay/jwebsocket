@@ -40,15 +40,18 @@ public final class JWebSocketLoader {
   // We cannot use the logging subsystem here because its config needs to be
   // loaded first!
   private JWebSocketConfigHandler mConfigHandler = new JWebSocketConfigHandler();
-
+  
   /**
    * Initialize the jWebSocket Server system
-   * 
+   * @param overrideConfigPath the overridden path to xml config file  
    * @return the initializer object
    * @throws WebSocketException if there's an exception while initialization
    */
-  public final WebSocketInitializer initialize() throws WebSocketException {
+  public final WebSocketInitializer initialize(String overrideConfigPath) throws WebSocketException {
     String lConfigPath = JWebSocketConfig.getConfigurationPath();
+    if (overrideConfigPath != null && !"".equals(overrideConfigPath)) {
+      lConfigPath = overrideConfigPath;
+    }
     if (lConfigPath == null) {
       throw new WebSocketException("Either JWEBSOCKET_HOME variable is not set" + 
           " or jWebSocket.xml file does neither exist at %JWEBSOCKET_HOME%/conf" + " nor at %CLASSPATH%/conf.");

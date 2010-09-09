@@ -31,13 +31,13 @@ public class JWebSocketFactory {
   private static WebSocketEngine mEngine = null;
   private static List<WebSocketServer> mServers = null;
 
-  public static void start() {
+  public static void start(String overrideConfigPath) {
 
     JWebSocketInstance.setStatus(JWebSocketInstance.STARTING);
 
     JWebSocketLoader loader = new JWebSocketLoader();
     try {
-      WebSocketInitializer lInitializer = loader.initialize();
+      WebSocketInitializer lInitializer = loader.initialize(overrideConfigPath);
       if (lInitializer == null) {
         JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
         return;

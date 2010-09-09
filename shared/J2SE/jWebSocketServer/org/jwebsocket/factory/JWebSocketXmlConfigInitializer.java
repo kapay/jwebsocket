@@ -177,7 +177,7 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
     for (ServerConfig lServerConfig : jWebSocketConfig.getServers()) {
       lPluginMap.put(lServerConfig.getId(), new FastList<WebSocketPlugIn>());
     }
-    // now initialize the plugin
+    // now initialize the plugins
     for (PluginConfig pluginConfig : jWebSocketConfig.getPlugins()) {
       try {
         Class<WebSocketPlugIn> lPluginClass = loadPluginFromClasspath(pluginConfig.getName());
