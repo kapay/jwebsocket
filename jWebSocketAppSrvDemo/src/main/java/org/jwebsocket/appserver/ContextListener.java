@@ -22,42 +22,28 @@ import org.jwebsocket.factory.JWebSocketFactory;
 
 /**
  * Web application life cycle listener.
+ * 
  * @author aschulze
  */
 public class ContextListener implements ServletContextListener {
 
-	/**
-	 * initializes the web application on startup.
-	 * @param sce
-	 */
-	@Override
-	public void contextInitialized(ServletContextEvent sce) {
-		// start the jWebSocket server sub system
-		JWebSocketFactory.start();
+  /**
+   * initializes the web application on startup.
+   * @param sce
+   */
+  @Override
+  public void contextInitialized(ServletContextEvent sce) {
+    // start the jWebSocket server sub system
+    JWebSocketFactory.start("");
+  }
 
-		/* Sample Plug-In gets loaded by jWebSocket.xml
-		 * If jWebSocket.xml is not used you can load it like this...
-		TokenServer lTS = (TokenServer)JWebSocketFactory.getServer("ts0");
-		if( lTS != null ) {
-			SamplePlugIn lSP = new SamplePlugIn();
-			lTS.getPlugInChain().addPlugIn(lSP);
-		}
-		 */
-
-		// ServletBridge.setServer(lTS);
-	}
-
-	/**
-	 * cleans up the web application on termination.
-	 * @param sce
-	 */
-	@Override
-	public void contextDestroyed(ServletContextEvent sce) {
-
-		// stop the jWebSocket server sub system
-		JWebSocketFactory.stop(
-		);
-
-	}
-
+  /**
+   * cleans up the web application on termination.
+   * @param sce
+   */
+  @Override
+  public void contextDestroyed(ServletContextEvent sce) {
+    // stop the jWebSocket server sub system
+    JWebSocketFactory.stop();
+  }
 }
