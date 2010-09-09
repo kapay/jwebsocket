@@ -19,7 +19,6 @@ import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
 import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATION;
 import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
 import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_XML;
-import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_OVERRIDE_XML;
 
 import java.io.File;
 import java.net.URI;
@@ -296,8 +295,13 @@ public final class JWebSocketConfig implements Config {
    */
   @Override
   public void validate() {
-    if ((mEngines == null || mEngines.isEmpty()) || (mServers == null || mServers.isEmpty()) || (mUsers == null || mUsers.isEmpty()) || (mPlugins == null || mPlugins.isEmpty())
-        || (mFilters == null || mFilters.isEmpty()) || (mLoggingConfig == null) || (mGlobalRights == null || mGlobalRights.isEmpty()) || (mGlobalRoles == null || mGlobalRoles.isEmpty())) {
+    if ((mEngines == null || mEngines.isEmpty()) 
+        || (mServers == null || mServers.isEmpty()) 
+        || (mUsers == null || mUsers.isEmpty()) 
+        || (mPlugins == null || mPlugins.isEmpty())
+        || (mFilters == null || mFilters.isEmpty()) 
+        || (mLoggingConfig == null) || (mGlobalRights == null || mGlobalRights.isEmpty()) 
+        || (mGlobalRoles == null || mGlobalRoles.isEmpty())) {
       throw new WebSocketRuntimeException("Missing one of the server configuration, please check your configuration file");
     }
   }
@@ -310,7 +314,6 @@ public final class JWebSocketConfig implements Config {
 
   /**
    * private method that checks the path of the jWebSocket.xml file
-   * 
    * @return the path to jWebSocket.xml
    */
   public static String getConfigurationPath() {
@@ -318,7 +321,6 @@ public final class JWebSocketConfig implements Config {
     String lWebSocketHome = null;
     String lFileSep = System.getProperty("file.separator");
     File lFile;
-
     // try to obtain JWEBSOCKET_HOME environment variable
     lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
     if (lWebSocketHome != null) {
@@ -333,7 +335,6 @@ public final class JWebSocketConfig implements Config {
         return lWebSocketXML;
       }
     }
-
     // try to obtain CATALINA_HOME environment variable
     lWebSocketHome = System.getenv(CATALINA_HOME);
     if (lWebSocketHome != null) {
@@ -348,36 +349,18 @@ public final class JWebSocketConfig implements Config {
         return lWebSocketXML;
       }
     }
-
     // finally try to find config file at %CLASSPATH%/conf/
     URL lURL = Thread.currentThread().getContextClassLoader().getResource("conf/" + JWEBSOCKET_XML);
     if (lURL != null) {
       try {
         URI lFilename = lURL.toURI();
-        // System.out.println("URI Filename: " + lFilename);
         lFile = new File(lFilename);
         if (lFile.exists()) {
           lWebSocketXML = lFile.getPath();
           return lWebSocketXML;
         }
       } catch (Exception ex) {
-        // TODO: log exception
       }
-    }
-    
-    URL overrideUrl = Thread.currentThread().getContextClassLoader().getResource(JWEBSOCKET_OVERRIDE_XML);
-    if (overrideUrl == null) {
-      return null;
-    }
-    try {
-      // System.out.println("URI Filename: " + lFilename);
-      lFile = new File(overrideUrl.getFile());
-      if (lFile.exists()) {
-        lWebSocketXML = lFile.getPath();
-        return lWebSocketXML;
-      }
-    } catch (Exception ex) {
-      // TODO: log exception
     }
     return null;
   }
