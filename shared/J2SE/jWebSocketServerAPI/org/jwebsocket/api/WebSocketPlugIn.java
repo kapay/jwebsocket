@@ -20,109 +20,115 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 
 /**
- *
+ * 
  * @author aschulze
  */
 public interface WebSocketPlugIn {
-	/**
-	 * is called by the server when the engine has been started.
-	 * @param aEngine
-	 */
-	void engineStarted(WebSocketEngine aEngine);
+  /**
+   * is called by the server when the engine has been started.
+   * 
+   * @param aEngine
+   */
+  void engineStarted(WebSocketEngine aEngine);
 
-	/**
-	 * is called by the server when the engine has been stopped.
-	 * @param aEngine
-	 */
-	void engineStopped(WebSocketEngine aEngine);
+  /**
+   * is called by the server when the engine has been stopped.
+   * 
+   * @param aEngine
+   */
+  void engineStopped(WebSocketEngine aEngine);
 
-	/**
+  /**
+   * 
+   * @param aConnector
+   */
+  void connectorStarted(WebSocketConnector aConnector);
+
+  /**
+   * 
+   * @param aResponse
+   * @param aConnector
+   * @param aDataPacket
+   */
+  void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
+
+  /**
+   * 
+   * @param aConnector
+   * @param aCloseReason
+   */
+  void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
+
+  /**
+   * 
+   * @param aPlugInChain
+   */
+  void setPlugInChain(WebSocketPlugInChain aPlugInChain);
+
+  /**
+   * @return the plugInChain
+   */
+  WebSocketPlugInChain getPlugInChain();
+
+  /**
+   * Set the plugin configuration
+   * 
+   * @param configuration
+   *          the plugin configuration object to set
+   */
+  void setPluginConfiguration(PluginConfiguration configuration);
+
+  /**
+   * Returns the plugin configuration object based on the configuration file
+   * values
+   * 
+   * @return the plugin configuration object
+   */
+  PluginConfiguration getPluginConfiguration();
+
+  /**
+   * 
+   * @param aKey
+   * @param aValue
+   */
+  void addSetting(String aKey, String aValue);
+
+  /**
+   * 
+   * 
+   * @param aSettings
+   */
+  void addAllSettings(Map<String, String> aSettings);
+
+  /**
+   * 
+   * @param aKey
+   */
+  void removeSetting(String aKey);
+
+  /**
 	 *
-	 * @param aConnector
 	 */
-	void connectorStarted(WebSocketConnector aConnector);
+  void clearSettings();
 
-	/**
-	 *
-	 * @param aResponse
-	 * @param aConnector
-	 * @param aDataPacket
-	 */
-	void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
+  /**
+   * 
+   * @param aKey
+   * @param aDefault
+   * @return
+   */
+  String getSetting(String aKey, String aDefault);
 
-	/**
-	 *
-	 * @param aConnector
-	 * @param aCloseReason
-	 */
-	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
+  /**
+   * 
+   * @param aKey
+   * @return
+   */
+  String getSetting(String aKey);
 
-	/**
-	 *
-	 * @param aPlugInChain
-	 */
-	void setPlugInChain(WebSocketPlugInChain aPlugInChain);
-
-	/**
-	 * @return the plugInChain
-	 */
-	WebSocketPlugInChain getPlugInChain();
-	
-	/**
-	 * Set the plugin configuration
-	 * @param configuration the plugin configuration object to set
-	 */
-	void setPluginConfiguration(PluginConfiguration configuration);
-	
-	/**
-	 * Returns the plugin configuration object based on the configuration file values 
-	 * @return the plugin configuration object
-	 */
-	PluginConfiguration getPluginConfiguration();
-
-	/**
-	 *
-	 * @param aKey
-	 * @param aValue
-	 */
-	void addSetting(String aKey, String aValue);
-
-	/**
-	 *
-	 *
-	 * @param aSettings
-	 */
-	void addAllSettings(Map<String, String> aSettings);
-
-	/**
-	 *
-	 * @param aKey
-	 */
-	void removeSetting(String aKey);
-
-	/**
-	 *
-	 */
-	void clearSettings();
-
-	/**
-	 *
-	 * @param aKey
-	 * @param aDefault
-	 * @return
-	 */
-	String getSetting(String aKey, String aDefault);
-
-	/**
-	 *
-	 * @param aKey
-	 * @return
-	 */
-	String getSetting(String aKey);
-
-	/**
-	 *
-	 * @return
-	 */
-	Map<String, String> getSettings();
+  /**
+   * 
+   * @return
+   */
+  Map<String, String> getSettings();
 }

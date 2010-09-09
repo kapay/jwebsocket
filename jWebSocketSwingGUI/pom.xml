@@ -18,14 +18,6 @@
 	</scm>
     
 	<build>
-<!--
-		<sourceDirectory>../shared/J2SE/jWebSocketSwingGUI</sourceDirectory>
-		<resources>
-			<resource>
-				<directory>../shared/J2SE/jWebSocketSwingGUI</directory>
-			</resource>
-		</resources>
--->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -48,7 +40,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketSwingGUI</reportOutputDirectory>
+					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs</reportOutputDirectory>
 					<stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css</stylesheetfile>
 				</configuration>
 			</plugin>

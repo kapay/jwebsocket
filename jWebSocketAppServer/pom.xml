@@ -20,7 +20,6 @@
 
 	<build>
 		<plugins>
-
 			<!-- create jWebSocket Web Application .war -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -33,18 +32,6 @@
 					<packagingExcludes>
 						**/*.jar
 					</packagingExcludes>
-
-					<!-- add your additional web resources here!
-					<webResources>
-            			<resource>
-              				<directory>../jWebSocketClient/web</directory>
-							<filtering>false</filtering>
-							<excludes>
-								<exclude>**/javadocs/**</exclude>
-							</excludes>
-            			</resource>
-          			</webResources>
-					-->
 				</configuration>
 			</plugin>
 
@@ -60,7 +47,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketAppServer</reportOutputDirectory>
+					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs</reportOutputDirectory>
 					<stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css</stylesheetfile>
 				</configuration>
 			</plugin>

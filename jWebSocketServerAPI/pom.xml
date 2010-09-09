@@ -19,13 +19,6 @@
 
 	<build>
 		<sourceDirectory>../shared/J2SE/jWebSocketServerAPI</sourceDirectory>
-<!--
-		<resources>
-			<resource>
-				<directory>../shared/J2SE/jWebSocketServerAPI</directory>
-			</resource>
-		</resources>
--->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -35,7 +28,6 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<!--<classpathPrefix>/svn/jWebSocket/trunk/jWebSocketRTE/jWebSocket-0.10/libs/</classpathPrefix>-->
 						</manifest>
 					</archive>
 				</configuration>
@@ -44,7 +36,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketServerAPI</reportOutputDirectory>
+					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs</reportOutputDirectory>
 					<stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css</stylesheetfile>
 				</configuration>
 			</plugin>

@@ -21,13 +21,6 @@
     <build>
 		<!-- use shared directory here, to share code across various platforms -->
 		<sourceDirectory>../shared/J2SE/jWebSocketCommon</sourceDirectory>
-<!--
-        <resources>
-            <resource>
-                <directory>../shared/J2SE/jWebSocketCommon</directory>
-            </resource>
-        </resources>
--->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -45,7 +38,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/jWebSocketCommon</reportOutputDirectory>
+                    <reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs</reportOutputDirectory>
                     <stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css</stylesheetfile>
                 </configuration>
             </plugin>
