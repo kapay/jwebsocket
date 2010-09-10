@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <docroot>
 <class ancestor="-" descr="Implements the basic &amp;quot;jws&amp;quot; name space for the jWebSocket client&#10;including various utility methods.&#10;" fullpath="jws" name="jws">
-<const descr="Base namespace&#10;" fullpath="jws.NS_BASE" name="NS_BASE" type="String" value="org.jWebSocket"/>
+<const descr="Base namespace&#10;" fullpath="jws.NS_BASE" name="NS_BASE" type="String" value="org.jwebsocket"/>
 <const descr="Current token id, incremented per token exchange to assign results.&#10;" fullpath="jws.CUR_TOKEN_ID" name="CUR_TOKEN_ID" type="Integer" value="0"/>
 <const descr="Current token id, incremented per token exchange to assign results.&#10;" fullpath="jws.JWS_SERVER_URL" name="JWS_SERVER_URL" type="String" value="ws"/>
 <method descr="Convenience replacement for [tt]document.getElementById()[/tt]. Returns the first HTML element with the given id or [tt]null[/tt] if the element could not be found.&#10;" fullpath="jws.$" name="$">
@@ -196,7 +196,7 @@
 </method>
 </class>
 <class ancestor="-" descr="Implementation of the [tt]jws.SystemClientPlugIn[/tt] class.&#10;" fullpath="jws.SystemClientPlugIn" name="SystemClientPlugIn">
-<const descr="Namespace for SystemClientPlugIn&#10;" fullpath="jws.SystemClientPlugIn.NS" name="NS" type="String" value="org.jWebSocket.plugins.system (jws.NS_BASE + &quot;.plugins.system&quot;)"/>
+<const descr="Namespace for SystemClientPlugIn&#10;" fullpath="jws.SystemClientPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.system (jws.NS_BASE + &quot;.plugins.system&quot;)"/>
 <const descr="For [tt]getClients[/tt] method&#10;: Returns all currently connected clients irrespective of their authentication state." fullpath="jws.SystemClientPlugIn.ALL_CLIENTS" name="ALL_CLIENTS" type="Number" value="0"/>
 <const descr="For [tt]getClients[/tt] method&#10;: Returns all authenticated clients only." fullpath="jws.SystemClientPlugIn.AUTHENTICATED" name="AUTHENTICATED" type="Number" value="1"/>
 <const descr="For [tt]getClients[/tt] method&#10;: Returns all non-authenticated clients only." fullpath="jws.SystemClientPlugIn.NON_AUTHENTICATED" name="NON_AUTHENTICATED" type="Number" value="2"/>
@@ -263,7 +263,7 @@
 </method>
 </class>
 <class ancestor="-" descr="Implementation of the [tt]jws.StreamingPlugIn[/tt] class. This plug-in provides the methods to register and unregister at certain stream sn the server.&#10;" fullpath="jws.StreamingPlugIn" name="StreamingPlugIn">
-<const descr="Namespace for the [tt]StreamingPlugIn[/tt] class.&#10;" fullpath="jws.StreamingPlugIn.NS" name="NS" type="String" value="org.jWebSocket.plugins.streaming (jws.NS_BASE + &quot;.plugins.streaming&quot;)"/>
+<const descr="Namespace for the [tt]StreamingPlugIn[/tt] class.&#10;" fullpath="jws.StreamingPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.streaming (jws.NS_BASE + &quot;.plugins.streaming&quot;)"/>
 <method descr="Registers the client at the given stream on the server. After this operation the client obtains all messages in this stream. Basically a client can register at multiple streams.&#10;If no stream with the given ID exists on the server an error token is returned. Depending on the type of the stream it may take more or less time until you get the first token from the stream.&#10;" fullpath="jws.StreamingPlugIn.registerStream" name="registerStream">
 <arg descr="The id of the server side data stream." field="aStream" object="" type="String"/>
 <result descr="none" field="" object="" type="void"/>
@@ -280,7 +280,7 @@
 </method>
 </class>
 <class ancestor="-" descr="Implementation of the [tt]jws.RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn" name="RPCClientPlugIn">
-<const descr="Namespace for the [tt]RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn.NS" name="NS" type="String" value="org.jWebSocket.plugins.rpc (jws.NS_BASE + &quot;.plugins.rpc&quot;)"/>
+<const descr="Namespace for the [tt]RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.rpc (jws.NS_BASE + &quot;.plugins.rpc&quot;)"/>
 <method descr="Processes an incoming token from the server or a remote client. Here the token is checked for type [tt]rrpc[/tt]. If such is detected it gets processed by the [tt]onRRPC[/tt] method of this class.&#10;" fullpath="jws.RPCClientPlugIn.processToken" name="processToken">
 <arg descr="Token received from the server or a remote client." field="aToken" object="" type="Object"/>
 <result descr="none" field="" object="" type="void"/>

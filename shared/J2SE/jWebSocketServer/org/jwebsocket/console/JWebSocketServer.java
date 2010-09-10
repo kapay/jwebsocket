@@ -28,50 +28,50 @@ import org.jwebsocket.server.TokenServer;
  */
 public class JWebSocketServer {
 
-  /**
-   * @param args the command line arguments
-   */
-  public static void main(String[] args) {
-    // the following 3 lines may not be removed due to GNU LGPL 3.0 license!
-    System.out.println("jWebSocket Ver. " + JWebSocketServerConstants.VERSION_STR + " (" + System.getProperty("sun.arch.data.model") + "bit)");
-    System.out.println(JWebSocketCommonConstants.COPYRIGHT);
-    System.out.println(JWebSocketCommonConstants.LICENSE);
-    System.out.println("Log files per default in jWebSocket.log if not overwritten in jWebSocket.xml.");
+	/**
+	 * @param args the command line arguments
+	 */
+	public static void main(String[] args) {
+		// the following 3 lines may not be removed due to GNU LGPL 3.0 license!
+		System.out.println("jWebSocket Ver. " + JWebSocketServerConstants.VERSION_STR + " (" + System.getProperty("sun.arch.data.model") + "bit)");
+		System.out.println(JWebSocketCommonConstants.COPYRIGHT);
+		System.out.println(JWebSocketCommonConstants.LICENSE);
+		System.out.println("Log files per default in jWebSocket.log if not overwritten in jWebSocket.xml.");
 
-    String overrideConfigPath = "";
-    if (args.length < 3) {
-      System.out.println("use [-config <path_to_config_file>] as command line arguments to override default jWebSocket.xml");
-    } else if (args.length == 2) {
-      if ("-config".equals(args[0])) {
-        overrideConfigPath = args[1];
-      }
-    }
+		String overrideConfigPath = "";
+		if (args.length < 3) {
+			System.out.println("use [-config <path_to_config_file>] as command line arguments to override default jWebSocket.xml");
+		} else if (args.length == 2) {
+			if ("-config".equals(args[0])) {
+				overrideConfigPath = args[1];
+			}
+		}
 
-    JWebSocketFactory.start(overrideConfigPath);
+		JWebSocketFactory.start(overrideConfigPath);
 
-    // get the token server
-    TokenServer lTS0 = (TokenServer) JWebSocketFactory.getServer("ts0");
-    if (lTS0 != null) {
-      // and add the sample listener to the server's listener chain
-      lTS0.addListener(new JWebSocketTokenListenerSample());
-    }
+		// get the token server
+		TokenServer lTS0 = (TokenServer) JWebSocketFactory.getServer("ts0");
+		if (lTS0 != null) {
+			// and add the sample listener to the server's listener chain
+			lTS0.addListener(new JWebSocketTokenListenerSample());
+		}
 
-    // get the custom server
-    CustomServer lCS0 = (CustomServer) JWebSocketFactory.getServer("cs0");
-    if (lCS0 != null) {
-      // and add the sample listener to the server's listener chain
-      lCS0.addListener(new JWebSocketCustomListenerSample());
-    }
+		// get the custom server
+		CustomServer lCS0 = (CustomServer) JWebSocketFactory.getServer("cs0");
+		if (lCS0 != null) {
+			// and add the sample listener to the server's listener chain
+			lCS0.addListener(new JWebSocketCustomListenerSample());
+		}
 
-    // remain here until shut down request
-    while (JWebSocketInstance.getStatus() != JWebSocketInstance.SHUTTING_DOWN) {
-      try {
-        Thread.sleep(250);
-      } catch (InterruptedException ex) {
-        // no handling required here
-      }
-    }
+		// remain here until shut down request
+		while (JWebSocketInstance.getStatus() != JWebSocketInstance.SHUTTING_DOWN) {
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException ex) {
+				// no handling required here
+			}
+		}
 
-    JWebSocketFactory.stop();
-  }
+		JWebSocketFactory.stop();
+	}
 }

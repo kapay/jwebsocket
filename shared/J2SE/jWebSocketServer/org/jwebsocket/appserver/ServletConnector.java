@@ -46,7 +46,7 @@ public class ServletConnector extends BaseConnector {
 		request = aRequest;
 		response = aResponse;
 		// TODO: Overhaul this hardcoded reference! See TokenServer class!
-		setBoolean("org.jWebSocket.tokenserver.isTS", true);
+		setBoolean("org.jwebsocket.tokenserver.isTS", true);
 		RequestHeader lHeader = new RequestHeader();
 		lHeader.put("prot", "json");
 		setHeader(lHeader);

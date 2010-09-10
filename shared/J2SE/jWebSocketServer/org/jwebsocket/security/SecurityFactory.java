@@ -54,8 +54,8 @@ public class SecurityFactory {
 		 */
 		mRights = new Rights();
 		// specify rights
-		Right lRPC = new Right("org.jWebSocket.plugins.rpc", "rpc", "Allow Remote Procedure Calls (RPC) to server");
-		Right lRRPC = new Right("org.jWebSocket.plugins.rpc", "rrpc", "Allow Reverse Remote Procedure Calls (RRPC) to other clients");
+		Right lRPC = new Right("org.jwebsocket.plugins.rpc", "rpc", "Allow Remote Procedure Calls (RPC) to server");
+		Right lRRPC = new Right("org.jwebsocket.plugins.rpc", "rrpc", "Allow Reverse Remote Procedure Calls (RRPC) to other clients");
 		mRights.addRight(lRPC);
 		mRights.addRight(lRRPC);
 

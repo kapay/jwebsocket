@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
-//	five-feet-further RIAServer-Framework - DBConnectSingleton.java
-//	Copyright (c) 2003-2009 Alexander Schulze, Innotrade GmbH
+//	jWebSocket - DBConnector
+//	Copyright (c) 2010 Innotrade GmbH (http://jWebSocket.org)
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -8,21 +8,10 @@
 //	option) any later version.
 //	This program is distributed in the hope that it will be useful, but WITHOUT
 //	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-//	more details.
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+//  for more details.
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
-//	---------------------------------------------------------------------------
-//	Dieses Programm ist freie Software. Sie können es unter den Bedingungen der
-//	GNU Lesser General Public License, wie von der Free Software Foundation
-//	veröffentlicht, weitergeben und/oder modifizieren, entweder gemäß Version 3
-//	der Lizenz oder (nach Ihrer Option) jeder späteren Version.
-//	Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen
-//	von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die
-//	implizite Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN
-//	BESTIMMTEN ZWECK. Details finden Sie in der GNU Lesser General Public License.
-//	Sie sollten ein Exemplar der GNU Lesser General Public License zusammen mit diesem
-//	Programm erhalten haben. Falls nicht, siehe <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.jdbc;
 
@@ -45,9 +34,9 @@ import org.apache.log4j.Logger;
  */
 public class DBConnectSingleton {
 
-	private static Logger log = Logging.getLogger(DBConnectSingleton.class);
-	private static Map connections = new FastMap();
-	public static String lastRecentException = null;
+	private static Logger mLog = Logging.getLogger(DBConnectSingleton.class);
+	private static Map mConnections = new FastMap();
+	private static String mLastRecentException = null;
 	/**
 	 * Name of the database user for system access
 	 * @since 1.0
@@ -63,9 +52,7 @@ public class DBConnectSingleton {
 	 * @since 1.0
 	 */
 	public final static String USR_DEMO = "DEMO";
-
 	// TODO: use plug-in settings for DB access here!
-
 	// DB_DRIVER
 	public static String DB_DRIVER = "com.mysql.jdbc.Driver";
 	public static String DB_URL = "jdbc:mysql://localhost:3306/ria-db";
@@ -103,39 +90,39 @@ public class DBConnectSingleton {
 			return null;
 		}
 
-		Connection lConnection = (Connection) connections.get(aUsr);
+		Connection lConnection = (Connection) mConnections.get(aUsr);
 
 		if (aAutoConnect) {
 			try {
-				// Prüfen, ob eine Verbindung besteht, und ggf. neu aufbauen.
+				// check if a connection already exists and re-connect if necessary
 				if (lConnection == null || lConnection.isClosed()) {
 					try {
-						if (log.isDebugEnabled()) {
-							log.debug("Verbindungsaufbau (" + aUsr + ") zur Datenbank...");
+						if (mLog.isDebugEnabled()) {
+							mLog.debug("Connecting '" + aUsr + "' to database...");
 						}
 						Class.forName(DB_DRIVER);
 						lConnection = DriverManager.getConnection(
 								DB_URL,
 								lUsername,
 								lPassword);
-						if (log.isInfoEnabled()) {
-							log.info("Verbindungsaufbau (" + aUsr + ") erfolgreich.");
+						if (mLog.isInfoEnabled()) {
+							mLog.info("'" + aUsr + "' successfully connected to database.");
 						}
-						connections.put(aUsr, lConnection);
+						mConnections.put(aUsr, lConnection);
 						return lConnection;
 					} catch (SQLException ex) {
-						lastRecentException =
-								ex.getClass().getName() + " "
-								+ "bei Verbindungsaufbau (" + aUsr + "), "
-								+ "Details: " + ex.getSQLState();
-						log.error(lastRecentException);
+						mLastRecentException =
+								ex.getClass().getSimpleName() + " "
+								+ " connecting '" + aUsr + "', to database"
+								+ " details: " + ex.getSQLState();
+						mLog.error(mLastRecentException);
 					}
 				}
 			} catch (Exception ex) {
-				lastRecentException =
-						ex.getClass().getName() + " "
-						+ "bei Connect zur Datenbank: " + ex.getMessage();
-				log.error(lastRecentException);
+				mLastRecentException =
+						ex.getClass().getSimpleName() + " "
+						+ " on database connection: " + ex.getMessage();
+				mLog.error(mLastRecentException);
 			}
 		}
 
@@ -159,26 +146,26 @@ public class DBConnectSingleton {
 	public static void closeConnection(String aUsr) {
 
 		try {
-			if (log.isDebugEnabled()) {
-				log.debug("Verbindung zur Datenbank (" + aUsr + ") wird getrennt...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Disconnecting '" + aUsr + "' from database...");
 			}
-			Connection lConnection = (Connection) connections.get(aUsr);
+			Connection lConnection = (Connection) mConnections.get(aUsr);
 
 			if (lConnection != null && !lConnection.isClosed()) {
 				lConnection.close();
-				if (log.isInfoEnabled()) {
-					log.info("Datenbankverbindung (" + aUsr + ") erfolgreich getrennt.");
+				if (mLog.isInfoEnabled()) {
+					mLog.info("'" + aUsr + "' successfully disconnected from database.");
 				}
 			} else {
-				if (log.isInfoEnabled()) {
-					log.info("Es besteht keine Verbindung (" + aUsr + ") zur Datenbank.");
+				if (mLog.isInfoEnabled()) {
+					mLog.info("'" + aUsr + "' not connected to database.");
 				}
 			}
 		} catch (SQLException ex) {
-			lastRecentException =
-					ex.getClass().getName() + " "
-					+ "bei Disconnect von Datenbank (" + aUsr + "): " + ex.getMessage();
-			log.error(lastRecentException);
+			mLastRecentException =
+					ex.getClass().getName()
+					+ " disconnecting '" + aUsr + "' from database, details: " + ex.getMessage();
+			mLog.error(mLastRecentException);
 		}
 	}
 
@@ -246,9 +233,9 @@ public class DBConnectSingleton {
 				aQueryRes.sql.close();
 			}
 		} catch (Exception ex) {
-			log.error(
-					ex.getClass().getName()
-					+ " beim Schließen einer Query : " + ex.getMessage());
+			mLog.error(
+					ex.getClass().getSimpleName()
+					+ " closing query : " + ex.getMessage());
 		}
 	}
 }

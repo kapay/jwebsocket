@@ -31,114 +31,115 @@ import org.jwebsocket.logging.Logging;
  * @version $Id: AbstractJWebSocketInitializer.java 437 2010-05-03 22:10:20Z mailtopuran $
  */
 public abstract class AbstractJWebSocketInitializer implements WebSocketInitializer {
-  // don't initialize logger here! Will be initialized with loaded settings!
-  protected static Logger mLog = null;
+	// don't initialize logger here! Will be initialized with loaded settings!
 
-  /** the configuration object */
-  protected JWebSocketConfig jWebSocketConfig = null;
+	protected static Logger mLog = null;
+	/** the configuration object */
+	protected JWebSocketConfig jWebSocketConfig = null;
 
-  /**
-   * @param theConfig the jwebsocket config object
-   */
-  public AbstractJWebSocketInitializer(JWebSocketConfig theConfig) {
-    this.jWebSocketConfig = theConfig;
-  }
+	/**
+	 * @param theConfig the jwebsocket config object
+	 */
+	public AbstractJWebSocketInitializer(JWebSocketConfig theConfig) {
+		this.jWebSocketConfig = theConfig;
+	}
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void initializeLogging() {
-    LoggingConfig lLoggingConfig = jWebSocketConfig.getLoggingConfig();
-    // initialize log4j logging engine
-    // BEFORE instantiating any jWebSocket classes
-    Logging.initLogs(lLoggingConfig.getLevel(), lLoggingConfig.getAppender(), lLoggingConfig.getFilename(), 
-        lLoggingConfig.getPattern(), lLoggingConfig.getBufferSize(), new String[] {"%JWEBSOCKET_HOME%/logs", 
-        "%CATALINA_HOME%/logs" });
-    mLog = Logging.getLogger(JWebSocketXmlConfigInitializer.class);
-    if (mLog.isDebugEnabled()) {
-      mLog.debug("Logging settings" + ": appender: " + lLoggingConfig.getAppender() + ", filename: " 
-          + lLoggingConfig.getFilename() + ", level: " + lLoggingConfig.getLevel() + ", buffersize: "
-          + lLoggingConfig.getBufferSize() + ", pattern: " + lLoggingConfig.getPattern());
-    }
-    if (mLog.isDebugEnabled()) {
-      mLog.debug("Starting jWebSocket Server Sub System...");
-    }
-  }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void initializeLogging() {
+		LoggingConfig lLoggingConfig = jWebSocketConfig.getLoggingConfig();
+		// initialize log4j logging engine
+		// BEFORE instantiating any jWebSocket classes
+		Logging.initLogs(lLoggingConfig.getLevel(), lLoggingConfig.getAppender(), lLoggingConfig.getFilename(),
+				lLoggingConfig.getPattern(), lLoggingConfig.getBufferSize(), new String[]{"%JWEBSOCKET_HOME%/logs",
+					"%CATALINA_HOME%/logs"});
+		mLog = Logging.getLogger(JWebSocketXmlConfigInitializer.class);
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Logging settings" + ": appender: " + lLoggingConfig.getAppender() + ", filename: "
+					+ lLoggingConfig.getFilename() + ", level: " + lLoggingConfig.getLevel() + ", buffersize: "
+					+ lLoggingConfig.getBufferSize() + ", pattern: " + lLoggingConfig.getPattern());
+		}
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Starting jWebSocket Server Sub System...");
+		}
+	}
 
-  /**
-   * Load the engine from the classpath
-   * @param engineName the name of the engine to load
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  public Class<WebSocketEngine> loadEngineFromClassPath(String engineName) {
-    if (mLog.isDebugEnabled()) {
-      mLog.debug("Instantiating engine...");
-    }
-    try {
-      Class<WebSocketEngine> engineClass = (Class<WebSocketEngine>) Class.forName(engineName);
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("Engine '" + engineName + "' loaded from classpath.");
-      }
-      return engineClass;
-    } catch (ClassNotFoundException e) {
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("Engine '" + engineName + "' not yet in classpat", e);
-      }
-    }
-    return null;
-  }
+	/**
+	 * Load the engine from the classpath
+	 * @param engineName the name of the engine to load
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Class<WebSocketEngine> loadEngineFromClassPath(String engineName) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating engine...");
+		}
+		try {
+			Class<WebSocketEngine> engineClass = (Class<WebSocketEngine>) Class.forName(engineName);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Engine '" + engineName + "' loaded from classpath.");
+			}
+			return engineClass;
+		} catch (ClassNotFoundException e) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Engine '" + engineName + "' not yet in classpat", e);
+			}
+		}
+		return null;
+	}
 
-  @SuppressWarnings("unchecked")
-  public Class<WebSocketServer> loadServerFromClasspath(String serverName) {
-    try {
-      Class<WebSocketServer> serverClass = (Class<WebSocketServer>) Class.forName(serverName);
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("Server '" + serverName + "' loaded from classpath.");
-      }
-      return serverClass;
-    } catch (ClassNotFoundException ex) {
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("Server '" + serverName + "' not yet in classpath", ex);
-      }
-    }
-    return null;
-  }
-  
-  @SuppressWarnings("unchecked")
-  public Class<WebSocketPlugIn> loadPluginFromClasspath(String pluginName) {
-    try {
-      Class<WebSocketPlugIn> pluginClass = (Class<WebSocketPlugIn>) Class.forName(pluginName);
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("PlugIn '" + pluginName + "' loaded from classpath.");
-      }
-      return pluginClass;
-    } catch (ClassNotFoundException ex) {
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("PlugIn '" + pluginName + "' not yet in classpath", ex);
-      }
-    }
-    return null;
-  }
-  
-  @SuppressWarnings("unchecked")
-  public Class<WebSocketFilter> loadFilterFromClasspath(String filterName) {
-    try {
-      Class<WebSocketFilter> filterClass = (Class<WebSocketFilter>) Class.forName(filterName);
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("Filter '" + filterName + "' loaded from classpath.");
-      }
-      return filterClass;
-    } catch (ClassNotFoundException ex) {
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("Filter '" + filterName + "' not yet in classpath", ex);
-      }
-    }
-    return null;
-  }
-  @Override
-  public JWebSocketConfig getConfig() {
-    return jWebSocketConfig;
-  }
+	@SuppressWarnings("unchecked")
+	public Class<WebSocketServer> loadServerFromClasspath(String serverName) {
+		try {
+			Class<WebSocketServer> serverClass = (Class<WebSocketServer>) Class.forName(serverName);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Server '" + serverName + "' loaded from classpath.");
+			}
+			return serverClass;
+		} catch (ClassNotFoundException ex) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Server '" + serverName + "' not yet in classpath", ex);
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Class<WebSocketPlugIn> loadPluginFromClasspath(String pluginName) {
+		try {
+			Class<WebSocketPlugIn> pluginClass = (Class<WebSocketPlugIn>) Class.forName(pluginName);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("PlugIn '" + pluginName + "' loaded from classpath.");
+			}
+			return pluginClass;
+		} catch (ClassNotFoundException ex) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("PlugIn '" + pluginName + "' not yet in classpath", ex);
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Class<WebSocketFilter> loadFilterFromClasspath(String filterName) {
+		try {
+			Class<WebSocketFilter> filterClass = (Class<WebSocketFilter>) Class.forName(filterName);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Filter '" + filterName + "' loaded from classpath.");
+			}
+			return filterClass;
+		} catch (ClassNotFoundException ex) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Filter '" + filterName + "' not yet in classpath", ex);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public JWebSocketConfig getConfig() {
+		return jWebSocketConfig;
+	}
 }

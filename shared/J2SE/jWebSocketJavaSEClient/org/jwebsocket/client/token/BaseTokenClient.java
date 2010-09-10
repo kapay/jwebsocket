@@ -38,7 +38,7 @@ import org.jwebsocket.token.TokenFactory;
 public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClient {
 
 	/** base namespace for jWebSocket */
-	private final static String NS_BASE = "org.jWebSocket";
+	private final static String NS_BASE = "org.jwebsocket";
 	/** constants for connection status */
 	public final static int DISCONNECTED = 0;
 	public final static int CONNECTED = 1;

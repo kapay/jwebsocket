@@ -45,7 +45,7 @@ public class TokenClient {
 	private int CUR_TOKEN_ID = 0;
 	private BaseClientJ2ME client = null;
 	private String lSubProt = "json"; // is hardcoded for java me
-	private final static String NS_BASE = "org.jWebSocket";
+	private final static String NS_BASE = "org.jwebsocket";
 	private String fUsername = null;
 	private String fClientId = null;
 	private String fSessionId = null;

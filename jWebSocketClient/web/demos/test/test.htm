@@ -222,7 +222,7 @@
 
 				function doRPC() {
 					var lRes = lWSC.rpc(
-					"org.jWebSocket.demo.DemoRPCServer", "getMD5", "This is a test!", {
+					"org.jwebsocket.demo.DemoRPCServer", "getMD5", "This is a test!", {
 						OnResponse: function( aToken ) {
 							if( aToken.error ) {
 								log( SYS, OUT, "RPC returned error, aborting loop." );
@@ -338,7 +338,7 @@
 				function doRPC() {
 					if( lCnt == 1 )	lStarted = new Date().getTime();
 					lCnt++;
-					var lRes = lWSC.rpc("org.jWebSocket.demo.DemoRPCServer", "getMD5", "This is a test!");
+					var lRes = lWSC.rpc("org.jwebsocket.demo.DemoRPCServer", "getMD5", "This is a test!");
 					if( lCnt > lMax ) {
 						clearInterval ( RPCPerf2IntervalId );
 						var lDuration = (new Date().getTime() - lStarted);

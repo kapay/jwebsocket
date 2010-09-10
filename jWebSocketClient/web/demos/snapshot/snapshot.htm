@@ -64,7 +64,7 @@
 
 					// OnMessage callback
 					OnMessage: function( aEvent ) {
-						// log( "<font style='color:#888'>jWebSocket message received: '" + aEvent.data + "'</font>" );
+						log( "<font style='color:#888'>jWebSocket message received: '" + aEvent.data + "'</font>" );
 					},
 
 					// OnClose callback
@@ -107,10 +107,40 @@
 			}
 
 			function onFileSavedObs( aToken ) {
-				log( "Picture received: '" + aToken.filename + "':" );
-				// aToken.url = aToken.url.replace("foto.jpg", "flowers_1280x1024.jpg");
-				var lHTML = "<img onload=\"checkImageSize()\" src=\"" + aToken.url + "\"/>";
+				var lFilename = aToken.filename;
+				var lLC = lFilename.toLowerCase();
+				var lHTML;
+				if( lLC.indexOf( ".jpg" ) > 0
+					|| lLC.indexOf( ".jpeg" ) > 0
+					|| lLC.indexOf( ".png" ) > 0
+					|| lLC.indexOf( ".gif" ) > 0
+				) {
+					log( "Picture received: '" + lFilename + "':" );
+					// aToken.url = aToken.url.replace("foto.jpg", "flowers_1280x1024.jpg");
+					lHTML = "<img onload=\"checkImageSize()\" src=\"" + aToken.url + "\"/>";
+				} else {
+					lHTML = "received file: " + lFilename;
+				}
 				log( lHTML );
+			}
+			
+			function uploadFile() {
+debugger;
+				var lReader = new FileReader();
+				var lFile = jws.$( "sinpUpload" ).files[ 0 ];
+				lReader.onloadend = function() {
+debugger;
+					lWSC.fileSave(
+						lFile.fileName,
+						lReader.result,
+						{	encoding: "base64",
+							// lReader.result is already base64 encoded!
+							suppressEncoder: true, 
+							scope: "public"
+						}
+					);
+				};
+				lReader.readAsDataURL(lFile);
 			}
 
 			function initPage() {
@@ -163,9 +193,13 @@
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
+					<td class="stdDlg" colspan ="4"><input id="sinpUpload" type="file" style="width:100%"></td>
+				</tr>
+				<tr class="strDlg">
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnect" type="button" value="Connect" onclick="connect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Disconnect" onclick="disconnect();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnUpload" type="button" value="Upload" onclick="uploadFile();"></td>
 				</tr>
 			</table>
 		</div>

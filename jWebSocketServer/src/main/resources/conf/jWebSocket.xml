@@ -113,67 +113,67 @@
 	<rights>
 		<!-- configuration of system plug-in specific rights -->
 		<right>
-			<ns>org.jWebSocket.plugins.system</ns>
+			<ns>org.jwebsocket.plugins.system</ns>
 			<id>broadcast</id>
 			<description>Broadcast message to all other clients.</description>
 		</right>
 		<right>
-			<ns>org.jWebSocket.plugins.system</ns>
+			<ns>org.jwebsocket.plugins.system</ns>
 			<id>send</id>
 			<description>Send message to a single target client.</description>
 		</right>
 
 		<!-- configuration of chat plug-in specific rights -->
 		<right>
-			<ns>org.jWebSocket.plugins.chat</ns>
+			<ns>org.jwebsocket.plugins.chat</ns>
 			<id>broadcast</id>
 			<description>Broadcast message to all other clients.</description>
 		</right>
 
 		<!-- configuration of rpc plug-in specific rights -->
 		<right>
-			<ns>org.jWebSocket.plugins.rpc</ns>
+			<ns>org.jwebsocket.plugins.rpc</ns>
 			<id>rpc</id>
 			<description>Allow Remote Procedure Calls (RPC) to server</description>
 		</right>
 		<right>
-			<ns>org.jWebSocket.plugins.rpc</ns>
+			<ns>org.jwebsocket.plugins.rpc</ns>
 			<id>rrpc</id>
 			<description>Allow Reverse Remote Procedure Calls (RRPC) to other clients</description>
 		</right>
 		
 		<!-- list all granted methods for RPC -->
 		<right>
-			<ns>org.jWebSocket.plugins.rpc</ns>
+			<ns>org.jwebsocket.plugins.rpc</ns>
 			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</id>
 			<description>A sample Rpc demo</description>
 		</right>
 		<right>
-			<ns>org.jWebSocket.plugins.rpc</ns>
+			<ns>org.jwebsocket.plugins.rpc</ns>
 			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</id>
 			<description>A sample Rpc demo</description>
 		</right>
 		<right>
-			<ns>org.jWebSocket.plugins.rpc</ns>
+			<ns>org.jwebsocket.plugins.rpc</ns>
 			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</id>
 			<description>A sample Rpc demo</description>
 		</right>
 
 		<!-- jdbc -->
 		<right>
-			<ns>org.jWebSocket.plugins.jdbc</ns>
+			<ns>org.jwebsocket.plugins.jdbc</ns>
 			<id>select</id>
 			<description>Allow to select from jdbc resources</description>
 		</right>
 		
 		<!-- configuration of filesystem plug-in specific rights -->
 		<right>
-			<ns>org.jWebSocket.plugins.filesystem</ns>
+			<ns>org.jwebsocket.plugins.filesystem</ns>
 			<id>load</id>
 			<description>Allow to load files from file system (public area)</description>
 		</right>
 		<right>
-			<ns>org.jWebSocket.plugins.filesystem</ns>
+			<ns>org.jwebsocket.plugins.filesystem</ns>
 			<id>save</id>
 			<description>Allow to save files to file system (public area)</description>
 		</right>
@@ -182,12 +182,12 @@
 				Unauthorized use could stop your server from
 				providing its services! -->
 		<right>
-			<ns>org.jWebSocket.plugins.admin</ns>
+			<ns>org.jwebsocket.plugins.admin</ns>
 			<id>shutdown</id>
 			<description>Allow to shutdown the server</description>
 		</right>
 		<right>
-			<ns>org.jWebSocket.plugins.admin</ns>
+			<ns>org.jwebsocket.plugins.admin</ns>
 			<id>getConnections</id>
 			<description>Allow to retreive current connections</description>
 		</right>
@@ -200,23 +200,23 @@
 			<description>Administrators</description>
 			<rights>
 				<!-- list of rights for "Administrator" role (ns + . + id) -->
-				<right>org.jWebSocket.plugins.system.broadcast</right>
-				<right>org.jWebSocket.plugins.system.send</right>
-				<right>org.jWebSocket.plugins.chat.broadcast</right>
-				<right>org.jWebSocket.plugins.rpc.rpc</right>
-				<right>org.jWebSocket.plugins.rpc.rrpc</right>
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>								
-				<right>org.jWebSocket.plugins.jdbc.select</right>
-				<right>org.jWebSocket.plugins.filesystem.load</right>
-				<right>org.jWebSocket.plugins.filesystem.save</right>
+				<right>org.jwebsocket.plugins.system.broadcast</right>
+				<right>org.jwebsocket.plugins.system.send</right>
+				<right>org.jwebsocket.plugins.chat.broadcast</right>
+				<right>org.jwebsocket.plugins.rpc.rpc</right>
+				<right>org.jwebsocket.plugins.rpc.rrpc</right>
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>								
+				<right>org.jwebsocket.plugins.jdbc.select</right>
+				<right>org.jwebsocket.plugins.filesystem.load</right>
+				<right>org.jwebsocket.plugins.filesystem.save</right>
 
 				<!-- Caution! Be careful with this right!
 						Unauthorized use could stop your server from
 						providing its services! -->
-				<right>org.jWebSocket.plugins.admin.shutdown</right>
-				<right>org.jWebSocket.plugins.admin.getConnections</right>
+				<right>org.jwebsocket.plugins.admin.shutdown</right>
+				<right>org.jwebsocket.plugins.admin.getConnections</right>
 			</rights>
 		</role>
 		<role>
@@ -224,19 +224,19 @@
 			<description>Registered and authenticated users.</description>
 			<rights>
 				<!-- list of rights for "User" role (ns + . + id) -->
-				<right>org.jWebSocket.plugins.system.broadcast</right>
-				<right>org.jWebSocket.plugins.system.send</right>
-				<right>org.jWebSocket.plugins.chat.broadcast</right>
-				<right>org.jWebSocket.plugins.rpc.rpc</right>
-				<right>org.jWebSocket.plugins.rpc.rrpc</right>
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>		
-				<right>org.jWebSocket.plugins.jdbc.select</right>
-				<right>org.jWebSocket.plugins.filesystem.load</right>
-				<right>org.jWebSocket.plugins.filesystem.save</right>
+				<right>org.jwebsocket.plugins.system.broadcast</right>
+				<right>org.jwebsocket.plugins.system.send</right>
+				<right>org.jwebsocket.plugins.chat.broadcast</right>
+				<right>org.jwebsocket.plugins.rpc.rpc</right>
+				<right>org.jwebsocket.plugins.rpc.rrpc</right>
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>		
+				<right>org.jwebsocket.plugins.jdbc.select</right>
+				<right>org.jwebsocket.plugins.filesystem.load</right>
+				<right>org.jwebsocket.plugins.filesystem.save</right>
 			</rights>
 		</role>
 		<role>
@@ -244,17 +244,17 @@
 			<description>Anonymous users (not registered)</description>
 			<rights>
 				<!-- list of rights for "Guest" role (ns + . + id) -->
-				<right>org.jWebSocket.plugins.system.broadcast</right>
-				<right>org.jWebSocket.plugins.system.send</right>
-				<right>org.jWebSocket.plugins.chat.broadcast</right>
-				<right>org.jWebSocket.plugins.rpc.rpc</right>
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
-				<right>org.jWebSocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>		
-				<right>org.jWebSocket.plugins.jdbc.select</right>
-				<right>org.jWebSocket.plugins.filesystem.load</right>
+				<right>org.jwebsocket.plugins.system.broadcast</right>
+				<right>org.jwebsocket.plugins.system.send</right>
+				<right>org.jwebsocket.plugins.chat.broadcast</right>
+				<right>org.jwebsocket.plugins.rpc.rpc</right>
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>		
+				<right>org.jwebsocket.plugins.jdbc.select</right>
+				<right>org.jwebsocket.plugins.filesystem.load</right>
 			</rights>
 		</role>
 	</roles>
@@ -263,7 +263,7 @@
 	<plugins>
 		<plugin>
 			<name>org.jwebsocket.plugins.system.SystemPlugIn</name>
-			<ns>org.jWebSocket.plugins.system</ns>
+			<ns>org.jwebsocket.plugins.system</ns>
 			<id>jws.system</id>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<!-- plug-in specific settings -->
@@ -281,7 +281,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.admin.AdminPlugIn</name>
 			<id>jws.admin</id>
-			<ns>org.jWebSocket.plugins.admin</ns>
+			<ns>org.jwebsocket.plugins.admin</ns>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>
@@ -293,7 +293,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn</name>
 			<id>jws.flashbridge</id>
-			<ns>org.jWebSocket.plugins.flashbridge</ns>
+			<ns>org.jwebsocket.plugins.flashbridge</ns>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>
@@ -303,7 +303,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.chat.ChatPlugIn</name>
 			<id>jws.chat</id>
-			<ns>org.jWebSocket.plugins.chat</ns>
+			<ns>org.jwebsocket.plugins.chat</ns>
 			<jar>jWebSocketPlugins-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>
@@ -313,7 +313,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.sharedobjects.SharedObjectsPlugIn</name>
 			<id>jws.sharedObjects</id>
-			<ns>org.jWebSocket.plugins.sharedobjects</ns>
+			<ns>org.jwebsocket.plugins.sharedobjects</ns>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>
@@ -322,7 +322,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.streaming.StreamingPlugIn</name>
 			<id>jws.streaming</id>
-			<ns>org.jWebSocket.plugins.streaming</ns>
+			<ns>org.jwebsocket.plugins.streaming</ns>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>
@@ -331,7 +331,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.jdbc.JDBCPlugIn</name>
 			<id>jws.jdbc</id>
-			<ns>org.jWebSocket.plugins.jdbc</ns>
+			<ns>org.jwebsocket.plugins.jdbc</ns>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>
@@ -354,7 +354,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.filesystem.FileSystemPlugIn</name>
 			<id>jws.filesystem</id>
-			<ns>org.jWebSocket.plugins.filesystem</ns>
+			<ns>org.jwebsocket.plugins.filesystem</ns>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<!-- plug-in specific settings -->
 			<settings>
@@ -384,7 +384,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.sample.SamplePlugIn</name>
 			<id>jws.sample</id>
-			<ns>org.jWebSocket.plugins.sample</ns>
+			<ns>org.jwebsocket.plugins.sample</ns>
 			<jar>jWebSocketSamples-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>
@@ -393,7 +393,7 @@
 		<plugin>
 			<name>org.jwebsocket.plugins.rpc.RPCPlugIn</name>
 			<id>jws.rpc</id>
-			<ns>org.jWebSocket.plugins.rpc</ns>
+			<ns>org.jwebsocket.plugins.rpc</ns>
 			<jar>jWebSocketServer-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>
@@ -413,7 +413,7 @@
 	<filters>
 		<filter>
 			<name>org.jwebsocket.filters.system.SystemFilter</name>
-			<ns>org.jWebSocket.filters.system</ns>
+			<ns>org.jwebsocket.filters.system</ns>
 			<id>systemFilter</id>
 			<jar>jWebSocketPlugins-0.10.jar</jar>
 			<!-- plug-in specific settings -->
@@ -427,7 +427,7 @@
 		<filter>
 			<name>org.jwebsocket.filters.custom.CustomTokenFilter</name>
 			<id>userFilter</id>
-			<ns>org.jWebSocket.filters.custom</ns>
+			<ns>org.jwebsocket.filters.custom</ns>
 			<jar>jWebSocketPlugins-0.10.jar</jar>
 			<server-assignments>
 				<server-assignment>ts0</server-assignment>

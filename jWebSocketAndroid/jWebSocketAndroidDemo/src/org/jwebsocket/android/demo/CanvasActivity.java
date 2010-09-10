@@ -163,12 +163,12 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		// use broadcast of system plug-in
 		// use namespace and type for server's broadcast "command"
 		Token lCanvasToken = TokenFactory.createToken(
-				"org.jWebSocket.plugins.system",
+				"org.jwebsocket.plugins.system",
 				"broadcast");
 
 		// pass namespace and type
 		// for client's canvas "command"
-		lCanvasToken.setString("reqNS", "org.jWebSocket.plugins.canvas");
+		lCanvasToken.setString("reqNS", "org.jwebsocket.plugins.canvas");
 		lCanvasToken.setString("reqType", "beginPath");
 		lCanvasToken.setDouble("x", ax);
 		lCanvasToken.setDouble("y", ay);
@@ -185,10 +185,10 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		// added by Alex: 2010-08-20
 		// use broadcast of system plug-in
 		Token lCanvasToken = TokenFactory.createToken(
-				"org.jWebSocket.plugins.system",
+				"org.jwebsocket.plugins.system",
 				"broadcast");
 
-		lCanvasToken.setString("reqNS", "org.jWebSocket.plugins.canvas");
+		lCanvasToken.setString("reqNS", "org.jwebsocket.plugins.canvas");
 		lCanvasToken.setString("reqType", "lineTo");
 		lCanvasToken.setDouble("x", aX);
 		lCanvasToken.setDouble("y", aY);
@@ -205,13 +205,13 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 		// use broadcast of system plug-in
 		// use namespace and type for server's broadcast "command"
 		Token lCanvasToken = TokenFactory.createToken(
-				"org.jWebSocket.plugins.system",
+				"org.jwebsocket.plugins.system",
 				"broadcast");
 		lCanvasToken.setString("id", CANVAS_ID);
 
 		// pass namespace and type
 		// for client's canvas "command"
-		lCanvasToken.setString("reqNS", "org.jWebSocket.plugins.canvas");
+		lCanvasToken.setString("reqNS", "org.jwebsocket.plugins.canvas");
 		lCanvasToken.setString("reqType", "closePath");
 
 		try {
@@ -250,13 +250,13 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 
 	private void sendClear() {
 		Token lCanvasToken = TokenFactory.createToken(
-				"org.jWebSocket.plugins.system",
+				"org.jwebsocket.plugins.system",
 				"broadcast");
 		lCanvasToken.setString("id", CANVAS_ID);
 
 		// pass namespace and type
 		// for client's canvas "command"
-		lCanvasToken.setString("reqNS", "org.jWebSocket.plugins.canvas");
+		lCanvasToken.setString("reqNS", "org.jwebsocket.plugins.canvas");
 		lCanvasToken.setString("reqType", "clear");
 
 		try {
@@ -302,7 +302,7 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 
 	public void processToken(WebSocketClientEvent aEvent, Token aToken) {
 		// check if incoming token is targetted to canvas (by name space)
-		if ("org.jWebSocket.plugins.canvas".equals(aToken.getString("reqNS"))) {
+		if ("org.jwebsocket.plugins.canvas".equals(aToken.getString("reqNS"))) {
 			// check "beginPath" request
 			if ("beginPath".equals(aToken.getString("reqType"))) {
 				// nothing to do here

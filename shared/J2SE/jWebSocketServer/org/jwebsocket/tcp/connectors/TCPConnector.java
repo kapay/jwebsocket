@@ -4,6 +4,7 @@
  */
 package org.jwebsocket.tcp.connectors;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,7 +12,6 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketPacket;
@@ -150,15 +150,14 @@ public class TCPConnector extends BaseConnector {
 		@Override
 		public void run() {
 			WebSocketEngine engine = getEngine();
-
+/*
 			int lMaxFrameSize = JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE;
 			EngineConfiguration config = engine.getConfiguration();
 			if (config != null && config.getMaxFramesize() > 0) {
 				lMaxFrameSize = config.getMaxFramesize();
 			}
-			byte[] lBuff = new byte[lMaxFrameSize];
-			int pos = -1;
-			int lStart = -1;
+ */
+			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
 
 			try {
 				// start client listener loop
@@ -172,36 +171,25 @@ public class TCPConnector extends BaseConnector {
 						int b = mIn.read();
 						// start of frame
 						if (b == 0x00) {
-							pos = 0;
-							lStart = 0;
-							// end of frame
+							lBuff.reset();
+						// end of frame
 						} else if (b == 0xff) {
-							if (lStart >= 0) {
-								if (pos <= lMaxFrameSize) {
-									RawPacket lPacket = new RawPacket(Arrays.copyOf(lBuff, pos));
-									try {
-										engine.processPacket(connector, lPacket);
-									} catch (Exception ex) {
-										mLog.error(ex.getClass().getSimpleName()
-												+ " in processPacket of connector "
-												+ connector.getClass().getSimpleName()
-												+ ": " + ex.getMessage());
-									}
-								} else {
-									mLog.error("Datapacket exceeded maximum size of " + lMaxFrameSize + " bytes and will not be processed!");
-								}
+							RawPacket lPacket = new RawPacket(lBuff.toByteArray());
+							try {
+								engine.processPacket(connector, lPacket);
+							} catch (Exception ex) {
+								mLog.error(ex.getClass().getSimpleName()
+										+ " in processPacket of connector "
+										+ connector.getClass().getSimpleName()
+										+ ": " + ex.getMessage());
 							}
-							lStart = -1;
-							// end of stream
+							lBuff.reset();
 						} else if (b < 0) {
 							mCloseReason = CloseReason.CLIENT;
 							mIsRunning = false;
-							// any other byte within or outside a frame
+						// any other byte within or outside a frame
 						} else {
-							if (lStart >= 0 && pos < lMaxFrameSize) {
-								lBuff[pos] = (byte) b;
-							}
-							pos++;
+							lBuff.write(b);
 						}
 					} catch (SocketTimeoutException ex) {
 						mLog.error("(timeout) "
@@ -258,7 +246,7 @@ public class TCPConnector extends BaseConnector {
 		// TODO: weird results like... '0:0:0:0:0:0:0:1:61130'... on JDK 1.6u19 Windows 7 64bit
 		String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
 		// TODO: don't hard code. At least use JWebSocketConstants field here.
-		String lUsername = getString("org.jWebSocket.plugins.system.username");
+		String lUsername = getString("org.jwebsocket.plugins.system.username");
 		if (lUsername != null) {
 			lRes += " (" + lUsername + ")";
 		}

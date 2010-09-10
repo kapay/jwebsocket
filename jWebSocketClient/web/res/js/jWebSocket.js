@@ -26,9 +26,9 @@
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:NS_BASE:String:org.jWebSocket
+	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
-	NS_BASE: "org.jWebSocket",
+	NS_BASE: "org.jwebsocket",
 	MSG_WS_NOT_SUPPORTED:
 		"Unfortunately your browser does neither natively support WebSockets\n" +
 		"nor you have the Adobe Flash-PlugIn 9+ installed.",
@@ -1142,7 +1142,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 //:d:en:Implementation of the [tt]jws.SystemClientPlugIn[/tt] class.
 jws.SystemClientPlugIn = {
 
-	//:const:*:NS:String:org.jWebSocket.plugins.system (jws.NS_BASE + ".plugins.system")
+	//:const:*:NS:String:org.jwebsocket.plugins.system (jws.NS_BASE + ".plugins.system")
 	//:d:en:Namespace for SystemClientPlugIn
 	// if namespace changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.system",
@@ -1499,7 +1499,7 @@ jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.SystemClientPlugIn );
 //:d:en:stream sn the server.
 jws.StreamingPlugIn = {
 
-	//:const:*:NS:String:org.jWebSocket.plugins.streaming (jws.NS_BASE + ".plugins.streaming")
+	//:const:*:NS:String:org.jwebsocket.plugins.streaming (jws.NS_BASE + ".plugins.streaming")
 	//:d:en:Namespace for the [tt]StreamingPlugIn[/tt] class.
 	// if namespace changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.streaming",
@@ -1568,7 +1568,7 @@ jws.RPCClientPlugIn = {
 	// granted rrpc's
 	spawnThreadDefault: false,
 
-	//:const:*:NS:String:org.jWebSocket.plugins.rpc (jws.NS_BASE + ".plugins.rpc")
+	//:const:*:NS:String:org.jwebsocket.plugins.rpc (jws.NS_BASE + ".plugins.rpc")
 	//:d:en:Namespace for the [tt]RPCClientPlugIn[/tt] class.
 	// if namespace changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.rpc",

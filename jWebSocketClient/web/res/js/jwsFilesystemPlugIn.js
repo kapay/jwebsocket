@@ -70,11 +70,29 @@ jws.FileSystemPlugIn = {
 
 	fileSave: function( aFilename, aData, aOptions ) {
 		var lRes = this.createDefaultResult();
+		var lEncoding = "base64";
+		var lSuppressEncoder = false;
+		if( aOptions ) {
+			if( aOptions.encoding != undefined ) {
+				lEncoding = aOptions.encoding;
+			}
+			if( aOptions.suppressEncoder != undefined ) {
+				lSuppressEncoder = aOptions.suppressEncoder;
+			}
+		}
+		if( !lSuppressEncoder ) {
+			if( lEncoding == "base64" ) {
+				aData = Base64.encode( aData );
+			}
+		}
 		if( this.isConnected() ) {
 			var lToken = {
 				ns: jws.FileSystemPlugIn.NS,
 				type: "save",
-				data: Base64.encode( aData ),
+				scope: "public",
+				encoding: lEncoding,
+				notify: true,
+				data: aData,
 				filename: aFilename
 			};
 			this.sendToken( lToken,	aOptions );

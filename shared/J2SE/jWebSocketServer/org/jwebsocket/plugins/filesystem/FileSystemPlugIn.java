@@ -22,6 +22,7 @@ package org.jwebsocket.plugins.filesystem;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
@@ -44,7 +45,7 @@ import org.jwebsocket.token.TokenFactory;
  */
 public class FileSystemPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logging.getLogger(FileSystemPlugIn.class);
+	private static Logger mLog = Logging.getLogger(FileSystemPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_FILESYSTEM = JWebSocketServerConstants.NS_BASE + ".plugins.filesystem";
 	// TODO: make these settings configurable
@@ -56,16 +57,16 @@ public class FileSystemPlugIn extends TokenPlugIn {
 	private static String WEB_ROOT_DEF = "http://jwebsocket.org/";
 
 	public FileSystemPlugIn() {
-	  this(null);
+		this(null);
 	}
-	
+
 	public FileSystemPlugIn(PluginConfiguration configuration) {
-	  super(configuration);
-	  if (log.isDebugEnabled()) {
-	    log.debug("Instantiating file system plug-in...");
-	   }
-	   // specify default name space for admin plugin
-	   this.setNamespace(NS_FILESYSTEM);
+		super(configuration);
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating file system plug-in...");
+		}
+		// specify default name space for admin plugin
+		this.setNamespace(NS_FILESYSTEM);
 	}
 
 	@Override
@@ -92,14 +93,14 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		TokenServer lServer = getServer();
 		String lMsg;
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'save'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'save'...");
 		}
 
 		// check if user is allowed to run 'save' command
 		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".save")) {
-			if (log.isDebugEnabled()) {
-				log.debug("Returning 'Access denied'...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Returning 'Access denied'...");
 			}
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			return;
@@ -123,8 +124,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				lBaseDir = lBaseDir.replace("{username}", lUsername);
 			} else {
 				lMsg = "not authenticated to save private file";
-				if (log.isDebugEnabled()) {
-					log.debug(lMsg);
+				if (mLog.isDebugEnabled()) {
+					mLog.debug(lMsg);
 				}
 				lResponse.setInteger("code", -1);
 				lResponse.setString("msg", lMsg);
@@ -136,8 +137,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			lBaseDir = getSetting(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
 		} else {
 			lMsg = "invalid scope";
-			if (log.isDebugEnabled()) {
-				log.debug(lMsg);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug(lMsg);
 			}
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", lMsg);
@@ -147,10 +148,21 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		}
 
 		Boolean lNotify = aToken.getBoolean("notify", false);
-		String lBase64 = aToken.getString("data");
+		String lData = aToken.getString("data");
+		String lEncoding = aToken.getString("encoding", "base64");
 		byte[] lBA = null;
-		if (lBase64 != null) {
-			lBA = Base64.decodeBase64(lBase64);
+		try {
+			if ("base64".equals(lEncoding)) {
+				int lIdx = lData.indexOf(',');
+				if (lIdx >= 0) {
+					lData = lData.substring(lIdx + 1);
+				}
+				lBA = Base64.decodeBase64(lData);
+			} else {
+				lBA = lData.getBytes("UTF-8");
+			}
+		} catch (Exception ex) {
+			mLog.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 
 		// complete the response token
@@ -162,7 +174,11 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				// force create folder if not yet exists
 				File lDir = new File(FilenameUtils.getFullPath(lFullPath));
 				FileUtils.forceMkdir(lDir);
-				FileUtils.writeByteArrayToFile(lFile, lBA);
+				if (lBA != null) {
+					FileUtils.writeByteArrayToFile(lFile, lBA);
+				} else {
+					FileUtils.writeStringToFile(lFile, lData, "UTF-8");
+				}
 			}
 		} catch (IOException ex) {
 			lResponse.setInteger("code", -1);
@@ -197,14 +213,14 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		TokenServer lServer = getServer();
 		String lMsg;
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'load'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'load'...");
 		}
 
 		// check if user is allowed to run 'load' command
 		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".load")) {
-			if (log.isDebugEnabled()) {
-				log.debug("Returning 'Access denied'...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Returning 'Access denied'...");
 			}
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			return;
@@ -226,8 +242,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				lBaseDir = lBaseDir.replace("{username}", lUsername);
 			} else {
 				lMsg = "not authenticated to load private file";
-				if (log.isDebugEnabled()) {
-					log.debug(lMsg);
+				if (mLog.isDebugEnabled()) {
+					mLog.debug(lMsg);
 				}
 				lResponse.setInteger("code", -1);
 				lResponse.setString("msg", lMsg);
@@ -239,8 +255,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			lBaseDir = getSetting(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
 		} else {
 			lMsg = "invalid scope";
-			if (log.isDebugEnabled()) {
-				log.debug(lMsg);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug(lMsg);
 			}
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", lMsg);
