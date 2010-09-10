@@ -125,11 +125,9 @@
 			}
 			
 			function uploadFile() {
-debugger;
 				var lReader = new FileReader();
 				var lFile = jws.$( "sinpUpload" ).files[ 0 ];
 				lReader.onloadend = function() {
-debugger;
 					lWSC.fileSave(
 						lFile.fileName,
 						lReader.result,
