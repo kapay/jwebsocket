@@ -20,7 +20,7 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     android:hint="@string/required_hint"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:text=""
+    android:text="org.jwebsocket.rpc.sample.SampleRPCLibrary"
     android:textSize="18sp"
     ></EditText>
 
@@ -36,7 +36,7 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     android:hint="@string/required_hint"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:text=""
+    android:text="getMD5"
     android:textSize="18sp"
     ></EditText>
 
@@ -55,6 +55,7 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     android:singleLine="false"
     android:lines="4"
     android:gravity="top"
+    android:text="test argument"
     ></EditText>
 
     <Button
