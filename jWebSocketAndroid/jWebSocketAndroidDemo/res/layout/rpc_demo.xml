@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+android:id="@+id/rpc"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:orientation="vertical"
+xmlns:android="http://schemas.android.com/apk/res/android"
+>
+    
+    <TextView
+    android:id="@+id/classLabel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Class"
+    ></TextView>
+
+    <EditText
+    android:id="@+id/classTxt"
+    android:hint="@string/required_hint"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text=""
+    android:textSize="18sp"
+    ></EditText>
+
+    <TextView
+    android:id="@+id/methodLabel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Method"
+    ></TextView>
+
+    <EditText
+    android:id="@+id/methodTxt"
+    android:hint="@string/required_hint"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text=""
+    android:textSize="18sp"
+    ></EditText>
+
+    <TextView
+    android:id="@+id/parameterLabel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Parameter"
+    ></TextView>
+
+    <EditText
+    android:id="@+id/parameterTxt"
+    android:hint="@string/required_hint"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:singleLine="false"
+    android:lines="4"
+    android:gravity="top"
+    ></EditText>
+
+    <Button
+    android:id="@+id/invokeBtn"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Invoke"
+    ></Button>
+
+    <TextView
+    android:id="@+id/resultLabel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Result"
+    ></TextView>
+
+    <EditText
+    android:id="@+id/resultTxt"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:singleLine="false"
+    android:gravity="top"
+    android:layout_weight="1"
+    ></EditText>
+
+
+</LinearLayout>

@@ -11,4 +11,5 @@
     <string name="mniCanvasDisconnect">Disconnect</string>
     <string name="mniCanvasExit">Exit</string>
     <string name="mniCanvasClear">Clear</string>
+    <string name="required_hint">(Required)</string>
 </resources>

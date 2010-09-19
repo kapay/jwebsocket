@@ -37,7 +37,7 @@ public class MainActivity extends ListActivity {
         JWC.init();
         JWC.loadSettings(this);
 
-        String[] lItems = {"Fundamentals", "Canvas Demo", "Camera Demo", "Setup"};
+        String[] lItems = {"Fundamentals", "Canvas Demo", "Camera Demo", "RPC Demo", "Setup"};
 
         setListAdapter(new ArrayAdapter<String>(this, R.layout.list_item, lItems));
 
@@ -59,7 +59,10 @@ public class MainActivity extends ListActivity {
                     case 2:
                         startActivity(new Intent(MainActivity.this, CameraActivity.class));
                         break;
-                    case 3:
+                   case 3:
+                        startActivity(new Intent(MainActivity.this, RPCDemoActivity.class));
+                        break;
+                    case 4:
                         startActivity(new Intent(MainActivity.this, ConfigActivity.class));
                         break;
                 }
