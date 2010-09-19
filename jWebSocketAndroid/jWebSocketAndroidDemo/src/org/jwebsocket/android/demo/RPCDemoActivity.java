@@ -98,10 +98,12 @@ public class RPCDemoActivity extends Activity  implements WebSocketClientTokenLi
     }
 
     public void processToken(WebSocketClientEvent aEvent, Token aToken) {
-        if(aToken.getString("result") != null) {
-            resultTxt.setText(aToken.getString("result"));
-        }else {
-            resultTxt.setText(aToken.getString("error"));
+        if(("rpc").equals(aToken.getString("reqType")) && ("response").equals(aToken.getString("type"))) {
+            if(aToken.getInteger("code") == 0) {
+                resultTxt.setText(aToken.getString("result"));
+            }else if(aToken.getInteger("code") == -1) {
+                resultTxt.setText(aToken.getString("msg"));
+            }
         }
     }
 
