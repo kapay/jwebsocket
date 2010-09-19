@@ -60,7 +60,7 @@ public class JWC {
             Toast.makeText(aActivity.getApplicationContext(), ex.getClass().getSimpleName() + ":" + ex.getMessage(),
                     Toast.LENGTH_SHORT).show();
         }
-        mURL = (String) lProps.getProperty("url", "http://jwebsocket.org:8787/");
+        mURL = (String) lProps.getProperty("url", "ws://jwebsocket.org:8787/");
     }
 
     public static void saveSettings(Activity aActivity) {

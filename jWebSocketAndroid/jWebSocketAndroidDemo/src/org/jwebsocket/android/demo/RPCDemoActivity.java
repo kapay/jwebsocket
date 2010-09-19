@@ -11,8 +11,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
@@ -63,7 +61,7 @@ public class RPCDemoActivity extends Activity  implements WebSocketClientTokenLi
         try {
             JWC.sendToken(rpcToken);
         } catch (WebSocketException ex) {
-            //TODO: log exception
+            resultTxt.setText(ex.getMessage());
         }
     }
 
@@ -86,7 +84,7 @@ public class RPCDemoActivity extends Activity  implements WebSocketClientTokenLi
             JWC.addListener(this);
             JWC.open();
         } catch (WebSocketException ex) {
-                //TODO: log exception
+                resultTxt.setText(ex.getMessage());
         }
     }
 
