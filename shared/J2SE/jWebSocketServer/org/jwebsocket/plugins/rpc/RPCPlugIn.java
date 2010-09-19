@@ -617,7 +617,12 @@ public class RPCPlugIn extends TokenPlugIn {
    * @return
    */
   public static WebSocketConnector getConnector(String aEngine, String aConnectorId) {
-    return sRPCPlugIn.getServer().getConnector(aEngine, aConnectorId);
+  	if (sRPCPlugIn == null) {
+      mLog.error("Try to make a rrpc call but the RPCPlugin doesn't seem to be load." + "Please make sure the plugin is correctly added to jWebsocket");
+      return null ;
+    } else {
+    	return sRPCPlugIn.getServer().getConnector(aEngine, aConnectorId);
+    }
   }
 
   /**
@@ -627,6 +632,11 @@ public class RPCPlugIn extends TokenPlugIn {
    * @return
    */
   public static String getUsernameStatic(WebSocketConnector aConnector) {
-    return sRPCPlugIn.getUsername(aConnector);
+  	if (sRPCPlugIn == null) {
+      mLog.error("Try to make a rrpc call but the RPCPlugin doesn't seem to be load." + "Please make sure the plugin is correctly added to jWebsocket");
+      return null ;
+    } else {
+    	return sRPCPlugIn.getUsername(aConnector);
+    }
   }
 }
