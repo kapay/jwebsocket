@@ -41,7 +41,7 @@ public class JWebSocketServer {
     System.out.println("Log files per default in jWebSocket.log if not overwritten in jWebSocket.xml.");
 
     String overrideConfigPath = "";
-    if (args != null) {
+    if (args != null && args.length > 0) {
       if (args.length < 3) {
         System.out.println("use [-config <path_to_config_file>] as command line arguments to override default jWebSocket.xml");
       } else if (args.length == 2) {
