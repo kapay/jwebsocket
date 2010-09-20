@@ -53,7 +53,7 @@ public class RPCDemoActivity extends Activity  implements WebSocketClientTokenLi
         String methodName = methodTxt.getText().toString().trim();
         String parameter = parameterTxt.getText().toString().trim();
         Token rpcToken = TokenFactory.createToken("rpc");
-        rpcToken.setString("ns", "org.jWebSocket.plugins.rpc");
+        rpcToken.setString("ns", "org.jwebsocket.plugins.rpc");
         rpcToken.setString("classname", className);
         rpcToken.setString("method", methodName);
         rpcToken.setString("args", parameter);
