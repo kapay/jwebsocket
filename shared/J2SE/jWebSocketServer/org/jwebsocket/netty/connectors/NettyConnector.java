@@ -18,9 +18,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import org.apache.log4j.Logger;
+import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
@@ -34,110 +36,113 @@ import org.jwebsocket.netty.engines.NettyEngineHandler;
  */
 public class NettyConnector extends BaseConnector {
 
-	private static Logger log = Logging.getLogger(NettyConnector.class);
+  private static Logger log = Logging.getLogger(NettyConnector.class);
 
-	private NettyEngineHandler handler = null;
+  private NettyEngineHandler handler = null;
 
-	/**
-	 * The private constructor, netty connector objects are created using static
-	 * factory method:
-	 * <tt>getNettyConnector({@code WebSocketEngine}, {@code ChannelHandlerContext})</tt>
-	 * 
-	 * @param theEngine
-	 *            the websocket engine object
-	 * @param theHandlerContext
-	 *            the netty engine handler context
-	 */
-	public NettyConnector(WebSocketEngine theEngine,
-			NettyEngineHandler theHandler) {
-		super(theEngine);
-		this.handler = theHandler;
-	}
+  /**
+   * The private constructor, netty connector objects are created using static
+   * factory method:
+   * <tt>getNettyConnector({@code WebSocketEngine}, {@code ChannelHandlerContext})</tt>
+   * 
+   * @param theEngine the websocket engine object
+   * @param theHandlerContext the netty engine handler context
+   */
+  public NettyConnector(WebSocketEngine theEngine, NettyEngineHandler theHandler) {
+    super(theEngine);
+    this.handler = theHandler;
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void startConnector() {
-		if (log.isDebugEnabled()) {
-			log.debug("Starting Netty connector...");
-		}
-		// DO CONNECTOR SPECIFIC INITIALIZATION HERE....
-		if (log.isInfoEnabled()) {
-			log.info("Started Netty connector on port" + getRemotePort() + ".");
-		}
-	}
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void startConnector() {
+    if (log.isDebugEnabled()) {
+      log.debug("Starting Netty connector...");
+    }
+    // DO CONNECTOR SPECIFIC INITIALIZATION HERE....
+    if (log.isInfoEnabled()) {
+      log.info("Started Netty connector on port" + getRemotePort() + ".");
+    }
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void stopConnector(CloseReason aCloseReason) {
-		if (log.isDebugEnabled()) {
-			log.debug("Stopping Netty connector (" + aCloseReason.name()+ ")...");
-		}
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void stopConnector(CloseReason aCloseReason) {
+    if (log.isDebugEnabled()) {
+      log.debug("Stopping Netty connector (" + aCloseReason.name() + ")...");
+    }
 
-		getEngine().connectorStopped(this, aCloseReason);
-		
-		if (handler.getChannelHandlerContext().getChannel().isConnected() && getEngine().isAlive()) {
-			handler.getChannelHandlerContext().getChannel().close();
-		}
-		if (log.isInfoEnabled()) {
-			log.info("Stopped Netty connector (" + aCloseReason.name()+ ") on port "+ getRemotePort());
-		}
-	}
+    getEngine().connectorStopped(this, aCloseReason);
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int getRemotePort() {
-		InetSocketAddress address = (InetSocketAddress) handler
-				.getChannelHandlerContext().getChannel().getRemoteAddress();
-		return address.getPort();
-	}
+    if (handler.getChannelHandlerContext().getChannel().isConnected() && getEngine().isAlive()) {
+      handler.getChannelHandlerContext().getChannel().close();
+    }
+    if (log.isInfoEnabled()) {
+      log.info("Stopped Netty connector (" + aCloseReason.name() + ") on port " + getRemotePort());
+    }
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public InetAddress getRemoteHost() {
-		InetSocketAddress address = (InetSocketAddress) handler
-				.getChannelHandlerContext().getChannel().getRemoteAddress();
-		return address.getAddress();
-	}
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public int getRemotePort() {
+    InetSocketAddress address = (InetSocketAddress) handler.getChannelHandlerContext().getChannel().getRemoteAddress();
+    return address.getPort();
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void processPacket(WebSocketPacket aDataPacket) {
-		// forward the data packet to the engine
-		getEngine().processPacket(this, aDataPacket);
-	}
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public InetAddress getRemoteHost() {
+    InetSocketAddress address = (InetSocketAddress) handler.getChannelHandlerContext().getChannel().getRemoteAddress();
+    return address.getAddress();
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void sendPacket(WebSocketPacket aDataPacket) {
-		if (handler.getChannelHandlerContext().getChannel().isConnected() && getEngine().isAlive()) {
-			handler.getChannelHandlerContext().getChannel().write(
-					new DefaultWebSocketFrame(aDataPacket.getString()));
-		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String toString() {
-		String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
-		// TODO: don't hard code. At least use JWebSocketConstants field here.
-		String lUsername = getString("org.jwebsocket.plugins.system.username");
-		if (lUsername != null) {
-			lRes += " (" + lUsername + ")";
-		}
-		return lRes;
-	}
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void processPacket(WebSocketPacket aDataPacket) {
+    // forward the data packet to the engine
+    getEngine().processPacket(this, aDataPacket);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void sendPacket(WebSocketPacket aDataPacket) {
+    if (handler.getChannelHandlerContext().getChannel().isConnected() && getEngine().isAlive()) {
+      handler.getChannelHandlerContext().getChannel().write(new DefaultWebSocketFrame(aDataPacket.getString()));
+    }
+  }
+  
+  public IOFuture sendPacketAsync(WebSocketPacket aDataPacket) {
+    if (handler.getChannelHandlerContext().getChannel().isConnected() && getEngine().isAlive()) {
+      ChannelFuture internalFuture = handler.getChannelHandlerContext().getChannel().write(new DefaultWebSocketFrame(aDataPacket.getString()));
+      return new NIOFuture(this, internalFuture);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String toString() {
+    String lRes = getRemoteHost().getHostAddress() + ":" + getRemotePort();
+    // TODO: don't hard code. At least use JWebSocketConstants field here.
+    String lUsername = getString("org.jwebsocket.plugins.system.username");
+    if (lUsername != null) {
+      lRes += " (" + lUsername + ")";
+    }
+    return lRes;
+  }
 }

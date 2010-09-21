@@ -14,8 +14,11 @@
 // ---------------------------------------------------------------------------
 package org.jwebsocket.netty.connectors;
 
+import java.util.Map;
+
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.util.internal.ConcurrentHashMap;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.async.IOFutureListener;
@@ -30,6 +33,11 @@ public class NIOFuture implements IOFuture {
   
   private ChannelFuture internalFuture = null; 
   private WebSocketConnector connector = null;
+
+  /**
+   * internal map that maps the jWebSocket IOFutureListener to Netty's channel future listener.
+   */
+  private Map<IOFutureListener, ChannelFutureListener> listenerMap = new ConcurrentHashMap<IOFutureListener, ChannelFutureListener>();
   
   /**
    * The constructor
@@ -41,62 +49,95 @@ public class NIOFuture implements IOFuture {
     this.internalFuture = nettyFuture;
     this.connector = theConnector;
   }
-
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public WebSocketConnector getConnector() {
     return connector;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isDone() {
     return internalFuture.isDone();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isCancelled() {
     return internalFuture.isCancelled();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isSuccess() {
     return internalFuture.isSuccess();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Throwable getCause() {
     return internalFuture.getCause();
   }
-
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean cancel() {
     return internalFuture.cancel();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean setSuccess() {
     return internalFuture.setSuccess();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean setFailure(Throwable cause) {
     return internalFuture.setFailure(cause);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean setProgress(long amount, long current, long total) {
     return internalFuture.setProgress(amount, current, total);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void addListener(IOFutureListener listener) {
     ChannelFutureListener internalListener = new NIOInternalFutureListener(this, listener);
+    listenerMap.put(listener, internalListener);
     internalFuture.addListener(internalListener);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void removeListener(IOFutureListener listener) {
+    internalFuture.removeListener(listenerMap.get(listener));
   }
-  
+
   public ChannelFuture getInternalFuture() {
     return internalFuture;
   }
