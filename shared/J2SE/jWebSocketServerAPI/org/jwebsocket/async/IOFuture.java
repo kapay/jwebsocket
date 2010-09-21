@@ -58,14 +58,7 @@ import org.jwebsocket.api.WebSocketConnector;
  * completed, wait for the completion, and retrieve the result of the I/O
  * operation. It also allows you to add {@link IOFutureListener}s so you
  * can get notified when the I/O operation is completed.
- * 
- * <p>
- * In spite of the disadvantages mentioned above, there are certainly the cases
- * where it is more convenient to call {@link #await()}. In such a case, please
- * make sure you do not call {@link #await()} in an I/O thread. Otherwise,
- * {@link IllegalStateException} will be raised to prevent a dead lock.
- * </p>
- * 
+ *
  * @author <a href="http://www.purans.net/">Puran Singh</a>
  */
 public interface IOFuture {
