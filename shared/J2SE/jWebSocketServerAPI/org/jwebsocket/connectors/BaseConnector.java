@@ -21,6 +21,7 @@ import javolution.util.FastMap;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketSession;
@@ -78,6 +79,11 @@ public class BaseConnector implements WebSocketConnector {
 
 	@Override
 	public void sendPacket(WebSocketPacket aDataPacket) {
+	}
+	
+	@Override 
+	public IOFuture sendPacketAsynch(WebSocketPacket aDataPacket) {
+	  return null;
 	}
 
 	@Override

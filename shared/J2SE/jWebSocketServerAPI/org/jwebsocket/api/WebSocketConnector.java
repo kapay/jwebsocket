@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.kit.CloseReason;
 import java.net.InetAddress;
 import org.jwebsocket.kit.RequestHeader;
@@ -67,6 +68,17 @@ public interface WebSocketConnector {
 	 * @param aDataPacket raw web socket data packet
 	 */
 	void sendPacket(WebSocketPacket aDataPacket);
+	
+	/**
+   * Sends a datapacket to a WebSocket client asynchronously. This method immediately returns 
+   * the future object to the caller so that it can proceed with the processing
+   * and not wait for the response.
+   * @param aDataPacket raw web socket data packet
+   * @return the {@link IOFuture} which will be notified when the
+   *         write request succeeds or fails
+   * null if there's any problem with the send operation.         
+   */
+  IOFuture sendPacketAsynch(WebSocketPacket aDataPacket);
 
 	/**
 	 * Returns the request header from the client during the connection

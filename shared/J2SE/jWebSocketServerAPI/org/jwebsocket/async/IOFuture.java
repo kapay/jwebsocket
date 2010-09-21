@@ -19,7 +19,7 @@ import org.jwebsocket.api.WebSocketConnector;
 /**
  * The result of an asynchronous {@link WebSocketConnector} I/O operation.
  * <p>
- * This is to suspport asynchronous I/O operations in <tt>jWebSocket</tt>. 
+ * This is to support asynchronous I/O operations in <tt>jWebSocket</tt>. 
  * It means any I/O calls will return immediately with no guarantee that the
  * requested I/O operation has been completed at the end of the call. 
  * Instead, you will be returned with a {@link IOFuture} instance which gives 
