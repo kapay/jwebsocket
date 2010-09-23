@@ -135,7 +135,9 @@ public class NIOFuture implements IOFuture {
    */
   @Override
   public void removeListener(IOFutureListener listener) {
-    internalFuture.removeListener(listenerMap.get(listener));
+    if (listenerMap.containsKey(listener)) {
+      internalFuture.removeListener(listenerMap.get(listener));
+    }
   }
 
   public ChannelFuture getInternalFuture() {
