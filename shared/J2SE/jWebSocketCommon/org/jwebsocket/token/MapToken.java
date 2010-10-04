@@ -360,9 +360,17 @@ public class MapToken extends BaseToken implements Token {
 	 * @return
 	 */
 	@Override
-	public Map getMap(String aKey, Boolean aDefault) {
-		// TODO: Implement this
-		return null;
+	public Map getMap(String aKey, Map aDefault) {
+		Map lResult = null;
+		try {
+			lResult = (Map) mData.get(aKey);
+			if (lResult == null) {
+				lResult = aDefault;
+			}
+		} catch (Exception ex) {
+			lResult = aDefault;
+		}
+		return lResult;
 	}
 
 	/**
@@ -372,8 +380,7 @@ public class MapToken extends BaseToken implements Token {
 	 */
 	@Override
 	public Map getMap(String aKey) {
-		// TODO: Implement this
-		return null;
+		return getMap(aKey, null);
 	}
 
 	/**

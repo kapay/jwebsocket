@@ -1621,11 +1621,13 @@ jws.RPCClientPlugIn = {
 	//:d:en:granted, otherwise it gets rejected.
 	//:a:en::aClass:String:Class of the method that is supposed to be called.
 	//:a:en::aMthd:String:Name of the method that is supposed to be called.
-	//:a:en::aArgs:Array:Arguments for method that is supposed to be called.
+	//:a:en::aArgs:Array:Arguments for method that is supposed to be called. Should always be an array, but also works with simple values. Caution with a simple array as parameter (args mus be: [[1,2..]]).
 	//:a:en::aOptions:Object:Optional arguments. For details please refer to the [tt]sendToken[/tt] method.
 	//:r:*:::void:none
 	rpc: function( aClass, aMthd, aArgs, aOptions) {
-		console.log(aArgs);
+		if (aArgs != null && !(aArgs instanceof Array)) {
+			aArgs = [aArgs];
+		}
 		aOptions = this.setDefaultOption (aOptions) ;
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
@@ -1665,6 +1667,9 @@ jws.RPCClientPlugIn = {
 	//:a:en::aOptions:Object:Optional arguments. For details please refer to the [tt]sendToken[/tt] method.
 	//:r:*:::void:none
 	rrpc: function( aTarget, aClass, aMthd, aArgs, aOptions ) {
+		if (aArgs != null && !(aArgs instanceof Array)) {
+			aArgs = [aArgs];
+		}
 		aOptions = this.setDefaultOption (aOptions) ;
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
@@ -1707,9 +1712,7 @@ jws.RPCClientPlugIn = {
 			}
 			var lRes;
 			try {
-				// You could even bind the function with something else,
-				// like a customPlugin, if needed.
-				lRes = lTheFunction[ lMethod ].call( null, lArgs );
+				lRes = lTheFunction[ lMethod ].apply( null, lArgs);
 			} catch (ex) {
 				//TODO: send back the error under a better format
 				lRes = ex 
@@ -1719,22 +1722,22 @@ jws.RPCClientPlugIn = {
 					+ JSON.stringify(lArgs)
 					+ ")";
 			}
-
-			this.sendToken({
+		} else {
+			//TODO: send back the error under a better format
+			lRes = ex 
+			+ "\nAcces not granted to the="
+			+ lMethod;
+		}
+		this.sendToken({
 				// ns: jws.SystemPlugIn.NS,
 				type: "send",
 				targetId: aToken.sourceId,
 				result: lRes,
 				reqType: "rrpc",
 				code: 0
-			},
-			null // aOptions
-			);
-		} else {
-			// console.log( "Reverse RPC request '" + lPath + "(" + lArgs + ")' not granted!" );
-		}
-	}
-
+			},null // aOptions
+		);
+	}	
 }
 
 // add the JWebSocket RPC PlugIn into the BaseClient class

@@ -15,10 +15,10 @@
 // ---------------------------------------------------------------------------
 package org.jwebsocket.packetProcessors;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -34,10 +34,25 @@ import org.jwebsocket.token.Token;
 
 /**
  * converts JSON formatted data packets into tokens and vice versa.
- * @author Alexander Schulze, Roderick Baier (improvements regarding JSON array).
+ * @author Alexander Schulze, Roderick Baier (improvements regarding JSON array), Quentin Ambard (add support for Map and List for PacketToToken and tokeToPacket).
  */
 @SuppressWarnings("rawtypes")
 public class JSONProcessor {
+		
+	 /**
+	 * @param aObject
+	 * @return an object which is the JSON representation of aObject
+	 */
+		@SuppressWarnings("unchecked")
+		private static Object convertJsonToJavaObject (Object aObject) {
+	    if (aObject instanceof JSONArray) {
+	        return jsonArrayToList((JSONArray) aObject);
+	    } else if (aObject instanceof JSONObject) {
+	        return jsonObjectToMap((JSONObject) aObject);
+	    } else {
+	        return aObject;
+	    }
+		}
 
     /**
      * Quentin: Recursivly convert a JSONArray to a List of List, Map or Object.
@@ -47,21 +62,14 @@ public class JSONProcessor {
      * 
      * @param aJsonArray
      * @return the list
-     */
-
+     */		
     @SuppressWarnings("unchecked")
     public static List jsonArrayToList(JSONArray aJsonArray) {
         List lList = new FastList();
         for (int i = 0; i < aJsonArray.length(); i++) {
             try {
                 Object lSubObject = aJsonArray.get(i);
-                if (lSubObject instanceof JSONArray) {
-                    lList.add(jsonArrayToList((JSONArray) lSubObject));
-                } else if (lSubObject instanceof JSONObject) {
-                    lList.add(jsonObjectToMap((JSONObject) lSubObject));
-                } else {
-                    lList.add(aJsonArray.get(i));
-                }
+                lList.add(convertJsonToJavaObject(lSubObject));
             } catch (JSONException e) { 
                 // Sould never happen: aJsonArray.get(i)
                 // will always exists
@@ -84,14 +92,8 @@ public class JSONProcessor {
         while (iterator.hasNext()) {
             try {
                 Object aKey = iterator.next();
-                Object aValue = aJsonObject.get(String.valueOf(aKey));
-                if (aValue instanceof JSONArray) {
-                    lFastMap.put(aKey, jsonArrayToList((JSONArray) aValue));
-                } else if (aValue instanceof JSONObject) {
-                    lFastMap.put(aKey, jsonObjectToMap((JSONObject) aValue));
-                } else {
-                    lFastMap.put(aKey, aValue);
-                }
+                Object aValue = convertJsonToJavaObject(aJsonObject.get(String.valueOf(aKey)));
+                lFastMap.put(aKey, aValue);
             } catch (JSONException e) { 
                 // Sould never happen:
                 // aJsonObject.get(String.valueOf(aKey))
@@ -153,37 +155,82 @@ public class JSONProcessor {
         return packet;
     }
 
+    
+    /**
+     * @param aList
+     * @return a JSONArray which represents aList
+     * @throws JSONException
+     */
+    private static JSONArray listToJsonArray (List aList) throws JSONException {
+      JSONArray lArray = new JSONArray();
+      for (Object item : aList) {
+      	lArray.put(convertObjectToJson(item));
+      }
+    	return lArray;
+    }
+    
+    /**
+     * 
+     * @param aObjectList
+     * @return a JSONArray which represents aObjectList
+     * @throws JSONException
+     */
+    private static JSONArray objectListToJsonArray (Object[] aObjectList) throws JSONException {
+      JSONArray lArray = new JSONArray();
+      for (int lIdx = 0; lIdx < aObjectList.length; lIdx++) {
+          Object lObj = aObjectList[lIdx];
+        	lArray.put(convertObjectToJson(lObj));
+      }
+    	return lArray;
+    }
+
+    /**
+     * 
+     * @param aMap
+     * @return a JSONObject which represents aMap. All the keys values are passed as String using the toString method of the key.
+     * @throws JSONException
+     */
+    private static JSONObject mapToJsonObject (Map<?, ?> aMap) throws JSONException {
+    	JSONObject lObject = new JSONObject();
+      for (Entry<?, ?> lEntry : aMap.entrySet()) {
+      	String lKey = lEntry.getKey().toString() ;
+      	Object lValue = convertObjectToJson(lEntry.getValue());
+      	lObject.put(lKey, lValue);
+      }
+    	return lObject;
+    }
+
+    /**
+     * @param aObject
+     * @return an Object which represents aObject (looks for List, Token and Maps)
+     * @throws JSONException
+     */
+    private static Object convertObjectToJson (Object aObject) throws JSONException {
+  		if (aObject instanceof List) { 
+  			return listToJsonArray((List)aObject);
+  		} else if (aObject instanceof Token) {
+      	return tokenToJSON((Token) aObject);
+      } else if (aObject instanceof Object[]) {
+      	return objectListToJsonArray((Object[]) aObject);
+      } else if (aObject instanceof Map) {
+      	return mapToJsonObject((Map<?, ?>) aObject);
+      } else {
+          return aObject ;
+      }
+    }
+    
+    /**
+     * @param aToken
+     * @return a JSONObject which represents aToken (looks for List, Token and Maps)
+     * @throws JSONException
+     */
     private static JSONObject tokenToJSON(Token aToken) throws JSONException {
         JSONObject lJSO = new JSONObject();
-
         Iterator<String> iterator = aToken.getKeyIterator();
         while (iterator.hasNext()) {
             String key = iterator.next();
             Object value = aToken.getObject(key);
-            if (value instanceof Collection) {
-                JSONArray lArray = new JSONArray();
-                for (Object item : (Collection) value) {
-                    if (item instanceof Token) {
-                        JSONObject object = tokenToJSON((Token) item);
-                        lArray.put(object);
-                    } else {
-                        lArray.put(item);
-                    }
-                }
-                lJSO.put(key, lArray);
-            } else if (value instanceof Token) {
-                lJSO.put(key, tokenToJSON((Token) value));
-            } else if (value instanceof Object[]) {
-                JSONArray lArray = new JSONArray();
-                Object[] lObjs = (Object[]) value;
-                for (int lIdx = 0; lIdx < lObjs.length; lIdx++) {
-                    Object lObj = lObjs[lIdx];
-                    lArray.put(lObj);
-                }
-                lJSO.put(key, lArray);
-            } else {
-                lJSO.put(key, value);
-            }
+            lJSO.put(key, convertObjectToJson(value));
         }
         return lJSO;
     }

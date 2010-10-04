@@ -121,9 +121,9 @@
 
 			function rpcTest() {
 
-				var lArgs= [2];
+				var lArgs= [[2]];
 				var aNameSpace = "org.jwebsocket.rpc.sample.SampleRPCLibrary";
-				var aMethod = "sampleOverloadRPC";
+				var aMethod = "testList";
 
 				log( "Remote calling '" + aMethod + "' with args '" + lArgs + "'..." );
 
@@ -170,7 +170,7 @@
 				rpc("getProtected");
 			}
 
-			function rrpcDemo() {
+			function rrpcDemo(aArgs, aMethod) {
 				var lArgs = eArgs.value;
 				var lMethod = "aDemoFunction1";
 				var aSpaceName = "demo";
@@ -205,9 +205,13 @@
 
 				if( jws.browserSupportsWebSockets() ) {
 					lWSC = new jws.jWebSocketJSONClient();
-					lWSC.addGrantedProcedure("demo.aDemoFunction1");
-					lWSC.addGrantedProcedure("demo.aDemoFunction2");
-					lWSC.removeGrantedProcedure("demo.aDemoFunction2");
+					lWSC.addGrantedProcedure("demo.rrpcTest1");
+					lWSC.addGrantedProcedure("demo.rrpcTest2");
+					lWSC.addGrantedProcedure("demo.rrpcTest3");
+					lWSC.addGrantedProcedure("org.jwebsocket.android.demo.RPCDemoActivity.rrpcTest1");
+					lWSC.addGrantedProcedure("org.jwebsocket.android.demo.RPCDemoActivity.rrpcTest2");
+					lWSC.addGrantedProcedure("org.jwebsocket.android.demo.RPCDemoActivity.rrpcTest3");
+					lWSC.removeGrantedProcedure("demo.rrpcTest3");
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnDisconnect" ).setAttribute( "disabled", "disabled" );
@@ -227,19 +231,99 @@
 			function exitPage() {
 				disconnect();
 			}
-			demo = {
-				aDemoFunction1: function (aArgs){
-					return (
-					confirm(
-					"Arguments received: '" + aArgs + "'\n" +
-						"'true' or 'false' will be returned to requester."
-				)
-				);
+			org = {jwebsocket: {android: {demo: {RPCDemoActivity: {
+				rrpcTest1: function (arg1, arg2, arg3){
+					log("rrpcTest1 has been called by the server");
+					if (arg1) {
+						log("arg1: " + arg1);
+					}
+				},
+				rrpcTest2: function (arg1, arg2){
+					log("rrpcTest2("+arg1+", "+arg2+") has been called by the server");
+				},
+				rrpcTest3: function (){
+					log("rrpcTest3 has been called by the server");
 				}
-			};
+			}}}}};
+			var rpcTest1 = function (){
+				rpcTestGeneric('rrpcTest1', null);
+			}
+			var rpcTest11 = function (){
+				rpcTestGeneric('rrpcTest1', "hello ' & é à");
+			}
+			var rpcTest12 = function (){
+				rpcTestGeneric('rrpcTest1', 123);
+			}
+			var rpcTest2 = function (){
+				rpcTestGeneric('rrpcTest2', [["'aa", "b&"], [[1,2],[3,4]]]);
+			}
+			var rpcTest21 = function (){
+				rpcTestGeneric('rrpcTest2', [["'aa", "b&"], [[1,"2"],[3,4]]]);
+			}
+			var rpcTest3 = function (){
+				rpcTestGeneric('rrpcTest3', null);
+			}
+			
+
+			var rpcTestGeneric = function (aMethodName, aArgs) {
+				// send a reverse remote procedure call to another client
+				//If targetID is not a number, try a simple RPC:
+				if (isNaN(parseInt(eTarget.value))) {
+					log( "remote calling " + aMethodName + " with args '" + aArgs + "'..." );
+					// perform the Remote Procedure Call...
+					var lRes = lWSC.rpc(
+						// pass class, method and argument for server java method:
+						'org.jwebsocket.rpc.sample.SampleRPCLibrary',
+						aMethodName,
+						aArgs,
+						// pass option to spawn thread and response call back
+						{	spawnThread: eSpawnThread.checked,
+							// new easy-to-use response callback
+							OnResponse: function( aToken ) {
+								if( aToken.code != 0 ) {
+									log( "RPC Error: " + aToken.msg );
+								} else {
+									var lRes = aToken.result;
+									// if an object is returned convert it into a human readable format
+									if( typeof lRes == "object") {
+										lRes = JSON.stringify( lRes );
+									}
+									log( "Received RPC result: " + lRes );
+								}
+							}
+						}
+					);					
+				} else {
+					log( "Reverse remote calling " + aMethodName + " with args '" + aArgs + "'..." );
+					aClassName = 'org.jwebsocket.android.demo.RPCDemoActivity';					
+					var lRes = lWSC.rrpc(
+							eTarget.value,			// target
+							aClassName,				// classname
+							aMethodName,				// method
+							aArgs,				// arguments as an array
+							{						// options
+								spawnThread: eSpawnThread.checked,
+								// new easy-to-use response callback
+								OnResponse: function( aToken ) {
+									if( aToken.error ) {
+										log( "RRPC Error: " + aToken.error );
+									} else {
+										log( "Received RRPC result: " + aToken.result );
+									}
+								}
+							});
+							log( lWSC.resultToString( lRes ) );				
+				}
+			}
+			changeTarget = function (value) {
+				if (isNaN(parseInt(eTarget.value))) {
+					document.getElementById('rpcOrRrpc').innerHTML = "call RPC";
+				} else {
+					document.getElementById('rpcOrRrpc').innerHTML = "call RRPC";
+				}
+			}
 		</script>
 	</head>
-
 	<body
 		onload="initPage();"
 		onunload="exitPage();"
@@ -291,10 +375,70 @@
 					<td class="stdDlg" width="5"></td>
 					<td class="stdDlg" width="5"></td>
 					<td class="stdDlg" width="5">Target&nbsp;Id</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfTarget" type="text" value="ID" style="width:100%"></td>
-					<td class="stdDlg" width=""><input class="schkThreaded" id="schkThreaded" type="checkbox" value="on" checked="checked" title="run remote procedure in separate thread on server"> spawn thread</td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRRPC" type="button" value="Call reverse" onclick="rrpcDemo();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="RPC Lib" onclick="rpcTest();"></td>
+					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfTarget" type="text" value="ID" onkeypress="changeTarget(this.value)" style="width:100%"></td>
+					<td class="stdDlg" width="">(Call RRPC if a target is set, or RPC if target is not an int)<input class="schkThreaded" id="schkThreaded" type="checkbox" value="on" checked="checked" title="run remote procedure in separate thread on server"> spawn thread</td>
+					<td class="stdDlg" width="5"><!-- <input class="sbtnDlg" id="sbtnRRPC" type="button" value="Call reverse" onclick="(r)rpcDemo();"> --></td>
+					<td class="stdDlg" width="5"><!-- <input class="sbtnDlg" id="sbtnRPCTest" type="button" value="RPC Lib" onclick="rpcTest();"> --></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5" id="rpcOrRrpc"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest1" onclick="rpcTest1();"></td>
+					<td class="stdDlg" width="">invoke (r)rpcTest1(), the most basic (r)rpc test.</td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest1.1" onclick="rpcTest11();"></td>
+					<td class="stdDlg" width="">invoke (r)rpcTest1(\"hello ! ' & = é test\"), with a special string as parameter. Will only work with clients which suport method overload (not with js)</td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest1.2" onclick="rpcTest12();"></td>
+					<td class="stdDlg" width="">invoke (r)rpcTest1(123), with a int as parameter. Will only work with clients which suport method overload (not with js</td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest2" onclick="rpcTest2();"></td>
+					<td class="stdDlg" width="">(r)rpcTest2(["'aa", "b&"], [[1,2],[3,4]]), test imbricated list</td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest2.1" onclick="rpcTest21();"></td>
+					<td class="stdDlg" width="">(r)rpcTest2(["'aa", "b&"], [[1,"2"],[3,4]]), test imbricated list : should fail since array parameter are not only int. (try to invoke java method (r)rpcTest2(List &lsaquo;String&rsaquo; aList, List&lsaquo;List&lsaquo;Integer&rsaquo;&rsaquo; aList2))</td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest3" onclick="rpcTest3();"></td>
+					<td class="stdDlg" width="">try to invoke a non-granted method</td>
+					<td class="stdDlg" width="5"></td>
+					<td class="stdDlg" width="5"></td>
 				</tr>
 			</table>
 		</div>

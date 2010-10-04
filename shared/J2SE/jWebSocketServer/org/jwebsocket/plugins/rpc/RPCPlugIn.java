@@ -18,7 +18,6 @@ package org.jwebsocket.plugins.rpc;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -36,7 +35,6 @@ import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.factory.JWebSocketJarClassLoader;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
@@ -44,14 +42,11 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.plugins.rpc.RPCCallableClassLoader.MethodRightLink;
 import org.jwebsocket.plugins.rpc.rrpc.Rrpc;
-import org.jwebsocket.plugins.rpc.rrpc.RrpcConnectorNotFoundException;
 import org.jwebsocket.plugins.rpc.rrpc.RrpcRightNotGrantedException;
-import org.jwebsocket.plugins.rpc.util.ListConverter;
 import org.jwebsocket.plugins.rpc.util.RPCRightNotGrantedException;
 import org.jwebsocket.plugins.rpc.util.TypeConverter;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.token.Token;
-import org.jwebsocket.token.TokenFactory;
 
 /**
  * This plug-in provides all the functionality for remote procedure calls (RPC)
@@ -69,21 +64,10 @@ import org.jwebsocket.token.TokenFactory;
 public class RPCPlugIn extends TokenPlugIn {
 
   // keys to buil the rrpc call
-  public static final String RRPC_KEY_TARGET_ID = "targetId";
-  public static final String RRPC_KEY_SOURCE_ID = "sourceId";
-  public static final String RRPC_KEY_CLASSNAME = "classname";
-  public static final String RRPC_KEY_METHOD = "method";
-  public static final String RRPC_KEY_ARGS = "args";
-
-  private static final String RPC_RIGHT_ID = "rpc";
-  public static final String RRPC_RIGHT_ID = "rrpc";
-
   private static RPCPlugIn sRPCPlugIn = null;
   private static Logger mLog = Logging.getLogger(RPCPlugIn.class);
   // Store the parameters type allowed for rpc method.
   private Map<String, RPCCallableClassLoader> mRpcCallableClassLoader = new FastMap<String, RPCCallableClassLoader>();
-  // if namespace changed update client plug-in accordingly!
-  public static String NS_RPC_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.rpc";
 
   // TODO: RRPC calls do not yet allow quotes in arguments
   // TODO: We need simple unique IDs to address a certain target, session id not
@@ -100,10 +84,10 @@ public class RPCPlugIn extends TokenPlugIn {
   public RPCPlugIn(PluginConfiguration configuration) {
     super(configuration);
     if (mLog.isDebugEnabled()) {
-      mLog.debug("Instantiating rpc plug-in...");
+      mLog.debug("Instantiating rpc plug-iiiin...");
     }
     // specify default name space
-    this.setNamespace(NS_RPC_DEFAULT);
+    this.setNamespace(CommonRpcPlugin.NS_RPC_DEFAULT);
 
     // currently this is the only supported RPCPlugIn server
     // mRpcServer = new DemoRPCServer();
@@ -111,6 +95,7 @@ public class RPCPlugIn extends TokenPlugIn {
   }
 
   @Override
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public void engineStarted(WebSocketEngine aEngine) {
     // we get the instance of the Plugin for the rrpc module:
     sRPCPlugIn = this;
@@ -180,17 +165,19 @@ public class RPCPlugIn extends TokenPlugIn {
       // We remove the pluginId because we just want the name of the method:
       String lFullMethodName = lRightId.substring(getNamespace().length() + 1);
       // We don't care about global rpc and rrpc rights in this section.
-      if (!lFullMethodName.equals(RPC_RIGHT_ID) && !lFullMethodName.equals(RRPC_RIGHT_ID)) {
+      if (!lFullMethodName.equals(CommonRpcPlugin.RPC_RIGHT_ID) && !lFullMethodName.equals(CommonRpcPlugin.RRPC_RIGHT_ID)) {
         // setting with parameters type to handle java method overload
-        String lParameterType = null;
+        String[] lParameterTypes = null;
         if (lFullMethodName.indexOf("(") != -1 && lFullMethodName.indexOf(")") != -1) {
-          lParameterType = lFullMethodName.substring(lFullMethodName.indexOf("(") + 1, lFullMethodName.length() - 1);
+        	String lParameters = lFullMethodName.substring(lFullMethodName.indexOf("(") + 1, lFullMethodName.length() - 1);
+        	lParameters = lParameters.replace(" ", "");
+        	lParameterTypes = lParameters.split(",");
           lFullMethodName = lFullMethodName.substring(0, lFullMethodName.indexOf("("));
         }
         String lClassName = lFullMethodName.substring(0, lFullMethodName.lastIndexOf("."));
         String lMethodName = lFullMethodName.substring(lFullMethodName.lastIndexOf(".") + 1);
 
-        Method lMethod = getValidMethod(lClassName, lMethodName, lParameterType);
+        Method lMethod = getValidMethod(lClassName, lMethodName, lParameterTypes);
         if (lMethod != null) {
           // Add this method as a RPCCallable method.
           mRpcCallableClassLoader.get(lClassName).addMethod(lMethodName, lMethod, lRightId);
@@ -199,9 +186,9 @@ public class RPCPlugIn extends TokenPlugIn {
     }
   }
 
-  /*
-   * @Override public void connectorStarted(WebSocketConnector aConnector) { }
-   */
+   @Override 
+   public void connectorStarted(WebSocketConnector aConnector) { }
+   
   @Override
   public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
     String lType = aToken.getType();
@@ -224,9 +211,10 @@ public class RPCPlugIn extends TokenPlugIn {
    * @param aConnector
    * @param aToken
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public void rpc(WebSocketConnector aConnector, Token aToken) {
     // check if user is allowed to run 'rpc' command
-    if (!SecurityFactory.hasRight(getUsername(aConnector), NS_RPC_DEFAULT + "." + RPC_RIGHT_ID)) {
+    if (!SecurityFactory.hasRight(getUsername(aConnector), CommonRpcPlugin.NS_RPC_DEFAULT + "." + CommonRpcPlugin.RPC_RIGHT_ID)) {
       sendToken(aConnector, aConnector, createAccessDenied(aToken));
       return;
     }
@@ -238,8 +226,13 @@ public class RPCPlugIn extends TokenPlugIn {
     List lArgs = aToken.getList("args");
     // if it's not a List, but just a simple arg
     if (lArgs == null) {
-      lArgs = new FastList();
-      lArgs.add(aToken.getObject("args"));
+    	Object lArg = aToken.getObject("args");
+    	if (lArg != null) {
+    		lArgs = new FastList();
+    		lArgs.add(aToken.getObject("args"));
+    	} else {
+    		lArgs = null;
+    	}
     }
     String lMsg = null;
 
@@ -281,7 +274,7 @@ public class RPCPlugIn extends TokenPlugIn {
     } catch (RPCRightNotGrantedException ex) {
       lMsg = "RPCRightNotGrantedException calling '" + lMethod + "' for class " + lClassName + ": " + ex.getMessage();
     } catch (ClassNotFoundException ex) {
-      lMsg = "RPCRightNotGrantedException calling '" + lMethod + "' for class " + lClassName + ": " + ex.getMessage();
+      lMsg = "ClassNotFoundException (the method does probably not exist or is not defined in the jwebsocket.xml file) calling '" + lMethod + "' for class " + lClassName + ": " + ex.getMessage();
     }
     if (lMsg != null) {
       lResponseToken.setInteger("code", -1);
@@ -295,17 +288,16 @@ public class RPCPlugIn extends TokenPlugIn {
 
     sendToken(aConnector, aConnector, lResponseToken);
   }
-
+  /**
+   * Do a rrpc call from a rrpc-ready-to-use token
+   * @param aConnectorFrom
+   * @param aToken rrpc-ready-to-use
+   */
   public void rrpc(WebSocketConnector aConnectorFrom, Token aToken) {
     try {
-      new Rrpc.Call(aToken);
+      new Rrpc(aToken).call();
     } catch (RrpcRightNotGrantedException e) {
       sendToken(aConnectorFrom, aConnectorFrom, createAccessDenied(aToken));
-    } catch (RrpcConnectorNotFoundException e) {
-      Token lResToken = createResponse(aToken);
-      lResToken.setInteger("code", -1);
-      lResToken.setString("msg", "target " + aToken.getString(RRPC_KEY_TARGET_ID) + " not found");
-      sendToken(aConnectorFrom, aConnectorFrom, lResToken);
     }
   }
 
@@ -315,28 +307,18 @@ public class RPCPlugIn extends TokenPlugIn {
    * @param aConnector
    * @param aToken
    */
-  public static void rrpc(WebSocketConnector aConnectorFrom, List<WebSocketConnector> aConnectorsTo, String aClassname, String aMethod, List aArgs) {
+  public static void processRrpc(WebSocketConnector aConnectorFrom, List<WebSocketConnector> aConnectorsTo, Token aToken) {
     if (mLog.isDebugEnabled()) {
       mLog.debug("Processing 'rrpc'...");
     }
     if (sRPCPlugIn == null) {
       mLog.error("Try to make a rrpc call but the RPCPlugin doesn't seem to be load." + "Please make sure the plugin is correctly added to jWebsocket");
     } else {
-      // If aConectorFrom is null, that means the server is calling.
-      String idConnectorFrom;
-      if (aConnectorFrom == null) {
-        idConnectorFrom = "server";
-      } else {
-        idConnectorFrom = aConnectorFrom.getId();
-      }
-      Token lRRPC = TokenFactory.createToken(RPCPlugIn.NS_RPC_DEFAULT, "rrpc");
-      lRRPC.setString(RPCPlugIn.RRPC_KEY_CLASSNAME, aClassname);
-      lRRPC.setString(RPCPlugIn.RRPC_KEY_METHOD, aMethod);
-      lRRPC.setList(RPCPlugIn.RRPC_KEY_ARGS, aArgs);
-      lRRPC.setString(RPCPlugIn.RRPC_KEY_SOURCE_ID, idConnectorFrom);
       // Send the rpc to every connector
       for (WebSocketConnector lConnector : aConnectorsTo) {
-        sRPCPlugIn.sendToken(aConnectorFrom, lConnector, lRRPC);
+      	if (lConnector != null) {
+          sRPCPlugIn.sendToken(aConnectorFrom, lConnector, aToken);
+      	}
       }
     }
   }
@@ -347,6 +329,7 @@ public class RPCPlugIn extends TokenPlugIn {
    * @param aURL
    * @return
    */
+  @SuppressWarnings("rawtypes")
   public static Class loadClass(String aClassName, String aURL) {
     Class lClass = null;
     try {
@@ -370,23 +353,23 @@ public class RPCPlugIn extends TokenPlugIn {
    * @param aArgs
    * @return
    */
-  public static Object createInstance(Class aClass, Object[] aArgs) {
-    Object lObj = null;
-    try {
-      Class[] lCA = new Class[aArgs != null ? aArgs.length : 0];
-      for (int i = 0; i < lCA.length; i++) {
-        lCA[i] = aArgs[i].getClass();
-      }
-      Constructor lConstructor = aClass.getConstructor(lCA);
-      lObj = lConstructor.newInstance(aArgs);
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("Object '" + aClass.getName() + "' instantiated!");
-      }
-    } catch (Exception ex) {
-      mLog.error("Exception instantiating class " + aClass.getName() + ": " + ex.getMessage());
-    }
-    return lObj;
-  }
+//  public static Object createInstance(Class aClass, Object[] aArgs) {
+//    Object lObj = null;
+//    try {
+//      Class[] lCA = new Class[aArgs != null ? aArgs.length : 0];
+//      for (int i = 0; i < lCA.length; i++) {
+//        lCA[i] = aArgs[i].getClass();
+//      }
+//      Constructor lConstructor = aClass.getConstructor(lCA);
+//      lObj = lConstructor.newInstance(aArgs);
+//      if (mLog.isDebugEnabled()) {
+//        mLog.debug("Object '" + aClass.getName() + "' instantiated!");
+//      }
+//    } catch (Exception ex) {
+//      mLog.error("Exception instantiating class " + aClass.getName() + ": " + ex.getMessage());
+//    }
+//    return lObj;
+//  }
 
   /**
    * 
@@ -400,88 +383,39 @@ public class RPCPlugIn extends TokenPlugIn {
    * @throws RPCRightNotGrantedException
    * @throws ClassNotFoundException
    */
-  public Object call(WebSocketConnector aConnector, RPCCallableClassLoader aRpcClassLoader, Object aInstance, String aMethodName, List aArgs) throws NoSuchMethodException, IllegalAccessException,
+  @SuppressWarnings("rawtypes")
+  private Object call(WebSocketConnector aConnector, RPCCallableClassLoader aRpcClassLoader, Object aInstance, String aMethodName, List aArgs) throws NoSuchMethodException, IllegalAccessException,
       InvocationTargetException, RPCRightNotGrantedException, ClassNotFoundException {
     Class lClass = aRpcClassLoader.getRpcCallableClass();
     Object[] lArg = null;
     // JSONArray lJsonArrayArgs = null;
     Method lMethodToInvoke = null;
-    if (aArgs != null) {
-      // convert aArgs as a JSONArray
-      // if (!(aArgs instanceof JSONArray)) {
-      // lJsonArrayArgs = new JSONArray().put(aArgs);
-      // } else {
-      // lJsonArrayArgs = (JSONArray) aArgs;
-      // }
-      // a JSON Array is passed as parameter => we look for the method which
-      // match with same parameters
-      // initialization
-      lArg = new Object[aArgs.size()];
-
-      // We look if one of the method we have loaded match
-      List<MethodRightLink> lListMethod = aRpcClassLoader.getMethods(aMethodName);
-      for (MethodRightLink lMethodRight : lListMethod) {
-        Method lMethod = lMethodRight.getMethod();
-        Class[] lParametersType = lMethod.getParameterTypes();
-        // We are looking for a method with the same number of parameters
-        if (lParametersType.length == aArgs.size()) {
-          // We make sure the types of the method match
-          try {
-            for (int j = 0; j < lParametersType.length; j++) {
-              Class lParameterType = lParametersType[j];
-              // Try to guess the object type.
-              // Only support primitive type+wrapper, String, List and Token.
-              // String and Token
-              if (lParameterType == String.class) {
-                lArg[j] = (String) aArgs.get(j);
-              } else if (lParameterType == Token.class) {
-                lArg[j] = (Token) aArgs.get(j);
-              } // Special support for primitive type
-              else if (lParameterType == int.class) {
-                lArg[j] = (Integer) aArgs.get(j);
-              } else if (lParameterType == boolean.class) {
-                lArg[j] = (Boolean) aArgs.get(j);
-              } else if (lParameterType == double.class) {
-                lArg[j] = (Double) aArgs.get(j);
-              } // Wrappers of primitive types
-              else if (lParameterType == Integer.class) {
-                lArg[j] = (Integer) aArgs.get(j);
-              } else if (lParameterType == Boolean.class) {
-                lArg[j] = (Boolean) aArgs.get(j);
-              } else if (lParameterType == Double.class) {
-                lArg[j] = (Double) aArgs.get(j);
-              } else if (lParameterType == List.class) {
-                // try to guess which type of object should be on the List:
-                Type genericParameterType = lMethod.getGenericParameterTypes()[j];
-                lArg[j] = ListConverter.convert((List) aArgs.get(j), genericParameterType);
-              } // any other object are *not* supported !
-              else {
-                if (mLog.isDebugEnabled()) {
-                  mLog.debug("Can't extract an object with type '" + lParameterType.getName() + "' in a Token Object");
-                }
-                throw new Exception("Can't extract an object whith type '" + lParameterType.getName() + "' in a Token Object");
-              }
-            }
-            // The method is found, all parameters match
-            // check if the user has the role to call this method
-            if (SecurityFactory.hasRight(aConnector.getUsername(), lMethodRight.getRightId())) {
-              lMethodToInvoke = lMethod;
-              break;
-            } else {
-              throw new RPCRightNotGrantedException(lMethod.getName(), aArgs.toString());
-            }
-          } catch (Exception e) {
-            // That's the wrong method. Do nothing, just pass to the next one.
-            // Any idea to do it in a cleaner way ?
-          }
-        }
+    List<MethodRightLink> lListMethod = aRpcClassLoader.getMethods(aMethodName);
+    
+    // We look if one of the method we have loaded match           
+    for (MethodRightLink lMethodRight : lListMethod) {
+      Method lMethod = lMethodRight.getMethod();
+      //We try to match each method against the parameter
+			MethodMatcher lMethodMatcher = new MethodMatcher(lMethod);
+      //If lArg is not null, means the method match
+      if (lMethodMatcher.isMethodMatchingAgainstParameter(aArgs)) {
+      	//If the method match, we make sure the connector has the right to execute this method.
+      	//TODO: problem with rigths here: aConnector.getUsername() is null ??
+        //if (SecurityFactory.hasRight(aConnector.getUsername(), lMethodRight.getRightId())) {
+          lMethodToInvoke = lMethod;
+          lArg = lMethodMatcher.getMethodParameters();
+          break;
+        //}
+        //otherwise, that's the correct method but the connector hasn't the correct right.
+        //throw new RPCRightNotGrantedException(lMethodRight.getRightId(), aArgs.toString());
       }
-      if (lMethodToInvoke == null) {
-        throw new NoSuchMethodException();
-      }
-    } else {
-      lMethodToInvoke = lClass.getMethod(aMethodName, new Class[0]);
     }
+    //If no method have been found.
+    if (lMethodToInvoke == null) {
+      throw new NoSuchMethodException();
+    }
+    
+    //We cast the intance to the correct class.
     aInstance = lClass.cast(aInstance);
     Object lObj = lMethodToInvoke.invoke(aInstance, lArg);
 
@@ -494,26 +428,26 @@ public class RPCPlugIn extends TokenPlugIn {
    * Log an error if on parameter is not valid Only called during the plugin
    * initialization
    * 
-   * @param aMethodName
+   * @param aClassName class name
+   * @param aMethodName method name
+   * @param parametersType list of parameter type found in the xml file (for instance: "int, string, map")
    * @return true if the parameters are OK
    */
-  private Method getValidMethod(String aClassName, String aMethodName, String parameterType) {
+  @SuppressWarnings("rawtypes")
+  private Method getValidMethod(String aClassName, String aMethodName, String[] parametersType) {
     // check if the method own to a class which has been loaded.
     if (!mRpcCallableClassLoader.containsKey(aClassName)) {
-      if (mLog.isDebugEnabled()) {
-        mLog.debug("You try to grant access to a method which own to a class the server can't initialize. Make sure you didn't forget to declare it's jar file. " + aMethodName
-            + " will *not* be loaded");
-      }
+      mLog.error("You try to grant access to a method which own to a class the server can't initialize. Make sure you didn't forget to declare it's jar file. " + aMethodName
+          + " will *not* be loaded");
       return null;
     }
-
-    Class lClass = mRpcCallableClassLoader.get(aClassName).getRpcCallableClass();
-    Method[] lMethods = lClass.getMethods();
     // Check if 2 methods have the same name and the same number of arguments
     // (this block just log an error if 2 method have the same number of
     // parameters without specific types)
+    Class lClass = mRpcCallableClassLoader.get(aClassName).getRpcCallableClass();
+    Method[] lMethods = lClass.getMethods();
     ArrayList<Integer> lMethodWithSameNameAndNumberOfArguments = new ArrayList<Integer>();
-    if (parameterType == null) {
+    if (parametersType == null) {
       for (int i = 0; i < lMethods.length; i++) {
         Method lMethod = lMethods[i];
         if (lMethod.getName().equals(aMethodName)) {
@@ -530,11 +464,23 @@ public class RPCPlugIn extends TokenPlugIn {
         }
       }
     }
+//    if (parametersType != null && parametersType.length == 1 && "".equals(parametersType[0])) {
+//    	parametersType =null;
+//    }
+    //Make sure every parameter type is valid
+    if (parametersType != null) {
+	    for (String parameterType : parametersType) {
+		  	if (!"".equals(parameterType) && !TypeConverter.isValidProtocolType(parameterType)) {
+			    mLog.error(parametersType+" is not a valid parameter type. Valid parameter types are: "+ TypeConverter.getValidParameterTypes());
+			    return null;
+			  }
+	    }
+    }
     // Check if on of the method match
     for (int i = 0; i < lMethods.length; i++) {
       // If we are on a method with the same name, we check it's parameters
       if (lMethods[i].getName().equals(aMethodName)) {
-        if (checkMethodParameters(lMethods[i], parameterType, aClassName)) {
+        if (checkMethodParameters(lMethods[i], parametersType, aClassName)) {
           return lMethods[i];
         }
       }
@@ -547,27 +493,44 @@ public class RPCPlugIn extends TokenPlugIn {
    * Check if the method aMethod match with aParametersType.
    * 
    * @param aMethod
-   * @param aParametersType
+   * @param aParametersType  list of parameter type found in the xml file (for instance: "int, string, map")
    * @param aClassName
    * @return true if the method match, false otherwise
    */
-  private boolean checkMethodParameters(Method aMethod, String aParametersType, String aClassName) {
-    Class[] lParametersType = aMethod.getParameterTypes();
+  @SuppressWarnings("rawtypes")
+  private boolean checkMethodParameters(Method aMethod, String[] aParametersType, String aClassName) {
+		Class[] lParametersType = aMethod.getParameterTypes();
+		
+		//no parameters
+		if (aParametersType != null && aParametersType.length == 1 && "".equals(aParametersType[0])) {
+			if (lParametersType.length == 0) {
+				if(mLog.isDebugEnabled()) {
+					mLog.debug("Method " + aMethod.getName() + " loaded (expect 0 parameters).");
+				}
+				return true ;
+			} else {
+				return false;
+			}
+		}
+
     // Look for a method with the same arguments if they are defined in the xml
     // setting...
     if (aParametersType != null) {
-      aParametersType = aParametersType.replace(" ", "");
-      String[] protocolParameters = aParametersType.split(",");
       boolean methodMatch = true;
-      for (int j = 0; j < protocolParameters.length; j++) {
-        if (!TypeConverter.matchProtocolTypeToJavaType(protocolParameters[j], lParametersType[j].getName())) {
+      for (int j = 0; j < aParametersType.length; j++) {
+        if (!TypeConverter.matchProtocolTypeToJavaType(aParametersType[j], lParametersType[j].getName())) {
           methodMatch = false;
           break;
         }
       }
       if (methodMatch) {
         if (mLog.isDebugEnabled()) {
-          mLog.debug("Complex method " + aMethod.getName() + " loaded (expect " + lParametersType.length + " parameters: " + aParametersType + ").");
+        	StringBuilder lParametersList = new StringBuilder();
+          for (int k = 0; k < aParametersType.length; k++) {
+          	lParametersList.append(aParametersType[k]+", ");
+          }
+          lParametersList.setLength(lParametersList.length()-2);
+          mLog.debug("Complex method " + aMethod.getName() + " loaded (expect " + lParametersType.length + " parameters: " + lParametersList.toString() + ").");
         }
         return true;
       }
@@ -583,7 +546,7 @@ public class RPCPlugIn extends TokenPlugIn {
     // method with this name.
     for (int j = 0; j < lParametersType.length; j++) {
       Class lParameterType = lParametersType[j];
-      if (!TypeConverter.isValidProtocolType(lParameterType)) {
+      if (!TypeConverter.isValidProtocolJavaType(lParameterType)) {
         mLog.error("The method " + aMethod.getName() + " has an invalid parameter: " + lParameterType.getName() + ". " + "This method will *not* be load."
             + "Suported parameters type are primitive, primitive's wrapper, List and Token.");
         return false;

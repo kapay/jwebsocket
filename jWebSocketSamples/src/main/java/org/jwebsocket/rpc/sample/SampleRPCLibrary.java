@@ -15,10 +15,13 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.rpc.sample;
 
+import java.util.List;
+
 import org.jwebsocket.plugins.rpc.BaseRPCCallable;
 import org.jwebsocket.plugins.rpc.RPCCallable;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
+
 
 /**
  *
@@ -70,5 +73,27 @@ public class SampleRPCLibrary extends BaseRPCCallable implements RPCCallable {
 		// currently simply return the same string for test purposes
 		return aInt;
 	}
+	
+	public String testList(List<Integer> aList) {
+		// currently simply return the same string for test purposes
+		return "I'm the server, testList has been called";
+	}
 
+	
+  public void rrpcTest1() {
+  	System.out.println("rrpcTest1");
+  }
+  public void rrpcTest1(String arg1) {
+  	System.out.println("rrpcTest11");
+  }
+  public void rrpcTest1(int arg1) {
+  	System.out.println("rrpcTest12");
+  }
+  public void rrpcTest2(List aList, List<List<Integer>> aList2) {
+  	System.out.println("rrpcTest2");
+  }
+  public void rrpcTest3() {
+  	System.out.println("rrpcTest3");
+  }
+	
 }

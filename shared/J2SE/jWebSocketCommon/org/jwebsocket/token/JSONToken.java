@@ -348,7 +348,7 @@ public class JSONToken extends BaseToken implements Token {
 	 * @return
 	 */
 	@Override
-	public Map getMap(String aKey, Boolean aDefault) {
+	public Map getMap(String aKey, Map aDefault) {
 		// TODO: Implement this
 		return null;
 	}

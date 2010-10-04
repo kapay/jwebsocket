@@ -158,7 +158,7 @@ public interface Token {
 	 * @param aDefault
 	 * @return
 	 */
-	Map getMap(String aKey, Boolean aDefault);
+	Map getMap(String aKey, Map aDefault);
 
 	/**
 	 *

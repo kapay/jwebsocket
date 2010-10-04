@@ -22,7 +22,9 @@ import java.util.Map;
 import javolution.util.FastMap;
 
 /**
- * ...
+ * 1 instance of RPCCallableClassLoader is used for each class.
+ * RPCCallableClassLoader contains a RPCCallable instance of the class it represents and
+ * the list of methods with associated rights (the relaction is stored in a MethodRightLink object)
  * @author Quentin Ambard
  */
 public class RPCCallableClassLoader {
@@ -35,7 +37,12 @@ public class RPCCallableClassLoader {
 		this.mRpcCallableClass = aRpcCallableClass;
 		this.mRpcCallableInstance = aRpcCallableInstance;
 	}
-
+	/**
+	 * Add a tuple (method, right) to the list method of the RPCCallableClassLoader
+	 * @param aMethodName
+	 * @param aMethod
+	 * @param aRightId
+	 */
 	public void addMethod(String aMethodName, Method aMethod, String aRightId) {
 		if (!mMethods.containsKey(aMethodName)) {
 			mMethods.put(aMethodName, new ArrayList<MethodRightLink>());
@@ -59,7 +66,10 @@ public class RPCCallableClassLoader {
 		return mMethods.get(aMethodName);
 	}
 	
-	
+	/**
+	 * make a link between a Right and a Method
+	 * @author Kiou
+	 */
 	public class MethodRightLink {
 		private String mRightId ;
 		private Method mMethod;
@@ -72,6 +82,35 @@ public class RPCCallableClassLoader {
 		}
 		public Method getMethod() {
 			return mMethod;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((mRightId == null) ? 0 : mRightId.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			MethodRightLink other = (MethodRightLink) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (mRightId == null) {
+				if (other.mRightId != null)
+					return false;
+			} else if (!mRightId.equals(other.mRightId))
+				return false;
+			return true;
+		}
+		private RPCCallableClassLoader getOuterType() {
+			return RPCCallableClassLoader.this;
 		}		
 	}
 }

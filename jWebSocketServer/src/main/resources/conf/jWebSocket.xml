@@ -158,7 +158,31 @@
 			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</id>
 			<description>A sample Rpc demo</description>
 		</right>
-
+		<right>
+			<ns>org.jwebsocket.plugins.rpc</ns>
+			<id>testpanel.server.jwebsocket.rpc.RpcTime</id>
+			<description>A sample Rpc demo: get the server Time</description>
+		</right>
+		<right>
+			<ns>org.jwebsocket.plugins.rpc</ns>
+			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.rrpcTest1()</id>
+			<description>A sample Rpc demo</description>
+		</right>
+		<right>
+			<ns>org.jwebsocket.plugins.rpc</ns>
+			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.rrpcTest1(string)</id>
+			<description>A sample Rpc demo</description>
+		</right>
+		<right>
+			<ns>org.jwebsocket.plugins.rpc</ns>
+			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.rrpcTest1(int)</id>
+			<description>A sample Rpc demo</description>
+		</right>
+		<right>
+			<ns>org.jwebsocket.plugins.rpc</ns>
+			<id>org.jwebsocket.rpc.sample.SampleRPCLibrary.rrpcTest2</id>
+			<description>A sample Rpc demo</description>
+		</right>
 		<!-- jdbc -->
 		<right>
 			<ns>org.jwebsocket.plugins.jdbc</ns>
@@ -205,9 +229,11 @@
 				<right>org.jwebsocket.plugins.chat.broadcast</right>
 				<right>org.jwebsocket.plugins.rpc.rpc</right>
 				<right>org.jwebsocket.plugins.rpc.rrpc</right>
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.rrpcTest2</right>				
 				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
 				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
-				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>								
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleOverloadRPC(int)</right>
+				<right>org.jwebsocket.plugins.rpc.testpanel.server.jwebsocket.rpc.RpcTime</right>								
 				<right>org.jwebsocket.plugins.jdbc.select</right>
 				<right>org.jwebsocket.plugins.filesystem.load</right>
 				<right>org.jwebsocket.plugins.filesystem.save</right>
@@ -229,6 +255,7 @@
 				<right>org.jwebsocket.plugins.chat.broadcast</right>
 				<right>org.jwebsocket.plugins.rpc.rpc</right>
 				<right>org.jwebsocket.plugins.rpc.rrpc</right>
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.rrpcTest2</right>				
 				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
 				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
 				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
@@ -248,6 +275,7 @@
 				<right>org.jwebsocket.plugins.system.send</right>
 				<right>org.jwebsocket.plugins.chat.broadcast</right>
 				<right>org.jwebsocket.plugins.rpc.rpc</right>
+				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.rrpcTest2</right>				
 				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
 				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.getMD5</right>				
 				<right>org.jwebsocket.plugins.rpc.org.jwebsocket.rpc.sample.SampleRPCLibrary.sampleTokenRPC</right>				
