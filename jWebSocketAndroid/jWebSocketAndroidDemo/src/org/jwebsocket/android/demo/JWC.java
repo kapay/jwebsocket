@@ -22,9 +22,13 @@ import android.widget.Toast;
 import java.util.List;
 import java.util.Properties;
 import javolution.util.FastList;
+
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.client.plugins.rpc.Rpc;
+import org.jwebsocket.client.plugins.rpc.RpcListener;
+import org.jwebsocket.client.plugins.rpc.Rrpc;
 import org.jwebsocket.client.token.BaseTokenClient;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketException;
@@ -50,6 +54,10 @@ public class JWC {
     public static void init() {
         mJWC = new BaseTokenClient();
         mJWC.addListener(new Listener());
+        mJWC.addListener(new RpcListener());
+        //TODO: this could be improve if we use client plugins.
+        Rpc.setDefaultBaseTokenClient(mJWC);
+        Rrpc.setDefaultBaseTokenClient(mJWC);
     }
 
     public static void loadSettings(Activity aActivity) {
