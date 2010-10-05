@@ -8,63 +8,75 @@ android:orientation="vertical"
 xmlns:android="http://schemas.android.com/apk/res/android"
 >
     
-    <TextView
+	<TextView
     android:id="@+id/classLabel"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Class"
-    ></TextView>
+    >
+	</TextView>
 
-    <EditText
+	<EditText
     android:id="@+id/classTxt"
     android:hint="@string/required_hint"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:text="org.jwebsocket.android.demo.RPCDemoActivity"
-    android:textSize="18sp"
-    ></EditText>
-
-    <TextView
+    android:layout_height="36sp"
+    android:text="org.jwebsocket.rpc.sample.SampleRPCLibrary"
+	android:gravity="top|left"
+	android:scrollHorizontally="true"
+    android:textSize="12sp"
+    >
+	</EditText>
+	<TextView
     android:id="@+id/methodLabel"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Method"
-    ></TextView>
+    >
+	</TextView>
 
-    <EditText
+	<EditText
     android:id="@+id/methodTxt"
     android:hint="@string/required_hint"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="36sp"
+	android:gravity="top|left"
     android:text="getMD5"
-    android:textSize="18sp"
-    ></EditText>
+	android:scrollHorizontally="true"
+    android:textSize="12sp"
+    >
+	</EditText>
 
 
-    <TextView
+	<TextView
     android:id="@+id/targetLabel"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Target"
-    ></TextView>
+    >
+	</TextView>
     
-    <EditText
+	<EditText
     android:id="@+id/targetTxt"
     android:hint="@string/required_hint"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="36sp"
+	android:gravity="top|left"
     android:text="server"
-    android:textSize="18sp"
-    ></EditText>
+	android:scrollHorizontally="true"
+    android:textSize="12sp"
+    >
+	</EditText>
      
-    <TextView
+	<TextView
     android:id="@+id/parameterLabel"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Parameter"
-    ></TextView>
+    >
+	</TextView>
 
-    <EditText
+	<EditText
     android:id="@+id/parameterTxt"
     android:hint="@string/required_hint"
     android:layout_width="fill_parent"
@@ -73,30 +85,36 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     android:lines="4"
     android:gravity="top"
     android:text="test argument"
-    ></EditText>
+	android:scrollHorizontally="true"
+    android:textSize="12sp"
+    >
+	</EditText>
 
-    <Button
+	<Button
     android:id="@+id/invokeBtn"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Invoke"
-    ></Button>
+    >
+	</Button>
 
-    <TextView
+	<TextView
     android:id="@+id/resultLabel"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Result"
-    ></TextView>
+    >
+	</TextView>
 
-    <EditText
+	<EditText
     android:id="@+id/resultTxt"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:singleLine="false"
     android:gravity="top"
     android:layout_weight="1"
-    ></EditText>
-
+    android:textSize="12sp"
+    >
+	</EditText>
 
 </LinearLayout>
