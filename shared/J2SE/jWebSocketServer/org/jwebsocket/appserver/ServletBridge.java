@@ -77,7 +77,7 @@ public class ServletBridge extends HttpServlet {
 				// convert request arguments to token
 				FastMap<String, String[]> lParms = new FastMap(aRequest.getParameterMap());
 				if (mLog.isDebugEnabled()) {
-					mLog.debug("Received http request, sid: " + aRequest.getSession().getId() + ", url-args: " + lParms.toString());
+					mLog.debug("Received http request, sid: " + aRequest.getSession().getId() + ", url-args: " + lParms.toText());
 				}
 				Token lToken = TokenFactory.createToken();
 				for (String lParm : lParms.keySet()) {
@@ -93,7 +93,7 @@ public class ServletBridge extends HttpServlet {
 					String lResponse = lConn.getPlainResponse();
 					out.println(lResponse);
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Send http response: " + lResponse);
+						mLog.debug("Sent http response: " + lResponse);
 					}
 				} else {
 					String lMsg = "Connector not found for request!";

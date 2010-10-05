@@ -64,7 +64,7 @@ public class ServletConnector extends BaseConnector {
 
 	@Override
 	public void sendPacket(WebSocketPacket aDataPacket) {
-		mPlainResponse = aDataPacket.getUTF8() + "\n";
+		mPlainResponse = aDataPacket.getUTF8();
 	}
 
 	@Override
