@@ -31,20 +31,18 @@ import org.jwebsocket.kit.RequestHeader;
  */
 public class ServletConnector extends BaseConnector {
 
-	HttpServletRequest request = null;
-	HttpServletResponse response = null;
-	String plainResponse = "";
+	private HttpServletRequest mRequest = null;
+	// private HttpServletResponse mResponse = null;
+	private String mPlainResponse = "";
 
 	/**
 	 *
 	 * @param aRequest
 	 * @param aResponse
 	 */
-	public ServletConnector(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+	public ServletConnector() {
 		// no "engine" available here
 		super(null);
-		request = aRequest;
-		response = aResponse;
 		// TODO: Overhaul this hardcoded reference! See TokenServer class!
 		setBoolean("org.jwebsocket.tokenserver.isTS", true);
 		RequestHeader lHeader = new RequestHeader();
@@ -66,7 +64,7 @@ public class ServletConnector extends BaseConnector {
 
 	@Override
 	public void sendPacket(WebSocketPacket aDataPacket) {
-		plainResponse += aDataPacket.getUTF8() + "\n";
+		mPlainResponse = aDataPacket.getUTF8() + "\n";
 	}
 
 	@Override
@@ -76,19 +74,18 @@ public class ServletConnector extends BaseConnector {
 
 	@Override
 	public String generateUID() {
-		return request.getSession().getId();
+		return getRequest().getSession().getId();
 	}
 
 	@Override
 	public int getRemotePort() {
-		// TODO: Need to return remote(!) port here
-		return request.getServerPort();
+		return getRequest().getRemotePort();
 	}
 
 	@Override
 	public InetAddress getRemoteHost() {
 		try {
-			return InetAddress.getByName(request.getRemoteAddr());
+			return InetAddress.getByName(getRequest().getRemoteAddr());
 		} catch (UnknownHostException ex) {
 			return null;
 		}
@@ -100,6 +97,20 @@ public class ServletConnector extends BaseConnector {
 	}
 
 	public String getPlainResponse() {
-		return "response:\n" + plainResponse;
+		return mPlainResponse;
+	}
+
+	/**
+	 * @return the request
+	 */
+	public HttpServletRequest getRequest() {
+		return mRequest;
+	}
+
+	/**
+	 * @param aRequest the request to set
+	 */
+	public void setRequest(HttpServletRequest aRequest) {
+		this.mRequest = aRequest;
 	}
 }

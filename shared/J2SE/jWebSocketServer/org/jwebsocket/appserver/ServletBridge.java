@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javolution.util.FastMap;
+import org.apache.log4j.Logger;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
@@ -33,13 +35,20 @@ import org.jwebsocket.token.TokenFactory;
 public class ServletBridge extends HttpServlet {
 
 	// reference to the token server
-	private static TokenServer server = null;
+	private static TokenServer mServer = null;
+	private static Logger mLog = null;
+
+	private void mCheckLogs() {
+		if (mLog == null) {
+			mLog = Logging.getLogger(ServletBridge.class);
+		}
+	}
 
 	/**
 	 * @return the server
 	 */
 	public static TokenServer getServer() {
-		return server;
+		return mServer;
 	}
 
 	/**
@@ -47,25 +56,29 @@ public class ServletBridge extends HttpServlet {
 	 * @param aServer
 	 */
 	public static void setServer(TokenServer aServer) {
-		server = aServer;
+		mServer = aServer;
 	}
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-	 * @param request servlet request
-	 * @param response servlet response
+	 * @param aRequest servlet request
+	 * @param aResponse servlet response
 	 * @throws ServletException if a servlet-specific error occurs
 	 * @throws IOException if an I/O error occurs
 	 */
-	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+	protected void processRequest(HttpServletRequest aRequest, HttpServletResponse aResponse)
 			throws ServletException, IOException {
-		response.setContentType("text/plain;charset=UTF-8");
-		PrintWriter out = response.getWriter();
+		aResponse.setContentType("text/plain;charset=UTF-8");
+		PrintWriter out = aResponse.getWriter();
+		mCheckLogs();
 
 		try {
-			if (server != null) {
+			if (mServer != null) {
 				// convert request arguments to token
-				FastMap<String, String[]> lParms = new FastMap(request.getParameterMap());
+				FastMap<String, String[]> lParms = new FastMap(aRequest.getParameterMap());
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Received http request, sid: " + aRequest.getSession().getId() + ", url-args: " + lParms.toString());
+				}
 				Token lToken = TokenFactory.createToken();
 				for (String lParm : lParms.keySet()) {
 					String[] lValues = lParms.get(lParm);
@@ -73,11 +86,24 @@ public class ServletBridge extends HttpServlet {
 						lToken.setValidated(lParm, lValues[0]);
 					}
 				}
-				ServletConnector lConn = new ServletConnector(request, response);
-				server.getPlugInChain().processToken(lConn, lToken);
-				out.println(lConn.getPlainResponse());
+				ServletConnector lConn = WebSocketHttpSessionMerger.getHttpConnector(aRequest.getSession());
+				if (lConn != null) {
+					lConn.setRequest(aRequest);
+					mServer.getPlugInChain().processToken(lConn, lToken);
+					String lResponse = lConn.getPlainResponse();
+					out.println(lResponse);
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("Send http response: " + lResponse);
+					}
+				} else {
+					String lMsg = "Connector not found for request!";
+					out.println("ERROR:\n" + lMsg);
+					mLog.error(lMsg);
+				}
 			} else {
-				out.println("ERROR:\nNo WebSocketServer assigned to Servlet!");
+				String lMsg = "No WebSocket server assigned to servlet!";
+				out.println("ERROR:\n" + lMsg);
+				mLog.error(lMsg);
 			}
 		} finally {
 			out.close();

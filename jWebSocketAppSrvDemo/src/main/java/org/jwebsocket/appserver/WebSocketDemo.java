@@ -1,7 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - Copyright (c) 2010 Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
 package org.jwebsocket.appserver;
 
 import java.io.IOException;
@@ -26,7 +36,7 @@ import org.jwebsocket.token.Token;
  */
 public class WebSocketDemo extends HttpServlet implements WebSocketServerTokenListener {
   private static final long serialVersionUID = 1L;
-  private static Logger log = null;
+  private static Logger mLog = null;
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -51,8 +61,8 @@ public class WebSocketDemo extends HttpServlet implements WebSocketServerTokenLi
 
 	@Override
 	public void init() {
-		log = Logging.getLogger(WebSocketDemo.class);
-		log.info("Adding servlet '" + getClass().getSimpleName() + "' to WebSocket listeners...");
+		mLog = Logging.getLogger(WebSocketDemo.class);
+		mLog.info("Adding servlet '" + getClass().getSimpleName() + "' to WebSocket listeners...");
 		TokenServer lServer = (TokenServer) JWebSocketFactory.getServer("ts0");
 		if (lServer != null) {
 			lServer.addListener(this);
@@ -61,7 +71,7 @@ public class WebSocketDemo extends HttpServlet implements WebSocketServerTokenLi
 
 	@Override
 	public void processOpened(WebSocketServerEvent aEvent) {
-		log.info("Opened WebSocket session: " + aEvent.getSession().getSessionId());
+		mLog.info("Opened WebSocket session: " + aEvent.getSession().getSessionId());
 		// if a new web socket connection has been started,
 		// update the session tables accordingly
 		WebSocketHttpSessionMerger.addWebSocketSession(aEvent.getSession());
@@ -69,17 +79,17 @@ public class WebSocketDemo extends HttpServlet implements WebSocketServerTokenLi
 
 	@Override
 	public void processPacket(WebSocketServerEvent aEvent, WebSocketPacket aPacket) {
-		log.info("Received WebSocket packet: " + aPacket.getASCII());
+		mLog.info("Received WebSocket packet: " + aPacket.getASCII());
 	}
 
 	@Override
 	public void processToken(WebSocketServerTokenEvent aEvent, Token aToken) {
-		log.info("Received WebSocket token: " + aToken.toString());
+		mLog.info("Received WebSocket token: " + aToken.toString());
 	}
 
 	@Override
 	public void processClosed(WebSocketServerEvent aEvent) {
-		log.info("Closed WebSocket session: " + aEvent.getSession().getSessionId());
+		mLog.info("Closed WebSocket session: " + aEvent.getSession().getSessionId());
 		// if a web socket connection has been terminated,
 		// update the session tables accordingly
 		WebSocketHttpSessionMerger.removeWebSocketSession(aEvent.getSession());

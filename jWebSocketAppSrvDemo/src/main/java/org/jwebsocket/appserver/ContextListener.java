@@ -19,6 +19,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.server.TokenServer;
 
 /**
  * Web application life cycle listener.
@@ -35,6 +36,9 @@ public class ContextListener implements ServletContextListener {
   public void contextInitialized(ServletContextEvent sce) {
     // start the jWebSocket server sub system
     JWebSocketFactory.start("");
+
+	// assign web socket server to servlet bridge
+	ServletBridge.setServer((TokenServer)JWebSocketFactory.getServer("ts0"));
   }
 
   /**

@@ -44,7 +44,6 @@ public class ContextListener implements ServletContextListener {
   public void contextDestroyed(ServletContextEvent sce) {
     // stop the jWebSocket server sub system
     JWebSocketFactory.stop();
-
   }
 
 }

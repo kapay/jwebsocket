@@ -80,10 +80,10 @@ public class BaseConnector implements WebSocketConnector {
 	@Override
 	public void sendPacket(WebSocketPacket aDataPacket) {
 	}
-	
-	@Override 
+
+	@Override
 	public IOFuture sendPacketAsynch(WebSocketPacket aDataPacket) {
-	  return null;
+		return null;
 	}
 
 	@Override
@@ -106,10 +106,12 @@ public class BaseConnector implements WebSocketConnector {
 
 		// TODO: this can be improved, maybe distinguish between header and URL args!
 		Map lArgs = header.getArgs();
-		String lNodeId = (String) lArgs.get("unid");
-		if (lNodeId != null) {
-			setNodeId(lNodeId);
-			lArgs.remove("unid");
+		if (lArgs != null) {
+			String lNodeId = (String) lArgs.get("unid");
+			if (lNodeId != null) {
+				setNodeId(lNodeId);
+				lArgs.remove("unid");
+			}
 		}
 	}
 

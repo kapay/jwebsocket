@@ -1,7 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - Copyright (c) 2010 Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
 package org.jwebsocket.appserver;
 
 import javax.servlet.http.HttpSessionEvent;
@@ -19,7 +29,7 @@ public class SessionListener implements HttpSessionListener {
 
 	private static Logger mLog = null;
 
-	private void checkLogs() {
+	private void mCheckLogs() {
 		if (mLog == null) {
 			mLog = Logging.getLogger(SessionListener.class);
 		}
@@ -30,7 +40,7 @@ public class SessionListener implements HttpSessionListener {
 		// when a new session is created by the servlet engine
 		// add this session to the global WebSockethttpSessionMerger.
 		WebSocketHttpSessionMerger.addHttpSession(hse.getSession());
-		checkLogs();
+		mCheckLogs();
 		mLog.info("Created Http session: '" + hse.getSession().getId() + "'");
 	}
 
@@ -39,7 +49,7 @@ public class SessionListener implements HttpSessionListener {
 		// when an existing session is destroyed by the servlet engine
 		// remove this session from the global WebSockethttpSessionMerger.
 		WebSocketHttpSessionMerger.removeHttpSession(hse.getSession());
-		checkLogs();
+		mCheckLogs();
 		mLog.info("Destroyed Http session: '" + hse.getSession().getId() + "'");
 	}
 }

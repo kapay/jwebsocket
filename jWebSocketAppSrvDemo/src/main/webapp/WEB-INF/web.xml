@@ -18,6 +18,15 @@
         <servlet-name>WebSocketDemo</servlet-name>
         <url-pattern>/WebSocketDemo</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>ServletBridge</servlet-name>
+        <servlet-class>org.jwebsocket.appserver.ServletBridge</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServletBridge</servlet-name>
+        <url-pattern>/ServletBridge</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>
             30
