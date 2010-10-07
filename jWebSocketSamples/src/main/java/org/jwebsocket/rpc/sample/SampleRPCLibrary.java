@@ -16,6 +16,8 @@
 package org.jwebsocket.rpc.sample;
 
 import java.util.List;
+import org.apache.log4j.Logger;
+import org.jwebsocket.logging.Logging;
 
 import org.jwebsocket.plugins.rpc.BaseRPCCallable;
 import org.jwebsocket.plugins.rpc.RPCCallable;
@@ -27,6 +29,17 @@ import org.jwebsocket.util.Tools;
  * @author aschulze
  */
 public class SampleRPCLibrary extends BaseRPCCallable implements RPCCallable {
+
+	private static Logger mLog = null;
+
+	private void logInfo(String aMessage) {
+		if (mLog == null) {
+			mLog = Logging.getLogger(SampleRPCLibrary.class);
+		}
+		if (mLog.isInfoEnabled()) {
+			mLog.info(aMessage);
+		}
+	}
 
 	/**
 	 * simply returns the MD5 sum of the given string.
@@ -79,23 +92,24 @@ public class SampleRPCLibrary extends BaseRPCCallable implements RPCCallable {
 		return "I'm the server, testList has been called";
 	}
 
-	public void rrpcTest1() {
-		System.out.println("rrpcTest1");
+	public String rrpcTest1() {
+		logInfo("rrpcTest1");
+		return "This is the result of 'rrpcTest1'.";
 	}
 
 	public void rrpcTest1(String arg1) {
-		System.out.println("rrpcTest11");
+		logInfo("rrpcTest11");
 	}
 
 	public void rrpcTest1(int arg1) {
-		System.out.println("rrpcTest12");
+		logInfo("rrpcTest12");
 	}
 
 	public void rrpcTest2(List aList, List<List<Integer>> aList2) {
-		System.out.println("rrpcTest2");
+		logInfo("rrpcTest2");
 	}
 
 	public void rrpcTest3() {
-		System.out.println("rrpcTest3");
+		logInfo("rrpcTest3");
 	}
 }

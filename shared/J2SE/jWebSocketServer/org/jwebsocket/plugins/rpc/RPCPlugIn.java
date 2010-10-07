@@ -260,7 +260,7 @@ public class RPCPlugIn extends TokenPlugIn {
 						lMsg = "Class '" + lClassName + "' found but get a null instance when calling the RPCCallable getInstance() method.";
 					}
 				} else {
-					lMsg = "Class '" + lClassName + "' found but the method " + lMethod + " is not avaible.";
+					lMsg = "Class '" + lClassName + "' found but the method " + lMethod + " is not available.";
 				}
 			} else {
 				lMsg = "Class '" + lClassName + "' not found or not properly loaded.";
@@ -517,7 +517,8 @@ public class RPCPlugIn extends TokenPlugIn {
 		// setting...
 		if (aParametersType != null) {
 			boolean methodMatch = true;
-			for (int j = 0; j < aParametersType.length; j++) {
+			// TODO: added by Alex 2010-10-07: "&& j < lParametersType.length"
+			for (int j = 0; j < aParametersType.length && j < lParametersType.length; j++) {
 				if (!TypeConverter.matchProtocolTypeToJavaType(aParametersType[j], lParametersType[j].getName())) {
 					methodMatch = false;
 					break;
