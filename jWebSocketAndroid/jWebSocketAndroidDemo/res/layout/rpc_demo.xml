@@ -76,9 +76,11 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     >
 	</TextView>
 
+    <!-- this is not really required! a method can be called w/o arguments
+		android:hint="@string/required_hint"
+	-->
 	<EditText
     android:id="@+id/parameterTxt"
-    android:hint="@string/required_hint"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:singleLine="false"

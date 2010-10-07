@@ -38,10 +38,10 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 	protected JWebSocketConfig jWebSocketConfig = null;
 
 	/**
-	 * @param theConfig the jwebsocket config object
+	 * @param aConfig the jwebsocket config object
 	 */
-	public AbstractJWebSocketInitializer(JWebSocketConfig theConfig) {
-		this.jWebSocketConfig = theConfig;
+	public AbstractJWebSocketInitializer(JWebSocketConfig aConfig) {
+		this.jWebSocketConfig = aConfig;
 	}
 
 	/**
@@ -77,62 +77,62 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 			mLog.debug("Instantiating engine...");
 		}
 		try {
-			Class<WebSocketEngine> engineClass = (Class<WebSocketEngine>) Class.forName(engineName);
+			Class<WebSocketEngine> lEngineClass = (Class<WebSocketEngine>) Class.forName(engineName);
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Engine '" + engineName + "' loaded from classpath.");
 			}
-			return engineClass;
+			return lEngineClass;
 		} catch (ClassNotFoundException e) {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Engine '" + engineName + "' not yet in classpat", e);
+				mLog.debug("Engine '" + engineName + "' not yet in classpath.");
 			}
 		}
 		return null;
 	}
 
 	@SuppressWarnings("unchecked")
-	public Class<WebSocketServer> loadServerFromClasspath(String serverName) {
+	public Class<WebSocketServer> loadServerFromClasspath(String aServerName) {
 		try {
-			Class<WebSocketServer> serverClass = (Class<WebSocketServer>) Class.forName(serverName);
+			Class<WebSocketServer> lServerClass = (Class<WebSocketServer>) Class.forName(aServerName);
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Server '" + serverName + "' loaded from classpath.");
+				mLog.debug("Server '" + aServerName + "' loaded from classpath.");
 			}
-			return serverClass;
+			return lServerClass;
 		} catch (ClassNotFoundException ex) {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Server '" + serverName + "' not yet in classpath", ex);
+				mLog.debug("Server '" + aServerName + "' not yet in classpath.");
 			}
 		}
 		return null;
 	}
 
 	@SuppressWarnings("unchecked")
-	public Class<WebSocketPlugIn> loadPluginFromClasspath(String pluginName) {
+	public Class<WebSocketPlugIn> loadPluginFromClasspath(String aPluginName) {
 		try {
-			Class<WebSocketPlugIn> pluginClass = (Class<WebSocketPlugIn>) Class.forName(pluginName);
+			Class<WebSocketPlugIn> lPluginClass = (Class<WebSocketPlugIn>) Class.forName(aPluginName);
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("PlugIn '" + pluginName + "' loaded from classpath.");
+				mLog.debug("PlugIn '" + aPluginName + "' loaded from classpath.");
 			}
-			return pluginClass;
+			return lPluginClass;
 		} catch (ClassNotFoundException ex) {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("PlugIn '" + pluginName + "' not yet in classpath", ex);
+				mLog.debug("PlugIn '" + aPluginName + "' not yet in classpath.");
 			}
 		}
 		return null;
 	}
 
 	@SuppressWarnings("unchecked")
-	public Class<WebSocketFilter> loadFilterFromClasspath(String filterName) {
+	public Class<WebSocketFilter> loadFilterFromClasspath(String aFilterName) {
 		try {
-			Class<WebSocketFilter> filterClass = (Class<WebSocketFilter>) Class.forName(filterName);
+			Class<WebSocketFilter> lFilterClass = (Class<WebSocketFilter>) Class.forName(aFilterName);
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Filter '" + filterName + "' loaded from classpath.");
+				mLog.debug("Filter '" + aFilterName + "' loaded from classpath.");
 			}
-			return filterClass;
+			return lFilterClass;
 		} catch (ClassNotFoundException ex) {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Filter '" + filterName + "' not yet in classpath", ex);
+				mLog.debug("Filter '" + aFilterName + "' not yet in classpath.");
 			}
 		}
 		return null;

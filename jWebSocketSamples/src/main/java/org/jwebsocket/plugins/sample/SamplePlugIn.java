@@ -45,16 +45,16 @@ public class SamplePlugIn extends TokenPlugIn {
 	private final static String SAMPLE_VAR = NS_SAMPLE + ".started";
 
 	public SamplePlugIn() {
-	  this(null);
+		this(null);
 	}
-	
+
 	public SamplePlugIn(PluginConfiguration configuration) {
-	  super(configuration);
-	  if (mLog.isDebugEnabled()) {
-	    mLog.debug("Instantiating sample plug-in...");
-	   }
-	   // specify default name space for sample plugin
-	   this.setNamespace(NS_SAMPLE);
+		super(configuration);
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating sample plug-in...");
+		}
+		// specify default name space for sample plugin
+		this.setNamespace(NS_SAMPLE);
 	}
 
 	@Override
@@ -72,8 +72,11 @@ public class SamplePlugIn extends TokenPlugIn {
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-	  RandomData data = new RandomData();
-	  System.out.println(data.getRandomText());
+		RandomData data = new RandomData();
+
+		// TODO: can the following line be ultimately removed?
+		// System.out.println(data.getRandomText());
+
 		// this method is called when the engine has started
 		super.engineStarted(aEngine);
 	}
@@ -105,7 +108,7 @@ public class SamplePlugIn extends TokenPlugIn {
 
 				// add the "time" and "started" field
 				lResponse.setString("time", new Date().toString());
-				lResponse.setString("started", (String)aConnector.getVar(SAMPLE_VAR));
+				lResponse.setString("started", (String) aConnector.getVar(SAMPLE_VAR));
 
 				// put an array into the token
 				Object[] lObjs = new Object[]{1, 2, 3, 'a', 'b', 'c', "ABC", "XYZ", true, false};
