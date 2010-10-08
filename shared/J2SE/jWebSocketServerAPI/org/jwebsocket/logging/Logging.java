@@ -51,19 +51,19 @@ public class Logging {
 	/**
 	 * Name of jWebSocket log file.
 	 */
-	private static String filename = "jWebSocket.log";
+	private static String mFilename = "jWebSocket.log";
 	/**
 	 * Pattern for jWebSocket log file.
 	 */
-	private static String pattern = "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n";
+	private static String mPattern = "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n";
 	/**
 	 * buffer size if write cache for logs is activated (recommended)
 	 * buffer size = 0 means no write cache.
 	 */
-	private static int buffersize = 8096; // 8K is log4j default
-	private static int logTarget = CONSOLE; // ROLLING_FILE;
+	private static int mBuffersize = 8096; // 8K is log4j default
+	private static int mLogTarget = CONSOLE; // ROLLING_FILE;
 
-	private static String getLogsFolderPath(String fileName, String[] aPaths) {
+	private static String getLogsFolderPath(String aFileName, String[] aPaths) {
 
 		// try to obtain JWEBSOCKET_HOME environment variable
 		String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
@@ -76,7 +76,7 @@ public class Logging {
 				lWebSocketHome += lFileSep;
 			}
 			// logs are located in %JWEBSOCKET_HOME%/logs
-			lWebSocketLogs = lWebSocketHome + "logs" + lFileSep + fileName;
+			lWebSocketLogs = lWebSocketHome + "logs" + lFileSep + aFileName;
 		}
 
 		if (lWebSocketLogs == null) {
@@ -88,7 +88,7 @@ public class Logging {
 					lWebSocketHome += lFileSep;
 				}
 				// logs are located in %CATALINA_HOME%/logs
-				lWebSocketLogs = lWebSocketHome + "logs" + lFileSep + fileName;
+				lWebSocketLogs = lWebSocketHome + "logs" + lFileSep + aFileName;
 			}
 		}
 
@@ -105,32 +105,32 @@ public class Logging {
 	private static void checkLogAppender() {
 		if (mLayout == null) {
 			mLayout = new PatternLayout();
-			mLayout.setConversionPattern(pattern);
+			mLayout.setConversionPattern(mPattern);
 		}
 		if (mAppender == null) {
-			String logsPath = getLogsFolderPath(filename, mSearchPaths);
-			if (ROLLING_FILE == logTarget && logsPath != null) {
+			String logsPath = getLogsFolderPath(mFilename, mSearchPaths);
+			if (ROLLING_FILE == mLogTarget && logsPath != null) {
 				try {
 					RollingFileAppender lRFA = new RollingFileAppender(mLayout,
 							logsPath, true /* append, don't truncate */);
-					lRFA.setBufferedIO(buffersize > 0);
+					lRFA.setBufferedIO(mBuffersize > 0);
 					lRFA.setImmediateFlush(true);
-					if (buffersize > 0) {
-						lRFA.setBufferSize(buffersize);
+					if (mBuffersize > 0) {
+						lRFA.setBufferSize(mBuffersize);
 					}
 					lRFA.setEncoding("UTF-8");
 					mAppender = lRFA;
 				} catch (IOException ex) {
 					mAppender = new ConsoleAppender(mLayout);
 				}
-			} else if (SINGLE_FILE == logTarget && logsPath != null) {
+			} else if (SINGLE_FILE == mLogTarget && logsPath != null) {
 				try {
 					FileAppender lFA = new FileAppender(mLayout, logsPath,
 							true /* append, don't truncate */);
-					lFA.setBufferedIO(buffersize > 0);
+					lFA.setBufferedIO(mBuffersize > 0);
 					lFA.setImmediateFlush(true);
-					if (buffersize > 0) {
-						lFA.setBufferSize(buffersize);
+					if (mBuffersize > 0) {
+						lFA.setBufferSize(mBuffersize);
 					}
 					lFA.setEncoding("UTF-8");
 					mAppender = lFA;
@@ -139,7 +139,7 @@ public class Logging {
 				}
 			} else {
 				mAppender = new ConsoleAppender(mLayout);
-				if (CONSOLE != logTarget) {
+				if (CONSOLE != mLogTarget) {
 					System.out.println("JWEBSOCKET_HOME"
 							+ " variable not set or invalid configuration,"
 							+ " using console output for log file.");
@@ -164,21 +164,21 @@ public class Logging {
 		}
 		if (aLogTarget != null) {
 			if ("console".equals(aLogTarget)) {
-				logTarget = Logging.CONSOLE;
+				mLogTarget = Logging.CONSOLE;
 			} else if ("singlefile".equals(aLogTarget)) {
-				logTarget = Logging.SINGLE_FILE;
+				mLogTarget = Logging.SINGLE_FILE;
 			} else if ("rollingfile".equals(aLogTarget)) {
-				logTarget = Logging.ROLLING_FILE;
+				mLogTarget = Logging.ROLLING_FILE;
 			}
 		}
 		if (aFilename != null) {
-			filename = aFilename;
+			mFilename = aFilename;
 		}
 		if (aPattern != null) {
-			pattern = aPattern;
+			mPattern = aPattern;
 		}
 		if (aBuffersize != null) {
-			buffersize = aBuffersize;
+			mBuffersize = aBuffersize;
 		}
 		checkLogAppender();
 	}

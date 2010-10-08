@@ -52,7 +52,7 @@ import org.jwebsocket.token.Token;
  * This plug-in provides all the functionality for remote procedure calls (RPC)
  * for client-to-server (C2S) apps, and reverse remote procedure calls (RRPC)
  * for server-to-client (S2C) or client-to-client apps (C2C).
- * 
+ *
  * @author aschulze
  * @author Quentin Ambard
  */
@@ -430,11 +430,11 @@ public class RPCPlugIn extends TokenPlugIn {
 	 *
 	 * @param aClassName class name
 	 * @param aMethodName method name
-	 * @param parametersType list of parameter type found in the xml file (for instance: "int, string, map")
+	 * @param aXmlParametersType list of parameter type found in the xml file (for instance: "int, string, map")
 	 * @return true if the parameters are OK
 	 */
 	@SuppressWarnings("rawtypes")
-	private Method getValidMethod(String aClassName, String aMethodName, String[] parametersType) {
+	private Method getValidMethod(String aClassName, String aMethodName, String[] aXmlParametersType) {
 		// check if the method own to a class which has been loaded.
 		if (!mRpcCallableClassLoader.containsKey(aClassName)) {
 			mLog.error("You try to grant access to a method which own to a class the server can't initialize. Make sure you didn't forget to declare it's jar file. " + aMethodName
@@ -447,7 +447,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		Class lClass = mRpcCallableClassLoader.get(aClassName).getRpcCallableClass();
 		Method[] lMethods = lClass.getMethods();
 		ArrayList<Integer> lMethodWithSameNameAndNumberOfArguments = new ArrayList<Integer>();
-		if (parametersType == null) {
+		if (aXmlParametersType == null) {
 			for (int i = 0; i < lMethods.length; i++) {
 				Method lMethod = lMethods[i];
 				if (lMethod.getName().equals(aMethodName)) {
@@ -464,14 +464,14 @@ public class RPCPlugIn extends TokenPlugIn {
 				}
 			}
 		}
-//    if (parametersType != null && parametersType.length == 1 && "".equals(parametersType[0])) {
-//    	parametersType =null;
+//    if (aXmlParametersType != null && aXmlParametersType.length == 1 && "".equals(aXmlParametersType[0])) {
+//    	aXmlParametersType =null;
 //    }
 		//Make sure every parameter type is valid
-		if (parametersType != null) {
-			for (String parameterType : parametersType) {
+		if (aXmlParametersType != null) {
+			for (String parameterType : aXmlParametersType) {
 				if (!"".equals(parameterType) && !TypeConverter.isValidProtocolType(parameterType)) {
-					mLog.error(parametersType + " is not a valid parameter type. Valid parameter types are: " + TypeConverter.getValidParameterTypes());
+					mLog.error(aXmlParametersType + " is not a valid parameter type. Valid parameter types are: " + TypeConverter.getValidParameterTypes());
 					return null;
 				}
 			}
@@ -480,7 +480,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		for (int i = 0; i < lMethods.length; i++) {
 			// If we are on a method with the same name, we check it's parameters
 			if (lMethods[i].getName().equals(aMethodName)) {
-				if (checkMethodParameters(lMethods[i], parametersType, aClassName)) {
+				if (checkMethodParameters(lMethods[i], aXmlParametersType, aClassName)) {
 					return lMethods[i];
 				}
 			}
@@ -490,19 +490,19 @@ public class RPCPlugIn extends TokenPlugIn {
 	}
 
 	/**
-	 * Check if the method aMethod match with aParametersType.
+	 * Check if the method aMethod match with aXmlParametersType.
 	 *
 	 * @param aMethod
-	 * @param aParametersType  list of parameter type found in the xml file (for instance: "int, string, map")
+	 * @param aXmlParametersType  list of parameter type found in the xml file (for instance: "int, string, map")
 	 * @param aClassName
 	 * @return true if the method match, false otherwise
 	 */
 	@SuppressWarnings("rawtypes")
-	private boolean checkMethodParameters(Method aMethod, String[] aParametersType, String aClassName) {
+	private boolean checkMethodParameters(Method aMethod, String[] aXmlParametersType, String aClassName) {
 		Class[] lParametersType = aMethod.getParameterTypes();
 
 		//no parameters
-		if (aParametersType != null && aParametersType.length == 1 && "".equals(aParametersType[0])) {
+		if (aXmlParametersType != null && aXmlParametersType.length == 1 && "".equals(aXmlParametersType[0])) {
 			if (lParametersType.length == 0) {
 				if (mLog.isDebugEnabled()) {
 					mLog.debug("Method " + aMethod.getName() + " loaded (expect 0 parameters).");
@@ -515,11 +515,14 @@ public class RPCPlugIn extends TokenPlugIn {
 
 		// Look for a method with the same arguments if they are defined in the xml
 		// setting...
-		if (aParametersType != null) {
+		if (aXmlParametersType != null) {
+			//Quentin: If it's not the same number of parameters as expected, that's not the correct method.
+			if (aXmlParametersType.length != lParametersType.length) {
+				return false ;
+			}
 			boolean methodMatch = true;
-			// TODO: added by Alex 2010-10-07: "&& j < lParametersType.length"
-			for (int j = 0; j < aParametersType.length && j < lParametersType.length; j++) {
-				if (!TypeConverter.matchProtocolTypeToJavaType(aParametersType[j], lParametersType[j].getName())) {
+			for (int j = 0; j < aXmlParametersType.length; j++) {
+				if (!TypeConverter.matchProtocolTypeToJavaType(aXmlParametersType[j], lParametersType[j].getName())) {
 					methodMatch = false;
 					break;
 				}
@@ -527,8 +530,8 @@ public class RPCPlugIn extends TokenPlugIn {
 			if (methodMatch) {
 				if (mLog.isDebugEnabled()) {
 					StringBuilder lParametersList = new StringBuilder();
-					for (int k = 0; k < aParametersType.length; k++) {
-						lParametersList.append(aParametersType[k] + ", ");
+					for (int k = 0; k < aXmlParametersType.length; k++) {
+						lParametersList.append(aXmlParametersType[k] + ", ");
 					}
 					lParametersList.setLength(lParametersList.length() - 2);
 					mLog.debug("Complex method " + aMethod.getName() + " loaded (expect " + lParametersType.length + " parameters: " + lParametersList.toString() + ").");

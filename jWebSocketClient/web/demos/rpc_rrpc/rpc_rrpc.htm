@@ -268,6 +268,7 @@
 			var rpcTestGeneric = function (aMethodName, aArgs) {
 				// send a reverse remote procedure call to another client
 				//If targetID is not a number, try a simple RPC:
+				debugger;
 				if (isNaN(parseInt(eTarget.value))) {
 					log( "remote calling " + aMethodName + " with args '" + aArgs + "'..." );
 					// perform the Remote Procedure Call...

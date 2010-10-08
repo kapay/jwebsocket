@@ -67,5 +67,4 @@ public class TokenStream extends BaseStream {
 	public TokenServer getServer() {
 		return server;
 	}
-
 }
