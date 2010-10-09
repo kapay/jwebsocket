@@ -22,10 +22,16 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -40,6 +46,9 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 	private EditText targetTxt;
 	private EditText resultTxt;
 	private Button invokeBtn;
+        private TextView targetLabel;
+        private Boolean useRRPC = false;
+        
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -50,13 +59,55 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 		parameterTxt = (EditText) findViewById(R.id.parameterTxt);
 		resultTxt = (EditText) findViewById(R.id.resultTxt);
 		targetTxt = (EditText) findViewById(R.id.targetTxt);
+                targetLabel = (TextView)findViewById(R.id.targetLabel);
 		invokeBtn = (Button) findViewById(R.id.invokeBtn);
+
+
+                final LinearLayout layout = (LinearLayout)findViewById(R.id.rpcLayout);
+                final CheckBox checkbox = (CheckBox) findViewById(R.id.rrpcCheckBox);
+                checkbox.setOnClickListener(new OnClickListener() {
+                    public void onClick(View v) {
+
+                        if (((CheckBox) v).isChecked()) {
+                            targetTxt.setVisibility(EditText.VISIBLE);
+                            targetLabel.setVisibility(TextView.VISIBLE);
+                            useRRPC = true;
+                        } else {
+                            targetTxt.setVisibility(EditText.GONE);
+                            targetLabel.setVisibility(TextView.GONE);
+                            useRRPC = false;
+                        }
+                       targetLabel.invalidate();
+                       targetTxt.invalidate();
+
+                    }
+                });
+
 		invokeBtn.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View arg0) {
 				sendMethodInvokeToken();
 			}
 		});
+	}
+
+        @Override
+	public boolean onCreateOptionsMenu(Menu aMenu) {
+		MenuInflater lMenInfl = getMenuInflater();
+		lMenInfl.inflate(R.menu.rpc_demo_menu, aMenu);
+		return true;
+	}
+
+        @Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+			case R.id.rpcMenuExit:
+                                this.finish();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 
 	private void sendMethodInvokeToken() {
