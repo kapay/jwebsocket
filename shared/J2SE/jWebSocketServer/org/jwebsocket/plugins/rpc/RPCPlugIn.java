@@ -260,7 +260,7 @@ public class RPCPlugIn extends TokenPlugIn {
 						lMsg = "Class '" + lClassName + "' found but get a null instance when calling the RPCCallable getInstance() method.";
 					}
 				} else {
-					lMsg = "Class '" + lClassName + "' found but the method " + lMethod + " is not available.";
+					lMsg = "Class '" + lClassName + "' found but the method " + lMethod + " is not available. Right is missing, probably a typo (call are case sensitive)";
 				}
 			} else {
 				lMsg = "Class '" + lClassName + "' not found or not properly loaded.";
