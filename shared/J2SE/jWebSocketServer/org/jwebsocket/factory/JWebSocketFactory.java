@@ -75,9 +75,9 @@ public class JWebSocketFactory {
                 for (WebSocketPlugIn lPlugIn : lPlugIns) {
                     lServer.getPlugInChain().addPlugIn(lPlugIn);
                 }
-            }
-            if (mLog.isInfoEnabled()) {
-                mLog.info("Plugins initialized.");
+	            if (mLog.isInfoEnabled()) {
+	                mLog.info(lPlugIns.size() + " plugin(s) initialized for server '" + lServer.getId() + "'.");
+	            }
             }
 
             Map<String, List<WebSocketFilter>> lFilterMap = lInitializer.initializeFilters();
@@ -90,9 +90,9 @@ public class JWebSocketFactory {
                 for (WebSocketFilter lFilter : lFilters) {
                     lServer.getFilterChain().addFilter(lFilter);
                 }
-            }
-            if (mLog.isInfoEnabled()) {
-                mLog.info("Filters initialized.");
+	            if (mLog.isInfoEnabled()) {
+	                mLog.info(lFilters.size() + " filter(s) initialized for server '" + lServer.getId() + "'.");
+	            }
             }
 
             boolean lEngineStarted = false;

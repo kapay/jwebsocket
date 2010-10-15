@@ -36,7 +36,13 @@
 					lWebSocketClient = new jws.jWebSocketBaseClient();
 					// create low level jWebSocket client, using custom
 					// low level sub protocol (ie. no JSON, CSV or XML token)
-					var lURL = jws.JWS_SERVER_URL + "/;prot=custom";
+					
+					// var lURL = jws.JWS_SERVER_URL + "/;prot=custom";
+
+					// further URLs for various test purposes:
+					// var lURL = "wss://yaws.hyber.org/";
+					var lURL = "wss://websockets.org:9797";
+
 					console.log( "Connecting to " + lURL + " ..." );
 					try {
 						lWebSocketClient.open( lURL, {

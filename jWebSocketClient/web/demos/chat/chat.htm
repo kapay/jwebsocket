@@ -33,6 +33,7 @@
 			eUsername = null,
 			ePool = null,
 			eMessage = null,
+			eTarget = null,
 			eDebug = null,
 			eKeepAlive = null;
 
@@ -90,6 +91,7 @@
 						log( SYS, IN, "Connection to " + lJWSID + " established." );
 						// start keep alive if user selected that option
 						checkKeepAlive({ immediate: false });
+						jws.$("simgStatus").src = "../../images/connected.png";
 					},
 
 					// OnMessage callback
@@ -100,6 +102,7 @@
 								( aToken ? aToken.type : "-" ) + ": " +
 								aEvent.data + "</font>");
 						}
+						jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;" + lWSC.getId();
 						if( aToken ) {
 							// is it a response from a previous request of this client?
 							if( aToken.type == "response" ) {
@@ -142,6 +145,8 @@
 					OnClose: function( aEvent ) {
 						lWSC.stopKeepAlive();
 						log( SYS, IN, "Disconnected from " + lJWSID + "." );
+						jws.$("simgStatus").src = "../../images/disconnected.png";
+						jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;-";
 						doFocus( eUsername );
 					}
 					
@@ -167,17 +172,26 @@
 
 			function broadcast() {
 				var lMsg = eMessage.value;
+				var lTarget = eTarget.value;
 				if( lMsg.length > 0 ) {
 					log( USR, OUT, lMsg );
-					var lRes = lWSC.broadcastText(
-					"",		// broadcast to all clients (not limited to a certain pool)
-					lMsg	// broadcast this message
-				);
+					var lRes;
+					if( !lTarget || lTarget == "*") {
+						lRes = lWSC.broadcastText(
+							"",			// broadcast to all clients (not limited to a certain pool)
+							lMsg		// broadcast this message
+						);
+					} else {
+						lRes = lWSC.sendText(
+							lTarget,	// broadcast to all clients (not limited to a certain pool)
+							lMsg		// broadcast this message
+						);
+					}
 					// log error only, on success don't confuse the user
 					if( lRes.code != 0 ) {
 						log( SYS, OUT, "broadcast: " + lRes.msg );
 					}
-					eMessage.value = "";
+					// eMessage.value = "";
 				}
 				doFocus( eMessage );
 			}
@@ -235,6 +249,7 @@
 				ePool = jws.$( "stxfPool" );
 				eReceiver = jws.$( "stxfReceiver" );
 				eMessage = jws.$( "stxaMsg" );
+				eTarget = jws.$( "stxfTarget" );
 				eDebug = jws.$( "schkDebug" );
 				eKeepAlive = jws.$( "schkKeepAlive" );
 					
@@ -267,6 +282,7 @@
 					eKeepAlive.setAttribute( "disabled", "disabled" );
 					eUsername.setAttribute( "disabled", "disabled" );
 					eMessage.setAttribute( "disabled", "disabled" );
+					eTarget.setAttribute( "disabled", "disabled" );
 					
 					var lMsg = jws.MSG_WS_NOT_SUPPORTED;
 					alert( lMsg );
@@ -299,8 +315,18 @@
 				location.replace( "../../index.htm?page=demos/chat/chat.htm" );
 			}
 		</script>
--->		
+-->
+
+		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="tdHeader" width="">jWebSocket Chat Demo</td>
+				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
+				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
+			</tr>
+		</table>
+<!--
 		<h1>jWebSocket Chat Demo</h1>
+-->
 		<p>This demo shows how to easily set up a very simple jWebSocket based chat system.
 		To run the chat on a single system you can
 			<a href="javascript:openSubWindow();">open multiple windows</a>. If 
@@ -330,7 +356,9 @@
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td valign="top" class="stdDlg" width="5">Message</td>
-					<td valign="top" class="stdDlg" width=""><textarea class="stxaDlg" id="stxaMsg" cols="255 "rows="2" style="width:100%">Please type your message here!</textarea></td>
+					<td valign="top" class="stdDlg" width="" style="padding-right:12pt"><textarea class="stxaDlg" id="stxaMsg" cols="255 "rows="2" style="width:100%">Please type your message here!</textarea></td>
+					<td valign="top" class="stdDlg" width="5">Target</td>
+					<td valign="top" class="stdDlg" width="5"><input class="stxfDlg" id="stxfTarget" type="text" value="*" onclick="send();"></td>
 					<td valign="top" class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSend" type="button" value="Send" onclick="broadcast();" style="margin-left:6pt"></td>
 				</tr>
 			</table>

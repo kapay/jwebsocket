@@ -49,29 +49,29 @@ public class FilterConfigHandler implements ConfigHandler {
 	@Override
 	public Config processConfig(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
-		String id = "", name = "", packageName = "", jar = "", namespace = "";
-		List<String> servers = new FastList<String>();
-		Map<String, String> settings = null;
+		String lId = "", lName = "", lPackageName = "", lJar = "", lNamespace = "";
+		List<String> lServers = new FastList<String>();
+		Map<String, String> lSettings = null;
 		while (aStreamReader.hasNext()) {
 			aStreamReader.next();
 			if (aStreamReader.isStartElement()) {
 				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(ID)) {
 					aStreamReader.next();
-					id = aStreamReader.getText();
+					lId = aStreamReader.getText();
 				} else if (elementName.equals(NAME)) {
 					aStreamReader.next();
-					name = aStreamReader.getText();
+					lName = aStreamReader.getText();
 				} else if (elementName.equals(JAR)) {
 					aStreamReader.next();
-					jar = aStreamReader.getText();
+					lJar = aStreamReader.getText();
 				} else if (elementName.equals(NAMESPACE)) {
 					aStreamReader.next();
-					namespace = aStreamReader.getText();
+					lNamespace = aStreamReader.getText();
 				} else if (elementName.equals(SETTINGS)) {
-					settings = getSettings(aStreamReader);
+					lSettings = getSettings(aStreamReader);
 				} else if (elementName.equals(SERVERS)) {
-					servers = getServers(aStreamReader);
+					lServers = getServers(aStreamReader);
 				} else {
 					// ignore
 				}
@@ -84,36 +84,36 @@ public class FilterConfigHandler implements ConfigHandler {
 			}
 		}
 
-		return new FilterConfig(id, name, packageName, jar, namespace, servers, settings);
+		return new FilterConfig(lId, lName, lPackageName, lJar, lNamespace, lServers, lSettings);
 	}
 
 	/**
 	 * private method that reads the list of servers from the plugin configuration 
-	 * @param streamReader the stream reader object
+	 * @param aStreamReader the stream reader object
 	 * @return the list of right ids
 	 * @throws XMLStreamException if exception while reading
 	 */
-	private List<String> getServers(XMLStreamReader streamReader)
+	private List<String> getServers(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
-		List<String> servers = new FastList<String>();
-		while (streamReader.hasNext()) {
-			streamReader.next();
-			if (streamReader.isStartElement()) {
-				String elementName = streamReader.getLocalName();
-				if (elementName.equals(SERVER)) {
-					streamReader.next();
-					String server = streamReader.getText();
-					servers.add(server);
+		List<String> lServers = new FastList<String>();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SERVER)) {
+					aStreamReader.next();
+					String server = aStreamReader.getText();
+					lServers.add(server);
 				}
 			}
-			if (streamReader.isEndElement()) {
-				String elementName = streamReader.getLocalName();
-				if (elementName.equals(SERVERS)) {
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SERVERS)) {
 					break;
 				}
 			}
 		}
-		return servers;
+		return lServers;
 	}
 
 	/**

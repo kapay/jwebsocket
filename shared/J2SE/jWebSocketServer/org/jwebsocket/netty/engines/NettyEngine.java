@@ -61,7 +61,7 @@ public class NettyEngine extends BaseEngine {
 	@Override
 	public void startEngine() throws WebSocketException {
 		if (log.isDebugEnabled()) {
-			log.debug("Starting Netty engine (" + getId() + ")...");
+			log.debug("Starting Netty engine '" + getId() + "'...");
 		}
 		// Configure the server.
 		ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
