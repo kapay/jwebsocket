@@ -30,8 +30,7 @@ import org.jwebsocket.server.TokenServer;
 public class JWebSocketServer {
 
   /**
-   * @param args
-   *          the command line arguments
+   * @param args the command line arguments
    */
   public static void main(String[] args) {
     // the following 3 lines may not be removed due to GNU LGPL 3.0 license!

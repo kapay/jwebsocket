@@ -235,7 +235,6 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
             res.setContent(ChannelBuffers.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8));
             setContentLength(res, res.getContent().readableBytes());
         }
-
         // Send the response and close the connection if necessary.
         ChannelFuture f = ctx.getChannel().write(res);
         if (!isKeepAlive(req) || res.getStatus().getCode() != 200) {
@@ -255,7 +254,6 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
         if (keepAlive != null && keepAlive.length() > 0) {
             return true;
         } else {
-            // TODO: Keep-Alive value is like 'timeout=15, max=500'
             return false;
         }
     }

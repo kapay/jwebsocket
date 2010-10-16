@@ -20,6 +20,7 @@ import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.server.TokenServer;
@@ -148,6 +149,21 @@ public class TokenPlugIn extends BasePlugIn {
     if (lServer != null) {
       lServer.sendToken(aSource, aTarget, aToken);
     }
+  }
+  /**
+   * Sends the the given token asynchronously and returns the future object to keep track of 
+   * the send operation
+   * @param aSource the source connector
+   * @param aTarget the target connector
+   * @param aToken the token object
+   * @return the I/O future object
+   */
+  public IOFuture sendTokenAsync(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+    TokenServer lServer = getServer();
+    if (lServer != null) {
+      return lServer.sendTokenAsync(aSource, aTarget, aToken);
+    }
+    return null;
   }
   /**
    * Convenience method, just a wrapper for token server method
