@@ -12,7 +12,7 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.channel;
+package org.jwebsocket.plugins.channel;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +29,6 @@ import javolution.util.FastList;
 public class Channel implements ChannelLifeCycle {
   private String id;
   private String name;
-  private String dbKey;
   private int subscriberCount;
   private boolean isPrivate;
   private List<Subscriber> subscribers;
@@ -45,12 +44,6 @@ public class Channel implements ChannelLifeCycle {
   }
   public void setName(String name) {
     this.name = name;
-  }
-  public String getDbKey() {
-    return dbKey;
-  }
-  public void setDbKey(String dbKey) {
-    this.dbKey = dbKey;
   }
   public int getSubscriberCount() {
     return subscriberCount;

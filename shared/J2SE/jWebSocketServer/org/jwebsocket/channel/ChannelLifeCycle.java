@@ -1,4 +1,4 @@
-package org.jwebsocket.channel;
+package org.jwebsocket.plugins.channel;
 
 public interface ChannelLifeCycle {
   void init();

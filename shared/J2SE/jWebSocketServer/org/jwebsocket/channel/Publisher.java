@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.jwebsocket.channel;
+package org.jwebsocket.plugins.channel;
 
 /**
  * @author puran
