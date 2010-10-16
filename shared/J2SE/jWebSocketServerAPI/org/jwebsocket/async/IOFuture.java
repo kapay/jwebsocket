@@ -39,18 +39,18 @@ import org.jwebsocket.api.WebSocketConnector;
  *                                      +---------------------------+
  *                                      | Completed successfully    |
  *                                      +---------------------------+
- *                                 +---->      isDone() = <b>true</b>      |
- * +--------------------------+    |    |   isSuccess() = <b>true</b>      |
+ *                                 +---->      isDone() = <b>true</b>|
+ * +--------------------------+    |    |   isSuccess() = <b>true</b>|
  * |        Uncompleted       |    |    +===========================+
  * +--------------------------+    |    | Completed with failure    |
- * |      isDone() = <b>false</b>    |    |    +---------------------------+
- * |   isSuccess() = false    |----+---->   isDone() = <b>true</b>         |
- * | isCancelled() = false    |    |    | getCause() = <b>non-null</b>     |
+ * |      isDone() = <b>false</b>  |    +---------------------------+
+ * |   isSuccess() = false    |----+---->   isDone() = <b>true</b>  |
+ * | isCancelled() = false    |    |    | getCause() = <b>non-null</b>|
  * |    getCause() = null     |    |    +===========================+
  * +--------------------------+    |    | Completed by cancellation |
  *                                 |    +---------------------------+
- *                                 +---->      isDone() = <b>true</b>      |
- *                                      | isCancelled() = <b>true</b>      |
+ *                                 +---->      isDone() = <b>true</b>|
+ *                                      | isCancelled() = <b>true</b>|
  *                                      +---------------------------+
  * </pre>
  * 

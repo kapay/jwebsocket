@@ -78,7 +78,7 @@ public interface WebSocketConnector {
    *         write request succeeds or fails
    * null if there's any problem with the send operation.         
    */
-  IOFuture sendPacketAsynch(WebSocketPacket aDataPacket);
+  IOFuture sendPacketAsync(WebSocketPacket aDataPacket);
 
 	/**
 	 * Returns the request header from the client during the connection

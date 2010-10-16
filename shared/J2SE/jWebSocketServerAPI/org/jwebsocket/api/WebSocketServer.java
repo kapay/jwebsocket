@@ -18,6 +18,7 @@ package org.jwebsocket.api;
 import java.util.List;
 import java.util.Map;
 
+import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
@@ -103,6 +104,17 @@ public interface WebSocketServer {
 	 * @param aDataPacket
 	 */
 	void sendPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket);
+	
+	/**
+	 * Sends the data packet asynchronously to the output channel through the given target
+	 * connector. This is a asynchronous output process which returns the future object 
+	 * to check the status and control the output operation.
+	 *  
+	 * @param aConnector the target connector to use for the packet output
+	 * @param aDataPacket the data packet 
+	 * @return the future object for this output operation
+	 */
+	IOFuture sendPacketAsync(WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
 	/**
 	 * Broadcasts a datapacket to all connectors.
