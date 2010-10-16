@@ -17,64 +17,98 @@ package org.jwebsocket.kit;
 
 /**
  * This class holds the various options to broadcast a data packet in the
- * WebSocket network. When broadcasting the sender can decide if the packet
- * is supposed to be sent only (one-way packet) or if the server is supposed
- * to sent an acknowledge. The sender also can decide if the sender himself
- * should be a broadcast target or not - which might be required for certain
- * business logic.
+ * WebSocket network. When broadcasting the sender can decide if the packet is
+ * supposed to be sent only (one-way packet) or if the server is supposed to
+ * sent an acknowledge. The sender also can decide if the sender himself should
+ * be a broadcast target or not - which might be required for certain business
+ * logic.
+ * 
  * @author aschulze
+ * @author puran
+ * @version $Id:$
  */
 public class BroadcastOptions {
 
-	private boolean senderIncluded = false;
-	private boolean responseRequested = false;
+    private boolean senderIncluded = false;
+    private boolean responseRequested = false;
+    private boolean async = false;
 
-	/**
-	 * Creates a new <tt>BroadcastOptions</tt> instance. The caller can decide
-	 * whether or not to include the sender in the broadcast and if the sender
-	 * expects a response from the server.
-	 * @param aSenderIncluded
-	 * @param aResponseRequested
-	 */
-	public BroadcastOptions(boolean aSenderIncluded, boolean aResponseRequested) {
-		senderIncluded = aSenderIncluded;
-		responseRequested = aResponseRequested;
-	}
+    /**
+     * Creates a new <tt>BroadcastOptions</tt> instance. The caller can decide
+     * whether or not to include the sender in the broadcast and if the sender
+     * expects a response from the server.
+     * 
+     * @param aSenderIncluded {@code true} if to include sender, {@code false} otherwise
+     * @param aResponseRequested {@code true} if to response is requested, {@code false}
+     *            otherwise
+     */
+    public BroadcastOptions(boolean aSenderIncluded, boolean aResponseRequested) {
+        this(aSenderIncluded, aResponseRequested, false);
+    }
 
-	/**
-	 * Returns if the sender is supposed to be included in the pending 
-	 * broadcast operation.
-	 * @return senderIncluded Is the sender included in the pending broadcast?
-	 */
-	public boolean isSenderIncluded() {
-		return senderIncluded;
-	}
+    /**
+     * Creates a new <tt>BroadcastOptions</tt> instance. The caller can decide
+     * whether or not to include the sender in the broadcast and if the sender
+     * expects a response from the server.
+     * 
+     * @param aSenderIncluded {@code true} if to include sender, {@code false} otherwise
+     * @param aResponseRequested {@code true} if to response is requested, {@code false} otherwise
+     * @param async {@code true} if to broadcast asynchronously
+     */
+    public BroadcastOptions(boolean aSenderIncluded, boolean aResponseRequested, boolean async) {
+        senderIncluded = aSenderIncluded;
+        responseRequested = aResponseRequested;
+        this.async = async;
+    }
 
-	/**
-	 * Specifies if the sender is supposed to be included in the pending
-	 * broadcast operation.
-	 * @param aSenderIncluded Sender supposed to be included in the pending broadcast?
-	 */
-	public void setSenderIncluded(boolean aSenderIncluded) {
-		this.senderIncluded = aSenderIncluded;
-	}
+    /**
+     * Returns if the sender is supposed to be included in the pending broadcast
+     * operation.
+     * @return senderIncluded Is the sender included in the pending broadcast?
+     */
+    public boolean isSenderIncluded() {
+        return senderIncluded;
+    }
 
-	/**
-	 * Returns if the server is supposed to send a response for the
-	 * broadcast operation.
-	 * @return responseRequested Server supposed to send a response?
-	 */
-	public boolean isResponseRequested() {
-		return responseRequested;
-	}
+    /**
+     * Specifies if the sender is supposed to be included in the pending
+     * broadcast operation.
+     * @param aSenderIncluded Sender supposed to be included in the pending broadcast?
+     */
+    public void setSenderIncluded(boolean aSenderIncluded) {
+        this.senderIncluded = aSenderIncluded;
+    }
 
-	/**
-	 * Specifies if the server is supposed to send a response for the
-	 * broadcast operation.
-	 * @param responseRequested Server supposed to send a response?
-	 */
-	public void setResponseRequested(boolean responseRequested) {
-		this.responseRequested = responseRequested;
-	}
+    /**
+     * Returns if the server is supposed to send a response for the broadcast
+     * operation.
+     * @return responseRequested Server supposed to send a response?
+     */
+    public boolean isResponseRequested() {
+        return responseRequested;
+    }
+
+    /**
+     * Specifies if the server is supposed to send a response for the broadcast
+     * operation.
+     * @param responseRequested Server supposed to send a response?
+     */
+    public void setResponseRequested(boolean responseRequested) {
+        this.responseRequested = responseRequested;
+    }
+
+    /**
+     * @return the async
+     */
+    public boolean isAsync() {
+        return async;
+    }
+
+    /**
+     * @param async the async to set
+     */
+    public void setAsync(boolean async) {
+        this.async = async;
+    }
 
 }
