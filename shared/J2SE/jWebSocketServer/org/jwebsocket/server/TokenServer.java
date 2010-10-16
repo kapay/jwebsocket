@@ -16,6 +16,10 @@
 package org.jwebsocket.server;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.ServerConfiguration;
@@ -53,7 +57,8 @@ public class TokenServer extends BaseServer {
 	// specify shared connector variables
 	public static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
 	private volatile boolean mIsAlive = false;
-
+	private static ExecutorService mCachedThreadPool ;
+	private final static int TIME_OUT_TERMINATION_THREAD = 10 ;
 	/**
 	 * 
 	 * @param aId
@@ -66,7 +71,8 @@ public class TokenServer extends BaseServer {
 
 	@Override
 	public void startServer() throws WebSocketException {
-
+		//Create the thread pool.
+		mCachedThreadPool = Executors.newCachedThreadPool() ;
 		mIsAlive = true;
 		if (mLog.isInfoEnabled()) {
 			mLog.info("Token server '" + getId() + "' started.");
@@ -82,8 +88,28 @@ public class TokenServer extends BaseServer {
 
 	@Override
 	public void stopServer() throws WebSocketException {
-
 		mIsAlive = false;
+		//Shutdown the thread pool
+		if (mCachedThreadPool != null) {
+			if (mLog.isInfoEnabled()) {
+				mLog.info("Shuting down token server threadPool.");
+			}
+			mCachedThreadPool.shutdown(); // Disable new tasks from being submitted
+		  try {
+		    // Wait a while for existing tasks to terminate
+		    if (!mCachedThreadPool.awaitTermination(TIME_OUT_TERMINATION_THREAD, TimeUnit.SECONDS)) {
+		      mCachedThreadPool.shutdownNow(); // Cancel currently executing tasks
+		      // Wait a while for tasks to respond to being cancelled
+		      if (!mCachedThreadPool.awaitTermination(TIME_OUT_TERMINATION_THREAD, TimeUnit.SECONDS)) {
+		          mLog.error("Pool did not terminate");
+		          mCachedThreadPool.shutdownNow();
+		      }
+		    }
+		  } catch (InterruptedException ie) {
+		    // (Re-)Cancel if current thread also interrupted
+		  	mCachedThreadPool.shutdownNow();
+		  }
+		}
 		if (mLog.isInfoEnabled()) {
 			mLog.info("Token server '" + getId() + "' stopped.");
 		}
@@ -217,13 +243,12 @@ public class TokenServer extends BaseServer {
 					if (mLog.isDebugEnabled()) {
 						mLog.debug("Processing threaded token '" + lToken.toString() + "' from '" + aConnector + "'...");
 					}
-					new Thread(new Runnable() {
-
+					mCachedThreadPool.execute(new Runnable() {
 						@Override
 						public void run() {
 							processToken(aConnector, lToken);
 						}
-					}).start();
+					});
 				} else {
 					if (mLog.isDebugEnabled()) {
 						mLog.debug("Processing token '" + lToken.toString() + "' from '" + aConnector + "'...");
