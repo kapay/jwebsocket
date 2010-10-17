@@ -33,8 +33,9 @@ public interface ChannelStore {
     /**
      * Store the given channel in the channel store
      * @param channel the channel object
+     * @return {@code true} if insert successful
      */
-    void storeChannel(Channel channel);
+    boolean storeChannel(Channel channel);
 
     /**
      * Removes the channel from the channel store based on given id

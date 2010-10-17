@@ -67,8 +67,10 @@ public class BaseChannelStore extends JDBCStore implements ChannelStore {
     private static final String PRIVATE = "private";
     private static final String SYSTEM = "system";
     private static final String SUBSCRIBERS = "subscribers";
-    private static final String SUBSCRIBER_KEY = "subscriber_key";
-    private static final String CHANNELS = "channels";
+    private static final String PUBLISHERS = "publishers";
+    private static final String SECRET_KEY = "secret_key";
+    private static final String ACCESS_KEY = "access_key";
+    private static final String CHANNEL = "channel";
 
     /**
      * default constructor
@@ -98,30 +100,42 @@ public class BaseChannelStore extends JDBCStore implements ChannelStore {
     public Channel getChannel(String id) {
         Channel channel = null;
         List<Subscriber> subscribers = new ArrayList<Subscriber>();
+        List<Publisher> publishers = new ArrayList<Publisher>();
         String channelData = (String) super.get(id);
         try {
-            JSONObject jsonObject = new JSONObject(channelData);
-            String channelId = jsonObject.getString(ID);
-            String channelName = jsonObject.getString(NAME);
-            int subscriberCount = jsonObject.getInt(SUBSCRIBER_COUNT);
-            boolean privateChannel = jsonObject.getBoolean(PRIVATE);
-            boolean systemChannel = jsonObject.getBoolean(SYSTEM);
+            JSONObject channelObject = new JSONObject(channelData);
+            String channelId = channelObject.getString(ID);
+            String channelName = channelObject.getString(NAME);
+            int subscriberCount = channelObject.getInt(SUBSCRIBER_COUNT);
+            boolean privateChannel = channelObject.getBoolean(PRIVATE);
+            boolean systemChannel = channelObject.getBoolean(SYSTEM);
+            String secretKey = channelObject.getString(SECRET_KEY);
+            String accessKey = channelObject.getString(ACCESS_KEY);
             
-            JSONArray subscribersArray = jsonObject.getJSONArray(SUBSCRIBERS);
+            JSONArray subscribersArray = channelObject.getJSONArray(SUBSCRIBERS);
             if (subscribersArray != null) {
                 for (int i = 0; i < subscribersArray.length(); i++) {
                     JSONObject subscriberObject = subscribersArray.getJSONObject(i);
                     String subscriberId = subscriberObject.getString(ID);
-                    String subscriberName = subscriberObject.getString(NAME);
-                    String subscriberKey = subscriberObject.getString(SUBSCRIBER_KEY);
-                    String channels = subscriberObject.getString(CHANNELS);
-                    
-                    Subscriber subscriber = new Subscriber(subscriberId, subscriberName, subscriberKey, channels);
+                    Subscriber subscriber = new Subscriber(subscriberId);
                     subscribers.add(subscriber);
                 }
             }
+            
+            JSONArray publishersArray = channelObject.getJSONArray(PUBLISHERS);
+            if (publishersArray != null) {
+                for (int i = 0; i < publishersArray.length(); i++) {
+                    JSONObject publisherObject = publishersArray.getJSONObject(i);
+                    String pid = publisherObject.getString(ID);
+                    String ch = publisherObject.getString(CHANNEL);
+                    
+                    Publisher publisher = new Publisher(pid, ch);
+                    publishers.add(publisher);
+                }
+            }
+            //construct the channel object
             channel = new Channel(channelId, channelName, subscriberCount, privateChannel, systemChannel,
-                    subscribers);
+                    secretKey, accessKey, subscribers, publishers);
         } catch (JSONException e) {
             logger.error("Error parsing json response from the channel store:", e);
         }
@@ -132,7 +146,41 @@ public class BaseChannelStore extends JDBCStore implements ChannelStore {
      * {@inheritDoc}
      */
     @Override
-    public void storeChannel(Channel channel) {
+    public boolean storeChannel(Channel channel) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put(ID, channel.getId());
+            jsonObject.put(NAME, channel.getName());
+            jsonObject.put(SUBSCRIBER_COUNT, channel.getSubscriberCount());
+            jsonObject.put(PRIVATE, channel.isPrivateChannel());
+            jsonObject.put(SYSTEM, channel.isSystemChannel());
+            jsonObject.put(SECRET_KEY, channel.getSecretKey());
+            jsonObject.put(ACCESS_KEY, channel.getAccessKey());
+            
+            JSONArray jsonArray = new JSONArray();
+            for (Subscriber subscriber : channel.getSubscribers()) {
+                JSONObject subscriberObject = new JSONObject();
+                subscriberObject.put(ID, subscriber.getId());
+                jsonArray.put(subscriberObject);
+            }
+            jsonObject.put(SUBSCRIBERS, jsonArray);
+            
+            JSONArray publisherArray = new JSONArray();
+            for (Publisher publisher : channel.getPublishers()) {
+                JSONObject subscriberObject = new JSONObject();
+                subscriberObject.put(ID, publisher.getId());
+                subscriberObject.put(CHANNEL, publisher.getChannel());
+                
+                jsonArray.put(publisherArray);
+            }
+            jsonObject.put(PUBLISHERS, publisherArray);
+            //now save
+            return super.put(channel.getId(), jsonObject);
+            
+        } catch (JSONException e) {
+            logger.error("Error constructing JSON data for the given channel:"+channel.getName(), e);
+        }
+        return false;
     }
 
     /**
@@ -140,6 +188,7 @@ public class BaseChannelStore extends JDBCStore implements ChannelStore {
      */
     @Override
     public void removeChannel(String id) {
+        super.remove(id);
     }
 
     /**
@@ -147,6 +196,7 @@ public class BaseChannelStore extends JDBCStore implements ChannelStore {
      */
     @Override
     public void clearChannels() {
+        super.clear();
     }
 
     /**
@@ -154,7 +204,6 @@ public class BaseChannelStore extends JDBCStore implements ChannelStore {
      */
     @Override
     public int getChannelStoreSize() {
-        // TODO Auto-generated method stub
-        return 0;
+        return super.getSize();
     }
 }

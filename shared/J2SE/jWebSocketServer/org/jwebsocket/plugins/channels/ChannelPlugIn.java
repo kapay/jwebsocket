@@ -38,6 +38,8 @@ import org.jwebsocket.util.Tools;
  * Token based implementation of the channel plugin. It's based on a publisher/subscriber 
  * model where channels can be either used to publish the data by one or more registered 
  * publishers and subscribed by multiple subscribers.
+ * 
+ * Subscribe: ws://localhost:8787/?subscriber=
  * @author puran
  * @version $Id$
  */
@@ -104,11 +106,19 @@ public class ChannelPlugIn extends TokenPlugIn {
         Random rand = new Random(System.nanoTime());
         theConnector.getSession().setSessionId(Tools.getMD5(theConnector.generateUID() + "." + rand.nextInt()));
         RequestHeader request = theConnector.getHeader();
-        String channel = request.getString("channel");
-        String subscriberKey = request.getString("subscriber_key");
-        if (channel == null || "".equals(channel)) {
+        String channelId = request.getString("channel");
+        if (channelId == null || "".equals(channelId)) {
             sendError(theConnector, CloseReason.CLIENT, "Subscribe failed, channel value is null");
         }
+        String accessKey = request.getString("access_key");
+        if (accessKey == null || "".equals(accessKey)) {
+            sendError(theConnector, CloseReason.CLIENT, "Subscribe failed, access_key value is null");
+        }
+        Subscriber subscriber = new Subscriber(theConnector, getServer());
+        Channel channel = channelManager.getChannel(channelId);
+        
+        channelManager.subscribeChannel(channel, subscriber);
+        
         // call super connectorStarted
         super.connectorStarted(theConnector);
     }

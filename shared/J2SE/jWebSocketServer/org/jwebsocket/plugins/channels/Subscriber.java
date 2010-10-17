@@ -15,6 +15,9 @@
 package org.jwebsocket.plugins.channels;
 
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.async.IOFuture;
+import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.token.Token;
 /**
  * Class that represents the subscriber of a channel
  * @author puran
@@ -22,22 +25,21 @@ import org.jwebsocket.api.WebSocketConnector;
  */
 public class Subscriber {
     private String id;
-    private String name;
-    private String subscriberKey;
     private WebSocketConnector connector;
-    private String channels;
+    private TokenServer tokenServer;
     
     /**
      * Default constructor
      */
-    public Subscriber(String id, String name, String subscriberKey, String channels) {
+    public Subscriber(String id) {
         this.id = id;
-        this.name = name;
-        this.subscriberKey = subscriberKey;
         this.connector = null;
-        this.channels = channels;
     }
-    
+    public Subscriber(WebSocketConnector theConnector, TokenServer theServer) {
+        this.id = theConnector.getId();
+        this.connector = theConnector;
+        this.tokenServer = theServer;
+    }
     /**
      * @return the id
      */
@@ -51,30 +53,6 @@ public class Subscriber {
         this.id = id;
     }
     /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-    /**
-     * @return the subscriberKey
-     */
-    public String getSubscriberKey() {
-        return subscriberKey;
-    }
-    /**
-     * @param subscriberKey the subscriberKey to set
-     */
-    public void setSubscriberKey(String subscriberKey) {
-        this.subscriberKey = subscriberKey;
-    }
-    /**
      * @return the connector
      */
     public WebSocketConnector getConnector() {
@@ -86,17 +64,37 @@ public class Subscriber {
     public void setConnector(WebSocketConnector connector) {
         this.connector = connector;
     }
-    /**
-     * @return the channels
-     */
-    public String getChannels() {
-        return channels;
-    }
-    /**
-     * @param channels the channels to set
-     */
-    public void setChannels(String channels) {
-        this.channels = channels;
+    
+    public IOFuture sendTokenAsync(Token token) {
+        return tokenServer.sendTokenAsync(connector, token);
     }
     
+    public void sendToken(Token token) {
+        tokenServer.sendToken(connector, token);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Subscriber other = (Subscriber) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
 }
