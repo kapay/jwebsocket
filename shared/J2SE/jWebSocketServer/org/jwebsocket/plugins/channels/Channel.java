@@ -37,6 +37,18 @@ public class Channel implements ChannelLifeCycle {
     private String accessKey;
     private List<Subscriber> subscribers;
     private List<Publisher> publishers;
+    private ChannelState state = ChannelState.STOPPED;
+    
+    public enum ChannelState {
+       STOPPED(0), INITIALIZED(1), STARTED(2), SUSPENDED(3);
+       private int status;
+       ChannelState(int theStatus) {
+           this.status = theStatus;
+       }
+       public int getStatus() {
+           return status;
+       }
+    }
 
     public Channel(String id, String name, int subscriberCount, boolean privateChannel, boolean systemChannel,
             String secretKey, String accessKey, List<Subscriber> subscribers, List<Publisher> publishers) {
@@ -160,19 +172,33 @@ public class Channel implements ChannelLifeCycle {
     public void broadcast(Token token) {
 
     }
+    
+    public void setState(ChannelState state) {
+        this.state = state;
+    }
+    
+    public ChannelState getState() {
+        return state;
+    }
 
     @Override
     public void init() {
-
+        this.state = ChannelState.INITIALIZED;
     }
 
     @Override
     public void start() {
-
+        this.state = ChannelState.STARTED;
+    }
+    
+    @Override
+    public void suspend() {
+        this.state = ChannelState.SUSPENDED;
     }
 
     @Override
     public void stop() {
+        this.state = ChannelState.STOPPED;
     }
 
     /* (non-Javadoc)
