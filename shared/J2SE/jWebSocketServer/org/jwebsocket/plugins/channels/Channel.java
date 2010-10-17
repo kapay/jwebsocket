@@ -22,74 +22,110 @@ import org.jwebsocket.token.Token;
 import javolution.util.FastList;
 
 /**
- * Channel class represents the data channel 
+ * Channel class represents the data channel
+ * 
  * @author puran
  * @version $Id$
  */
 public class Channel implements ChannelLifeCycle {
-  private String id;
-  private String name;
-  private int subscriberCount;
-  private boolean isPrivate;
-  private List<Subscriber> subscribers;
-  
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
-  }
-  public String getName() {
-    return name;
-  }
-  public void setName(String name) {
-    this.name = name;
-  }
-  public int getSubscriberCount() {
-    return subscriberCount;
-  }
-  public void setSubscriberCount(int subscriberCount) {
-    this.subscriberCount = subscriberCount;
-  }
-  public boolean isPrivate() {
-    return isPrivate;
-  }
-  public void setPrivate(boolean isPrivate) {
-    this.isPrivate = isPrivate;
-  }
-  public List<Subscriber> getSubscribers() {
-    return Collections.unmodifiableList(subscribers);
-  }
-  public void setSubscribers(List<Subscriber> subscribers) {
-    this.subscribers = subscribers;
-  }
-  public void addSubscriber(Subscriber subscriber) {
-    if (this.subscribers == null) {
-      this.subscribers = new FastList<Subscriber>();
+    private String id;
+    private String name;
+    private int subscriberCount;
+    private boolean privateChannel;
+    private boolean systemChannel;
+    private List<Subscriber> subscribers;
+
+    public Channel(String id, String name, int subscriberCount, boolean privateChannel, boolean systemChannel,
+            List<Subscriber> subscribers) {
+        this.id = id;
+        this.name = name;
+        this.subscriberCount = subscriberCount;
+        this.privateChannel = privateChannel;
+        this.systemChannel = systemChannel;
+        this.subscribers = subscribers;
     }
-    subscribers.add(subscriber);
-  }
-  
-  public void send(Token token, Subscriber subscriber) {
-    
-  }
-  
-  public void broadcast(Token token) {
-    
-  }
-  @Override
-  public void init() {
-    // TODO Auto-generated method stub
-    
-  }
-  @Override
-  public void start() {
-    // TODO Auto-generated method stub
-    
-  }
-  @Override
-  public void stop() {
-    // TODO Auto-generated method stub
-    
-  }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getSubscriberCount() {
+        return subscriberCount;
+    }
+
+    public void setSubscriberCount(int subscriberCount) {
+        this.subscriberCount = subscriberCount;
+    }
+
+    public boolean isPrivateChannel() {
+        return privateChannel;
+    }
+
+    public void setPrivateChannel(boolean privateChannel) {
+        this.privateChannel = privateChannel;
+    }
+
+    /**
+     * @return the systemChannel
+     */
+    public boolean isSystemChannel() {
+        return systemChannel;
+    }
+
+    /**
+     * @param systemChannel
+     *            the systemChannel to set
+     */
+    public void setSystemChannel(boolean systemChannel) {
+        this.systemChannel = systemChannel;
+    }
+
+    public List<Subscriber> getSubscribers() {
+        return Collections.unmodifiableList(subscribers);
+    }
+
+    public void setSubscribers(List<Subscriber> subscribers) {
+        this.subscribers = subscribers;
+    }
+
+    public void addSubscriber(Subscriber subscriber) {
+        if (this.subscribers == null) {
+            this.subscribers = new FastList<Subscriber>();
+        }
+        subscribers.add(subscriber);
+    }
+
+    public void send(Token token, Subscriber subscriber) {
+
+    }
+
+    public void broadcast(Token token) {
+
+    }
+
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void stop() {
+    }
 }

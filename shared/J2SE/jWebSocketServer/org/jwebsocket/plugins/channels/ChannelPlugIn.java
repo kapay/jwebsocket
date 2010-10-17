@@ -43,13 +43,13 @@ import org.jwebsocket.util.Tools;
  */
 public class ChannelPlugIn extends TokenPlugIn {
     /**
-     * Channel Manager that manages all the channels
-     */
-    private ChannelManager channelManager = new ChannelManager();
-    /**
      * logger
      */
     private static Logger log = Logging.getLogger(ChannelPlugIn.class);
+    /**
+     * Channel Manager that manages all the channels
+     */
+    private ChannelManager channelManager = new ChannelManager();
     /**
      * Namespace for channels
      */

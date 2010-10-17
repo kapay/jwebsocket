@@ -14,8 +14,6 @@
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 package org.jwebsocket.plugins.channels;
 
-import java.util.List;
-
 import org.jwebsocket.api.WebSocketConnector;
 /**
  * Class that represents the subscriber of a channel
@@ -27,7 +25,18 @@ public class Subscriber {
     private String name;
     private String subscriberKey;
     private WebSocketConnector connector;
-    private List<String> channels;
+    private String channels;
+    
+    /**
+     * Default constructor
+     */
+    public Subscriber(String id, String name, String subscriberKey, String channels) {
+        this.id = id;
+        this.name = name;
+        this.subscriberKey = subscriberKey;
+        this.connector = null;
+        this.channels = channels;
+    }
     
     /**
      * @return the id
@@ -80,13 +89,13 @@ public class Subscriber {
     /**
      * @return the channels
      */
-    public List<String> getChannels() {
+    public String getChannels() {
         return channels;
     }
     /**
      * @param channels the channels to set
      */
-    public void setChannels(List<String> channels) {
+    public void setChannels(String channels) {
         this.channels = channels;
     }
     
