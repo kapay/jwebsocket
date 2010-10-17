@@ -15,81 +15,44 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
-import org.jwebsocket.data.store.JDBCStore;
-
 /**
- * This class handles all the data store/retrieval operations for channels.
+ * Channel store interface that defines the operation for store/retrieval of
+ * channel data.
+ * 
  * @author puran
- * @version $Id$ 
+ * @version $Id$
  */
-public class ChannelStore extends JDBCStore {
-    
-    /** default table name for the channel store */
-    private static final String TABLE_NAME = "table_channels_store";
-    
-    /** default mysql driver name for channel store */
-    private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
-    
-    /** default application column name for channels data store  */
-    private static final String APP_COLUMN_NAME = "channels";
-    
-    /** default key column name for channel data store */
-    private static final String KEY_COLUMN_NAME = "channel_key";
-    
-    /** default value column name for channel data store */
-    private static final String VALUE_COLUMN_NAME = "channel_value";
-    
-    /** default connection url for the channels data store */
-    private static final String CONNECTION_URL = "jdbc:mysql://localhost:3306/jwebsocketdb";
-    
-    /** default connection user name for channels data store*/
-    private static final String CONNECTION_NAME = "jwebsocket";
-    
-    /** default connection password for the channels data store*/
-    private static final String CONNECTION_PASSWORD = "himalayantiger";
-    
+public interface ChannelStore {
     /**
-     * default constructor
+     * Returns the channel from the data store based on channel key or id
+     * @param id the channel id
+     * @return the channel object
      */
-    public ChannelStore() {
-        init();
-    }
+    Channel getChannel(String id);
+
     /**
-     * initialize the JDBC store properties.
+     * Store the given channel in the channel store
+     * @param channel the channel object
      */
-    private void init() {
-        super.tableName = TABLE_NAME;
-        super.driverName = DRIVER_NAME;
-        super.appColumnName = APP_COLUMN_NAME;
-        super.keyColumnName = KEY_COLUMN_NAME;
-        super.valueColumnName = VALUE_COLUMN_NAME;
-        super.connectionURL = CONNECTION_URL;
-        super.connectionName = CONNECTION_NAME;
-        super.connectionPassword = CONNECTION_PASSWORD;
-    }
+    void storeChannel(Channel channel);
 
-    @Override
-    public String getInfo() {
-        // TODO Auto-generated method stub
-        return super.getInfo();
-    }
+    /**
+     * Removes the channel from the channel store based on given id
+     * @param key the key of the data to remove from the store
+     */
+    void removeChannel(String id);
 
-    @Override
-    public Object get(String key) {
-        // TODO Auto-generated method stub
-        return super.get(key);
-    }
+    /**
+     * Clears the channel store, use this method with care since it removes
+     * all the channel information from the store physically and cannot be 
+     * rolled back. 
+     */
+    void clearChannels();
 
-    @Override
-    public void remove(String key) {
-        // TODO Auto-generated method stub
-        super.remove(key);
-    }
-
-    @Override
-    public boolean put(String key, Object data) {
-        // TODO Auto-generated method stub
-        return super.put(key, data);
-    }
+    /**
+     * Returns the size of the channel store
+     * @return the size value
+     */
+    int getChannelStoreSize();
 
 }
