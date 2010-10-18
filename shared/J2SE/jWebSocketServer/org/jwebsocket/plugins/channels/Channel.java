@@ -191,7 +191,7 @@ public class Channel implements ChannelLifeCycle {
         this.state = ChannelState.STARTED;
     }
     
-    @Override
+//    @Override
     public void suspend() {
         this.state = ChannelState.SUSPENDED;
     }

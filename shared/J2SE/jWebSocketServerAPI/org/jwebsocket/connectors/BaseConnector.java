@@ -31,7 +31,7 @@ import org.jwebsocket.kit.WebSocketSession;
  * {@code BaseConnector} is supposed to be used as ancestor for the connector
  * implementations like e.g. the {@code TCPConnector} or the
  * {@code NettyConnector }.
- * 
+ *
  * @author aschulze
  */
 public class BaseConnector implements WebSocketConnector {
