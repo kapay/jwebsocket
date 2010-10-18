@@ -30,7 +30,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,20 +44,28 @@ import android.widget.Toast;
  */
 public class RPCDemoActivity extends Activity implements WebSocketClientTokenListener {
 
-	private EditText classTxt;
+        private enum Target {ANDROID, BROWSER};
+
+        private EditText classTxt;
 	private EditText methodTxt;
 	private EditText parameterTxt;
 	private EditText targetTxt;
 	private EditText resultTxt;
 	private Button invokeBtn;
         private TextView targetLabel;
+        private RadioGroup targetRadioGroup;
         private Boolean useRRPC = false;
+        private ImageView statusImage;
+        private Target selectedTarget = Target.ANDROID;
+
         
 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+                
 		setContentView(R.layout.rpc_demo);
+                
 		classTxt = (EditText) findViewById(R.id.classTxt);
 		methodTxt = (EditText) findViewById(R.id.methodTxt);
 		parameterTxt = (EditText) findViewById(R.id.parameterTxt);
@@ -61,9 +73,12 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 		targetTxt = (EditText) findViewById(R.id.targetTxt);
                 targetLabel = (TextView)findViewById(R.id.targetLabel);
 		invokeBtn = (Button) findViewById(R.id.invokeBtn);
+                statusImage = (ImageView)findViewById(R.id.statusImage);
+                targetRadioGroup = (RadioGroup)findViewById(R.id.radio_group);
+                
+                statusImage.setImageResource(R.drawable.disconnected);
 
-
-                final LinearLayout layout = (LinearLayout)findViewById(R.id.rpcLayout);
+                
                 final CheckBox checkbox = (CheckBox) findViewById(R.id.rrpcCheckBox);
                 checkbox.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
@@ -71,14 +86,17 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
                         if (((CheckBox) v).isChecked()) {
                             targetTxt.setVisibility(EditText.VISIBLE);
                             targetLabel.setVisibility(TextView.VISIBLE);
+                            targetRadioGroup.setVisibility(RadioGroup.VISIBLE);
                             useRRPC = true;
                         } else {
                             targetTxt.setVisibility(EditText.GONE);
                             targetLabel.setVisibility(TextView.GONE);
+                            targetRadioGroup.setVisibility(RadioGroup.GONE);
                             useRRPC = false;
                         }
                        targetLabel.invalidate();
                        targetTxt.invalidate();
+                       targetRadioGroup.invalidate();
 
                     }
                 });
@@ -89,7 +107,30 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 				sendMethodInvokeToken();
 			}
 		});
+
+                final RadioButton radio_browser = (RadioButton) findViewById(R.id.radio_browser);
+                final RadioButton radio_android = (RadioButton) findViewById(R.id.radio_android);
+                radio_browser.setOnClickListener(radio_listener);
+                radio_android.setOnClickListener(radio_listener);
+
+
 	}
+
+        private OnClickListener radio_listener = new OnClickListener() {
+            public void onClick(View v) {
+                // Perform action on clicks
+                RadioButton rb = (RadioButton) v;
+                if(rb.getId() == R.id.radio_android)
+                {
+                    selectedTarget = Target.ANDROID;
+                }
+
+                if(rb.getId() == R.id.radio_browser)
+                {
+                    selectedTarget = Target.BROWSER;
+                }
+            }
+        };
 
         @Override
 	public boolean onCreateOptionsMenu(Menu aMenu) {
@@ -176,6 +217,9 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 	}
 
 	public void processOpened(WebSocketClientEvent aEvent) {
+            if(statusImage != null) {
+                statusImage.setImageResource(R.drawable.authenticated);
+            }
 	}
 
 	public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
