@@ -1,7 +1,7 @@
 package org.jwebsocket.plugins.channels;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jwebsocket.api.PluginConfiguration;
 /**
@@ -13,13 +13,39 @@ import org.jwebsocket.api.PluginConfiguration;
 public class ChannelManager {
     
     /** channel store */
-    private ChannelStore channelStore = new BaseChannelStore();
+    private final ChannelStore channelStore = new BaseChannelStore();
     
     /** system channels map */
-    private Map<String, Channel> systemChannels = new HashMap<String, Channel>();
+    private final Map<String, Channel> systemChannels = new ConcurrentHashMap<String, Channel>();
     
     /** user channels map */
-    private Map<String, Channel> publicChannels = new HashMap<String, Channel>();
+    private final Map<String, Channel> publicChannels = new ConcurrentHashMap<String, Channel>();
+    /**
+     * Logger channel
+     */
+    private Channel loggerChannel = null;
+    /**
+     * admin channel
+     */
+    private Channel adminChannel = null;
+    /**
+     * single instance of the channel manager 
+     */
+    private static final ChannelManager INSTANCE = new ChannelManager();
+    
+    /**
+     * don't allow this
+     */
+    private ChannelManager() {
+        throw new AssertionError();
+    }
+
+    /**
+     * @return the static manager instance
+     */
+    public static ChannelManager getChannelManager() {
+        return INSTANCE;
+    }
     
     /**
      * Starts the system channels within the jWebSocket system
@@ -39,18 +65,31 @@ public class ChannelManager {
         if (publicChannels.containsKey(channelId)) {
             return publicChannels.get(channelId);
         }
-        return null;
+        //if not anywhere then look in the channel store
+        Channel channel = channelStore.getChannel(channelId);
+        if (channel != null) {
+            publicChannels.put(channelId, channel);
+        }
+        return channel;
     }
     
     public void registerChannel(Channel channel) {
         
     }
     
-    public void subscribeChannel(Channel channel, Subscriber subscriber) {
-        
+    /**
+     * Returns the instance of the logger channel.
+     * @return the logger channel
+     */
+    public Channel getLoggerChannel() {
+        return loggerChannel;
     }
     
-    public void unsuscribeChannel(Channel channel, Subscriber subscriber) {
-        
+    /**
+     * Returns the instance of the admin channel
+     * @return the admin channel
+     */
+    public Channel getAdminChannel() {
+        return adminChannel;
     }
 }

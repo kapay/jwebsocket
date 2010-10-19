@@ -39,7 +39,8 @@ import org.jwebsocket.util.Tools;
  * model where channels can be either used to publish the data by one or more registered 
  * publishers and subscribed by multiple subscribers.
  * 
- * Subscribe: ws://localhost:8787/?subscriber=
+ * Subscribe: ws://localhost:8787/?channel=puranschannel&access_key=4323nhn23n24323333fdsfsd
+ * 
  * @author puran
  * @version $Id$
  */
@@ -51,20 +52,11 @@ public class ChannelPlugIn extends TokenPlugIn {
     /**
      * Channel Manager that manages all the channels
      */
-    private ChannelManager channelManager = new ChannelManager();
+    private ChannelManager channelManager = ChannelManager.getChannelManager();
     /**
      * Namespace for channels
      */
     private static String NS_CHANNELS_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.channel";
-    /**
-     * Logger channel
-     */
-    private Channel loggerChannel = null;
-    /**
-     * admin channel
-     */
-    private Channel adminChannel = null;
-
     /**
      * Constructor with plugin config
      * @param configuration the plugin configuration for this PlugIn
@@ -117,9 +109,9 @@ public class ChannelPlugIn extends TokenPlugIn {
         Subscriber subscriber = new Subscriber(theConnector, getServer());
         Channel channel = channelManager.getChannel(channelId);
         
-        channelManager.subscribeChannel(channel, subscriber);
+        //subscribe the channel 
+        channel.subscribe(subscriber, channelManager);
         
-        // call super connectorStarted
         super.connectorStarted(theConnector);
     }
 

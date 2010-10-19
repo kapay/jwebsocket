@@ -31,7 +31,7 @@ import org.jwebsocket.kit.WebSocketSession;
  * {@code BaseConnector} is supposed to be used as ancestor for the connector
  * implementations like e.g. the {@code TCPConnector} or the
  * {@code NettyConnector }.
- *
+ * 
  * @author aschulze
  */
 public class BaseConnector implements WebSocketConnector {
@@ -98,7 +98,8 @@ public class BaseConnector implements WebSocketConnector {
     }
 
     /**
-     * @param header the header to set
+     * @param header
+     *            the header to set
      */
     @Override
     public void setHeader(RequestHeader header) {
@@ -187,6 +188,7 @@ public class BaseConnector implements WebSocketConnector {
     public String getId() {
         return String.valueOf(getRemotePort());
     }
+
     @Override
     public WebSocketSession getSession() {
         return session;

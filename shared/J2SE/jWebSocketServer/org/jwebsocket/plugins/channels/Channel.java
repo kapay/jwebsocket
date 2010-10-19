@@ -14,15 +14,32 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.token.Token;
 
-import javolution.util.FastList;
-
 /**
- * Channel class represents the data channel
+ * Channel class represents the data channel which is used by the <tt>Publisher</tt>
+ * to publish the data and the number of <tt>Subscriber</tt>'s can subscribe to the given
+ * channel to receive the data stream through the channel as soon as it is available to 
+ * the channel via publisher.
+ * 
+ * Channel can be of 3 types:
+ * 
+ * 1. System Channel - The channels which are and can only be initialized and started by the jWebSocket 
+ * components and are used by it for providing system level information are called system channel. 
+ * Examples can be <tt>LoggerChannel</tt> for streaming server logs to the client, <tt>AdminChannel<tt>
+ * to stream the admin level read only information etc..
+ * 
+ * 2. Private Channel - These are the channels that can be registered, initialized and started by user at 
+ * configuration time using <tt>jWebSocket.xml</tt> or runtime. But to subscribe to this channel the user 
+ * or client should have valid <tt>api_key</tt> or rights.
+ * 
+ * 3. Public Channel - Same as private channel except anyone can subscribe to this channel without the use
+ * of <tt>access_key</tt> or irrespective of the roles and rights.
  * 
  * @author puran
  * @version $Id$
@@ -35,9 +52,13 @@ public class Channel implements ChannelLifeCycle {
     private boolean systemChannel;
     private String secretKey;
     private String accessKey;
+    private long createdDate;
+    private String owner;
     private List<Subscriber> subscribers;
     private List<Publisher> publishers;
     private ChannelState state = ChannelState.STOPPED;
+    
+    private List<ChannelListener> channelListeners;
     
     public enum ChannelState {
        STOPPED(0), INITIALIZED(1), STARTED(2), SUSPENDED(3);
@@ -59,39 +80,28 @@ public class Channel implements ChannelLifeCycle {
         this.systemChannel = systemChannel;
         this.secretKey = secretKey;
         this.accessKey = accessKey;
+        this.createdDate = System.nanoTime();
         this.subscribers = subscribers;
     }
 
+    /**
+     * Returns the channel unique id.  
+     * @return the id
+     */
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public int getSubscriberCount() {
         return subscriberCount;
     }
 
-    public void setSubscriberCount(int subscriberCount) {
-        this.subscriberCount = subscriberCount;
-    }
-
     public boolean isPrivateChannel() {
         return privateChannel;
-    }
-
-    public void setPrivateChannel(boolean privateChannel) {
-        this.privateChannel = privateChannel;
     }
 
     /**
@@ -100,77 +110,115 @@ public class Channel implements ChannelLifeCycle {
     public boolean isSystemChannel() {
         return systemChannel;
     }
-
-    /**
-     * @param systemChannel the systemChannel to set
-     */
-    public void setSystemChannel(boolean systemChannel) {
-        this.systemChannel = systemChannel;
-    }
-    
     /**
      * @return the secretKey
      */
     public String getSecretKey() {
         return secretKey;
     }
-
-    /**
-     * @param secretKey the secretKey to set
-     */
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
-
     /**
      * @return the accessKey
      */
     public String getAccessKey() {
         return accessKey;
     }
-
     /**
-     * @param accessKey the accessKey to set
+     * @return the createdDate
      */
-    public void setAccessKey(String accessKey) {
-        this.accessKey = accessKey;
+    public long getCreatedDate() {
+        return createdDate;
     }
-
+    /**
+     * @return the owner
+     */
+    public String getOwner() {
+        return owner;
+    }
+    /**
+     * Returns the unmodifiable list of all the subscribers to this channel
+     * @return the list of subscribers
+     */
     public List<Subscriber> getSubscribers() {
         return Collections.unmodifiableList(subscribers);
     }
-
-    public void setSubscribers(List<Subscriber> subscribers) {
+    
+    /**
+     * Set the subscribers to this channel. Note that this method simply replaces 
+     * the existing list of subscribers.
+     * @param subscribers the list of subscribers
+     */
+    public synchronized void setSubscribers(List<Subscriber> subscribers) {
         this.subscribers = subscribers;
     }
 
     /**
-     * @return the publishers
+     * @return the publishers who is currently publishing to this channel
      */
     public List<Publisher> getPublishers() {
-        return publishers;
+        return Collections.unmodifiableList(publishers);
     }
 
     /**
      * @param publishers the publishers to set
      */
-    public void setPublishers(List<Publisher> publishers) {
+    public synchronized void setPublishers(List<Publisher> publishers) {
+        if (this.publishers == null) {
+            this.publishers = new ArrayList<Publisher>();
+        }
         this.publishers = publishers;
     }
 
-    public void addSubscriber(Subscriber subscriber) {
+    /**
+     * Subscribe to this channel
+     * @param subscriber the subscriber which wants to subscribe
+     */
+    public synchronized void subscribe(Subscriber subscriber, ChannelManager channelManager) {
         if (this.subscribers == null) {
-            this.subscribers = new FastList<Subscriber>();
+            this.subscribers = new ArrayList<Subscriber>();
         }
         subscribers.add(subscriber);
+        if (channelListeners != null) {
+            for (ChannelListener listener : channelListeners) {
+                listener.subscribed(this, subscriber);
+            }
+        }
+    }
+    
+    /**
+     * Unsuscribe from this channel, and updates the channel store information
+     * @param subscriber the subscriber to unsuscribe
+     * @param channelManager the channel manager
+     */
+    public synchronized void unsubscribe(Subscriber subscriber, ChannelManager channelManager) {
+        if (this.subscribers == null) {
+            return;
+        }
+        subscribers.remove(subscriber);
+        if (channelListeners != null) {
+            for (ChannelListener listener : channelListeners) {
+                listener.unsubscribed(this, subscriber);
+            }
+        }
     }
 
     public void send(Token token, Subscriber subscriber) {
-
+        subscriber.sendToken(token);
+    }
+    
+    public IOFuture sendAsync(Token token, Subscriber subscriber) {
+        return subscriber.sendTokenAsync(token);
     }
 
     public void broadcast(Token token) {
-
+        for (Subscriber subscriber : subscribers) {
+            subscriber.sendToken(token);
+        }
+    }
+    
+    public void broadcastAsync(Token token) {
+        for (Subscriber subscriber : subscribers) {
+            subscriber.sendTokenAsync(token);
+        }
     }
     
     public void setState(ChannelState state) {
@@ -179,6 +227,19 @@ public class Channel implements ChannelLifeCycle {
     
     public ChannelState getState() {
         return state;
+    }
+    
+    public synchronized void registerListener(ChannelListener channelListener) {
+        if (channelListeners == null) {
+            channelListeners = new ArrayList<ChannelListener>();
+        }
+        channelListeners.add(channelListener);
+    }
+
+    public synchronized void removeListener(ChannelListener channelListener) {
+        if (channelListeners != null) {
+            channelListeners.remove(channelListener);
+        }
     }
 
     @Override
@@ -189,16 +250,31 @@ public class Channel implements ChannelLifeCycle {
     @Override
     public void start() {
         this.state = ChannelState.STARTED;
+        if (channelListeners != null) {
+            for (ChannelListener listener : channelListeners) {
+                listener.channelStarted(this);
+            }
+        }
     }
     
-//    @Override
+    @Override
     public void suspend() {
         this.state = ChannelState.SUSPENDED;
+        if (channelListeners != null) {
+            for (ChannelListener listener : channelListeners) {
+                listener.channelSuspended(this);
+            }
+        }
     }
 
     @Override
     public void stop() {
         this.state = ChannelState.STOPPED;
+        if (channelListeners != null) {
+            for (ChannelListener listener : channelListeners) {
+                listener.channelStopped(this);
+            }
+        }
     }
 
     /* (non-Javadoc)
