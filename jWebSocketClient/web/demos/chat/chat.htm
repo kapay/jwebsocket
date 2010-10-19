@@ -102,7 +102,15 @@
 								( aToken ? aToken.type : "-" ) + ": " +
 								aEvent.data + "</font>");
 						}
-						jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;" + lWSC.getId();
+						if( lWSC.isLoggedIn() ) {
+							jws.$("simgStatus").src = "../../images/authenticated.png";
+						} else {
+							jws.$("simgStatus").src = "../../images/connected.png";
+						}
+						jws.$("slblClientId").innerHTML =
+							"&nbsp;Client&#x2011;Id:&nbsp;"
+							+ lWSC.getId() + "&nbsp;"
+							+ ( jws.browserSupportsNativeWebSockets ? "(native)" : "(flashbridge)" );
 						if( aToken ) {
 							// is it a response from a previous request of this client?
 							if( aToken.type == "response" ) {

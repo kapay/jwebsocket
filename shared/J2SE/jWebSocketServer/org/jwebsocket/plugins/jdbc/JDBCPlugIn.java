@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
 //	jWebSocket - jWebSocket JDBC Plug-In
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //	---------------------------------------------------------------------------
 //  THIS CODE IS FOR RESEARCH, EVALUATION AND TEST PURPOSES ONLY!
 //  THIS CODE MAY BE SUBJECT TO CHANGES WITHOUT ANY NOTIFICATION!
@@ -41,135 +41,135 @@ import org.jwebsocket.token.Token;
  */
 public class JDBCPlugIn extends TokenPlugIn {
 
-  private static Logger mLog = Logging.getLogger(JDBCPlugIn.class);
-  // if namespace changed update client plug-in accordingly!
-  private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
+	private static Logger mLog = Logging.getLogger(JDBCPlugIn.class);
+	// if namespace changed update client plug-in accordingly!
+	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
 
-  public JDBCPlugIn() {
-    super(null);
-  }
-  
-  public JDBCPlugIn(PluginConfiguration configuration) {
-    super(configuration);
-    if (mLog.isDebugEnabled()) {
-      mLog.debug("Instantiating JDBC plug-in...");
-    }
-    // specify default name space for admin plugin
-    this.setNamespace(NS_JDBC);
-  }
+	public JDBCPlugIn() {
+		super(null);
+	}
 
-  @Override
-  public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-    String lType = aToken.getType();
-    String lNS = aToken.getNS();
+	public JDBCPlugIn(PluginConfiguration aConfiguration) {
+		super(aConfiguration);
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating JDBC plug-in...");
+		}
+		// specify default name space for admin plugin
+		this.setNamespace(NS_JDBC);
+	}
 
-    if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
-      // select from database
-      if (lType.equals("select")) {
-        select(aConnector, aToken);
-      }
-    }
-  }
+	@Override
+	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+		String lType = aToken.getType();
+		String lNS = aToken.getNS();
 
-  public List<Object> getResultColumns(ResultSet aResultSet, int aColCount) {
-    // TODO: should work with usual arrays!
-    List<Object> lDataRow = new FastList<Object>();
-    Object lObj = null;
+		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+			// select from database
+			if (lType.equals("select")) {
+				select(aConnector, aToken);
+			}
+		}
+	}
 
-    try {
-      for (int i = 1; i <= aColCount; i++) {
-        lObj = aResultSet.getObject(i);
-        lDataRow.add(lObj);
-      }
+	public List<Object> getResultColumns(ResultSet aResultSet, int aColCount) {
+		// TODO: should work with usual arrays!
+		List<Object> lDataRow = new FastList<Object>();
+		Object lObj = null;
 
-    } catch (Exception ex) {
-      System.out.println("EXCEPTION in getResultColumns");
-    }
+		try {
+			for (int lColIdx = 1; lColIdx <= aColCount; lColIdx++) {
+				lObj = aResultSet.getObject(lColIdx);
+				lDataRow.add(lObj);
+			}
 
-    return lDataRow;
-  }
+		} catch (Exception lEx) {
+			System.out.println("EXCEPTION in getResultColumns");
+		}
 
-  /**
-   * shutdown server
-   * 
-   * @param aConnector
-   * @param aToken
-   */
-  public void select(WebSocketConnector aConnector, Token aToken) {
-    TokenServer lServer = getServer();
+		return lDataRow;
+	}
 
-    if (mLog.isDebugEnabled()) {
-      mLog.debug("Processing 'select'...");
-    }
+	/**
+	 * shutdown server
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void select(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
 
-    // check if user is allowed to run 'select' command
-    if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
-      lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-      // return;
-    }
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'select'...");
+		}
 
-    // obtain required parameters for query
-    String lTable = aToken.getString("table");
-    String lFields = aToken.getString("fields");
-    String lOrder = aToken.getString("order");
-    String lWhere = aToken.getString("where");
-    String lGroup = aToken.getString("group");
-    String lHaving = aToken.getString("having");
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
 
-    // buld SQL string
-    String lSQL = "select " + lFields + " from " + lTable;
-    if (lWhere != null && lWhere.length() > 0) {
-      lSQL += " where " + lWhere;
-    }
-    if (lOrder != null && lOrder.length() > 0) {
-      lSQL += " order by " + lOrder;
-    }
+		// obtain required parameters for query
+		String lTable = aToken.getString("table");
+		String lFields = aToken.getString("fields");
+		String lOrder = aToken.getString("order");
+		String lWhere = aToken.getString("where");
+		String lGroup = aToken.getString("group");
+		String lHaving = aToken.getString("having");
 
-    // instantiate response token
-    Token lResponse = lServer.createResponse(aToken);
-    // TODO: should work with usual arrays as well!
-    // Object[] lColumns = null;
-    int lRowCount = 0;
-    int lColCount = 0;
-    List<Map> lColumns = new FastList<Map>();
-    List lData = new FastList<Map>();
-    try {
-      DBQueryResult lRes = DBConnectSingleton.querySQL(DBConnectSingleton.USR_SYSTEM, lSQL);
+		// buld SQL string
+		String lSQL = "select " + lFields + " from " + lTable;
+		if (lWhere != null && lWhere.length() > 0) {
+			lSQL += " where " + lWhere;
+		}
+		if (lOrder != null && lOrder.length() > 0) {
+			lSQL += " order by " + lOrder;
+		}
 
-      // TODO: metadata should be optional to save bandwidth!
-      // generate the meta data for the response
-      lColCount = lRes.metaData.getColumnCount();
-      lResponse.setInteger("colcount", lColCount);
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+		// TODO: should work with usual arrays as well!
+		// Object[] lColumns = null;
+		int lRowCount = 0;
+		int lColCount = 0;
+		List<Map> lColumns = new FastList<Map>();
+		List lData = new FastList<Map>();
+		try {
+			DBQueryResult lRes = DBConnectSingleton.querySQL(DBConnectSingleton.USR_SYSTEM, lSQL);
 
-      for (int i = 1; i <= lColCount; i++) {
-        // get name of colmuns
-        String lSimpleClass = JDBCTools.extractSimpleClass(lRes.metaData.getColumnClassName(i));
-        // convert to json type
-        String lRIAType = JDBCTools.getJSONType(lSimpleClass, lRes.metaData);
+			// TODO: metadata should be optional to save bandwidth!
+			// generate the meta data for the response
+			lColCount = lRes.metaData.getColumnCount();
+			lResponse.setInteger("colcount", lColCount);
 
-        Map lColHeader = new FastMap<String, Object>();
-        lColHeader.put("name", lRes.metaData.getColumnName(i));
-        lColHeader.put("jsontype", lRIAType);
-        lColHeader.put("jdbctype", lRes.metaData.getColumnTypeName(i));
+			for (int lColIdx = 1; lColIdx <= lColCount; lColIdx++) {
+				// get name of colmuns
+				String lSimpleClass = JDBCTools.extractSimpleClass(lRes.metaData.getColumnClassName(lColIdx));
+				// convert to json type
+				String lRIAType = JDBCTools.getJSONType(lSimpleClass, lRes.metaData);
 
-        lColumns.add(lColHeader);
-      }
+				Map lColHeader = new FastMap<String, Object>();
+				lColHeader.put("name", lRes.metaData.getColumnName(lColIdx));
+				lColHeader.put("jsontype", lRIAType);
+				lColHeader.put("jdbctype", lRes.metaData.getColumnTypeName(lColIdx));
 
-      // generate the result data
-      while (lRes.resultSet.next()) {
-        lData.add(getResultColumns(lRes.resultSet, lColCount));
-        lRowCount++;
-      }
-    } catch (Exception ex) {
-      mLog.error(ex.getClass().getSimpleName() + " on query: " + ex.getMessage());
-    }
+				lColumns.add(lColHeader);
+			}
 
-    // complete the response token
-    lResponse.setInteger("rowcount", lRowCount);
-    lResponse.setList("columns", lColumns);
-    lResponse.setList("data", lData);
+			// generate the result data
+			while (lRes.resultSet.next()) {
+				lData.add(getResultColumns(lRes.resultSet, lColCount));
+				lRowCount++;
+			}
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + " on query: " + lEx.getMessage());
+		}
 
-    // send response to requester
-    lServer.sendToken(aConnector, lResponse);
-  }
+		// complete the response token
+		lResponse.setInteger("rowcount", lRowCount);
+		lResponse.setList("columns", lColumns);
+		lResponse.setList("data", lData);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
 }

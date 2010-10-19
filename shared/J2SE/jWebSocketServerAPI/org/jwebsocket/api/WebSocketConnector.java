@@ -68,17 +68,17 @@ public interface WebSocketConnector {
 	 * @param aDataPacket raw web socket data packet
 	 */
 	void sendPacket(WebSocketPacket aDataPacket);
-	
+
 	/**
-   * Sends a datapacket to a WebSocket client asynchronously. This method immediately returns 
-   * the future object to the caller so that it can proceed with the processing
-   * and not wait for the response.
-   * @param aDataPacket raw web socket data packet
-   * @return the {@link IOFuture} which will be notified when the
-   *         write request succeeds or fails
-   * null if there's any problem with the send operation.         
-   */
-  IOFuture sendPacketAsync(WebSocketPacket aDataPacket);
+	 * Sends a datapacket to a WebSocket client asynchronously. This method immediately returns
+	 * the future object to the caller so that it can proceed with the processing
+	 * and not wait for the response.
+	 * @param aDataPacket raw web socket data packet
+	 * @return the {@link IOFuture} which will be notified when the
+	 *         write request succeeds or fails
+	 * null if there's any problem with the send operation.
+	 */
+	IOFuture sendPacketAsync(WebSocketPacket aDataPacket);
 
 	/**
 	 * Returns the request header from the client during the connection
@@ -206,17 +206,60 @@ public interface WebSocketConnector {
 	/*
 	 * Returns the session for the websocket connection.
 	 */
+	/**
+	 *
+	 * @return
+	 */
 	WebSocketSession getSession();
 
+	/**
+	 *
+	 * @return
+	 */
 	String getUsername();
 
+	/**
+	 *
+	 * @param aUsername
+	 */
 	void setUsername(String aUsername);
 
+	/**
+	 *
+	 */
 	void removeUsername();
 
+	/**
+	 *
+	 * @return
+	 */
+	String getSubprot();
+
+	/**
+	 *
+	 * @param aSubprot
+	 */
+	void setSubprot(String aSubprot);
+
+	/**
+	 *
+	 */
+	void removeSubprot();
+
+	/**
+	 *
+	 * @return
+	 */
 	String getNodeId();
 
+	/**
+	 *
+	 * @param aNodeId
+	 */
 	void setNodeId(String aNodeId);
 
+	/**
+	 *
+	 */
 	void removeNodeId();
 }

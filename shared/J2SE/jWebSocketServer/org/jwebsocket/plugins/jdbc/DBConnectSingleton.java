@@ -200,7 +200,7 @@ public class DBConnectSingleton {
 			int lParmIdx = 0;
 			while (lParmIdx < aParms.length) {
 				Object lParm = aParms[lParmIdx];
-				// Die Zählung der Parameter beginnt mit 1, nicht mit 0!
+				// Counting starts with 1 here, not with 0!
 				lParmIdx++;
 				sql.setObject(lParmIdx, lParm);
 			}
