@@ -31,7 +31,7 @@ public interface ISharedObject {
 	 * only. This method is called by the createObject method of the 
 	 * SharedObjects plug-in. The userId specifies the owner of the 
 	 * sharedObject, this can be either a certain client or the server. 
-	 * The owner as well as the server have special access rights to the object.	 
+	 * The owner as well as the server have special access rights to the object.
 	 * @param aUserId
 	 */
 	void init(String aUserId);
