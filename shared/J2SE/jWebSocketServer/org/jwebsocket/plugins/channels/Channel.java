@@ -1,5 +1,6 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - Copyright (c) 2010 jwebsocket.org
+//  jWebSocket - Channel
+//  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
 //  under the terms of the GNU Lesser General Public License as published by the
@@ -45,284 +46,303 @@ import org.jwebsocket.token.Token;
  * @version $Id$
  */
 public class Channel implements ChannelLifeCycle {
-    private String id;
-    private String name;
-    private int subscriberCount;
-    private boolean privateChannel;
-    private boolean systemChannel;
-    private String secretKey;
-    private String accessKey;
-    private long createdDate;
-    private String owner;
-    private List<Subscriber> subscribers;
-    private List<Publisher> publishers;
-    private ChannelState state = ChannelState.STOPPED;
-    
-    private List<ChannelListener> channelListeners;
-    
-    public enum ChannelState {
-       STOPPED(0), INITIALIZED(1), STARTED(2), SUSPENDED(3);
-       private int status;
-       ChannelState(int theStatus) {
-           this.status = theStatus;
-       }
-       public int getStatus() {
-           return status;
-       }
-    }
 
-    public Channel(String id, String name, int subscriberCount, boolean privateChannel, boolean systemChannel,
-            String secretKey, String accessKey, List<Subscriber> subscribers, List<Publisher> publishers) {
-        this.id = id;
-        this.name = name;
-        this.subscriberCount = subscriberCount;
-        this.privateChannel = privateChannel;
-        this.systemChannel = systemChannel;
-        this.secretKey = secretKey;
-        this.accessKey = accessKey;
-        this.createdDate = System.nanoTime();
-        this.subscribers = subscribers;
-    }
+	private String id;
+	private String name;
+	private int subscriberCount;
+	private boolean privateChannel;
+	private boolean systemChannel;
+	private String secretKey;
+	private String accessKey;
+	private long createdDate;
+	private String owner;
+	private List<Subscriber> subscribers;
+	private List<Publisher> publishers;
+	private ChannelState state = ChannelState.STOPPED;
+	private List<ChannelListener> channelListeners;
 
-    /**
-     * Returns the channel unique id.  
-     * @return the id
-     */
-    public String getId() {
-        return id;
-    }
+	public enum ChannelState {
 
-    public String getName() {
-        return name;
-    }
+		STOPPED(0), INITIALIZED(1), STARTED(2), SUSPENDED(3);
+		private int status;
 
-    public int getSubscriberCount() {
-        return subscriberCount;
-    }
+		ChannelState(int theStatus) {
+			this.status = theStatus;
+		}
 
-    public boolean isPrivateChannel() {
-        return privateChannel;
-    }
+		public int getStatus() {
+			return status;
+		}
+	}
 
-    /**
-     * @return the systemChannel
-     */
-    public boolean isSystemChannel() {
-        return systemChannel;
-    }
-    /**
-     * @return the secretKey
-     */
-    public String getSecretKey() {
-        return secretKey;
-    }
-    /**
-     * @return the accessKey
-     */
-    public String getAccessKey() {
-        return accessKey;
-    }
-    /**
-     * @return the createdDate
-     */
-    public long getCreatedDate() {
-        return createdDate;
-    }
-    /**
-     * @return the owner
-     */
-    public String getOwner() {
-        return owner;
-    }
-    /**
-     * Returns the unmodifiable list of all the subscribers to this channel
-     * @return the list of subscribers
-     */
-    public List<Subscriber> getSubscribers() {
-        return Collections.unmodifiableList(subscribers);
-    }
-    
-    /**
-     * Set the subscribers to this channel. Note that this method simply replaces 
-     * the existing list of subscribers.
-     * @param subscribers the list of subscribers
-     */
-    public synchronized void setSubscribers(List<Subscriber> subscribers) {
-        this.subscribers = subscribers;
-    }
+	public Channel(String id, String name, int subscriberCount, boolean privateChannel, boolean systemChannel,
+			String secretKey, String accessKey, List<Subscriber> subscribers, List<Publisher> publishers) {
+		this.id = id;
+		this.name = name;
+		this.subscriberCount = subscriberCount;
+		this.privateChannel = privateChannel;
+		this.systemChannel = systemChannel;
+		this.secretKey = secretKey;
+		this.accessKey = accessKey;
+		this.createdDate = System.nanoTime();
+		this.subscribers = subscribers;
+	}
 
-    /**
-     * @return the publishers who is currently publishing to this channel
-     */
-    public List<Publisher> getPublishers() {
-        return Collections.unmodifiableList(publishers);
-    }
+	/**
+	 * Returns the channel unique id.
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
 
-    /**
-     * @param publishers the publishers to set
-     */
-    public synchronized void setPublishers(List<Publisher> publishers) {
-        if (this.publishers == null) {
-            this.publishers = new ArrayList<Publisher>();
-        }
-        this.publishers = publishers;
-    }
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * Subscribe to this channel
-     * @param subscriber the subscriber which wants to subscribe
-     */
-    public synchronized void subscribe(Subscriber subscriber, ChannelManager channelManager) {
-        if (this.subscribers == null) {
-            this.subscribers = new ArrayList<Subscriber>();
-        }
-        subscribers.add(subscriber);
-        if (channelListeners != null) {
-            for (ChannelListener listener : channelListeners) {
-                listener.subscribed(this, subscriber);
-            }
-        }
-    }
-    
-    /**
-     * Unsuscribe from this channel, and updates the channel store information
-     * @param subscriber the subscriber to unsuscribe
-     * @param channelManager the channel manager
-     */
-    public synchronized void unsubscribe(Subscriber subscriber, ChannelManager channelManager) {
-        if (this.subscribers == null) {
-            return;
-        }
-        subscribers.remove(subscriber);
-        if (channelListeners != null) {
-            for (ChannelListener listener : channelListeners) {
-                listener.unsubscribed(this, subscriber);
-            }
-        }
-    }
+	public int getSubscriberCount() {
+		return subscriberCount;
+	}
 
-    public void send(Token token, Subscriber subscriber) {
-        subscriber.sendToken(token);
-    }
-    
-    public IOFuture sendAsync(Token token, Subscriber subscriber) {
-        return subscriber.sendTokenAsync(token);
-    }
+	public boolean isPrivateChannel() {
+		return privateChannel;
+	}
 
-    public void broadcast(Token token) {
-        for (Subscriber subscriber : subscribers) {
-            subscriber.sendToken(token);
-        }
-    }
-    
-    public void broadcastAsync(Token token) {
-        for (Subscriber subscriber : subscribers) {
-            subscriber.sendTokenAsync(token);
-        }
-    }
-    
-    public void setState(ChannelState state) {
-        this.state = state;
-    }
-    
-    public ChannelState getState() {
-        return state;
-    }
-    
-    public synchronized void registerListener(ChannelListener channelListener) {
-        if (channelListeners == null) {
-            channelListeners = new ArrayList<ChannelListener>();
-        }
-        channelListeners.add(channelListener);
-    }
+	/**
+	 * @return the systemChannel
+	 */
+	public boolean isSystemChannel() {
+		return systemChannel;
+	}
 
-    public synchronized void removeListener(ChannelListener channelListener) {
-        if (channelListeners != null) {
-            channelListeners.remove(channelListener);
-        }
-    }
+	/**
+	 * @return the secretKey
+	 */
+	public String getSecretKey() {
+		return secretKey;
+	}
 
-    @Override
-    public void init() {
-        this.state = ChannelState.INITIALIZED;
-    }
+	/**
+	 * @return the accessKey
+	 */
+	public String getAccessKey() {
+		return accessKey;
+	}
 
-    @Override
-    public void start() {
-        this.state = ChannelState.STARTED;
-        if (channelListeners != null) {
-            for (ChannelListener listener : channelListeners) {
-                listener.channelStarted(this);
-            }
-        }
-    }
-    
-    @Override
-    public void suspend() {
-        this.state = ChannelState.SUSPENDED;
-        if (channelListeners != null) {
-            for (ChannelListener listener : channelListeners) {
-                listener.channelSuspended(this);
-            }
-        }
-    }
+	/**
+	 * @return the createdDate
+	 */
+	public long getCreatedDate() {
+		return createdDate;
+	}
 
-    @Override
-    public void stop() {
-        this.state = ChannelState.STOPPED;
-        if (channelListeners != null) {
-            for (ChannelListener listener : channelListeners) {
-                listener.channelStopped(this);
-            }
-        }
-    }
+	/**
+	 * @return the owner
+	 */
+	public String getOwner() {
+		return owner;
+	}
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((accessKey == null) ? 0 : accessKey.hashCode());
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((secretKey == null) ? 0 : secretKey.hashCode());
-        return result;
-    }
+	/**
+	 * Returns the unmodifiable list of all the subscribers to this channel
+	 * @return the list of subscribers
+	 */
+	public List<Subscriber> getSubscribers() {
+		return Collections.unmodifiableList(subscribers);
+	}
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Channel other = (Channel) obj;
-        if (accessKey == null) {
-            if (other.accessKey != null)
-                return false;
-        } else if (!accessKey.equals(other.accessKey))
-            return false;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (secretKey == null) {
-            if (other.secretKey != null)
-                return false;
-        } else if (!secretKey.equals(other.secretKey))
-            return false;
-        return true;
-    }
+	/**
+	 * Set the subscribers to this channel. Note that this method simply replaces
+	 * the existing list of subscribers.
+	 * @param subscribers the list of subscribers
+	 */
+	public synchronized void setSubscribers(List<Subscriber> subscribers) {
+		this.subscribers = subscribers;
+	}
+
+	/**
+	 * @return the publishers who is currently publishing to this channel
+	 */
+	public List<Publisher> getPublishers() {
+		return Collections.unmodifiableList(publishers);
+	}
+
+	/**
+	 * @param publishers the publishers to set
+	 */
+	public synchronized void setPublishers(List<Publisher> publishers) {
+		if (this.publishers == null) {
+			this.publishers = new ArrayList<Publisher>();
+		}
+		this.publishers = publishers;
+	}
+
+	/**
+	 * Subscribe to this channel
+	 * @param subscriber the subscriber which wants to subscribe
+	 */
+	public synchronized void subscribe(Subscriber subscriber, ChannelManager channelManager) {
+		if (this.subscribers == null) {
+			this.subscribers = new ArrayList<Subscriber>();
+		}
+		subscribers.add(subscriber);
+		if (channelListeners != null) {
+			for (ChannelListener listener : channelListeners) {
+				listener.subscribed(this, subscriber);
+			}
+		}
+	}
+
+	/**
+	 * Unsubscribe from this channel, and updates the channel store information
+	 * @param subscriber the subscriber to unsubscribe
+	 * @param channelManager the channel manager
+	 */
+	public synchronized void unsubscribe(Subscriber subscriber, ChannelManager channelManager) {
+		if (this.subscribers == null) {
+			return;
+		}
+		subscribers.remove(subscriber);
+		if (channelListeners != null) {
+			for (ChannelListener listener : channelListeners) {
+				listener.unsubscribed(this, subscriber);
+			}
+		}
+	}
+
+	public void send(Token token, Subscriber subscriber) {
+		subscriber.sendToken(token);
+	}
+
+	public IOFuture sendAsync(Token token, Subscriber subscriber) {
+		return subscriber.sendTokenAsync(token);
+	}
+
+	public void broadcast(Token token) {
+		for (Subscriber subscriber : subscribers) {
+			subscriber.sendToken(token);
+		}
+	}
+
+	public void broadcastAsync(Token token) {
+		for (Subscriber subscriber : subscribers) {
+			subscriber.sendTokenAsync(token);
+		}
+	}
+
+	public void setState(ChannelState state) {
+		this.state = state;
+	}
+
+	public ChannelState getState() {
+		return state;
+	}
+
+	public synchronized void registerListener(ChannelListener channelListener) {
+		if (channelListeners == null) {
+			channelListeners = new ArrayList<ChannelListener>();
+		}
+		channelListeners.add(channelListener);
+	}
+
+	public synchronized void removeListener(ChannelListener channelListener) {
+		if (channelListeners != null) {
+			channelListeners.remove(channelListener);
+		}
+	}
+
+	@Override
+	public void init() {
+		this.state = ChannelState.INITIALIZED;
+	}
+
+	@Override
+	public void start() {
+		this.state = ChannelState.STARTED;
+		if (channelListeners != null) {
+			for (ChannelListener listener : channelListeners) {
+				listener.channelStarted(this);
+			}
+		}
+	}
+
+	@Override
+	public void suspend() {
+		this.state = ChannelState.SUSPENDED;
+		if (channelListeners != null) {
+			for (ChannelListener listener : channelListeners) {
+				listener.channelSuspended(this);
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		this.state = ChannelState.STOPPED;
+		if (channelListeners != null) {
+			for (ChannelListener listener : channelListeners) {
+				listener.channelStopped(this);
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((accessKey == null) ? 0 : accessKey.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((secretKey == null) ? 0 : secretKey.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Channel other = (Channel) obj;
+		if (accessKey == null) {
+			if (other.accessKey != null) {
+				return false;
+			}
+		} else if (!accessKey.equals(other.accessKey)) {
+			return false;
+		}
+		if (id == null) {
+			if (other.id != null) {
+				return false;
+			}
+		} else if (!id.equals(other.id)) {
+			return false;
+		}
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		if (secretKey == null) {
+			if (other.secretKey != null) {
+				return false;
+			}
+		} else if (!secretKey.equals(other.secretKey)) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -1,6 +1,6 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - RequestHeader Object
-//  Copyright (c) 2010 jWebSocket
+//  jWebSocket - ChannelStore
+//  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
 //  under the terms of the GNU Lesser General Public License as published by the
@@ -23,37 +23,37 @@ package org.jwebsocket.plugins.channels;
  * @version $Id$
  */
 public interface ChannelStore {
-    /**
-     * Returns the channel from the data store based on channel key or id
-     * @param id the channel id
-     * @return the channel object
-     */
-    Channel getChannel(String id);
 
-    /**
-     * Store the given channel in the channel store
-     * @param channel the channel object
-     * @return {@code true} if insert successful
-     */
-    boolean storeChannel(Channel channel);
+	/**
+	 * Returns the channel from the data store based on channel key or id
+	 * @param id the channel id
+	 * @return the channel object
+	 */
+	Channel getChannel(String id);
 
-    /**
-     * Removes the channel from the channel store based on given id
-     * @param key the key of the data to remove from the store
-     */
-    void removeChannel(String id);
+	/**
+	 * Store the given channel in the channel store
+	 * @param channel the channel object
+	 * @return {@code true} if insert successful
+	 */
+	boolean storeChannel(Channel channel);
 
-    /**
-     * Clears the channel store, use this method with care since it removes
-     * all the channel information from the store physically and cannot be 
-     * rolled back. 
-     */
-    void clearChannels();
+	/**
+	 * Removes the channel from the channel store based on given id
+	 * @param key the key of the data to remove from the store
+	 */
+	void removeChannel(String id);
 
-    /**
-     * Returns the size of the channel store
-     * @return the size value
-     */
-    int getChannelStoreSize();
+	/**
+	 * Clears the channel store, use this method with care since it removes
+	 * all the channel information from the store physically and cannot be
+	 * rolled back.
+	 */
+	void clearChannels();
 
+	/**
+	 * Returns the size of the channel store
+	 * @return the size value
+	 */
+	int getChannelStoreSize();
 }

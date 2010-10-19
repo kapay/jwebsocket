@@ -1,6 +1,6 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - RequestHeader Object
-//  Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//  jWebSocket - ChannelPlugIn
+//  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
 //  under the terms of the GNU Lesser General Public License as published by the
@@ -45,114 +45,118 @@ import org.jwebsocket.util.Tools;
  * @version $Id$
  */
 public class ChannelPlugIn extends TokenPlugIn {
-    /**
-     * logger
-     */
-    private static Logger log = Logging.getLogger(ChannelPlugIn.class);
-    /**
-     * Channel Manager that manages all the channels
-     */
-    private ChannelManager channelManager = ChannelManager.getChannelManager();
-    /**
-     * Namespace for channels
-     */
-    private static String NS_CHANNELS_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.channel";
-    /**
-     * Constructor with plugin config
-     * @param configuration the plugin configuration for this PlugIn
-     */
-    public ChannelPlugIn(PluginConfiguration configuration) {
-        super(configuration);
-        if (log.isDebugEnabled()) {
-            log.debug("Instantiating channel plug-in...");
-        }
-        // specify default name space
-        this.setNamespace(NS_CHANNELS_DEFAULT);
-    }
 
-    /**
-     * {@inheritDoc} When the engine starts perform all the initialization of
-     * default and system channels and start it for accepting subscriptions.
-     */
-    @Override
-    public void engineStarted(WebSocketEngine aEngine) {
-        channelManager.startSystemChannels(getPluginConfiguration());
-    }
+	/**
+	 * logger
+	 */
+	private static Logger log = Logging.getLogger(ChannelPlugIn.class);
+	/**
+	 * Channel Manager that manages all the channels
+	 */
+	private ChannelManager channelManager = ChannelManager.getChannelManager();
+	/**
+	 * Namespace for channels
+	 */
+	private static String NS_CHANNELS_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.channel";
 
-    /**
-     * {@inheritDoc} Stops the system channels and clean up all the taken
-     * resources by those channels.
-     */
-    @Override
-    public void engineStopped(WebSocketEngine aEngine) {
-        channelManager.stopSystemChannels(getPluginConfiguration());
-    }
+	/**
+	 * Constructor with plugin config
+	 * @param configuration the plugin configuration for this PlugIn
+	 */
+	public ChannelPlugIn(PluginConfiguration configuration) {
+		super(configuration);
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating channel plug-in...");
+		}
+		// specify default name space
+		this.setNamespace(NS_CHANNELS_DEFAULT);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void connectorStarted(WebSocketConnector theConnector) {
-        // set session id first, so that it can be processed in the
-        // connectorStarted method
-        Random rand = new Random(System.nanoTime());
-        theConnector.getSession().setSessionId(Tools.getMD5(theConnector.generateUID() + "." + rand.nextInt()));
-        RequestHeader request = theConnector.getHeader();
-        String channelId = request.getString("channel");
-        if (channelId == null || "".equals(channelId)) {
-            sendError(theConnector, CloseReason.CLIENT, "Subscribe failed, channel value is null");
-        }
-        String accessKey = request.getString("access_key");
-        if (accessKey == null || "".equals(accessKey)) {
-            sendError(theConnector, CloseReason.CLIENT, "Subscribe failed, access_key value is null");
-        }
-        Subscriber subscriber = new Subscriber(theConnector, getServer());
-        Channel channel = channelManager.getChannel(channelId);
-        
-        //subscribe the channel 
-        channel.subscribe(subscriber, channelManager);
-        
-        super.connectorStarted(theConnector);
-    }
+	/**
+	 * {@inheritDoc} When the engine starts perform all the initialization of
+	 * default and system channels and start it for accepting subscriptions.
+	 */
+	@Override
+	public void engineStarted(WebSocketEngine aEngine) {
+		channelManager.startSystemChannels(getPluginConfiguration());
+	}
 
-    public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-    }
+	/**
+	 * {@inheritDoc} Stops the system channels and clean up all the taken
+	 * resources by those channels.
+	 */
+	@Override
+	public void engineStopped(WebSocketEngine aEngine) {
+		channelManager.stopSystemChannels(getPluginConfiguration());
+	}
 
-    @Override
-    public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
-        //
-    }
-    @Override
-    public void connectorStopped(WebSocketConnector aConnector, CloseReason closeReason) {
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void connectorStarted(WebSocketConnector theConnector) {
+		// set session id first, so that it can be processed in the
+		// connectorStarted method
+		Random rand = new Random(System.nanoTime());
+		theConnector.getSession().setSessionId(Tools.getMD5(theConnector.generateUID() + "." + rand.nextInt()));
+		RequestHeader request = theConnector.getHeader();
+		String channelId = request.getString("channel");
+		if (channelId == null || "".equals(channelId)) {
+			sendError(theConnector, CloseReason.CLIENT, "Subscribe failed, channel value is null");
+		}
+		String accessKey = request.getString("access_key");
+		if (accessKey == null || "".equals(accessKey)) {
+			sendError(theConnector, CloseReason.CLIENT, "Subscribe failed, access_key value is null");
+		}
+		Subscriber subscriber = new Subscriber(theConnector, getServer());
+		Channel channel = channelManager.getChannel(channelId);
 
-    /**
-     * Send the error token to the client and stops the connector that means
-     * connection is closed
-     * 
-     * @param theConnector the target connector
-     * @param closeReason the reason for error
-     * @param error the error message
-     */
-    private void sendError(WebSocketConnector theConnector, CloseReason closeReason, String error) {
-        if (log.isDebugEnabled()) {
-            log.debug("Cannot subscribe to a channel, disconnecting..");
-        }
-        // send "error" token to client
-        Token errorToken = TokenFactory.createToken("close");
-        errorToken.setString("vendor", JWebSocketCommonConstants.VENDOR);
-        errorToken.setString("version", JWebSocketServerConstants.VERSION_STR);
-        errorToken.setString("sourceId", theConnector.getId());
-        errorToken.setString("error", error);
-        if (closeReason != null) {
-            errorToken.setString("reason", closeReason.toString().toLowerCase());
-        }
-        // don't send session-id on good bye, neither required nor desired
-        IOFuture future = sendTokenAsync(theConnector, theConnector, errorToken);
-        if (future != null) {
-            if (future.isDone()) {
-                theConnector.stopConnector(CloseReason.CLIENT);
-            }
-        }
-    }
+		//subscribe the channel
+		channel.subscribe(subscriber, channelManager);
+
+		super.connectorStarted(theConnector);
+	}
+
+	@Override
+	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+	}
+
+	@Override
+	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
+		//
+	}
+
+	@Override
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason closeReason) {
+	}
+
+	/**
+	 * Send the error token to the client and stops the connector that means
+	 * connection is closed
+	 *
+	 * @param theConnector the target connector
+	 * @param closeReason the reason for error
+	 * @param error the error message
+	 */
+	private void sendError(WebSocketConnector theConnector, CloseReason closeReason, String error) {
+		if (log.isDebugEnabled()) {
+			log.debug("Cannot subscribe to a channel, disconnecting..");
+		}
+		// send "error" token to client
+		Token errorToken = TokenFactory.createToken("close");
+		errorToken.setString("vendor", JWebSocketCommonConstants.VENDOR);
+		errorToken.setString("version", JWebSocketServerConstants.VERSION_STR);
+		errorToken.setString("sourceId", theConnector.getId());
+		errorToken.setString("error", error);
+		if (closeReason != null) {
+			errorToken.setString("reason", closeReason.toString().toLowerCase());
+		}
+		// don't send session-id on good bye, neither required nor desired
+		IOFuture future = sendTokenAsync(theConnector, theConnector, errorToken);
+		if (future != null) {
+			if (future.isDone()) {
+				theConnector.stopConnector(CloseReason.CLIENT);
+			}
+		}
+	}
 }
