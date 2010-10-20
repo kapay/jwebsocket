@@ -40,7 +40,7 @@ public class AdminPlugIn extends TokenPlugIn {
 
   private static Logger log = Logging.getLogger(AdminPlugIn.class);
   // if namespace changed update client plug-in accordingly!
-  private String NS_ADMIN = JWebSocketServerConstants.NS_BASE + ".plugins.admin";
+  private static final String NS_ADMIN = JWebSocketServerConstants.NS_BASE + ".plugins.admin";
 
   /**
    * Default Constructor

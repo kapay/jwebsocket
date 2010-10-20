@@ -54,7 +54,7 @@
 				<configuration>
 					<mainClass>org.jwebsocket.console.JWebSocketServer</mainClass>
 					<arguments>
-					    <argument>-config</argument>
+						<argument>-config</argument>
 						<argument>${project.build.directory}/src/main/resources/jWebSocket.xml</argument>
 					</arguments>
 				</configuration>
@@ -139,6 +139,11 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-email</artifactId>
+			<version>1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>

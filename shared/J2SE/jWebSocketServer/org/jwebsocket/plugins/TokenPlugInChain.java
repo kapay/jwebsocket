@@ -29,7 +29,7 @@ import org.jwebsocket.token.Token;
  */
 public class TokenPlugInChain extends BasePlugInChain {
 
-	private static Logger log = Logging.getLogger(TokenPlugInChain.class);
+	private static Logger mLog = Logging.getLogger(TokenPlugInChain.class);
 
 	/**
 	 *
@@ -47,11 +47,15 @@ public class TokenPlugInChain extends BasePlugInChain {
 	 */
 	public PlugInResponse processToken(WebSocketConnector aConnector, Token aToken) {
 		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (WebSocketPlugIn plugIn : getPlugIns()) {
+		for (WebSocketPlugIn lPlugIn : getPlugIns()) {
+			// TODO: introduce optimization: only pass token to plug-ins that match the token name space!
 			try {
-				((TokenPlugIn) plugIn).processToken(lPluginResponse, aConnector, aToken);
-			} catch (Exception ex) {
-				log.error("(plugin '" + ((TokenPlugIn) plugIn).getNamespace() + "')" + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				((TokenPlugIn) lPlugIn).processToken(lPluginResponse, aConnector, aToken);
+			} catch (Exception lEx) {
+				mLog.error("(plugin '"
+						+ ((TokenPlugIn) lPlugIn).getNamespace() + "')"
+						+ lEx.getClass().getSimpleName() + ": "
+						+ lEx.getMessage());
 			}
 			if (lPluginResponse.isChainAborted()) {
 				break;
