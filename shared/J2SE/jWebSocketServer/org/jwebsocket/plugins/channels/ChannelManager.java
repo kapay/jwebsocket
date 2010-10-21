@@ -21,87 +21,122 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jwebsocket.api.PluginConfiguration;
 
 /**
- * Manager class responsible for all the channel operations within the jWebSocket 
- * server system.
+ * Manager class responsible for all the channel operations within the
+ * jWebSocket server system.
+ * 
  * @author puran
  * @version $Id$
  */
 public class ChannelManager {
 
-	/** channel store */
-	private final ChannelStore channelStore = new BaseChannelStore();
-	/** system channels map */
-	private final Map<String, Channel> systemChannels = new ConcurrentHashMap<String, Channel>();
-	/** user channels map */
-	private final Map<String, Channel> publicChannels = new ConcurrentHashMap<String, Channel>();
-	/**
-	 * Logger channel
-	 */
-	private Channel loggerChannel = null;
-	/**
-	 * admin channel
-	 */
-	private Channel adminChannel = null;
-	/**
-	 * single instance of the channel manager
-	 */
-	private static final ChannelManager INSTANCE = new ChannelManager();
+    /** channel store */
+    private final ChannelStore channelStore = new BaseChannelStore();
+    /** subscriber store */
+    private final SubscriberStore subscriberStore = new BaseSubscriberStore();
+    /** system channels map */
+    private final Map<String, Channel> systemChannels = new ConcurrentHashMap<String, Channel>();
+    /** private channel map */
+    private final Map<String, Channel> privateChannels = new ConcurrentHashMap<String, Channel>();
+    /** user channels map */
+    private final Map<String, Channel> publicChannels = new ConcurrentHashMap<String, Channel>();
+    /**
+     * Logger channel
+     */
+    private Channel loggerChannel = null;
+    /**
+     * admin channel
+     */
+    private Channel adminChannel = null;
+    /**
+     * don't allow this
+     */
+    private ChannelManager() {
+        throw new AssertionError();
+    }
 
-	/**
-	 * don't allow this
-	 */
-	private ChannelManager() {
-		throw new AssertionError();
-	}
+    /**
+     * @return the static manager instance
+     */
+    public static ChannelManager getChannelManager() {
+        return new ChannelManager();
+    }
+    /**
+     * Starts the system channels within the jWebSocket system
+     * 
+     * @param configuration
+     *            the channel plugin configuration
+     */
+    public void startSystemChannels(PluginConfiguration configuration) {
+    }
 
-	/**
-	 * @return the static manager instance
-	 */
-	public static ChannelManager getChannelManager() {
-		return INSTANCE;
-	}
+    public void stopSystemChannels(PluginConfiguration pluginConfiguration) {
+    }
 
-	/**
-	 * Starts the system channels within the jWebSocket system
-	 * @param configuration the channel plugin configuration
-	 */
-	public void startSystemChannels(PluginConfiguration configuration) {
-	}
+    public Channel getChannel(String channelId) {
+        if (systemChannels.containsKey(channelId)) {
+            return systemChannels.get(channelId);
+        }
+        if (privateChannels.containsKey(channelId)) {
+          return privateChannels.get(channelId);
+        }
+        if (publicChannels.containsKey(channelId)) {
+            return publicChannels.get(channelId);
+        }
+        // if not anywhere then look in the channel store
+        Channel channel = channelStore.getChannel(channelId);
+        if (channel != null) {
+            publicChannels.put(channelId, channel);
+        }
+        return channel;
+    }
 
-	public void stopSystemChannels(PluginConfiguration pluginConfiguration) {
-	}
+    public void registerChannel(Channel channel) {
+      if (channel.isPrivateChannel() && !channel.isSystemChannel()) {
+        privateChannels.put(channel.getId(), channel);
+      } else if (!channel.isPrivateChannel() && !channel.isSystemChannel()) {
+        publicChannels.put(channel.getId(), channel);
+      } else {
+        systemChannels.put(channel.getId(), channel);
+      }
+      channelStore.storeChannel(channel);
+    }
 
-	public Channel getChannel(String channelId) {
-		if (systemChannels.containsKey(channelId)) {
-			return systemChannels.get(channelId);
-		}
-		if (publicChannels.containsKey(channelId)) {
-			return publicChannels.get(channelId);
-		}
-		//if not anywhere then look in the channel store
-		Channel channel = channelStore.getChannel(channelId);
-		if (channel != null) {
-			publicChannels.put(channelId, channel);
-		}
-		return channel;
-	}
+    /**
+     * Returns the registered subscriber object for the given subscriber id
+     * @param subscriberId the subscriber id
+     * @return the subscriber object
+     */
+    public Subscriber getSubscriber(String subscriberId) {
+        return subscriberStore.getSubscriber(subscriberId);
+    }
+    /**
+     * Stores the registered subscriber information in the channel store
+     * @param subscriber the subscriber to register
+     */
+    public void storeSubscriber(Subscriber subscriber) {
+      subscriberStore.storeSubscriber(subscriber);
+    }
+    /**
+     * Removes the given subscriber information from channel store
+     * @param subscriber the subscriber object
+     */
+    public void removeSubscriber(Subscriber subscriber) {
+      subscriberStore.removeSubscriber(subscriber.getId());
+    }
+    
+    /**
+     * Returns the instance of the logger channel.
+     * @return the logger channel
+     */
+    public Channel getLoggerChannel() {
+        return loggerChannel;
+    }
 
-	public void registerChannel(Channel channel) {
-	}
-
-	/**
-	 * Returns the instance of the logger channel.
-	 * @return the logger channel
-	 */
-	public Channel getLoggerChannel() {
-		return loggerChannel;
-	}
-
-	/**
-	 * Returns the instance of the admin channel
-	 * @return the admin channel
-	 */
-	public Channel getAdminChannel() {
-		return adminChannel;
-	}
+    /**
+     * Returns the instance of the admin channel
+     * @return the admin channel
+     */
+    public Channel getAdminChannel() {
+        return adminChannel;
+    }
 }

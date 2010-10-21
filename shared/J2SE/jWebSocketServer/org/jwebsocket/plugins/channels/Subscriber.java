@@ -15,6 +15,9 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.server.TokenServer;
@@ -22,92 +25,124 @@ import org.jwebsocket.token.Token;
 
 /**
  * Class that represents the subscriber of a channel
+ * 
  * @author puran
  * @version $Id$
  */
 public class Subscriber {
+    private String id;
+    private WebSocketConnector connector;
+    private TokenServer tokenServer;
+    private long loggedInTime;
+    private List<String> channels = new ArrayList<String>();
+    /**
+     * Default constructor
+     */
+    public Subscriber(String id, long loggedInTime, List<String> channels) {
+        this.id = id;
+        this.loggedInTime = loggedInTime;
+        this.channels = channels;
+        this.connector = null;
+    }
+    /**
+     * Subscriber constructor 
+     * @param theConnector the low-level WebSocket connector object for this subscriber
+     * @param theServer the token server instance
+     * @param loggedInTime the first time the subscriber logged in
+     */
+    public Subscriber(WebSocketConnector theConnector, TokenServer theServer, long loggedInTime) {
+        this.id = theConnector.getId();
+        this.connector = theConnector;
+        this.tokenServer = theServer;
+        this.loggedInTime = loggedInTime;
+    }
 
-	private String id;
-	private WebSocketConnector connector;
-	private TokenServer tokenServer;
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
+    /**
+     * @return the connector
+     */
+    public WebSocketConnector getConnector() {
+        return connector;
+    }
+    /**
+     * @return the channels
+     */
+    public List<String> getChannels() {
+      return channels;
+    }
+    /**
+     * Add the channel id to the list of channels this subscriber is
+     * subscribed 
+     * @param channel the channel object
+     */
+    public void addChannel(String channel) {
+      this.channels.add(channel);
+    }
+    /**
+     * Removes the channel from the subscriber list of channels
+     * @param channel the channel id to remove.
+     */
+    public void removeChannel(String channel) {
+      if (this.channels != null) {
+        this.channels.remove(channel);
+      }
+    }
+    
+    /**
+     * @return the loggedInTime
+     */
+    public long getLoggedInTime() {
+      return loggedInTime;
+    }
+    /**
+     * Sends the token data asynchronously to the token server
+     * @param token the token data 
+     * @return future object for IO status
+     */
+    public IOFuture sendTokenAsync(Token token) {
+        return tokenServer.sendTokenAsync(connector, token);
+    }
 
-	/**
-	 * Default constructor
-	 */
-	public Subscriber(String id) {
-		this.id = id;
-		this.connector = null;
-	}
-
-	public Subscriber(WebSocketConnector theConnector, TokenServer theServer) {
-		this.id = theConnector.getId();
-		this.connector = theConnector;
-		this.tokenServer = theServer;
-	}
-
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return the connector
-	 */
-	public WebSocketConnector getConnector() {
-		return connector;
-	}
-
-	/**
-	 * @param connector the connector to set
-	 */
-	public void setConnector(WebSocketConnector connector) {
-		this.connector = connector;
-	}
-
-	public IOFuture sendTokenAsync(Token token) {
-		return tokenServer.sendTokenAsync(connector, token);
-	}
-
-	public void sendToken(Token token) {
-		tokenServer.sendToken(connector, token);
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		Subscriber other = (Subscriber) obj;
-		if (id == null) {
-			if (other.id != null) {
-				return false;
-			}
-		} else if (!id.equals(other.id)) {
-			return false;
-		}
-		return true;
-	}
+    public void sendToken(Token token) {
+        tokenServer.sendToken(connector, token);
+    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Subscriber other = (Subscriber) obj;
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        return true;
+    }
 }

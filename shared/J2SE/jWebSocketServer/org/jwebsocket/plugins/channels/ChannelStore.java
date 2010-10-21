@@ -23,34 +23,29 @@ package org.jwebsocket.plugins.channels;
  * @version $Id$
  */
 public interface ChannelStore {
-
 	/**
 	 * Returns the channel from the data store based on channel key or id
 	 * @param id the channel id
 	 * @return the channel object
 	 */
 	Channel getChannel(String id);
-
 	/**
 	 * Store the given channel in the channel store
 	 * @param channel the channel object
 	 * @return {@code true} if insert successful
 	 */
 	boolean storeChannel(Channel channel);
-
 	/**
 	 * Removes the channel from the channel store based on given id
 	 * @param key the key of the data to remove from the store
 	 */
 	void removeChannel(String id);
-
 	/**
 	 * Clears the channel store, use this method with care since it removes
 	 * all the channel information from the store physically and cannot be
 	 * rolled back.
 	 */
 	void clearChannels();
-
 	/**
 	 * Returns the size of the channel store
 	 * @return the size value
