@@ -28,6 +28,15 @@ import org.jwebsocket.api.data.Store;
  */
 public class JDBCStore implements Store {
 
+  /** default connection url for the channels data store */
+  private static final String CONNECTION_URL = "jdbc:mysql://localhost:3306/jwebsocketdb";
+
+  /** default connection user name for channels data store */
+  private static final String CONNECTION_NAME = "jwebsocket";
+
+  /** default connection password for the channels data store */
+  private static final String CONNECTION_PASSWORD = "himalayanyoddha";
+  
   /**
    * The descriptive information about this implementation.
    */
@@ -46,17 +55,17 @@ public class JDBCStore implements Store {
   /**
    * The connection username to use when trying to connect to the database.
    */
-  protected String connectionName = null;
+  private String connectionName = CONNECTION_NAME;
 
   /**
    * The connection URL to use when trying to connect to the database.
    */
-  protected String connectionPassword = null;
+  private String connectionPassword = CONNECTION_PASSWORD;
 
   /**
    * Connection string to use when connecting to the DB.
    */
-  protected String connectionURL = null;
+  private String connectionURL = CONNECTION_URL;
 
   /**
    * The database connection.
