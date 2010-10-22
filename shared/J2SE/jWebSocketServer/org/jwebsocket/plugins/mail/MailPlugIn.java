@@ -271,7 +271,7 @@ public class MailPlugIn extends TokenPlugIn {
 			// send the Email
 			String lMsgId = lEmail.send();
 
-			if (mLog.isDebugEnabled()) {
+			if (mLog.isInfoEnabled()) {
 				mLog.info(
 						"Email successfully sent"
 						+ " from " + (lFrom != null ? lFrom : "(no sender)")
