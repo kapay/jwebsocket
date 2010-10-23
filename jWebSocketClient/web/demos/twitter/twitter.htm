@@ -32,6 +32,7 @@
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
+			var lTwitterAuthenticationURL = null;
 
 			function log( aString ) {
 				eLog.innerHTML +=
@@ -61,6 +62,7 @@
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection established.</font>" );
+						jWebSocketClient.twitterLogin();
 					},
 					// OnMessage callback
 					OnMessage: function( aEvent, aToken ) {
@@ -89,35 +91,80 @@
 			}
 
 			function getTimeline() {
-				jWebSocketClient.twitterTimeline(
+				var lRes = jWebSocketClient.twitterTimeline(
 					eTwitterUsername.value
 				);
+				log( lRes.msg );
 			}
 
-			function twitterAuth() {
-				jWebSocketClient.twitterAuth(
-					eTwitterUsername.value,
-					eTwitterPassword.value
-				);
+			function twitterLogin() {
+				jWebSocketClient.twitterLogin();
+			}
+
+			function twitterLogout() {
+				jWebSocketClient.twitterLogout();
+				var lLink = jws.$("twLink");
+				lLink.href = null;
+				// lLink.target="twAuthTab";
+				lLink.onclick = twitterLogin;
+
 			}
 
 			function tweet() {
 				jWebSocketClient.tweet(
-					eTwitterUsername.value,
-					eTwitterPassword.value,
 					eTwitterMessage.value
 				);
+			}
+
+			function getUserData() {
+				var lRes = jWebSocketClient.twitterUserData(
+					eTwitterUsername.value
+				);
+				log( lRes.msg );
 			}
 
 			function onGotTwitterTimeline( aToken ) {
 				log( "Timeline: " + aToken.msg );
 			}
 
+			var hTwAuth = null;
+
+			function onTwitterRequestToken( aToken ) {
+				lTwitterAuthenticationURL = "twauth.htm?" + encodeURI(aToken.authenticationURL);
+				// alert("login at " + lURL);
+/*
+				htwitterLoginentication = window.open(
+					lURL
+					, "twauth"
+					, "status=1,resizable=1,dependent=1,scrollbars=0,width=800,height=400,left=100,top=200"
+				);
+				if( !htwitterLoginentication ) {
+					alert("pop up blocker is active use link!");
+				}
+*/
+				var lLink = jws.$("twLink");
+				lLink.href = lTwitterAuthenticationURL;
+				// lLink.target="twAuthTab";
+				lLink.onclick = openTwitterLogin;
+				// lLink.focus();
+				// lLink.click();
+			}
+
+
+			function openTwitterLogin() {
+				// open the twitter login window
+				hTwAuth = window.open(
+					lTwitterAuthenticationURL,
+					'twauth',
+					'status=1,resizable=1,dependent=1,scrollbars=0,width=820,height=420,left=100,top=200'
+				);
+				return false;
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
 
 				eTwitterUsername = jws.$( "stxfTwitterUsername" );
-				eTwitterPassword = jws.$( "spwdTwitterPassword" );
 				eTwitterMessage = jws.$( "stxfTwitterMessage" );
 
 				eUsername = jws.$( "stxfUsername" );
@@ -128,7 +175,8 @@
 				if( jws.browserSupportsWebSockets() ) {
 					jWebSocketClient = new jws.jWebSocketJSONClient();
 					jWebSocketClient.setTwitterCallbacks({
-						OnGotTwitterTimeline: onGotTwitterTimeline
+						OnGotTwitterTimeline: onGotTwitterTimeline,
+						onTwitterRequestToken: onTwitterRequestToken
 					});
 					eUsername.focus();
 				} else {
@@ -136,9 +184,8 @@
 					jws.$( "sbtnLogoff" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnClear" ).setAttribute( "disabled", "disabled" );
 
-					jws.$( "stxfTwitterUsername" ).setAttribute( "disabled", "disabled" );
-					jws.$( "spwdTwitterPassword" ).setAttribute( "disabled", "disabled" );
 					jws.$( "stxfTwitterMessage" ).setAttribute( "disabled", "disabled" );
+					jws.$( "stxfTwitterUsername" ).setAttribute( "disabled", "disabled" );
 
 					jws.$( "stxfUsername" ).setAttribute( "disabled", "disabled" );
 					jws.$( "spwfPassword" ).setAttribute( "disabled", "disabled" );
@@ -147,6 +194,7 @@
 					alert( lMsg );
 					log( lMsg );
 				}
+
 			}
 
 			function exitPage() {
@@ -168,43 +216,38 @@
 				// location.href = "../../index.htm?page=demos/hello_world/hello_world.htm" ;
 			}
 		</script>
+Testing our new #jWebSocket Twitter-Plugin, tweet via #WebSockets! http://jwebsocket.org
 -->		
 		<h1>jWebSocket Twitter Demo</h1>
 		<p>This demo shows how to easily use Twitter via the jWebSocket Twitter service.</p>
+		<!-- <iframe id="sifrtwitterLogin" style="width:100%; height:200px"></iframe> -->
+		
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Username</td>
 					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="YourUsername" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnLoginTwitter" type="button" value="Twitter Login" onclick="twitterAuth();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLoginTwitter" type="button" value="Twitter Login" onclick="twitterLogin();"></td>
+					<td class="stdDlg" width=""><a class="sancDlg" id="twLink" onclick="twitterLogin();">Twitter Login</a></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnGetUser" type="button" value="Get User" onclick="getUserData();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Password</td>
 					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetTimeline" type="button" value="getTimeline" onclick="getTimeline();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnTweet" type="button" value="tweet" onclick="tweet();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnTweet" type="button" value="tweet" onclick="tweet();"></td>
+					<td class="stdDlg" width=""><a class="sancDlg" id="twLink" onclick="twitterLogout();">Twitter Logout</a></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Twitter&nbsp;Username</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfTwitterUsername" type="text" value="jwebsocket" style="width:150px"></td>
-					<td class="stdDlg" width="" colspan="3" rowspan="2">CAUTION! SECURITY ADVISE! If you type your Twitter credentials here they will be passed
-						to the jWebSocket Server and forwarded to Twitter to authenticate against Twitter! We respect your privacy and do neither
-						save your credentials nor track any data you pass! However, please consider that your credentials will passed in plain
-						text unless you use SSL (https).
-						This function is for demo purposes only. You pass your credentials at our own risk. If you do so we strongly recommend to
-						change your Twitter password immediately after the test!
-					</td>
-				</tr>
-				<tr class="strDlg">
-					<td class="stdDlg" width="5">Twitter&nbsp;Password</td>
-					<td class="stdDlg" width="5" ><input class="spwfDlg" id="spwdTwitterPassword" type="password" value="" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfTwitterUsername" type="text" value="jwebsocket" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Twitter&nbsp;Message</td>
-					<td class="stdDlg" width="" colspan="3"><input class="stxfDlg" id="stxfTwitterMessage" type="text" value="Message-Body..." style="width:99%"></td>
+					<td class="stdDlg" width="" colspan="5"><input class="stxfDlg" id="stxfTwitterMessage" type="text" value="Message-Body..." style="width:99%"></td>
 				</tr>
 			</table>
 		</div>

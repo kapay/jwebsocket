@@ -34,60 +34,75 @@ jws.TwitterPlugIn = {
 				if( this.OnGotTwitterTimeline ) {
 					this.OnGotTwitterTimeline( aToken );
 				}
+			} else if( "login" == aToken.reqType ) {
+				if( this.onTwitterRequestToken ) {
+					this.onTwitterRequestToken( aToken );
+				}
 			}
 		}
 	},
 
-	tweet: function( aUsername, aPassword, aMessage, aOptions ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+	tweet: function( aMessage, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
 			var lToken = {
 				ns: jws.TwitterPlugIn.NS,
 				type: "tweet",
-				username: aUsername,
-				password: aPassword,
 				message: aMessage
 			};
 			this.sendToken( lToken,	aOptions );
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
 		}
 		return lRes;
 	},
 
-	twitterAuth: function( aUsername, aPassword, aOptions ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+	twitterLogin: function( aUsername, aPassword, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
 			var lToken = {
 				ns: jws.TwitterPlugIn.NS,
-				type: "auth",
+				type: "login",
 				username: aUsername,
 				password: aPassword
 			};
 			this.sendToken( lToken,	aOptions );
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	twitterLogout: function( aUsername, aPassword, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "logout"
+			};
+			this.sendToken( lToken,	aOptions );
 		}
 		return lRes;
 	},
 
 	twitterTimeline: function( aUsername, aOptions ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
 			var lToken = {
 				ns: jws.TwitterPlugIn.NS,
 				type: "getTimeline",
 				username: aUsername
 			};
 			this.sendToken( lToken,	aOptions );
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	twitterUserData: function( aUsername, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "getUserData",
+				username: aUsername
+			};
+			this.sendToken( lToken,	aOptions );
 		}
 		return lRes;
 	},
@@ -98,6 +113,9 @@ jws.TwitterPlugIn = {
 		}
 		if( aListeners.OnGotTwitterTimeline !== undefined ) {
 			this.OnGotTwitterTimeline = aListeners.OnGotTwitterTimeline;
+		}
+		if( aListeners.onTwitterRequestToken !== undefined ) {
+			this.onTwitterRequestToken = aListeners.onTwitterRequestToken;
 		}
 	}
 
