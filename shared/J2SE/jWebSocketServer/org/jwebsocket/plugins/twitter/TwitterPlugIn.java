@@ -19,6 +19,7 @@
 package org.jwebsocket.plugins.twitter;
 
 import java.util.List;
+import javolution.util.FastList;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
@@ -32,6 +33,7 @@ import org.jwebsocket.token.Token;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.http.AccessToken;
 import twitter4j.http.RequestToken;
 
@@ -42,6 +44,9 @@ import twitter4j.http.RequestToken;
 public class TwitterPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(TwitterPlugIn.class);
+	private static final String TWITTER_VAR = "$twitter";
+	private static final String OAUTH_REQUEST_TOKEN = "$twUsrReqTok";
+	private static final String OAUTH_VERIFIER = "$twUsrVerifier";
 	private static String TWITTER_USER = null;
 	private static final String TWITTER_USER_KEY = "username";
 	private static String TWITTER_PASSWORD = null;
@@ -79,7 +84,11 @@ public class TwitterPlugIn extends TokenPlugIn {
 		TWITTER_PASSWORD = getSetting(TWITTER_PASSWORD_KEY, null);
 		CONSUMER_KEY = getSetting(CONSUMER_KEY_KEY, null);
 		CONSUMER_SECRET = getSetting(CONSUMER_SECRET_KEY, null);
-		APP_ID = Integer.parseInt(getSetting(APP_ID_KEY, "0"));
+		try {
+			APP_ID = Integer.parseInt(getSetting(APP_ID_KEY, "0"));
+		} catch (Exception lEx) {
+			APP_ID = 0;
+		}
 		ACCESSTOKEN_KEY = getSetting(ACCESSTOKEN_KEY_KEY, null);
 		ACCESSTOKEN_SECRET = getSetting(ACCESSTOKEN_SECRET_KEY, null);
 	}
@@ -95,12 +104,23 @@ public class TwitterPlugIn extends TokenPlugIn {
 			mGetSettings();
 			if (lType.equals("tweet")) {
 				tweet(aConnector, aToken);
-			} else if (lType.equals("auth")) {
-				auth(aConnector, aToken);
+			} else if (lType.equals("login")) {
+				login(aConnector, aToken);
+			} else if (lType.equals("logout")) {
+				logout(aConnector, aToken);
 			} else if (lType.equals("getTimeline")) {
 				getTimeline(aConnector, aToken);
+			} else if (lType.equals("getUserData")) {
+				getUserData(aConnector, aToken);
+			} else if (lType.equals("setVerifier")) {
+				setVerifier(aConnector, aToken);
 			}
+
 		}
+	}
+
+	public void connectorStopped(WebSocketConnector aConnector) {
+		aConnector.removeVar(TWITTER_VAR);
 	}
 
 	private boolean mCheckAuth(Token aToken) {
@@ -134,37 +154,34 @@ public class TwitterPlugIn extends TokenPlugIn {
 		return false;
 	}
 
-	private void auth(WebSocketConnector aConnector, Token aToken) {
+	private void login(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
 		String lMsg;
-		String lUsername = aToken.getString("username");
-		String lPassword = aToken.getString("password");
 		try {
-			if (lUsername == null || lUsername.length() <= 0) {
-				lResponse.setInteger("code", -1);
-				lResponse.setString("msg", "No username passed for Twitter authentication.");
-			} else if (lPassword == null || lPassword.length() <= 0) {
-				lResponse.setInteger("code", -1);
-				lResponse.setString("msg", "No password passed for Twitter authentication.");
-			} else if (!mCheckAuth(lResponse)) {
+			if (!mCheckAuth(lResponse)) {
 				mLog.error(lResponse.getString("msg"));
 			} else {
-
 				TwitterFactory lTwitterFactory = new TwitterFactory();
 				Twitter lTwitter = lTwitterFactory.getInstance();
 				lTwitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-				RequestToken lReqToken = lTwitter.getOAuthRequestToken();
+				RequestToken lReqToken = lTwitter.getOAuthRequestToken("http://localhost/demos/twitter/twauth.htm?isAuth=true");
 
-				lMsg = "URLs.";
+				lMsg = "URLs";
 				lResponse.setString("authenticationURL", lReqToken.getAuthenticationURL());
 				lResponse.setString("authorizationURL", lReqToken.getAuthorizationURL());
 				lResponse.setString("msg", lMsg);
 				if (mLog.isInfoEnabled()) {
 					mLog.info(lMsg);
 				}
+
+				// every connector maintains it's own twitter connection
+				aConnector.setVar(TWITTER_VAR, lTwitter);
+				// persist the request token, it's required
+				// to get access token from verifier
+				aConnector.setVar(OAUTH_REQUEST_TOKEN, lReqToken);
 			}
 		} catch (Exception lEx) {
 			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
@@ -177,6 +194,42 @@ public class TwitterPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
+	private void logout(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+		String lMsg;
+		try {
+			if (!mCheckAuth(lResponse)) {
+				mLog.error(lResponse.getString("msg"));
+			} else {
+				Twitter lTwitter = (Twitter) aConnector.getVar(TWITTER_VAR);
+				if (lTwitter != null) {
+					lTwitter.shutdown();
+					lResponse.setString("msg", "Twitter instance has been shut down.");
+				} else {
+					lResponse.setString("msg", "Twitter instance down (not up before).");
+				}
+				aConnector.removeVar(TWITTER_VAR);
+				aConnector.removeVar(OAUTH_REQUEST_TOKEN);
+				aConnector.removeVar(OAUTH_VERIFIER);
+			}
+		} catch (Exception lEx) {
+			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+			mLog.error(lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	/*
+	 * Gets the Twitter timeline for a given user. If no user is given
+	 * the user registered for the app is used as default.
+	 */
 	private void getTimeline(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
@@ -195,16 +248,25 @@ public class TwitterPlugIn extends TokenPlugIn {
 				mLog.error(lResponse.getString("msg"));
 			} else {
 				List<Status> lStatuses;
+				// getting timelines is public so we can use the mTwitter object here
 				if (lUsername != null && lUsername.length() > 0) {
 					lStatuses = mTwitter.getUserTimeline(lUsername);
 				} else {
 					lStatuses = mTwitter.getUserTimeline();
 				}
-				lMsg = "";
+				// return the list of messages as an array of strings...
+				FastList<String> lMessages = new FastList<String>();
 				for (Status lStatus : lStatuses) {
-					lMsg += lStatus.getUser().getName() + ": " + lStatus.getText() + "<br>";
+					lMessages.add(lStatus.getUser().getName() + ": " + lStatus.getText());
+					/*
+					// If each status is supposed to be sent separately...
+					Token lItem = TokenFactory.createToken(NS_TWITTER, BaseToken.TT_EVENT);
+					lItem.setString("username", lStatus.getUser().getName());
+					lItem.setString("message", lStatus.getText());
+					lServer.sendToken(aConnector, lItem);
+					 */
 				}
-				lResponse.setString("msg", lMsg);
+				lResponse.setList("messages", lMessages);
 				if (mLog.isInfoEnabled()) {
 					mLog.info("Twitter timeline for user '"
 							+ (lUsername != null ? lUsername : "[not given]")
@@ -222,30 +284,78 @@ public class TwitterPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
+	private void getUserData(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+		String lUsername = aToken.getString("username");
+		Integer lUserId = aToken.getInteger("userid");
+		try {
+			User lUser = null;
+			// if user id is given use this to get user data
+			if (lUserId != null && lUserId != 0) {
+				lUser = mTwitter.showUser(lUserId);
+				// if user name is given use this to get user data
+			} else if (lUsername != null && lUsername.length() > 0) {
+				lUser = mTwitter.showUser(lUsername);
+				// otherwise return user data of provider (ourselves)
+			} else {
+				lUser = mTwitter.verifyCredentials();
+			}
+			if (lUser != null) {
+				lResponse.setString("screenname", lUser.getScreenName());
+				lResponse.setInteger("id", lUser.getId());
+				lResponse.setString("description", lUser.getDescription());
+				lResponse.setString("location", lUser.getLocation());
+				lResponse.setString("lang", lUser.getLang());
+				lResponse.setString("name", lUser.getName());
+			} else {
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "Neither UserId nor Username passed.");
+			}
+		} catch (Exception lEx) {
+			String lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+			mLog.error(lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	private void setVerifier(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// instantiate response token
+		String lVerifier = aToken.getString("verifier");
+		aConnector.setString(OAUTH_VERIFIER, lVerifier);
+	}
+
 	private void tweet(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
 		String lMsg = aToken.getString("message");
-		String lUsername = aToken.getString("username");
-		String lPassword = aToken.getString("password");
-
 		try {
-			if (lMsg == null || lMsg.length() <= 0) {
+			// to send tweet we need an authenticated user
+			Twitter lTwitter = (Twitter) aConnector.getVar(TWITTER_VAR);
+			RequestToken lReqToken = (RequestToken) aConnector.getVar(OAUTH_REQUEST_TOKEN);
+			String lVerifier = aConnector.getString(OAUTH_VERIFIER);
+			AccessToken lAccessToken = lTwitter.getOAuthAccessToken(lReqToken, lVerifier);
+			lTwitter.setOAuthAccessToken(lAccessToken);
+
+			if (lTwitter == null) {
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "Not yet authenticated against Twitter!");
+			} else if (lMsg == null || lMsg.length() <= 0) {
 				lResponse.setInteger("code", -1);
 				lResponse.setString("msg", "No message passed for tweet.");
-			} else if (lUsername == null || lUsername.length() <= 0) {
-				lResponse.setInteger("code", -1);
-				lResponse.setString("msg", "No username passed for tweet.");
-			} else if (lPassword == null || lPassword.length() <= 0) {
-				lResponse.setInteger("code", -1);
-				lResponse.setString("msg", "No password passed for tweet.");
-			} else if (!mCheckAuth(lResponse)) {
-				mLog.error(lResponse.getString("msg"));
 			} else {
-				mTwitter.updateStatus(lMsg);
-				lMsg = "Twitter status successfully updated for user '" + lUsername + "'.";
+				lTwitter.updateStatus(lMsg);
+				lMsg = "Twitter status successfully updated for user '" + lTwitter.getScreenName() + "'.";
 				lResponse.setString("msg", lMsg);
 				if (mLog.isInfoEnabled()) {
 					mLog.info(lMsg);
