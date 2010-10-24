@@ -47,7 +47,7 @@ public class ChannelPlugIn extends TokenPlugIn {
   private static Logger log = Logging.getLogger(ChannelPlugIn.class);
   /** channel manager */
   private ChannelManager channelManager = ChannelManager.getChannelManager();;
-  /** Namespace for channels */
+  /** namespace for channels */
   private static final String NS_CHANNELS_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.channel";
   /** empty string */
   private static final String EMPTY_STRING = "";
@@ -207,6 +207,16 @@ public class ChannelPlugIn extends TokenPlugIn {
     }
   }
 
+  /**
+   * Validates the publisher based on the accessKey and secretKey. If the authorization fails
+   * the publisher object will have flag authorized set to false.
+   * 
+   * @param connector the connector for the publisher
+   * @param channel the channel to publish
+   * @param secretKey the secretKey value from the publisher
+   * @param accessKey the accessKey value from the publisher
+   * @return the publisher object
+   */
   private Publisher authorizePublisher(WebSocketConnector connector, Channel channel, String secretKey, String accessKey) {
     Publisher publisher = null;
     if (channel.getAccessKey().equals(accessKey) && channel.getSecretKey().equals(secretKey)) {
@@ -255,11 +265,30 @@ public class ChannelPlugIn extends TokenPlugIn {
     responseToken.setString("subscribe", "ok");
     //send the success response
     sendToken(aConnector, aConnector, responseToken);
-    
   }
 
+  /**
+   * 
+   * @param aConnector
+   * @param aToken
+   */
   private void unsubscribe(WebSocketConnector aConnector, Token aToken) {
-    
+    String channelId = aToken.getString(CHANNEL);
+    if (channelId == null || EMPTY_STRING.equals(channelId)) {
+      sendError(aConnector, CloseReason.CLIENT, "channel value is null");
+      return;
+    }
+    Subscriber subscriber = channelManager.getSubscriber(aConnector.getId());
+    if (subscriber != null) {
+       Channel channel = channelManager.getChannel(channelId);
+       if (channel != null) {
+         channel.unsubscribe(subscriber, channelManager);
+         Token responseToken = createResponse(aToken);
+         responseToken.setString("unsubscribe", "ok");
+         //send the success response
+         sendToken(aConnector, aConnector, responseToken);
+       }
+    }
   }
   /**
    * {@inheritDoc} 

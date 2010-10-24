@@ -15,13 +15,19 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
+/**
+ * Lifecycle interface for a channel
+ * 
+ * @author puran
+ * @version $Id$
+ */
 public interface ChannelLifeCycle {
 
-	void init();
+  void init();
 
-	void start();
+  void start();
 
-	void suspend();
+  void suspend();
 
-	void stop();
+  void stop();
 }

@@ -203,15 +203,17 @@ public final class Channel implements ChannelLifeCycle {
     if (this.subscribers == null) {
       this.subscribers = new ArrayList<Subscriber>();
     }
-    subscribers.add(subscriber);
-    subscriber.addChannel(this.getId());
+    if (!subscribers.contains(subscriber)) {
+      subscribers.add(subscriber);
+      subscriber.addChannel(this.getId());
 
-    // persist the subscriber
-    channelManager.storeSubscriber(subscriber);
+      // persist the subscriber
+      channelManager.storeSubscriber(subscriber);
 
-    if (channelListeners != null) {
-      for (ChannelListener listener : channelListeners) {
-        listener.subscribed(this, subscriber);
+      if (channelListeners != null) {
+        for (ChannelListener listener : channelListeners) {
+          listener.subscribed(this, subscriber);
+        }
       }
     }
   }
@@ -226,10 +228,12 @@ public final class Channel implements ChannelLifeCycle {
     if (this.subscribers == null) {
       return;
     }
-    subscribers.remove(subscriber);
-    if (channelListeners != null) {
-      for (ChannelListener listener : channelListeners) {
-        listener.unsubscribed(this, subscriber);
+    if (subscribers.contains(subscriber)) {
+      subscribers.remove(subscriber);
+      if (channelListeners != null) {
+        for (ChannelListener listener : channelListeners) {
+          listener.unsubscribed(this, subscriber);
+        }
       }
     }
   }

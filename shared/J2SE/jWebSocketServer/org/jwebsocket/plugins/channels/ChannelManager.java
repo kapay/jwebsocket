@@ -70,6 +70,42 @@ public class ChannelManager {
 
     public void stopSystemChannels(PluginConfiguration pluginConfiguration) {
     }
+    
+    /**
+     * Creates the complete new system channel, this channel is stored in the channel store 
+     * by default.
+     * @param channelId the id of the channel to create
+     * @param accessKey the access key for the new channel
+     * @param secretKey the secretKey for the new channel
+     * @param owner the owner of the channel
+     * @return the new created channel
+     */
+    public Channel createSystemChannel(String channelId, String accessKey, String secretKey, String owner) {
+      return null;
+    }
+    
+    /**
+     * Creates the complete new private channel without any publishers and subscribers 
+     * @param channelId the id of the channel to create
+     * @param accessKey the access key for the new channel
+     * @param secretKey the secretKey for the new channel
+     * @param owner the owner of the channel
+     * @return the new created channel
+     */
+    public Channel createPrivateChannel(String channelId) {
+      return null;
+    }
+    
+    /**
+     * Creates the complete new public channel without any publishers and subscribers 
+     * @param channelId the channelId for the new channel
+     * @param secretKey the secretKey for the new channel
+     * @param owner the owner of the channel
+     * @return the public channel
+     */
+    public Channel createPublicChannel(String channelId, String secretKey, String owner) {
+      return null;
+    }
 
     /**
      * Returns the channel registered in the jWebSocket system based on channel id
