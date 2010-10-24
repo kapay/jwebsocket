@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.config.xml.ChannelConfig;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.FilterConfig;
 import org.jwebsocket.config.xml.PluginConfig;
@@ -61,6 +62,7 @@ public final class JWebSocketConfig implements Config {
 	private final LoggingConfig mLoggingConfig;
 	private final List<RightConfig> mGlobalRights;
 	private final List<RoleConfig> mGlobalRoles;
+	private final List<ChannelConfig> mChannels;
 	private static JWebSocketConfig mConfig = null;
 
 	/**
@@ -138,6 +140,7 @@ public final class JWebSocketConfig implements Config {
 		mLoggingConfig = aBuilder.mLoggingConfig;
 		mGlobalRights = aBuilder.mGlobalRights;
 		mGlobalRoles = aBuilder.mGlobalRoles;
+		mChannels = aBuilder.mChannels;
 		// validate the config
 		validate();
 	}
@@ -164,6 +167,7 @@ public final class JWebSocketConfig implements Config {
 		private LoggingConfig mLoggingConfig;
 		private List<RightConfig> mGlobalRights;
 		private List<RoleConfig> mGlobalRoles;
+		private List<ChannelConfig> mChannels;
 
 		public Builder setInstallation(String aInstallation) {
 			mInstallation = aInstallation;
@@ -228,6 +232,11 @@ public final class JWebSocketConfig implements Config {
 		public Builder setUsers(List<UserConfig> aUsers) {
 			mUsers = aUsers;
 			return this;
+		}
+		
+		public Builder setChannels(List<ChannelConfig> aChannels) {
+		  mChannels = aChannels;
+		  return this;
 		}
 
 		public synchronized JWebSocketConfig buildConfig() {
@@ -300,6 +309,13 @@ public final class JWebSocketConfig implements Config {
 	public List<RoleConfig> getGlobalRoles() {
 		return Collections.unmodifiableList(mGlobalRoles);
 	}
+	
+ /**
+  * @return the channels
+  */
+ public List<ChannelConfig> getChannels() {
+  return Collections.unmodifiableList(mChannels);
+ }
 
 	/**
 	 * {@inheritDoc}
