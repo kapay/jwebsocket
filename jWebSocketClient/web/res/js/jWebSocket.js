@@ -57,6 +57,19 @@ var jws = {
 	//:d:en:The connection has been closed or could not be opened.
 	CLOSED: 3,
 
+	//:const:*:WS_SUBPROT_JSON:String:jWebSocket-JSON"
+	//:d:en:jWebSocket sub protocol JSON
+	WS_SUBPROT_JSON: "jWebSocket-JSON",
+	//:const:*:WS_SUBPROT_XML:String:jWebSocket-XML"
+	//:d:en:jWebSocket sub protocol XML
+	WS_SUBPROT_XML: "jWebSocket-XML",
+	//:const:*:WS_SUBPROT_CSV:String:jWebSocket-CSV"
+	//:d:en:jWebSocket sub protocol CSV
+	WS_SUBPROT_CSV: "jWebSocket-CSV",
+	//:const:*:WS_SUBPROT_CUSTOM:String:jWebSocket-Custom"
+	//:d:en:jWebSocket sub protocol Custom
+	WS_SUBPROT_CUSTOM: "jWebSocket-Custom",
+
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
 	//:d:en:Returns the first HTML element with the given id or [tt]null[/tt] _
@@ -453,8 +466,16 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				var lThis = this;
 				var lValue = null;
 
+				// check if subprotocol is given
+				// if not use JSON as default
+				var lSubProt = jws.WS_SUBPROT_JSON;
+				if( aOptions.subProtocol ) {
+					lSubProt = aOptions.subProtocol;
+				}
+				// console.log("Opening with sub-prot: " + lSubProt)
+
 				// create a new web socket instance
-				this.fConn = new WebSocket( aURL );
+				this.fConn = new WebSocket( aURL, lSubProt );
 
 				// assign the listeners to local functions (closure) to allow
 				// to handle event before and after the application

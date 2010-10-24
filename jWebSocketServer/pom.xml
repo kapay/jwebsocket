@@ -125,6 +125,7 @@
 			<artifactId>servlet-api-2.5</artifactId>
 			<version>6.1.14</version>
 		</dependency>
+		<!-- required for the jWebSocket JDBC Plugin -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -135,20 +136,29 @@
 			<artifactId>commons-io</artifactId>
 			<version>1.4</version>
 		</dependency>
+		<!-- Required for Base64 for binary transfer wrapped in text packets -->
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.4</version>
 		</dependency>
+		<!-- Required for the jWebSocket Mail Plugin -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-email</artifactId>
 			<version>1.2</version>
 		</dependency>
+		<!-- required for the jWebSocket Twitter Plugin -->
 		<dependency>
 			<groupId>org.twitter4j</groupId>
 			<artifactId>twitter4j-core</artifactId>
 			<version>[2.1,)</version>
+		</dependency>
+		<!-- required for the jWebSocket XMPP Plugin -->
+		<dependency>
+			<groupId>jivesoftware</groupId>
+			<artifactId>smackx</artifactId>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jwebsocket</groupId>

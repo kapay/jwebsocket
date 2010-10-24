@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket Twitter PlugIn (uses jWebSocket Client and Server)
+//	jWebSocket XMPP PlugIn (uses jWebSocket Client and Server)
 //	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -16,70 +16,52 @@
 
 
 //	---------------------------------------------------------------------------
-//  jWebSocket Twitter Client Plug-In
+//  jWebSocket XMPP Client Plug-In
 //	---------------------------------------------------------------------------
 
-jws.TwitterPlugIn = {
+jws.XMPPPlugIn = {
 
-	// namespace for twitter plugin
+	// namespace for xmpp plugin
 	// if namespace is changed update server plug-in accordingly!
-	NS: jws.NS_BASE + ".plugins.twitter",
+	NS: jws.NS_BASE + ".plugins.xmpp",
 
 	processToken: function( aToken ) {
 		// check if namespace matches
-		if( aToken.ns == jws.TwitterPlugIn.NS ) {
+		if( aToken.ns == jws.XMPPPlugIn.NS ) {
 			// here you can handle incoming tokens from the server
 			// directy in the plug-in if desired.
-			if( "getTimeline" == aToken.reqType ) {
-				if( this.OnGotTwitterTimeline ) {
-					this.OnGotTwitterTimeline( aToken );
-				}
-			} else if( "login" == aToken.reqType ) {
-				if( this.onTwitterRequestToken ) {
-					this.onTwitterRequestToken( aToken );
+			if( "login" == aToken.reqType ) {
+				if( this.onXMPPRequestToken ) {
+					this.onXMPPRequestToken( aToken );
 				}
 			}
 		}
 	},
 
-	tweet: function( aMessage, aOptions ) {
-		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
-			var lToken = {
-				ns: jws.TwitterPlugIn.NS,
-				type: "tweet",
-				message: aMessage
-			};
-			this.sendToken( lToken,	aOptions );
-		}
-		return lRes;
-	},
 
-
-	twitterLogin: function( aCallbackURL, aOptions ) {
+	xmppLogin: function( aCallbackURL, aOptions ) {
 		// check websocket connection status
 		var lRes = this.checkConnected();
 		// if connected to websocket network...
 		if( 0 == lRes.code ) {
-			// Twitter API calls Twitter Login screen,
+			// XMPP API calls XMPP Login screen,
 			// hence here no user name or password are required.
 			// Pass the callbackURL to notify Web App on successfull connection
 			// and to obtain OAuth verifier for user.
 			var lToken = {
-				ns: jws.TwitterPlugIn.NS,
-				type: "login",
-				callbackURL: aCallbackURL
+				ns: jws.XMPPPlugIn.NS,
+				type: "login"
 			};
 			this.sendToken( lToken,	aOptions );
 		}
 		return lRes;
 	},
 
-	twitterLogout: function( aUsername, aPassword, aOptions ) {
+	xmppLogout: function( aUsername, aPassword, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			var lToken = {
-				ns: jws.TwitterPlugIn.NS,
+				ns: jws.XMPPPlugIn.NS,
 				type: "logout"
 			};
 			this.sendToken( lToken,	aOptions );
@@ -87,45 +69,16 @@ jws.TwitterPlugIn = {
 		return lRes;
 	},
 
-	twitterTimeline: function( aUsername, aOptions ) {
-		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
-			var lToken = {
-				ns: jws.TwitterPlugIn.NS,
-				type: "getTimeline",
-				username: aUsername
-			};
-			this.sendToken( lToken,	aOptions );
-		}
-		return lRes;
-	},
-
-	twitterUserData: function( aUsername, aOptions ) {
-		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
-			var lToken = {
-				ns: jws.TwitterPlugIn.NS,
-				type: "getUserData",
-				username: aUsername
-			};
-			this.sendToken( lToken,	aOptions );
-		}
-		return lRes;
-	},
-
-	setTwitterCallbacks: function( aListeners ) {
+	setXMPPCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
 		}
-		if( aListeners.OnGotTwitterTimeline !== undefined ) {
-			this.OnGotTwitterTimeline = aListeners.OnGotTwitterTimeline;
-		}
-		if( aListeners.onTwitterRequestToken !== undefined ) {
-			this.onTwitterRequestToken = aListeners.onTwitterRequestToken;
+		if( aListeners.onXMPPRequestToken !== undefined ) {
+			this.onXMPPRequestToken = aListeners.onXMPPRequestToken;
 		}
 	}
 
 }
 
-// add the JWebSocket Twitter PlugIn into the TokenClient class
-jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.TwitterPlugIn );
+// add the JWebSocket XMPP PlugIn into the TokenClient class
+jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.XMPPPlugIn );

@@ -38,28 +38,54 @@ public class JWebSocketCommonConstants {
 	public static final String VENDOR = "jWebSocket.org";
 	/**
 	 * Default protocol
+	 * @deprecated
 	 */
 	public static String DEFAULT_PROTOCOL = "json";
 	/**
 	 * JSON sub protocol
+	 * @deprecated
 	 */
 	public final static String SUB_PROT_JSON = "json";
 	/**
 	 * CSV sub protocol
+	 * @deprecated
 	 */
 	public final static String SUB_PROT_CSV = "csv";
 	/**
 	 * XML sub protocol
+	 * @deprecated
 	 */
 	public final static String SUB_PROT_XML = "xml";
 	/**
-	 * Custom specfic sub protocol
+	 * Custom specific sub protocol
+	 * @deprecated
 	 */
 	public final static String SUB_PROT_CUSTOM = "custom";
 	/**
 	 * Default sub protocol if not explicitely specified by client (json).
+	 * @deprecated
 	 */
 	public final static String SUB_PROT_DEFAULT = SUB_PROT_JSON;
+	/**
+	 * jWebSocket JSON sub protocol
+	 */
+	public final static String WS_SUBPROT_JSON = "jWebSocket-JSON";
+	/**
+	 * jWebSocket CSV sub protocol
+	 */
+	public final static String WS_SUBPROT_CSV = "jWebSocket-CSV";
+	/**
+	 * jWebSocket XML sub protocol
+	 */
+	public final static String WS_SUBPROT_XML = "jWebSocket-XML";
+	/**
+	 * jWebSocket Custom specific sub protocol
+	 */
+	public final static String WS_SUBPROT_CUSTOM = "jWebSocket-Custom";
+	/**
+	 * Default protocol
+	 */
+	public static String WS_SUBPROT_DEFAULT = WS_SUBPROT_JSON;
 	/**
 	 * Separator between the path and the argument list in the URL.
 	 */

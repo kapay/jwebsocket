@@ -59,6 +59,7 @@
 
 				log( "Connecting to " + lURL + " and logging in as '" + gUsername + "'..." );
 				var lRes = jWebSocketClient.logon( lURL, gUsername, lPassword, {
+					
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection established.</font>" );

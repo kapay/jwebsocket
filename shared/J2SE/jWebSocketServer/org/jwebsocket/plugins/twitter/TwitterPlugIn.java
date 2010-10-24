@@ -167,6 +167,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 				TwitterFactory lTwitterFactory = new TwitterFactory();
 				Twitter lTwitter = lTwitterFactory.getInstance();
 				lTwitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+				// pass callback URL to Twitter API
 				RequestToken lReqToken = lTwitter.getOAuthRequestToken("http://localhost/demos/twitter/twauth.htm?isAuth=true");
 
 				lMsg = "URLs";

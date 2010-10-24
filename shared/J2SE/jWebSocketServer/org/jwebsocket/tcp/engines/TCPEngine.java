@@ -149,6 +149,7 @@ public class TCPEngine extends BaseEngine {
 		super.stopEngine(aCloseReason);
 
 		// now wait until all connectors have been closed properly
+		// or timeout exceeds...
 		try {
 			while (getConnectors().size() > 0 && new Date().getTime() - lStarted < 10000) {
 				Thread.sleep(250);
@@ -203,16 +204,17 @@ public class TCPEngine extends BaseEngine {
 		byte[] lReq = new byte[lRead];
 		System.arraycopy(lBuff, 0, lReq, 0, lRead);
 
-		//if (mLog.isDebugEnabled()) {
-		//    mLog.debug("Handshake Request:\n" + new String(lResp));
-		//    mLog.debug("Parsing initial WebSocket handshake...");
-		//}
+		if (mLog.isDebugEnabled()) {
+		    mLog.debug("Handshake Request:\n" + new String(lReq));
+		    mLog.debug("Parsing initial WebSocket handshake...");
+		}
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(lReq);
 		// maybe the request is a flash policy-file-request
 		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
 		if (lFlashBridgeReq != null) {
 			mLog.warn("TCPEngine returned policy file request ('"
-					+ lFlashBridgeReq + "'), check for FlashBridge plug-in.");
+					+ lFlashBridgeReq
+					+ "'), check for FlashBridge plug-in.");
 		}
 		// generate the websocket handshake
 		// if policy-file-request is found answer it
@@ -223,17 +225,19 @@ public class TCPEngine extends BaseEngine {
 			}
 			return null;
 		}
-		//if (log.isDebugEnabled()) {
-		//	log.debug("Handshake Response:\n" + new String(lResp));
-		//	mLog.debug("Flushing initial WebSocket handshake...");
-		//}
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Handshake Response:\n" + new String(lBA));
+			mLog.debug("Flushing initial WebSocket handshake...");
+		}
 		lOut.write(lBA);
 		lOut.flush();
 
 		// if we detected a flash policy-file-request return "null"
 		// (no websocket header detected)
 		if (lFlashBridgeReq != null) {
-			mLog.warn("TCPEngine returned policy file response ('" + new String(lBA, "US-ASCII") + "'), check for FlashBridge plug-in.");
+			mLog.warn("TCPEngine returned policy file response ('" 
+					+ new String(lBA, "US-ASCII")
+					+ "'), check for FlashBridge plug-in.");
 			return null;
 		}
 

@@ -6,7 +6,7 @@
 		<!-- Comment needs to be BELOW this meta tag! -->
 <!--
 //	****************************************************************************
-//	jWebSocket Mail Demo (uses jWebSocket Client and Server)
+//	jWebSocket Twitter Callback Page (uses jWebSocket Client and Server)
 //	(C) 2010 Alexander Schulze, jWebSocket.org, Innotrade GmbH, Herzogenrath
 //	****************************************************************************
 //	This program is free software; you can redistribute it and/or modify it
@@ -25,9 +25,13 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket Twitter Demo</title>
 		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
+		<!-- do not link jWebSocket.js here but use the one in the opener window
+			 to set on top of the same connection -->
 		<script type="text/javascript">
 			function initPage() {
+				// Twitter API returns OAuth verifier in (callback)URL argument
 				var lURL = location.search.substring(1);
+				// isAuth 
 				var lIsAuth = lURL.indexOf( "isAuth=true" ) >= 0;
 				// console.log("going to: " + lURL);
 				if( lIsAuth) {

@@ -14,7 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config;
 
-import static org.jwebsocket.config.JWebSocketCommonConstants.DEFAULT_PROTOCOL;
+import static org.jwebsocket.config.JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
 import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
 import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATION;
 import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
@@ -80,7 +80,7 @@ public final class JWebSocketConfig implements Config {
 	 */
 	public String getProtocol() {
 		if (mProtocol == null || mProtocol.length() == 0) {
-			return DEFAULT_PROTOCOL;
+			return WS_SUBPROT_DEFAULT;
 		}
 		return mProtocol;
 	}
