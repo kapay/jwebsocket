@@ -24,7 +24,7 @@
 		define the protocol, default protocol if not specified is 'json'
 		possible values are [json|xml|csv]
 	-->
-	<protocol>dev</protocol>
+	<protocol>json</protocol>
 
 	<!-- jWebSocket logging configuration -->
 	<logging>
