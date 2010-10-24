@@ -1,5 +1,4 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - ChannelManager
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -33,6 +32,8 @@ public class ChannelManager {
     private final ChannelStore channelStore = new BaseChannelStore();
     /** subscriber store */
     private final SubscriberStore subscriberStore = new BaseSubscriberStore();
+    /** publisher store*/
+    private final PublisherStore publisherStore = new BasePublisherStore();
     /** system channels map */
     private final Map<String, Channel> systemChannels = new ConcurrentHashMap<String, Channel>();
     /** private channel map */
@@ -62,9 +63,7 @@ public class ChannelManager {
     }
     /**
      * Starts the system channels within the jWebSocket system
-     * 
-     * @param configuration
-     *            the channel plugin configuration
+     * @param configuration the channel plugin configuration
      */
     public void startSystemChannels(PluginConfiguration configuration) {
     }
@@ -72,6 +71,14 @@ public class ChannelManager {
     public void stopSystemChannels(PluginConfiguration pluginConfiguration) {
     }
 
+    /**
+     * Returns the channel registered in the jWebSocket system based on channel id
+     * it does a various lookup and then if it doesn't find anywhere from the memory
+     * it loads the channel from the database.
+     * If it doesn' find anything then it returns the null object 
+     * @param channelId
+     * @return
+     */
     public Channel getChannel(String channelId) {
         if (systemChannels.containsKey(channelId)) {
             return systemChannels.get(channelId);
@@ -89,7 +96,11 @@ public class ChannelManager {
         }
         return channel;
     }
-
+    /**
+     * Register the given channel to the list of channels maintained by the 
+     * jWebSocket system.
+     * @param channel the channel to store.
+     */
     public void registerChannel(Channel channel) {
       if (channel.isPrivateChannel() && !channel.isSystemChannel()) {
         privateChannels.put(channel.getId(), channel);
@@ -123,7 +134,28 @@ public class ChannelManager {
     public void removeSubscriber(Subscriber subscriber) {
       subscriberStore.removeSubscriber(subscriber.getId());
     }
-    
+    /**
+     * Returns the registered publisher for the given publisher id
+     * @param publisherId the publisher id
+     * @return the publisher object
+     */
+    public Publisher getPublisher(String publisherId) {
+      return publisherStore.getPublisher(publisherId);
+    }
+    /**
+     * Stores the given publisher to the channel store
+     * @param publisher the publisher object to store
+     */
+    public void storePublisher(Publisher publisher) {
+      publisherStore.storePublisher(publisher);
+    }
+    /**
+     * Removes the publisher from the channel store permanently
+     * @param publisher the publisher to remove
+     */
+    public void removePublisher(Publisher publisher) {
+      publisherStore.removePublisher(publisher.getId());
+    }
     /**
      * Returns the instance of the logger channel.
      * @return the logger channel

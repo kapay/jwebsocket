@@ -16,6 +16,7 @@
 package org.jwebsocket.plugins.channels;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -88,7 +89,7 @@ public class BaseSubscriberStore extends JDBCStore implements SubscriberStore {
           channels.add(channelId);
         }
       }
-      subscriber = new Subscriber(id, loggedInTime, channels);
+      subscriber = new Subscriber(id, new Date(loggedInTime), channels);
     } catch (JSONException e) {
       logger.error("Error parsing json response from the channel repository:", e);
     }

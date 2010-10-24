@@ -16,6 +16,7 @@
 package org.jwebsocket.plugins.channels;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.jwebsocket.api.WebSocketConnector;
@@ -33,12 +34,12 @@ public class Subscriber {
     private String id;
     private WebSocketConnector connector;
     private TokenServer tokenServer;
-    private long loggedInTime;
+    private Date loggedInTime;
     private List<String> channels = new ArrayList<String>();
     /**
      * Default constructor
      */
-    public Subscriber(String id, long loggedInTime, List<String> channels) {
+    public Subscriber(String id, Date loggedInTime, List<String> channels) {
         this.id = id;
         this.loggedInTime = loggedInTime;
         this.channels = channels;
@@ -50,7 +51,7 @@ public class Subscriber {
      * @param theServer the token server instance
      * @param loggedInTime the first time the subscriber logged in
      */
-    public Subscriber(WebSocketConnector theConnector, TokenServer theServer, long loggedInTime) {
+    public Subscriber(WebSocketConnector theConnector, TokenServer theServer, Date loggedInTime) {
         this.id = theConnector.getId();
         this.connector = theConnector;
         this.tokenServer = theServer;
@@ -96,7 +97,7 @@ public class Subscriber {
     /**
      * @return the loggedInTime
      */
-    public long getLoggedInTime() {
+    public Date getLoggedInTime() {
       return loggedInTime;
     }
     /**
