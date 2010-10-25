@@ -100,15 +100,15 @@ public class JSONToken extends BaseToken implements Token {
 			for (Entry<Object, Object> lItem : ((Map<Object, Object>) aValue).entrySet()) {
 				try {
 					lJO.put(lItem.getKey().toString(), getValue(lItem.getValue()));
-				} catch (JSONException ex) {
+				} catch (JSONException lEx) {
 				}
 			}
 			aValue = lJO;
 		} else if (aValue instanceof Object[]) {
 			JSONArray lJA = new JSONArray();
 			Object[] lOA = (Object[]) aValue;
-			for (int i = 0; i < lOA.length; i++) {
-				lJA.put(getValue(lOA[i]));
+			for (int lIdx = 0; lIdx < lOA.length; lIdx++) {
+				lJA.put(getValue(lOA[lIdx]));
 			}
 			aValue = lJA;
 		}
@@ -124,7 +124,7 @@ public class JSONToken extends BaseToken implements Token {
 	public void put(String aKey, Object aValue) {
 		try {
 			mData.put(aKey, getValue(aValue));
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -137,7 +137,7 @@ public class JSONToken extends BaseToken implements Token {
 	public Object get(String aKey) {
 		try {
 			return mData.get(aKey);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			return null;
 		}
 	}
@@ -163,7 +163,7 @@ public class JSONToken extends BaseToken implements Token {
 		String lResult;
 		try {
 			lResult = mData.getString(aKey);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -177,7 +177,7 @@ public class JSONToken extends BaseToken implements Token {
 	public void setString(String aKey, String aValue) {
 		try {
 			mData.put(aKey, aValue);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -203,7 +203,7 @@ public class JSONToken extends BaseToken implements Token {
 		Integer lResult;
 		try {
 			lResult = mData.getInt(aKey);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -223,7 +223,7 @@ public class JSONToken extends BaseToken implements Token {
 	public void setInteger(String aKey, Integer aValue) {
 		try {
 			mData.put(aKey, aValue);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -239,7 +239,7 @@ public class JSONToken extends BaseToken implements Token {
 		Double lResult;
 		try {
 			lResult = mData.getDouble(aKey);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -259,7 +259,7 @@ public class JSONToken extends BaseToken implements Token {
 	public void setDouble(String aKey, Double aValue) {
 		try {
 			mData.put(aKey, aValue);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -275,7 +275,7 @@ public class JSONToken extends BaseToken implements Token {
 		Boolean lResult;
 		try {
 			lResult = mData.getBoolean(aKey);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -299,7 +299,7 @@ public class JSONToken extends BaseToken implements Token {
 	public void setBoolean(String aKey, Boolean aValue) {
 		try {
 			mData.put(aKey, aValue);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -336,7 +336,7 @@ public class JSONToken extends BaseToken implements Token {
 	public void setList(String aKey, List aList) {
 		try {
 			mData.put(aKey, aList);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -373,7 +373,7 @@ public class JSONToken extends BaseToken implements Token {
 	public void setMap(String aKey, Map aMap) {
 		try {
 			mData.put(aKey, aMap);
-		} catch (JSONException ex) {
+		} catch (JSONException lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -394,13 +394,13 @@ public class JSONToken extends BaseToken implements Token {
 	@Override
 	public Map asMap() {
 		Map lMap = new FastMap<String, Object>();
-		Iterator<String> iterator = mData.keys();
-		while (iterator.hasNext()) {
-			String lKey = (String)iterator.next();
+		Iterator<String> lIterator = mData.keys();
+		while (lIterator.hasNext()) {
+			String lKey = (String)lIterator.next();
 			try{
 				Object lVal = mData.get(lKey);
 				lMap.put(lKey, lVal);
-			} catch(Exception ex) {
+			} catch(Exception lEx) {
 				// TODO: process exception
 			}
 		}
@@ -411,6 +411,7 @@ public class JSONToken extends BaseToken implements Token {
 	 *
 	 * @return
 	 */
+	@Override
 	public Iterator<String> getKeyIterator() {
 		return mData.keys();
 	}
@@ -420,11 +421,12 @@ public class JSONToken extends BaseToken implements Token {
 	 * @param aKey
 	 * @return
 	 */
+	@Override
 	public Object getObject(String aKey) {
 		Object lObj = null;
 		try {
 			lObj = mData.get(aKey);
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			// 
 		}
 		return lObj;

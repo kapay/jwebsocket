@@ -62,12 +62,12 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 			for (WebSocketPlugIn lPlugIn : getPlugIns()) {
 				try {
 					lPlugIn.engineStarted(aEngine);
-				} catch (Exception ex) {
-					mLog.error("Engine '" + aEngine.getId() + "' started (1): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				} catch (Exception lEx) {
+					mLog.error("Engine '" + aEngine.getId() + "' started (1): " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 				}
 			}
-		} catch (Exception ex) {
-			mLog.error("Engine '" + aEngine.getId() + "' started (2): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (Exception lEx) {
+			mLog.error("Engine '" + aEngine.getId() + "' started (2): " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
 	}
 
@@ -94,16 +94,16 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 					}
 					 */
 					lPlugIn.engineStopped(aEngine);
-				} catch (Exception ex) {
+				} catch (Exception lEx) {
 					mLog.error("Engine '" + aEngine.getId() 
-							+ "' stopped (1): " + ex.getClass().getSimpleName()
-							+ ": " + ex.getMessage());
+							+ "' stopped (1): " + lEx.getClass().getSimpleName()
+							+ ": " + lEx.getMessage());
 				}
 			}
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			mLog.error("Engine '" + aEngine.getId() 
-					+ "' stopped (2): " + ex.getClass().getSimpleName()
-					+ ": " + ex.getMessage());
+					+ "' stopped (2): " + lEx.getClass().getSimpleName()
+					+ ": " + lEx.getMessage());
 		}
 	}
 
@@ -120,12 +120,12 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 				try {
 					// log.debug("Notifying plug-in " + plugIn + " that connector started...");
 					lPlugIn.connectorStarted(aConnector);
-				} catch (Exception ex) {
-					mLog.error("Connector '" + aConnector.getId() + "' started (1): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				} catch (Exception lEx) {
+					mLog.error("Connector '" + aConnector.getId() + "' started (1): " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 				}
 			}
-		} catch (Exception ex) {
-			mLog.error("Connector '" + aConnector.getId() + "' started (2): " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (Exception lEx) {
+			mLog.error("Connector '" + aConnector.getId() + "' started (2): " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
 	}
 
@@ -148,8 +148,8 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 				}
 				 */
 				lPlugIn.processPacket(lPluginResponse, aConnector, aDataPacket);
-			} catch (Exception ex) {
-				mLog.error("Processing packet on connector '" + aConnector.getId() + "': " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			} catch (Exception lEx) {
+				mLog.error("Processing packet on connector '" + aConnector.getId() + "': " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 			}
 			if (lPluginResponse.isChainAborted()) {
 				break;
@@ -172,8 +172,8 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 			try {
 				// log.debug("Notifying plug-in " + plugIn + " that connector stopped...");
 				lPlugIn.connectorStopped(aConnector, aCloseReason);
-			} catch (Exception ex) {
-				mLog.error("Connector '" + aConnector.getId() + "' stopped: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			} catch (Exception lEx) {
+				mLog.error("Connector '" + aConnector.getId() + "' stopped: " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 			}
 		}
 	}

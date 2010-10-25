@@ -16,6 +16,7 @@
 package org.jwebsocket.server;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -62,8 +63,8 @@ public class TokenServer extends BaseServer {
 
 	public TokenServer(ServerConfiguration aServerConfig) {
 		super(aServerConfig);
-		plugInChain = new TokenPlugInChain(this);
-		filterChain = new TokenFilterChain(this);
+		mPlugInChain = new TokenPlugInChain(this);
+		mFilterChain = new TokenFilterChain(this);
 	}
 
 	@Override
@@ -104,7 +105,7 @@ public class TokenServer extends BaseServer {
 						mCachedThreadPool.shutdownNow();
 					}
 				}
-			} catch (InterruptedException ie) {
+			} catch (InterruptedException lEx) {
 				// (Re-)Cancel if current thread also interrupted
 				mCachedThreadPool.shutdownNow();
 			}
@@ -120,7 +121,7 @@ public class TokenServer extends BaseServer {
 	 * @param aPlugIn
 	 */
 	public void removePlugIn(WebSocketPlugIn aPlugIn) {
-		plugInChain.removePlugIn(aPlugIn);
+		mPlugInChain.removePlugIn(aPlugIn);
 	}
 
 	@Override
@@ -128,7 +129,7 @@ public class TokenServer extends BaseServer {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing engine '" + aEngine.getId() + "' started...");
 		}
-		plugInChain.engineStarted(aEngine);
+		mPlugInChain.engineStarted(aEngine);
 	}
 
 	@Override
@@ -136,7 +137,7 @@ public class TokenServer extends BaseServer {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing engine '" + aEngine.getId() + "' stopped...");
 		}
-		plugInChain.engineStopped(aEngine);
+		mPlugInChain.engineStopped(aEngine);
 	}
 
 	/**
@@ -161,7 +162,7 @@ public class TokenServer extends BaseServer {
 			}
 			// notify plugins that a connector has started,
 			// i.e. a client was sconnected.
-			plugInChain.connectorStarted(aConnector);
+			mPlugInChain.connectorStarted(aConnector);
 		}
 		super.connectorStarted(aConnector);
 	}
@@ -174,49 +175,29 @@ public class TokenServer extends BaseServer {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Processing connector '" + aConnector.getId() + "' stopped...");
 			}
-			plugInChain.connectorStopped(aConnector, aCloseReason);
+			mPlugInChain.connectorStopped(aConnector, aCloseReason);
 		}
 		super.connectorStopped(aConnector, aCloseReason);
 	}
 
 	public Token packetToToken(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
-		Token lToken = null;
-		if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
-			lToken = JSONProcessor.packetToToken(aDataPacket);
-		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
-			lToken = CSVProcessor.packetToToken(aDataPacket);
-		} else if (lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
-			lToken = XMLProcessor.packetToToken(aDataPacket);
-		}
-		return lToken;
+		return TokenFactory.packetToToken(lSubProt, aDataPacket);
 	}
 
 	public WebSocketPacket tokenToPacket(WebSocketConnector aConnector, Token aToken) {
 		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
-		WebSocketPacket lPacket = null;
-		// TODO: Remove deprecated sub protocol constants one day, when browsers have been updated
-		if (lSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_JSON)
-				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
-			lPacket = JSONProcessor.tokenToPacket(aToken);
-		} else if (lSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_CSV)
-				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
-			lPacket = CSVProcessor.tokenToPacket(aToken);
-		} else if (lSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_XML)
-				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
-			lPacket = XMLProcessor.tokenToPacket(aToken);
-		}
-		return lPacket;
+		return TokenFactory.tokenToPacket(lSubProt, aToken);
 	}
 
 	private void processToken(WebSocketConnector aConnector, Token aToken) {
 		// before forwarding the token to the plug-ins push it through filter
 		// chain
-		FilterResponse filterResponse = getFilterChain().processTokenIn(aConnector, aToken);
+		FilterResponse lFilterResponse = getFilterChain().processTokenIn(aConnector, aToken);
 
 		// only forward the token to the plug-in chain
 		// if filter chain does not response "aborted"
-		if (!filterResponse.isRejected()) {
+		if (!lFilterResponse.isRejected()) {
 			getPlugInChain().processToken(aConnector, aToken);
 			// forward the token to the listener chain
 			List<WebSocketServerListener> lListeners = getListeners();
@@ -284,7 +265,7 @@ public class TokenServer extends BaseServer {
 		if (lTargetConnector != null) {
 			if (lTargetConnector.getBool(VAR_IS_TOKENSERVER)) {
 				// before sending the token push it through filter chain
-				FilterResponse filterResponse = getFilterChain().processTokenOut(null, lTargetConnector, aToken);
+				FilterResponse lFilterResponse = getFilterChain().processTokenOut(null, lTargetConnector, aToken);
 
 				if (mLog.isDebugEnabled()) {
 					mLog.debug("Sending token '" + aToken + "' to '" + lTargetConnector + "'...");
@@ -298,19 +279,19 @@ public class TokenServer extends BaseServer {
 		}
 	}
 
-	private IOFuture sendTokenData(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken, boolean async) {
+	private IOFuture sendTokenData(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken, boolean aIsAsync) {
 		if (aTarget.getBool(VAR_IS_TOKENSERVER)) {
 			// before sending the token push it through filter chain
-			FilterResponse filterResponse = getFilterChain().processTokenOut(aSource, aTarget, aToken);
+			FilterResponse lFilterResponse = getFilterChain().processTokenOut(aSource, aTarget, aToken);
 
 			// only forward the token to the plug-in chain
 			// if filter chain does not response "aborted"
-			if (!filterResponse.isRejected()) {
+			if (!lFilterResponse.isRejected()) {
 				if (mLog.isDebugEnabled()) {
 					mLog.debug("Sending token '" + aToken + "' to '" + aTarget + "'...");
 				}
-				WebSocketPacket aPacket = tokenToPacket(aTarget, aToken);
-				return sendPacketData(aTarget, aPacket, false);
+				WebSocketPacket lPacket = tokenToPacket(aTarget, aToken);
+				return sendPacketData(aTarget, lPacket, false);
 			} else {
 				if (mLog.isDebugEnabled()) {
 					mLog.debug("");
@@ -322,11 +303,11 @@ public class TokenServer extends BaseServer {
 		return null;
 	}
 
-	private IOFuture sendPacketData(WebSocketConnector target, WebSocketPacket dataPacket, boolean isAsync) {
-		if (isAsync) {
-			return super.sendPacketAsync(target, dataPacket);
+	private IOFuture sendPacketData(WebSocketConnector aTarget, WebSocketPacket aDataPacket, boolean aIsAsync) {
+		if (aIsAsync) {
+			return super.sendPacketAsync(aTarget, aDataPacket);
 		} else {
-			super.sendPacket(target, dataPacket);
+			super.sendPacket(aTarget, aDataPacket);
 			return null;
 		}
 	}
@@ -381,7 +362,7 @@ public class TokenServer extends BaseServer {
 		}
 
 		// before sending the token push it through filter chain
-		FilterResponse filterResponse = getFilterChain().processTokenOut(null, null, aToken);
+		FilterResponse lFilterResponse = getFilterChain().processTokenOut(null, null, aToken);
 
 		aFilter.put(VAR_IS_TOKENSERVER, true);
 
@@ -415,7 +396,7 @@ public class TokenServer extends BaseServer {
 		}
 
 		// before sending the token push it through filter chain
-		FilterResponse filterResponse = getFilterChain().processTokenOut(null, null, aToken);
+		FilterResponse lFilterResponse = getFilterChain().processTokenOut(null, null, aToken);
 
 		FastMap<String, Object> lFilter = new FastMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
@@ -450,15 +431,15 @@ public class TokenServer extends BaseServer {
 		}
 
 		// before sending the token push it through filter chain
-		FilterResponse filterResponse = getFilterChain().processTokenOut(aSource, null, aToken);
+		FilterResponse lFilterResponse = getFilterChain().processTokenOut(aSource, null, aToken);
 
-		FastMap<String, Object> lFilter = new FastMap<String, Object>();
+		Map<String, Object> lFilter = new FastMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 
 		// converting the token within the loop is removed in this method!
 		WebSocketPacket lPacket;
 		// lPackets maps protocols to appropriate converted packets:
-		FastMap<String, WebSocketPacket> lPackets = new FastMap<String, WebSocketPacket>();
+		Map<String, WebSocketPacket> lPackets = new FastMap<String, WebSocketPacket>();
 		String lSubProt;
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector)) {
@@ -491,19 +472,19 @@ public class TokenServer extends BaseServer {
 		}
 
 		// before sending the token push it through filter chain
-		FilterResponse filterResponse = getFilterChain().processTokenOut(aSource, null, aToken);
+		FilterResponse lFilterResponse = getFilterChain().processTokenOut(aSource, null, aToken);
 
-		FastMap<String, Object> lFilter = new FastMap<String, Object>();
+		Map<String, Object> lFilter = new FastMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
 
 		// converting the token within the loop is removed in this method!
 		WebSocketPacket lPacket;
 		// lPackets maps protocols to appropriate converted packets:
-		FastMap<String, WebSocketPacket> lPackets = new FastMap<String, WebSocketPacket>();
+		Map<String, WebSocketPacket> lPackets = new FastMap<String, WebSocketPacket>();
 		String lSubProt;
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector) || aBroadcastOptions.isSenderIncluded()) {
-				lSubProt = lConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.SUB_PROT_DEFAULT);
+				lSubProt = lConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
 				lPacket = lPackets.get(lSubProt);
 				// if there is no packet for this protocol already, make one and
 				// store it in the map
@@ -568,18 +549,18 @@ public class TokenServer extends BaseServer {
 	}
 
 	/**
-	 * @return the plugInChain
+	 * @return the mPlugInChain
 	 */
 	@Override
 	public TokenPlugInChain getPlugInChain() {
-		return (TokenPlugInChain) plugInChain;
+		return (TokenPlugInChain) mPlugInChain;
 	}
 
 	/**
-	 * @return the filterChain
+	 * @return the mFilterChain
 	 */
 	@Override
 	public TokenFilterChain getFilterChain() {
-		return (TokenFilterChain) filterChain;
+		return (TokenFilterChain) mFilterChain;
 	}
 }

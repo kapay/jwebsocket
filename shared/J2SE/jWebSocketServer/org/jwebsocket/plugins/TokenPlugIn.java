@@ -32,159 +32,159 @@ import org.jwebsocket.token.Token;
  */
 public class TokenPlugIn extends BasePlugIn {
 
-  private String namespace = null;
+	private String mNamespace = null;
 
-  public TokenPlugIn() {
+	public TokenPlugIn() {
+	}
 
-  }
+	public TokenPlugIn(PluginConfiguration aConfiguration) {
+		super(aConfiguration);
+	}
 
-  public TokenPlugIn(PluginConfiguration configuration) {
-    super(configuration);
-  }
+	@Override
+	public void engineStarted(WebSocketEngine aEngine) {
+	}
 
-  @Override
-  public void engineStarted(WebSocketEngine aEngine) {
-  }
+	@Override
+	public void engineStopped(WebSocketEngine aEngine) {
+	}
 
-  @Override
-  public void engineStopped(WebSocketEngine aEngine) {
-  }
+	/**
+	 *
+	 * @param aConnector
+	 */
+	@Override
+	public void connectorStarted(WebSocketConnector aConnector) {
+	}
 
-  /**
-   * 
-   * @param aConnector
-   */
-  @Override
-  public void connectorStarted(WebSocketConnector aConnector) {
-  }
+	/**
+	 *
+	 * @param aResponse
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+	}
 
-  /**
-   * 
-   * @param aResponse
-   * @param aConnector
-   * @param aToken
-   */
-  public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-  }
+	@Override
+	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
+		//
+	}
 
-  @Override
-  public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
-    //
-  }
+	/**
+	 *
+	 * @param aConnector
+	 */
+	@Override
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
+	}
 
-  /**
-   * 
-   * @param aConnector
-   */
-  @Override
-  public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-  }
+	/**
+	 * @return the namespace
+	 */
+	public String getNamespace() {
+		return mNamespace;
+	}
 
-  /**
-   * @return the namespace
-   */
-  public String getNamespace() {
-    return namespace;
-  }
+	/**
+	 * @param aNamespace
+	 * the namespace to set
+	 */
+	public void setNamespace(String aNamespace) {
+		this.mNamespace = aNamespace;
+	}
 
-  /**
-   * @param namespace
-   *          the namespace to set
-   */
-  public void setNamespace(String namespace) {
-    this.namespace = namespace;
-  }
+	/**
+	 *
+	 * @return
+	 */
+	@Override
+	public TokenServer getServer() {
+		return (TokenServer) super.getServer();
+	}
 
-  /**
-   * 
-   * @return
-   */
-  @Override
-  public TokenServer getServer() {
-    return (TokenServer) super.getServer();
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>createResponse</tt> to simplify token plug-in code.
+	 *
+	 * @param aInToken
+	 * @return
+	 */
+	public Token createResponse(Token aInToken) {
+		TokenServer lServer = getServer();
+		if (lServer != null) {
+			return lServer.createResponse(aInToken);
+		} else {
+			return null;
+		}
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>createResponse</tt> to simplify token plug-in code.
-   * 
-   * @param aInToken
-   * @return
-   */
-  public Token createResponse(Token aInToken) {
-    TokenServer lServer = getServer();
-    if (lServer != null) {
-      return lServer.createResponse(aInToken);
-    } else {
-      return null;
-    }
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>createAccessDenied</tt> to simplify token plug-in code.
+	 *
+	 * @param aInToken
+	 * @return
+	 */
+	public Token createAccessDenied(Token aInToken) {
+		TokenServer lServer = getServer();
+		if (lServer != null) {
+			return lServer.createAccessDenied(aInToken);
+		} else {
+			return null;
+		}
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>createAccessDenied</tt> to simplify token plug-in code.
-   * 
-   * @param aInToken
-   * @return
-   */
-  public Token createAccessDenied(Token aInToken) {
-    TokenServer lServer = getServer();
-    if (lServer != null) {
-      return lServer.createAccessDenied(aInToken);
-    } else {
-      return null;
-    }
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>sendToken</tt> to simplify token plug-in code.
+	 *
+	 * @param aSource
+	 * @param aTarget
+	 * @param aToken
+	 */
+	public void sendToken(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+		TokenServer lServer = getServer();
+		if (lServer != null) {
+			lServer.sendToken(aSource, aTarget, aToken);
+		}
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>sendToken</tt> to simplify token plug-in code.
-   * 
-   * @param aSource
-   * @param aTarget
-   * @param aToken
-   */
-  public void sendToken(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
-    TokenServer lServer = getServer();
-    if (lServer != null) {
-      lServer.sendToken(aSource, aTarget, aToken);
-    }
-  }
-  /**
-   * Sends the the given token asynchronously and returns the future object to keep track of 
-   * the send operation
-   * @param aSource the source connector
-   * @param aTarget the target connector
-   * @param aToken the token object
-   * @return the I/O future object
-   */
-  public IOFuture sendTokenAsync(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
-    TokenServer lServer = getServer();
-    if (lServer != null) {
-      return lServer.sendTokenAsync(aSource, aTarget, aToken);
-    }
-    return null;
-  }
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>sendToken</tt> to simplify token plug-in code.
-   * 
-   * @param aSource
-   * @param aTarget
-   * @param aToken
-   */
-  public void broadcastToken(WebSocketConnector aSource, Token aToken) {
-    TokenServer lServer = getServer();
-    if (lServer != null) {
-      lServer.broadcastToken(aSource, aToken);
-    }
-  }
+	/**
+	 * Sends the the given token asynchronously and returns the future object to keep track of
+	 * the send operation
+	 * @param aSource the source connector
+	 * @param aTarget the target connector
+	 * @param aToken the token object
+	 * @return the I/O future object
+	 */
+	public IOFuture sendTokenAsync(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+		TokenServer lServer = getServer();
+		if (lServer != null) {
+			return lServer.sendTokenAsync(aSource, aTarget, aToken);
+		}
+		return null;
+	}
 
-  public void broadcastToken(WebSocketConnector aSource, Token aToken, BroadcastOptions aBroadcastOptions) {
-    TokenServer lServer = getServer();
-    if (lServer != null) {
-      lServer.broadcastToken(aSource, aToken, aBroadcastOptions);
-    }
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>sendToken</tt> to simplify token plug-in code.
+	 *
+	 * @param aSource
+	 * @param aTarget
+	 * @param aToken
+	 */
+	public void broadcastToken(WebSocketConnector aSource, Token aToken) {
+		TokenServer lServer = getServer();
+		if (lServer != null) {
+			lServer.broadcastToken(aSource, aToken);
+		}
+	}
 
+	public void broadcastToken(WebSocketConnector aSource, Token aToken, BroadcastOptions aBroadcastOptions) {
+		TokenServer lServer = getServer();
+		if (lServer != null) {
+			lServer.broadcastToken(aSource, aToken, aBroadcastOptions);
+		}
+	}
 }

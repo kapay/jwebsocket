@@ -47,10 +47,10 @@ public class BaseServer implements WebSocketServer {
 
     private Map<String, WebSocketEngine> mEngines = null;
     private String mId = null;
-    protected WebSocketPlugInChain plugInChain = null;
-    protected WebSocketFilterChain filterChain = null;
+    protected WebSocketPlugInChain mPlugInChain = null;
+    protected WebSocketFilterChain mFilterChain = null;
     private List<WebSocketServerListener> mListeners = new FastList<WebSocketServerListener>();
-    private ServerConfiguration configuration;
+    private ServerConfiguration mConfiguration;
 
     /**
      * Create a new instance of the Base Server. Each BaseServer maintains a
@@ -61,7 +61,7 @@ public class BaseServer implements WebSocketServer {
      *            Id for the new server.
      */
     public BaseServer(ServerConfiguration aServerConfig) {
-        this.configuration = aServerConfig;
+        this.mConfiguration = aServerConfig;
         mId = aServerConfig.getId();
         mEngines = new FastMap<String, WebSocketEngine>();
     }
@@ -426,12 +426,12 @@ public class BaseServer implements WebSocketServer {
 
     @Override
     public WebSocketPlugInChain getPlugInChain() {
-        return plugInChain;
+        return mPlugInChain;
     }
 
     @Override
     public WebSocketFilterChain getFilterChain() {
-        return filterChain;
+        return mFilterChain;
     }
 
     @Override
@@ -483,13 +483,13 @@ public class BaseServer implements WebSocketServer {
     }
 
     @Override
-    public void setServerConfiguration(ServerConfiguration theConfiguraion) {
-        this.configuration = theConfiguraion;
+    public void setServerConfiguration(ServerConfiguration aConfiguraion) {
+        this.mConfiguration = aConfiguraion;
     }
 
     @Override
     public ServerConfiguration getServerConfiguration() {
-        return configuration;
+        return mConfiguration;
     }
 
 }

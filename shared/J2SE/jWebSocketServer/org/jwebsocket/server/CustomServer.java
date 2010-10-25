@@ -46,7 +46,7 @@ public class CustomServer extends BaseServer {
 	 */
 	public CustomServer(ServerConfiguration aServerConfig) {
 		super(aServerConfig);
-		plugInChain = new BasePlugInChain(this);
+		mPlugInChain = new BasePlugInChain(this);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class CustomServer extends BaseServer {
 			// broadcastPacket(aDataPacket);
 			// ...or forward it to your custom specific plug-in chain
 			// PlugInResponse response = new PlugInResponse();
-			// plugInChain.processPacket(response, aConnector, aDataPacket);
+			// mPlugInChain.processPacket(response, aConnector, aDataPacket);
 
 			// forward the token to the listener chain
 			List<WebSocketServerListener> lListeners = getListeners();
@@ -86,7 +86,7 @@ public class CustomServer extends BaseServer {
 	 * @param aPlugIn
 	 */
 	public void removePlugIn(WebSocketPlugIn aPlugIn) {
-		plugInChain.removePlugIn(aPlugIn);
+		mPlugInChain.removePlugIn(aPlugIn);
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class CustomServer extends BaseServer {
 		if (log.isDebugEnabled()) {
 			log.debug("Processing engine started...");
 		}
-		plugInChain.engineStarted(aEngine);
+		mPlugInChain.engineStarted(aEngine);
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class CustomServer extends BaseServer {
 		if (log.isDebugEnabled()) {
 			log.debug("Processing engine stopped...");
 		}
-		plugInChain.engineStopped(aEngine);
+		mPlugInChain.engineStopped(aEngine);
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class CustomServer extends BaseServer {
 		}
 		// notify plugins that a connector has started,
 		// i.e. a client was sconnected.
-		plugInChain.connectorStarted(aConnector);
+		mPlugInChain.connectorStarted(aConnector);
 		super.connectorStarted(aConnector);
 	}
 
@@ -123,15 +123,15 @@ public class CustomServer extends BaseServer {
 		}
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
-		plugInChain.connectorStopped(aConnector, aCloseReason);
+		mPlugInChain.connectorStopped(aConnector, aCloseReason);
 		super.connectorStopped(aConnector, aCloseReason);
 	}
 
 	/**
-	 * @return the plugInChain
+	 * @return the mPlugInChain
 	 */
 	@Override
 	public BasePlugInChain getPlugInChain() {
-		return (BasePlugInChain) plugInChain;
+		return (BasePlugInChain) mPlugInChain;
 	}
 }

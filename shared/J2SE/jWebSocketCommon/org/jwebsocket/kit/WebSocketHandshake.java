@@ -75,7 +75,7 @@ public final class WebSocketHandshake {
 		byte[] lBA = null;
 		try {
 			lBA = lHandshake.getBytes("US-ASCII");
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 		}
 		return lBA;
 	}
@@ -84,8 +84,8 @@ public final class WebSocketHandshake {
 		StringBuilder lSB = new StringBuilder();
 		// StringBuuffer lSB = new StringBuuffer();
 		int lSpaces = 0;
-		for (int i = 0; i < aKey.length(); i++) {
-			char lC = aKey.charAt(i);
+		for (int lIdx = 0; lIdx < aKey.length(); lIdx++) {
+			char lC = aKey.charAt(lIdx);
 			if (lC == ' ') {
 				lSpaces++;
 			} else if (lC >= '0' && lC <= '9') {
@@ -98,7 +98,7 @@ public final class WebSocketHandshake {
 				lRes = Long.parseLong(lSB.toString()) / lSpaces;
 				// log.debug("Key: " + aKey + ", Numbers: " + lSB.toString() +
 				// ", Spaces: " + lSpaces + ", Result: " + lRes);
-			} catch (NumberFormatException ex) {
+			} catch (NumberFormatException lEx) {
 				// use default result
 			}
 		}
@@ -134,7 +134,7 @@ public final class WebSocketHandshake {
 		String lRequest = "";
 		try {
 			lRequest = new String(aReq, "US-ASCII");
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			// TODO: add exception handling
 		}
 
@@ -147,8 +147,8 @@ public final class WebSocketHandshake {
 
 		if (lIsSecure) {
 			lReqLen -= 8;
-			for (int i = 0; i < 8; i++) {
-				lSecKey3[i] = aReq[lReqLen + i];
+			for (int lIdx = 0; lIdx < 8; lIdx++) {
+				lSecKey3[lIdx] = aReq[lReqLen + lIdx];
 			}
 		}
 
@@ -237,15 +237,15 @@ public final class WebSocketHandshake {
 		if (lSecNum1 != null && lSecNum2 != null) {
 
 			// log.debug("Sec-WebSocket-Key3:" + new String(secKey3, "UTF-8"));
-			BigInteger sec1 = new BigInteger(lSecNum1.toString());
-			BigInteger sec2 = new BigInteger(lSecNum2.toString());
+			BigInteger lSec1 = new BigInteger(lSecNum1.toString());
+			BigInteger lSec2 = new BigInteger(lSecNum2.toString());
 
 			// concatenate 3 parts secNum1 + secNum2 + secKey (16 Bytes)
 			byte[] l128Bit = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			byte[] lTmp;
 			int lOfs;
 
-			lTmp = sec1.toByteArray();
+			lTmp = lSec1.toByteArray();
 			int lIdx = lTmp.length;
 			int lCnt = 0;
 			while (lIdx > 0 && lCnt < 4) {
@@ -254,7 +254,7 @@ public final class WebSocketHandshake {
 				l128Bit[4 - lCnt] = lTmp[lIdx];
 			}
 
-			lTmp = sec2.toByteArray();
+			lTmp = lSec2.toByteArray();
 			lIdx = lTmp.length;
 			lCnt = 0;
 			while (lIdx > 0 && lCnt < 4) {
@@ -268,9 +268,9 @@ public final class WebSocketHandshake {
 
 			// build md5 sum of this new 128 byte string
 			try {
-				MessageDigest md = MessageDigest.getInstance("MD5");
-				lSecKeyResp = md.digest(l128Bit);
-			} catch (Exception ex) {
+				MessageDigest lMD = MessageDigest.getInstance("MD5");
+				lSecKeyResp = lMD.digest(l128Bit);
+			} catch (Exception lEx) {
 				// log.error("getMD5: " + ex.getMessage());
 			}
 		}
@@ -305,7 +305,7 @@ public final class WebSocketHandshake {
 				lBA = ("<cross-domain-policy>"
 						+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
 						+ "</cross-domain-policy>\n").getBytes("US-ASCII");
-			} catch (UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException lEx) {
 				lBA = null;
 			}
 			return lBA;
@@ -323,9 +323,9 @@ public final class WebSocketHandshake {
 				"HTTP/1.1 101 Web" + (lIsSecure ? "" : " ")
 				+ "Socket Protocol Handshake\r\n"
 				+ "Upgrade: WebSocket\r\n"
-				+ "Connection: Upgrade\r\n" + (lIsSecure ? "Sec-" : "")
+				+ "Connection: Upgrade\r\n"
 				+ (lSubProt != null ? (lIsSecure ? "Sec-" : "") + "WebSocket-Protocol: " + lSubProt + "\r\n" : "")
-				+ "WebSocket-Origin: " + lOrigin + "\r\n" + (lIsSecure ? "Sec-" : "")
+				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Origin: " + lOrigin + "\r\n" + (lIsSecure ? "Sec-" : "")
 				+ "WebSocket-Location: " + lLocation + "\r\n" + "\r\n";
 
 		byte[] lBA;
@@ -341,7 +341,7 @@ public final class WebSocketHandshake {
 			} else {
 				return lBA;
 			}
-		} catch (UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException lEx) {
 			return null;
 		}
 
@@ -360,22 +360,22 @@ public final class WebSocketHandshake {
 		int lIdx = 0;
 		int lB1 = 0, lB2 = 0, lB3 = 0, lB4 = 0;
 		while (lContinue && lIdx < MAX_HEADER_SIZE) {
-			int b;
+			int lIn;
 			try {
-				b = aIS.read();
-				if (b < 0) {
+				lIn = aIS.read();
+				if (lIn < 0) {
 					return null;
 				}
-			} catch (IOException ex) {
+			} catch (IOException lIOEx) {
 				return null;
 			}
 			// build mini queue to check for \r\n\r\n sequence in handshake
 			lB1 = lB2;
 			lB2 = lB3;
 			lB3 = lB4;
-			lB4 = b;
+			lB4 = lIn;
 			lContinue = !(lB1 == 13 && lB2 == 10 && lB3 == 13 && lB4 == 10);
-			lBuff[lIdx] = (byte) b;
+			lBuff[lIdx] = (byte) lIn;
 			lIdx++;
 		}
 		byte[] lRes = new byte[lIdx];
@@ -396,162 +396,162 @@ public final class WebSocketHandshake {
 		String lResp = null;
 		try {
 			lResp = new String(aResp, "US-ASCII");
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			// TODO: add exception handling
 		}
 		return lRes;
 	}
 
 	public byte[] getHandshake() {
-		String path = mURL.getPath();
-		String host = mURL.getHost();
-		mOrigin = "http://" + host;
-		if ("".equals(path)) {
-			path = "/";
+		String lPath = mURL.getPath();
+		String lHost = mURL.getHost();
+		mOrigin = "http://" + lHost;
+		if ("".equals(lPath)) {
+			lPath = "/";
 		}
-		String handshake =
-				"GET " + path + " HTTP/1.1\r\n"
-				+ "Host: " + host + "\r\n"
+		String lHandshake =
+				"GET " + lPath + " HTTP/1.1\r\n"
+				+ "Host: " + lHost + "\r\n"
 				+ "Connection: Upgrade\r\n"
 				+ "Sec-WebSocket-Key2: " + mKey2 + "\r\n";
 
 		if (mProtocol != null) {
-			handshake += "Sec-WebSocket-Protocol: " + mProtocol + "\r\n";
+			lHandshake += "Sec-WebSocket-Protocol: " + mProtocol + "\r\n";
 		}
 
-		handshake +=
+		lHandshake +=
 				"Upgrade: WebSocket\r\n"
 				+ "Sec-WebSocket-Key1: " + mKey1 + "\r\n"
 				+ "Origin: " + mOrigin + "\r\n" + "\r\n";
 
-		byte[] handshakeBytes = new byte[handshake.getBytes().length + 8];
-		System.arraycopy(handshake.getBytes(), 0, handshakeBytes, 0, handshake.getBytes().length);
-		System.arraycopy(mKey3, 0, handshakeBytes, handshake.getBytes().length, 8);
+		byte[] lHandshakeBytes = new byte[lHandshake.getBytes().length + 8];
+		System.arraycopy(lHandshake.getBytes(), 0, lHandshakeBytes, 0, lHandshake.getBytes().length);
+		System.arraycopy(mKey3, 0, lHandshakeBytes, lHandshake.getBytes().length, 8);
 
-		return handshakeBytes;
+		return lHandshakeBytes;
 	}
 
-	public void verifyServerResponse(byte[] bytes) throws WebSocketException {
-		if (!Arrays.equals(bytes, mExpectedServerResponse)) {
+	public void verifyServerResponse(byte[] aBytes) throws WebSocketException {
+		if (!Arrays.equals(aBytes, mExpectedServerResponse)) {
 			throw new WebSocketException("not a WebSocket Server");
 		}
 	}
 
-	public void verifyServerStatusLine(String statusLine) throws WebSocketException {
-		int statusCode = Integer.valueOf(statusLine.substring(9, 12));
+	public void verifyServerStatusLine(String aStatusLine) throws WebSocketException {
+		int lStatusCode = Integer.valueOf(aStatusLine.substring(9, 12));
 
-		if (statusCode == 407) {
+		if (lStatusCode == 407) {
 			throw new WebSocketException("connection failed: proxy authentication not supported");
-		} else if (statusCode == 404) {
+		} else if (lStatusCode == 404) {
 			throw new WebSocketException("connection failed: 404 not found");
-		} else if (statusCode != 101) {
-			throw new WebSocketException("connection failed: unknown status code " + statusCode);
+		} else if (lStatusCode != 101) {
+			throw new WebSocketException("connection failed: unknown status code " + lStatusCode);
 		}
 	}
 
-	public void verifyServerHandshakeHeaders(Map<String, String> headers) throws WebSocketException {
-		if (!headers.get("Upgrade").equals("WebSocket")) {
+	public void verifyServerHandshakeHeaders(Map<String, String> aHeaders) throws WebSocketException {
+		if (!aHeaders.get("Upgrade").equals("WebSocket")) {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Upgrade");
-		} else if (!headers.get("Connection").equals("Upgrade")) {
+		} else if (!aHeaders.get("Connection").equals("Upgrade")) {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Connection");
-		} else if (!headers.get("Sec-WebSocket-Origin").equals(mOrigin)) {
+		} else if (!aHeaders.get("Sec-WebSocket-Origin").equals(mOrigin)) {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Sec-WebSocket-Origin");
 		}
 	}
 
 	private void generateKeys() {
 
-		int spaces1 = rand(1, 12);
-		int spaces2 = rand(1, 12);
+		int lSpaces1 = rand(1, 12);
+		int lSpaces2 = rand(1, 12);
 
-		int max1 = Integer.MAX_VALUE / spaces1;
-		int max2 = Integer.MAX_VALUE / spaces2;
+		int lMax1 = Integer.MAX_VALUE / lSpaces1;
+		int lMax2 = Integer.MAX_VALUE / lSpaces2;
 
-		int number1 = rand(0, max1);
-		int number2 = rand(0, max2);
+		int lNumber1 = rand(0, lMax1);
+		int lNumber2 = rand(0, lMax2);
 
-		int product1 = number1 * spaces1;
-		int product2 = number2 * spaces2;
+		int lProduct1 = lNumber1 * lSpaces1;
+		int lProduct2 = lNumber2 * lSpaces2;
 
-		mKey1 = Integer.toString(product1);
-		mKey2 = Integer.toString(product2);
+		mKey1 = Integer.toString(lProduct1);
+		mKey2 = Integer.toString(lProduct2);
 
 		mKey1 = insertRandomCharacters(mKey1);
 		mKey2 = insertRandomCharacters(mKey2);
 
-		mKey1 = insertSpaces(mKey1, spaces1);
-		mKey2 = insertSpaces(mKey2, spaces2);
+		mKey1 = insertSpaces(mKey1, lSpaces1);
+		mKey2 = insertSpaces(mKey2, lSpaces2);
 
 		mKey3 = createRandomBytes();
 
-		ByteBuffer buffer = ByteBuffer.allocate(4);
-		buffer.putInt(number1);
-		byte[] number1Array = buffer.array();
-		buffer = ByteBuffer.allocate(4);
-		buffer.putInt(number2);
-		byte[] number2Array = buffer.array();
+		ByteBuffer lBuffer = ByteBuffer.allocate(4);
+		lBuffer.putInt(lNumber1);
+		byte[] lNumber1Array = lBuffer.array();
+		lBuffer = ByteBuffer.allocate(4);
+		lBuffer.putInt(lNumber2);
+		byte[] lNumber2Array = lBuffer.array();
 
-		byte[] challenge = new byte[16];
-		System.arraycopy(number1Array, 0, challenge, 0, 4);
-		System.arraycopy(number2Array, 0, challenge, 4, 4);
-		System.arraycopy(mKey3, 0, challenge, 8, 8);
+		byte[] lChallenge = new byte[16];
+		System.arraycopy(lNumber1Array, 0, lChallenge, 0, 4);
+		System.arraycopy(lNumber2Array, 0, lChallenge, 4, 4);
+		System.arraycopy(mKey3, 0, lChallenge, 8, 8);
 
-		mExpectedServerResponse = md5(challenge);
+		mExpectedServerResponse = md5(lChallenge);
 	}
 
-	private String insertRandomCharacters(String key) {
-		int count = rand(1, 12);
+	private String insertRandomCharacters(String aKey) {
+		int lCount = rand(1, 12);
 
-		char[] randomChars = new char[count];
-		int randCount = 0;
-		while (randCount < count) {
-			int rand = (int) (Math.random() * 0x7e + 0x21);
-			if (((0x21 < rand) && (rand < 0x2f)) || ((0x3a < rand) && (rand < 0x7e))) {
-				randomChars[randCount] = (char) rand;
-				randCount += 1;
+		char[] lRandomChars = new char[lCount];
+		int lRandCount = 0;
+		while (lRandCount < lCount) {
+			int lRand = (int) (Math.random() * 0x7e + 0x21);
+			if (((0x21 < lRand) && (lRand < 0x2f)) || ((0x3a < lRand) && (lRand < 0x7e))) {
+				lRandomChars[lRandCount] = (char) lRand;
+				lRandCount += 1;
 			}
 		}
 
-		for (int i = 0; i < count; i++) {
-			int split = rand(0, key.length());
-			String part1 = key.substring(0, split);
-			String part2 = key.substring(split);
-			key = part1 + randomChars[i] + part2;
+		for (int lIdx = 0; lIdx < lCount; lIdx++) {
+			int lSplit = rand(0, aKey.length());
+			String lPart1 = aKey.substring(0, lSplit);
+			String lPart2 = aKey.substring(lSplit);
+			aKey = lPart1 + lRandomChars[lIdx] + lPart2;
 		}
 
-		return key;
+		return aKey;
 	}
 
-	private String insertSpaces(String key, int spaces) {
-		for (int i = 0; i < spaces; i++) {
-			int split = rand(0, key.length());
-			String part1 = key.substring(0, split);
-			String part2 = key.substring(split);
-			key = part1 + " " + part2;
+	private String insertSpaces(String aKey, int aSpaces) {
+		for (int lIdx = 0; lIdx < aSpaces; lIdx++) {
+			int lSplit = rand(0, aKey.length());
+			String lPart1 = aKey.substring(0, lSplit);
+			String lPart2 = aKey.substring(lSplit);
+			aKey = lPart1 + " " + lPart2;
 		}
-		return key;
+		return aKey;
 	}
 
 	private byte[] createRandomBytes() {
-		byte[] bytes = new byte[8];
+		byte[] lBytes = new byte[8];
 
-		for (int i = 0; i < 8; i++) {
-			bytes[i] = (byte) rand(0, 255);
+		for (int lIdx = 0; lIdx < 8; lIdx++) {
+			lBytes[lIdx] = (byte) rand(0, 255);
 		}
-		return bytes;
+		return lBytes;
 	}
 
-	private byte[] md5(byte[] bytes) {
+	private byte[] md5(byte[] aBytes) {
 		try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			return md.digest(bytes);
-		} catch (NoSuchAlgorithmException e) {
+			MessageDigest lMD = MessageDigest.getInstance("MD5");
+			return lMD.digest(aBytes);
+		} catch (NoSuchAlgorithmException lEx) {
 			return null;
 		}
 	}
 
-	private int rand(int min, int max) {
-		int rand = (int) (Math.random() * max + min);
-		return rand;
+	private int rand(int aMin, int aMax) {
+		int lRand = (int) (Math.random() * aMax + aMin);
+		return lRand;
 	}
 }
