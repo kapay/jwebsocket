@@ -117,16 +117,21 @@
   };
 
   WebSocket.prototype.close = function() {
-    if (!this.__flash) return;
-    this.readyState = this.__flash.getReadyState();
-    if (this.readyState != WebSocket.OPEN) return;
-    this.__flash.close();
+    var self = this;
+    if (!self.__flash) return;
+    self.readyState = self.__flash.getReadyState();
+    if (self.readyState == WebSocket.CLOSED || self.readyState == WebSocket.CLOSING) return;
+    self.__flash.close();
     // Sets/calls them manually here because Flash WebSocketConnection.close cannot fire events
     // which causes weird error:
     // > You are trying to call recursively into the Flash Player which is not allowed.
-    this.readyState = WebSocket.CLOSED;
-    if (this.__timer) clearInterval(this.__timer);
-    if (this.onclose) this.onclose();
+    self.readyState = WebSocket.CLOSED;
+    if (self.__timer) clearInterval(self.__timer);
+    if (self.onclose) {
+       // Make it asynchronous so that it looks more like an actual
+       // close event
+       setTimeout(self.onclose, 1);
+     }
   };
 
   /**
@@ -204,10 +209,10 @@
       try {
         if (this.onmessage) {
           var e;
-          if (window.MessageEvent) {
+          if (window.MessageEvent && !window.opera) {
             e = document.createEvent("MessageEvent");
             e.initMessageEvent("message", false, false, data, null, null, window, null);
-          } else { // IE
+          } else { // IE and Opera, the latter one truncates the data parameter after any 0x00 bytes
             e = {data: data};
           }
           this.onmessage(e);
@@ -304,18 +309,29 @@
     }
     var container = document.createElement("div");
     container.id = "webSocketContainer";
-    // Puts the Flash out of the window. Note that we cannot use display: none or visibility: hidden
-    // here because it prevents Flash from loading at least in IE.
+    // Hides Flash box. We cannot use display: none or visibility: hidden because it prevents
+    // Flash from loading at least in IE. So we move it out of the screen at (-100, -100).
+    // But this even doesn't work with Flash Lite (e.g. in Droid Incredible). So with Flash
+    // Lite, we put it at (0, 0). This shows 1x1 box visible at left-top corner but this is
+    // the best we can do as far as we know now.
     container.style.position = "absolute";
-    container.style.left = "-100px";
-    container.style.top = "-100px";
+    if (WebSocket.__isFlashLite()) {
+      container.style.left = "0px";
+      container.style.top = "0px";
+    } else {
+      container.style.left = "-100px";
+      container.style.top = "-100px";
+    }
     var holder = document.createElement("div");
     holder.id = "webSocketFlash";
     container.appendChild(holder);
     document.body.appendChild(container);
+    // See this article for hasPriority:
+    // http://help.adobe.com/en_US/as3/mobile/WS4bebcd66a74275c36cfb8137124318eebc6-7ffd.html
     swfobject.embedSWF(
-      WEB_SOCKET_SWF_LOCATION, "webSocketFlash", "8", "8", "9.0.0",
-      null, {bridgeName: "webSocket"}, null, null,
+      WEB_SOCKET_SWF_LOCATION, "webSocketFlash",
+      "1" /* width */, "1" /* height */, "9.0.0" /* SWF version */,
+      null, {bridgeName: "webSocket"}, {hasPriority: true, allowScriptAccess: "always"}, null,
       function(e) {
         if (!e.success) console.error("[WebSocket] swfobject.embedSWF failed");
       }
@@ -342,7 +358,14 @@
     } else {
       WebSocket.__tasks.push(task);
     }
-  }
+  };
+  
+  WebSocket.__isFlashLite = function() {
+    if (!window.navigator || !window.navigator.mimeTypes) return false;
+    var mimeType = window.navigator.mimeTypes["application/x-shockwave-flash"];
+    if (!mimeType || !mimeType.enabledPlugin || !mimeType.enabledPlugin.filename) return false;
+    return mimeType.enabledPlugin.filename.match(/flashlite/i) ? true : false;
+  };
 
   // called from Flash
   window.webSocketLog = function(message) {
