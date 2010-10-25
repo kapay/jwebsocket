@@ -19,6 +19,8 @@
 package org.jwebsocket.plugins.xmpp;
 
 import org.apache.log4j.Logger;
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketServerConstants;
@@ -31,6 +33,10 @@ import org.jwebsocket.token.Token;
 /**
  *
  * @author aschulze
+ *
+ * This Plug-In make heavy use of Smack API 3.1.0
+ * http://www.igniterealtime.org/projects/smack/
+ *
  */
 public class XMPPPlugIn extends TokenPlugIn {
 
@@ -98,12 +104,18 @@ public class XMPPPlugIn extends TokenPlugIn {
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
 		String lMsg;
+
+		String lUsername = aToken.getString("username");
+
 		try {
 			if (!mCheckAuth(lResponse)) {
 				mLog.error(lResponse.getString("msg"));
 			} else {
-				lMsg = "Hi!";
-				lResponse.setString("msg", lMsg);
+				// Create a connection to the xmpp server on a specific port.
+				ConnectionConfiguration config = new ConnectionConfiguration("jabber.org", 5222);
+				XMPPConnection conn2 = new XMPPConnection(config);
+				conn2.connect();
+				lResponse.setString("msg", "Successfully connect to XMPP server");
 				if (mLog.isInfoEnabled()) {
 					mLog.info(lMsg);
 				}

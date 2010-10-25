@@ -39,7 +39,7 @@ jws.XMPPPlugIn = {
 	},
 
 
-	xmppLogin: function( aCallbackURL, aOptions ) {
+	xmppLogin: function( aUsername, aPassword, aServer, aPort, aUseSSL, aOptions ) {
 		// check websocket connection status
 		var lRes = this.checkConnected();
 		// if connected to websocket network...
@@ -50,14 +50,19 @@ jws.XMPPPlugIn = {
 			// and to obtain OAuth verifier for user.
 			var lToken = {
 				ns: jws.XMPPPlugIn.NS,
-				type: "login"
+				type: "login",
+				username: aUsername,
+				password: aPassword,
+				server: aServer,
+				port: aPort,
+				useSSL: aUseSSL
 			};
 			this.sendToken( lToken,	aOptions );
 		}
 		return lRes;
 	},
 
-	xmppLogout: function( aUsername, aPassword, aOptions ) {
+	xmppLogout: function( aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			var lToken = {
@@ -73,9 +78,11 @@ jws.XMPPPlugIn = {
 		if( !aListeners ) {
 			aListeners = {};
 		}
+		/*
 		if( aListeners.onXMPPRequestToken !== undefined ) {
 			this.onXMPPRequestToken = aListeners.onXMPPRequestToken;
 		}
+		*/
 	}
 
 }

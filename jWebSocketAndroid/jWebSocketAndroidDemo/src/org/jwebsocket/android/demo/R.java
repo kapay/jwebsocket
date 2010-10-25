@@ -42,30 +42,36 @@ public final class R {
         public static final int cfgTxfURL=0x7f060005;
         public static final int cfgTxfUsername=0x7f060007;
         public static final int classLabel=0x7f060021;
-        public static final int classTxt=0x7f060022;
+        public static final int classTxt=0x7f060023;
         public static final int fundImgStatus=0x7f06000f;
         public static final int fundLblLogTitle=0x7f060016;
-        public static final int invokeBtn=0x7f060029;
+        public static final int invokeBtn=0x7f06002e;
         public static final int lblFundLog=0x7f060017;
         public static final int lblFundMessage=0x7f06000e;
         public static final int lblFundTarget=0x7f060011;
         public static final int lblUsername=0x7f06001b;
         public static final int lytFund=0x7f06000c;
         public static final int lytFundTitle=0x7f06000d;
-        public static final int methodLabel=0x7f060023;
-        public static final int methodTxt=0x7f060024;
-        public static final int mniCanvasClear=0x7f06002f;
-        public static final int mniCanvasConnect=0x7f06002c;
-        public static final int mniCanvasDisconnect=0x7f06002d;
-        public static final int mniCanvasExit=0x7f06002e;
-        public static final int parameterLabel=0x7f060027;
-        public static final int parameterTxt=0x7f060028;
-        public static final int resultLabel=0x7f06002a;
-        public static final int resultTxt=0x7f06002b;
-        public static final int rpc=0x7f060020;
+        public static final int methodLabel=0x7f060024;
+        public static final int methodTxt=0x7f060025;
+        public static final int mniCanvasClear=0x7f060034;
+        public static final int mniCanvasConnect=0x7f060031;
+        public static final int mniCanvasDisconnect=0x7f060032;
+        public static final int mniCanvasExit=0x7f060033;
+        public static final int parameterLabel=0x7f06002c;
+        public static final int parameterTxt=0x7f06002d;
+        public static final int radio_android=0x7f060029;
+        public static final int radio_browser=0x7f060028;
+        public static final int radio_group=0x7f060027;
+        public static final int resultLabel=0x7f06002f;
+        public static final int resultTxt=0x7f060030;
+        public static final int rpcLayout=0x7f060020;
+        public static final int rpcMenuExit=0x7f060035;
+        public static final int rrpcCheckBox=0x7f060026;
         public static final int sfvCamera=0x7f060002;
-        public static final int targetLabel=0x7f060025;
-        public static final int targetTxt=0x7f060026;
+        public static final int statusImage=0x7f060022;
+        public static final int targetLabel=0x7f06002a;
+        public static final int targetTxt=0x7f06002b;
         public static final int txfFundMessage=0x7f060010;
         public static final int txfFundTarget=0x7f060012;
         public static final int txfPassword=0x7f06001d;
@@ -84,6 +90,7 @@ public final class R {
     }
     public static final class menu {
         public static final int canvas_menu=0x7f050000;
+        public static final int rpc_demo_menu=0x7f050001;
     }
     public static final class string {
         public static final int app_name=0x7f040005;
