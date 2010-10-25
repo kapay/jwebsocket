@@ -103,7 +103,7 @@ public class XMPPPlugIn extends TokenPlugIn {
 
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
-		String lMsg;
+		String lMsg = "";
 
 		String lUsername = aToken.getString("username");
 
@@ -115,7 +115,8 @@ public class XMPPPlugIn extends TokenPlugIn {
 				ConnectionConfiguration config = new ConnectionConfiguration("jabber.org", 5222);
 				XMPPConnection conn2 = new XMPPConnection(config);
 				conn2.connect();
-				lResponse.setString("msg", "Successfully connect to XMPP server");
+				lMsg = "Successfully connect to XMPP server";
+				lResponse.setString("msg", lMsg );
 				if (mLog.isInfoEnabled()) {
 					mLog.info(lMsg);
 				}
