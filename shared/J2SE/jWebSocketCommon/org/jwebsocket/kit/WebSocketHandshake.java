@@ -513,7 +513,9 @@ public final class WebSocketHandshake {
 		}
 
 		for (int lIdx = 0; lIdx < lCount; lIdx++) {
-			int lSplit = rand(0, aKey.length());
+			// updated by Alex 2010-10-25 after Roderik's hint:
+			// int lSplit = rand(0, aKey.length());
+			int lSplit = rand(1, aKey.length() - 1);
 			String lPart1 = aKey.substring(0, lSplit);
 			String lPart2 = aKey.substring(lSplit);
 			aKey = lPart1 + lRandomChars[lIdx] + lPart2;
@@ -524,7 +526,9 @@ public final class WebSocketHandshake {
 
 	private String insertSpaces(String aKey, int aSpaces) {
 		for (int lIdx = 0; lIdx < aSpaces; lIdx++) {
-			int lSplit = rand(0, aKey.length());
+			// updated by Alex 2010-10-25 after Roderik's hint:
+			// int lSplit = rand(0, aKey.length());
+			int lSplit = rand(1, aKey.length() - 1);
 			String lPart1 = aKey.substring(0, lSplit);
 			String lPart2 = aKey.substring(lSplit);
 			aKey = lPart1 + " " + lPart2;

@@ -368,6 +368,12 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
             res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
             res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_LOCATION, getWebSocketLocation(req));
             String protocol = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
+			// Added by Alex 2010-10-25:
+			// fallback for FlashBridge (which sends "WebSocket-Protocol"
+			// instead of "Sec-WebSocket-Protocol"
+            if (protocol == null) {
+				protocol = req.getHeader("WebSocket-Protocol");
+			}
             if (protocol != null) {
                 res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL, protocol);
             }
