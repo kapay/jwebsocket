@@ -16,6 +16,7 @@ package org.jwebsocket.netty.engines;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -74,15 +75,15 @@ import org.jwebsocket.netty.http.HttpHeaders;
  */
 public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 
-    private static Logger log = Logging.getLogger(NettyEngineHandler.class);
+    private static final Logger mLog = Logging.getLogger(NettyEngineHandler.class);
 
-    private NettyEngine engine = null;
+    private NettyEngine mEngine = null;
 
-    private WebSocketConnector connector = null;
+    private WebSocketConnector mConnector = null;
 
-    private ChannelHandlerContext context = null;
+    private ChannelHandlerContext mContext = null;
 
-    private static final ChannelGroup channels = new DefaultChannelGroup();
+    private static final ChannelGroup mChannels = new DefaultChannelGroup();
 
     private static final String CONTENT_LENGTH = "Content-Length";
 
@@ -94,105 +95,105 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
     private static final String HOST = "host";
 
     public NettyEngineHandler(NettyEngine aEngine) {
-        this.engine = aEngine;
+        this.mEngine = aEngine;
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public void channelBound(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        this.context = ctx;
-        super.channelBound(ctx, e);
+    public void channelBound(ChannelHandlerContext aCtx, ChannelStateEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        super.channelBound(aCtx, aEvent);
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        this.context = ctx;
-        super.channelClosed(ctx, e);
+    public void channelClosed(ChannelHandlerContext aCtx, ChannelStateEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        super.channelClosed(aCtx, aEvent);
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        this.context = ctx;
-        super.channelConnected(ctx, e);
+    public void channelConnected(ChannelHandlerContext aCtx, ChannelStateEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        super.channelConnected(aCtx, aEvent);
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        if (log.isDebugEnabled()) {
-            log.debug("Channel is disconnected");
+    public void channelDisconnected(ChannelHandlerContext aCtx, ChannelStateEvent aEvent) throws Exception {
+        if (mLog.isDebugEnabled()) {
+            mLog.debug("Channel is disconnected");
         }
         // remove the channel
-        channels.remove(e.getChannel());
+        mChannels.remove(aEvent.getChannel());
 
-        this.context = ctx;
-        super.channelDisconnected(ctx, e);
-        engine.connectorStopped(connector, CloseReason.CLIENT);
+        this.mContext = aCtx;
+        super.channelDisconnected(aCtx, aEvent);
+        mEngine.connectorStopped(mConnector, CloseReason.CLIENT);
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public void channelInterestChanged(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        this.context = ctx;
-        super.channelInterestChanged(ctx, e);
+    public void channelInterestChanged(ChannelHandlerContext aCtx, ChannelStateEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        super.channelInterestChanged(aCtx, aEvent);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        this.context = ctx;
-        super.channelOpen(ctx, e);
+    public void channelOpen(ChannelHandlerContext aCtx, ChannelStateEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        super.channelOpen(aCtx, aEvent);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void channelUnbound(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        this.context = ctx;
-        super.channelUnbound(ctx, e);
+    public void channelUnbound(ChannelHandlerContext aCtx, ChannelStateEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        super.channelUnbound(aCtx, aEvent);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void childChannelClosed(ChannelHandlerContext ctx, ChildChannelStateEvent e) throws Exception {
-        this.context = ctx;
-        super.childChannelClosed(ctx, e);
+    public void childChannelClosed(ChannelHandlerContext aCtx, ChildChannelStateEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        super.childChannelClosed(aCtx, aEvent);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void childChannelOpen(ChannelHandlerContext ctx, ChildChannelStateEvent e) throws Exception {
-        this.context = ctx;
-        super.childChannelOpen(ctx, e);
+    public void childChannelOpen(ChannelHandlerContext aCtx, ChildChannelStateEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        super.childChannelOpen(aCtx, aEvent);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        this.context = ctx;
-        if (log.isDebugEnabled()) {
-            log.debug("Channel is disconnected:" + e.getCause().getLocalizedMessage());
+    public void exceptionCaught(ChannelHandlerContext aCtx, ExceptionEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        if (mLog.isDebugEnabled()) {
+            mLog.debug("Channel is disconnected:" + aEvent.getCause().getLocalizedMessage());
         }
     }
 
@@ -200,58 +201,58 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      * {@inheritDoc}
      */
     @Override
-    public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent arg1) throws Exception {
-        this.context = ctx;
-        super.handleUpstream(ctx, arg1);
+    public void handleUpstream(ChannelHandlerContext aCtx, ChannelEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        super.handleUpstream(aCtx, aEvent);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-        this.context = ctx;
-        if (log.isDebugEnabled()) {
-            log.debug("message received in the engine handler");
+    public void messageReceived(ChannelHandlerContext aCtx, MessageEvent aEvent) throws Exception {
+        this.mContext = aCtx;
+        if (mLog.isDebugEnabled()) {
+            mLog.debug("message received in the engine handler");
         }
-        Object msg = e.getMessage();
-        if (msg instanceof HttpRequest) {
-            handleHttpRequest(ctx, (HttpRequest) msg);
-        } else if (msg instanceof WebSocketFrame) {
-            handleWebSocketFrame(ctx, (WebSocketFrame) msg);
+        Object lMsg = aEvent.getMessage();
+        if (lMsg instanceof HttpRequest) {
+            handleHttpRequest(aCtx, (HttpRequest) lMsg);
+        } else if (lMsg instanceof WebSocketFrame) {
+            handleWebSocketFrame(aCtx, (WebSocketFrame) lMsg);
         }
     }
 
     /**
      * private method that sends the handshake response for WebSocket connection
      * 
-     * @param ctx the channel context
-     * @param req http request object
-     * @param res http response object
+     * @param aCtx the channel context
+     * @param aReq http request object
+     * @param aResp http response object
      */
-    private void sendHttpResponse(ChannelHandlerContext ctx, HttpRequest req, HttpResponse res) {
+    private void sendHttpResponse(ChannelHandlerContext aCtx, HttpRequest aReq, HttpResponse aResp) {
         // Generate an error page if response status code is not OK (200).
-        if (res.getStatus().getCode() != 200) {
-            res.setContent(ChannelBuffers.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8));
-            setContentLength(res, res.getContent().readableBytes());
+        if (aResp.getStatus().getCode() != 200) {
+            aResp.setContent(ChannelBuffers.copiedBuffer(aResp.getStatus().toString(), CharsetUtil.UTF_8));
+            setContentLength(aResp, aResp.getContent().readableBytes());
         }
         // Send the response and close the connection if necessary.
-        ChannelFuture f = ctx.getChannel().write(res);
-        if (!isKeepAlive(req) || res.getStatus().getCode() != 200) {
-            f.addListener(ChannelFutureListener.CLOSE);
+        ChannelFuture lCF = aCtx.getChannel().write(aResp);
+        if (!isKeepAlive(aReq) || aResp.getStatus().getCode() != 200) {
+            lCF.addListener(ChannelFutureListener.CLOSE);
         }
     }
 
     /**
      * Check if the request header has Keep-Alive
      * 
-     * @param req the http request object
+     * @param aReq the http request object
      * @return {@code true} if keep-alive is set in the header {@code false}
      *         otherwise
      */
-    private boolean isKeepAlive(HttpRequest req) {
-        String keepAlive = req.getHeader(HttpHeaders.Values.KEEP_ALIVE);
-        if (keepAlive != null && keepAlive.length() > 0) {
+    private boolean isKeepAlive(HttpRequest aReq) {
+        String lKeepAlive = aReq.getHeader(HttpHeaders.Values.KEEP_ALIVE);
+        if (lKeepAlive != null && lKeepAlive.length() > 0) {
             return true;
         } else {
             return false;
@@ -262,29 +263,29 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      * Set the content length in the response
      * 
      * @param res the http response object
-     * @param readableBytes the length of the bytes
+     * @param aReadableBytes the length of the bytes
      */
-    private void setContentLength(HttpResponse res, int readableBytes) {
-        res.setHeader(CONTENT_LENGTH, readableBytes);
+    private void setContentLength(HttpResponse aResp, int aReadableBytes) {
+        aResp.setHeader(CONTENT_LENGTH, aReadableBytes);
     }
 
     /**
      * private method that handles the web socket frame data, this method is
      * used only after the WebSocket connection is established.
      * 
-     * @param ctx the channel handler context
-     * @param msg the web socket frame data
+     * @param aCtx the channel handler context
+     * @param aMsg the web socket frame data
      */
-    private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame msg) throws WebSocketRuntimeException {
-        String textData = "";
-        if (msg.isBinary()) {
+    private void handleWebSocketFrame(ChannelHandlerContext aCtx, WebSocketFrame aMsg) throws WebSocketRuntimeException {
+        String lTextData = "";
+        if (aMsg.isBinary()) {
             // TODO: handle binary data
-        } else if (msg.isText()) {
-            textData = msg.getTextData();
+        } else if (aMsg.isText()) {
+            lTextData = aMsg.getTextData();
         } else {
             throw new WebSocketRuntimeException("Frame Doesn't contain any type of data");
         }
-        engine.processPacket(connector, new RawPacket(textData));
+        mEngine.processPacket(mConnector, new RawPacket(lTextData));
     }
 
     /**
@@ -292,114 +293,115 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      * contains Upgrade header value as WebSocket then this method sends the
      * handshake response and also fires the events on client connector.
      * 
-     * @param ctx the channel handler context
+     * @param aCtx the channel handler context
      * @param req  the request message
      */
-    private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest req) {
+    private void handleHttpRequest(ChannelHandlerContext aCtx, HttpRequest aReq) {
         // Allow only GET methods.
-        if (req.getMethod() != HttpMethod.GET) {
-            sendHttpResponse(ctx, req, new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN));
+        if (aReq.getMethod() != HttpMethod.GET) {
+            sendHttpResponse(aCtx, aReq, new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN));
             return;
         }
         // Serve the WebSocket handshake request.
-        if (HttpHeaders.Values.UPGRADE.equalsIgnoreCase(req.getHeader(HttpHeaders.Names.CONNECTION)) && 
-                HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(req.getHeader(HttpHeaders.Names.UPGRADE))) {
+        if (HttpHeaders.Values.UPGRADE.equalsIgnoreCase(aReq.getHeader(HttpHeaders.Names.CONNECTION)) &&
+                HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(aReq.getHeader(HttpHeaders.Names.UPGRADE))) {
             // Create the WebSocket handshake response.
-            HttpResponse response = null;
+            HttpResponse lResp = null;
             try {
-                response = constructHandShakeResponse(req, ctx);
-            } catch (NoSuchAlgorithmException e) {
+                lResp = constructHandShakeResponse(aReq, aCtx);
+            } catch (NoSuchAlgorithmException lNSAEx) {
                 // better to close the channel
-                log.debug("Channel is disconnected");
-                ctx.getChannel().close();
+                mLog.debug("Channel is disconnected");
+                aCtx.getChannel().close();
             }
 
             // write the response
-            ctx.getChannel().write(response);
+            aCtx.getChannel().write(lResp);
 
-            channels.add(ctx.getChannel());
+            mChannels.add(aCtx.getChannel());
 
             // since handshaking is done, replace the encoder/decoder with
             // web socket data frame encoder/decoder
-            ChannelPipeline p = ctx.getChannel().getPipeline();
-            p.remove("aggregator");
-            EngineConfiguration config = engine.getConfiguration();
-            if (config == null || config.getMaxFramesize() == 0) {
-                p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE));
+            ChannelPipeline lPipeline = aCtx.getChannel().getPipeline();
+            lPipeline.remove("aggregator");
+            EngineConfiguration lConfig = mEngine.getConfiguration();
+            if (lConfig == null || lConfig.getMaxFramesize() == 0) {
+                lPipeline.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE));
             } else {
-                p.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(config.getMaxFramesize()));
+                lPipeline.replace("decoder", "jwsdecoder", new WebSocketFrameDecoder(lConfig.getMaxFramesize()));
             }
-            p.replace("encoder", "jwsencoder", new WebSocketFrameEncoder());
+            lPipeline.replace("encoder", "jwsencoder", new WebSocketFrameEncoder());
             
             //if the WebSocket connection URI is wss then start SSL TLS handshaking
-            if (req.getUri().startsWith("wss:")) {
+            if (aReq.getUri().startsWith("wss:")) {
                 // Get the SslHandler in the current pipeline.
-                final SslHandler sslHandler = ctx.getPipeline().get(SslHandler.class);
+                final SslHandler sslHandler = aCtx.getPipeline().get(SslHandler.class);
                 // Get notified when SSL handshake is done.
-                ChannelFuture handshakeFuture = sslHandler.handshake();
-                handshakeFuture.addListener(new SecureWebSocketConnectionListener(sslHandler));
+                ChannelFuture lHandshakeFuture = sslHandler.handshake();
+                lHandshakeFuture.addListener(new SecureWebSocketConnectionListener(sslHandler));
             }
             // initialize the connector
-            connector = initializeConnector(ctx, req);
+            mConnector = initializeConnector(aCtx, aReq);
 
             return;
         }
 
         // Send an error page otherwise.
-        sendHttpResponse(ctx, req, new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN));
+        sendHttpResponse(aCtx, aReq, new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN));
     }
 
     /**
      * Constructs the <tt>HttpResponse</tt> object for the handshake response
      * 
-     * @param req the http request object
-     * @param ctx the channel handler context
+     * @param aReq the http request object
+     * @param aCtx the channel handler context
      * @return the http handshake response
      * @throws NoSuchAlgorithmException
      */
-    private HttpResponse constructHandShakeResponse(HttpRequest req, ChannelHandlerContext ctx) throws NoSuchAlgorithmException {
-        HttpResponse res = new DefaultHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(101, "Web Socket Protocol Handshake"));
-        res.addHeader(HttpHeaders.Names.UPGRADE, HttpHeaders.Values.WEBSOCKET);
-        res.addHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.UPGRADE);
+    private HttpResponse constructHandShakeResponse(HttpRequest aReq, ChannelHandlerContext aCtx) throws NoSuchAlgorithmException {
+        HttpResponse lResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(101, "Web Socket Protocol Handshake"));
+        lResp.addHeader(HttpHeaders.Names.UPGRADE, HttpHeaders.Values.WEBSOCKET);
+        lResp.addHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.UPGRADE);
 
         // Fill in the headers and contents depending on handshake method.
-        if (req.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY1) && req.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY2)) {
+        if (aReq.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY1) && aReq.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY2)) {
             // New handshake method with a challenge:
-            res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
-            res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_LOCATION, getWebSocketLocation(req));
-            String protocol = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
+            lResp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_ORIGIN, aReq.getHeader(HttpHeaders.Names.ORIGIN));
+            lResp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_LOCATION, getWebSocketLocation(aReq));
+            String lProtocol = aReq.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
 			// Added by Alex 2010-10-25:
 			// fallback for FlashBridge (which sends "WebSocket-Protocol"
 			// instead of "Sec-WebSocket-Protocol"
-            if (protocol == null) {
-				protocol = req.getHeader("WebSocket-Protocol");
+            if (lProtocol != null) {
+                lResp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL, lProtocol);
+            } else {
+				lProtocol = aReq.getHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL);
+				if (lProtocol != null) {
+					lResp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL, lProtocol);
+				}
 			}
-            if (protocol != null) {
-                res.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL, protocol);
-            }
-
             // Calculate the answer of the challenge.
-            String key1 = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY1);
-            String key2 = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY2);
-            int a = (int) (Long.parseLong(key1.replaceAll("[^0-9]", "")) / key1.replaceAll("[^ ]", "").length());
-            int b = (int) (Long.parseLong(key2.replaceAll("[^0-9]", "")) / key2.replaceAll("[^ ]", "").length());
-            long c = req.getContent().readLong();
-            ChannelBuffer input = ChannelBuffers.buffer(16);
-            input.writeInt(a);
-            input.writeInt(b);
-            input.writeLong(c);
-            ChannelBuffer output = ChannelBuffers.wrappedBuffer(MessageDigest.getInstance("MD5").digest(input.array()));
-            res.setContent(output);
+            String lKey1 = aReq.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY1);
+            String lKey2 = aReq.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY2);
+            int lA = (int) (Long.parseLong(lKey1.replaceAll("[^0-9]", "")) / lKey1.replaceAll("[^ ]", "").length());
+            int lB = (int) (Long.parseLong(lKey2.replaceAll("[^0-9]", "")) / lKey2.replaceAll("[^ ]", "").length());
+            long lC = aReq.getContent().readLong();
+            ChannelBuffer lInput = ChannelBuffers.buffer(16);
+            lInput.writeInt(lA);
+            lInput.writeInt(lB);
+            lInput.writeLong(lC);
+            ChannelBuffer lOutput = ChannelBuffers.wrappedBuffer(MessageDigest.getInstance("MD5").digest(lInput.array()));
+            lResp.setContent(lOutput);
         } else {
             // Old handshake method with no challenge:
-            res.addHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
-            res.addHeader(HttpHeaders.Names.WEBSOCKET_LOCATION, getWebSocketLocation(req));
-            String protocol = req.getHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL);
-            if (protocol != null) {
-                res.addHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL, protocol);
+            lResp.addHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN, aReq.getHeader(HttpHeaders.Names.ORIGIN));
+            lResp.addHeader(HttpHeaders.Names.WEBSOCKET_LOCATION, getWebSocketLocation(aReq));
+            String lProtocol = aReq.getHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL);
+            if (lProtocol != null) {
+                lResp.addHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL, lProtocol);
             }
         }
-        return res;
+        return lResp;
 
     }
 
@@ -407,88 +409,88 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      * Initialize the {@code NettyConnector} after initial handshaking is
      * successfull.
      * 
-     * @param ctx the channel handler context
+     * @param aCtx the channel handler context
      * @param req the http request object
      */
-    private WebSocketConnector initializeConnector(ChannelHandlerContext ctx, HttpRequest req) {
+    private WebSocketConnector initializeConnector(ChannelHandlerContext aCtx, HttpRequest aReq) {
 
-        RequestHeader header = getRequestHeader(req);
-        int lSessionTimeout = header.getTimeout(JWebSocketCommonConstants.DEFAULT_TIMEOUT);
+        RequestHeader lHeader = getRequestHeader(aReq);
+        int lSessionTimeout = lHeader.getTimeout(JWebSocketCommonConstants.DEFAULT_TIMEOUT);
         if (lSessionTimeout > 0) {
-            ctx.getChannel().getConfig().setConnectTimeoutMillis(lSessionTimeout);
+            aCtx.getChannel().getConfig().setConnectTimeoutMillis(lSessionTimeout);
         }
         // create connector
-        WebSocketConnector theConnector = new NettyConnector(engine, this);
-        theConnector.setHeader(header);
+        WebSocketConnector lConnector = new NettyConnector(mEngine, this);
+        lConnector.setHeader(lHeader);
 
-        engine.getConnectors().put(theConnector.getId(), theConnector);
-        theConnector.startConnector();
+        mEngine.getConnectors().put(lConnector.getId(), lConnector);
+        lConnector.startConnector();
         // allow descendant classes to handle connector started event
-        engine.connectorStarted(theConnector);
-        return theConnector;
+        mEngine.connectorStarted(lConnector);
+        return lConnector;
 
     }
 
     /**
      * Construct the request header to save it in the connector
      * 
-     * @param req the http request header
+     * @param aReq the http request header
      * @return the request header
      */
-    private RequestHeader getRequestHeader(HttpRequest req) {
-        RequestHeader header = new RequestHeader();
-        FastMap<String, String> args = new FastMap<String, String>();
-        String searchString = "";
-        String path = req.getUri();
+    private RequestHeader getRequestHeader(HttpRequest aReq) {
+        RequestHeader lHeader = new RequestHeader();
+        Map<String, String> lArgs = new FastMap<String, String>();
+        String lSearchString = "";
+        String lPath = aReq.getUri();
 
         // isolate search string
-        int pos = path.indexOf(JWebSocketCommonConstants.PATHARG_SEPARATOR);
-        if (pos >= 0) {
-            searchString = path.substring(pos + 1);
-            if (searchString.length() > 0) {
-                String[] lArgs = searchString.split(JWebSocketCommonConstants.ARGARG_SEPARATOR);
-                for (int i = 0; i < lArgs.length; i++) {
-                    String[] lKeyValuePair = lArgs[i].split(JWebSocketCommonConstants.KEYVAL_SEPARATOR, 2);
-                    if (lKeyValuePair.length == 2) {
-                        args.put(lKeyValuePair[0], lKeyValuePair[1]);
-                        if (log.isDebugEnabled()) {
-                            log.debug("arg" + i + ": " + lKeyValuePair[0] + "=" + lKeyValuePair[1]);
+        int lPos = lPath.indexOf(JWebSocketCommonConstants.PATHARG_SEPARATOR);
+        if (lPos >= 0) {
+            lSearchString = lPath.substring(lPos + 1);
+            if (lSearchString.length() > 0) {
+                String[] lKeyValPairs = lSearchString.split(JWebSocketCommonConstants.ARGARG_SEPARATOR);
+                for (int lIdx = 0; lIdx < lKeyValPairs.length; lIdx++) {
+                    String[] lKeyVal = lKeyValPairs[lIdx].split(JWebSocketCommonConstants.KEYVAL_SEPARATOR, 2);
+                    if (lKeyVal.length == 2) {
+                        lArgs.put(lKeyVal[0], lKeyVal[1]);
+                        if (mLog.isDebugEnabled()) {
+                            mLog.debug("arg" + lIdx + ": " + lKeyVal[0] + "=" + lKeyVal[1]);
                         }
                     }
                 }
             }
         }
         // set default sub protocol if none passed
-        if (args.get("prot") == null) {
-            args.put("prot", JWebSocketCommonConstants.SUB_PROT_DEFAULT);
+        if (lArgs.get("prot") == null) {
+            lArgs.put("prot", JWebSocketCommonConstants.SUB_PROT_DEFAULT);
         }
-        header.put(ARGS, args);
-        header.put(ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
-        header.put(LOCATION, getWebSocketLocation(req));
-        header.put(PATH, req.getUri());
+        lHeader.put(ARGS, lArgs);
+        lHeader.put(ORIGIN, aReq.getHeader(HttpHeaders.Names.ORIGIN));
+        lHeader.put(LOCATION, getWebSocketLocation(aReq));
+        lHeader.put(PATH, aReq.getUri());
 
-        header.put(SEARCH_STRING, searchString);
-        header.put(HOST, req.getHeader(HttpHeaders.Names.HOST));
-        return header;
+        lHeader.put(SEARCH_STRING, lSearchString);
+        lHeader.put(HOST, aReq.getHeader(HttpHeaders.Names.HOST));
+        return lHeader;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void writeComplete(ChannelHandlerContext ctx, WriteCompletionEvent e) throws Exception {
-        super.writeComplete(ctx, e);
+    public void writeComplete(ChannelHandlerContext aCtx, WriteCompletionEvent aEvent) throws Exception {
+        super.writeComplete(aCtx, aEvent);
     }
 
     /**
      * Returns the web socket location URL
      * 
-     * @param req the http request object
+     * @param aReq the http request object
      * @return the location url string
      */
-    private String getWebSocketLocation(HttpRequest req) {
+    private String getWebSocketLocation(HttpRequest aReq) {
         //TODO: fix this URL for wss: (secure)
-        String location = "ws://" + req.getHeader(HttpHeaders.Names.HOST) + req.getUri();
+        String location = "ws://" + aReq.getHeader(HttpHeaders.Names.HOST) + aReq.getUri();
         return location;
     }
 
@@ -498,7 +500,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      * @return the channel context
      */
     public ChannelHandlerContext getChannelHandlerContext() {
-        return context;
+        return mContext;
     }
 
     /**
@@ -506,17 +508,18 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
      */
     private static final class SecureWebSocketConnectionListener implements ChannelFutureListener {
 
-        private final SslHandler sslHandler;
+        private final SslHandler mSSLHandler;
 
-        SecureWebSocketConnectionListener(SslHandler sslHandler) {
-            this.sslHandler = sslHandler;
+        SecureWebSocketConnectionListener(SslHandler aSSLHandler) {
+            this.mSSLHandler = aSSLHandler;
         }
 
-        public void operationComplete(ChannelFuture future) throws Exception {
-            if (future.isSuccess()) {
+		@Override
+        public void operationComplete(ChannelFuture aFuture) throws Exception {
+            if (aFuture.isSuccess()) {
                 // that means SSL handshaking is done.
             } else {
-                future.getChannel().close();
+                aFuture.getChannel().close();
             }
         }
     }
