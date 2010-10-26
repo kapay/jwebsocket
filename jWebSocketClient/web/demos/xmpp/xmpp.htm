@@ -32,6 +32,15 @@
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
+			var eXMPPUsername = null;
+			var eXMPPPassword = null;
+			var eXMPPHost = null;
+			var eXMPPPort = null;
+			var eXMPPDomain = null;
+			var eXMPPStatus = null;
+			var eXMPPMessage = null;
+			var eJWSUsername = null;
+			var eJWSPassword = null;
 
 			function log( aString ) {
 				eLog.innerHTML +=
@@ -52,9 +61,9 @@
 			function logon() {
 				// URL is ws://[yourhostname|localhost]:8787
 				var lURL = jws.JWS_SERVER_URL;
-				gUsername = eUsername.value;
-				var lPassword = ePassword.value;
-				ePassword.value = "";
+				gUsername = eJWSUsername.value;
+				var lPassword = eJWSPassword.value;
+				eJWSPassword.value = "";
 
 				log( "Connecting to " + lURL + " and logging in as '" + gUsername + "'..." );
 				var lRes = jWebSocketClient.logon( lURL, gUsername, lPassword, {
@@ -89,17 +98,30 @@
 				}
 			}
 
+			function xmppConnect() {
+				jWebSocketClient.xmppConnect(
+					eXMPPHost.value, parseInt( eXMPPPort.value ), eXMPPDomain.value, false
+				);
+			}
+
+			function xmppDisconnect() {
+				jWebSocketClient.xmppDisconnect();
+			}
+
 			function xmppLogin() {
-				jWebSocketClient.xmppLogin();
+				jWebSocketClient.xmppLogin( eXMPPUsername.value, eXMPPPassword.value );
 			}
 
 			function xmppLogout() {
 				jWebSocketClient.xmppLogout();
-				var lLink = jws.$("twLink");
-				lLink.href = null;
-				// lLink.target="twAuthTab";
-				lLink.onclick = xmppLogin;
+			}
 
+			function xmppRoster() {
+				jWebSocketClient.xmppRoster();
+			}
+
+			function xmppSetStatus() {
+				jWebSocketClient.xmppSetStatus(eXMPPStatus.value);
 			}
 
 			function post() {
@@ -117,12 +139,14 @@
 
 				eXMPPUsername	= jws.$( "stxfXMPPUsername" );
 				eXMPPPassword	= jws.$( "stxfXMPPPassword" );
-				eXMPPServer		= jws.$( "stxfXMPPServer" );
+				eXMPPHost		= jws.$( "stxfXMPPHost" );
 				eXMPPPort		= jws.$( "stxfXMPPPort" );
+				eXMPPDomain		= jws.$( "stxfXMPPDomain" );
+				eXMPPStatus		= jws.$( "stxfXMPPStatus" );
 				eXMPPMessage	= jws.$( "stxfXMPPMessage" );
 
-				eUsername		= jws.$( "stxfUsername" );
-				ePassword		= jws.$( "spwfPassword" );
+				eJWSUsername	= jws.$( "stxfUsername" );
+				eJWSPassword	= jws.$( "spwfPassword" );
 
 				// jws.browserSupportsWebSockets checks web if sockets are available
 				// either natively, by the Flash Bridge or by the Chrome Frame.
@@ -131,7 +155,7 @@
 					jWebSocketClient.setXMPPCallbacks({
 						// onXMPPRequestToken: onXMPPRequestToken
 					});
-					eUsername.focus();
+					eJWSUsername.focus();
 				} else {
 					jws.$( "sbtnLogon" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnLogoff" ).setAttribute( "disabled", "disabled" );
@@ -139,8 +163,10 @@
 
 					jws.$( "stxfXMPPUsername" ).setAttribute( "disabled", "disabled" );
 					jws.$( "stxfXMPPPassword" ).setAttribute( "disabled", "disabled" );
-					jws.$( "stxfXMPPServer" ).setAttribute( "disabled", "disabled" );
+					jws.$( "stxfXMPPHost" ).setAttribute( "disabled", "disabled" );
 					jws.$( "stxfXMPPPort" ).setAttribute( "disabled", "disabled" );
+					jws.$( "stxfXMPPDomain" ).setAttribute( "disabled", "disabled" );
+					jws.$( "stxfXMPPStatus" ).setAttribute( "disabled", "disabled" );
 					jws.$( "stxfXMPPMessage" ).setAttribute( "disabled", "disabled" );
 
 					jws.$( "stxfUsername" ).setAttribute( "disabled", "disabled" );
@@ -184,34 +210,39 @@ Testing our new #jWebSocket XMPP-Plugin, tweet via #WebSockets! http://jwebsocke
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Username</td>
 					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="YourUsername" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLoginXMPP" type="button" value="XMPP Login" onclick="xmppLogin();"></td>
-					<td class="stdDlg" width=""><a class="sancDlg" id="twLink" onclick="xmppLogin();">XMPP Login</a></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnGetUser" type="button" value="Get User" onclick="getUserData();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnectXMPP" type="button" value="X/Connect" onclick="xmppConnect();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLoginXMPP" type="button" value="X/Login" onclick="xmppLogin();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRoster" type="button" value="Roster" onclick="xmppRoster();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Password</td>
 					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetTimeline" type="button" value="getTimeline" onclick="getTimeline();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnTweet" type="button" value="tweet" onclick="tweet();"></td>
-					<td class="stdDlg" width=""><a class="sancDlg" id="twLink" onclick="xmppLogout();">XMPP Logout</a></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnXXX" type="button" value="-" onclick=""></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnectXMPP" type="button" value="X/Disconnect" onclick="xmppDisconnect();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoutXMPP" type="button" value="X/Logout" onclick="xmppLogout();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSetStatus" type="button" value="Set Status" onclick="xmppSetStatus();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPUsername" type="text" value="jwebsocket" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPUsername" type="text" value="google-id" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Server</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPServer" type="text" value="talk.google.com" style="width:150px"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPHost" type="text" value="talk.google.com" style="width:150px"></td>
+					<td class="stdDlg" width="5">XMPP&nbsp;Domain</td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPDomain" type="text" value="googlemail.com" style="width:150px"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Password</td>
 					<td class="stdDlg" width="5"><input class="spwfDlg" id="stxfXMPPPassword" type="password" value="" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Port</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPPort" type="text" value="5222" style="width:150px"></td>
+					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfXMPPPort" type="text" value="5222" style="width:150px"></td>
+					<td class="stdDlg" width="5">XMPP&nbsp;Status</td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPStatus" type="text" value="YourStatus..." style="width:150px"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Message</td>
-					<td class="stdDlg" width="" colspan="5"><input class="stxfDlg" id="stxfXMPPMessage" type="text" value="Message-Body..." style="width:99%"></td>
+					<td class="stdDlg" width="" colspan="6"><input class="stxfDlg" id="stxfXMPPMessage" type="text" value="Message-Body..." style="width:99%"></td>
 				</tr>
 			</table>
 		</div>

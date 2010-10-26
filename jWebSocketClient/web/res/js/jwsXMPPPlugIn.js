@@ -25,6 +25,8 @@ jws.XMPPPlugIn = {
 	// if namespace is changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.xmpp",
 
+	AVAILABLE: "",
+
 	processToken: function( aToken ) {
 		// check if namespace matches
 		if( aToken.ns == jws.XMPPPlugIn.NS ) {
@@ -38,8 +40,41 @@ jws.XMPPPlugIn = {
 		}
 	},
 
+	xmppConnect: function( aHost, aPort, aDomain, aUseSSL, aOptions ) {
+		// check websocket connection status
+		var lRes = this.checkConnected();
+		// if connected to websocket network...
+		if( 0 == lRes.code ) {
+			// XMPP API calls XMPP Login screen,
+			// hence here no user name or password are required.
+			// Pass the callbackURL to notify Web App on successfull connection
+			// and to obtain OAuth verifier for user.
+			var lToken = {
+				ns: jws.XMPPPlugIn.NS,
+				type: "connect",
+				host: aHost,
+				port: aPort,
+				domain: aDomain,
+				useSSL: aUseSSL
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
 
-	xmppLogin: function( aUsername, aPassword, aServer, aPort, aUseSSL, aOptions ) {
+	xmppDisconnect: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.XMPPPlugIn.NS,
+				type: "disconnect"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	xmppLogin: function( aUsername, aPassword, aOptions ) {
 		// check websocket connection status
 		var lRes = this.checkConnected();
 		// if connected to websocket network...
@@ -52,10 +87,7 @@ jws.XMPPPlugIn = {
 				ns: jws.XMPPPlugIn.NS,
 				type: "login",
 				username: aUsername,
-				password: aPassword,
-				server: aServer,
-				port: aPort,
-				useSSL: aUseSSL
+				password: aPassword
 			};
 			this.sendToken( lToken,	aOptions );
 		}
@@ -68,6 +100,31 @@ jws.XMPPPlugIn = {
 			var lToken = {
 				ns: jws.XMPPPlugIn.NS,
 				type: "logout"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	xmppRoster: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.XMPPPlugIn.NS,
+				type: "getRoster"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	xmppSetStatus: function( aStatus, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.XMPPPlugIn.NS,
+				type: "setStatus",
+				status: aStatus
 			};
 			this.sendToken( lToken,	aOptions );
 		}
