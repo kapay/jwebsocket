@@ -48,7 +48,8 @@ import org.jwebsocket.token.Token;
  * http://www.igniterealtime.org/projects/smack/
  *
  * Nice tips at: http://www.adarshr.com/papers/xmpp and http://www.adarshr.com/papers/xmpp2
- *
+ * Smack Java Docs: http://www.igniterealtime.org/builds/smack/docs/latest/javadoc/
+ * 
  */
 public class XMPPPlugIn extends TokenPlugIn {
 
@@ -499,8 +500,8 @@ public class XMPPPlugIn extends TokenPlugIn {
 				Presence lPresence = new Presence(Presence.Type.available);
 				// Set the highest priority
 				lPresence.setPriority(24);
-				// lPresence.setStatus(lStatus);
-				lPresence.setMode(Presence.Mode.away);
+				lPresence.setStatus(lStatus);
+				lPresence.setMode(Presence.Mode.chat);
 				// send the update
 				lXMPPConn.sendPacket(lPresence);
 				lMsg = "Status successfully sent to '" + lStatus + "'.";
