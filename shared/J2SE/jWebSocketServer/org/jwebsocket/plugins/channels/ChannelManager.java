@@ -17,7 +17,8 @@ package org.jwebsocket.plugins.channels;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jwebsocket.api.PluginConfiguration;
+import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.config.xml.ChannelConfig;
 
 /**
  * Manager class responsible for all the channel operations within the
@@ -27,7 +28,10 @@ import org.jwebsocket.api.PluginConfiguration;
  * @version $Id$
  */
 public class ChannelManager {
-
+	/** id for the logger channel */
+	private static final String LOGGER_CHANNEL_ID = "jws.logger.channel";
+	/** id for the admin channel */
+	private static final String ADMIN_CHANNEL_ID = "jws.admin.channel";
     /** channel store */
     private final ChannelStore channelStore = new BaseChannelStore();
     /** subscriber store */
@@ -52,9 +56,7 @@ public class ChannelManager {
      * don't allow this
      */
     private ChannelManager() {
-        throw new AssertionError();
     }
-
     /**
      * @return the static manager instance
      */
@@ -62,25 +64,57 @@ public class ChannelManager {
         return new ChannelManager();
     }
     /**
-     * Starts the system channels within the jWebSocket system
-     * @param configuration the channel plugin configuration
+     * Starts the system channels within the jWebSocket system configured 
+     * via jWebSocket.xml, Note that it doesn't insert the system channels to
+     * the channel store.
      */
-    public void startSystemChannels(PluginConfiguration configuration) {
-    }
-
-    public void stopSystemChannels(PluginConfiguration pluginConfiguration) {
+	public void startSystemChannels() {
+		JWebSocketConfig config = JWebSocketConfig.getConfig();
+		for (ChannelConfig cfg : config.getChannels()) {
+			if (cfg.isSystemChannel()) {
+				cfg.validate();
+				if (LOGGER_CHANNEL_ID.equals(cfg.getId())) {
+					loggerChannel = new Channel(cfg);
+				} else if (ADMIN_CHANNEL_ID.equals(cfg.getId())) {
+					adminChannel = new Channel(cfg);
+				} else {
+					Channel channel = new Channel(cfg);
+					// put in system channels map
+					systemChannels.put(channel.getId(), channel);
+				}
+			}
+		}
+	}
+    
+    /**
+     * Stops all the system channels running in the system and clears the system
+     * channels map
+     */
+    public void stopSystemChannels() {
+    	for (Map.Entry<String, Channel> entry : systemChannels.entrySet()) {
+    		Channel channel = entry.getValue();
+    		channel.stop();
+    	}
+    	systemChannels.clear();
+    	if (loggerChannel != null) {
+    		loggerChannel.stop();
+    	}
+    	if (adminChannel != null) {
+    		adminChannel.stop();
+    	}
     }
     
     /**
      * Creates the complete new system channel, this channel is stored in the channel store 
      * by default.
      * @param channelId the id of the channel to create
+     * @param name the channel name
      * @param accessKey the access key for the new channel
      * @param secretKey the secretKey for the new channel
      * @param owner the owner of the channel
      * @return the new created channel
      */
-    public Channel createSystemChannel(String channelId, String accessKey, String secretKey, String owner) {
+    public Channel createSystemChannel(String channelId, String channelName, String accessKey, String secretKey, String owner) {
       return null;
     }
     
@@ -193,7 +227,8 @@ public class ChannelManager {
       publisherStore.removePublisher(publisher.getId());
     }
     /**
-     * Returns the instance of the logger channel.
+     * Returns the instance of the logger channel.If not initialized for some 
+     * reason returns null.
      * @return the logger channel
      */
     public Channel getLoggerChannel() {
@@ -201,7 +236,8 @@ public class ChannelManager {
     }
 
     /**
-     * Returns the instance of the admin channel
+     * Returns the instance of the admin channel. If not initialized for some
+     * reasons returns null.
      * @return the admin channel
      */
     public Channel getAdminChannel() {

@@ -75,7 +75,6 @@ public class ChannelPlugIn extends TokenPlugIn {
   private static final String CHANNEL = "channel";
   /** connected string */
   private static final String CONNECTED = "connected";
-  
 
   /**
    * Constructor with plugin config
@@ -96,7 +95,7 @@ public class ChannelPlugIn extends TokenPlugIn {
    */
   @Override
   public void engineStarted(WebSocketEngine aEngine) {
-    channelManager.startSystemChannels(getPluginConfiguration());
+    channelManager.startSystemChannels();
   }
 
   /**
@@ -105,7 +104,7 @@ public class ChannelPlugIn extends TokenPlugIn {
    */
   @Override
   public void engineStopped(WebSocketEngine aEngine) {
-    channelManager.stopSystemChannels(getPluginConfiguration());
+    channelManager.stopSystemChannels();
   }
 
   /**
@@ -219,10 +218,11 @@ public class ChannelPlugIn extends TokenPlugIn {
    */
   private Publisher authorizePublisher(WebSocketConnector connector, Channel channel, String secretKey, String accessKey) {
     Publisher publisher = null;
+    Date now = new Date();
     if (channel.getAccessKey().equals(accessKey) && channel.getSecretKey().equals(secretKey)) {
-      publisher = new Publisher(connector, channel.getId(), new Date(), new Date(), false);
+      publisher = new Publisher(connector, channel.getId(), now, now, false);
     } else {
-      publisher = new Publisher(connector, channel.getId(), new Date(), new Date(), true);
+      publisher = new Publisher(connector, channel.getId(), now, now, true);
       channelManager.storePublisher(publisher);
     }
     return publisher;
@@ -268,9 +268,11 @@ public class ChannelPlugIn extends TokenPlugIn {
   }
 
   /**
-   * 
-   * @param aConnector
-   * @param aToken
+   * Method for subscribers to unsuscribe from the channel. If the unsuscribe 
+   * operation is successful it sends the unsuscriber - ok response to the 
+   * client.
+   * @param aConnector the connector associated with the susbcriber
+   * @param aToken the token object
    */
   private void unsubscribe(WebSocketConnector aConnector, Token aToken) {
     String channelId = aToken.getString(CHANNEL);

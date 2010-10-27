@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jwebsocket.async.IOFuture;
+import org.jwebsocket.config.xml.ChannelConfig;
 import org.jwebsocket.token.Token;
 
 /**
@@ -77,7 +78,24 @@ public final class Channel implements ChannelLifeCycle {
       return value;
     }
   }
-
+  
+  /**
+   * Initialize the new channel but it doesn't start.
+   * @param config the channel config
+   */
+  public Channel(ChannelConfig config) {
+	  this.id = config.getId();
+	  this.name = config.getName();
+	  this.subscriberCount = 0;
+	  this.privateChannel = config.isPrivateChannel();
+	  this.systemChannel = config.isSystemChannel();
+	  this.secretKey = config.getSecretKey();
+	  this.accessKey = config.getAccessKey();
+	  this.owner = config.getOwner();
+	  this.createdDate = System.currentTimeMillis();
+	  this.state = ChannelState.INITIALIZED;
+  }
+  
   public Channel(String id, String name, int subscriberCount, boolean privateChannel, boolean systemChannel,
       String secretKey, String accessKey, String owner, long createdDate, ChannelState state,
       List<Subscriber> subscribers, List<Publisher> publishers) {
@@ -256,10 +274,6 @@ public final class Channel implements ChannelLifeCycle {
     for (Subscriber subscriber : subscribers) {
       subscriber.sendTokenAsync(token);
     }
-  }
-
-  public void setState(ChannelState state) {
-    this.state = state;
   }
 
   public ChannelState getState() {
