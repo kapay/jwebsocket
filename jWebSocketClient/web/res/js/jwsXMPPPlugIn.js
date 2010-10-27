@@ -25,16 +25,37 @@ jws.XMPPPlugIn = {
 	// if namespace is changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.xmpp",
 
-	AVAILABLE: "",
+	// presence flags
+	// Status: free-form text describing a user's presence (i.e., gone to lunch).
+	// Priority: non-negative numerical priority of a sender's resource.
+	//		The highest resource priority is the default recipient
+	//		of packets not addressed to a particular resource.
+	// Mode: one of five presence modes: available (the default), chat, away, xa (extended away), and dnd (do not disturb).
+
+	MODE_AVAILABLE: "available",		// default
+	MODE_AWAY: "away",					// away
+	MODE_CHAT: "chat",					// free to chat
+	MODE_DND: "dnd",					// do not disturb
+	MODE_XA: "xa",						// away for an extended period of time
+
+	TYPE_AVAILABLE: "available",		// (Default) indicates the user is available to receive messages.
+	TYPE_UNAVAILABLE: "unavailable",	// the user is unavailable to receive messages.
+	TYPE_SUBSCRIBE: "subscribe",		// request subscription to recipient's presence.
+	TYPE_SUBSCRIBED: "subscribed",		// grant subscription to sender's presence.
+	TYPE_UNSUBSCRIBE: "unsubscribe",	// request removal of subscription to sender's presence.
+	TYPE_UNSUBSCRIBED: "unsubscribed",	// grant removal of subscription to sender's presence.
+	TYPE_ERROR: "error",				// the presence packet contains an error message.
 
 	processToken: function( aToken ) {
 		// check if namespace matches
 		if( aToken.ns == jws.XMPPPlugIn.NS ) {
 			// here you can handle incoming tokens from the server
 			// directy in the plug-in if desired.
-			if( "login" == aToken.reqType ) {
-				if( this.onXMPPRequestToken ) {
-					this.onXMPPRequestToken( aToken );
+			if( "event" == aToken.type ) {
+				if( "chatMessage" == aToken.name ) {
+					if( this.OnXMPPChatMessage ) {
+						this.OnXMPPChatMessage( aToken );
+					}
 				}
 			}
 		}
@@ -118,13 +139,56 @@ jws.XMPPPlugIn = {
 		return lRes;
 	},
 
-	xmppSetStatus: function( aStatus, aOptions ) {
+	xmppSetPresence: function( aMode, aType, aStatus, aPriority, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			var lToken = {
 				ns: jws.XMPPPlugIn.NS,
-				type: "setStatus",
-				status: aStatus
+				type: "setPresence",
+				pmode: aMode,
+				ptype: aType,
+				ppriority: aPriority,
+				pstatus: aStatus
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	xmppOpenChat: function( aUserId, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.XMPPPlugIn.NS,
+				type: "openChat",
+				userId: aUserId
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	xmppSendChat: function( aUserId, aMessage, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.XMPPPlugIn.NS,
+				type: "sendChat",
+				userId: aUserId,
+				message: aMessage
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	xmppCloseChat: function( aUserId, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.XMPPPlugIn.NS,
+				userId: aUserId,
+				type: "closeChat"
 			};
 			this.sendToken( lToken,	aOptions );
 		}
@@ -135,11 +199,9 @@ jws.XMPPPlugIn = {
 		if( !aListeners ) {
 			aListeners = {};
 		}
-		/*
-		if( aListeners.onXMPPRequestToken !== undefined ) {
-			this.onXMPPRequestToken = aListeners.onXMPPRequestToken;
+		if( aListeners.OnXMPPChatMessage !== undefined ) {
+			this.OnXMPPChatMessage = aListeners.OnXMPPChatMessage;
 		}
-		*/
 	}
 
 }

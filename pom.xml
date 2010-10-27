@@ -5,7 +5,7 @@
 	<artifactId>jWebSocket-Parent</artifactId>
 	<packaging>pom</packaging>
 	<name>jWebSocket-Parent</name>
-	<version>0.10</version>
+	<version>0.11</version>
 	<description>Parent project for jWebSocket</description>
 	<modules>
 		<module>jWebSocketCommon</module>
@@ -36,12 +36,12 @@
 			</plugin>
 		</plugins>
 		<extensions>
-            <extension>
-               <groupId>org.jvnet.wagon-svn</groupId>
-  			   <artifactId>wagon-svn</artifactId>
-  			   <version>1.9</version>
-            </extension>
-        </extensions>
+			<extension>
+				<groupId>org.jvnet.wagon-svn</groupId>
+				<artifactId>wagon-svn</artifactId>
+				<version>1.9</version>
+			</extension>
+		</extensions>
 	</build>
 
 	<repositories>
@@ -49,6 +49,13 @@
 			<id>netbeans</id>
 			<name>NetBeans Repository</name>
 			<url>http://bits.netbeans.org/maven2</url>
+		</repository>
+		<repository>
+			<id>repository.jboss.org</id>
+			<url>http://repository.jboss.org/nexus/content/groups/public/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>maven-central-repo</id>
@@ -62,13 +69,13 @@
 		</repository>
 	</repositories>
 	
-    <distributionManagement>
-        <repository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>googlecode</id>
-            <url>svn:https://jwebsocket.googlecode.com/svn/repo/${project.version}</url>
-        </repository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>googlecode</id>
+			<url>svn:https://jwebsocket.googlecode.com/svn/repo/${project.version}</url>
+		</repository>
+	</distributionManagement>
 
 	<!--
 		define common dependencies used across all the modules of jWebSocket

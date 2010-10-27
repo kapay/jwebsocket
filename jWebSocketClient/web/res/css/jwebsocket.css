@@ -266,6 +266,12 @@ td.stdData {
 	padding: 2px 7px 2px 7px;
 }
 
+select.sselDlg {
+	font-family: inherit;
+	border: 1px solid #444;
+	background-color: white;
+}
+
 input[type="text"].stxfDlg {
 	font-family: inherit;
 	border: 1px solid #444;

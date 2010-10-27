@@ -4,23 +4,23 @@
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<!-- If Google's chrome frame installed, use it! -->
 		<!-- Comment needs to be BELOW this meta tag! -->
-<!--
-//	****************************************************************************
-//	jWebSocket Mail Demo (uses jWebSocket Client and Server)
-//	(C) 2010 Alexander Schulze, jWebSocket.org, Innotrade GmbH, Herzogenrath
-//	****************************************************************************
-//	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU Lesser General Public License as published by the
-//	Free Software Foundation; either version 3 of the License, or (at your
-//	option) any later version.
-//	This program is distributed in the hope that it will be useful, but WITHOUT
-//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-//	more details.
-//	You should have received a copy of the GNU Lesser General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
-//	****************************************************************************
--->
+		<!--
+		//	****************************************************************************
+		//	jWebSocket Mail Demo (uses jWebSocket Client and Server)
+		//	(C) 2010 Alexander Schulze, jWebSocket.org, Innotrade GmbH, Herzogenrath
+		//	****************************************************************************
+		//	This program is free software; you can redistribute it and/or modify it
+		//	under the terms of the GNU Lesser General Public License as published by the
+		//	Free Software Foundation; either version 3 of the License, or (at your
+		//	option) any later version.
+		//	This program is distributed in the hope that it will be useful, but WITHOUT
+		//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+		//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+		//	more details.
+		//	You should have received a copy of the GNU Lesser General Public License along
+		//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+		//	****************************************************************************
+		-->
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket XMPP Demo</title>
@@ -39,6 +39,10 @@
 			var eXMPPDomain = null;
 			var eXMPPStatus = null;
 			var eXMPPMessage = null;
+			var eXMPPType = null;
+			var eXMPPStatus = null;
+			var eXMPPPriority = null;
+
 			var eJWSUsername = null;
 			var eJWSPassword = null;
 
@@ -100,8 +104,8 @@
 
 			function xmppConnect() {
 				jWebSocketClient.xmppConnect(
-					eXMPPHost.value, parseInt( eXMPPPort.value ), eXMPPDomain.value, false
-				);
+				eXMPPHost.value, parseInt( eXMPPPort.value ), eXMPPDomain.value, false
+			);
 			}
 
 			function xmppDisconnect() {
@@ -120,18 +124,30 @@
 				jWebSocketClient.xmppRoster();
 			}
 
-			function xmppSetStatus() {
-				jWebSocketClient.xmppSetStatus(eXMPPStatus.value);
+			function xmppSetPresence() {
+				jWebSocketClient.xmppSetPresence(
+				eXMPPMode.value,
+				eXMPPType.value,
+				eXMPPStatus.value,
+				24
+				// eXMPPPriority.value
+			);
 			}
 
-			function post() {
-				jWebSocketClient.tweet(
-					eXMPPMessage.value
-				);
+			function xmppOpenChat() {
+				jWebSocketClient.xmppOpenChat("fivefeetfurther@googlemail.com");
 			}
 
-			function onGotMessage( aToken ) {
-				log( "Timeline: " + aToken.msg );
+			function xmppSendChat() {
+				jWebSocketClient.xmppSendChat("fivefeetfurther@googlemail.com", eXMPPMessage.value);
+			}
+
+			function xmppCloseChat() {
+				jWebSocketClient.xmppCloseChat("fivefeetfurther@googlemail.com");
+			}
+
+			function onXMPPChatMessage( aToken ) {
+				log( aToken.from + "->" + aToken.to + ": " + aToken.body );
 			}
 
 			function initPage() {
@@ -144,6 +160,8 @@
 				eXMPPDomain		= jws.$( "stxfXMPPDomain" );
 				eXMPPStatus		= jws.$( "stxfXMPPStatus" );
 				eXMPPMessage	= jws.$( "stxfXMPPMessage" );
+				eXMPPType		= jws.$( "sselXMPPType" );
+				eXMPPMode		= jws.$( "sselXMPPMode" );
 
 				eJWSUsername	= jws.$( "stxfUsername" );
 				eJWSPassword	= jws.$( "spwfPassword" );
@@ -153,7 +171,7 @@
 				if( jws.browserSupportsWebSockets() ) {
 					jWebSocketClient = new jws.jWebSocketJSONClient();
 					jWebSocketClient.setXMPPCallbacks({
-						// onXMPPRequestToken: onXMPPRequestToken
+						OnXMPPChatMessage: onXMPPChatMessage
 					});
 					eJWSUsername.focus();
 				} else {
@@ -190,7 +208,7 @@
 		onload="initPage();"
 		onunload="exitPage();"
 		>
-<!--	remarked temporarily due to chrome 5 browser bug
+		<!--	remarked temporarily due to chrome 5 browser bug
 		<script type="text/javascript">
 			var lFrameElem = this.frameElement;
 			if( !lFrameElem ) {
@@ -198,12 +216,12 @@
 				// location.href = "../../index.htm?page=demos/hello_world/hello_world.htm" ;
 			}
 		</script>
-Testing our new #jWebSocket XMPP-Plugin, tweet via #WebSockets! http://jwebsocket.org
--->		
+		Testing our new #jWebSocket XMPP-Plugin, tweet via #WebSockets! http://jwebsocket.org
+		-->
 		<h1>jWebSocket XMPP/Jabber Demo</h1>
 		<p>This demo shows how to easily use XMPP/Jabber via the jWebSocket XMPP service.</p>
 		<!-- <iframe id="sifrxmppLogin" style="width:100%; height:200px"></iframe> -->
-		
+
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
@@ -213,7 +231,9 @@ Testing our new #jWebSocket XMPP-Plugin, tweet via #WebSockets! http://jwebsocke
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnectXMPP" type="button" value="X/Connect" onclick="xmppConnect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLoginXMPP" type="button" value="X/Login" onclick="xmppLogin();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRoster" type="button" value="Roster" onclick="xmppRoster();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRoster" type="button" value="Roster" onclick="xmppRoster();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnOpenChat" type="button" value="Open Chat" onclick="xmppOpenChat();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSendMsg" type="button" value="Send Msg." onclick="xmppSendChat();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Password</td>
@@ -222,15 +242,25 @@ Testing our new #jWebSocket XMPP-Plugin, tweet via #WebSockets! http://jwebsocke
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnXXX" type="button" value="-" onclick=""></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnectXMPP" type="button" value="X/Disconnect" onclick="xmppDisconnect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoutXMPP" type="button" value="X/Logout" onclick="xmppLogout();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSetStatus" type="button" value="Set Status" onclick="xmppSetStatus();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSetStatus" type="button" value="Set Status" onclick="xmppSetPresence();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnCloseChat" type="button" value="Close Chat" onclick="xmppCloseChat();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPUsername" type="text" value="google-id" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPUsername" type="text" value="jabber-id" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Server</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPHost" type="text" value="talk.google.com" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPHost" type="text" value="jabber.org" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Domain</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPDomain" type="text" value="googlemail.com" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPDomain" type="text" value="jabber.org" style="width:150px"></td>
+					<td class="stdDlg" width="5">XMPP&nbsp;Mode</td>
+					<td class="stdDlg" width="">
+						<select class="sselDlg" id="sselXMPPMode" style="width:100px">
+							<option value="available">available</option>
+							<option value="away">away</option>
+							<option value="chat">free to chat</option>
+							<option value="dnd">do not disturb</option>
+							<option value="xa">away for an extended period of time</option>
+						</select></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Password</td>
@@ -238,11 +268,22 @@ Testing our new #jWebSocket XMPP-Plugin, tweet via #WebSockets! http://jwebsocke
 					<td class="stdDlg" width="5">XMPP&nbsp;Port</td>
 					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfXMPPPort" type="text" value="5222" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Status</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPStatus" type="text" value="YourStatus..." style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPStatus" type="text" value="I'm here!" style="width:150px"></td>
+					<td class="stdDlg" width="5">XMPP&nbsp;Type</td>
+					<td class="stdDlg" width="">
+						<select class="sselDlg" id="sselXMPPType" style="width:100px">
+							<option value="available">available</option>
+							<option value="unavailable">unavailable</option>
+							<option value="subscribe">subscribe</option>
+							<option value="subscribed">subscribed</option>
+							<option value="unsubscribe">unsubscribe</option>
+							<option value="unsubscribed">unsubscribed</option>
+							<option value="error">error</option>
+						</select></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Message</td>
-					<td class="stdDlg" width="" colspan="6"><input class="stxfDlg" id="stxfXMPPMessage" type="text" value="Message-Body..." style="width:99%"></td>
+					<td class="stdDlg" width="" colspan="8"><input class="stxfDlg" id="stxfXMPPMessage" type="text" value="Message-Body..." style="width:99%"></td>
 				</tr>
 			</table>
 		</div>

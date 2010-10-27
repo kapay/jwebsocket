@@ -77,7 +77,7 @@
 
             <zipfileset dir="${external.libs.dir}" includes="javolution-5.5.1.jar" prefix="" />
             <zipfileset dir="${external.libs.dir}" includes="log4j-1.2.15.jar" prefix="" />
-            <zipfileset dir="${external.libs.dir}" includes="netty-3.2.0.BETA1" prefix="" />
+            <zipfileset dir="${external.libs.dir}" includes="netty-3.2.1.Final" prefix="" />
         </zip>
         -->
 

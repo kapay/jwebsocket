@@ -19,15 +19,20 @@
 package org.jwebsocket.plugins.xmpp;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.RosterPacket.ItemStatus;
 import org.jivesoftware.smack.packet.RosterPacket.ItemType;
@@ -38,7 +43,9 @@ import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  *
@@ -55,6 +62,7 @@ public class XMPPPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(XMPPPlugIn.class);
 	private static final String XMPP_CONN_VAR = "$xmpp_connection";
+	private static final String XMPP_CHAT_VAR = "$xmpp_chat";
 	private static final String XMPP_CRED_VAR = "$xmpp_credentials";
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_XMPP = JWebSocketServerConstants.NS_BASE + ".plugins.xmpp";
@@ -95,8 +103,14 @@ public class XMPPPlugIn extends TokenPlugIn {
 				disconnect(aConnector, aToken);
 			} else if (lType.equals("getRoster")) {
 				getRoster(aConnector, aToken);
-			} else if (lType.equals("setStatus")) {
-				setStatus(aConnector, aToken);
+			} else if (lType.equals("setPresence")) {
+				setPresence(aConnector, aToken);
+			} else if (lType.equals("openChat")) {
+				openChat(aConnector, aToken);
+			} else if (lType.equals("sendChat")) {
+				sendChat(aConnector, aToken);
+			} else if (lType.equals("closeChat")) {
+				closeChat(aConnector, aToken);
 			}
 		}
 	}
@@ -384,7 +398,7 @@ public class XMPPPlugIn extends TokenPlugIn {
 				lResponse.setInteger("code", -1);
 				lResponse.setString("msg", lMsg);
 			} else {
-				lXMPPConn.login(lUsername, lPassword, "athome");
+				lXMPPConn.login(lUsername, lPassword, "jWebSocket_" + new Date().getTime());
 				lMsg = "Successfully authenticated against XMPP server.";
 				lResponse.setString("msg", lMsg);
 				if (mLog.isInfoEnabled()) {
@@ -412,7 +426,11 @@ public class XMPPPlugIn extends TokenPlugIn {
 			// check if already connected to the same or a different server.
 			XMPPConnection lXMPPConn = getXMPPConnection(aConnector);
 			if (lXMPPConn != null && lXMPPConn.isConnected()) {
-				lXMPPConn.loginAnonymously();
+				// Create a new presence. Pass in false to indicate we're unavailable.
+				Presence lPresence = new Presence(Presence.Type.unavailable);
+				lPresence.setPriority(24);
+				// send the update
+				lXMPPConn.sendPacket(lPresence);
 				lMsg = "Successfully logged out from XMPP server";
 			} else {
 				lResponse.setInteger("code", -1);
@@ -483,26 +501,28 @@ public class XMPPPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
-	private void setStatus(WebSocketConnector aConnector, Token aToken) {
+	private void setPresence(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
 		String lMsg;
 
-		String lStatus = aToken.getString("status");
+		String lStatus = aToken.getString("pstatus");
+		String lType = aToken.getString("ptype");
+		String lMode = aToken.getString("pmode");
+		Integer lPriority = aToken.getInteger("ppriority");
 
 		try {
 			// check if already connected to the same or a different server.
 			XMPPConnection lXMPPConn = getXMPPConnection(aConnector);
 			if (lXMPPConn != null && lXMPPConn.isConnected()) {
 				// Create a new presence. Pass in false to indicate we're unavailable.
-				Presence lPresence = new Presence(Presence.Type.available);
-				// Set the highest priority
-				lPresence.setPriority(24);
-				lPresence.setStatus(lStatus);
-				lPresence.setMode(Presence.Mode.chat);
-				// send the update
+				Presence lPresence = new Presence(
+						Presence.Type.valueOf(lType),
+						lStatus,
+						lPriority,
+						Presence.Mode.valueOf(lMode));
 				lXMPPConn.sendPacket(lPresence);
 				lMsg = "Status successfully sent to '" + lStatus + "'.";
 			} else {
@@ -513,6 +533,126 @@ public class XMPPPlugIn extends TokenPlugIn {
 				mLog.info(lMsg);
 			}
 			lResponse.setString("msg", lMsg);
+		} catch (Exception lEx) {
+			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+			mLog.error(lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	private class XMPPMessageListener implements MessageListener {
+
+		TokenServer mServer = null;
+		WebSocketConnector mConnector = null;
+
+		public XMPPMessageListener(WebSocketConnector aConnector, TokenServer aServer) {
+			mServer = aServer;
+			mConnector = aConnector;
+		}
+
+		@Override
+		public void processMessage(Chat aChat, Message aMessage) {
+			Token lToken = TokenFactory.createToken(NS_XMPP, BaseToken.TT_EVENT);
+			lToken.setString("name", "chatMessage");
+			lToken.setString("from", aMessage.getFrom());
+			lToken.setString("to", aMessage.getTo());
+			lToken.setString("body", aMessage.getBody());
+			mServer.sendToken(mConnector, lToken);
+		}
+	}
+
+	private void openChat(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+		String lMsg;
+
+		// example: "jsmith@jivesoftware.com"
+		String lUserId = aToken.getString("userId");
+
+		try {
+			// check if already connected to the same or a different server.
+			XMPPConnection lXMPPConn = getXMPPConnection(aConnector);
+			if (lXMPPConn != null && lXMPPConn.isConnected()) {
+				// Assume we've created an XMPPConnection name "connection".
+				ChatManager lChatmanager = lXMPPConn.getChatManager();
+				Chat lChat = lChatmanager.createChat(lUserId, new XMPPMessageListener(aConnector, lServer));
+				aConnector.setVar(XMPP_CHAT_VAR, lChat);
+				lMsg = "Chat successfully opened.";
+			} else {
+				lResponse.setInteger("code", -1);
+				lMsg = "No XMPP connection or authentication.";
+			}
+			if (mLog.isInfoEnabled()) {
+				mLog.info(lMsg);
+			}
+			lResponse.setString("msg", lMsg);
+		} catch (Exception lEx) {
+			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+			mLog.error(lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	private void sendChat(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+		String lMsg;
+
+		// example: "jsmith@jivesoftware.com"
+		String lUserId = aToken.getString("userId");
+		String lMessage = aToken.getString("message");
+
+		try {
+			Chat lChat = (Chat) aConnector.getVar(XMPP_CHAT_VAR);
+			if (lChat != null) {
+				lChat.sendMessage(lMessage);
+				lMsg = "Message successfully sent to '" + lUserId + "'.";
+			} else {
+				lResponse.setInteger("code", -1);
+				lMsg = "No chat active.";
+			}
+		} catch (Exception lEx) {
+			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+			mLog.error(lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	private void closeChat(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+		String lMsg;
+
+		// example: "jsmith@jivesoftware.com"
+		String lUserId = aToken.getString("userId");
+
+		try {
+			Chat lChat = (Chat) aConnector.getVar(XMPP_CHAT_VAR);
+			if (lChat != null) {
+				// lChat.
+				lMsg = "Chat with '" + lUserId + "' closed.";
+			} else {
+				lResponse.setInteger("code", -1);
+				lMsg = "No chat active.";
+			}
 		} catch (Exception lEx) {
 			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
 			mLog.error(lMsg);
