@@ -15,6 +15,7 @@
 package org.jwebsocket.config.xml;
 
 import org.jwebsocket.config.Config;
+import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
  * Represents the channels configuration information configured via jWebSocket.xml file
@@ -93,7 +94,15 @@ public class ChannelConfig implements Config {
 
   @Override
   public void validate() {
-
+	  if ((id != null && id.length() > 0)
+				&& (name != null && name.length() > 0)
+				&& (owner != null && owner.length() > 0)
+				&& (secretKey != null && secretKey.length() > 0)) {
+			return;
+		}
+		throw new WebSocketRuntimeException(
+				"Missing one of the engine configuration, "
+				+ "please check your configuration file");
   }
 
 }
