@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>run</actionName>
+            <goals>
+                <goal>jetty:run</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-Start Jetty</actionName>
+            <displayName>Start Jetty</displayName>
+            <goals>
+                <goal>jetty:start</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-Stop Jetty</actionName>
+            <displayName>Stop Jetty</displayName>
+            <goals>
+                <goal>jetty:stop</goal>
+            </goals>
+        </action>
+    </actions>
