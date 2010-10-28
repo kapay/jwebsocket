@@ -17,10 +17,10 @@ package org.jwebsocket.rpc.sample;
 
 import java.util.List;
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.logging.Logging;
 
 import org.jwebsocket.plugins.rpc.BaseRPCCallable;
-import org.jwebsocket.plugins.rpc.RPCCallable;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
 
@@ -28,7 +28,7 @@ import org.jwebsocket.util.Tools;
  *
  * @author aschulze
  */
-public class SampleRPCLibrary extends BaseRPCCallable implements RPCCallable {
+public class SampleRPCLibrary extends BaseRPCCallable {
 
 	private static Logger mLog = null;
 
@@ -101,8 +101,8 @@ public class SampleRPCLibrary extends BaseRPCCallable implements RPCCallable {
 		logInfo("rrpcTest11");
 	}
 
-	public void rrpcTest1(int arg1) {
-		logInfo("rrpcTest12");
+	public void rrpcTest1(WebSocketConnector aWebSocketConnector, int arg1) {
+		logInfo("rrpcTest12 has been called by connector: " + aWebSocketConnector.getId());
 	}
 
 	public void rrpcTest2(List aList, List<List<Integer>> aList2) {
