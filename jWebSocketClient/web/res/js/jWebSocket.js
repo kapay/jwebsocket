@@ -1132,6 +1132,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					// call inherited disconnect, catching potential exception
 				}
 				arguments.callee.inherited.call( this, aOptions );
+			} else {
+				lRes.code = -1;
+				lRes.localeKey = "jws.jsc.res.notConnected";
+				lRes.msg = "Not connected.";
 			}
 		} catch( ex ) {
 			lRes.code = -1;
@@ -1190,7 +1194,7 @@ jws.SystemClientPlugIn = {
 	//:r:*:::void:none
 	login: function( aUsername, aPassword, aOptions ) {
 		var lPool = null;
-		var lAutoConnect = true;
+		var lAutoConnect = false;
 		if( aOptions ) {
 			if( aOptions.pool !== undefined ) {
 				lPool = aOptions.pool;
@@ -1210,6 +1214,9 @@ jws.SystemClientPlugIn = {
 		} else {
 			if( lAutoConnect ) {
 				// TODO: Implement auto connect! Update documentation when done.
+				lRes.code = -1;
+				lRes.localeKey = "jws.jsc.res.notConnected";
+				lRes.msg = "Not connected.";
 			} else {
 				lRes.code = -1;
 				lRes.localeKey = "jws.jsc.res.notConnected";
@@ -1276,18 +1283,6 @@ jws.SystemClientPlugIn = {
 				type: "logout"
 			});
 		}
-/*
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
-			this.sendToken({
-				type: "logout"
-			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not logged in.";
-		}
-*/
 		return lRes;
 	},
 
