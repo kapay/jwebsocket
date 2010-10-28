@@ -58,10 +58,10 @@ public class Tools {
 	 */
 	public static String intToHex(int aInt, int aLen) {
 		String lRes = Integer.toHexString(aInt);
-		if (aLen > 0 && lRes.length() > aLen ) {
+		if (aLen > 0 && lRes.length() > aLen) {
 			lRes = lRes.substring(0, aLen);
 		} else {
-			while(lRes.length() < aLen) {
+			while (lRes.length() < aLen) {
 				lRes = "0" + lRes.substring(0, aLen);
 			}
 		}
@@ -78,12 +78,29 @@ public class Tools {
 	 */
 	public static String intToString(int aInt, int aLen) {
 		String lRes = Integer.toString(aInt);
-		if (aLen > 0 && lRes.length() > aLen ) {
+		if (aLen > 0 && lRes.length() > aLen) {
 			lRes = lRes.substring(0, aLen);
 		} else {
-			while(lRes.length() < aLen) {
+			while (lRes.length() < aLen) {
 				lRes = "0" + lRes;
 			}
+		}
+		return lRes;
+	}
+
+	/**
+	 * Converts a string into an integer value and automatically sets it to
+	 * a given default value if the string could not be parsed.
+	 * @param aString string to be converted into an integer.
+	 * @param aDefault default value assigned to the result in case of an exception.
+	 * @return integer value of string or given default value in case of exception.
+	 */
+	public static int stringToInt(String aString, int aDefault) {
+		int lRes;
+		try {
+			lRes = Integer.parseInt(aString);
+		} catch (Exception lEx) {
+			lRes = aDefault;
 		}
 		return lRes;
 	}

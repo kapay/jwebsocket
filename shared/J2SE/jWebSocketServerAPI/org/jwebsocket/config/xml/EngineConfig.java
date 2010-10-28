@@ -28,35 +28,35 @@ import org.jwebsocket.config.Config;
  */
 public final class EngineConfig implements Config, EngineConfiguration {
 
-	private final String id;
-	private final String name;
-	private final String jar;
-	private final int port;
-	private final int timeout;
-	private final int maxframesize;
-	private final List<String> domains;
+	private final String mId;
+	private final String mName;
+	private final String mJar;
+	private final int mPort;
+	private final int mTimeout;
+	private final int mMaxframesize;
+	private final List<String> mDomains;
 
 	/**
 	 * Constructor for engine
 	 *
-	 * @param id           the engine id
-	 * @param name         the name of the engine
-	 * @param jar          the jar file name
-	 * @param port         the port number where engine runs
-	 * @param timeout      the timeout value
-	 * @param maxFrameSize the maximum frame size that engine will
-	 *                     receive without closing the connection
-	 * @param domains      list of domain names
+	 * @param aId           the engine id
+	 * @param aName         the name of the engine
+	 * @param aJar          the jar file name
+	 * @param aPort         the port number where engine runs
+	 * @param aTimeout      the timeout value
+	 * @param aMaxFrameSize the maximum frame size that engine will
+	 *						receive without closing the connection
+	 * @param aDomains      list of domain names
 	 */
-	public EngineConfig(String id, String name, String jar, int port, int timeout,
-			int maxFrameSize, List<String> domains) {
-		this.id = id;
-		this.name = name;
-		this.jar = jar;
-		this.port = port;
-		this.timeout = timeout;
-		this.maxframesize = maxFrameSize;
-		this.domains = domains;
+	public EngineConfig(String aId, String aName, String aJar, int aPort, 
+			int aTimeout, int aMaxFrameSize, List<String> aDomains) {
+		this.mId = aId;
+		this.mName = aName;
+		this.mJar = aJar;
+		this.mPort = aPort;
+		this.mTimeout = aTimeout;
+		this.mMaxframesize = aMaxFrameSize;
+		this.mDomains = aDomains;
 		validate();
 	}
 	
@@ -65,7 +65,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 */
 	@Override
 	public String getId() {
-		return id;
+		return mId;
 	}
 
 	/**
@@ -73,7 +73,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 */
 	@Override
 	public String getName() {
-		return name;
+		return mName;
 	}
 
 	/**
@@ -81,7 +81,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 */
 	@Override
 	public String getJar() {
-		return jar;
+		return mJar;
 	}
 
 	/**
@@ -89,7 +89,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 */
 	@Override
 	public int getPort() {
-		return port;
+		return mPort;
 	}
 
 	/**
@@ -97,7 +97,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 */
 	@Override
 	public int getTimeout() {
-		return timeout;
+		return mTimeout;
 	}
 
 	/**
@@ -105,7 +105,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 */
 	@Override
 	public int getMaxFramesize() {
-		return maxframesize;
+		return mMaxframesize;
 	}
 
 	/**
@@ -113,7 +113,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 */
 	@Override
 	public List<String> getDomains() {
-		return domains;
+		return mDomains;
 	}
 
 	/**
@@ -123,12 +123,12 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 */
 	@Override
 	public void validate() {
-		if ((id != null && id.length() > 0)
-				&& (name != null && name.length() > 0)
-				&& (jar != null && jar.length() > 0)
-				&& (domains != null && domains.size() > 0)
-				&& port >= 1024
-				&& timeout >= 0) {
+		if ((mId != null && mId.length() > 0)
+				&& (mName != null && mName.length() > 0)
+				&& (mJar != null && mJar.length() > 0)
+				&& (mDomains != null && mDomains.size() > 0)
+				&& mPort > 0 && mPort < 65536
+				&& mTimeout >= 0) {
 			return;
 		}
 		throw new WebSocketRuntimeException(

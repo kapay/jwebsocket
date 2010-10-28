@@ -68,49 +68,53 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 	@SuppressWarnings("unchecked")
 	@Override
 	public WebSocketEngine initializeEngine() {
-		WebSocketEngine newEngine = null;
-		EngineConfig engineConfig = jWebSocketConfig.getEngines().get(0);
-		String jarFilePath = "-";
+		WebSocketEngine lNewEngine = null;
+		EngineConfig lEngineConfig = jWebSocketConfig.getEngines().get(0);
+		String lJarFilePath = "-";
 		try {
 			// try to load engine from classpath first,could be located in server bundle
-			Class<WebSocketEngine> lEngineClass = loadEngineFromClassPath(engineConfig.getName());
+			Class<WebSocketEngine> lEngineClass = loadEngineFromClassPath(lEngineConfig.getName());
 			// in case of a class not found exception we DO NOT want to show the
 			// exception but subsequently load the class from the jar file
 			if (lEngineClass == null) {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug("Loading from the jar file '" + engineConfig.getName() + "'  ");
+					mLog.debug("Loading from the jar file '" + lEngineConfig.getName() + "'  ");
 				}
-				jarFilePath = JWebSocketConfig.getLibraryFolderPath(engineConfig.getJar());
+				lJarFilePath = JWebSocketConfig.getLibraryFolderPath(lEngineConfig.getJar());
 				// jarFilePath may be null if .jar is included in server bundle
-				if (jarFilePath != null) {
+				if (lJarFilePath != null) {
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Loading engine '" + engineConfig.getName() + "' from '" + jarFilePath + "'...");
+						mLog.debug("Loading engine '" + lEngineConfig.getName() + "' from '" + lJarFilePath + "'...");
 					}
-					mClassLoader.addFile(jarFilePath);
-					lEngineClass = (Class<WebSocketEngine>) mClassLoader.loadClass(engineConfig.getName());
+					mClassLoader.addFile(lJarFilePath);
+					lEngineClass = (Class<WebSocketEngine>) mClassLoader.loadClass(lEngineConfig.getName());
 				}
 			}
 			// if class found try to create an instance
 			if (lEngineClass != null) {
-				Constructor<WebSocketEngine> ctor = lEngineClass.getDeclaredConstructor(EngineConfiguration.class);
-				if (ctor != null) {
-					ctor.setAccessible(true);
-					newEngine = ctor.newInstance(new Object[]{engineConfig});
+				Constructor<WebSocketEngine> lConstructor =
+						lEngineClass.getDeclaredConstructor(EngineConfiguration.class);
+				if (lConstructor != null) {
+					lConstructor.setAccessible(true);
+					lNewEngine = lConstructor.newInstance(new Object[]{lEngineConfig});
 				} else {
-					newEngine = lEngineClass.newInstance();
-					newEngine.setEngineConfiguration(engineConfig);
+					lNewEngine = lEngineClass.newInstance();
+					lNewEngine.setEngineConfiguration(lEngineConfig);
 				}
 				if (mLog.isDebugEnabled()) {
-					mLog.debug("Engine '" + engineConfig.getId() + "' successfully instantiated.");
+					mLog.debug("Engine '" + lEngineConfig.getId()
+							+ "' successfully instantiated.");
 				}
 			} else {
-				mLog.error("jWebSocket engine class " + engineConfig.getName() + " could not be loaded.");
+				mLog.error("jWebSocket engine class "
+						+ lEngineConfig.getName() + " could not be loaded.");
 			}
-		} catch (Exception es) {
-			mLog.error("Error initializing engine based on given configuration. Make sure that you are using correct jar file or "
-					+ "engine class is in the classpath", es);
+		} catch (Exception lEx) {
+			mLog.error("Error initializing engine based on given configuration. "
+					+ "Make sure that you are using correct jar file or "
+					+ "engine class is in the classpath", lEx);
 		}
-		return newEngine;
+		return lNewEngine;
 	}
 
 	/**
@@ -143,25 +147,28 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 				}
 				// if class found try to create an instance
 				if (lServerClass != null) {
-					Constructor<WebSocketServer> ctor = lServerClass.getDeclaredConstructor(ServerConfiguration.class);
-					if (ctor != null) {
-						ctor.setAccessible(true);
-						lServer = ctor.newInstance(new Object[]{lServerConfig});
+					Constructor<WebSocketServer> lConstructor =
+							lServerClass.getDeclaredConstructor(ServerConfiguration.class);
+					if (lConstructor != null) {
+						lConstructor.setAccessible(true);
+						lServer = lConstructor.newInstance(new Object[]{lServerConfig});
 					} else {
 						lServer = lServerClass.newInstance();
 						lServer.setServerConfiguration(lServerConfig);
 					}
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Server '" + lServerConfig.getId() + "' successfully instantiated.");
+						mLog.debug("Server '" + lServerConfig.getId()
+								+ "' successfully instantiated.");
 					}
 					// add the initialized server to the list
 					lServers.add(lServer);
 				} else {
-					mLog.error("jWebSocket server class " + lServerConfig.getName() + " could not be loaded.");
+					mLog.error("jWebSocket server class "
+							+ lServerConfig.getName() + " could not be loaded.");
 				}
-			} catch (Exception es) {
+			} catch (Exception lEx) {
 				mLog.error("Error initializing server based on given configuration. Make sure that you are using correct jar file or "
-						+ "server class is in the classpath", es);
+						+ "server class is in the classpath", lEx);
 			}
 		}
 		return lServers;
@@ -173,56 +180,61 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, List<WebSocketPlugIn>> initializePlugins() {
-		Map<String, List<WebSocketPlugIn>> lPluginMap = new FastMap<String, List<WebSocketPlugIn>>();
+		Map<String, List<WebSocketPlugIn>> lPluginMap =
+				new FastMap<String, List<WebSocketPlugIn>>();
 		// populate the plugin FastMap with server id and empty list
 		for (ServerConfig lServerConfig : jWebSocketConfig.getServers()) {
 			lPluginMap.put(lServerConfig.getId(), new FastList<WebSocketPlugIn>());
 		}
 		// now initialize the plugins
-		for (PluginConfig pluginConfig : jWebSocketConfig.getPlugins()) {
+		for (PluginConfig lPluginConfig : jWebSocketConfig.getPlugins()) {
 			try {
-				Class<WebSocketPlugIn> lPluginClass = loadPluginFromClasspath(pluginConfig.getName());
+				Class<WebSocketPlugIn> lPluginClass =
+						loadPluginFromClasspath(lPluginConfig.getName());
 				// if not in classpath..try to load plug-in from given .jar file
 				if (lPluginClass == null) {
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Plug-in '" + pluginConfig.getName() + "' trying to load from file...");
+						mLog.debug("Plug-in '" + lPluginConfig.getName()
+								+ "' trying to load from file...");
 					}
-					String jarFilePath = JWebSocketConfig.getLibraryFolderPath(pluginConfig.getJar());
+					String lJarFilePath = JWebSocketConfig.getLibraryFolderPath(lPluginConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
-					if (jarFilePath != null) {
-						mClassLoader.addFile(jarFilePath);
+					if (lJarFilePath != null) {
+						mClassLoader.addFile(lJarFilePath);
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Loading plug-in '" + pluginConfig.getName() + "' from '" + jarFilePath + "'...");
+							mLog.debug("Loading plug-in '"
+									+ lPluginConfig.getName()
+									+ "' from '" + lJarFilePath + "'...");
 						}
-						lPluginClass = (Class<WebSocketPlugIn>) mClassLoader.loadClass(pluginConfig.getName());
+						lPluginClass = (Class<WebSocketPlugIn>) mClassLoader.loadClass(lPluginConfig.getName());
 					}
 				}
 				// if class found try to create an instance
 				if (lPluginClass != null) {
 					WebSocketPlugIn lPlugIn = null;
-					Constructor<WebSocketPlugIn> pluginConstructor = lPluginClass.getConstructor(PluginConfiguration.class);
-					if (pluginConstructor != null) {
-						pluginConstructor.setAccessible(true);
-						lPlugIn = pluginConstructor.newInstance(pluginConfig);
-					} else {
-						lPlugIn = lPluginClass.newInstance();
-						lPlugIn.setPluginConfiguration(pluginConfig);
-					}
-					lPlugIn.addAllSettings(pluginConfig.getSettings());
-					if (mLog.isDebugEnabled()) {
-						mLog.debug("Plug-in '" + pluginConfig.getId() + "' successfully instantiated.");
-					}
-					// now add the plugin to plugin map based on server ids
-					for (String lServerId : pluginConfig.getServers()) {
-						List<WebSocketPlugIn> lPlugIns = lPluginMap.get(lServerId);
-						if (lPlugIns != null) {
-							lPlugIns.add((WebSocketPlugIn) lPlugIn);
+					Constructor<WebSocketPlugIn> lPluginConstructor =
+							lPluginClass.getConstructor(PluginConfiguration.class);
+					if (lPluginConstructor != null) {
+						lPluginConstructor.setAccessible(true);
+						lPlugIn = lPluginConstructor.newInstance(lPluginConfig);
+						if (mLog.isDebugEnabled()) {
+							mLog.debug("Plug-in '" + lPluginConfig.getId() + "' successfully instantiated.");
 						}
+						// now add the plugin to plugin map based on server ids
+						for (String lServerId : lPluginConfig.getServers()) {
+							List<WebSocketPlugIn> lPlugIns = lPluginMap.get(lServerId);
+							if (lPlugIns != null) {
+								lPlugIns.add((WebSocketPlugIn) lPlugIn);
+							}
+						}
+					} else {
+						mLog.error("Plug-in '" + lPluginConfig.getId()
+								+ "' could not be instantiated due to invalid constructor.");
 					}
 				}
 
-			} catch (Exception ex) {
-				mLog.error("Couldn't instantiate the plugin.", ex);
+			} catch (Exception lEx) {
+				mLog.error("Couldn't instantiate the plugin.", lEx);
 			}
 		}
 		return lPluginMap;
@@ -234,7 +246,8 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, List<WebSocketFilter>> initializeFilters() {
-		Map<String, List<WebSocketFilter>> lFilterMap = new FastMap<String, List<WebSocketFilter>>();
+		Map<String, List<WebSocketFilter>> lFilterMap =
+				new FastMap<String, List<WebSocketFilter>>();
 
 		// populate the filter FastMap with server id and empty list
 		for (ServerConfig lServerConfig : jWebSocketConfig.getServers()) {
@@ -243,26 +256,32 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 		// now initialize the filter
 		for (FilterConfig lFilterConfig : jWebSocketConfig.getFilters()) {
 			try {
-				Class<WebSocketFilter> lFilterClass = loadFilterFromClasspath(lFilterConfig.getName());
+				Class<WebSocketFilter> lFilterClass =
+						loadFilterFromClasspath(lFilterConfig.getName());
 				// try to load filter from classpath first, could be located in server bundle
 				lFilterClass = loadFilterFromClasspath(lFilterConfig.getName());
 				if (lFilterClass == null) {
-					String jarFilePath = JWebSocketConfig.getLibraryFolderPath(lFilterConfig.getJar());
+					String lJarFilePath =
+							JWebSocketConfig.getLibraryFolderPath(lFilterConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
-					if (jarFilePath != null) {
-						mClassLoader.addFile(jarFilePath);
+					if (lJarFilePath != null) {
+						mClassLoader.addFile(lJarFilePath);
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Loading filter '" + lFilterConfig.getName() + "' from '" + jarFilePath + "'...");
+							mLog.debug("Loading filter '" 
+									+ lFilterConfig.getName()
+									+ "' from '" + lJarFilePath + "'...");
 						}
 						lFilterClass = (Class<WebSocketFilter>) mClassLoader.loadClass(lFilterConfig.getName());
 					}
 				}
 				if (lFilterClass != null) {
-					Constructor<WebSocketFilter> lConstr = lFilterClass.getDeclaredConstructor(FilterConfiguration.class);
+					Constructor<WebSocketFilter> lConstr =
+							lFilterClass.getDeclaredConstructor(FilterConfiguration.class);
 					lConstr.setAccessible(true);
 					WebSocketFilter lFilter = lConstr.newInstance(new Object[]{lFilterConfig});
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Filter '" + lFilterConfig.getName() + "' successfully instantiated.");
+						mLog.debug("Filter '" + lFilterConfig.getName()
+								+ "' successfully instantiated.");
 					}
 					// now add the filter to filter FastMap based on server ids
 					for (String lServerId : lFilterConfig.getServers()) {
@@ -273,8 +292,8 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 					}
 				}
 
-			} catch (Exception e) {
-				mLog.error("Error instantiating filters", e);
+			} catch (Exception lEx) {
+				mLog.error("Error instantiating filters", lEx);
 			}
 		}
 		return lFilterMap;

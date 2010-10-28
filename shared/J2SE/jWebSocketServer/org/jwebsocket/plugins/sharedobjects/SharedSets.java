@@ -16,13 +16,12 @@
 package org.jwebsocket.plugins.sharedobjects;
 
 import javolution.util.FastSet;
-import org.jwebsocket.plugins.TokenPlugIn;
 
 /**
  *
  * @author aschulze
  */
-public class SharedSets extends TokenPlugIn {
+public class SharedSets {
 
 	private FastSet set = new FastSet();
 

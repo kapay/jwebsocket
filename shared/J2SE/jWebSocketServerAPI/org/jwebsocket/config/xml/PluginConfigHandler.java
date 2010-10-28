@@ -55,25 +55,25 @@ public class PluginConfigHandler implements ConfigHandler {
 		while (aStreamReader.hasNext()) {
 			aStreamReader.next();
 			if (aStreamReader.isStartElement()) {
-				String elementName = aStreamReader.getLocalName();
-				if (elementName.equals(ID)) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(ID)) {
 					aStreamReader.next();
 					lId = aStreamReader.getText();
-				} else if (elementName.equals(NAME)) {
+				} else if (lElementName.equals(NAME)) {
 					aStreamReader.next();
 					lName = aStreamReader.getText();
-				} else if (elementName.equals(PACKAGE)) {
+				} else if (lElementName.equals(PACKAGE)) {
 					aStreamReader.next();
 					lPackage = aStreamReader.getText();
-				} else if (elementName.equals(JAR)) {
+				} else if (lElementName.equals(JAR)) {
 					aStreamReader.next();
 					lJar = aStreamReader.getText();
-				} else if (elementName.equals(NAMESPACE)) {
+				} else if (lElementName.equals(NAMESPACE)) {
 					aStreamReader.next();
 					lNamespace = aStreamReader.getText();
-				} else if (elementName.equals(SETTINGS)) {
+				} else if (lElementName.equals(SETTINGS)) {
 					lSettings = getSettings(aStreamReader);
-				} else if (elementName.equals(SERVERS)) {
+				} else if (lElementName.equals(SERVERS)) {
 					lServers = getServers(aStreamReader);
 				} else {
 					// ignore
@@ -86,36 +86,37 @@ public class PluginConfigHandler implements ConfigHandler {
 				}
 			}
 		}
-		return new PluginConfig(lId, lName, lPackage, lJar, lNamespace, lServers, lSettings);
+		return new PluginConfig(lId, lName, lPackage, lJar,
+				lNamespace, lServers, lSettings);
 	}
 
 	/**
 	 * private method that reads the list of servers from the plugin configuration 
-	 * @param streamReader the stream reader object
+	 * @param aStreamReader the stream reader object
 	 * @return the list of right ids
 	 * @throws XMLStreamException if exception while reading
 	 */
-	private List<String> getServers(XMLStreamReader streamReader)
+	private List<String> getServers(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
-		List<String> servers = new FastList<String>();
-		while (streamReader.hasNext()) {
-			streamReader.next();
-			if (streamReader.isStartElement()) {
-				String elementName = streamReader.getLocalName();
-				if (elementName.equals(SERVER)) {
-					streamReader.next();
-					String server = streamReader.getText();
-					servers.add(server);
+		List<String> lServers = new FastList<String>();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SERVER)) {
+					aStreamReader.next();
+					String lServer = aStreamReader.getText();
+					lServers.add(lServer);
 				}
 			}
-			if (streamReader.isEndElement()) {
-				String elementName = streamReader.getLocalName();
-				if (elementName.equals(SERVERS)) {
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SERVERS)) {
 					break;
 				}
 			}
 		}
-		return servers;
+		return lServers;
 	}
 
 	/**
@@ -135,7 +136,8 @@ public class PluginConfigHandler implements ConfigHandler {
 			if (aStreamReader.isStartElement()) {
 				String lElementName = aStreamReader.getLocalName();
 				if (lElementName.equals(SETTING)) {
-					// TODO: Don't just get first attribute here! Scan for key="xxx"!
+					// TODO: Don't just get first attribute here!
+					// Scan for key="xxx"!
 					String lKey = aStreamReader.getAttributeValue(0);
 					aStreamReader.next();
 					String lValue = aStreamReader.getText();

@@ -33,10 +33,10 @@ import org.jwebsocket.token.Token;
 public class TokenPlugIn extends BasePlugIn {
 
 	private String mNamespace = null;
-
+/*
 	public TokenPlugIn() {
 	}
-
+*/
 	public TokenPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 	}

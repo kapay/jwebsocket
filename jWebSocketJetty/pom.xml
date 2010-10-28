@@ -9,38 +9,13 @@
 	<groupId>org.jwebsocket</groupId>
 	<artifactId>jWebSocketJetty</artifactId>
 	<packaging>war</packaging>
-	<version>1.0-SNAPSHOT</version>
-	<name>jWebSocketJetty Java EE 6 Webapp</name>
+	<name>jWebSocketJetty</name>
 	<url>http://maven.apache.org</url>
-	<repositories>
-		<repository>
-			<id>java.net2</id>
-			<name>Repository hosting the jee6 artifacts</name>
-			<url>http://download.java.net/maven/2</url>
-		</repository>
-	</repositories>
-	<dependencies>
-		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-web-api</artifactId>
-			<version>6.0</version>
-			<scope>provided</scope>
-		</dependency>
+    <description>Project within jWebSocket</description>
+    <version>0.11</version>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-websocket</artifactId>
-			<!-- <version>7.2.0.v20101020</version> -->
-			<version>8.0.0.M1</version>
-		</dependency>
-	</dependencies>
 	<build>
+		<finalName>jWebSocketJetty</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -51,6 +26,7 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -76,22 +52,15 @@
 
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
-				<!--<groupId>org.eclipse.jetty</groupId>-->
-				<!-- <artifactId>maven-jetty-plugin</artifactId> -->
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>8.0.0.M1</version>
-				<!-- <version>6.1.25</version> -->
-				<!-- <version>6.1.14</version>-->
-				<!-- <version>7.0.1.v20091125</version>-->
-				<!-- <version>7.2.0.v20101020</version> -->
-				<!-- <version>7.2.0.RC0</version>-->
 				<configuration>
 					<scanIntervalSeconds>5</scanIntervalSeconds>
 				</configuration>
 			</plugin>
 		</plugins>
-		<finalName>jWebSocketJetty</finalName>
 	</build>
+
 	<profiles>
 		<profile>
 			<id>endorsed</id>
@@ -115,7 +84,7 @@
 							<compilerArguments>
 								<bootclasspath>${settings.localRepository}/javax/javaee-endorsed-api/6.0/javaee-endorsed-api-6.0.jar${path.separator}${sun.boot.class.path}</bootclasspath>
 							</compilerArguments>
-							
+
 						</configuration>
 						<dependencies>
 							<dependency>
@@ -140,5 +109,51 @@
 			</build>
 		</profile>
 	</profiles>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-web-api</artifactId>
+			<version>6.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-websocket</artifactId>
+			<version>8.0.0.M1</version>
+		</dependency>
+		<!-- requires jWebSocket Server Module -->
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketServer</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketServerAPI</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketCommon</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>java.net2</id>
+			<name>Repository hosting the jee6 artifacts</name>
+			<url>http://download.java.net/maven/2</url>
+		</repository>
+	</repositories>
 
 </project>

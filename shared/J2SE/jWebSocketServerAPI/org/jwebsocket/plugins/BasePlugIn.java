@@ -34,263 +34,267 @@ import org.jwebsocket.kit.CloseReason;
  */
 public abstract class BasePlugIn implements WebSocketPlugIn {
 
-  private WebSocketPlugInChain mPlugInChain = null;
-  private Map<String, String> mSettings = new FastMap<String, String>();
-  private PluginConfiguration configuration;
+	private WebSocketPlugInChain mPlugInChain = null;
+	private Map<String, String> mSettings = new FastMap<String, String>();
+	private PluginConfiguration mConfiguration;
 
-  /**
-   * default constructor
-   */
-  public BasePlugIn() {
-  }
+	/**
+	 * default constructor
+	 */
+	/*
+	public BasePlugIn() {
+	}
+	 */
 
-  /**
-   * Constructor
-   * 
-   * @param configuration
-   *          the plugin configuration
-   */
-  public BasePlugIn(PluginConfiguration configuration) {
-    this.configuration = configuration;
-  }
-  
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setPluginConfiguration(PluginConfiguration theConfiguration) {
-    this.configuration = theConfiguration;
-  }
- 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public PluginConfiguration getPluginConfiguration() {
-    return configuration;
-  }
+	/**
+	 * Constructor
+	 *
+	 * @param aConfiguration
+	 *          the plugin configuration
+	 */
+	public BasePlugIn(PluginConfiguration aConfiguration) {
+		this.mConfiguration = aConfiguration;
+		addAllSettings(aConfiguration.getSettings());
+	}
 
-  @Override
-  public abstract void engineStarted(WebSocketEngine aEngine);
+	/**
+	 * {@inheritDoc}
+	 */
+/*
+	@Override
+	public void setPluginConfiguration(PluginConfiguration aConfiguration) {
+		this.mConfiguration = aConfiguration;
+	}
+*/
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PluginConfiguration getPluginConfiguration() {
+		return mConfiguration;
+	}
 
-  @Override
-  public abstract void engineStopped(WebSocketEngine aEngine);
+	@Override
+	public abstract void engineStarted(WebSocketEngine aEngine);
 
-  /**
-   * 
-   * @param aConnector
-   */
-  @Override
-  public abstract void connectorStarted(WebSocketConnector aConnector);
+	@Override
+	public abstract void engineStopped(WebSocketEngine aEngine);
 
-  /**
-   * 
-   * @param aResponse
-   * @param aConnector
-   * @param aDataPacket
-   */
-  @Override
-  public abstract void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
+	/**
+	 *
+	 * @param aConnector
+	 */
+	@Override
+	public abstract void connectorStarted(WebSocketConnector aConnector);
 
-  /**
-   * 
-   * @param aConnector
-   * @param aCloseReason
-   */
-  @Override
-  public abstract void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
+	/**
+	 *
+	 * @param aResponse
+	 * @param aConnector
+	 * @param aDataPacket
+	 */
+	@Override
+	public abstract void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
-  /**
-   * 
-   * @param aPlugInChain
-   */
-  @Override
-  public void setPlugInChain(WebSocketPlugInChain aPlugInChain) {
-    mPlugInChain = aPlugInChain;
-  }
+	/**
+	 *
+	 * @param aConnector
+	 * @param aCloseReason
+	 */
+	@Override
+	public abstract void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
-  /**
-   * @return the plugInChain
-   */
-  @Override
-  public WebSocketPlugInChain getPlugInChain() {
-    return mPlugInChain;
-  }
+	/**
+	 *
+	 * @param aPlugInChain
+	 */
+	@Override
+	public void setPlugInChain(WebSocketPlugInChain aPlugInChain) {
+		mPlugInChain = aPlugInChain;
+	}
 
-  /**
-   * 
-   * @return
-   */
-  public WebSocketServer getServer() {
-    WebSocketServer lServer = null;
-    if (mPlugInChain != null) {
-      lServer = mPlugInChain.getServer();
-    }
-    return lServer;
-  }
+	/**
+	 * @return the plugInChain
+	 */
+	@Override
+	public WebSocketPlugInChain getPlugInChain() {
+		return mPlugInChain;
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>getUsername</tt> to simplify token plug-in code.
-   * 
-   * @param aConnector
-   * @return
-   */
-  public String getUsername(WebSocketConnector aConnector) {
-    return getServer().getUsername(aConnector);
-  }
+	/**
+	 *
+	 * @return
+	 */
+	public WebSocketServer getServer() {
+		WebSocketServer lServer = null;
+		if (mPlugInChain != null) {
+			lServer = mPlugInChain.getServer();
+		}
+		return lServer;
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>setUsername</tt> to simplify token plug-in code.
-   * 
-   * @param aConnector
-   * @param aUsername
-   */
-  public void setUsername(WebSocketConnector aConnector, String aUsername) {
-    getServer().setUsername(aConnector, aUsername);
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>getUsername</tt> to simplify token plug-in code.
+	 *
+	 * @param aConnector
+	 * @return
+	 */
+	public String getUsername(WebSocketConnector aConnector) {
+		return getServer().getUsername(aConnector);
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>removeUsername</tt> to simplify token plug-in code.
-   * 
-   * @param aConnector
-   */
-  public void removeUsername(WebSocketConnector aConnector) {
-    getServer().removeUsername(aConnector);
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>setUsername</tt> to simplify token plug-in code.
+	 *
+	 * @param aConnector
+	 * @param aUsername
+	 */
+	public void setUsername(WebSocketConnector aConnector, String aUsername) {
+		getServer().setUsername(aConnector, aUsername);
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>getNodeId</tt> to simplify token plug-in code.
-   * 
-   * @param aConnector
-   * @return
-   */
-  public String getNodeId(WebSocketConnector aConnector) {
-    return getServer().getNodeId(aConnector);
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>removeUsername</tt> to simplify token plug-in code.
+	 *
+	 * @param aConnector
+	 */
+	public void removeUsername(WebSocketConnector aConnector) {
+		getServer().removeUsername(aConnector);
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>setNodeId</tt> to simplify token plug-in code.
-   * 
-   * @param aConnector
-   * @param aNodeId
-   */
-  public void setNodeId(WebSocketConnector aConnector, String aNodeId) {
-    getServer().setNodeId(aConnector, aNodeId);
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>getNodeId</tt> to simplify token plug-in code.
+	 *
+	 * @param aConnector
+	 * @return
+	 */
+	public String getNodeId(WebSocketConnector aConnector) {
+		return getServer().getNodeId(aConnector);
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>removeNodeId</tt> to simplify token plug-in code.
-   * 
-   * @param aConnector
-   */
-  public void removeNodeId(WebSocketConnector aConnector) {
-    getServer().removeNodeId(aConnector);
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>setNodeId</tt> to simplify token plug-in code.
+	 *
+	 * @param aConnector
+	 * @param aNodeId
+	 */
+	public void setNodeId(WebSocketConnector aConnector, String aNodeId) {
+		getServer().setNodeId(aConnector, aNodeId);
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>getConnector</tt> to simplify token plug-in code.
-   * 
-   * @param aId
-   * @return
-   */
-  public WebSocketConnector getConnector(String aId) {
-    return (aId != null ? getServer().getConnector(aId) : null);
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>removeNodeId</tt> to simplify token plug-in code.
+	 *
+	 * @param aConnector
+	 */
+	public void removeNodeId(WebSocketConnector aConnector) {
+		getServer().removeNodeId(aConnector);
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method <tt>getNode</tt>
-   * to simplify token plug-in code.
-   * 
-   * @param aNodeId
-   * @return
-   */
-  public WebSocketConnector getNode(String aNodeId) {
-    return (aNodeId != null ? getServer().getNode(aNodeId) : null);
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>getConnector</tt> to simplify token plug-in code.
+	 *
+	 * @param aId
+	 * @return
+	 */
+	public WebSocketConnector getConnector(String aId) {
+		return (aId != null ? getServer().getConnector(aId) : null);
+	}
 
-  /**
-   * Convenience method, just a wrapper for token server method
-   * <tt>getServer().getAllConnectors().size()</tt> to simplify token plug-in
-   * code.
-   * 
-   * @return
-   */
-  public int getConnectorCount() {
-    return getServer().getAllConnectors().size();
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method <tt>getNode</tt>
+	 * to simplify token plug-in code.
+	 *
+	 * @param aNodeId
+	 * @return
+	 */
+	public WebSocketConnector getNode(String aNodeId) {
+		return (aNodeId != null ? getServer().getNode(aNodeId) : null);
+	}
 
-  /**
-   * 
-   * @param aKey
-   * @param aValue
-   */
-  @Override
-  public void addSetting(String aKey, String aValue) {
-    if (aKey != null) {
-      mSettings.put(aKey, aValue);
-    }
-  }
+	/**
+	 * Convenience method, just a wrapper for token server method
+	 * <tt>getServer().getAllConnectors().size()</tt> to simplify token plug-in
+	 * code.
+	 *
+	 * @return
+	 */
+	public int getConnectorCount() {
+		return getServer().getAllConnectors().size();
+	}
 
-  /**
-   * @param aSettings
-   */
-  @Override
-  public void addAllSettings(Map<String, String> aSettings) {
-    if (aSettings != null) {
-      mSettings.putAll(aSettings);
-    }
-  }
+	/**
+	 *
+	 * @param aKey
+	 * @param aValue
+	 */
+	@Override
+	public void addSetting(String aKey, String aValue) {
+		if (aKey != null) {
+			mSettings.put(aKey, aValue);
+		}
+	}
 
-  /**
-   * 
-   * @param aKey
-   */
-  @Override
-  public void removeSetting(String aKey) {
-    if (aKey != null) {
-      mSettings.remove(aKey);
-    }
-  }
+	/**
+	 * @param aSettings
+	 */
+	// @Override
+	private void addAllSettings(Map<String, String> aSettings) {
+		if (aSettings != null) {
+			mSettings.putAll(aSettings);
+		}
+	}
 
-  /**
+	/**
+	 *
+	 * @param aKey
+	 */
+	@Override
+	public void removeSetting(String aKey) {
+		if (aKey != null) {
+			mSettings.remove(aKey);
+		}
+	}
+
+	/**
 	 *
 	 */
-  @Override
-  public void clearSettings() {
-    mSettings.clear();
-  }
+	@Override
+	public void clearSettings() {
+		mSettings.clear();
+	}
 
-  /**
-   * 
-   * @param aKey
-   * @param aDefault
-   * @return
-   */
-  @Override
-  public String getSetting(String aKey, String aDefault) {
-    String lRes = mSettings.get(aKey);
-    return (lRes != null ? lRes : aDefault);
-  }
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public String getSetting(String aKey, String aDefault) {
+		String lRes = mSettings.get(aKey);
+		return (lRes != null ? lRes : aDefault);
+	}
 
-  /**
-   * 
-   * @param aKey
-   * @return
-   */
-  @Override
-  public String getSetting(String aKey) {
-    return (aKey != null ? getSetting(aKey, null) : null);
-  }
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public String getSetting(String aKey) {
+		return (aKey != null ? getSetting(aKey, null) : null);
+	}
 
-  @Override
-  public Map<String, String> getSettings() {
-    return mSettings;
-  }
+	@Override
+	public Map<String, String> getSettings() {
+		return mSettings;
+	}
 }

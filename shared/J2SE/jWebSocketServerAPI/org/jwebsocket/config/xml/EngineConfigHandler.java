@@ -21,6 +21,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.util.List;
 import javolution.util.FastList;
 import org.jwebsocket.config.ConfigHandler;
+import org.jwebsocket.util.Tools;
 
 /**
  * Handles the engine configuration
@@ -29,89 +30,91 @@ import org.jwebsocket.config.ConfigHandler;
  * @version $Id: EngineConfigHandler.java 624 2010-07-06 12:28:44Z fivefeetfurther $
  */
 public class EngineConfigHandler implements ConfigHandler {
-    private static final String ELEMENT_ENGINE = "engine";
-    private static final String ID = "id";
-    private static final String NAME = "name";
-    private static final String JAR = "jar";
-    private static final String PORT = "port";
-    private static final String TIMEOUT = "timeout";
-    private static final String MAXFRAMESIZE = "maxframesize";
-    private static final String DOMAINS = "domains";
-    private static final String DOMAIN = "domain";
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Config processConfig(XMLStreamReader streamReader)
-            throws XMLStreamException {
-        String id = "", name = "", jar = "";
-        int port = 0, timeout = 0, framesize = 0;
-        List<String> domains = null;
-        while (streamReader.hasNext()) {
-            streamReader.next();
-            if (streamReader.isStartElement()) {
-                String elementName = streamReader.getLocalName();
-                if (elementName.equals(ID)) {
-                    streamReader.next();
-                    id = streamReader.getText();
-                } else if (elementName.equals(NAME)) {
-                    streamReader.next();
-                    name = streamReader.getText();
-                } else if (elementName.equals(JAR)) {
-                    streamReader.next();
-                    jar = streamReader.getText();
-                } else if (elementName.equals(PORT)) {
-                    streamReader.next();
-                    port = Integer.parseInt(streamReader.getText());
-                } else if (elementName.equals(TIMEOUT)) {
-                    streamReader.next();
-                    timeout = Integer.parseInt(streamReader.getText());
-                } else if (elementName.equals(DOMAINS)) {
-                    domains = getDomains(streamReader);
-                } else if (elementName.equals(MAXFRAMESIZE)) {
-                    streamReader.next();
-                    framesize = Integer.parseInt(streamReader.getText());
-                } else {
-                    //ignore
-                }
-            }
-            if (streamReader.isEndElement()) {
-                String elementName = streamReader.getLocalName();
-                if (elementName.equals(ELEMENT_ENGINE)) {
-                    break;
-                }
-            }
-        }
-        return new EngineConfig(id, name, jar, port, timeout, framesize, domains);
-    }
+	private static final String ELEMENT_ENGINE = "engine";
+	private static final String ID = "id";
+	private static final String NAME = "name";
+	private static final String JAR = "jar";
+	private static final String PORT = "port";
+	private static final String TIMEOUT = "timeout";
+	private static final String MAXFRAMESIZE = "maxframesize";
+	private static final String DOMAINS = "domains";
+	private static final String DOMAIN = "domain";
 
-    /**
-     * Read the list of domains
-     *
-     * @param streamReader the stream reader object
-     * @return the list of domains for the engine
-     * @throws XMLStreamException in case of stream exception
-     */
-    private List<String> getDomains(XMLStreamReader streamReader) throws XMLStreamException {
-        List<String> domains = new FastList<String>();
-        while (streamReader.hasNext()) {
-            streamReader.next();
-            if (streamReader.isStartElement()) {
-                String elementName = streamReader.getLocalName();
-                if (elementName.equals(DOMAIN)) {
-                    streamReader.next();
-                    domains.add(streamReader.getText());
-                }
-            }
-            if (streamReader.isEndElement()) {
-                String elementName = streamReader.getLocalName();
-                if (elementName.equals(DOMAINS)) {
-                    break;
-                }
-            }
-        }
-        return domains;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Config processConfig(XMLStreamReader aStreamReader)
+			throws XMLStreamException {
+		String lId = "", lName = "", lJar = "";
+		int lPort = 0, lTimeout = 0, lFramesize = 0;
+		List<String> lDomains = null;
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(ID)) {
+					aStreamReader.next();
+					lId = aStreamReader.getText();
+				} else if (lElementName.equals(NAME)) {
+					aStreamReader.next();
+					lName = aStreamReader.getText();
+				} else if (lElementName.equals(JAR)) {
+					aStreamReader.next();
+					lJar = aStreamReader.getText();
+				} else if (lElementName.equals(PORT)) {
+					aStreamReader.next();
+					lPort = Tools.stringToInt(aStreamReader.getText(), -1);
+				} else if (lElementName.equals(TIMEOUT)) {
+					aStreamReader.next();
+					lTimeout = Integer.parseInt(aStreamReader.getText());
+				} else if (lElementName.equals(DOMAINS)) {
+					lDomains = getDomains(aStreamReader);
+				} else if (lElementName.equals(MAXFRAMESIZE)) {
+					aStreamReader.next();
+					lFramesize = Integer.parseInt(aStreamReader.getText());
+				} else {
+					//ignore
+				}
+			}
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(ELEMENT_ENGINE)) {
+					break;
+				}
+			}
+		}
+		return new EngineConfig(lId, lName, lJar, lPort,
+				lTimeout, lFramesize, lDomains);
+	}
 
+	/**
+	 * Read the list of domains
+	 *
+	 * @param aStreamReader the stream reader object
+	 * @return the list of domains for the engine
+	 * @throws XMLStreamException in case of stream exception
+	 */
+	private List<String> getDomains(XMLStreamReader aStreamReader)
+			throws XMLStreamException {
+		List<String> lDomains = new FastList<String>();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(DOMAIN)) {
+					aStreamReader.next();
+					lDomains.add(aStreamReader.getText());
+				}
+			}
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(DOMAINS)) {
+					break;
+				}
+			}
+		}
+		return lDomains;
+	}
 }

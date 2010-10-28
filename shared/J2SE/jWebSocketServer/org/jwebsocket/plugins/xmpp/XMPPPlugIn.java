@@ -91,8 +91,6 @@ public class XMPPPlugIn extends TokenPlugIn {
 		String lNS = aToken.getNS();
 
 		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
-			// select from database
-			mGetSettings();
 			if (lType.equals("connect")) {
 				connect(aConnector, aToken);
 			} else if (lType.equals("login")) {

@@ -100,8 +100,6 @@ public class TwitterPlugIn extends TokenPlugIn {
 		String lNS = aToken.getNS();
 
 		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
-			// select from database
-			mGetSettings();
 			if (lType.equals("tweet")) {
 				tweet(aConnector, aToken);
 			} else if (lType.equals("login")) {
@@ -127,7 +125,6 @@ public class TwitterPlugIn extends TokenPlugIn {
 		String lMsg;
 		try {
 			if (mTwitter == null) {
-				mGetSettings();
 				if (mLog.isDebugEnabled()) {
 					mLog.debug("Authenticating against Twitter...");
 				}

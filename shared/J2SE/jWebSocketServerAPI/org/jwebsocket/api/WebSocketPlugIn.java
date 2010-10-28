@@ -76,7 +76,7 @@ public interface WebSocketPlugIn {
    * @param configuration
    *          the plugin configuration object to set
    */
-  void setPluginConfiguration(PluginConfiguration configuration);
+  // void setPluginConfiguration(PluginConfiguration configuration);
 
   /**
    * Returns the plugin configuration object based on the configuration file
@@ -98,7 +98,7 @@ public interface WebSocketPlugIn {
    * 
    * @param aSettings
    */
-  void addAllSettings(Map<String, String> aSettings);
+  // void addAllSettings(Map<String, String> aSettings);
 
   /**
    * 

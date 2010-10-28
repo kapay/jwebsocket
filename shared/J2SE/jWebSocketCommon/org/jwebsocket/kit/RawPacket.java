@@ -29,8 +29,8 @@ public class RawPacket implements WebSocketPacket {
 	public static final int FRAMETYPE_UTF8 = 0;
 	public static final int FRAMETYPE_BINARY = 1;
 
-	private byte[] data = null;
-	private int frameType = FRAMETYPE_UTF8;
+	private byte[] mData = null;
+	private int mFrameType = FRAMETYPE_UTF8;
 
 	/**
 	 * Instantiates a new data packet and initializes its value to the passed
@@ -64,25 +64,25 @@ public class RawPacket implements WebSocketPacket {
 
 	@Override
 	public void setByteArray(byte[] aByteArray) {
-		data = aByteArray;
+		mData = aByteArray;
 	}
 
 	@Override
 	public void setString(String aString) {
-		data = aString.getBytes();
+		mData = aString.getBytes();
 	}
 
 	@Override
 	public void setString(String aString, String aEncoding)
 		throws UnsupportedEncodingException {
-		data = aString.getBytes(aEncoding);
+		mData = aString.getBytes(aEncoding);
 	}
 
 	@Override
 	public void setUTF8(String aString) {
 		try {
-			data = aString.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+			mData = aString.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException lEx) {
 			// ignore exception here
 		}
 	}
@@ -90,33 +90,33 @@ public class RawPacket implements WebSocketPacket {
 	@Override
 	public void setASCII(String aString) {
 		try {
-			data = aString.getBytes("US-ASCII");
-		} catch (UnsupportedEncodingException ex) {
+			mData = aString.getBytes("US-ASCII");
+		} catch (UnsupportedEncodingException lEx) {
 			// ignore exception here
 		}
 	}
 
 	@Override
 	public byte[] getByteArray() {
-		return data;
+		return mData;
 	}
 
 	@Override
 	public String getString() {
-		return new String(data);
+		return new String(mData);
 	}
 
 	@Override
 	public String getString(String aEncoding)
 		throws UnsupportedEncodingException {
-		return new String(data, aEncoding);
+		return new String(mData, aEncoding);
 	}
 
 	@Override
 	public String getUTF8() {
 		try {
-			return new String(data, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+			return new String(mData, "UTF-8");
+		} catch (UnsupportedEncodingException lEx) {
 			return null;
 		}
 	}
@@ -124,8 +124,8 @@ public class RawPacket implements WebSocketPacket {
 	@Override
 	public String getASCII() {
 		try {
-			return new String(data, "US-ASCII");
-		} catch (UnsupportedEncodingException ex) {
+			return new String(mData, "US-ASCII");
+		} catch (UnsupportedEncodingException lEx) {
 			return null;
 		}
 	}
@@ -135,7 +135,7 @@ public class RawPacket implements WebSocketPacket {
 	 */
 	@Override
 	public int getFrameType() {
-		return frameType;
+		return mFrameType;
 	}
 
 	/**
@@ -143,6 +143,6 @@ public class RawPacket implements WebSocketPacket {
 	 */
 	@Override
 	public void setFrameType(int aFrameType) {
-		this.frameType = aFrameType;
+		this.mFrameType = aFrameType;
 	}
 }

@@ -148,6 +148,14 @@ public interface WebSocketEngine {
 	void broadcastPacket(WebSocketConnector aSource, WebSocketPacket aDataPacket);
 
 	/**
+	 * Adds a certain connector to the engine. This usually has not to be
+	 * done by the application but by the engine implementations only.
+	 *
+	 * @param aConnector
+	 */
+	void addConnector(WebSocketConnector aConnector);
+
+	/**
 	 * Removes a certain connector from the engine. This usually has not to be
 	 * done by the application but by the engine implementations only.
 	 *
@@ -222,7 +230,7 @@ public interface WebSocketEngine {
 	 */
 	@Deprecated
 	int getMaxFrameSize();
-	
+
 	/**
 	 * @param configuration the engine configuration to set
 	 */
@@ -233,5 +241,4 @@ public interface WebSocketEngine {
 	 * @return the engine configuration object
 	 */
 	EngineConfiguration getConfiguration();
-	
 }

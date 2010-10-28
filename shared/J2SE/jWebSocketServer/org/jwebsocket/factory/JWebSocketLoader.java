@@ -47,7 +47,8 @@ public final class JWebSocketLoader {
 	 * @return the initializer object
 	 * @throws WebSocketException if there's an exception while initialization
 	 */
-	public final WebSocketInitializer initialize(String aOverrideConfigPath) throws WebSocketException {
+	public final WebSocketInitializer initialize(String aOverrideConfigPath)
+			throws WebSocketException {
 		String lConfigPath = JWebSocketConfig.getConfigurationPath();
 		if (aOverrideConfigPath != null && !"".equals(aOverrideConfigPath)) {
 			lConfigPath = aOverrideConfigPath;

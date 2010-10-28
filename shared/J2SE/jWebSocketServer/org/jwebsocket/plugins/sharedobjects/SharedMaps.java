@@ -23,7 +23,7 @@ import org.jwebsocket.plugins.TokenPlugIn;
  *
  * @author aschulze
  */
-public class SharedMaps extends TokenPlugIn {
+public class SharedMaps {
 
 	private Map mMaps = new FastMap();
 

@@ -1,7 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - TCP Connector
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
 package org.jwebsocket.tcp.connectors;
 
 import java.io.ByteArrayOutputStream;
@@ -51,9 +62,11 @@ public class TCPConnector extends BaseConnector {
         try {
             mIn = mClientSocket.getInputStream();
             mOut = new PrintStream(mClientSocket.getOutputStream(), true, "UTF-8");
-        } catch (Exception ex) {
-            mLog.error(ex.getClass().getSimpleName() + " instantiating " + getClass().getSimpleName() + ": "
-                    + ex.getMessage());
+        } catch (Exception lEx) {
+            mLog.error(lEx.getClass().getSimpleName() 
+					+ " instantiating "
+					+ getClass().getSimpleName() + ": "
+                    + lEx.getMessage());
         }
     }
 
@@ -64,15 +77,15 @@ public class TCPConnector extends BaseConnector {
         try {
             lPort = mClientSocket.getPort();
             lTimeout = mClientSocket.getSoTimeout();
-        } catch (Exception ex) {
+        } catch (Exception lEx) {
         }
         if (mLog.isDebugEnabled()) {
             mLog.debug("Starting TCP connector on port " + lPort + " with timeout "
                     + (lTimeout > 0 ? lTimeout + "ms" : "infinite") + "");
         }
-        ClientProcessor clientProc = new ClientProcessor(this);
-        Thread clientThread = new Thread(clientProc);
-        clientThread.start();
+        ClientProcessor lClientProc = new ClientProcessor(this);
+        Thread lClientThread = new Thread(lClientProc);
+        lClientThread.start();
         if (mLog.isInfoEnabled()) {
             mLog.info("Started TCP connector on port " + lPort + " with timeout "
                     + (lTimeout > 0 ? lTimeout + "ms" : "infinite") + "");
@@ -93,10 +106,10 @@ public class TCPConnector extends BaseConnector {
             if (mLog.isInfoEnabled()) {
                 mLog.info("Stopped TCP connector (" + aCloseReason.name() + ") on port " + lPort + ".");
             }
-        } catch (IOException ex) {
+        } catch (IOException lEx) {
             if (mLog.isDebugEnabled()) {
-                mLog.info(ex.getClass().getSimpleName() + " while stopping TCP connector (" + aCloseReason.name()
-                        + ") on port " + lPort + ": " + ex.getMessage());
+                mLog.info(lEx.getClass().getSimpleName() + " while stopping TCP connector (" + aCloseReason.name()
+                        + ") on port " + lPort + ": " + lEx.getMessage());
             }
         }
     }
@@ -125,8 +138,8 @@ public class TCPConnector extends BaseConnector {
                 mOut.write(0xFF);
             }
             mOut.flush();
-        } catch (IOException ex) {
-            mLog.error(ex.getClass().getSimpleName() + " sending data packet: " + ex.getMessage());
+        } catch (IOException lEx) {
+            mLog.error(lEx.getClass().getSimpleName() + " sending data packet: " + lEx.getMessage());
         }
     }
     
@@ -137,7 +150,7 @@ public class TCPConnector extends BaseConnector {
 
     private class ClientProcessor implements Runnable {
 
-        private WebSocketConnector connector = null;
+        private WebSocketConnector mConnector = null;
 
         /**
          * Creates the new socket listener thread for this connector.
@@ -145,12 +158,12 @@ public class TCPConnector extends BaseConnector {
          * @param aConnector
          */
         public ClientProcessor(WebSocketConnector aConnector) {
-            connector = aConnector;
+            mConnector = aConnector;
         }
 
         @Override
         public void run() {
-            WebSocketEngine engine = getEngine();
+            WebSocketEngine lEngine = getEngine();
             ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
 
             try {
@@ -158,37 +171,37 @@ public class TCPConnector extends BaseConnector {
                 mIsRunning = true;
 
                 // call connectorStarted method of engine
-                engine.connectorStarted(connector);
+                lEngine.connectorStarted(mConnector);
 
                 while (mIsRunning) {
                     try {
-                        int b = mIn.read();
+                        int lIn = mIn.read();
                         // start of frame
-                        if (b == 0x00) {
+                        if (lIn == 0x00) {
                             lBuff.reset();
                             // end of frame
-                        } else if (b == 0xff) {
+                        } else if (lIn == 0xff) {
                             RawPacket lPacket = new RawPacket(lBuff.toByteArray());
                             try {
-                                engine.processPacket(connector, lPacket);
-                            } catch (Exception ex) {
-                                mLog.error(ex.getClass().getSimpleName() + " in processPacket of connector "
-                                        + connector.getClass().getSimpleName() + ": " + ex.getMessage());
+                                lEngine.processPacket(mConnector, lPacket);
+                            } catch (Exception lEx) {
+                                mLog.error(lEx.getClass().getSimpleName() + " in processPacket of connector "
+                                        + mConnector.getClass().getSimpleName() + ": " + lEx.getMessage());
                             }
                             lBuff.reset();
-                        } else if (b < 0) {
+                        } else if (lIn < 0) {
                             mCloseReason = CloseReason.CLIENT;
                             mIsRunning = false;
                             // any other byte within or outside a frame
                         } else {
-                            lBuff.write(b);
+                            lBuff.write(lIn);
                         }
-                    } catch (SocketTimeoutException ex) {
-                        mLog.error("(timeout) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                    } catch (SocketTimeoutException lEx) {
+                        mLog.error("(timeout) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
                         mCloseReason = CloseReason.TIMEOUT;
                         mIsRunning = false;
-                    } catch (Exception ex) {
-                        mLog.error("(other) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                    } catch (Exception lEx) {
+                        mLog.error("(other) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
                         mCloseReason = CloseReason.SERVER;
                         mIsRunning = false;
                     }
@@ -196,16 +209,16 @@ public class TCPConnector extends BaseConnector {
 
                 // call client stopped method of engine
                 // (e.g. to release client from streams)
-                engine.connectorStopped(connector, mCloseReason);
+                lEngine.connectorStopped(mConnector, mCloseReason);
 
                 // br.close();
                 mIn.close();
                 mOut.close();
                 mClientSocket.close();
 
-            } catch (Exception ex) {
+            } catch (Exception lEx) {
                 // ignore this exception for now
-                mLog.error("(close) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                mLog.error("(close) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
             }
         }
     }

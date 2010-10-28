@@ -17,6 +17,7 @@
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>
+		<!-- <module>jWebSocketJetty</module> -->
 	</modules>
 
 	<build>

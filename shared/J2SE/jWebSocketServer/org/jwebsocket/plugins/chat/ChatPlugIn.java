@@ -16,6 +16,7 @@
 package org.jwebsocket.plugins.chat;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 
@@ -27,7 +28,8 @@ public class ChatPlugIn extends TokenPlugIn {
 
 	private static Logger log = Logging.getLogger(ChatPlugIn.class);
 
-	public ChatPlugIn() {
+	public ChatPlugIn(PluginConfiguration aConfiguration) {
+		super(aConfiguration);
 		if (log.isDebugEnabled()) {
 			log.debug("Instantiating chat plug-in...");
 		}

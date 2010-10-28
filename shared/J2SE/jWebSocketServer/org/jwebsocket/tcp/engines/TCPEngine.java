@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - WebSocket TCP Engine
+//	jWebSocket - TCP Engine
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -83,8 +83,8 @@ public class TCPEngine extends BaseEngine {
 			mEngineThread = new Thread(listener);
 			mEngineThread.start();
 
-		} catch (IOException ex) {
-			throw new WebSocketException(ex.getMessage());
+		} catch (IOException lEx) {
+			throw new WebSocketException(lEx.getMessage());
 		}
 
 		// TODO: results in firing started event twice! make more clean!
@@ -122,16 +122,16 @@ public class TCPEngine extends BaseEngine {
 			} else {
 				mLog.warn("Stopping TCP engine '" + getId() + "': no server socket or server socket closed.");
 			}
-		} catch (Exception ex) {
-			mLog.error(ex.getClass().getSimpleName() + " on stopping TCP engine '" + getId() + "': " + ex.getMessage());
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + " on stopping TCP engine '" + getId() + "': " + lEx.getMessage());
 		}
 
 		if (mEngineThread != null) {
 			try {
 				// TODO: Make this timeout configurable one day
 				mEngineThread.join(10000);
-			} catch (Exception ex) {
-				mLog.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			} catch (Exception lEx) {
+				mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 			}
 			if (mLog.isDebugEnabled()) {
 				long lDuration = new Date().getTime() - lStarted;
@@ -154,8 +154,8 @@ public class TCPEngine extends BaseEngine {
 			while (getConnectors().size() > 0 && new Date().getTime() - lStarted < 10000) {
 				Thread.sleep(250);
 			}
-		} catch (Exception ex) {
-			mLog.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
 		if (mLog.isDebugEnabled()) {
 			long lDuration = new Date().getTime() - lStarted;
@@ -204,10 +204,12 @@ public class TCPEngine extends BaseEngine {
 		byte[] lReq = new byte[lRead];
 		System.arraycopy(lBuff, 0, lReq, 0, lRead);
 
+/* please keep comment for debugging purposes!
 		if (mLog.isDebugEnabled()) {
-		    mLog.debug("Handshake Request:\n" + new String(lReq));
-		    mLog.debug("Parsing initial WebSocket handshake...");
+			mLog.debug("Handshake Request:\n" + new String(lReq));
+			mLog.debug("Parsing initial WebSocket handshake...");
 		}
+ */
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(lReq);
 		// maybe the request is a flash policy-file-request
 		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
@@ -225,17 +227,20 @@ public class TCPEngine extends BaseEngine {
 			}
 			return null;
 		}
+
+/* please keep comment for debugging purposes!
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Handshake Response:\n" + new String(lBA));
 			mLog.debug("Flushing initial WebSocket handshake...");
 		}
+ */
 		lOut.write(lBA);
 		lOut.flush();
 
 		// if we detected a flash policy-file-request return "null"
 		// (no websocket header detected)
 		if (lFlashBridgeReq != null) {
-			mLog.warn("TCPEngine returned policy file response ('" 
+			mLog.warn("TCPEngine returned policy file response ('"
 					+ new String(lBA, "US-ASCII")
 					+ "'), check for FlashBridge plug-in.");
 			return null;
@@ -252,13 +257,17 @@ public class TCPEngine extends BaseEngine {
 			if (lPos >= 0) {
 				lSearchString = lPath.substring(lPos + 1);
 				if (lSearchString.length() > 0) {
-					String[] lArgsArray = lSearchString.split(JWebSocketCommonConstants.ARGARG_SEPARATOR);
-					for (int i = 0; i < lArgsArray.length; i++) {
-						String[] lKeyValuePair = lArgsArray[i].split(JWebSocketCommonConstants.KEYVAL_SEPARATOR, 2);
+					String[] lArgsArray =
+							lSearchString.split(JWebSocketCommonConstants.ARGARG_SEPARATOR);
+					for (int lIdx = 0; lIdx < lArgsArray.length; lIdx++) {
+						String[] lKeyValuePair =
+								lArgsArray[lIdx].split(JWebSocketCommonConstants.KEYVAL_SEPARATOR, 2);
 						if (lKeyValuePair.length == 2) {
 							lArgs.put(lKeyValuePair[0], lKeyValuePair[1]);
 							if (mLog.isDebugEnabled()) {
-								mLog.debug("arg" + i + ": " + lKeyValuePair[0] + "=" + lKeyValuePair[1]);
+								mLog.debug("arg" + lIdx + ": "
+										+ lKeyValuePair[0] + "="
+										+ lKeyValuePair[1]);
 							}
 						}
 					}
@@ -367,16 +376,16 @@ public class TCPEngine extends BaseEngine {
 							// immediately disconnect the client.
 							lClientSocket.close();
 						}
-					} catch (UnsupportedEncodingException ex) {
-						mLog.error("(encoding) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-					} catch (IOException ex) {
-						mLog.error("(io) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-					} catch (Exception ex) {
-						mLog.error("(other) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+					} catch (UnsupportedEncodingException lEx) {
+						mLog.error("(encoding) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+					} catch (IOException lEx) {
+						mLog.error("(io) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+					} catch (Exception lEx) {
+						mLog.error("(other) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 					}
-				} catch (Exception ex) {
+				} catch (Exception lEx) {
 					mIsRunning = false;
-					mLog.error("(accept) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+					mLog.error("(accept) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 				}
 			}
 

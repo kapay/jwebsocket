@@ -103,7 +103,6 @@ public class MailPlugIn extends TokenPlugIn {
 		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
 			// select from database
 			if (lType.equals("sendMail")) {
-				mGetSettings();
 				sendMail(aConnector, aToken);
 			}
 		}
