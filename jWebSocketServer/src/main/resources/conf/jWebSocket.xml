@@ -304,6 +304,15 @@
 			<private>false</private>
 			<owner>psingh</owner>
 		</channel>
+		<channel>
+			<id>jws.timestream.channel</id>
+			<name>JWebSocket Time Stream Channel</name>
+			<secret>jws.timestream.channel.secret.123456</secret>
+			<access>jws.timestream.channel.access.123456</access>
+			<system>true</system>
+			<private>false</private>
+			<owner>psingh</owner>
+		</channel>
 	</channels>
 
 	<!-- plug-ins to be instantiated for jWebSocket -->
@@ -354,15 +363,6 @@
 			      will cause everything to load from memory.
 			     -->
 				<setting key="use_channel_store">false</setting>
-				<!-- 
-				  if above value is true, below are store configurations, if not defined it
-				  will use the default values. 
-				-->
-				<setting key="db_driver">com.mysql.jdbc.Driver</setting>
-				<setting key="db_url">jdbc:mysql://localhost:3306/jwebsocket</setting>
-				<setting key="db_name">jwebsocket</setting>
-				<setting key="db_user">jwebsocket_user</setting>
-				<setting key="db_password">himalayanyoddha</setting>
 				<!--  
 				   flag to enable the other jWebSocket components such as plugins, filters
 				   etc..to create,start and stop new channels dynamically. 
