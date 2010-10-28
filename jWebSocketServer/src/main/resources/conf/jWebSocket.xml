@@ -122,7 +122,7 @@
 			<id>broadcast</id>
 			<description>Broadcast message to all other clients.</description>
 		</right>
-
+		
 		<!-- configuration of rpc plug-in specific rights -->
 		<right>
 			<ns>org.jwebsocket.plugins.rpc</ns>
@@ -279,6 +279,32 @@
 			</rights>
 		</role>
 	</roles>
+	
+	<!-- 
+	 Initialize the system channels, private is set to true if the channel
+	 needs access key for subscribing. secret key and access key both are needed
+	 to publish a data from the remote location
+	-->
+	<channels>
+		<channel>
+			<id>jws.logger.channel</id>
+			<name>JWebSocket Logger Channel</name>
+			<secret>jws.logger.channel.secret.123456</secret>
+			<access>jws.logger.channel.access.123456</access>
+			<system>true</system>
+			<private>false</private>
+			<owner>psingh</owner>
+		</channel>
+		<channel>
+			<id>jws.admin.channel</id>
+			<name>JWebSocket Admin Channel</name>
+			<secret>jws.admin.channel.secret.123456</secret>
+			<access>jws.admin.channel.access.123456</access>
+			<system>true</system>
+			<private>false</private>
+			<owner>psingh</owner>
+		</channel>
+	</channels>
 
 	<!-- plug-ins to be instantiated for jWebSocket -->
 	<plugins>
@@ -309,6 +335,39 @@
 			</server-assignments>
 			<settings>
 				<setting key="allowShutdown">true</setting>
+			</settings>
+		</plugin>
+		<plugin>
+			<name>org.jwebsocket.plugins.channels.ChannelPlugIn</name>
+			<id>jws.channel</id>
+			<ns>org.jwebsocket.plugins.channel</ns>
+			<jar>jWebSocketServer-0.10.jar</jar>
+			<server-assignments>
+				<server-assignment>ts0</server-assignment>
+			</server-assignments>
+			<settings>
+			    <!--
+			      use this flag to store the channel, publisher and subscriber
+			      information to the database. Recommended if the number of active channels
+			      is very high in the jWebSocket system. For less number of channels
+			      and publisher/subscribes registered, use_persistent_store value set to 'false'
+			      will cause everything to load from memory.
+			     -->
+				<setting key="use_channel_store">false</setting>
+				<!-- 
+				  if above value is true, below are store configurations, if not defined it
+				  will use the default values. 
+				-->
+				<setting key="db_driver">com.mysql.jdbc.Driver</setting>
+				<setting key="db_url">jdbc:mysql://localhost:3306/jwebsocket</setting>
+				<setting key="db_name">jwebsocket</setting>
+				<setting key="db_user">jwebsocket_user</setting>
+				<setting key="db_password">himalayanyoddha</setting>
+				<!--  
+				   flag to enable the other jWebSocket components such as plugins, filters
+				   etc..to create,start and stop new channels dynamically. 
+				 -->
+				<setting key="allow_new_channels">true</setting>
 			</settings>
 		</plugin>
 		<plugin>
