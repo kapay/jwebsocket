@@ -46,7 +46,7 @@ public class ChannelPlugIn extends TokenPlugIn {
   /** logger */
   private static Logger log = Logging.getLogger(ChannelPlugIn.class);
   /** channel manager */
-  private ChannelManager channelManager = ChannelManager.getChannelManager();;
+  private ChannelManager channelManager = null;
   /** namespace for channels */
   private static final String NS_CHANNELS_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.channel";
   /** empty string */
@@ -87,6 +87,7 @@ public class ChannelPlugIn extends TokenPlugIn {
     }
     // specify default name space
     this.setNamespace(NS_CHANNELS_DEFAULT);
+    channelManager = ChannelManager.getChannelManager(configuration.getSettings());
   }
 
   /**
@@ -95,7 +96,11 @@ public class ChannelPlugIn extends TokenPlugIn {
    */
   @Override
   public void engineStarted(WebSocketEngine aEngine) {
-    channelManager.startSystemChannels();
+    try {
+		channelManager.startSystemChannels();
+	} catch (ChannelLifeCycleException e) {
+		log.error("Failed to start system channels", e);
+	}
   }
 
   /**
@@ -104,7 +109,11 @@ public class ChannelPlugIn extends TokenPlugIn {
    */
   @Override
   public void engineStopped(WebSocketEngine aEngine) {
-    channelManager.stopSystemChannels();
+    try {
+		channelManager.stopSystemChannels();
+	} catch (ChannelLifeCycleException e) {
+		log.error("Error stopping system channels", e);
+	}
   }
 
   /**

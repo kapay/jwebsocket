@@ -15,6 +15,7 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
+
 /**
  * Lifecycle interface for a channel
  * 
@@ -25,9 +26,9 @@ public interface ChannelLifeCycle {
 
   void init();
 
-  void start();
+  void start(String user) throws ChannelLifeCycleException;
 
-  void suspend();
+  void suspend(String user) throws ChannelLifeCycleException;
 
-  void stop();
+  void stop(String user) throws ChannelLifeCycleException;
 }

@@ -39,9 +39,6 @@ public class BaseSubscriberStore extends JDBCStore implements SubscriberStore {
   /** default table name for the channel store */
   private static final String TABLE_NAME = "subscriber_store_table";
 
-  /** default mysql driver name for channel store */
-  private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
-
   /** default application column name for channels data store */
   private static final String APP_COLUMN_NAME = "subscribers";
 
@@ -68,7 +65,6 @@ public class BaseSubscriberStore extends JDBCStore implements SubscriberStore {
    */
   private void init() {
     super.tableName = TABLE_NAME;
-    super.driverName = DRIVER_NAME;
     super.appColumnName = APP_COLUMN_NAME;
     super.keyColumnName = KEY_COLUMN_NAME;
     super.valueColumnName = VALUE_COLUMN_NAME;
