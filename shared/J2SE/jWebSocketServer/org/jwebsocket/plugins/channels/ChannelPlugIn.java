@@ -29,6 +29,8 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.security.SecurityFactory;
+import org.jwebsocket.security.User;
 import org.jwebsocket.token.JSONToken;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
@@ -38,7 +40,52 @@ import org.jwebsocket.util.Tools;
  * Token based implementation of the channel plugin. It's based on a
  * publisher/subscriber model where channels can be either used to publish the
  * data by one or more registered publishers and subscribed by multiple
- * subscribers.
+ * subscribers. The operation of channel is best handled by channel sub-protocol
+ * that has to be followed by clients to publish data to the channel or subscribe
+ * for receiving the data from the channels.
+ * 
+ * PUBLISHER OPERATION: Here are the basic token key/value pairs information for 
+ * publisher client:
+ * 
+ * Token Type   : <tt>publisher</tt>
+ * Namespace    : <tt>org.jwebsocket.plugins.channel</tt>
+ * 
+ * Token Key    : <tt>operation</tt>
+ * Token Value  : <tt>[authorize][publish][stop]</tt>
+ * 
+ * <tt>authorize</tt> operation command is used for authorization of client before publishing 
+ * a data to the channel publisher client has to authorize itself using 
+ * <tt>secret_key</tt>, <tt>access_key</tt> and <tt>login</tt> which is registered in the 
+ * jWebSocket server system via configuration file or from other jWebSocket components.
+ * 
+ * Token Key    : <tt>secret_key<tt>
+ * Token Value  : <tt>value of the secret key</tt>
+ * 
+ * Token Key    : <tt>access_key<tt>
+ * Token Value  : <tt>value of the access key</tt>
+ * 
+ * Token Key    : <tt>login<tt>
+ * Token Value  : <tt>login name or id of the jWebSocket registered user</tt>
+ *
+ * <tt>publish</tt>: publish command means publisher client has been authorized and ready to 
+ * publish the data. Data is received from the token string of key <tt>data</tt>. If the 
+ * channel registered is not started then it is started when publish command is received for 
+ * the first time. 
+ * 
+ * Token Key    : <tt>data<tt>
+ * Token Value  : <tt>data to publish to the channel</tt>
+ * 
+ * <tt>stop</tt>: stop command means proper shutdown of channel and no more data will be 
+ * received from the publisher.
+ * 
+ * <p> SUBSCRIBER OPERATION:</p>
+ * Token Type : <tt>subscriber</tt>
+ * Namespace : <tt>org.jwebsocket.plugins.channel</tt>
+ * 
+ * Token Key: <tt>operation</tt>, Token Value: <tt></tt>
+ * 
+ * 
+ * 
  * @author puran
  * @version $Id$
  */
@@ -55,25 +102,20 @@ public class ChannelPlugIn extends TokenPlugIn {
   private static final String PUBLISHER = "publisher";
   /** subscriber request string */
   private static final String SUBSCRIBER = "subscriber";
-  /** publish operation command*/
-  private static final String PUBLISH = "publish";
-  /** subscribe operation command */
-  private static final String SUBSCRIBE = "subscribe";
-  /** unsuscribe operation command */
-  private static final String UNSUSCRIBE = "unsuscribe";
-  /** access key */
-  private static final String ACCESS_KEY = "access_key";
-  /** secret key*/
-  private static final String SECRET_KEY = "secret_key";
-  /** operation string*/
-  private static final String OPERATION = "operation";
-  /** publisher data string */
-  private static final String DATA = "data";
-  /** connect string */
+
+  /** channel plugin handshake protocol operation values */
   private static final String AUTHORIZE = "authorize";
-  /** channel string */
+  private static final String PUBLISH = "publish";
+  private static final String STOP = "stop";
+  private static final String SUBSCRIBE = "subscribe";
+  private static final String UNSUSCRIBE = "unsuscribe";
+
+  /** channel plugin handshake protocol parameters */
+  private static final String DATA = "data";
+  private static final String OPERATION = "operation";
+  private static final String ACCESS_KEY = "access_key";
+  private static final String SECRET_KEY = "secret_key";
   private static final String CHANNEL = "channel";
-  /** connected string */
   private static final String CONNECTED = "connected";
 
   /**
@@ -91,7 +133,8 @@ public class ChannelPlugIn extends TokenPlugIn {
   }
 
   /**
-   * {@inheritDoc} When the engine starts perform all the initialization of
+   * {@inheritDoc} 
+   * When the engine starts perform the initialization of
    * default and system channels and start it for accepting subscriptions.
    */
   @Override
@@ -104,7 +147,8 @@ public class ChannelPlugIn extends TokenPlugIn {
   }
 
   /**
-   * {@inheritDoc} Stops the system channels and clean up all the taken
+   * {@inheritDoc} 
+   * Stops the system channels and clean up all the taken
    * resources by those channels.
    */
   @Override
@@ -183,19 +227,27 @@ public class ChannelPlugIn extends TokenPlugIn {
     if (operation.equals(AUTHORIZE)) {
       String accessKey = aToken.getString(ACCESS_KEY);
       String secretKey = aToken.getString(SECRET_KEY);
+      String login = aToken.getString("login");
       
+      User user = SecurityFactory.getUser(login);
+      if (user == null) {
+    	  sendError(aConnector, CloseReason.CLIENT, "Channel owner is not registered");
+          return;
+      }
       if (secretKey == null || accessKey == null) {
         sendError(aConnector, CloseReason.CLIENT, "Authorization failed, secret_key or access_key value is null");
         return;
       } else {
         Channel channel = channelManager.getChannel(channelId);
-        Publisher publisher = authorizePublisher(aConnector, channel, secretKey, accessKey);
+        Publisher publisher = authorizePublisher(aConnector, channel, user, secretKey, accessKey);
         if (!publisher.isAuthorized()) {
           //couldn't authorize  the publisher
           sendError(aConnector, CloseReason.CLIENT, "Authorization failed!!");
         } else {
           channel.addPublisher(publisher);
           Token responseToken = createResponse(aToken);
+          responseToken.setString("channel", channelId);
+          responseToken.setString("sourceId", aConnector.getId());
           responseToken.setString("authorization", "ok");
           //send the success response
           sendToken(aConnector, aConnector, responseToken);
@@ -212,6 +264,8 @@ public class ChannelPlugIn extends TokenPlugIn {
       Token token = new JSONToken(aToken.getNS(), DATA);
       token.setString(DATA, data);
       channel.broadcastAsync(token);
+    } else if (operation.equals(STOP)) {
+    	
     }
   }
 
@@ -221,18 +275,21 @@ public class ChannelPlugIn extends TokenPlugIn {
    * 
    * @param connector the connector for the publisher
    * @param channel the channel to publish
+   * @param user the user object that represents the publisher
    * @param secretKey the secretKey value from the publisher
    * @param accessKey the accessKey value from the publisher
    * @return the publisher object
    */
-  private Publisher authorizePublisher(WebSocketConnector connector, Channel channel, String secretKey, String accessKey) {
+  private Publisher authorizePublisher(WebSocketConnector connector, Channel channel, User user,
+		  String secretKey, String accessKey) {
     Publisher publisher = null;
     Date now = new Date();
-    if (channel.getAccessKey().equals(accessKey) && channel.getSecretKey().equals(secretKey)) {
-      publisher = new Publisher(connector, channel.getId(), now, now, false);
-    } else {
+    if (channel.getAccessKey().equals(accessKey) && channel.getSecretKey().equals(secretKey) 
+    		&& user.getLoginname().equals(channel.getOwner())) {
       publisher = new Publisher(connector, channel.getId(), now, now, true);
       channelManager.storePublisher(publisher);
+    } else {
+      publisher = new Publisher(connector, channel.getId(), now, now, false);
     }
     return publisher;
   }

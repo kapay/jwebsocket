@@ -82,8 +82,7 @@ public final class Channel implements ChannelLifeCycle {
 	/**
 	 * Initialize the new channel but it doesn't start.
 	 * 
-	 * @param config
-	 *            the channel config
+	 * @param config the channel config
 	 */
 	public Channel(ChannelConfig config) {
 		this.id = config.getId();
