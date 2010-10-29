@@ -40,6 +40,8 @@
 			var eXMPPStatus = null;
 			var eXMPPMessage = null;
 			var eXMPPType = null;
+			var eXMPPMode = null;
+			var eXMPPRoster = null;
 			var eXMPPStatus = null;
 			var eXMPPPriority = null;
 
@@ -64,7 +66,7 @@
 
 			function logon() {
 				// URL is ws://[yourhostname|localhost]:8787
-				var lURL = jws.JWS_SERVER_URL;
+				var lURL = jws.JWS_SERVER_URL; // "/;arg1=value1,arg2=value2";
 				gUsername = eJWSUsername.value;
 				var lPassword = eJWSPassword.value;
 				eJWSPassword.value = "";
@@ -150,6 +152,26 @@
 				log( aToken.from + "->" + aToken.to + ": " + aToken.body );
 			}
 
+			function onXMPPRoster( aToken ) {
+				log( "Roster received: " );
+				// remove all list items
+				var lOptions = eXMPPRoster.options;
+				for( var lIdx = eXMPPRoster.options.length - 1; lIdx >= 0; lIdx-- ) {
+					lOptions.remove( lIdx );
+				}
+				// append all roster items to select element
+				var lRoster = aToken.roster;
+				if( lRoster ) {
+					for( var lIdx = 0, lCnt = lRoster.length; lIdx < lCnt; lIdx++ ) {
+						var lItem = lRoster[ lIdx ];
+						var lOption = document.createElement( "option" );
+						lOptions.add( lOption );
+						lOption.innerHTML = "(" + lItem.user + ")";
+						lOption.value = lItem.user;
+					}
+				}
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
 
@@ -162,6 +184,7 @@
 				eXMPPMessage	= jws.$( "stxfXMPPMessage" );
 				eXMPPType		= jws.$( "sselXMPPType" );
 				eXMPPMode		= jws.$( "sselXMPPMode" );
+				eXMPPRoster		= jws.$( "sselXMPPRoster" );
 
 				eJWSUsername	= jws.$( "stxfUsername" );
 				eJWSPassword	= jws.$( "spwfPassword" );
@@ -171,7 +194,8 @@
 				if( jws.browserSupportsWebSockets() ) {
 					jWebSocketClient = new jws.jWebSocketJSONClient();
 					jWebSocketClient.setXMPPCallbacks({
-						OnXMPPChatMessage: onXMPPChatMessage
+						OnXMPPChatMessage: onXMPPChatMessage,
+						OnXMPPRoster: onXMPPRoster
 					});
 					eJWSUsername.focus();
 				} else {
@@ -243,11 +267,28 @@
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnectXMPP" type="button" value="X/Disconnect" onclick="xmppDisconnect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoutXMPP" type="button" value="X/Logout" onclick="xmppLogout();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSetStatus" type="button" value="Set Status" onclick="xmppSetPresence();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnCloseChat" type="button" value="Close Chat" onclick="xmppCloseChat();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnCloseChat" type="button" value="Close Chat" onclick="xmppCloseChat();"></td>
+					<td class="stdDlg" width="" rowspan="4" valign="top">
+						<select id="sselXMPPRoster" size="0" style="width:100px">
+<!--
+							<optgroup label="Group1">
+								<option value="1">A</option>
+								<option value="2">B</option>
+								<option value="3">C</option>
+							</optgroup>
+							<optgroup label="Group2">
+								<option value="4">A</option>
+								<option value="5">B</option>
+								<option value="6">C</option>
+								<option value="7">E</option>
+							</optgroup>
+-->
+						</select>
+					</td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPUsername" type="text" value="jabber-id" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPUsername" type="text" value="jwebsocket" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Server</td>
 					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPHost" type="text" value="jabber.org" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Domain</td>
@@ -264,7 +305,7 @@
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Password</td>
-					<td class="stdDlg" width="5"><input class="spwfDlg" id="stxfXMPPPassword" type="password" value="" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="spwfDlg" id="stxfXMPPPassword" type="password" value="JWS@jb211" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Port</td>
 					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfXMPPPort" type="text" value="5222" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Status</td>

@@ -56,6 +56,10 @@ jws.XMPPPlugIn = {
 					if( this.OnXMPPChatMessage ) {
 						this.OnXMPPChatMessage( aToken );
 					}
+				} 
+			} else if( "getRoster" == aToken.reqType) {
+				if( this.OnXMPPRoster ) {
+					this.OnXMPPRoster( aToken );
 				}
 			}
 		}
@@ -195,12 +199,28 @@ jws.XMPPPlugIn = {
 		return lRes;
 	},
 
+	xmpp: function( aUserId, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.XMPPPlugIn.NS,
+				userId: aUserId,
+				type: "closeChat"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	setXMPPCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
 		}
 		if( aListeners.OnXMPPChatMessage !== undefined ) {
 			this.OnXMPPChatMessage = aListeners.OnXMPPChatMessage;
+		}
+		if( aListeners.OnXMPPRoster !== undefined ) {
+			this.OnXMPPRoster = aListeners.OnXMPPRoster;
 		}
 	}
 

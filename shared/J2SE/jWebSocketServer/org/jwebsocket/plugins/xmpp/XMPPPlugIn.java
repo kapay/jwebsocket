@@ -463,15 +463,20 @@ public class XMPPPlugIn extends TokenPlugIn {
 				Roster lRoster = lXMPPConn.getRoster();
 				if (lRoster != null) {
 					Collection<RosterEntry> lEntries = lRoster.getEntries();
+					// list os all roster items
 					List lItems = new FastList();
 					for (RosterEntry lEntry : lEntries) {
+						// map of all fields for a roster item
 						Map lItem = new FastMap();
-						lItem.put("name", lEntry.getName());
+						String lString;
+						lString = lEntry.getName();
+						lItem.put("name", (lString != null ? lString : "[unknown]"));
 						ItemStatus lStatus = lEntry.getStatus();
-						lItem.put("status", (lStatus != null ? lStatus.toString() : "?"));
-						lItem.put("user", lEntry.getUser());
+						lItem.put("status", (lStatus != null ? lStatus.toString() : "[unknown]"));
+						lString = lEntry.getUser();
+						lItem.put("user", (lString != null ? lString : "[unknown]"));
 						ItemType lType = lEntry.getType();
-						lItem.put("type", (lType != null ? lType.name() : "?"));
+						lItem.put("type", (lType != null ? lType.name() : "[unknown]"));
 						lItems.add(lItem);
 					}
 					lResponse.setList("roster", lItems);
