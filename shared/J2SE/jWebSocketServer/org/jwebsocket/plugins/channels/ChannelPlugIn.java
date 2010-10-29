@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.CloseReason;
@@ -44,8 +43,7 @@ import org.jwebsocket.util.Tools;
  * that has to be followed by clients to publish data to the channel or subscribe
  * for receiving the data from the channels.
  * 
- * PUBLISHER OPERATION: Here are the basic token key/value pairs information for 
- * publisher client:
+ ************************PUBLISHER OPERATION***********************************
  * 
  * Token Type   : <tt>publisher</tt>
  * Namespace    : <tt>org.jwebsocket.plugins.channel</tt>
@@ -57,6 +55,11 @@ import org.jwebsocket.util.Tools;
  * a data to the channel publisher client has to authorize itself using 
  * <tt>secret_key</tt>, <tt>access_key</tt> and <tt>login</tt> which is registered in the 
  * jWebSocket server system via configuration file or from other jWebSocket components.
+ * 
+ * <tt>Token Request Includes:</tt>
+ * 
+ * Token Key    : <tt>channel<tt>
+ * Token Value  : <tt>channel id to authorize for</tt>
  * 
  * Token Key    : <tt>secret_key<tt>
  * Token Value  : <tt>value of the secret key</tt>
@@ -72,19 +75,41 @@ import org.jwebsocket.util.Tools;
  * channel registered is not started then it is started when publish command is received for 
  * the first time. 
  * 
+ * <tt>Token Request Includes:</tt>
+ * Token Key    : <tt>channel<tt>
+ * Token Value  : <tt>channel id to publish the data</tt>
+ * 
  * Token Key    : <tt>data<tt>
  * Token Value  : <tt>data to publish to the channel</tt>
  * 
  * <tt>stop</tt>: stop command means proper shutdown of channel and no more data will be 
  * received from the publisher.
  * 
- * <p> SUBSCRIBER OPERATION:</p>
- * Token Type : <tt>subscriber</tt>
- * Namespace : <tt>org.jwebsocket.plugins.channel</tt>
+ ************************SUBSCRIBER OPERATION *****************************************
  * 
- * Token Key: <tt>operation</tt>, Token Value: <tt></tt>
+ * Token Type  : <tt>subscriber</tt>
+ * Namespace   : <tt>org.jwebsocket.plugins.channel</tt>
  * 
+ * Token Key   : <tt>operation</tt>
+ * Token Value : <tt>[subscribe][unsuscribe]</tt>
  * 
+ * <tt>subscribe</tt> subscribe operation is to register the client as a subscriber for the 
+ * passed in channel and access_key if the channel is private and needs access_key for 
+ * subscription 
+ * 
+ * <tt>Token Request Includes:</tt>
+ * Token Key    : <tt>channel<tt>
+ * Token Value  : <tt>channel id to publish the data</tt>
+ * 
+ * Token Key    : <tt>access_key<tt>
+ * Token Value  : <tt>access_key value required for subscription</tt>
+ * 
+ * <tt>unsubscribe</tt> removes the client from the channel so no data will be broadcasted 
+ * to the unsuscribed clients.
+ * 
+ * <tt>Token Request Includes:</tt>
+ * Token Key    : <tt>channel<tt>
+ * Token Value  : <tt>channel id to unsuscribe</tt>
  * 
  * @author puran
  * @version $Id$
@@ -392,16 +417,6 @@ public class ChannelPlugIn extends TokenPlugIn {
     errorToken.setString("version", JWebSocketServerConstants.VERSION_STR);
     errorToken.setString("sourceId", theConnector.getId());
     errorToken.setString("error", error);
-    if (closeReason != null) {
-      errorToken.setString("reason", closeReason.toString().toLowerCase());
-    }
-    // don't send session-id on good bye, neither required nor desired
-    IOFuture future = sendTokenAsync(theConnector, theConnector, errorToken);
-    if (future != null) {
-      if (future.isDone()) {
-        theConnector.stopConnector(CloseReason.CLIENT);
-      }
-    }
   }
 
   /**
