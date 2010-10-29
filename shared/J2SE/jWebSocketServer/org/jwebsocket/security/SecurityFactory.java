@@ -175,6 +175,13 @@ public class SecurityFactory {
 		}
 		return lUser;
 	}
+	
+	/**
+	 * Returns the root user for the jWebSocket system.
+	 */
+	public static User getRootUser() {
+		return  mUsers.getUserByLoginName("root");
+	}
 
 	/**
 	 * checks if a user identified by its login name has a certain right.
