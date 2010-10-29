@@ -37,6 +37,9 @@ public class JDBCStore implements Store {
   /** default connection password for the channels data store */
   private static final String CONNECTION_PASSWORD = "himalayanyoddha";
   
+  /** default mysql driver name for channel store */
+  private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
+  
   /**
    * The descriptive information about this implementation.
    */
@@ -80,7 +83,7 @@ public class JDBCStore implements Store {
   /**
    * Driver to use.
    */
-  protected String driverName = null;
+  protected String driverName = DRIVER_NAME;
 
   /**
    * Table to use
