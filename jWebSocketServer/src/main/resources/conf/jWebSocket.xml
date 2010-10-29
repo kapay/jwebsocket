@@ -115,6 +115,23 @@
 			<id>send</id>
 			<description>Send message to a single target client.</description>
 		</right>
+		
+		<!-- configuration of channels related rights -->
+		<right>
+			<ns>org.jwebsocket.plugins.channel</ns>
+			<id>start</id>
+			<description>users can start channels.</description>
+		</right>
+		<right>
+			<ns>org.jwebsocket.plugins.channel</ns>
+			<id>stop</id>
+			<description>user can stop channels.</description>
+		</right>
+		<right>
+			<ns>org.jwebsocket.plugins.channel</ns>
+			<id>suspend</id>
+			<description>user can suspend channels.</description>
+		</right>
 
 		<!-- configuration of chat plug-in specific rights -->
 		<right>
@@ -236,6 +253,9 @@
 						providing its services! -->
 				<right>org.jwebsocket.plugins.admin.shutdown</right>
 				<right>org.jwebsocket.plugins.admin.getConnections</right>
+				<right>org.jwebsocket.plugins.channel.start</right>
+				<right>org.jwebsocket.plugins.channel.stop</right>
+				<right>org.jwebsocket.plugins.channel.suspend</right>
 			</rights>
 		</role>
 		<role>
@@ -257,6 +277,9 @@
 				<right>org.jwebsocket.plugins.jdbc.select</right>
 				<right>org.jwebsocket.plugins.filesystem.load</right>
 				<right>org.jwebsocket.plugins.filesystem.save</right>
+				<right>org.jwebsocket.plugins.channel.start</right>
+				<right>org.jwebsocket.plugins.channel.stop</right>
+				<right>org.jwebsocket.plugins.channel.suspend</right>
 			</rights>
 		</role>
 		<role>
@@ -362,7 +385,7 @@
 			      and publisher/subscribes registered, use_persistent_store value set to 'false'
 			      will cause everything to load from memory.
 			     -->
-				<setting key="use_channel_store">false</setting>
+				<setting key="use_channel_store">true</setting>
 				<!--  
 				   flag to enable the other jWebSocket components such as plugins, filters
 				   etc..to create,start and stop new channels dynamically. 
@@ -517,6 +540,21 @@
 
 	<!-- jWebSocket users -->
 	<users>
+	    <user>
+			<loginname>root</loginname>
+			<firstname>jWebSocket</firstname>
+			<lastname>Project</lastname>
+			<password>t0p-s3cr3t</password>
+			<description>jWebSocket Root User</description>
+			<!-- 0=blocked 1=allowed ... future states pending -->
+			<status>1</status>
+			<roles>
+				<!-- the rights of all roles are merged -->
+				<role>Administrator</role>
+				<role>User</role>
+				<role>Guest</role>
+			</roles>
+		</user>
 		<user>
 			<loginname>aschulze</loginname>
 			<firstname>Alexander</firstname>
