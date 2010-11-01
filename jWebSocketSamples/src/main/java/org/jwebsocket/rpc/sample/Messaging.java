@@ -25,7 +25,7 @@ public class Messaging extends BaseConnectorRPCCallable {
 		WebSocketConnector connector = getConnector();
 		for (int i = 0; i < messages.size(); i++) {
 			String message = messages.get(i);
-			new Rrpc("org.jwebsocket.android.demo.RPCDemo", "receiveMessage").to(connector).send(message).call();
+			new Rrpc("org.jwebsocket.android.demo.RPCDemoActivity", "receiveMessage").to(connector).send(message).call();
 		}
 	}
 }
