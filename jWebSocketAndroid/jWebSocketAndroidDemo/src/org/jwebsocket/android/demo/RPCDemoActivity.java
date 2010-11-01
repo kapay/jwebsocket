@@ -6,7 +6,6 @@ package org.jwebsocket.android.demo;
 
 import java.util.List;
 
-
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
@@ -39,67 +38,67 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- *
+ * 
  * @author prashant
  */
-public class RPCDemoActivity extends Activity implements WebSocketClientTokenListener {
+public class RPCDemoActivity extends Activity implements
+		WebSocketClientTokenListener {
 
-        private enum Target {ANDROID, BROWSER};
+	private enum Target {
+		ANDROID, BROWSER
+	};
 
-        private EditText classTxt;
+	private EditText classTxt;
 	private EditText methodTxt;
 	private EditText parameterTxt;
 	private EditText targetTxt;
 	private EditText resultTxt;
 	private Button invokeBtn;
-        private TextView targetLabel;
-        private RadioGroup targetRadioGroup;
-        private Boolean useRRPC = false;
-        private ImageView statusImage;
-        private Target selectedTarget = Target.ANDROID;
-
-        
+	private TextView targetLabel;
+	private RadioGroup targetRadioGroup;
+	private Boolean useRRPC = false;
+	private ImageView statusImage;
+	private Target selectedTarget = Target.ANDROID;
 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-                
+
 		setContentView(R.layout.rpc_demo);
-                
+
 		classTxt = (EditText) findViewById(R.id.classTxt);
 		methodTxt = (EditText) findViewById(R.id.methodTxt);
 		parameterTxt = (EditText) findViewById(R.id.parameterTxt);
 		resultTxt = (EditText) findViewById(R.id.resultTxt);
 		targetTxt = (EditText) findViewById(R.id.targetTxt);
-                targetLabel = (TextView)findViewById(R.id.targetLabel);
+		targetLabel = (TextView) findViewById(R.id.targetLabel);
 		invokeBtn = (Button) findViewById(R.id.invokeBtn);
-                statusImage = (ImageView)findViewById(R.id.statusImage);
-                targetRadioGroup = (RadioGroup)findViewById(R.id.radio_group);
-                
-                statusImage.setImageResource(R.drawable.disconnected);
+		statusImage = (ImageView) findViewById(R.id.statusImage);
+		targetRadioGroup = (RadioGroup) findViewById(R.id.radio_group);
 
-                
-                final CheckBox checkbox = (CheckBox) findViewById(R.id.rrpcCheckBox);
-                checkbox.setOnClickListener(new OnClickListener() {
-                    public void onClick(View v) {
+		statusImage.setImageResource(R.drawable.disconnected);
 
-                        if (((CheckBox) v).isChecked()) {
-                            targetTxt.setVisibility(EditText.VISIBLE);
-                            targetLabel.setVisibility(TextView.VISIBLE);
-                            targetRadioGroup.setVisibility(RadioGroup.VISIBLE);
-                            useRRPC = true;
-                        } else {
-                            targetTxt.setVisibility(EditText.GONE);
-                            targetLabel.setVisibility(TextView.GONE);
-                            targetRadioGroup.setVisibility(RadioGroup.GONE);
-                            useRRPC = false;
-                        }
-                       targetLabel.invalidate();
-                       targetTxt.invalidate();
-                       targetRadioGroup.invalidate();
+		final CheckBox checkbox = (CheckBox) findViewById(R.id.rrpcCheckBox);
+		checkbox.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				if (((CheckBox) v).isChecked()) {
+					targetTxt.setVisibility(EditText.VISIBLE);
+					targetLabel.setVisibility(TextView.VISIBLE);
+					targetRadioGroup.setVisibility(RadioGroup.VISIBLE);
+					useRRPC = true;
+				} else {
+					targetTxt.setVisibility(EditText.GONE);
+					targetLabel.setVisibility(TextView.GONE);
+					targetRadioGroup.setVisibility(RadioGroup.GONE);
+					useRRPC = false;
+				}
+				predefinedValues();
+				targetLabel.invalidate();
+				targetTxt.invalidate();
+				targetRadioGroup.invalidate();
 
-                    }
-                });
+			}
+		});
 
 		invokeBtn.setOnClickListener(new OnClickListener() {
 
@@ -108,70 +107,80 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 			}
 		});
 
-                final RadioButton radio_browser = (RadioButton) findViewById(R.id.radio_browser);
-                final RadioButton radio_android = (RadioButton) findViewById(R.id.radio_android);
-                radio_browser.setOnClickListener(radio_listener);
-                radio_android.setOnClickListener(radio_listener);
-
+		final RadioButton radio_browser = (RadioButton) findViewById(R.id.radio_browser);
+		final RadioButton radio_android = (RadioButton) findViewById(R.id.radio_android);
+		radio_browser.setOnClickListener(radio_listener);
+		radio_android.setOnClickListener(radio_listener);
 
 	}
+	
+	private void predefinedValues () {
+		if (useRRPC) {
+			if (selectedTarget.equals(Target.ANDROID)) {				
+				classTxt.setText("org.jwebsocket.android.demo.RPCDemoActivity");
+				methodTxt.setText("rrpcTest1");
+			}
+			else if (selectedTarget.equals(Target.BROWSER)) {
+				classTxt.setText("demo");
+				methodTxt.setText("rrpcTest1");
+			}
+		} else {
+			classTxt.setText("org.jwebsocket.rpc.sample.SampleRPCLibrary");
+			methodTxt.setText("getMD5");
+		}
+	}
 
-        private OnClickListener radio_listener = new OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on clicks
-                RadioButton rb = (RadioButton) v;
-                if(rb.getId() == R.id.radio_android)
-                {
-                    selectedTarget = Target.ANDROID;
-                }
+	private OnClickListener radio_listener = new OnClickListener() {
+		public void onClick(View v) {
+			// Perform action on clicks
+			RadioButton rb = (RadioButton) v;
+			if (rb.getId() == R.id.radio_android) {
+				selectedTarget = Target.ANDROID;
+			}
+			if (rb.getId() == R.id.radio_browser) {
+				selectedTarget = Target.BROWSER;
+			}
+			predefinedValues();
+		}
+	};
 
-                if(rb.getId() == R.id.radio_browser)
-                {
-                    selectedTarget = Target.BROWSER;
-                }
-            }
-        };
-
-        @Override
+	@Override
 	public boolean onCreateOptionsMenu(Menu aMenu) {
 		MenuInflater lMenInfl = getMenuInflater();
 		lMenInfl.inflate(R.menu.rpc_demo_menu, aMenu);
 		return true;
 	}
 
-        @Override
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
-			case R.id.rpcMenuExit:
-                                this.finish();
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
+		case R.id.rpcMenuExit:
+			this.finish();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
 		}
 	}
 
 	private void sendMethodInvokeToken() {
-		//TODO:validate the text fields first
+		// TODO:validate the text fields first
 		String lClassName = classTxt.getText().toString().trim();
 		String lMethodName = methodTxt.getText().toString().trim();
 		String lParameter = parameterTxt.getText().toString().trim();
 		String lTarget = targetTxt.getText().toString().trim();
 
-		//If we make a simple rpc
-		if ("server".equals(lTarget)) {
-			new Rpc(lClassName, lMethodName).send(lParameter).call();
-		} else {
+		// If we make a simple rpc
+		if (useRRPC) {
 			new Rrpc(lClassName, lMethodName).to(lTarget).send(lParameter).call();
+		} else {
+			//Sending "" or "null" will send null.
+			if ("".equals(lParameter) || "null".equals(lParameter)) {
+				new Rpc(lClassName, lMethodName).call();
+			}else {
+				new Rpc(lClassName, lMethodName).send(lParameter).call();
+			}
 		}
-//      	new Rrpc("org.jwebsocket.android.demo.RPCDemoActivity", "rrpcTest1").to(lTarget).send(lParameter).call();
-
-//        Token rpcToken = TokenFactory.createToken("rpc");
-//        rpcToken.setString("ns", CommonRpcPlugin.NS_RPC_DEFAULT);
-//        rpcToken.setString("classname", className);
-//        rpcToken.setString("method", methodName);
-//        rpcToken.setString("args", parameter);
-//        rpcToken.setBoolean("spawnThread", Boolean.FALSE);
 	}
 
 	@Override
@@ -201,13 +210,12 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 			JWC.removeListener(this);
 			JWC.close();
 		} catch (WebSocketException ex) {
-			//TODO: log exception
+			// TODO: log exception
 		}
 	}
 
 	public void processToken(WebSocketClientEvent aEvent, Token aToken) {
-		if ((CommonRpcPlugin.RPC_TYPE).equals(aToken.getString("reqType"))
-				&& ("response").equals(aToken.getType())) {
+		if ((CommonRpcPlugin.RPC_TYPE).equals(aToken.getString("reqType"))) {
 			if (aToken.getInteger("code") == 0) {
 				resultTxt.setText(aToken.getString("result"));
 			} else if (aToken.getInteger("code") == -1) {
@@ -217,9 +225,9 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 	}
 
 	public void processOpened(WebSocketClientEvent aEvent) {
-            if(statusImage != null) {
-                statusImage.setImageResource(R.drawable.authenticated);
-            }
+		if (statusImage != null) {
+			statusImage.setImageResource(R.drawable.authenticated);
+		}
 	}
 
 	public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
@@ -227,13 +235,15 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 
 	public void processClosed(WebSocketClientEvent aEvent) {
 	}
+
 	private static Handler handler = new Handler() {
 
 		@Override
 		public void handleMessage(Message msg) {
-			Toast.makeText(mContext, msg.getData().get("method")
-					+ " has been called by the server (args "
-					+ msg.getData().get("args"), Toast.LENGTH_SHORT).show();
+			Toast.makeText(
+					mContext,
+					msg.getData().get("method") + " has been called by the server (args "
+							+ msg.getData().get("args"), Toast.LENGTH_SHORT).show();
 		}
 	};
 	private static Context mContext;
@@ -273,6 +283,16 @@ public class RPCDemoActivity extends Activity implements WebSocketClientTokenLis
 		Bundle b = new Bundle();
 		b.putString("method", "rrpcTest2");
 		b.putString("args", aList.toString() + ", " + aList2.toString());
+		Message msg = new Message();
+		msg.setData(b);
+		handler.sendMessage(msg);
+	}
+	
+	@RPCCallable
+	public static void receiveMessage(String aMessage) {
+		Bundle b = new Bundle();
+		b.putString("method", "receiveMessage");
+		b.putString("args", aMessage);
 		Message msg = new Message();
 		msg.setData(b);
 		handler.sendMessage(msg);
