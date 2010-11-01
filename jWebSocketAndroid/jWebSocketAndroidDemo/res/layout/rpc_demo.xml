@@ -28,7 +28,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
         android:layout_width="fill_parent"
         android:layout_below="@id/classLabel"
         android:layout_height="36sp"        
-        android:text="org.jwebsocket.rpc.sample.SampleRPCLibrary"
+        android:text="org.jwebsocket.rpc.sample.Messaging"
 	android:gravity="top|left"
 	android:scrollHorizontally="true"
         android:textSize="12sp"
@@ -51,7 +51,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
         android:layout_below="@id/methodLabel"
         android:layout_height="36sp"        
 	android:gravity="top|left"
-        android:text="getMD5"
+        android:text="getMyMessages"
 	android:scrollHorizontally="true"
         android:textSize="12sp"
         >
@@ -87,7 +87,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/rrpcCheckBox"
-        android:text="Target (a connector ID for rrpc, or 'server' for simple rpc)"
+        android:text="Target (a connector ID for rrpc)"
         android:visibility="gone"
         >
 	</TextView>
@@ -99,7 +99,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
         android:layout_below="@id/targetLabel"
         android:layout_height="36sp"
             android:gravity="top|left"
-        android:text="server"
+        android:text="a connectorId"
             android:scrollHorizontally="true"
         android:textSize="12sp"
         android:visibility="gone"
