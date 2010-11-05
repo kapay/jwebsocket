@@ -17,6 +17,9 @@ package org.jwebsocket.jetty;
 
 import java.util.Date;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.engines.BaseEngine;
@@ -35,6 +38,27 @@ public class JettyEngine extends BaseEngine {
 
 	public JettyEngine(EngineConfiguration aConfiguration) {
 		super(aConfiguration);
+
+		// We will create our server running at http://localhost:8070
+		Server lJettyServer = new Server();
+		Connector lJettyConnector = new SelectChannelConnector();
+		lJettyConnector.setPort(8080);
+		lJettyConnector.setHost("127.0.0.1");
+		lJettyServer.addConnector(lJettyConnector);
+		/*
+		WebAppContext wac = new WebAppContext();
+		wac.setContextPath("/");
+		//expanded war or path of war file
+		// lJettyServer.addHandler(wac);
+		wac.setWar("./src/main/resources/web");
+		 */
+		lJettyServer.setStopAtShutdown(true);
+		try {
+			lJettyServer.start();
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ "Instantiating Embedded Jetty Server: " + lEx.getMessage());
+		}
 	}
 
 	@Override

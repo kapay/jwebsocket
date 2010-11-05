@@ -18,6 +18,7 @@
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>
 		<module>jWebSocketJetty</module>
+		<!-- <module>jWebSocketGlassFish</module> -->
 	</modules>
 
 	<build>
