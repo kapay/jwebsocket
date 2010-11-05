@@ -94,7 +94,7 @@ public class TCPEngine extends BaseEngine {
 					+ getId() + "' started' at port "
 					+ mListenerPort + " with default timeout "
 					+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
-					+ "...");
+					+ ".");
 		}
 	}
 
@@ -281,7 +281,7 @@ public class TCPEngine extends BaseEngine {
 
 		// set default sub protocol if none passed
 		if (lArgs.get("prot") == null) {
-			lArgs.put("prot", JWebSocketCommonConstants.SUB_PROT_DEFAULT);
+			lArgs.put("prot", JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
 		}
 
 		lHeader.put("host", lRespMap.get("host"));

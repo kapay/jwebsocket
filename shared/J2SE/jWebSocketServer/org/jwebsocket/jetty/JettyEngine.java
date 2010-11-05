@@ -15,8 +15,14 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.jetty;
 
+import java.util.Date;
+import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
+import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.engines.BaseEngine;
+import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.logging.Logging;
 
 /**
  *
@@ -24,8 +30,94 @@ import org.jwebsocket.engines.BaseEngine;
  */
 public class JettyEngine extends BaseEngine {
 
+	private static Logger mLog = Logging.getLogger(JettyEngine.class);
+	private boolean mIsRunning = false;
+
 	public JettyEngine(EngineConfiguration aConfiguration) {
 		super(aConfiguration);
 	}
 
+	@Override
+	public void startEngine()
+			throws WebSocketException {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Starting Jetty engine '"
+					+ getId()
+					+ "...");
+		}
+
+		super.startEngine();
+
+		if (mLog.isInfoEnabled()) {
+			mLog.info("Jetty engine '"
+					+ getId()
+					+ "' started.");
+		}
+	}
+
+	@Override
+	public void stopEngine(CloseReason aCloseReason)
+			throws WebSocketException {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Stopping Jetty engine '" + getId() + "...");
+		}
+
+		// resetting "isRunning" causes engine listener to terminate
+		mIsRunning = false;
+		// inherited method stops all connectors
+
+		long lStarted = new Date().getTime();
+		int lNumConns = getConnectors().size();
+		super.stopEngine(aCloseReason);
+		/*
+		// now wait until all connectors have been closed properly
+		// or timeout exceeds...
+		try {
+		while (getConnectors().size() > 0 && new Date().getTime() - lStarted < 10000) {
+		Thread.sleep(250);
+		}
+		} catch (Exception lEx) {
+		mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+		}
+		if (mLog.isDebugEnabled()) {
+		long lDuration = new Date().getTime() - lStarted;
+		int lRemConns = getConnectors().size();
+		if (lRemConns > 0) {
+		mLog.warn(lRemConns + " of " + lNumConns
+		+ " Jetty connectors '" + getId()
+		+ "' did not stop after " + lDuration + "ms.");
+		} else {
+		mLog.debug(lNumConns
+		+ " Jetty connectors '" + getId()
+		+ "' stopped after " + lDuration + "ms.");
+		}
+		}
+		 */
+	}
+
+	@Override
+	public void connectorStarted(WebSocketConnector aConnector) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Detected new connector at port " + aConnector.getRemotePort() + ".");
+		}
+		super.connectorStarted(aConnector);
+	}
+
+	@Override
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Detected stopped connector at port " + aConnector.getRemotePort() + ".");
+		}
+		super.connectorStopped(aConnector, aCloseReason);
+	}
+
+	@Override
+	/*
+	 * Returns {@code true} if the TCP engine is running or {@code false}
+	 * otherwise. The alive status represents the state of the TCP engine
+	 * listener thread.
+	 */
+	public boolean isAlive() {
+		return mIsRunning;
+	}
 }

@@ -323,6 +323,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	private void login(WebSocketConnector aConnector, Token aToken) {
+		
+		// sendWelcome(aConnector);
+
 		Token lResponse = createResponse(aToken);
 
 		String lUsername = aToken.getString("username");
@@ -445,7 +448,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		Token lResponse = createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'broadcast' (username='" 
+			log.debug("Processing 'broadcast' (username='"
 					+ getUsername(aConnector)
 					+ "') from '" + aConnector + "'...");
 		}

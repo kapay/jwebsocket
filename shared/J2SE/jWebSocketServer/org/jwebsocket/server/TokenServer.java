@@ -40,10 +40,7 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.listener.WebSocketServerTokenEvent;
 import org.jwebsocket.listener.WebSocketServerTokenListener;
-import org.jwebsocket.packetProcessors.CSVProcessor;
-import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.plugins.TokenPlugInChain;
-import org.jwebsocket.packetProcessors.XMLProcessor;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 
@@ -214,6 +211,10 @@ public class TokenServer extends BaseServer {
 	public void processPacket(WebSocketEngine aEngine, final WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		// is the data packet supposed to be interpreted as token?
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Processing packet as token...");
+			}
+
 			final Token lToken = packetToToken(aConnector, aDataPacket);
 			if (lToken != null) {
 				boolean lRunReqInOwnThread = "true".equals(lToken.getString("spawnThread"));
@@ -238,6 +239,10 @@ public class TokenServer extends BaseServer {
 				}
 			} else {
 				mLog.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
+			}
+		} else {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Processing packet as custom packet...");
 			}
 		}
 		super.processPacket(aEngine, aConnector, aDataPacket);
@@ -266,7 +271,6 @@ public class TokenServer extends BaseServer {
 			if (lTargetConnector.getBool(VAR_IS_TOKENSERVER)) {
 				// before sending the token push it through filter chain
 				FilterResponse lFilterResponse = getFilterChain().processTokenOut(null, lTargetConnector, aToken);
-
 				if (mLog.isDebugEnabled()) {
 					mLog.debug("Sending token '" + aToken + "' to '" + lTargetConnector + "'...");
 				}

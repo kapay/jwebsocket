@@ -46,8 +46,8 @@ public class BaseEngine implements WebSocketEngine {
 	}
 
 	@Override
-	public void setEngineConfiguration(EngineConfiguration theConfiguration) {
-		this.mConfiguration = theConfiguration;
+	public void setEngineConfiguration(EngineConfiguration aConfiguration) {
+		this.mConfiguration = aConfiguration;
 	}
 
 	@Override
@@ -97,7 +97,8 @@ public class BaseEngine implements WebSocketEngine {
 	}
 
 	@Override
-	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
+	public void connectorStopped(WebSocketConnector aConnector,
+			CloseReason aCloseReason) {
 		// notify servers that a connector has stopped
 		for (WebSocketServer lServer : mServers.values()) {
 			lServer.connectorStopped(aConnector, aCloseReason);
@@ -112,7 +113,8 @@ public class BaseEngine implements WebSocketEngine {
 	}
 
 	@Override
-	public void processPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
+	public void processPacket(WebSocketConnector aConnector,
+			WebSocketPacket aDataPacket) {
 		Map<String, WebSocketServer> lServers = getServers();
 		for (WebSocketServer lServer : lServers.values()) {
 			lServer.processPacket(this, aConnector, aDataPacket);
@@ -120,12 +122,14 @@ public class BaseEngine implements WebSocketEngine {
 	}
 
 	@Override
-	public void sendPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
+	public void sendPacket(WebSocketConnector aConnector,
+			WebSocketPacket aDataPacket) {
 		aConnector.sendPacket(aDataPacket);
 	}
 
 	@Override
-	public void broadcastPacket(WebSocketConnector aSource, WebSocketPacket aDataPacket) {
+	public void broadcastPacket(WebSocketConnector aSource,
+			WebSocketPacket aDataPacket) {
 		for (WebSocketConnector lConnector : mConnectors.values()) {
 			lConnector.sendPacket(aDataPacket);
 		}
