@@ -15,6 +15,8 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
+import org.jwebsocket.token.Token;
+
 
 /**
  * Listener interface for the <tt>Channel</tt>. 
@@ -55,4 +57,20 @@ public interface ChannelListener {
 	 * @param subscriber the subscriber who unsuscribed
 	 */
 	void unsubscribed(Channel channel, Subscriber subscriber);
+	
+	/**
+	 * called when channel receives the data from the publisher.
+	 * @param channel the channel object
+	 * @param token the token data received that will be broadcasted
+	 * to the subscribers
+	 */
+	void dataReceived(Channel channel, Token token);
+	
+	/**
+	 * Called when channel is done with the broadcast of the data it received to 
+	 * all the subscribers.
+	 * @param channel the channel object
+	 * @param token the token data which was broadcasted
+	 */
+	void dataBroadcasted(Channel channel, Token token);
 }

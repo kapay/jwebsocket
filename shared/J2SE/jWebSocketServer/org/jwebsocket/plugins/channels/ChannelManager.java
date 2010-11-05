@@ -17,12 +17,17 @@ package org.jwebsocket.plugins.channels;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.config.xml.ChannelConfig;
 import org.jwebsocket.security.Right;
 import org.jwebsocket.security.Rights;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.security.User;
+import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * Manager class responsible for all the channel operations within the
@@ -343,11 +348,72 @@ public class ChannelManager implements ChannelListener {
 
 	@Override
 	public void subscribed(Channel channel, Subscriber subscriber) {
-		// ignore for now
 	}
 
 	@Override
 	public void unsubscribed(Channel channel, Subscriber subscriber) {
-		// ignore for now
 	}
+
+	@Override
+	public void dataReceived(Channel channel, Token token) {
+		
+	}
+	@Override
+	public void dataBroadcasted(Channel channel, Token token) {
+		
+	}
+	
+	public void publishToLoggerChannel(Token token) {
+		getLoggerChannel().broadcastAsync(token);
+	}
+	
+	/**
+	 * Returns the error token 
+	 * @param aConnector the target connector object
+	 * @param channelId the channelId 
+	 * @param message the error message
+	 * @return the error token
+	 */
+	public Token getErrorToken(WebSocketConnector aConnector, String channelId, String message) {
+		Token logToken = getBaseChannelResponse(aConnector, channelId);
+		logToken.setString("event", "error");
+		logToken.setString("error", message);
+		
+		return logToken;
+	}
+	
+	/**
+	 * Returns the basic response token for a channel
+	 * @param aConnector the target connector object
+	 * @param channel the target channel
+	 * @return the base token of type channel
+	 */
+	public Token getBaseChannelResponse(WebSocketConnector aConnector, String channel) {
+	    Token channelToken = TokenFactory.createToken("channel");
+      channelToken.setString("vendor", JWebSocketCommonConstants.VENDOR);
+      channelToken.setString("version", JWebSocketServerConstants.VERSION_STR);
+      channelToken.setString("sourceId", aConnector.getId());
+      channelToken.setString("channelId", channel);
+      
+      return channelToken;
+	}
+	
+	public Token getChannelSuccessToken(WebSocketConnector aConnector, String channel, ChannelEventEnum eventType) {
+	    Token token = getBaseChannelResponse(aConnector, channel);
+	    String event = "";
+	    switch(eventType) {
+	    case LOGIN: event = "login";break;
+	    case AUTHORIZE:event = "authorize"; break;
+	    case PUBLISH: event = "publish"; break;
+	    case SUSCRIBE: event = "subscribe";
+	    case UNSUSCRIBE: event = "unsuscribe"; break;
+	    default:
+	        break;
+	    }
+	    token.setString("event", event);
+	    token.setString("status", "ok");
+	    
+	    return token;
+	}
+	
 }

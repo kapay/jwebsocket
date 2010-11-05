@@ -81,7 +81,6 @@ public final class Channel implements ChannelLifeCycle {
 
 	/**
 	 * Initialize the new channel but it doesn't start.
-	 * 
 	 * @param config the channel config
 	 */
 	public Channel(ChannelConfig config) {
@@ -236,7 +235,13 @@ public final class Channel implements ChannelLifeCycle {
 
 			if (channelListeners != null) {
 				for (ChannelListener listener : channelListeners) {
-					listener.subscribed(this, subscriber);
+					try {
+						listener.subscribed(this, subscriber);
+					} catch(Exception es) {
+						//trap for any exception so that if any of the
+						//listener implementation fails or throws exception
+						//we continue with others.
+					}
 				}
 			}
 		}
@@ -244,11 +249,8 @@ public final class Channel implements ChannelLifeCycle {
 
 	/**
 	 * Unsubscribe from this channel, and updates the channel store information
-	 * 
-	 * @param subscriber
-	 *            the subscriber to unsubscribe
-	 * @param channelManager
-	 *            the channel manager
+	 * @param subscriber the subscriber to unsubscribe
+	 * @param channelManager the channel manager
 	 */
 	public synchronized void unsubscribe(Subscriber subscriber,
 			ChannelManager channelManager) {
