@@ -44,12 +44,8 @@ public class SamplePlugIn extends TokenPlugIn {
 	private final static String NS_SAMPLE = JWebSocketServerConstants.NS_BASE + ".plugins.samples";
 	private final static String SAMPLE_VAR = NS_SAMPLE + ".started";
 
-	public SamplePlugIn() {
-		this(null);
-	}
-
-	public SamplePlugIn(PluginConfiguration configuration) {
-		super(configuration);
+	public SamplePlugIn(PluginConfiguration aConfiguration) {
+		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Instantiating sample plug-in...");
 		}
