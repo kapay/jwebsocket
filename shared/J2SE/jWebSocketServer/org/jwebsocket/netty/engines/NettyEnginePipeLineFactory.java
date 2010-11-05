@@ -48,12 +48,13 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
     private boolean sslEnabled = false;
 
     /**
-     * constructor that takes engine
-     * 
-     * @param engine
+     * constructor that takes engine and the flag to enable/disable ssl
+     * @param engine the netty engine object
+     * @param sslEnabled the flag for ssl/tls
      */
-    public NettyEnginePipeLineFactory(NettyEngine engine) {
+    public NettyEnginePipeLineFactory(NettyEngine engine, boolean sslEnabled) {
         this.engine = engine;
+        this.sslEnabled = sslEnabled;
     }
 
     /**
@@ -77,7 +78,6 @@ public class NettyEnginePipeLineFactory implements ChannelPipelineFactory {
             sslEngine.setUseClientMode(false);
 
             pipeline.addLast("ssl", new SslHandler(sslEngine));
-
         }
         pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast("aggregator", new HttpChunkAggregator(65536));

@@ -122,7 +122,15 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void channelConnected(ChannelHandlerContext aCtx, ChannelStateEvent aEvent) throws Exception {
         this.mContext = aCtx;
-        super.channelConnected(aCtx, aEvent);
+        // Get the SslHandler in the current pipeline.
+        final SslHandler sslHandler = aCtx.getPipeline().get(SslHandler.class);
+        // Get notified when SSL handshake is done.
+        try {
+        	ChannelFuture lHandshakeFuture = sslHandler.handshake();
+            lHandshakeFuture.addListener(new SecureWebSocketConnectionListener(sslHandler));
+        } catch (Exception es) {
+        	es.printStackTrace();
+        }
     }
 
     /**
@@ -518,6 +526,9 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
         public void operationComplete(ChannelFuture aFuture) throws Exception {
             if (aFuture.isSuccess()) {
                 // that means SSL handshaking is done.
+            	if (mLog.isInfoEnabled()) {
+            		mLog.info("SSL handshaking success");
+            	}
             } else {
                 aFuture.getChannel().close();
             }

@@ -66,7 +66,7 @@ public class NettyEngine extends BaseEngine {
 		// Configure the server.
 		ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
 		// Set up the event pipeline factory.
-		bootstrap.setPipelineFactory(new NettyEnginePipeLineFactory(this));
+		bootstrap.setPipelineFactory(new NettyEnginePipeLineFactory(this, true));
 		// Bind and start to accept incoming connections.
 		channel = bootstrap.bind(new InetSocketAddress(getConfiguration().getPort()));
 
