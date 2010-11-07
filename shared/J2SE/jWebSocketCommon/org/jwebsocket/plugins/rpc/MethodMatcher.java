@@ -109,7 +109,7 @@ public class MethodMatcher {
   }
   
   /**
-   * Set the parameter n° "aIndice" to aParameter (in the list of parameter used to invoke the method)
+   * Set the parameter "aIndice" to aParameter (in the list of parameter used to invoke the method)
    * @param aIndice
    * @param aParameter
    */
