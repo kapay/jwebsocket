@@ -114,17 +114,21 @@ public class Camera implements CommandListener {
 
 		public void run() {
 			try {
-				byte[] lRAW = mVideoControl.getSnapshot("encoding=jpeg");
+				byte[] lRAW = mVideoControl.getSnapshot("encoding=jpeg&width=240&height=320");
 				// &width=160&height=120
 
 				if (mClient.isConnected()) {
 					lImgCounter++;
-					mClient.saveFile(lRAW, "img_" + lImgCounter + ".jpg",
+					String lImgId = String.valueOf(lImgCounter);
+					while( lImgId.length() < 4) {
+						lImgId = "0" + lImgId;
+					}
+					mClient.saveFile(lRAW, "img_" + lImgId + ".jpg",
 							"public", Boolean.TRUE);
 				}
-				Image lImage = Image.createImage(lRAW, 0, lRAW.length);
-				ImageItem lImgItem = new ImageItem("", lImage, 0, "");
-				mPrevForm.append(lImgItem);
+				// Image lImage = Image.createImage(lRAW, 0, lRAW.length);
+				// ImageItem lImgItem = new ImageItem("", lImage, 0, "");
+				// mPrevForm.append(lImgItem);
 			} catch (Exception ex) {
 				mForm.setTitle(ex.getMessage());
 			}

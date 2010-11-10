@@ -459,7 +459,7 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 	public TextField getTxfURL() {
 		if (txfURL == null) {//GEN-END:|47-getter|0|47-preInit
 			// write pre-init user code here
-			txfURL = new TextField("URL", "socket://10.21.68.117:8787", 32, TextField.ANY);//GEN-BEGIN:|47-getter|1|47-postInit
+			txfURL = new TextField("URL", "ws://jwebsocket.org:8787", 32, TextField.ANY);//GEN-BEGIN:|47-getter|1|47-postInit
 			txfURL.setLayout(ImageItem.LAYOUT_DEFAULT | Item.LAYOUT_SHRINK | Item.LAYOUT_VSHRINK | Item.LAYOUT_2);
 			txfURL.setPreferredSize(50, -1);//GEN-END:|47-getter|1|47-postInit
 			// write post-init user code here

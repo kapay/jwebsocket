@@ -44,7 +44,14 @@ public class BaseClientJ2ME extends BaseClient {
 
 	public void open(String aURL) throws WebSocketException {
 		try {
-			socket = (SocketConnection) Connector.open(aURL, Connector.READ_WRITE); // "socket://localhost:8787"
+			// validate URL, Java ME expects socket:// 
+			if( aURL.startsWith("ws:") ) {
+				aURL = "socket" + aURL.substring(2);
+			} else if( aURL.startsWith("http:") ) {
+				aURL = "socket" + aURL.substring(4);
+			}
+			socket = (SocketConnection) Connector.open(aURL, Connector.READ_WRITE);
+			// "socket://localhost:8787"
 
 			is = socket.openInputStream();
 			os = socket.openOutputStream();

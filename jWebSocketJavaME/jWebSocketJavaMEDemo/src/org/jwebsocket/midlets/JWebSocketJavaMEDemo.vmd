@@ -168,7 +168,7 @@
                         <Property name="layout" typeID="Pint" value="V19456"/>
                         <Property name="preferredWidth" typeID="Pint" value="V50"/>
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
-                        <Property name="text" typeID="Pjava.lang.String" value="Vsocket://10.21.68.117:8787"/>
+                        <Property name="text" typeID="Pjava.lang.String" value="Vws://jwebsocket.org:8787"/>
                         <Property name="maxSize" typeID="Pint" value="V32"/>
                         <Property name="constraints" typeID="Pint" value="V0"/>
                     </Component>
@@ -207,5 +207,8 @@
             <Component componentID="21" typeID="C#DatabindingCategory"/>
         </Component>
     </Document>
-    <FlowScene version="1"/>
+    <FlowScene version="1">
+        <Node componentID="2" descriptorID="componentNode2" x="34" y="32"/>
+        <Node componentID="14" descriptorID="componentNode14" x="268" y="181"/>
+    </FlowScene>
 </VisualDesign>
