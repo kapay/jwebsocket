@@ -4,6 +4,14 @@
 <const descr="Base namespace&#10;" fullpath="jws.NS_BASE" name="NS_BASE" type="String" value="org.jwebsocket"/>
 <const descr="Current token id, incremented per token exchange to assign results.&#10;" fullpath="jws.CUR_TOKEN_ID" name="CUR_TOKEN_ID" type="Integer" value="0"/>
 <const descr="Current token id, incremented per token exchange to assign results.&#10;" fullpath="jws.JWS_SERVER_URL" name="JWS_SERVER_URL" type="String" value="ws"/>
+<const descr="The connection has not yet been established.&#10;" fullpath="jws.CONNECTING" name="CONNECTING" type="Integer" value="0"/>
+<const descr="The WebSocket connection is established and communication is possible.&#10;" fullpath="jws.OPEN" name="OPEN" type="Integer" value="1"/>
+<const descr="The connection is going through the closing handshake.&#10;" fullpath="jws.CLOSING" name="CLOSING" type="Integer" value="2"/>
+<const descr="The connection has been closed or could not be opened.&#10;" fullpath="jws.CLOSED" name="CLOSED" type="Integer" value="3"/>
+<const descr="jWebSocket sub protocol JSON&#10;" fullpath="jws.WS_SUBPROT_JSON" name="WS_SUBPROT_JSON" type="String" value="jWebSocket-JSON&quot;"/>
+<const descr="jWebSocket sub protocol XML&#10;" fullpath="jws.WS_SUBPROT_XML" name="WS_SUBPROT_XML" type="String" value="jWebSocket-XML&quot;"/>
+<const descr="jWebSocket sub protocol CSV&#10;" fullpath="jws.WS_SUBPROT_CSV" name="WS_SUBPROT_CSV" type="String" value="jWebSocket-CSV&quot;"/>
+<const descr="jWebSocket sub protocol Custom&#10;" fullpath="jws.WS_SUBPROT_CUSTOM" name="WS_SUBPROT_CUSTOM" type="String" value="jWebSocket-Custom&quot;"/>
 <method descr="Convenience replacement for [tt]document.getElementById()[/tt]. Returns the first HTML element with the given id or [tt]null[/tt] if the element could not be found.&#10;" fullpath="jws.$" name="$">
 <arg descr="id of the HTML element to be returned." field="aId" object="" type="String"/>
 <result descr="none" field="" object="" type="void"/>
@@ -38,6 +46,13 @@
 </method>
 <method descr="Returns the element which originally fired the event in a cross-browser compatible way.&#10;" fullpath="jws.events.getTarget" name="getTarget">
 <result descr="Element that originally fired the event." field="" object="" type="Node"/>
+</method>
+</class>
+<class ancestor="-" descr="Implements some required JavaScript tools.&#10;" fullpath="jws.tools" name="tools">
+<method descr="Fills up an integer value with the given number of zero characters&#10;to support a date time exchange according to ISO 8601&#10;" fullpath="jws.tools.zerofill" name="zerofill">
+<arg descr="Number to be formatted." field="aInt" object="" type="Number"/>
+<arg descr="Nu,ber of digits for the result." field="aDigits" object="" type="Number"/>
+<result descr="String with the exact number of digits filled with 0." field="" object="" type="String"/>
 </method>
 </class>
 <class ancestor="-" descr="Implementation of the [tt]jws.jWebSocketBaseClient[/tt] class. This class does not handle exceptions or error, it throws exceptions, which are (have to be) handled by the descendant classes.&#10;" fullpath="jws.jWebSocketBaseClient" name="jWebSocketBaseClient">
@@ -157,6 +172,14 @@
 <arg descr="Reference to callback function, which is called when the response is received." field="OnResponse" object="aOptions" type="Function"/>
 <result descr="none" field="" object="" type="void"/>
 </method>
+<method descr="Returns the last token id that has been used for the last recent&#10;request.This id was already used and cannot be used for further&#10;tranmissions.&#10;" fullpath="jws.jWebSocketTokenClient.getLastTokenId" name="getLastTokenId">
+<arg descr="none" field="" object="" type=""/>
+<result descr="Last recently used unique token-id." field="" object="" type="Integer"/>
+</method>
+<method descr="Returns the next token id that will be used for the next request.&#10;This id will be used by the next sendToken call.&#10;" fullpath="jws.jWebSocketTokenClient.getNextTokenId" name="getNextTokenId">
+<arg descr="none" field="" object="" type=""/>
+<result descr="Next unique token-id used for the next sendToken call." field="" object="" type="Integer"/>
+</method>
 <method descr="Sends a simple text message to a certain target client within the WebSocket network by creating and sending a [tt]send[/tt] token. The receiver must be addressed by its client id.&#10;This method requires the user to be authenticated.&#10;" fullpath="jws.jWebSocketTokenClient.sendText" name="sendText">
 <arg descr="Client id of the target client for the message." field="aTarget" object="" type="String"/>
 <arg descr="Textmessage to be send to the target client." field="aText" object="" type="String"/>
@@ -262,49 +285,6 @@
 <result descr="none" field="" object="" type="void"/>
 </method>
 </class>
-<class ancestor="-" descr="Implementation of the [tt]jws.StreamingPlugIn[/tt] class. This plug-in provides the methods to register and unregister at certain stream sn the server.&#10;" fullpath="jws.StreamingPlugIn" name="StreamingPlugIn">
-<const descr="Namespace for the [tt]StreamingPlugIn[/tt] class.&#10;" fullpath="jws.StreamingPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.streaming (jws.NS_BASE + &quot;.plugins.streaming&quot;)"/>
-<method descr="Registers the client at the given stream on the server. After this operation the client obtains all messages in this stream. Basically a client can register at multiple streams.&#10;If no stream with the given ID exists on the server an error token is returned. Depending on the type of the stream it may take more or less time until you get the first token from the stream.&#10;" fullpath="jws.StreamingPlugIn.registerStream" name="registerStream">
-<arg descr="The id of the server side data stream." field="aStream" object="" type="String"/>
-<result descr="none" field="" object="" type="void"/>
-</method>
-<method descr="Unregisters the client from the given stream on the server.&#10;" fullpath="jws.StreamingPlugIn.unregisterStream" name="unregisterStream">
-<arg descr="The id of the server side data stream." field="aStream" object="" type="String"/>
-<result descr="none" field="" object="" type="void"/>
-</method>
-</class>
-<class ancestor="-" descr="The RRPCServer server provides the methods which are granted to be called by the server and thus from the &amp;quot;outside&amp;quot;. This class is used by the [tt]jws.RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RRPCServer" name="RRPCServer">
-<method descr="description pending...&#10;" fullpath="jws.RRPCServer.demo" name="demo">
-<arg descr="Array of arguments to the remote procedure." field="aArgs" object="" type="Array"/>
-<result descr="none" field="" object="" type="void"/>
-</method>
-</class>
-<class ancestor="-" descr="Implementation of the [tt]jws.RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn" name="RPCClientPlugIn">
-<const descr="Namespace for the [tt]RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.rpc (jws.NS_BASE + &quot;.plugins.rpc&quot;)"/>
-<method descr="Processes an incoming token from the server or a remote client. Here the token is checked for type [tt]rrpc[/tt]. If such is detected it gets processed by the [tt]onRRPC[/tt] method of this class.&#10;" fullpath="jws.RPCClientPlugIn.processToken" name="processToken">
-<arg descr="Token received from the server or a remote client." field="aToken" object="" type="Object"/>
-<result descr="none" field="" object="" type="void"/>
-</method>
-<method descr="Runs a remote procedure call (RPC) on the jWebSocket server. The security mechanisms on the server require the call to be granted, otherwise it gets rejected.&#10;" fullpath="jws.RPCClientPlugIn.rpc" name="rpc">
-<arg descr="Class of the method that is supposed to be called." field="aClass" object="" type="String"/>
-<arg descr="Name of the method that is supposed to be called." field="aMthd" object="" type="String"/>
-<arg descr="Arguments for method that is supposed to be called." field="aArgs" object="" type="Array"/>
-<arg descr="Optional arguments. For details please refer to the [tt]sendToken[/tt] method." field="aOptions" object="" type="Object"/>
-<result descr="none" field="" object="" type="void"/>
-</method>
-<method descr="Runs a reverse remote procedure call (RRPC) on another client.&#10;" fullpath="jws.RPCClientPlugIn.rrpc" name="rrpc">
-<arg descr="Id of the target remote client." field="aTarget" object="" type="String"/>
-<arg descr="Class of the method that is supposed to be called." field="aClass" object="" type="String"/>
-<arg descr="Name of the method that is supposed to be called." field="aMthd" object="" type="String"/>
-<arg descr="Arguments for method that is supposed to be called." field="aArgs" object="" type="Array"/>
-<arg descr="Optional arguments. For details please refer to the [tt]sendToken[/tt] method." field="aOptions" object="" type="Object"/>
-<result descr="none" field="" object="" type="void"/>
-</method>
-<method descr="Processes a remote procedure call from another client. This method is called internally only and should not be invoked by the application.&#10;" fullpath="jws.RPCClientPlugIn.onRRPC" name="onRRPC">
-<arg descr="Token that contains the rrpc arguments from the source client." field="aToken" object="" type="Object"/>
-<result descr="none" field="" object="" type="void"/>
-</method>
-</class>
 <class ancestor="jws.jWebSocketTokenClient" descr="Implementation of the [tt]jws.jWebSocketJSONClient[/tt] class.&#10;" fullpath="jws.jWebSocketJSONClient" name="jWebSocketJSONClient">
 <method descr="converts a token to a JSON stream. If the browser provides a native JSON class this is used, otherwise it use the automatically embedded JSON library from json.org.&#10;" fullpath="jws.jWebSocketJSONClient.tokenToStream" name="tokenToStream">
 <arg descr="The token (an JavaScript Object) to be converted into an JSON stream." field="aToken" object="" type="Token"/>
@@ -337,5 +317,66 @@
 <result descr="The Token object of stream could be parsed successfully." field="Token" object="" type="Object"/>
 <result descr="Fields of the token depend on its content and purpose and need to be interpreted by the higher level software tiers." field="[i]field[/i]" object="Token" type="[i]type[/i]"/>
 </method>
+</class>
+<class ancestor="-" descr="Implementation of the [tt]jws.JDBCPlugIn[/tt] class.&#10;" fullpath="jws.JDBCPlugIn" name="JDBCPlugIn">
+<const descr="Namespace for the [tt]JDBCPlugIn[/tt] class.&#10;" fullpath="jws.JDBCPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.jdbc (jws.NS_BASE + &quot;.plugins.jdbc&quot;)"/>
+</class>
+<class ancestor="-" descr="Implementation of the [tt]jws.MailPlugIn[/tt] class.&#10;" fullpath="jws.MailPlugIn" name="MailPlugIn">
+<const descr="Namespace for the [tt]MailPlugIn[/tt] class.&#10;" fullpath="jws.MailPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.mail (jws.NS_BASE + &quot;.plugins.mail&quot;)"/>
+</class>
+<class ancestor="-" descr="Implementation of the [tt]jws.RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn" name="RPCClientPlugIn">
+<const descr="Namespace for the [tt]RPCClientPlugIn[/tt] class.&#10;" fullpath="jws.RPCClientPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.rpc (jws.NS_BASE + &quot;.plugins.rpc&quot;)"/>
+<method descr="set the default value of the spawnThread option&#10;" fullpath="jws.RPCClientPlugIn.setSpawnThreadDefault" name="setSpawnThreadDefault">
+<arg descr="" field="aDefault" object="" type="Boolean."/>
+<result descr="none" field="" object="" type="void"/>
+</method>
+<method descr="grant the access to a rrpc procedure&#10;" fullpath="jws.RPCClientPlugIn.addGrantedProcedure" name="addGrantedProcedure">
+<arg descr="" field="aProcedure" object="" type="String procedure name (including name space)."/>
+<result descr="none" field="" object="" type="void"/>
+</method>
+<method descr="remove the access to a rrpc procedure&#10;" fullpath="jws.RPCClientPlugIn.removeGrantedProcedure" name="removeGrantedProcedure">
+<arg descr="" field="aProcedure" object="" type="String procedure name (including name space)."/>
+<result descr="none" field="" object="" type="void"/>
+</method>
+<method descr="Processes an incoming token from the server or a remote client. Here the token is checked for type [tt]rrpc[/tt]. If such is detected it gets processed by the [tt]onRRPC[/tt] method of this class.&#10;" fullpath="jws.RPCClientPlugIn.processToken" name="processToken">
+<arg descr="Token received from the server or a remote client." field="aToken" object="" type="Object"/>
+<result descr="none" field="" object="" type="void"/>
+</method>
+<method descr="Runs a remote procedure call (RPC) on the jWebSocket server. The security mechanisms on the server require the call to be granted, otherwise it gets rejected.&#10;" fullpath="jws.RPCClientPlugIn.rpc" name="rpc">
+<arg descr="Class of the method that is supposed to be called." field="aClass" object="" type="String"/>
+<arg descr="Name of the method that is supposed to be called." field="aMthd" object="" type="String"/>
+<arg descr="Arguments for method that is supposed to be called. Should always be an array, but also works with simple values. Caution with a simple array as parameter (args mus be" field="aArgs" object="" type="Array"/>
+<arg descr="Optional arguments. For details please refer to the [tt]sendToken[/tt] method." field="aOptions" object="" type="Object"/>
+<result descr="none" field="" object="" type="void"/>
+</method>
+<method descr="Runs a reverse remote procedure call (RRPC) on another client.&#10;" fullpath="jws.RPCClientPlugIn.rrpc" name="rrpc">
+<arg descr="Id of the target remote client." field="aTarget" object="" type="String"/>
+<arg descr="Class of the method that is supposed to be called." field="aClass" object="" type="String"/>
+<arg descr="Name of the method that is supposed to be called." field="aMthd" object="" type="String"/>
+<arg descr="Arguments for method that is supposed to be called." field="aArgs" object="" type="Array"/>
+<arg descr="Optional arguments. For details please refer to the [tt]sendToken[/tt] method." field="aOptions" object="" type="Object"/>
+<result descr="none" field="" object="" type="void"/>
+</method>
+<method descr="Processes a remote procedure call from another client. This method is called internally only and should not be invoked by the application.&#10;" fullpath="jws.RPCClientPlugIn.onRRPC" name="onRRPC">
+<arg descr="Token that contains the rrpc arguments from the source client." field="aToken" object="" type="Object"/>
+<result descr="none" field="" object="" type="void"/>
+</method>
+</class>
+<class ancestor="-" descr="Implementation of the [tt]jws.StreamingPlugIn[/tt] class. This plug-in provides the methods to register and unregister at certain stream sn the server.&#10;" fullpath="jws.StreamingPlugIn" name="StreamingPlugIn">
+<const descr="Namespace for the [tt]StreamingPlugIn[/tt] class.&#10;" fullpath="jws.StreamingPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.streaming (jws.NS_BASE + &quot;.plugins.streaming&quot;)"/>
+<method descr="Registers the client at the given stream on the server. After this operation the client obtains all messages in this stream. Basically a client can register at multiple streams.&#10;If no stream with the given ID exists on the server an error token is returned. Depending on the type of the stream it may take more or less time until you get the first token from the stream.&#10;" fullpath="jws.StreamingPlugIn.registerStream" name="registerStream">
+<arg descr="The id of the server side data stream." field="aStream" object="" type="String"/>
+<result descr="none" field="" object="" type="void"/>
+</method>
+<method descr="Unregisters the client from the given stream on the server.&#10;" fullpath="jws.StreamingPlugIn.unregisterStream" name="unregisterStream">
+<arg descr="The id of the server side data stream." field="aStream" object="" type="String"/>
+<result descr="none" field="" object="" type="void"/>
+</method>
+</class>
+<class ancestor="-" descr="Implementation of the [tt]jws.TwitterPlugIn[/tt] class.&#10;" fullpath="jws.TwitterPlugIn" name="TwitterPlugIn">
+<const descr="Namespace for the [tt]TwitterPlugIn[/tt] class.&#10;" fullpath="jws.TwitterPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.twitter (jws.NS_BASE + &quot;.plugins.twitter&quot;)"/>
+</class>
+<class ancestor="-" descr="Implementation of the [tt]jws.XMPPPlugIn[/tt] class.&#10;" fullpath="jws.XMPPPlugIn" name="XMPPPlugIn">
+<const descr="Namespace for the [tt]XMPPPlugIn[/tt] class.&#10;" fullpath="jws.XMPPPlugIn.NS" name="NS" type="String" value="org.jwebsocket.plugins.xmpp (jws.NS_BASE + &quot;.plugins.xmpp&quot;)"/>
 </class>
 </docroot>

@@ -19,9 +19,14 @@
 //  jWebSocket Sample Client Plug-In
 //	---------------------------------------------------------------------------
 
+//:package:*:jws
+//:class:*:jws.JDBCPlugIn
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.JDBCPlugIn[/tt] class.
 jws.JDBCPlugIn = {
 
-	// namespace for shared objects plugin
+	//:const:*:NS:String:org.jwebsocket.plugins.jdbc (jws.NS_BASE + ".plugins.jdbc")
+	//:d:en:Namespace for the [tt]JDBCPlugIn[/tt] class.
 	// if namespace is changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.jdbc",
 

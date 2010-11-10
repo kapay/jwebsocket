@@ -19,9 +19,14 @@
 //  jWebSocket Mail Client Plug-In
 //	---------------------------------------------------------------------------
 
+//:package:*:jws
+//:class:*:jws.MailPlugIn
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.MailPlugIn[/tt] class.
 jws.MailPlugIn = {
 
-	// namespace for mail plugin
+	//:const:*:NS:String:org.jwebsocket.plugins.mail (jws.NS_BASE + ".plugins.mail")
+	//:d:en:Namespace for the [tt]MailPlugIn[/tt] class.
 	// if namespace is changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.mail",
 

@@ -19,9 +19,14 @@
 //  jWebSocket Twitter Client Plug-In
 //	---------------------------------------------------------------------------
 
+//:package:*:jws
+//:class:*:jws.TwitterPlugIn
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.TwitterPlugIn[/tt] class.
 jws.TwitterPlugIn = {
 
-	// namespace for twitter plugin
+	//:const:*:NS:String:org.jwebsocket.plugins.twitter (jws.NS_BASE + ".plugins.twitter")
+	//:d:en:Namespace for the [tt]TwitterPlugIn[/tt] class.
 	// if namespace is changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.twitter",
 

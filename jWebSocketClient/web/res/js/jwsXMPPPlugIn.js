@@ -19,9 +19,14 @@
 //  jWebSocket XMPP Client Plug-In
 //	---------------------------------------------------------------------------
 
+//:package:*:jws
+//:class:*:jws.XMPPPlugIn
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.XMPPPlugIn[/tt] class.
 jws.XMPPPlugIn = {
 
-	// namespace for xmpp plugin
+	//:const:*:NS:String:org.jwebsocket.plugins.xmpp (jws.NS_BASE + ".plugins.xmpp")
+	//:d:en:Namespace for the [tt]XMPPPlugIn[/tt] class.
 	// if namespace is changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.xmpp",
 
