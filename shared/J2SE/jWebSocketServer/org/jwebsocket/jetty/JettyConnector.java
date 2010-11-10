@@ -15,7 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.jetty;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;

@@ -35,7 +35,10 @@ public class EngineConfigHandler implements ConfigHandler {
 	private static final String ID = "id";
 	private static final String NAME = "name";
 	private static final String JAR = "jar";
+	private static final String CONTEXT = "context";
+	private static final String SERVLET = "servlet";
 	private static final String PORT = "port";
+	private static final String SSL_PORT = "sslport";
 	private static final String TIMEOUT = "timeout";
 	private static final String MAXFRAMESIZE = "maxframesize";
 	private static final String DOMAINS = "domains";
@@ -47,8 +50,8 @@ public class EngineConfigHandler implements ConfigHandler {
 	@Override
 	public Config processConfig(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
-		String lId = "", lName = "", lJar = "";
-		int lPort = 0, lTimeout = 0, lFramesize = 0;
+		String lId = "", lName = "", lJar = "", lContext = "", lServlet = "";
+		int lPort = 0, lSSLPort = 0, lTimeout = 0, lFramesize = 0;
 		List<String> lDomains = null;
 		while (aStreamReader.hasNext()) {
 			aStreamReader.next();
@@ -63,9 +66,18 @@ public class EngineConfigHandler implements ConfigHandler {
 				} else if (lElementName.equals(JAR)) {
 					aStreamReader.next();
 					lJar = aStreamReader.getText();
+				} else if (lElementName.equals(CONTEXT)) {
+					aStreamReader.next();
+					lContext = aStreamReader.getText();
+				} else if (lElementName.equals(SERVLET)) {
+					aStreamReader.next();
+					lServlet = aStreamReader.getText();
 				} else if (lElementName.equals(PORT)) {
 					aStreamReader.next();
 					lPort = Tools.stringToInt(aStreamReader.getText(), -1);
+				} else if (lElementName.equals(SSL_PORT)) {
+					aStreamReader.next();
+					lSSLPort = Tools.stringToInt(aStreamReader.getText(), -1);
 				} else if (lElementName.equals(TIMEOUT)) {
 					aStreamReader.next();
 					lTimeout = Integer.parseInt(aStreamReader.getText());
@@ -85,7 +97,9 @@ public class EngineConfigHandler implements ConfigHandler {
 				}
 			}
 		}
-		return new EngineConfig(lId, lName, lJar, lPort,
+		return new EngineConfig(lId, lName, lJar, 
+				lPort, lSSLPort,
+				lContext, lServlet,
 				lTimeout, lFramesize, lDomains);
 	}
 

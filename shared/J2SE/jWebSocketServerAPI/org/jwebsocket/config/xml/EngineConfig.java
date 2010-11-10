@@ -31,7 +31,10 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	private final String mId;
 	private final String mName;
 	private final String mJar;
+	private final String mContext;
+	private final String mServlet;
 	private final int mPort;
+	private final int mSSLPort;
 	private final int mTimeout;
 	private final int mMaxframesize;
 	private final List<String> mDomains;
@@ -48,12 +51,16 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 *						receive without closing the connection
 	 * @param aDomains      list of domain names
 	 */
-	public EngineConfig(String aId, String aName, String aJar, int aPort, 
-			int aTimeout, int aMaxFrameSize, List<String> aDomains) {
+	public EngineConfig(String aId, String aName, String aJar, int aPort, int aSSLPort,
+			String aContext, String aServlet, int aTimeout,
+			int aMaxFrameSize, List<String> aDomains) {
 		this.mId = aId;
 		this.mName = aName;
 		this.mJar = aJar;
+		this.mContext = aContext;
+		this.mServlet = aServlet;
 		this.mPort = aPort;
+		this.mSSLPort = aSSLPort;
 		this.mTimeout = aTimeout;
 		this.mMaxframesize = aMaxFrameSize;
 		this.mDomains = aDomains;
@@ -90,6 +97,32 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	@Override
 	public int getPort() {
 		return mPort;
+	}
+
+	/**
+	 * @return the SSL port
+	 */
+	@Override
+	public int getSSLPort() {
+		return mSSLPort;
+	}
+
+	/**
+	 * Returns the context for servlet based engines like Jetty
+	 * @return the context for servlet based engines, null for native servers
+	 */
+	@Override
+	public String getContext() {
+		return mContext;
+	}
+
+	/**
+	 * Returns the servlet for servlet based engines like Jetty
+	 * @return the servlet for servlet based engines, null for native servers
+	 */
+	@Override
+	public String getServlet() {
+		return mServlet;
 	}
 
 	/**

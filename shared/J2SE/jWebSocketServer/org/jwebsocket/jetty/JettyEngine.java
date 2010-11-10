@@ -17,9 +17,10 @@ package org.jwebsocket.jetty;
 
 import java.util.Date;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.engines.BaseEngine;
@@ -35,29 +36,80 @@ public class JettyEngine extends BaseEngine {
 
 	private static Logger mLog = Logging.getLogger(JettyEngine.class);
 	private boolean mIsRunning = false;
+	private Server mJettyServer = null;
 
 	public JettyEngine(EngineConfiguration aConfiguration) {
+
 		super(aConfiguration);
 
-		// We will create our server running at http://localhost:8070
-		Server lJettyServer = new Server();
-		Connector lJettyConnector = new SelectChannelConnector();
-		lJettyConnector.setPort(8080);
-		lJettyConnector.setHost("127.0.0.1");
-		lJettyServer.addConnector(lJettyConnector);
-		/*
-		WebAppContext wac = new WebAppContext();
-		wac.setContextPath("/");
-		//expanded war or path of war file
-		// lJettyServer.addHandler(wac);
-		wac.setWar("./src/main/resources/web");
-		 */
-		lJettyServer.setStopAtShutdown(true);
+		int lPort = aConfiguration.getPort();
+		int lSSLPort = aConfiguration.getSSLPort();
+
+		String lContext = aConfiguration.getContext();
+		if (lContext == null) {
+			lContext = "/";
+		}
+		String lServlet = aConfiguration.getContext();
+		if (lServlet == null) {
+			lServlet = "/*";
+		}
 		try {
-			lJettyServer.start();
+
+			// create Jetty server
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Instantiating Jetty server at "
+						+ "port " + lPort
+						+ ", ssl-port " + lSSLPort
+						+ ", context: '" + lContext
+						+ "', servlet: '" + lServlet + "'...");
+			}
+			mJettyServer = new Server(lPort);
+
+			SslSelectChannelConnector lSSLConnector = new SslSelectChannelConnector();
+			String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
+			String lKeyStore = lWebSocketHome + "/conf/jWebSocket.ks";
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Loading SSL cert from keystore '" + lKeyStore + "'...");
+			}
+			lSSLConnector.setPort(lSSLPort);
+			lSSLConnector.setKeystore(lKeyStore);
+			lSSLConnector.setPassword("jWebSocket");
+			lSSLConnector.setKeyPassword("jWebSocket");
+			mJettyServer.addConnector(lSSLConnector);
+
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Instantiating SelectChannelConnector...");
+			}
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Adding connector to server...");
+			}
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Setting the context w/o sessions...");
+			}
+			ServletContextHandler lServletContext =
+					new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+
+			lServletContext.setContextPath(lContext);
+			mJettyServer.setHandler(lServletContext);
+
+			lServletContext.addServlet(new ServletHolder(new JettyServlet()), lServlet);
+
+			mJettyServer.setStopAtShutdown(true);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Starting embedded Jetty server...");
+			}
+			mJettyServer.start();
+			// if (mLog.isDebugEnabled()) {
+			//	mLog.debug("Joining embedded Jetty server...");
+			// }
+			// mJettyServer.join();
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
 					+ "Instantiating Embedded Jetty Server: " + lEx.getMessage());
+		}
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Jetty Server sucessfully instantiated at port "
+					+ lPort + ", SSL port " + lSSLPort + "...");
 		}
 	}
 
@@ -93,6 +145,14 @@ public class JettyEngine extends BaseEngine {
 		long lStarted = new Date().getTime();
 		int lNumConns = getConnectors().size();
 		super.stopEngine(aCloseReason);
+
+		try {
+			mJettyServer.stop();
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ "Stopping Embedded Jetty Server: " + lEx.getMessage());
+		}
+
 		/*
 		// now wait until all connectors have been closed properly
 		// or timeout exceeds...

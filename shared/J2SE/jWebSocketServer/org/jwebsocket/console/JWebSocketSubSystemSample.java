@@ -70,7 +70,10 @@ public class JWebSocketSubSystemSample {
 				"tcp0", // id
 				"org.jwebsocket.tcp.engines.TCPEngine", // name
 				"-", // jar, needs to be in classpath, i.e. embedded in .jar'/manifest
-				8787, // port
+				8787, // unsecured nonssl-port
+				9797, // secured ssl-port
+				null, // context if such
+				null, // servlet if such
 				120000, // default session timeout
 				JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE, // max framesize
 				lDomains // list of accepted domains

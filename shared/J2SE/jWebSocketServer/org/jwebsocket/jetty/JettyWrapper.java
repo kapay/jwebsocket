@@ -26,8 +26,35 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.logging.Logging;
 
-
 // LOOK AT THIS: http://www.maths.tcd.ie/~dacurran/4ict12/assignment3/
+// Jetty Home: http://www.eclipse.org/jetty/
+// Jetty M1 JavaDoc: http://www.jarvana.com/jarvana/browse/org/eclipse/jetty/aggregate/jetty-all-server/8.0.0.M1/
+// SSL Tutorial: http://docs.codehaus.org/display/JETTY/How+to+configure+SSL
+// " http://www.opennms.org/wiki/Standalone_HTTPS_with_Jetty
+
+/*
+aschulze-dt1:~ alexanderschulze$ keytool -keystore keystore -alias jWebSocket -genkey -keyalg RSA
+Enter keystore password:
+Re-enter new password:
+What is your first and last name?
+  [Unknown]:  Alexander Schulze
+What is the name of your organizational unit?
+  [Unknown]:  jWebSocket
+What is the name of your organization?
+  [Unknown]:  Innotrade GmbH
+What is the name of your City or Locality?
+  [Unknown]:  Herzogenrath
+What is the name of your State or Province?
+  [Unknown]:  NRW
+What is the two-letter country code for this unit?
+  [Unknown]:  DE
+Is CN=Alexander Schulze, OU=jWebSocket, O=Innotrade GmbH, L=Herzogenrath, ST=NRW, C=DE correct?
+  [no]:  yes
+
+Enter key password for <jWebSocket>
+	(RETURN if same as keystore password):
+aschulze-dt1:~ alexanderschulze$
+*/
 
 /**
  *
@@ -60,7 +87,17 @@ public class JettyWrapper implements WebSocket {
 		mEngine.addConnector(mConnector);
 		// inherited BaseConnector.startConnector
 		// calls mEngine connector started
-		mConnector.startConnector();
+
+		// need to call startConnector in a separate thread 
+		// because Jetty does not allow to send a welcome message 
+		// during it's onConnect listener.
+		new Thread() {
+
+			@Override
+			public void run() {
+				mConnector.startConnector();
+			}
+		}.start();
 	}
 
 	@Override
@@ -77,8 +114,8 @@ public class JettyWrapper implements WebSocket {
 	@Override
 	public void onMessage(byte aFrame, String aData) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Message (string, opcode " 
-					+ aFrame 
+			mLog.debug("Message (string, opcode "
+					+ aFrame
 					+ ") from Jetty client: '"
 					+ aData + "'...");
 		}
