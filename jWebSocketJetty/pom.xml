@@ -146,6 +146,11 @@
 			<artifactId>jetty-websocket</artifactId>
 			<version>8.0.0.M1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>8.0.0.M1</version>
+		</dependency>
 		<!-- requires jWebSocket Server Module -->
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
