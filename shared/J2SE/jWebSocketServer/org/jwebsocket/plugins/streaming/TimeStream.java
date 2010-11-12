@@ -107,6 +107,15 @@ public class TimeStream extends TokenStream {
 					lToken.setString("msg", new Date().toString());
 					lToken.setString("streamID", getStreamID());
 
+					// keep this her for demo purposes
+					/*
+					FastMap<String, Object> lRecord = new FastMap<String, Object>();
+					lRecord.put("string_field", "value");
+					lRecord.put("int_field", 4711);
+
+					lToken.setMap("record", lRecord);
+					*/
+					
 					// log.debug("Time streamer queues '" + lData + "'...");
 					put(lToken);
 				} catch (InterruptedException ex) {
