@@ -179,10 +179,28 @@
 			<artifactId>jWebSocketServerAPI</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
+		<!-- to import MS SQL Server JDBC Driver w/o maven support
+			(do not remove this comment)
+		<dependency>
+			<groupId>mssqlserver</groupId>
+			<artifactId>sqljdbc</artifactId>
+			<version>4.0</version>
+		</dependency>
+		-->
+
 	</dependencies>
 
 	<!-- define repositories -->
 	<repositories>
+		<!-- to use local repository .jars
+			(do not remove this comment)
+		<repository>
+			<id>Local-Repository</id>
+			<url>file://${basedir}/li</url>
+		</repository>
+		-->
+
 		<repository>
 			<id>repository.jboss.org</id>
 			<url>http://repository.jboss.org/nexus/content/groups/public/</url>

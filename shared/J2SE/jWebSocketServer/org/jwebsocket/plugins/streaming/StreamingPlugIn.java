@@ -39,13 +39,14 @@ import org.jwebsocket.token.Token;
  */
 public class StreamingPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logging.getLogger(StreamingPlugIn.class);
-	private String NS_STREAMING_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.streaming";
-	private Map<String, BaseStream> streams = new FastMap<String, BaseStream>();
-	private boolean streamsInitialized = false;
-	private TimeStream lTimeStream = null;
-	private MonitorStream lMonitorStream = null;
-	private StressStream lStressStream = null;
+	private static Logger mLog = Logging.getLogger(StreamingPlugIn.class);
+	private final static String NS_STREAMING_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.streaming";
+	private Map<String, BaseStream> mStreams = new FastMap<String, BaseStream>();
+	private boolean mStreamsInitialized = false;
+	private TimeStream mTimeStream = null;
+	private MonitorStream mMonitorStream = null;
+	private StressStream mStressStream = null;
+	private JDBCStream mJDBCStream = null;
 
 	/**
 	 * create a new instance of the streaming plug-in and set the default name
@@ -61,8 +62,8 @@ public class StreamingPlugIn extends TokenPlugIn {
 	 */
 	public StreamingPlugIn(PluginConfiguration configuration) {
 		super(configuration);
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating streaming plug-in...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating streaming plug-in...");
 		}
 		// specify default name space for streaming plugin
 		this.setNamespace(NS_STREAMING_DEFAULT);
@@ -70,49 +71,57 @@ public class StreamingPlugIn extends TokenPlugIn {
 	}
 
 	private void startStreams() {
-		if (!streamsInitialized) {
-			if (log.isDebugEnabled()) {
-				log.debug("Starting registered streams...");
+		if (!mStreamsInitialized) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Starting registered streams...");
 			}
 			TokenServer lTokenServer = getServer();
 			if (lTokenServer != null) {
 				// create the stream for the time stream demo
-				lTimeStream = new TimeStream("timeStream", lTokenServer);
-				addStream(lTimeStream);
+				mTimeStream = new TimeStream("timeStream", lTokenServer);
+				addStream(mTimeStream);
 				// create the stream for the monitor stream demo
-				lMonitorStream = new MonitorStream("monitorStream", lTokenServer);
-				addStream(lMonitorStream);
+				mMonitorStream = new MonitorStream("monitorStream", lTokenServer);
+				addStream(mMonitorStream);
 				// create the stream for the monitor stream demo
-				lStressStream = new StressStream("stressStream", lTokenServer);
-				addStream(lStressStream);
-				streamsInitialized = true;
+				mStressStream = new StressStream("stressStream", lTokenServer);
+				addStream(mStressStream);
+				// create the stream for the monitor stream demo
+				mJDBCStream = new JDBCStream("jdbcStream", lTokenServer);
+				addStream(mJDBCStream);
+				mStreamsInitialized = true;
 			}
 		}
 	}
 
 	private void stopStreams() {
-		if (streamsInitialized) {
-			if (log.isDebugEnabled()) {
-				log.debug("Stopping registered streams...");
+		if (mStreamsInitialized) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Stopping registered streams...");
 			}
 			TokenServer lTokenServer = getServer();
 			if (lTokenServer != null) {
 				// stop the stream for the time stream demo
-				if (lTimeStream != null) {
-					lTimeStream.stopStream(3000);
+				if (mTimeStream != null) {
+					mTimeStream.stopStream(3000);
 				}
 				// stop the stream for the monitor stream demo
-				if (lMonitorStream != null) {
-					lMonitorStream.stopStream(3000);
+				if (mMonitorStream != null) {
+					mMonitorStream.stopStream(3000);
 				}
 				// stop the stream for the stress stream demo
-				if (lStressStream != null) {
-					lStressStream.stopStream(3000);
+				if (mStressStream != null) {
+					mStressStream.stopStream(3000);
 				}
-				lTimeStream = null;
-				lMonitorStream = null;
-				lStressStream = null;
-				streamsInitialized = false;
+				// stop the stream for the JDBC stream demo
+				if (mJDBCStream != null) {
+					mJDBCStream.stopStream(3000);
+				}
+				mTimeStream = null;
+				mMonitorStream = null;
+				mStressStream = null;
+				mJDBCStream = null;
+				mStreamsInitialized = false;
 			}
 		}
 	}
@@ -125,7 +134,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 	 */
 	public void addStream(BaseStream aStream) {
 		if (aStream != null && aStream.getStreamID() != null) {
-			streams.put(aStream.getStreamID(), aStream);
+			mStreams.put(aStream.getStreamID(), aStream);
 		}
 	}
 
@@ -150,20 +159,20 @@ public class StreamingPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void registerConnector(WebSocketConnector aConnector, Token aToken) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing register...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing register...");
 		}
 
 		BaseStream lStream = null;
 		String lStreamID = aToken.getString("stream");
 		if (lStreamID != null) {
-			lStream = streams.get(lStreamID);
+			lStream = mStreams.get(lStreamID);
 		}
 
 		if (lStream != null) {
 			if (!lStream.isConnectorRegistered(aConnector)) {
-				if (log.isDebugEnabled()) {
-					log.debug("Registering client at stream '" + lStreamID + "'...");
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Registering client at stream '" + lStreamID + "'...");
 				}
 				lStream.registerConnector(aConnector);
 			}
@@ -181,20 +190,20 @@ public class StreamingPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void unregisterConnector(WebSocketConnector aConnector, Token aToken) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing unregister...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing unregister...");
 		}
 
 		BaseStream lStream = null;
 		String lStreamID = aToken.getString("stream");
 		if (lStreamID != null) {
-			lStream = streams.get(lStreamID);
+			lStream = mStreams.get(lStreamID);
 		}
 
 		if (lStream != null) {
 			if (lStream.isConnectorRegistered(aConnector)) {
-				if (log.isDebugEnabled()) {
-					log.debug("Unregistering client from stream '" + lStreamID + "'...");
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Unregistering client from stream '" + lStreamID + "'...");
 				}
 				lStream.unregisterConnector(aConnector);
 			}
@@ -208,11 +217,11 @@ public class StreamingPlugIn extends TokenPlugIn {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// if a connector terminates, unregister it from all streams.
-		for (BaseStream lStream : streams.values()) {
+		for (BaseStream lStream : mStreams.values()) {
 			try {
 				lStream.unregisterConnector(aConnector);
 			} catch (Exception ex) {
-				log.error(ex.getClass().getSimpleName() + " on stopping conncector: " + ex.getMessage());
+				mLog.error(ex.getClass().getSimpleName() + " on stopping conncector: " + ex.getMessage());
 			}
 		}
 	}
