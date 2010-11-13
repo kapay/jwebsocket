@@ -250,20 +250,20 @@
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="YourUsername" style="width:150px"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnectXMPP" type="button" value="X/Connect" onclick="xmppConnect();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLoginXMPP" type="button" value="X/Login" onclick="xmppLogin();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRoster" type="button" value="Roster" onclick="xmppRoster();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnOpenChat" type="button" value="Open Chat" onclick="xmppOpenChat();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSendMsg" type="button" value="Send Msg." onclick="xmppSendChat();"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px" title="jWebSocket username or 'guest' for demo."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();" title="Authenticates you against the jWebSocket Server."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();" title="Clears the chat log below."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnectXMPP" type="button" value="X/Connect" onclick="xmppConnect();" title="Connects you to the XMPP server, requires jWebSocket login."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLoginXMPP" type="button" value="X/Login" onclick="xmppLogin();" title="Authenticates you against the XMPP server, requires jWebSocket login."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRoster" type="button" value="Roster" onclick="xmppRoster();" title="Returns the current roster, requires XMPP authentication."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnOpenChat" type="button" value="Open Chat" onclick="xmppOpenChat();" title="Opens a chat, requires XMPP authentication."></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSendMsg" type="button" value="Send Msg." onclick="xmppSendChat();" title="Sends a chat message to the XMPP server, requires XMPP authentication."></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Password</td>
-					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="" style="width:150px"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnXXX" type="button" value="-" onclick=""></td>
+					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:150px" title="jWebSocket password or 'guest' for demo."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();" title="Logs out and disconnects from jWebSocket and XMPP server."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnXXX" type="button" value="-" onclick="" title="n/a"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnectXMPP" type="button" value="X/Disconnect" onclick="xmppDisconnect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoutXMPP" type="button" value="X/Logout" onclick="xmppLogout();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSetStatus" type="button" value="Set Status" onclick="xmppSetPresence();"></td>
@@ -305,7 +305,7 @@
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Password</td>
-					<td class="stdDlg" width="5"><input class="spwfDlg" id="stxfXMPPPassword" type="password" value="JWS@jb211" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="spwfDlg" id="stxfXMPPPassword" type="password" value="" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Port</td>
 					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfXMPPPort" type="text" value="5222" style="width:150px"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Status</td>

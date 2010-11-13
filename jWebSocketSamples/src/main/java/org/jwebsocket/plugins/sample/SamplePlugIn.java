@@ -106,6 +106,7 @@ public class SamplePlugIn extends TokenPlugIn {
 				lResponse.setString("time", new Date().toString());
 				lResponse.setString("started", (String) aConnector.getVar(SAMPLE_VAR));
 
+/* please keep this code snippet for test purposes for complex objects!
 				// put an array into the token
 				Object[] lObjs = new Object[]{1, 2, 3, 'a', 'b', 'c', "ABC", "XYZ", true, false};
 				lResponse.setList("array", Arrays.asList(lObjs));
@@ -140,7 +141,7 @@ public class SamplePlugIn extends TokenPlugIn {
 
 				// put the token incl. its subtoken into the response
 				lResponse.setMap("token", lToken.asMap());
-
+*/
 				// send the response token back to the client
 				sendToken(aConnector, aConnector, lResponse);
 

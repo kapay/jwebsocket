@@ -53,10 +53,18 @@ jws.FileSystemPlugIn = {
 
 	fileLoad: function( aFilename, aOptions ) {
 		var lRes = this.createDefaultResult();
+		var lScope = jws.SCOPE_PRIVATE;
+
+		if( aOptions ) {
+			if( aOptions.scope != undefined ) {
+				lScope = aOptions.scope;
+			}
+		}
 		if( this.isConnected() ) {
 			var lToken = {
 				ns: jws.FileSystemPlugIn.NS,
 				type: "load",
+				scope: lScope,
 				filename: aFilename
 			};
 			this.sendToken( lToken,	aOptions );
@@ -72,7 +80,11 @@ jws.FileSystemPlugIn = {
 		var lRes = this.createDefaultResult();
 		var lEncoding = "base64";
 		var lSuppressEncoder = false;
+		var lScope = jws.SCOPE_PRIVATE;
 		if( aOptions ) {
+			if( aOptions.scope != undefined ) {
+				lScope = aOptions.scope;
+			}
 			if( aOptions.encoding != undefined ) {
 				lEncoding = aOptions.encoding;
 			}
@@ -89,7 +101,7 @@ jws.FileSystemPlugIn = {
 			var lToken = {
 				ns: jws.FileSystemPlugIn.NS,
 				type: "save",
-				scope: "public",
+				scope: lScope,
 				encoding: lEncoding,
 				notify: true,
 				data: aData,

@@ -50,7 +50,7 @@
 				eLog.scrollTop = 0;
 			}
 
-			var jWebSocketClient = null;
+			var lWSC = null;
 			var gUsername = null;
 
 			function logon() {
@@ -58,13 +58,17 @@
 				var lURL = jws.JWS_SERVER_URL;
 				gUsername = eUsername.value;
 				var lPassword = ePassword.value;
-				ePassword.value = "";
+				
+				// optionally reset the password to force
+				// re-typing after a disconnect or logout.
+				// ePassword.value = "";
 
 				log( "Connecting to " + lURL + " and logging in as '" + gUsername + "'..." );
-				var lRes = jWebSocketClient.logon( lURL, gUsername, lPassword, {
+				var lRes = lWSC.logon( lURL, gUsername, lPassword, {
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection established.</font>" );
+						jws.$("simgStatus").src = "../../images/connected.png";
 					},
 					// OnMessage callback
 					OnMessage: function( aEvent, aToken ) {
@@ -73,22 +77,33 @@
 							lDate = jws.tools.ISO2Date( aToken.date_val );
 						}
 						log( "<font style='color:#888'>jWebSocket '" + aToken.type + "' token received, full message: '" + aEvent.data + "' " + lDate + "</font>" );
+						if( lWSC.isLoggedIn() ) {
+							jws.$("simgStatus").src = "../../images/authenticated.png";
+						} else {
+							jws.$("simgStatus").src = "../../images/connected.png";
+						}
+						jws.$("slblClientId").innerHTML =
+							"&nbsp;Client&#x2011;Id:&nbsp;"
+							+ lWSC.getId() + "&nbsp;"
+							+ ( jws.browserSupportsNativeWebSockets ? "(native)" : "(flashbridge)" );
 					},
 					// OnClose callback
 					OnClose: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection closed.</font>" );
+						jws.$("simgStatus").src = "../../images/disconnected.png";
+						jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;-";
 					}
 				});
 
-				log( jWebSocketClient.resultToString( lRes ) );
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function logoff() {
-				if( jWebSocketClient ) {
+				if( lWSC ) {
 					log( "Logging off " + ( gUsername != null ? "'" + gUsername + "'" : "" ) + " and disconnecting..." );
 					// the timeout below  is optional, if you use it you'll get a good-bye message.
-					var lRes = jWebSocketClient.close({ timeout: 3000 });
-					log( jWebSocketClient.resultToString( lRes ) );
+					var lRes = lWSC.close({ timeout: 3000 });
+					log( lWSC.resultToString( lRes ) );
 				}
 			}
 
@@ -96,14 +111,15 @@
 				var lMsg = eMessage.value;
 				if( lMsg.length > 0 ) {
 					log( "Broadcasting '" + lMsg + "'..." );
-					var lRes = jWebSocketClient.broadcastText(
+					var lRes = lWSC.broadcastText(
 						"",		// broadcast to all clients (not limited to a certain pool)
 						lMsg	// broadcast this message
 					);
-					// log error only, on success don't confuse the user
-					if( lRes.code != 0 ) {
-						log( jWebSocketClient.resultToString( lRes ) );
-					}
+					// you may want log error only,
+					// on success don't confuse the user
+					// if( lRes.code != 0 ) {
+						log( lWSC.resultToString( lRes ) );
+					//  }
 					eMessage.value = "";
 				}
 			}
@@ -111,7 +127,8 @@
 			// example how to exchange arbitrary complex objects between clients
 			// the processComplexObject method in the server side sample plug-in
 			function exchangeComplexObjects() {
-				if( jWebSocketClient.isConnected() ) {
+				log( "Retreiving a complex object from the server via WebSockets..." );
+				if( lWSC.isConnected() ) {
 					var lToken = {
 						ns: jws.SamplesPlugIn.NS,
 						type: "processComplexObject",
@@ -128,7 +145,7 @@
 							object2: { obj2field1: "obj2value1", obj2field2: "obj2value2" }
 						}
 					};
-					jWebSocketClient.sendToken( lToken,	{
+					lWSC.sendToken( lToken,	{
 					});
 				} else {
 					log( "Not connected." );
@@ -137,12 +154,13 @@
 
 			// example how to exchange data with a server side listener
 			function sampleListener() {
-				if( jWebSocketClient.isConnected() ) {
+				log( "Retreiving a token from the server via a jWebSocket listener..." );
+				if( lWSC.isConnected() ) {
 					var lToken = {
 						ns: "my.namespace",
 						type: "getInfo"
 					};
-					jWebSocketClient.sendToken( lToken,	{
+					lWSC.sendToken( lToken,	{
 						OnResponse: function( aToken ) {
 							log("Server responded: "
 								+ "vendor: " + aToken.vendor
@@ -159,10 +177,10 @@
 			function sampleGetTime() {
 				log( "Requesting server time via WebSockets..." );
 				// call the getTime method of the client side plug-in
-				var lRes = jWebSocketClient.requestServerTime();
+				var lRes = lWSC.requestServerTime();
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
-					log( jWebSocketClient.resultToString( lRes ) );
+					log( lWSC.resultToString( lRes ) );
 				}
 			}
 
@@ -174,7 +192,7 @@
 			function sampleSelect() {
 				log( "Requesting JDBC data via WebSockets..." );
 				// call the getTime method of the client side plug-in
-				var lRes = jWebSocketClient.jdbcSelect({
+				var lRes = lWSC.jdbcSelect({
 					table	: "locales",
 					fields	: "*",
 					order	: "code",
@@ -184,34 +202,41 @@
 				});
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
-					log( jWebSocketClient.resultToString( lRes ) );
+					log( lWSC.resultToString( lRes ) );
 				}
 			}
 
 			function loadFile() {
 				log( "Loading a file from the server via WebSockets..." );
 				// call the getTime method of the client side plug-in
-				var lRes = jWebSocketClient.fileLoad( "test.txt", {
-				});
+				var lRes = lWSC.fileLoad( 
+					"test.txt",
+					{	scope: jws.SCOPE_PUBLIC
+					}
+				);
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
-					log( jWebSocketClient.resultToString( lRes ) );
+					log( lWSC.resultToString( lRes ) );
 				}
 			}
 
 			function saveFile() {
 				log( "Saving a file from the server via WebSockets..." );
 				// call the getTime method of the client side plug-in
-				var lRes = jWebSocketClient.fileSave( "test.txt", eMessage.value, {
-				});
+				var lRes = lWSC.fileSave(
+					"test.txt",
+					eMessage.value,
+					{	scope: jws.SCOPE_PUBLIC
+					}
+				);
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
-					log( jWebSocketClient.resultToString( lRes ) );
+					log( lWSC.resultToString( lRes ) );
 				}
 			}
 			
 			function cgiTest() {
-				jWebSocketClient.sendToken({
+				lWSC.sendToken({
 					ns: "org.jwebsocket.plugins.system",
 					type: "send",
 					subType: "exec",
@@ -222,6 +247,7 @@
 
 			function onFileLoadedObs( aToken ) {
 				log( "Loaded file: " + aToken.data );
+				eMessage.value = aToken.data;
 			}
 
 			function onFileErrorObs( aToken ) {
@@ -229,8 +255,16 @@
 			}
 
 			function onFileSavedObs( aToken ) {
-				var lHTML = "<img src=\"" + aToken.url + "\"/>";
-				log( lHTML );
+				var lURL = aToken.url.toLowerCase();
+				if( lURL.indexOf(".png") > 0
+					|| lURL.indexOf(".jpg") > 0
+					|| lURL.indexOf(".jpeg") > 0
+					|| lURL.indexOf(".gif") > 0) {
+					var lHTML = "<img src=\"" + aToken.url + "\"/>";
+					log( lHTML );
+				} else {
+					log( "File " + aToken.url + " has been stored on server.");
+				}
 			}
 
 			function initPage() {
@@ -242,11 +276,11 @@
 				// jws.browserSupportsWebSockets checks web if sockets are available
 				// either natively, by the Flash Bridge or by the Chrome Frame.
 				if( jws.browserSupportsWebSockets() ) {
-					jWebSocketClient = new jws.jWebSocketJSONClient();
-					jWebSocketClient.setSamplesCallbacks({
+					lWSC = new jws.jWebSocketJSONClient();
+					lWSC.setSamplesCallbacks({
 						OnSamplesServerTime: getServerTimeCallback
 					});
-					jWebSocketClient.setFileSystemCallbacks({
+					lWSC.setFileSystemCallbacks({
 						OnFileLoaded: onFileLoadedObs,
 						OnFileSaved: onFileSavedObs,
 						OnFileError: onFileErrorObs
@@ -286,8 +320,14 @@
 				// location.href = "../../index.htm?page=demos/hello_world/hello_world.htm" ;
 			}
 		</script>
--->		
-		<h1>jWebSocket Hello World</h1>
+-->
+		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="tdHeader" width="">jWebSocket Hello World</td>
+				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
+				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
+			</tr>
+		</table>
 		<p>This little &quot;Hello World&quot; demonstrates how to easily logon to the jWebSocket Server, broadcast a message and logoff again.<br/>
 		Please use the browser's show frame source function to see the entire source code of this page.
 		</p>
@@ -298,26 +338,26 @@
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="YourUsername" style="width:150px"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSaveFile" type="button" value="Save File" onclick="saveFile();"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px" title="jWebSocket username or 'guest' for demo."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();" title="Authenticates you against the jWebSocket Server."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();" title="Clears the result and event log above."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();" title="Retreives a 'complex' JSON object from the jWebSocket server."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();" title="Retreives a result (copyright and license token) from a server side listener."></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSaveFile" type="button" value="Save File" onclick="saveFile();" title="Saves the message below into a shared file on the jWebSocket server."></td>
 					<td class="stdDlg" width=""><!--<input class="sbtnDlg" id="sbtnCGITest" type="button" value="CGI Test" onclick="cgiTest();">--></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Password</td>
-					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="" style="width:150px"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetTime" type="button" value="GetTime" onclick="sampleGetTime();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSelect" type="button" value="Select" onclick="sampleSelect();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnLoadFile" type="button" value="Load File" onclick="loadFile();"></td>
+					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:150px" title="jWebSocket password or 'guest' for demo."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logout" onclick="logoff();" title="Logs you out and disconnects from the jWebSocket server."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();" title="Broadcasts the message below to all connected clients."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetTime" type="button" value="GetTime" onclick="sampleGetTime();" title="Retreives the current system time from the jWebSocket server."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSelect" type="button" value="Select" onclick="sampleSelect();" title="Retreives a single record from a JDBC datasource on the server."></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnLoadFile" type="button" value="Load File" onclick="loadFile();" title="Loads a shared file on the jWebSocket server and displays it below."></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Message</td>
-					<td class="stdDlg" width="" colspan="5"><input class="stxfDlg" id="stxfMessage" type="text" value="Your Message" style="width:99%"></td>
+					<td class="stdDlg" width="" colspan="7"><input class="stxfDlg" id="stxfMessage" type="text" value="Your Message" style="width:99%" title="Message to be broadcasted or save to file on the jWebSocket Server."></td>
 				</tr>
 			</table>
 		</div>

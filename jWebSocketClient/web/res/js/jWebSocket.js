@@ -57,18 +57,25 @@ var jws = {
 	//:d:en:The connection has been closed or could not be opened.
 	CLOSED: 3,
 
-	//:const:*:WS_SUBPROT_JSON:String:jWebSocket-JSON"
+	//:const:*:WS_SUBPROT_JSON:String:jWebSocket-JSON
 	//:d:en:jWebSocket sub protocol JSON
 	WS_SUBPROT_JSON: "jWebSocket-JSON",
-	//:const:*:WS_SUBPROT_XML:String:jWebSocket-XML"
+	//:const:*:WS_SUBPROT_XML:String:jWebSocket-XML
 	//:d:en:jWebSocket sub protocol XML
 	WS_SUBPROT_XML: "jWebSocket-XML",
-	//:const:*:WS_SUBPROT_CSV:String:jWebSocket-CSV"
+	//:const:*:WS_SUBPROT_CSV:String:jWebSocket-CSV
 	//:d:en:jWebSocket sub protocol CSV
 	WS_SUBPROT_CSV: "jWebSocket-CSV",
-	//:const:*:WS_SUBPROT_CUSTOM:String:jWebSocket-Custom"
+	//:const:*:WS_SUBPROT_CUSTOM:String:jWebSocket-Custom
 	//:d:en:jWebSocket sub protocol Custom
 	WS_SUBPROT_CUSTOM: "jWebSocket-Custom",
+
+	//:const:*:SCOPE_PRIVATE:String:private
+	//:d:en:private scope, only authenticated user can read and write his personal items
+	SCOPE_PRIVATE: "private",
+	//:const:*:SCOPE_PUBLIC:String:public
+	//:d:en:public scope, everybody can read and write items from this scope
+	SCOPE_PUBLIC: "public",
 
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
@@ -720,8 +727,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::::none
 	//:r:*:::void:none
 	checkLoggedIn: function() {
-		var lRes = this.createDefaultResult();
-		if( !this.isLoggedIn() ) {
+		var lRes = this.checkConnected();
+		if( lRes.code == 0 && !this.isLoggedIn() ) {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notLoggedIn";
 			lRes.msg = "Not logged in.";
