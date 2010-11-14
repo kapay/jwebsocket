@@ -15,11 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.tcp.connectors;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -29,6 +25,7 @@ import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.async.IOFuture;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
@@ -101,6 +98,13 @@ public class TCPConnector extends BaseConnector {
         mCloseReason = aCloseReason;
         mIsRunning = false;
 
+        if(!isHixieDraft()) {
+            // Hybi specs demand that client must be notified with CLOSE control message before disconnect
+            WebSocketPacket close = new RawPacket("BYE");
+            close.setFrameType(RawPacket.FRAMETYPE_CLOSE);
+            sendPacket(close);
+        }
+
         try {
             mIn.close();
             if (mLog.isInfoEnabled()) {
@@ -123,19 +127,10 @@ public class TCPConnector extends BaseConnector {
     @Override
     public synchronized void sendPacket(WebSocketPacket aDataPacket) {
         try {
-            if (aDataPacket.getFrameType() == RawPacket.FRAMETYPE_BINARY) {
-                // each packet is enclosed in 0xFF<length><data>
-                // TODO: for future use! Not yet finally spec'd in IETF drafts!
-                mOut.write(0xFF);
-                byte[] lBA = aDataPacket.getByteArray();
-                // TODO: implement multi byte length!
-                mOut.write(lBA.length);
-                mOut.write(lBA);
+            if(isHixieDraft()) {
+                sendHixie(aDataPacket);
             } else {
-                // each packet is enclosed in 0x00<data>0xFF
-                mOut.write(0x00);
-                mOut.write(aDataPacket.getByteArray());
-                mOut.write(0xFF);
+                sendHybi(aDataPacket);
             }
             mOut.flush();
         } catch (IOException lEx) {
@@ -173,38 +168,11 @@ public class TCPConnector extends BaseConnector {
                 // call connectorStarted method of engine
                 lEngine.connectorStarted(mConnector);
 
-                while (mIsRunning) {
-                    try {
-                        int lIn = mIn.read();
-                        // start of frame
-                        if (lIn == 0x00) {
-                            lBuff.reset();
-                            // end of frame
-                        } else if (lIn == 0xff) {
-                            RawPacket lPacket = new RawPacket(lBuff.toByteArray());
-                            try {
-                                lEngine.processPacket(mConnector, lPacket);
-                            } catch (Exception lEx) {
-                                mLog.error(lEx.getClass().getSimpleName() + " in processPacket of connector "
-                                        + mConnector.getClass().getSimpleName() + ": " + lEx.getMessage());
-                            }
-                            lBuff.reset();
-                        } else if (lIn < 0) {
-                            mCloseReason = CloseReason.CLIENT;
-                            mIsRunning = false;
-                            // any other byte within or outside a frame
-                        } else {
-                            lBuff.write(lIn);
-                        }
-                    } catch (SocketTimeoutException lEx) {
-                        mLog.error("(timeout) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
-                        mCloseReason = CloseReason.TIMEOUT;
-                        mIsRunning = false;
-                    } catch (Exception lEx) {
-                        mLog.error("(other) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
-                        mCloseReason = CloseReason.SERVER;
-                        mIsRunning = false;
-                    }
+                if(isHixieDraft()) {
+                    readHixie(lBuff, lEngine);
+                } else {
+                    // assume that #02 and #03 are the same regarding packet processing
+                    readHybi(lBuff, lEngine);
                 }
 
                 // call client stopped method of engine
@@ -219,6 +187,177 @@ public class TCPConnector extends BaseConnector {
             } catch (Exception lEx) {
                 // ignore this exception for now
                 mLog.error("(close) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+            }
+        }
+
+        private void readHixie(ByteArrayOutputStream lBuff, WebSocketEngine lEngine) throws IOException {
+            while (mIsRunning) {
+                try {
+                    int lIn = mIn.read();
+                    // start of frame
+                    if (lIn == 0x00) {
+                        lBuff.reset();
+                        // end of frame
+                    } else if (lIn == 0xff) {
+                        RawPacket lPacket = new RawPacket(lBuff.toByteArray());
+                        try {
+                            lEngine.processPacket(mConnector, lPacket);
+                        } catch (Exception lEx) {
+                            mLog.error(lEx.getClass().getSimpleName() + " in processPacket of connector "
+                                    + mConnector.getClass().getSimpleName() + ": " + lEx.getMessage());
+                        }
+                        lBuff.reset();
+                    } else if (lIn < 0) {
+                        mCloseReason = CloseReason.CLIENT;
+                        mIsRunning = false;
+                        // any other byte within or outside a frame
+                    } else {
+                        lBuff.write(lIn);
+                    }
+                } catch (SocketTimeoutException lEx) {
+                    mLog.error("(timeout) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+                    mCloseReason = CloseReason.TIMEOUT;
+                    mIsRunning = false;
+                } catch (Exception lEx) {
+                    mLog.error("(other) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+                    mCloseReason = CloseReason.SERVER;
+                    mIsRunning = false;
+                }
+            }
+        }
+
+        /**
+         *  One message may consist of one or more (fragmented message) protocol packets.
+         *  The spec is currently unclear whether control packets (ping, pong, close) may
+         *  be intermingled with fragmented packets of another message. For now I've
+         *  decided to not implement such packets 'swapping', and therefore reading fails
+         *  miserably if a client sends control packets during fragmented message read.
+         *  TODO: follow next spec drafts and add support for control packets inside fragmented message if needed.
+         *  <p>
+         *  Structure of packets conforms to the following scheme (copied from spec):
+         *  </p>
+         *  <pre>
+         *  0                   1                   2                   3
+         *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+         * +-+-+-+-+-------+-+-------------+-------------------------------+
+         * |M|R|R|R| opcode|R| Payload len |    Extended payload length    |
+         * |O|S|S|S|  (4)  |S|     (7)     |             (16/63)           |
+         * |R|V|V|V|       |V|             |   (if payload len==126/127)   |
+         * |E|1|2|3|       |4|             |                               |
+         * +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+         * |     Extended payload length continued, if payload len == 127  |
+         * + - - - - - - - - - - - - - - - +-------------------------------+
+         * |                               |         Extension data        |
+         * +-------------------------------+ - - - - - - - - - - - - - - - +
+         * :                                                               :
+         * +---------------------------------------------------------------+
+         * :                       Application data                        :
+         * +---------------------------------------------------------------+
+         * </pre>
+         * RSVx bits are ignored (reserved for future use).
+         * TODO: add support for extension data, when extensions will be defined in the specs.
+         *
+         * <p>
+         * Read section 4.2 of the spec for detailed explanation.
+         * </p>
+         */
+        private void readHybi(ByteArrayOutputStream lBuff, WebSocketEngine lEngine) throws IOException {
+            int lPacketType = -1;
+            // utilize data input stream, because it has convenience methods for reading
+            // signed/unsigned bytes, shorts, ints and longs
+            DataInputStream mDis = new DataInputStream(mIn);
+
+            while (mIsRunning) {
+                try {
+                    // begin normal packet read
+                    int flags = mDis.read();
+                    // determine fragmentation
+                    boolean lFragmented = (0x01 & flags) == 0x01;
+                    // shift 4 bits to skip the first bit and three RSVx bits
+                    int lType = flags >> 4;
+                    switch(lType) {
+                        // continuation frame (if we have fragmented packets)
+                        case 0: lPacketType = RawPacket.FRAMETYPE_FRAGMENT; break;
+                        // connection close
+                        case 1: {
+                            lPacketType = RawPacket.FRAMETYPE_CLOSE;
+                            mCloseReason = CloseReason.CLIENT;
+                            mIsRunning = false;
+                            break;
+                        }
+                        // ping, respond with pong!
+                        case 2: lPacketType = RawPacket.FRAMETYPE_PING; break;
+                        // pong,
+                        case 3: lPacketType = RawPacket.FRAMETYPE_PONG; break;
+                        // text data
+                        case 4: lPacketType = RawPacket.FRAMETYPE_UTF8; break;
+                        // binary data
+                        case 5: lPacketType = RawPacket.FRAMETYPE_BINARY; break;
+                        // other types are reserved for future use
+                        default: break;
+                    }
+
+                    if(lPacketType == -1) {
+                        // Could not determine packet type, ignore the packet.
+                        // Maybe we need a setting to decide, if such packets should abort the connection?
+                        mLog.trace("Dropping packet with unknown type: " + lType);
+                    } else {
+                        // Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
+                        long payloadLen = mIn.read() >> 1;
+                        if(payloadLen == 126) {
+                            // following two bytes are acutal payload length (16-bit unsigned integer)
+                            payloadLen = mDis.readUnsignedShort();
+                        } else if(payloadLen == 127) {
+                            // following eight bytes are actual payload length (64-bit unsigned integer)
+                            payloadLen = mDis.readLong();
+                        }
+
+                        if(payloadLen > 0) {
+                            // payload length may be extremely long, so we read in loop rather
+                            // than construct one byte[] array and fill it with read() method,
+                            // because java does not allow longs as array size
+                            while(payloadLen-- > 0)
+                            {
+                                lBuff.write(mDis.read());
+                            }
+                        }
+
+                        if(!lFragmented) {
+                            if(lPacketType == RawPacket.FRAMETYPE_PING) {
+                                // As per spec, server must respond to PING with PONG (maybe
+                                // this should be handled higher up in the hierarchy?)
+                                WebSocketPacket pong = new RawPacket(lBuff.toByteArray());
+                                pong.setFrameType(RawPacket.FRAMETYPE_PONG);
+                                sendPacket(pong);
+                            } else if (lPacketType == RawPacket.FRAMETYPE_CLOSE) {
+                                // As per spec, server must respond tlPacketType = RawPacket.FRAMETYPEo CLOSE with acknowledgment CLOSE (maybe
+                                // this should be handled higher up in the hierarchy?)
+                                WebSocketPacket close = new RawPacket(lBuff.toByteArray());
+                                close.setFrameType(RawPacket.FRAMETYPE_CLOSE);
+                                sendPacket(close);
+                            }
+
+                            // Packet was read, pass it forward.
+                            WebSocketPacket lPacket = new RawPacket(lBuff.toByteArray());
+                            lPacket.setFrameType(lPacketType);
+                            try {
+                                lEngine.processPacket(mConnector, lPacket);
+                            } catch (Exception lEx) {
+                                mLog.error(lEx.getClass().getSimpleName() + " in processPacket of connector "
+                                        + mConnector.getClass().getSimpleName() + ": " + lEx.getMessage());
+                            }
+                            lBuff.reset();
+                        }
+                    }
+                } catch (SocketTimeoutException lEx) {
+                    mLog.error("(timeout) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+                    mCloseReason = CloseReason.TIMEOUT;
+                    mIsRunning = false;
+                } catch (Exception lEx) {
+                    mLog.error("(other) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+                    mCloseReason = CloseReason.SERVER;
+                    mIsRunning = false;
+                }
             }
         }
     }
@@ -250,5 +389,68 @@ public class TCPConnector extends BaseConnector {
             lRes += " (" + lUsername + ")";
         }
         return lRes;
+    }
+
+
+    private void sendHixie(WebSocketPacket aDataPacket) throws IOException {
+        if (aDataPacket.getFrameType() == RawPacket.FRAMETYPE_BINARY) {
+            // each packet is enclosed in 0xFF<length><data>
+            // TODO: for future use! Not yet finally spec'd in IETF drafts!
+            mOut.write(0xFF);
+            byte[] lBA = aDataPacket.getByteArray();
+            // TODO: implement multi byte length!
+            mOut.write(lBA.length);
+            mOut.write(lBA);
+        } else {
+            // each packet is enclosed in 0x00<data>0xFF
+            mOut.write(0x00);
+            mOut.write(aDataPacket.getByteArray());
+            mOut.write(0xFF);
+        }
+    }
+
+    // TODO: implement fragmentation for packet sending
+    private void sendHybi(WebSocketPacket aDataPacket) throws IOException {
+        int lType = aDataPacket.getFrameType();
+        int lTargetType;
+        switch(lType) {
+            case RawPacket.FRAMETYPE_CLOSE: lTargetType = 0x01; break;
+            case RawPacket.FRAMETYPE_PING: lTargetType = 0x02; break;
+            case RawPacket.FRAMETYPE_PONG: lTargetType = 0x03; break;
+            case RawPacket.FRAMETYPE_UTF8: lTargetType = 0x04; break;
+            case RawPacket.FRAMETYPE_BINARY: lTargetType = 0x05; break;
+            default: throw new IOException("Cannot construct a packet with unknown packet type: " + lType);
+        }
+
+        // just shift four bits to the left (MORE and RSVx bits are not set)
+        lTargetType = lTargetType << 4;
+        mOut.write(lTargetType);
+
+        int lPayloadLen = aDataPacket.getByteArray().length;
+        int lTargetPayloadLen = lPayloadLen << 1;
+        mOut.write(lTargetPayloadLen);
+        // Here, the spec allows payload length with up to 64-bit integer
+        // in size (that is long data type in java):
+        // ----
+        //   The length of the payload: if 0-125, that is the payload length.
+        //   If 126, the following 2 bytes interpreted as a 16 bit unsigned
+        //   integer are the payload length.  If 127, the following 8 bytes
+        //   interpreted as a 64-bit unsigned integer (the high bit must be 0)
+        //   are the payload length.
+        // ----
+        // However, arrays in java may only have Integer.MAX_VALUE(32-bit) elements.
+        // Therefore, we never set target payload length to 127.
+        if(lPayloadLen > 126)
+        {
+            mOut.write((lPayloadLen >>> 8) & 0xFF);
+            mOut.write(lPayloadLen & 0xFF);
+        }
+
+        mOut.write(aDataPacket.getByteArray());
+    }
+
+    private boolean isHixieDraft()
+    {
+        return JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(getHeader().getDraft());
     }
 }

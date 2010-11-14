@@ -25,12 +25,14 @@ import javolution.util.FastMap;
  * @author aschulze
  * @version $Id: RequestHeader.java 596 2010-06-22 17:09:54Z fivefeetfurther $
  */
-public final class RequestHeader {
+public final class
+        RequestHeader {
 
     private Map<String, Object> mArgs = new FastMap<String, Object>();
     private static final String URL_ARGS = "args";
     private static final String PROT = "prot";
     private static final String TIMEOUT = "timeout";
+    private static final String DRAFT = "draft";
 
     /**
      * Puts a new object value to the request header.
@@ -102,5 +104,9 @@ public final class RequestHeader {
             }
         }
         return (lTimeout != null ? lTimeout : aDefault);
+    }
+
+    public String getDraft() {
+        return (String) mArgs.get(DRAFT);
     }
 }

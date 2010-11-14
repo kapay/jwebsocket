@@ -86,6 +86,15 @@ public class JWebSocketCommonConstants {
 	 * Default protocol
 	 */
 	public static String WS_SUBPROT_DEFAULT = WS_SUBPROT_JSON;
+
+    /** WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-03) */
+    public final static String WS_DRAFT_03 = "3";
+
+    /** WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-02) */
+    public final static String WS_DRAFT_02 = "2";
+
+    /** WebSocket protocol hixie draft 76 (http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76) */
+    public final static String WS_DRAFT_DEFAULT = "76";
 	/**
 	 * Separator between the path and the argument list in the URL.
 	 */

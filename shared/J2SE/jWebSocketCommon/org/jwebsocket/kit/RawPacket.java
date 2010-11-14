@@ -28,6 +28,11 @@ public class RawPacket implements WebSocketPacket {
 
 	public static final int FRAMETYPE_UTF8 = 0;
 	public static final int FRAMETYPE_BINARY = 1;
+    // control frames
+	public static final int FRAMETYPE_PING = 2;
+	public static final int FRAMETYPE_PONG = 3;
+	public static final int FRAMETYPE_CLOSE = 4;
+	public static final int FRAMETYPE_FRAGMENT = 5;
 
 	private byte[] mData = null;
 	private int mFrameType = FRAMETYPE_UTF8;

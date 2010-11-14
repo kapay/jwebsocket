@@ -120,6 +120,7 @@ public final class WebSocketHandshake {
 		String lLocation = null;
 		String lPath = null;
 		String lSubProt = null;
+        String lDraft = null;
 		String lSecKey1 = null;
 		String lSecKey2 = null;
 		byte[] lSecKey3 = new byte[8];
@@ -182,6 +183,26 @@ public final class WebSocketHandshake {
 			lPos = lSubProt.indexOf("\r\n");
 			lSubProt = lSubProt.substring(0, lPos);
 		}
+
+        // Sec-WebSocket-Draft: This field was introduced with hybi-03 web socket protocol draft.
+        // See: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-03
+        //
+        // Specification proposes the use of draft number (without any prefixes or suffixes) as a value
+        // for this field. For example: "Sec-WebSocket-Draft: 3" indicates that the communication will proceed
+        // according to #03 draft. If the value is something that the server doesn't recognize,
+        // then the handshake should fail and web socket connection must be aborted.
+        //
+        // If present, then BaseEngine & BaseConnector (their subclasses) should process further
+        // packets according to this field. If it's not present, then all the logic defaults to hixie drafts
+        // (see: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76).
+        lPos = lRequest.indexOf("Sec-WebSocket-Draft:");
+        if(lPos > 0)
+        {
+            lPos += 21;
+            lDraft = lRequest.substring(lPos);
+            lPos = lSubProt.indexOf("\r\n");
+            lDraft = lDraft.substring(0, lPos);
+        }
 
 		// the following section implements the sec-key process in WebSocket
 		// Draft 76

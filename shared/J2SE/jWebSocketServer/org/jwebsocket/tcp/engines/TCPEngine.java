@@ -218,6 +218,26 @@ public class TCPEngine extends BaseEngine {
 					+ lFlashBridgeReq
 					+ "'), check for FlashBridge plug-in.");
 		}
+        
+        // Check for draft. If it is present and if it's something unrecognizable, force disconnect (return null).
+        String lDraft = (String) lRespMap.get("draft");
+        if(lDraft != null) {
+            // Since this field was introduced in draft 02, we can safely assume that
+            // it will only be supplied with clients that use draft #02 and greater.
+            if(JWebSocketCommonConstants.WS_DRAFT_02.equals(lDraft)
+                    || JWebSocketCommonConstants.WS_DRAFT_03.equals(lDraft)) {
+                if(mLog.isDebugEnabled())
+                {
+                    mLog.debug("Client uses draft -" + lDraft + "- for protocol communication");
+                }
+            }
+            else
+            {
+                mLog.warn("Illegal handshake: header 'Sec-WebSocket-Draft' contains unrecognized value: " + lDraft);
+                return null;
+            }
+        }
+
 		// generate the websocket handshake
 		// if policy-file-request is found answer it
 		byte[] lBA = WebSocketHandshake.generateS2CResponse(lRespMap);
@@ -291,6 +311,7 @@ public class TCPEngine extends BaseEngine {
 		lHeader.put("path", lRespMap.get("path"));
 		lHeader.put("searchString", lSearchString);
 		lHeader.put("args", lArgs);
+        lHeader.put("draft", lDraft == null ? JWebSocketCommonConstants.WS_DRAFT_DEFAULT : lDraft);
 
 		return lHeader;
 	}
