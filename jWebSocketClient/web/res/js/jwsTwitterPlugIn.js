@@ -80,7 +80,20 @@ jws.TwitterPlugIn = {
 	},
 
 	twitterSetVerifier: function( aVerifier, aOptions ) {
-
+		// check websocket connection status
+		var lRes = this.checkConnected();
+		// if connected to websocket network...
+		if( 0 == lRes.code ) {
+			// passes the verifier from the OAuth window
+			// to the jWebSocket server.
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "setVerifier",
+				verifier: aVerifier
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
 	},
 
 	twitterLogin: function( aCallbackURL, aOptions ) {

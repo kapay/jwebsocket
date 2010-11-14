@@ -402,7 +402,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 
 	/**
 	 * posts a Twitter message on behalf of a OAtuh authenticated
-	 * user by using the retreived AccessToken and its verifier.
+	 * user by using the retrieved AccessToken and its verifier.
 	 * @param aConnector
 	 * @param aToken
 	 */
