@@ -198,7 +198,7 @@ public class TCPConnector extends BaseConnector {
                     if (lIn == 0x00) {
                         lBuff.reset();
                         // end of frame
-                    } else if (lIn == 0xff) {
+                    } else if (lIn == 0xFF) {
                         RawPacket lPacket = new RawPacket(lBuff.toByteArray());
                         try {
                             lEngine.processPacket(mConnector, lPacket);
@@ -427,8 +427,7 @@ public class TCPConnector extends BaseConnector {
         mOut.write(lTargetType);
 
         int lPayloadLen = aDataPacket.getByteArray().length;
-        int lTargetPayloadLen = lPayloadLen << 1;
-        mOut.write(lTargetPayloadLen);
+
         // Here, the spec allows payload length with up to 64-bit integer
         // in size (that is long data type in java):
         // ----
@@ -441,14 +440,27 @@ public class TCPConnector extends BaseConnector {
         // However, arrays in java may only have Integer.MAX_VALUE(32-bit) elements.
         // Therefore, we never set target payload length greater than 32-bit number
         // (more than 0xffff or 65535 in decimal)
-        if(lPayloadLen > 126 && lPayloadLen < 0xffff) {
-            mOut.write((lPayloadLen >>> 8) & 0xff);
-            mOut.write(lPayloadLen & 0xFF);
+        if(lPayloadLen < 126) {
+            mOut.write(lPayloadLen << 1); // just write the payload length
+        } else if(lPayloadLen > 126 && lPayloadLen < 0xFFFF) {
+            // first write 126 (meaning, there will follow two bytes for actual length)
+            mOut.write(126 << 1);
+            mOut.write((lPayloadLen >>> 8) & 0xFF);
+            mOut.write((lPayloadLen >>> 0) & 0xFF);
         } else if(lPayloadLen > 0xffff) {
-            mOut.write((lPayloadLen >>> 24) & 0xFF);
-            mOut.write((lPayloadLen >>> 16) & 0xFF);
-            mOut.write((lPayloadLen >>>  8) & 0xFF);
-            mOut.write(lPayloadLen & 0xFF);
+            // first write 127 (meaning, there will follow eight bytes for actual length)
+            mOut.write(127 << 1);
+            long len = lPayloadLen;
+            byte[] writeBuffer = new byte[8];
+            writeBuffer[0] = (byte)(len >>> 56);
+            writeBuffer[1] = (byte)(len >>> 48);
+            writeBuffer[2] = (byte)(len >>> 40);
+            writeBuffer[3] = (byte)(len >>> 32);
+            writeBuffer[4] = (byte)(len >>> 24);
+            writeBuffer[5] = (byte)(len >>> 16);
+            writeBuffer[6] = (byte)(len >>>  8);
+            writeBuffer[7] = (byte)(len >>>  0);
+            mOut.write(writeBuffer, 0, 8);
         }
 
 
