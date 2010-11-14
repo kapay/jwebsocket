@@ -23,37 +23,41 @@
 -->
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-		<title>jWebSocket Twitter Demo</title>
+		<title>jWebSocket Twitter OAuth Demo</title>
 		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
 		<!-- do not link jWebSocket.js here but use the one in the opener window
 			 to set on top of the same connection -->
 		<script type="text/javascript">
 			function initPage() {
 				// Twitter API returns OAuth verifier in (callback)URL argument
-				var lURL = location.search.substring(1);
-				// isAuth 
+				var lSearch = location.search;
+				var lURL = lSearch.substring(1);
+				// isAuth
 				var lIsAuth = lURL.indexOf( "isAuth=true" ) >= 0;
 				// console.log("going to: " + lURL);
 				if( lIsAuth) {
-					document.getElementById("title").innerHTML = "You are successfully authenticated at Twitter!";
+					document.getElementById("shdrTitle").innerHTML = "You are successfully authenticated at Twitter!";
+					document.getElementById("sparMessage").innerHTML = "Window will close automatically in 3 seconds...";
 					var lOpener = window.opener;
 					if( lOpener ) {
 						// extract the OAuth verifier from the URL
-						var lIdx = location.search.indexOf("oauth_verifier=");
+						var lIdx = lSearch.indexOf("oauth_verifier=");
 						var lVerifier = "-";
 						if( lIdx >= 0 ) {
-							lVerifier = location.search.substr(lIdx + 15);
+							lVerifier = lSearch.substr(lIdx + 15);
 						}
-						alert( "verifier=" + lVerifier + " from " + location.search);
-						lOpener.jWebSocketClient.sendToken({
-							ns: "org.jwebsocket.plugins.twitter",
-							type: "setVerifier",
-							verifier: lVerifier
-						});
+						// just to check if the verifier has been isolated correctly
+						// alert( "verifier=" + lVerifier + " from " + location.search);
+
+						// send the Access Verifier to the jWebSocket server
+						// to let the server act on behalf of the user w/o
+						// knowing the user's credentias.
+						lOpener.setVerifier( lVerifier );
 					} else {
 						alert("No opener");
 					}
-					// setTimeout("window.close();", 3000);
+					// optionally auto-close this window after 3 seconds
+					setTimeout("window.close();", 3000);
 				} else {
 					location.href = lURL;
 				}
@@ -69,6 +73,7 @@
 		onload="initPage();"
 		onunload="exitPage();"
 		>
-		<h1 id="title">jWebSocket Twitter Authentication</h1>
+		<h1 id="shdrTitle">jWebSocket Twitter Authentication</h1>
+		<p id="sparMessage"></p>
 	</body>
 </html>

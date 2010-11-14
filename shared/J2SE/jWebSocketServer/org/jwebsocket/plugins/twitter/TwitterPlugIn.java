@@ -40,6 +40,8 @@ import twitter4j.http.RequestToken;
 /**
  *
  * @author aschulze
+ * logout see: http://stackoverflow.com/questions/1960957/twitter-api-logout
+ * http://groups.google.com/group/twitter4j/browse_thread/thread/5957722d596e269c/c2956d43a46b31b5?lnk=gst&q=stateless
  */
 public class TwitterPlugIn extends TokenPlugIn {
 
@@ -61,10 +63,17 @@ public class TwitterPlugIn extends TokenPlugIn {
 	private static final String NS_TWITTER = JWebSocketServerConstants.NS_BASE + ".plugins.twitter";
 	private Twitter mTwitter = null;
 
+	/**
+	 *
+	 */
 	public TwitterPlugIn() {
 		super(null);
 	}
 
+	/**
+	 *
+	 * @param aConfiguration
+	 */
 	public TwitterPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
@@ -96,6 +105,8 @@ public class TwitterPlugIn extends TokenPlugIn {
 		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
 			if (lType.equals("tweet")) {
 				tweet(aConnector, aToken);
+			} else if (lType.equals("requestAccessToken")) {
+				requestAccessToken(aConnector, aToken);
 			} else if (lType.equals("login")) {
 				login(aConnector, aToken);
 			} else if (lType.equals("logout")) {
@@ -111,6 +122,10 @@ public class TwitterPlugIn extends TokenPlugIn {
 		}
 	}
 
+	/**
+	 *
+	 * @param aConnector
+	 */
 	public void connectorStopped(WebSocketConnector aConnector) {
 		aConnector.removeVar(TWITTER_VAR);
 	}
@@ -145,6 +160,50 @@ public class TwitterPlugIn extends TokenPlugIn {
 		return false;
 	}
 
+	private void requestAccessToken(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+		String lMsg;
+		try {
+			if (!mCheckAuth(lResponse)) {
+				mLog.error(lResponse.getString("msg"));
+			} else {
+				TwitterFactory lTwitterFactory = new TwitterFactory();
+				Twitter lTwitter = lTwitterFactory.getInstance();
+				lTwitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+
+				// pass callback URL to Twitter API
+				RequestToken lReqToken =
+						lTwitter.getOAuthRequestToken(
+							"http://localhost/demos/twitter/twauth.htm?isAuth=true"
+						);
+
+				String lAuthenticationURL = lReqToken.getAuthenticationURL();
+				String lAuthorizationURL = lReqToken.getAuthorizationURL();
+
+				lResponse.setString("authenticationURL", lAuthenticationURL);
+				lResponse.setString("authorizationURL", lAuthorizationURL);
+				lMsg = "authenticationURL: " + lAuthenticationURL + ", authorizationURL: " + lAuthorizationURL;
+				lResponse.setString("msg", lMsg);
+				if (mLog.isInfoEnabled()) {
+					mLog.info(lMsg);
+				}
+
+				aConnector.setVar(OAUTH_REQUEST_TOKEN, lReqToken);
+			}
+		} catch (Exception lEx) {
+			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+			mLog.error(lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
 	private void login(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
@@ -158,12 +217,16 @@ public class TwitterPlugIn extends TokenPlugIn {
 				TwitterFactory lTwitterFactory = new TwitterFactory();
 				Twitter lTwitter = lTwitterFactory.getInstance();
 				lTwitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+				/*
 				// pass callback URL to Twitter API
 				RequestToken lReqToken = lTwitter.getOAuthRequestToken("http://localhost/demos/twitter/twauth.htm?isAuth=true");
 
-				lMsg = "URLs";
-				lResponse.setString("authenticationURL", lReqToken.getAuthenticationURL());
-				lResponse.setString("authorizationURL", lReqToken.getAuthorizationURL());
+				String lAuthenticationURL = lReqToken.getAuthenticationURL();
+				String lAuthorizationURL = lReqToken.getAuthorizationURL();
+
+				lResponse.setString("authenticationURL", lAuthenticationURL);
+				lResponse.setString("authorizationURL", lAuthorizationURL);
+				lMsg = "authenticationURL: " + lAuthenticationURL + ", authorizationURL: " + lAuthorizationURL;
 				lResponse.setString("msg", lMsg);
 				if (mLog.isInfoEnabled()) {
 					mLog.info(lMsg);
@@ -174,6 +237,9 @@ public class TwitterPlugIn extends TokenPlugIn {
 				// persist the request token, it's required
 				// to get access token from verifier
 				aConnector.setVar(OAUTH_REQUEST_TOKEN, lReqToken);
+				 */
+
+				aConnector.setVar(TWITTER_VAR, lTwitter);
 			}
 		} catch (Exception lEx) {
 			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
@@ -218,7 +284,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
-	/*
+	/**
 	 * Gets the Twitter timeline for a given user. If no user is given
 	 * the user registered for the app is used as default.
 	 */
@@ -317,6 +383,15 @@ public class TwitterPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
+	/**
+	 * is called by the jWebSocket OAuth confirmation window to pass the
+	 * OAuth AccessToken Verifier from the Browser to the Server so that
+	 * the server is able to run Twitter API commands w/o knowing the user's
+	 * credentials.
+	 * @param aConnector
+	 * @param aToken
+	 */
+
 	private void setVerifier(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
@@ -324,6 +399,13 @@ public class TwitterPlugIn extends TokenPlugIn {
 		String lVerifier = aToken.getString("verifier");
 		aConnector.setString(OAUTH_VERIFIER, lVerifier);
 	}
+
+	/**
+	 * posts a Twitter message on behalf of a OAtuh authenticated
+	 * user by using the retreived AccessToken and its verifier.
+	 * @param aConnector
+	 * @param aToken
+	 */
 
 	private void tweet(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();

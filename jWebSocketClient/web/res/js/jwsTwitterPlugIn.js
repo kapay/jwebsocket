@@ -39,9 +39,9 @@ jws.TwitterPlugIn = {
 				if( this.OnGotTwitterTimeline ) {
 					this.OnGotTwitterTimeline( aToken );
 				}
-			} else if( "login" == aToken.reqType ) {
-				if( this.onTwitterRequestToken ) {
-					this.onTwitterRequestToken( aToken );
+			} else if( "requestAccessToken" == aToken.reqType ) {
+				if( this.OnTwitterAccessToken ) {
+					this.OnTwitterAccessToken( aToken );
 				}
 			}
 		}
@@ -60,6 +60,28 @@ jws.TwitterPlugIn = {
 		return lRes;
 	},
 
+	twitterRequestAccessToken: function( aCallbackURL, aOptions ) {
+		// check websocket connection status
+		var lRes = this.checkConnected();
+		// if connected to websocket network...
+		if( 0 == lRes.code ) {
+			// Twitter API calls Twitter Login screen,
+			// hence here no user name or password are required.
+			// Pass the callbackURL to notify Web App on successfull connection
+			// and to obtain OAuth verifier for user.
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "requestAccessToken",
+				callbackURL: aCallbackURL
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	twitterSetVerifier: function( aVerifier, aOptions ) {
+
+	},
 
 	twitterLogin: function( aCallbackURL, aOptions ) {
 		// check websocket connection status
@@ -125,8 +147,8 @@ jws.TwitterPlugIn = {
 		if( aListeners.OnGotTwitterTimeline !== undefined ) {
 			this.OnGotTwitterTimeline = aListeners.OnGotTwitterTimeline;
 		}
-		if( aListeners.onTwitterRequestToken !== undefined ) {
-			this.onTwitterRequestToken = aListeners.onTwitterRequestToken;
+		if( aListeners.OnTwitterAccessToken !== undefined ) {
+			this.OnTwitterAccessToken = aListeners.OnTwitterAccessToken;
 		}
 	}
 
