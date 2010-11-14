@@ -77,6 +77,7 @@ public class JWebSocketServer {
 			}
 		} catch (Exception lEx) {
 			System.out.println(lEx.getClass().getSimpleName() + " on starting jWebsocket server: " + lEx.getMessage());
+			lEx.printStackTrace();
 		} finally {
 			JWebSocketFactory.stop();
 		}
