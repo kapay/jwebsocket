@@ -439,12 +439,18 @@ public class TCPConnector extends BaseConnector {
         //   are the payload length.
         // ----
         // However, arrays in java may only have Integer.MAX_VALUE(32-bit) elements.
-        // Therefore, we never set target payload length to 127.
-        if(lPayloadLen > 126)
-        {
-            mOut.write((lPayloadLen >>> 8) & 0xFF);
+        // Therefore, we never set target payload length greater than 32-bit number
+        // (more than 0xffff or 65535 in decimal)
+        if(lPayloadLen > 126 && lPayloadLen < 0xffff) {
+            mOut.write((lPayloadLen >>> 8) & 0xff);
+            mOut.write(lPayloadLen & 0xFF);
+        } else if(lPayloadLen > 0xffff) {
+            mOut.write((lPayloadLen >>> 24) & 0xFF);
+            mOut.write((lPayloadLen >>> 16) & 0xFF);
+            mOut.write((lPayloadLen >>>  8) & 0xFF);
             mOut.write(lPayloadLen & 0xFF);
         }
+
 
         mOut.write(aDataPacket.getByteArray());
     }
