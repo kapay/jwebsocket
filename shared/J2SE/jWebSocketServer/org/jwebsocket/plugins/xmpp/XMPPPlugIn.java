@@ -90,7 +90,7 @@ public class XMPPPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+		if (lType != null && getNamespace().equals(lNS)) {
 			if (lType.equals("connect")) {
 				connect(aConnector, aToken);
 			} else if (lType.equals("login")) {

@@ -105,7 +105,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+		if (lType != null && getNamespace().equals(lNS)) {
 			if (lType.equals(TT_SEND)) {
 				send(aConnector, aToken);
 				aResponse.abortChain();
@@ -233,6 +233,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		}
 		// send "welcome" token to client
 		Token lWelcome = TokenFactory.createToken(TT_WELCOME);
+		lWelcome.setString("ns", getNamespace());
 		lWelcome.setString("vendor", JWebSocketCommonConstants.VENDOR);
 		lWelcome.setString("version", JWebSocketServerConstants.VERSION_STR);
 		// here the session id is MANDATORY! to pass to the client!
@@ -285,6 +286,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			}
 			// broadcast login event to other clients of the jWebSocket network
 			Token lLogout = TokenFactory.createToken(BaseToken.TT_EVENT);
+			lLogout.setString("ns", getNamespace());
 			lLogout.setString("name", "logout");
 			lLogout.setString("username", getUsername(aConnector));
 			lLogout.setInteger("clientCount", getConnectorCount());
@@ -311,6 +313,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		}
 		// send "goodBye" token to client
 		Token lGoodBye = TokenFactory.createToken(TT_GOODBYE);
+		lGoodBye.setString("ns", getNamespace());
 		lGoodBye.setString("vendor", JWebSocketCommonConstants.VENDOR);
 		lGoodBye.setString("version", JWebSocketServerConstants.VERSION_STR);
 		lGoodBye.setString("sourceId", aConnector.getId());
@@ -323,7 +326,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	private void login(WebSocketConnector aConnector, Token aToken) {
-		
+
 		// sendWelcome(aConnector);
 
 		Token lResponse = createResponse(aToken);
@@ -345,7 +348,6 @@ public class SystemPlugIn extends TokenPlugIn {
 
 			// TODO: Here we need to check if the user is in the user data base at
 			// all.
-
 			lResponse.setString("username", lUsername);
 			// lResponse.put("usid", getSessionId(aConnector));
 			lResponse.setString("sourceId", aConnector.getId());

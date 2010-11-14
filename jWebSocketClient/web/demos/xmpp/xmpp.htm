@@ -48,6 +48,8 @@
 			var eJWSUsername = null;
 			var eJWSPassword = null;
 
+			var lCurChatPartner = null;
+
 			function log( aString ) {
 				eLog.innerHTML +=
 					aString + "<br>";
@@ -61,7 +63,7 @@
 				eLog.scrollTop = 0;
 			}
 
-			var jWebSocketClient = null;
+			var lWSC = null;
 			var gUsername = null;
 
 			function logon() {
@@ -72,93 +74,148 @@
 				eJWSPassword.value = "";
 
 				log( "Connecting to " + lURL + " and logging in as '" + gUsername + "'..." );
-				var lRes = jWebSocketClient.logon( lURL, gUsername, lPassword, {
+				var lRes = lWSC.logon( lURL, gUsername, lPassword, {
 					
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection established.</font>" );
+						jws.$("simgStatus").src = "../../images/connected.png";
 					},
 					// OnMessage callback
 					OnMessage: function( aEvent, aToken ) {
-						var lDate = "";
-						if( aToken.date_val ) {
-							lDate = jws.tools.ISO2Date( aToken.date_val );
+						log( "<font style='color:#888'>jWebSocket '" + aToken.type + "' token received, full message: '" + aEvent.data + "'</font>" );
+						if( lWSC.isLoggedIn() ) {
+							jws.$("simgStatus").src = "../../images/authenticated.png";
+						} else {
+							jws.$("simgStatus").src = "../../images/connected.png";
 						}
-						log( "<font style='color:#888'>jWebSocket '" + aToken.type + "' token received, full message: '" + aEvent.data + "' " + lDate + "</font>" );
+						jws.$("slblClientId").innerHTML =
+							"&nbsp;Client&#x2011;Id:&nbsp;"
+							+ lWSC.getId() + "&nbsp;"
+							+ ( jws.browserSupportsNativeWebSockets ? "(native)" : "(flashbridge)" );
 					},
 					// OnClose callback
 					OnClose: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection closed.</font>" );
+						jws.$("simgStatus").src = "../../images/disconnected.png";
+						jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;-";
 					}
 				});
 
-				log( jWebSocketClient.resultToString( lRes ) );
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function logoff() {
-				if( jWebSocketClient ) {
+				if( lWSC ) {
 					log( "Logging off " + ( gUsername != null ? "'" + gUsername + "'" : "" ) + " and disconnecting..." );
 					// the timeout below  is optional, if you use it you'll get a good-bye message.
-					var lRes = jWebSocketClient.close({ timeout: 3000 });
-					log( jWebSocketClient.resultToString( lRes ) );
+					var lRes = lWSC.close({ timeout: 3000 });
+					// remove users from list
+					mClearRoster();
+					log( lWSC.resultToString( lRes ) );
 				}
 			}
 
 			function xmppConnect() {
-				jWebSocketClient.xmppConnect(
-				eXMPPHost.value, parseInt( eXMPPPort.value ), eXMPPDomain.value, false
-			);
+				log( "Connecting to XMPP Server '" + eXMPPHost.value
+					+ ":" + eXMPPPort.value 
+					+ "'..." );
+				var lRes = lWSC.xmppConnect(
+					eXMPPHost.value,
+					parseInt( eXMPPPort.value ),
+					eXMPPDomain.value,
+					false
+				);
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function xmppDisconnect() {
-				jWebSocketClient.xmppDisconnect();
+				log( "Disconnecting to XMPP Server..." );
+				var lRes = lWSC.xmppDisconnect();
+				// remove users from list
+				mClearRoster();
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function xmppLogin() {
-				jWebSocketClient.xmppLogin( eXMPPUsername.value, eXMPPPassword.value );
+				log( "Authenticating user '"
+					+ eXMPPUsername.value + "' against XMPP server"
+					+ "..." );
+				var lRes = lWSC.xmppLogin(
+					eXMPPUsername.value,
+					eXMPPPassword.value
+				);
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function xmppLogout() {
-				jWebSocketClient.xmppLogout();
+				log( "Logging out user '"
+					+ eXMPPUsername.value + "' from XMPP server"
+					+ "..." );
+				var lRes = lWSC.xmppLogout();
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function xmppRoster() {
-				jWebSocketClient.xmppRoster();
+				log( "Retreiving roster from XMPP server..." );
+				var lRes = lWSC.xmppRoster();
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function xmppSetPresence() {
-				jWebSocketClient.xmppSetPresence(
-				eXMPPMode.value,
-				eXMPPType.value,
-				eXMPPStatus.value,
-				24
-				// eXMPPPriority.value
-			);
+				log( "Setting presence..." );
+				var lRes = lWSC.xmppSetPresence(
+					eXMPPMode.value,
+					eXMPPType.value,
+					eXMPPStatus.value,
+					24
+					// eXMPPPriority.value
+				);
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function xmppOpenChat() {
-				jWebSocketClient.xmppOpenChat("fivefeetfurther@googlemail.com");
+				if( eXMPPRoster.selectedIndex >= 0 ) {
+					lCurChatPartner = eXMPPRoster.value;
+				} else {
+					lCurChatPartner = "";
+				}
+				log( "Opening chat with '" + lCurChatPartner + "'..." );
+				var lRes = lWSC.xmppOpenChat( lCurChatPartner );
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function xmppSendChat() {
-				jWebSocketClient.xmppSendChat("fivefeetfurther@googlemail.com", eXMPPMessage.value);
+				log( "Sending message to chat with '" + lCurChatPartner + "'..." );
+				var lRes = lWSC.xmppSendChat(
+					lCurChatPartner,
+					eXMPPMessage.value
+				);
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function xmppCloseChat() {
-				jWebSocketClient.xmppCloseChat("fivefeetfurther@googlemail.com");
+				log( "Closing chat with '" + lCurChatPartner + "'..." );
+				var lRes = lWSC.xmppCloseChat(lCurChatPartner);
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function onXMPPChatMessage( aToken ) {
 				log( aToken.from + "->" + aToken.to + ": " + aToken.body );
 			}
 
-			function onXMPPRoster( aToken ) {
-				log( "Roster received: " );
-				// remove all list items
+			function mClearRoster() {
 				var lOptions = eXMPPRoster.options;
 				for( var lIdx = eXMPPRoster.options.length - 1; lIdx >= 0; lIdx-- ) {
 					lOptions.remove( lIdx );
 				}
+			}
+
+			function onXMPPRoster( aToken ) {
+				log( "Roster received: " );
+				// remove all list items
+				mClearRoster();
+				var lOptions = eXMPPRoster.options;
 				// append all roster items to select element
 				var lRoster = aToken.roster;
 				if( lRoster ) {
@@ -166,7 +223,7 @@
 						var lItem = lRoster[ lIdx ];
 						var lOption = document.createElement( "option" );
 						lOptions.add( lOption );
-						lOption.innerHTML = "(" + lItem.user + ")";
+						lOption.innerHTML = lItem.user;
 						lOption.value = lItem.user;
 					}
 				}
@@ -192,8 +249,8 @@
 				// jws.browserSupportsWebSockets checks web if sockets are available
 				// either natively, by the Flash Bridge or by the Chrome Frame.
 				if( jws.browserSupportsWebSockets() ) {
-					jWebSocketClient = new jws.jWebSocketJSONClient();
-					jWebSocketClient.setXMPPCallbacks({
+					lWSC = new jws.jWebSocketJSONClient();
+					lWSC.setXMPPCallbacks({
 						OnXMPPChatMessage: onXMPPChatMessage,
 						OnXMPPRoster: onXMPPRoster
 					});
@@ -242,7 +299,13 @@
 		</script>
 		Testing our new #jWebSocket XMPP-Plugin, tweet via #WebSockets! http://jwebsocket.org
 		-->
-		<h1>jWebSocket XMPP/Jabber Demo</h1>
+		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="tdHeader" width="">jWebSocket XMPP/Jabber Demo</td>
+				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
+				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
+			</tr>
+		</table>
 		<p>This demo shows how to easily use XMPP/Jabber via the jWebSocket XMPP service.</p>
 		<!-- <iframe id="sifrxmppLogin" style="width:100%; height:200px"></iframe> -->
 
@@ -250,26 +313,26 @@
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px" title="jWebSocket username or 'guest' for demo."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();" title="Authenticates you against the jWebSocket Server."></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px" title="jWebSocket username or 'Guest' for demo."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();" title="Connects and authenticates you against the jWebSocket Server."></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();" title="Clears the chat log below."></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnectXMPP" type="button" value="X/Connect" onclick="xmppConnect();" title="Connects you to the XMPP server, requires jWebSocket login."></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLoginXMPP" type="button" value="X/Login" onclick="xmppLogin();" title="Authenticates you against the XMPP server, requires jWebSocket login."></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnRoster" type="button" value="Roster" onclick="xmppRoster();" title="Returns the current roster, requires XMPP authentication."></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnOpenChat" type="button" value="Open Chat" onclick="xmppOpenChat();" title="Opens a chat, requires XMPP authentication."></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSendMsg" type="button" value="Send Msg." onclick="xmppSendChat();" title="Sends a chat message to the XMPP server, requires XMPP authentication."></td>
+					<td class="stdDlg" width="">Roster/Users</td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Password</td>
 					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:150px" title="jWebSocket password or 'guest' for demo."></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();" title="Logs out and disconnects from jWebSocket and XMPP server."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnXXX" type="button" value="-" onclick="" title="n/a"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnectXMPP" type="button" value="X/Disconnect" onclick="xmppDisconnect();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoutXMPP" type="button" value="X/Logout" onclick="xmppLogout();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSetStatus" type="button" value="Set Status" onclick="xmppSetPresence();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnCloseChat" type="button" value="Close Chat" onclick="xmppCloseChat();"></td>
-					<td class="stdDlg" width="" rowspan="4" valign="top">
-						<select id="sselXMPPRoster" size="0" style="width:100px">
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnNA" type="button" value="-" onclick="" title="n/a"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnectXMPP" type="button" value="X/Disconnect" onclick="xmppDisconnect();" title="Disconnects you from the XMPP server."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoutXMPP" type="button" value="X/Logout" onclick="xmppLogout();" title="Logs you out from the XMPP server."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSetStatus" type="button" value="Set Status" onclick="xmppSetPresence();" title="Sets your status and applies mode and type."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnCloseChat" type="button" value="Close Chat" onclick="xmppCloseChat();" title="Closes an open chat."></td>
+					<td class="stdDlg" width="" rowspan="3" valign="top">
+						<select class="sselDlg" id="sselXMPPRoster" size="5" style="width:150px">
 <!--
 							<optgroup label="Group1">
 								<option value="1">A</option>
@@ -288,14 +351,14 @@
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPUsername" type="text" value="jwebsocket" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPUsername" type="text" value="jwebsocket" style="width:150px" title="Your chat-id without(!) the @-extension, e.g. myname"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Server</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPHost" type="text" value="jabber.org" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPHost" type="text" value="jabber.org" style="width:150px" title="e.g. jabber.org or talk.google.com"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Domain</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPDomain" type="text" value="jabber.org" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPDomain" type="text" value="jabber.org" style="width:150px" title="e.g. jabber.org or google.com (or googlemail.com in Germany)"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Mode</td>
 					<td class="stdDlg" width="">
-						<select class="sselDlg" id="sselXMPPMode" style="width:100px">
+						<select class="sselDlg" id="sselXMPPMode" style="width:100px" title="Specifies your current mode if you are connected.">
 							<option value="available">available</option>
 							<option value="away">away</option>
 							<option value="chat">free to chat</option>
@@ -305,14 +368,14 @@
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Password</td>
-					<td class="stdDlg" width="5"><input class="spwfDlg" id="stxfXMPPPassword" type="password" value="" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="spwfDlg" id="stxfXMPPPassword" type="password" value="" style="width:150px" title="Your XMPP password, will not be saved on the jWebSocket server!"></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Port</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfXMPPPort" type="text" value="5222" style="width:150px"></td>
+					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfXMPPPort" type="text" value="5222" style="width:150px" title="Port of your XMPP server, default is 5222."></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Status</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPStatus" type="text" value="I'm here!" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfXMPPStatus" type="text" value="jWebSocket rocks!" style="width:150px" title="Status message appearing to others as text to your account."></td>
 					<td class="stdDlg" width="5">XMPP&nbsp;Type</td>
 					<td class="stdDlg" width="">
-						<select class="sselDlg" id="sselXMPPType" style="width:100px">
+						<select class="sselDlg" id="sselXMPPType" style="width:100px" title="Specifies if you are connected or not.">
 							<option value="available">available</option>
 							<option value="unavailable">unavailable</option>
 							<option value="subscribe">subscribe</option>
@@ -324,7 +387,8 @@
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">XMPP&nbsp;Message</td>
-					<td class="stdDlg" width="" colspan="8"><input class="stxfDlg" id="stxfXMPPMessage" type="text" value="Message-Body..." style="width:99%"></td>
+					<td class="stdDlg" width="" colspan="7"><input class="stxfDlg" id="stxfXMPPMessage" type="text" value="Message-Body..." style="width:99%" title="Message sent to the XMPP chat."></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSendMsg" type="button" value="Send Msg." onclick="xmppSendChat();" title="Sends a chat message to the XMPP server, requires XMPP authentication."></td>
 				</tr>
 			</table>
 		</div>

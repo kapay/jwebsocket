@@ -47,7 +47,7 @@
 				eLog.scrollTop = 0;
 			}
 
-			var jWebSocketClient = null;
+			var lWSC = null;
 			var gUsername = null;
 
 			function logon() {
@@ -58,52 +58,60 @@
 				ePassword.value = "";
 
 				log( "Connecting to " + lURL + " and logging in as '" + gUsername + "'..." );
-				var lRes = jWebSocketClient.logon( lURL, gUsername, lPassword, {
+				var lRes = lWSC.logon( lURL, gUsername, lPassword, {
 					
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection established.</font>" );
-						jWebSocketClient.twitterLogin();
+						jws.$("simgStatus").src = "../../images/connected.png";
+						lWSC.twitterLogin();
 					},
 					// OnMessage callback
 					OnMessage: function( aEvent, aToken ) {
-						var lDate = "";
-						if( aToken.date_val ) {
-							lDate = jws.tools.ISO2Date( aToken.date_val );
+						log( "<font style='color:#888'>jWebSocket '" + aToken.type + "' token received, full message: '" + aEvent.data + "</font>" );
+						if( lWSC.isLoggedIn() ) {
+							jws.$("simgStatus").src = "../../images/authenticated.png";
+						} else {
+							jws.$("simgStatus").src = "../../images/connected.png";
 						}
-						log( "<font style='color:#888'>jWebSocket '" + aToken.type + "' token received, full message: '" + aEvent.data + "' " + lDate + "</font>" );
+						jws.$("slblClientId").innerHTML =
+							"&nbsp;Client&#x2011;Id:&nbsp;"
+							+ lWSC.getId() + "&nbsp;"
+							+ ( jws.browserSupportsNativeWebSockets ? "(native)" : "(flashbridge)" );
 					},
 					// OnClose callback
 					OnClose: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection closed.</font>" );
+						jws.$("simgStatus").src = "../../images/disconnected.png";
+						jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;-";
 					}
 				});
 
-				log( jWebSocketClient.resultToString( lRes ) );
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function logoff() {
-				if( jWebSocketClient ) {
+				if( lWSC ) {
 					log( "Logging off " + ( gUsername != null ? "'" + gUsername + "'" : "" ) + " and disconnecting..." );
 					// the timeout below  is optional, if you use it you'll get a good-bye message.
-					var lRes = jWebSocketClient.close({ timeout: 3000 });
-					log( jWebSocketClient.resultToString( lRes ) );
+					var lRes = lWSC.close({ timeout: 3000 });
+					log( lWSC.resultToString( lRes ) );
 				}
 			}
 
 			function getTimeline() {
-				var lRes = jWebSocketClient.twitterTimeline(
+				var lRes = lWSC.twitterTimeline(
 					eTwitterUsername.value
 				);
 				log( lRes.msg );
 			}
 
 			function twitterLogin() {
-				jWebSocketClient.twitterLogin();
+				lWSC.twitterLogin();
 			}
 
 			function twitterLogout() {
-				jWebSocketClient.twitterLogout();
+				lWSC.twitterLogout();
 				var lLink = jws.$("twLink");
 				lLink.href = null;
 				// lLink.target="twAuthTab";
@@ -112,13 +120,13 @@
 			}
 
 			function tweet() {
-				jWebSocketClient.tweet(
+				lWSC.tweet(
 					eTwitterMessage.value
 				);
 			}
 
 			function getUserData() {
-				var lRes = jWebSocketClient.twitterUserData(
+				var lRes = lWSC.twitterUserData(
 					eTwitterUsername.value
 				);
 				log( lRes.msg );
@@ -174,8 +182,8 @@
 				// jws.browserSupportsWebSockets checks web if sockets are available
 				// either natively, by the Flash Bridge or by the Chrome Frame.
 				if( jws.browserSupportsWebSockets() ) {
-					jWebSocketClient = new jws.jWebSocketJSONClient();
-					jWebSocketClient.setTwitterCallbacks({
+					lWSC = new jws.jWebSocketJSONClient();
+					lWSC.setTwitterCallbacks({
 						OnGotTwitterTimeline: onGotTwitterTimeline,
 						onTwitterRequestToken: onTwitterRequestToken
 					});
@@ -219,7 +227,13 @@
 		</script>
 Testing our new #jWebSocket Twitter-Plugin, tweet via #WebSockets! http://jwebsocket.org
 -->		
-		<h1>jWebSocket Twitter Demo</h1>
+		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="tdHeader" width="">jWebSocket Twitter Demo</td>
+				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
+				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
+			</tr>
+		</table>
 		<p>This demo shows how to easily use Twitter via the jWebSocket Twitter service.</p>
 		<!-- <iframe id="sifrtwitterLogin" style="width:100%; height:200px"></iframe> -->
 		
@@ -227,8 +241,8 @@ Testing our new #jWebSocket Twitter-Plugin, tweet via #WebSockets! http://jwebso
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">jWebSocket&nbsp;Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="YourUsername" style="width:150px"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px" title="jWebSocket username or 'Guest' for demo."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();" title="Authenticates you against the jWebSocket Server."></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLoginTwitter" type="button" value="Twitter Login" onclick="twitterLogin();"></td>
 					<td class="stdDlg" width=""><a class="sancDlg" id="twLink" onclick="twitterLogin();">Twitter Login</a></td>
 					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnGetUser" type="button" value="Get User" onclick="getUserData();"></td>

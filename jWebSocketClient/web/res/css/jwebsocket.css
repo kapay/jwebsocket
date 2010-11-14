@@ -230,6 +230,7 @@ tr.strDlg {
 td.stdDlg {
 	/* we could use inherited here but IE doesn't get this */
 	background-color: #f0f0f0;
+	/* border: 1px solid red; */
 }
 th.sthDlg {
 	/* we could use inherited here but IE doesn't get this */

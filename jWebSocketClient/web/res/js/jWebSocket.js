@@ -29,6 +29,8 @@ var jws = {
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
 	NS_BASE: "org.jwebsocket",
+	NS_SYSTEM: "org.jwebsocket.plugins.system",
+	
 	MSG_WS_NOT_SUPPORTED:
 		"Unfortunately your browser does neither natively support WebSockets\n" +
 		"nor you have the Adobe Flash-PlugIn 9+ installed.",
@@ -853,36 +855,39 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::aToken:Object:Token to be processed by the plug-ins in the plug-in chain.
 	//:r:*:::void:none
 	processToken: function( aToken ) {
-		// check welcome and goodBye tokens to manage the session
-		if( aToken.type == "welcome" && aToken.usid ) {
-			this.fSessionId = aToken.usid;
-			this.fClientId = aToken.sourceId;
-			this.notifyPlugInsOpened();
-		} else if( aToken.type == "goodBye" ) {
-			this.fSessionId = null;
-		} else if( aToken.type == "close" ) {
-			// if the server closes the connection close immediately too.
-			this.close({
-				timeout: 0
-			});
-		// check if we got a response from a previous request
-		} else if( aToken.type == "response" ) {
-			// check login and logout manage the username
-			if( aToken.reqType == "login" ) {
-				this.fUsername = aToken.username;
-			}
-			if( aToken.reqType == "logout" ) {
-				this.fUsername = null;
-			}
-			// check if some requests need to be answered
-			this.checkCallbacks( aToken );
-		} else if( aToken.type == "event" ) {
-			// check login and logout manage the username
-			if( aToken.name == "connect" ) {
-				this.processConnected( aToken );
-			}
-			if( aToken.name == "disconnect" ) {
-				this.processDisconnected( aToken );
+		// is it a token from the system plug-in at all?
+		if( jws.NS_SYSTEM == aToken.ns ) {
+			// check welcome and goodBye tokens to manage the session
+			if( aToken.type == "welcome" && aToken.usid ) {
+				this.fSessionId = aToken.usid;
+				this.fClientId = aToken.sourceId;
+				this.notifyPlugInsOpened();
+			} else if( aToken.type == "goodBye" ) {
+				this.fSessionId = null;
+			} else if( aToken.type == "close" ) {
+				// if the server closes the connection close immediately too.
+				this.close({
+					timeout: 0
+				});
+			// check if we got a response from a previous request
+			} else if( aToken.type == "response" ) {
+				// check login and logout manage the username
+				if( aToken.reqType == "login" ) {
+					this.fUsername = aToken.username;
+				}
+				if( aToken.reqType == "logout" ) {
+					this.fUsername = null;
+				}
+				// check if some requests need to be answered
+				this.checkCallbacks( aToken );
+			} else if( aToken.type == "event" ) {
+				// check login and logout manage the username
+				if( aToken.name == "connect" ) {
+					this.processConnected( aToken );
+				}
+				if( aToken.name == "disconnect" ) {
+					this.processDisconnected( aToken );
+				}
 			}
 		}
 
@@ -1133,6 +1138,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 						navigator.userAgent.indexOf( "Safari" ) >= 0 &&
 						navigator.userAgent.indexOf( "Chrome" ) < 0 ) ) {
 					this.sendToken({
+						ns: jws.NS_SYSTEM,
 						type: "close",
 						timeout: lTimeout
 					});
@@ -1178,7 +1184,7 @@ jws.SystemClientPlugIn = {
 	//:const:*:NS:String:org.jwebsocket.plugins.system (jws.NS_BASE + ".plugins.system")
 	//:d:en:Namespace for SystemClientPlugIn
 	// if namespace changed update server plug-in accordingly!
-	NS: jws.NS_BASE + ".plugins.system",
+	NS: jws.NS_SYSTEM,
 
 	//:const:*:ALL_CLIENTS:Number:0
 	//:d:en:For [tt]getClients[/tt] method: Returns all currently connected clients irrespective of their authentication state.
@@ -1213,6 +1219,7 @@ jws.SystemClientPlugIn = {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
+				ns: jws.SystemClientPlugIn.NS,
 				type: "login",
 				username: aUsername,
 				password: aPassword,
@@ -1287,6 +1294,7 @@ jws.SystemClientPlugIn = {
 		var lRes = this.checkConnected();
 		if( lRes.code == 0 ) {
 			this.sendToken({
+				ns: jws.SystemClientPlugIn.NS,
 				type: "logout"
 			});
 		}

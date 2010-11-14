@@ -73,7 +73,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+		if (lType != null && lNS.equals(getNamespace())) {
 			// select from database
 			if (lType.equals("save")) {
 				save(aConnector, aToken);

@@ -47,10 +47,6 @@ public class TwitterPlugIn extends TokenPlugIn {
 	private static final String TWITTER_VAR = "$twitter";
 	private static final String OAUTH_REQUEST_TOKEN = "$twUsrReqTok";
 	private static final String OAUTH_VERIFIER = "$twUsrVerifier";
-	private static String TWITTER_USER = null;
-	private static final String TWITTER_USER_KEY = "username";
-	private static String TWITTER_PASSWORD = null;
-	private static final String TWITTER_PASSWORD_KEY = "password";
 	private static String CONSUMER_KEY = null;
 	private static final String CONSUMER_KEY_KEY = "consumer_key";
 	private static String CONSUMER_SECRET = null;
@@ -80,8 +76,6 @@ public class TwitterPlugIn extends TokenPlugIn {
 	}
 
 	private void mGetSettings() {
-		TWITTER_USER = getSetting(TWITTER_USER_KEY, null);
-		TWITTER_PASSWORD = getSetting(TWITTER_PASSWORD_KEY, null);
 		CONSUMER_KEY = getSetting(CONSUMER_KEY_KEY, null);
 		CONSUMER_SECRET = getSetting(CONSUMER_SECRET_KEY, null);
 		try {
