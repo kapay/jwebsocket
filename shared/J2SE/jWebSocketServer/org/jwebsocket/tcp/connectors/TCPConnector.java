@@ -330,7 +330,7 @@ public class TCPConnector extends BaseConnector {
                                 pong.setFrameType(RawPacket.FRAMETYPE_PONG);
                                 sendPacket(pong);
                             } else if (lPacketType == RawPacket.FRAMETYPE_CLOSE) {
-                                // As per spec, server must respond tlPacketType = RawPacket.FRAMETYPEo CLOSE with acknowledgment CLOSE (maybe
+                                // As per spec, server must respond to CLOSE with acknowledgment CLOSE (maybe
                                 // this should be handled higher up in the hierarchy?)
                                 WebSocketPacket close = new RawPacket(lBuff.toByteArray());
                                 close.setFrameType(RawPacket.FRAMETYPE_CLOSE);
