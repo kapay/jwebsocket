@@ -292,7 +292,7 @@ public class RPCPlugIn extends TokenPlugIn {
 					lMsg = "Class '" + lClassName + "' found but the method " + lMethod + " is not available. Right is missing, probably a typo (call are case sensitive)";
 				}
 			} else {
-				lMsg = "Class '" + lClassName + "' not found or not properly loaded.";
+				lMsg = "Class '" + lClassName + "' not found in the jwebsocket.xml file, or not properly loaded. probably a typo.";
 			}
 		} catch (NoSuchMethodException ex) {
 			lMsg = "NoSuchMethodException calling '" + lMethod + "' for class " + lClassName + ": " + ex.getMessage();
