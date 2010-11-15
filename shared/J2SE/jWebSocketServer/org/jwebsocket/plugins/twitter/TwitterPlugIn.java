@@ -30,15 +30,21 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
+import twitter4j.FilterQuery;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.ResponseList;
 import twitter4j.Status;
+import twitter4j.StatusDeletionNotice;
+import twitter4j.StatusListener;
 import twitter4j.Trend;
 import twitter4j.Trends;
 import twitter4j.Tweet;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
+import twitter4j.TwitterStream;
+import twitter4j.TwitterStreamFactory;
 import twitter4j.User;
 import twitter4j.http.AccessToken;
 import twitter4j.http.RequestToken;
@@ -55,6 +61,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 	private static final String TWITTER_VAR = "$twitter";
 	private static final String OAUTH_REQUEST_TOKEN = "$twUsrReqTok";
 	private static final String OAUTH_VERIFIER = "$twUsrVerifier";
+	private static final String TWITTER_STREAM = "$twStream";
 	private static String CONSUMER_KEY = null;
 	private static final String CONSUMER_KEY_KEY = "consumer_key";
 	private static String CONSUMER_SECRET = null;
@@ -129,8 +136,9 @@ public class TwitterPlugIn extends TokenPlugIn {
 				getUserData(aConnector, aToken);
 			} else if (lType.equals("setVerifier")) {
 				setVerifier(aConnector, aToken);
+			} else if (lType.equals("setStream")) {
+				setStream(aConnector, aToken);
 			}
-
 		}
 	}
 
@@ -140,6 +148,12 @@ public class TwitterPlugIn extends TokenPlugIn {
 	 */
 	public void connectorStopped(WebSocketConnector aConnector) {
 		aConnector.removeVar(TWITTER_VAR);
+		// if still some stream is allocated release it!
+		TwitterStream lTwitterStream = (TwitterStream) aConnector.getVar(TWITTER_STREAM);
+		if (lTwitterStream != null) {
+			lTwitterStream.shutdown();
+			aConnector.removeVar(TWITTER_STREAM);
+		}
 	}
 
 	private boolean mCheckAuth(Token aToken) {
@@ -576,7 +590,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 
 				ResponseList lRespList = mTwitter.getPublicTimeline();
 				for (int lIdx = 0; lIdx < lRespList.size(); lIdx++) {
-					Status lStatus = (Status)lRespList.get(lIdx);
+					Status lStatus = (Status) lRespList.get(lIdx);
 					lMessages.add(lStatus.getText());
 				}
 				lResponse.setList("messages", lMessages);
@@ -584,6 +598,79 @@ public class TwitterPlugIn extends TokenPlugIn {
 					mLog.info("Public timeline successfully received");
 				}
 			}
+		} catch (Exception lEx) {
+			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+			mLog.error(lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	private void setStream(final WebSocketConnector aConnector, Token aToken) {
+
+		final TokenServer lServer = getServer();
+
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+		String lMsg = "";
+
+		StatusListener lListener = new StatusListener() {
+
+			@Override
+			public void onStatus(Status aStatus) {
+				Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
+				lToken.setString("status", aStatus.getText());
+				lServer.sendToken(aConnector, lToken);
+				// System.out.println(status.getUser().getName() + " : " + status.getText());
+			}
+
+			@Override
+			public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
+			}
+
+			@Override
+			public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
+			}
+
+			@Override
+			public void onException(Exception ex) {
+			}
+		};
+
+		/*
+		Configuration lConfig = new Configuration();
+		Authorization lAuth = new OAuthAuthorization();
+		// sample() method internally creates a thread which manipulates TwitterStream and calls these adequate listener methods continuously.
+		 */
+		try {
+			TwitterStream lTwitterStream = (TwitterStream) aConnector.getVar(TWITTER_STREAM);
+			if (lTwitterStream == null) {
+				lTwitterStream = new TwitterStreamFactory(lListener).getInstance("username", "password");
+				aConnector.setVar(TWITTER_STREAM, lTwitterStream);
+			}
+			/*
+			FilterQuery lFilter = new FilterQuery(
+			20,
+			new int[]{},
+			new String[]{
+			"jWebSocket", "WebSockets", "WebSocket",
+			"Android", "iPhone", "iOS", "Symbian",
+			"Apple", "Google", "Innotrade",
+			"AJAX", "Comet", "TCP", "HTTP", "XHR", "XMLHttpRequest",
+			"Atmosphere", "Kaazing"});
+			 */
+			FilterQuery lFilter = new FilterQuery();
+			lFilter.count(1).track(new String[]{
+						"jWebSocket", "WebSockets", "WebSocket",
+						"Android", "iPhone", "iOS", "Symbian",
+						"Apple", "Google", "Innotrade",
+						"AJAX", "Comet", "TCP", "HTTP", "XHR", "XMLHttpRequest",
+						"Atmosphere", "Kaazing"});
+			//lTwitterStream.filter(lFilter);
+			lTwitterStream.sample();
 		} catch (Exception lEx) {
 			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
 			mLog.error(lMsg);

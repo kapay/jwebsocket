@@ -177,6 +177,18 @@ jws.TwitterPlugIn = {
 		return lRes;
 	},
 
+	twitterSetStream: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "setStream"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	twitterUserData: function( aUsername, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {

@@ -144,6 +144,14 @@
 				log( lWSC.resultToString( lRes ) );
 			}
 
+			function twitterSetStream() {
+				log( "Setting Stream..." );
+				var lRes = lWSC.twitterSetStream(
+				);
+				log( lWSC.resultToString( lRes ) );
+			}
+
+
 			function twitterLogout() {
 				var lRunLogOut = true;
 				if( lTwitterAccessVerifier == null ) {
@@ -339,6 +347,7 @@ Testing our new #jWebSocket Twitter-Plugin, tweet via #WebSockets! http://jwebso
 					<td class="stdDlg" width="5"><a class="sancDlg" id="sancTwitterLogout" onclick="twitterLogout();" title="Logs you out from Twitter so that you can re-login e.g. with another account.">Twitter&nbsp;Logout</a></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetTimeline" type="button" value="getTimeline" onclick="getTimeline();" title="Retreives the timeline (message) for the given Twitter user."></td>
 					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnTweet" type="button" value="Tweet" onclick="tweet();" title="Updates your twitter status, i.e. sends a new tweet to Twitter."></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnStream" type="button" value="Stream" onclick="twitterSetStream();" title="Searches for tweets matching the query."></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Twitter&nbsp;Username</td>
