@@ -188,7 +188,7 @@ jws.RPCClientPlugIn = {
 			}
 		} else {
 			//TODO: send back the error under a better format
-			lRes = ex
+			lRes =
 			+ "\nAcces not granted to the="
 			+ lMethod;
 		}
