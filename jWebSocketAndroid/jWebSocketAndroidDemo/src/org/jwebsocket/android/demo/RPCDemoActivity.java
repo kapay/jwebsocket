@@ -74,7 +74,7 @@ public class RPCDemoActivity extends Activity implements
 		targetLabel = (TextView) findViewById(R.id.targetLabel);
 		invokeBtn = (Button) findViewById(R.id.invokeBtn);
 		statusImage = (ImageView) findViewById(R.id.statusImage);
-		targetRadioGroup = (RadioGroup) findViewById(R.id.radio_group);
+//	targetRadioGroup = (RadioGroup) findViewById(R.id.radio_group);
 
 		statusImage.setImageResource(R.drawable.disconnected);
 
@@ -84,33 +84,32 @@ public class RPCDemoActivity extends Activity implements
 				if (((CheckBox) v).isChecked()) {
 					targetTxt.setVisibility(EditText.VISIBLE);
 					targetLabel.setVisibility(TextView.VISIBLE);
-					targetRadioGroup.setVisibility(RadioGroup.VISIBLE);
+					//targetRadioGroup.setVisibility(RadioGroup.VISIBLE);
 					useRRPC = true;
 				} else {
 					targetTxt.setVisibility(EditText.GONE);
 					targetLabel.setVisibility(TextView.GONE);
-					targetRadioGroup.setVisibility(RadioGroup.GONE);
+					//targetRadioGroup.setVisibility(RadioGroup.GONE);
 					useRRPC = false;
 				}
 				predefinedValues();
 				targetLabel.invalidate();
 				targetTxt.invalidate();
-				targetRadioGroup.invalidate();
+				//targetRadioGroup.invalidate();
 
 			}
 		});
 
 		invokeBtn.setOnClickListener(new OnClickListener() {
-
 			public void onClick(View arg0) {
 				sendMethodInvokeToken();
 			}
 		});
 
-		final RadioButton radio_browser = (RadioButton) findViewById(R.id.radio_browser);
-		final RadioButton radio_android = (RadioButton) findViewById(R.id.radio_android);
-		radio_browser.setOnClickListener(radio_listener);
-		radio_android.setOnClickListener(radio_listener);
+//		final RadioButton radio_browser = (RadioButton) findViewById(R.id.radio_browser);
+//		final RadioButton radio_android = (RadioButton) findViewById(R.id.radio_android);
+//		radio_browser.setOnClickListener(radio_listener);
+//		radio_android.setOnClickListener(radio_listener);
 
 	}
 	
@@ -130,19 +129,19 @@ public class RPCDemoActivity extends Activity implements
 		}
 	}
 
-	private OnClickListener radio_listener = new OnClickListener() {
-		public void onClick(View v) {
-			// Perform action on clicks
-			RadioButton rb = (RadioButton) v;
-			if (rb.getId() == R.id.radio_android) {
-				selectedTarget = Target.ANDROID;
-			}
-			if (rb.getId() == R.id.radio_browser) {
-				selectedTarget = Target.BROWSER;
-			}
-			predefinedValues();
-		}
-	};
+//	private OnClickListener radio_listener = new OnClickListener() {
+//		public void onClick(View v) {
+//			// Perform action on clicks
+//			RadioButton rb = (RadioButton) v;
+//			if (rb.getId() == R.id.radio_android) {
+//				selectedTarget = Target.ANDROID;
+//			}
+//			if (rb.getId() == R.id.radio_browser) {
+//				selectedTarget = Target.BROWSER;
+//			}
+//			predefinedValues();
+//		}
+//	};
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu aMenu) {

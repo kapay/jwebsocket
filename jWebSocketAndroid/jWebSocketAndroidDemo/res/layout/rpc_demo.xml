@@ -63,7 +63,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
         android:layout_below="@id/methodTxt"
         android:layout_alignParentLeft="true"
         android:text="RRPC"
-        />
+        /><!--
         <RadioGroup
             android:id="@+id/radio_group"
       android:layout_width="wrap_content"
@@ -82,7 +82,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
           android:checked="true"
           android:text="Android" />
     </RadioGroup>
-	<TextView
+	--><TextView
         android:id="@+id/targetLabel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
