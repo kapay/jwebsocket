@@ -17,8 +17,9 @@ package org.jwebsocket.server;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javolution.util.FastMap;
@@ -58,16 +59,28 @@ public class TokenServer extends BaseServer {
 	private static ExecutorService mCachedThreadPool;
 	private final static int TIME_OUT_TERMINATION_THREAD = 10;
 
+	private int corePoolSize ;
+	private int maximumPoolSize ;
+	private int keepAliveTime ;
+	private int blockingQueueSize ;
+	
 	public TokenServer(ServerConfiguration aServerConfig) {
 		super(aServerConfig);
 		mPlugInChain = new TokenPlugInChain(this);
 		mFilterChain = new TokenFilterChain(this);
+		mFilterChain = new TokenFilterChain(this);
+		
+		corePoolSize = aServerConfig.getThreadPoolConfig().getCorePoolSize() ;
+		maximumPoolSize = aServerConfig.getThreadPoolConfig().getMaximumPoolSize() ;
+		keepAliveTime = aServerConfig.getThreadPoolConfig().getKeepAliveTime() ;
+		blockingQueueSize = aServerConfig.getThreadPoolConfig().getBlockingQueueSize() ;
 	}
 
 	@Override
 	public void startServer() throws WebSocketException {
 		// Create the thread pool.
-		mCachedThreadPool = Executors.newCachedThreadPool();
+		 mCachedThreadPool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, 
+				new ArrayBlockingQueue<Runnable>(blockingQueueSize));
 		mIsAlive = true;
 		if (mLog.isInfoEnabled()) {
 			mLog.info("Token server '" + getId() + "' started.");
