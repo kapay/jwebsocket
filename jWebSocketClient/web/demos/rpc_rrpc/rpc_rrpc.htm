@@ -148,7 +148,7 @@
 			}
 			var selectRrpcType = function () {
 				var lClassName ;
-				if (!rrpc) {
+				if (rrpc) {
 /*					if (document.getElementById('rrpcTypeBrowser').checked) {
 						lClassName = 'demo' ; //browser className
 					} else { */
@@ -206,7 +206,7 @@
 					arguments = document.getElementById('stxfMsg').value ;
 				}
 			
-				if (rrpc) {
+				if (!rrpc) {
 					// perform the Remote Procedure Call...
 					var lRes = lWSC.rpc(
 						// pass class, method and argument for server java method:
@@ -254,7 +254,7 @@
 				}
 			}
 			var clickOnRrpc = function () {
-				rrpc = eTarget.value == "";
+				rrpc = eTarget.value != "";
 				//document.getElementById('rrpcTypeBrowser').disabled = rrpc ;
 				//document.getElementById('rrpcTypeAndroid').disabled = rrpc ;
 			}
