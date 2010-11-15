@@ -75,7 +75,6 @@
 						jws.$("simgStatus").src = "../../images/disconnected.png";
 						jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;-";
 					}
-
 				});
 
 				log( lWSC.resultToString( lRes ) );
@@ -95,14 +94,14 @@
 				eArgs = jws.$( "stxfMsg" );
 				eTarget = jws.$( "stxfTarget" );
 				eSpawnThread = jws.$( "schkThreaded" );
-				eRrpc = jws.$( "schkRrpc" );
+				rrpc = false ;
 				
 				if( jws.browserSupportsWebSockets() ) {
 					lWSC = new jws.jWebSocketJSONClient();
-					lWSC.addGrantedProcedure("demo.rrpcTest1");
-					lWSC.addGrantedProcedure("demo.rrpcTest2");
-					lWSC.addGrantedProcedure("demo.rrpcTest3");
-					lWSC.removeGrantedProcedure("demo.rrpcTest3");
+					lWSC.addGrantedProcedure("org.jwebsocket.android.demo.RPCDemoActivity.rrpcTest1");
+					lWSC.addGrantedProcedure("org.jwebsocket.android.demo.RPCDemoActivity.rrpcTest2");
+					lWSC.addGrantedProcedure("org.jwebsocket.android.demo.RPCDemoActivity.rrpcTest3");
+					lWSC.removeGrantedProcedure("org.jwebsocket.android.demo.RPCDemoActivity.rrpcTest3");
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnDisconnect" ).setAttribute( "disabled", "disabled" );
@@ -122,32 +121,39 @@
 			function exitPage() {
 				disconnect();
 			}
-			
-			demo = {
-				rrpcTest1: function (arg1, arg2, arg3){
-					log("rrpcTest1 has been called by the server");
-					if (arg1) {
-						log("arg1: " + arg1);
+			org = {
+				jwebsocket: {
+					android: {
+						demo: {
+							RPCDemoActivity: {
+								rrpcTest1: function (arg1, arg2, arg3){
+									log("rrpcTest1 has been called by the server");
+									if (arg1) {
+										log("arg1: " + arg1);
+									}
+									if (arg2) {
+										log("arg2: " + arg2);
+									}
+								},
+								rrpcTest2: function (arg1, arg2){
+									log("rrpcTest2("+arg1+", "+arg2+") has been called by the server");
+								},
+								rrpcTest3: function (){
+									log("rrpcTest3 has been called by the server");
+								}
+							}
+						}
 					}
-					if (arg2) {
-						log("arg2: " + arg2);
-					}
-				},
-				rrpcTest2: function (arg1, arg2){
-					log("rrpcTest2("+arg1+", "+arg2+") has been called by the server");
-				},
-				rrpcTest3: function (){
-					log("rrpcTest3 has been called by the server");
 				}
-			};
+			}
 			var selectRrpcType = function () {
 				var lClassName ;
-				if (eRrpc.checked) {
-					if (document.getElementById('rrpcTypeBrowser').checked) {
+				if (!rrpc) {
+/*					if (document.getElementById('rrpcTypeBrowser').checked) {
 						lClassName = 'demo' ; //browser className
-					} else {
+					} else { */
 						lClassName = 'org.jwebsocket.android.demo.RPCDemoActivity' ; //android classname
-					}
+					/*}*/
 				} else {
 					lClassName = 'org.jwebsocket.rpc.sample.SampleRPCLibrary'; //server rpc classname
 				}
@@ -158,24 +164,34 @@
 				document.getElementById('methodName').value = aMethodName;
 				eArgs.value = aArgs ;
 			}
-			
+			var getMd5 = function () {
+				eTarget.value="";
+				setValues('getMD5', "a string to md5-encode");
+				document.getElementById('descriptionRPC').innerHTML='return the md5 value of the server';
+			}
 			var rpcTest1 = function (){
 				setValues('rrpcTest1', "null");
+				document.getElementById('descriptionRPC').innerHTML='invoke (r)rpcTest1(), the most basic (r)rpc test.';
 			}
 			var rpcTest11 = function (){
 				setValues('rrpcTest1', "hello ' & é à");
+				document.getElementById('descriptionRPC').innerHTML='invoke (r)rpcTest1(\"hello ! \' & = é test\"), with a special string as parameter. Will only work with clients which suport method overload (not with js)';
 			}
 			var rpcTest12 = function (){
 				setValues('rrpcTest1', 123);
+				document.getElementById('descriptionRPC').innerHTML='invoke (r)rpcTest1(123), with a int as parameter. Will only work with clients which suport method overload (not with js)';
 			}
 			var rpcTest2 = function (){
 				setValues('rrpcTest2', "[[\"'aa\", \"b&\"], [[1,2],[3,4]]]");
+				document.getElementById('descriptionRPC').innerHTML='(r)rpcTest2(["\'aa", "b&"], [[1,2],[3,4]]), test imbricated list';
 			}
 			var rpcTest21 = function (){
 				setValues('rrpcTest2', "[[\"'aa\", \"b&\"], [[1,\"2\"],[3,4]]]");
+				document.getElementById('descriptionRPC').innerHTML='(r)rpcTest2(["\'aa", "b&"], [[1,"2"],[3,4]]), test imbricated list : should fail since array parameter are not only int. (try to invoke java method (r)rpcTest2(List &lsaquo;String&rsaquo; aList, List&lsaquo;List&lsaquo;Integer&rsaquo;&rsaquo; aList2))';
 			}
 			var rpcTest3 = function (){
 				setValues('rrpcTest3', "null");
+				document.getElementById('descriptionRPC').innerHTML='try to invoke a non-granted method.';
 			}
 			
 
@@ -190,7 +206,7 @@
 					arguments = document.getElementById('stxfMsg').value ;
 				}
 			
-				if (!eRrpc.checked) {
+				if (rrpc) {
 					// perform the Remote Procedure Call...
 					var lRes = lWSC.rpc(
 						// pass class, method and argument for server java method:
@@ -238,9 +254,9 @@
 				}
 			}
 			var clickOnRrpc = function () {
-				eTarget.disabled = !eRrpc.checked ;
-				document.getElementById('rrpcTypeBrowser').disabled = !eRrpc.checked ;
-				document.getElementById('rrpcTypeAndroid').disabled = !eRrpc.checked ;
+				rrpc = eTarget.value == "";
+				//document.getElementById('rrpcTypeBrowser').disabled = rrpc ;
+				//document.getElementById('rrpcTypeAndroid').disabled = rrpc ;
 			}
 		</script>
 	</head>
@@ -304,8 +320,8 @@
 					<td class="stdDlg" width="5"></td>
 					<td class="stdDlg" width="5"></td>
 					<td class="stdDlg" width="5">(R)Rpc</td>
-					<td class="stdDlg" width=""><input class="schkRrpc" id="schkRrpc" type="checkbox" value="on" title="run rrpc" onchange="clickOnRrpc(); selectRrpcType();" >Rrpc</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfTarget" type="text" value="" style="width: 70px" > ID  - Select rrpc target type : <input checked="true" type="radio" name="rrpcType" value="browser" id="rrpcTypeBrowser" onchange="selectRrpcType()" /> browser <input type="radio" name="rrpcType" value="android" id="rrpcTypeAndroid" onchange="selectRrpcType()" /> android</td>
+					<td class="stdDlg" width="">Target Id:<input class="stxfDlg" id="stxfTarget" type="text" value="" style="width: 70px" onkeyup="clickOnRrpc(); selectRrpcType();" ></td>
+					<td class="stdDlg" width=""><!--  Select rrpc target type : <input checked="true" type="radio" name="rrpcType" value="browser" id="rrpcTypeBrowser" onchange="selectRrpcType()" /> browser <input type="radio" name="rrpcType" value="android" id="rrpcTypeAndroid" onchange="selectRrpcType()" /> android --></td>
 					<td class="stdDlg" width="5"></td>
 					<td class="stdDlg" width="5"></td>
 				</tr>
@@ -313,59 +329,19 @@
 					<td class="stdDlg" width="5"></td>
 					<td class="stdDlg" width="5"></td>
 					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5" id="rpcOrRrpc"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest1" onclick="rpcTest1();"></td>
-					<td class="stdDlg" width="">invoke (r)rpcTest1(), the most basic (r)rpc test.</td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-				</tr>
-				<tr class="strDlg">
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest1.1" onclick="rpcTest11();"></td>
-					<td class="stdDlg" width="">invoke (r)rpcTest1(\"hello ! ' & = é test\"), with a special string as parameter. Will only work with clients which suport method overload (not with js)</td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-				</tr>
-				<tr class="strDlg">
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest1.2" onclick="rpcTest12();"></td>
-					<td class="stdDlg" width="">invoke (r)rpcTest1(123), with a int as parameter. Will only work with clients which suport method overload (not with js</td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-				</tr>
-				<tr class="strDlg">
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest2" onclick="rpcTest2();"></td>
-					<td class="stdDlg" width="">(r)rpcTest2(["'aa", "b&"], [[1,2],[3,4]]), test imbricated list</td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-				</tr>
-				<tr class="strDlg">
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest2.1" onclick="rpcTest21();"></td>
-					<td class="stdDlg" width="">(r)rpcTest2(["'aa", "b&"], [[1,"2"],[3,4]]), test imbricated list : should fail since array parameter are not only int. (try to invoke java method (r)rpcTest2(List &lsaquo;String&rsaquo; aList, List&lsaquo;List&lsaquo;Integer&rsaquo;&rsaquo; aList2))</td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-				</tr>
-				<tr class="strDlg">
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width="5"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnRPCTest" type="button" value="(r)rpcTest3" onclick="rpcTest3();"></td>
-					<td class="stdDlg" width="">try to invoke a non-granted method</td>
+					<td class="stdDlg" width="5">Predefined RPC :</td>
+					<td class="stdDlg" width="">
+						<select onchange="eval(this.value)">
+							<option value="getMd5();">getMd5</option>
+							<option value="rpcTest1();">(r)rpcTest1</option>
+							<option value="rpcTest11();">(r)rpcTest1.1</option>
+							<option value="rpcTest12();">(r)rpcTest1.2</option>
+							<option value="rpcTest2();">(r)rpcTest2</option>
+							<option value="rpcTest21();">(r)rpcTest2.1</option>
+							<option value="rpcTest3();">(r)rpcTest3</option>
+						</select>
+					</td>
+					<td class="stdDlg" width="50%" id="descriptionRPC"></td>
 					<td class="stdDlg" width="5"></td>
 					<td class="stdDlg" width="5"></td>
 				</tr>
