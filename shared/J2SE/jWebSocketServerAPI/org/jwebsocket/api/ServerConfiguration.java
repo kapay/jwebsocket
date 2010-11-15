@@ -14,6 +14,8 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import org.jwebsocket.config.xml.ThreadPoolConfig;
+
 /**
  * Server Configuration
  * @author aschulze
@@ -24,5 +26,9 @@ public interface ServerConfiguration extends Configuration {
      * @return the jar file name
      */
     String getJar();
+    /**
+     * @return the thread pool configuration
+     */
+    ThreadPoolConfig getThreadPoolConfig();
     
 }

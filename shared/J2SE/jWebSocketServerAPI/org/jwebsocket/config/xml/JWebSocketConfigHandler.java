@@ -66,6 +66,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_CHANNELS = "channels";
 	private static final String ELEMENT_CHANNEL = "channel";
 	private static final String JWEBSOCKET = "jWebSocket";
+	private static final String ELEMENT_THREAD_POOL = "threadPool";
 	private static Map<String, ConfigHandler> handlerContext = new FastMap<String, ConfigHandler>();
 
 	// initialize the different config handler implementations
@@ -79,6 +80,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		handlerContext.put("filter", new FilterConfigHandler());
 		handlerContext.put("log4j", new LoggingConfigHandler());
 		handlerContext.put("channel", new ChannelConfigHandler());
+		handlerContext.put("threadPool", new ThreadPoolConfigHandler());
 	}
 
 	/**
@@ -93,7 +95,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 				aStreamReader.next();
 				if (aStreamReader.isStartElement()) {
 					String lElementName = aStreamReader.getLocalName();
-
 					if (lElementName.equals(ELEMENT_INSTALLATION)) {
 						aStreamReader.next();
 						lConfigBuilder.setInstallation(aStreamReader.getText());
@@ -163,6 +164,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		return lConfigBuilder.buildConfig();
 	}
 
+	
 	/**
 	 * private method to handle the user config.
 	 *

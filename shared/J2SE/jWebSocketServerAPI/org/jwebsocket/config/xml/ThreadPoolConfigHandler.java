@@ -24,50 +24,59 @@ import org.jwebsocket.config.ConfigHandler;
  * @version $Id: ServerConfigHandler.java 596 2010-06-22 17:09:54Z fivefeetfurther $
  *
  */
-public class ServerConfigHandler implements ConfigHandler {
+public class ThreadPoolConfigHandler implements ConfigHandler {
 
-	private static final String ID = "id";
-	private static final String NAME = "name";
-	private static final String JAR = "jar";
-	private static final String ELEMENT_THREAD_POOL = "threadPool";
-	private static final String ELEMENT_SERVER = "server";
-	
+	private static final String CORE_POOL_SIZE = "corePoolSize";
+	private static final String MAXIMUM_POOL_SIZE = "maximumPoolSize";
+	private static final String KEEP_ALIVE_TIME = "keepAliveTime";
+	private static final String BLOCKING_QUEUE_SIZE = "blockingQueueSize";
+	private static final String ELEMENT_THREAD_POOL = "threadPool";	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Config processConfig(XMLStreamReader streamReader) throws XMLStreamException {
-		String id = "", name = "", jar = "";
-		ThreadPoolConfig lThreadPoolConfig = null ;
+	public Config processConfig(XMLStreamReader streamReader) throws XMLStreamException {	  
+		int corePoolSize = 0, maximumPoolSize = 0, keepAliveTime = 0, blockingQueueSize = 0;
 		while (streamReader.hasNext()) {
 			streamReader.next();
 			if (streamReader.isStartElement()) {
 				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ID)) {
+				if (elementName.equals(CORE_POOL_SIZE)) {
 					streamReader.next();
-					id = streamReader.getText();
-				} else if (elementName.equals(NAME)) {
+					try {
+						corePoolSize = Integer.valueOf(streamReader.getText());
+					} catch (NumberFormatException e) {
+					}
+				} else if (elementName.equals(MAXIMUM_POOL_SIZE)) {
 					streamReader.next();
-					name = streamReader.getText();
-				} else if (elementName.equals(JAR)) {
+					try {
+						maximumPoolSize = Integer.valueOf(streamReader.getText());
+					} catch (NumberFormatException e) {
+					}
+				} else if (elementName.equals(KEEP_ALIVE_TIME)) {
 					streamReader.next();
-					jar = streamReader.getText();
-				} else if (elementName.equals(ELEMENT_THREAD_POOL)) {
+					try {
+						keepAliveTime = Integer.valueOf(streamReader.getText());
+					} catch (NumberFormatException e) {
+					}
+				} else if (elementName.equals(BLOCKING_QUEUE_SIZE)) {
 					streamReader.next();
-					lThreadPoolConfig = (ThreadPoolConfig) new ThreadPoolConfigHandler().processConfig(streamReader);
-				}
-				else {
+					try {
+						blockingQueueSize = Integer.valueOf(streamReader.getText());
+					} catch (NumberFormatException e) {
+					}
+				} else {
 					//ignore
 				}
 			}
 			if (streamReader.isEndElement()) {
 				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ELEMENT_SERVER)) {
+				if (elementName.equals(ELEMENT_THREAD_POOL)) {
 					break;
 				}
 			}
 		}
-		return new ServerConfig(id, name, jar, lThreadPoolConfig);
+		return new ThreadPoolConfig(corePoolSize, maximumPoolSize, keepAliveTime, blockingQueueSize);
 	}
 
 }

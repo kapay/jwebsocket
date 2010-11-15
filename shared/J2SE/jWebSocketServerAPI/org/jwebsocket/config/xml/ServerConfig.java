@@ -29,11 +29,22 @@ public final class ServerConfig implements Config, ServerConfiguration {
 	private final String id;
 	private final String name;
 	private final String jar;
+	private final ThreadPoolConfig threadPoolConfig ;
 
 	public ServerConfig(String id, String name, String jar) {
+		this(id, name, jar, new ThreadPoolConfig());
+	}
+
+	public ServerConfig(String id, String name, String jar, ThreadPoolConfig threadPoolConfig) {
 		this.id = id;
 		this.name = name;
 		this.jar = jar;
+		//If the threadpoolconfig is not set, we just create a default-one.
+		if (threadPoolConfig == null) {
+			this.threadPoolConfig = new ThreadPoolConfig();
+		} else {
+			this.threadPoolConfig = threadPoolConfig ;
+		}
 		//validate the server configuration
 		validate();
 	}
@@ -61,6 +72,13 @@ public final class ServerConfig implements Config, ServerConfiguration {
 	public String getJar() {
 		return jar;
 	}
+	
+	/**
+	 * @return the server thread pool configuration
+	 */
+	public ThreadPoolConfig getThreadPoolConfig () {
+		return threadPoolConfig ;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -70,6 +88,7 @@ public final class ServerConfig implements Config, ServerConfiguration {
 		if ((id != null && id.length() > 0)
 				&& (name != null && name.length() > 0)
 				&& (jar != null && jar.length() > 0)) {
+			threadPoolConfig.validate();
 			return;
 		}
 		throw new WebSocketRuntimeException(
