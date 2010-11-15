@@ -232,6 +232,12 @@ td.stdDlg {
 	background-color: #f0f0f0;
 	/* border: 1px solid red; */
 }
+td.stdDlgTopTxt {
+	/* we could use inherited here but IE doesn't get this */
+	background-color: #f0f0f0;
+	/* border: 1px solid green; */
+	padding-top: 7px;
+}
 th.sthDlg {
 	/* we could use inherited here but IE doesn't get this */
 	background-color: #f0f0f0;
