@@ -290,6 +290,7 @@ input[type="password"].spwfDlg {
 	background-color: white;
 }
 input[type="button"].sbtnDlg {
+	font-size: 10pt;
 	font-family: inherit;
 	border: 1px solid #808080;
 	-moz-border-radius: 10px;
@@ -329,7 +330,7 @@ input[type="button"].inpBtnEm {
 a.sancDlg {
 	font-family: Verdana, Helvetica, sans-serif;
 	font-weight: normal;
-	font-size: 8pt;
+	font-size: 10pt;
 	border: 1px solid #808080;
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
@@ -339,7 +340,22 @@ a.sancDlg {
 	width: 100px;
 	height:22px;
 	padding:2px 10px 3px 10px;
-	cursor: pointer;
+	cursor: default;
+	text-decoration: none;
+}
+a.sancDlg:hover {
+	margin: 1px;
+	background-color: #006bb5;
+}
+a.sancDlg:active {
+	margin: 1px;
+	font-weight: bold;
+	background-color: #006bb5;
+}
+a.sancDlg:focus {
+	margin: 0px;
+	font-weight: bold;
+	background-color: #006bb5;
 }
 
 textarea.stxaDlg {

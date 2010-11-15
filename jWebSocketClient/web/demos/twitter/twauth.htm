@@ -36,8 +36,10 @@
 				var lIsAuth = lURL.indexOf( "isAuth=true" ) >= 0;
 				// console.log("going to: " + lURL);
 				if( lIsAuth) {
-					document.getElementById("shdrTitle").innerHTML = "You are successfully authenticated at Twitter!";
-					document.getElementById("sparMessage").innerHTML = "Window will close automatically in 3 seconds...";
+					document.getElementById("shdrTitle").innerHTML =
+						"You are successfully authenticated at Twitter!";
+					document.getElementById("sparMessage").innerHTML =
+						"Window will close automatically in 3 seconds...";
 					var lOpener = window.opener;
 					if( lOpener ) {
 						// extract the OAuth verifier from the URL
@@ -52,9 +54,9 @@
 						// send the Access Verifier to the jWebSocket server
 						// to let the server act on behalf of the user w/o
 						// knowing the user's credentias.
-						lOpener.setVerifier( lVerifier );
+						lOpener.twitterSetVerifier( lVerifier );
 					} else {
-						alert("No opener");
+						alert("No opener, this window has been opened in a non-intended way.");
 					}
 					// optionally auto-close this window after 3 seconds
 					setTimeout("window.close();", 3000);

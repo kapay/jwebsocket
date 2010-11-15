@@ -874,6 +874,10 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				// check login and logout manage the username
 				if( aToken.reqType == "login" ) {
 					this.fUsername = aToken.username;
+					// if re-login used previous session-id re-assign it here!
+					if( aToken.usid ) {
+						this.fSessionId = aToken.usid;
+					}
 				}
 				if( aToken.reqType == "logout" ) {
 					this.fUsername = null;

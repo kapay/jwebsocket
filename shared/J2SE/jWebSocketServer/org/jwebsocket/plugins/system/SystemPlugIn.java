@@ -263,6 +263,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			lLogin.setString("name", "login");
 			lLogin.setString("username", getUsername(aConnector));
 			lLogin.setInteger("clientCount", getConnectorCount());
+			// do NEVER broadcast client's session id here!
 			// lLogin.put("usid", getSessionId(aConnector));
 			lLogin.setString("sourceId", aConnector.getId());
 			// if a unique node id is specified for the client include that
@@ -290,6 +291,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			lLogout.setString("name", "logout");
 			lLogout.setString("username", getUsername(aConnector));
 			lLogout.setInteger("clientCount", getConnectorCount());
+			// do NEVER broadcast client's session id here!
 			// lLogout.put("usid", getSessionId(aConnector));
 			lLogout.setString("sourceId", aConnector.getId());
 			// if a unique node id is specified for the client include that
@@ -334,6 +336,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		String lUsername = aToken.getString("username");
 		// TODO: Add authentication and password check
 		String lPassword = aToken.getString("password");
+		// optionally continue previous session
+		String lSessionId = aToken.getString("usid");
 		String lGroup = aToken.getString("group");
 		Boolean lReturnRoles = aToken.getBoolean("getRoles", Boolean.FALSE);
 		Boolean lReturnRights = aToken.getBoolean("getRights", Boolean.FALSE);
@@ -349,7 +353,11 @@ public class SystemPlugIn extends TokenPlugIn {
 			// TODO: Here we need to check if the user is in the user data base at
 			// all.
 			lResponse.setString("username", lUsername);
-			// lResponse.put("usid", getSessionId(aConnector));
+			// if previous session id was passed to continue an aborted session
+			// return the session-id to notify client about acceptance
+			if (lSessionId != null) {
+				lResponse.setString("usid", lSessionId);
+			}
 			lResponse.setString("sourceId", aConnector.getId());
 			// set shared variables
 			setUsername(aConnector, lUsername);
@@ -460,15 +468,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		aToken.setString("sourceId", aConnector.getId());
 		// don't distribute session id here!
 		aToken.remove("usid");
-		String lSenderIncluded = aToken.getString("senderIncluded");
-		String lResponseRequested = aToken.getString("responseRequested");
-		boolean lIsSenderIncluded =
-				(lSenderIncluded != null
-				&& lSenderIncluded.equals("true"));
-		boolean lIsResponseRequested =
-				(lResponseRequested != null
-				&& lResponseRequested.equals("true"));
-
+		Boolean lIsSenderIncluded = aToken.getBoolean("senderIncluded", true);
+		Boolean lIsResponseRequested = aToken.getBoolean("responseRequested", true);
 		// broadcast the token
 		broadcastToken(aConnector, aToken,
 				new BroadcastOptions(lIsSenderIncluded, lIsResponseRequested));

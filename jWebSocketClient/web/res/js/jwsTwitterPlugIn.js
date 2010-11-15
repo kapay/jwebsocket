@@ -140,6 +140,43 @@ jws.TwitterPlugIn = {
 		return lRes;
 	},
 
+	twitterQuery: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "query",
+				query: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	twitterTrends: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "getTrends"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	twitterPublicTimeline: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "getPublicTimeline"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	twitterUserData: function( aUsername, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
