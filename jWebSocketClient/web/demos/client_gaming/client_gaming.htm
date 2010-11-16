@@ -112,6 +112,8 @@
 						login();
 						// start keep alive if user selected that option
 						checkKeepAlive({ immediate: false });
+
+						jws.$("simgStatus").src = "../../images/connected.png";
 					},
 
 					// OnMessage callback
@@ -152,6 +154,16 @@
 								// is it any token from another client
 							}
 						}
+
+						if( lWSC.isLoggedIn() ) {
+							jws.$("simgStatus").src = "../../images/authenticated.png";
+						} else {
+							jws.$("simgStatus").src = "../../images/connected.png";
+						}
+						jws.$("slblClientId").innerHTML =
+							"&nbsp;Client&#x2011;Id:&nbsp;"
+							+ lWSC.getId() + "&nbsp;"
+							+ ( jws.browserSupportsNativeWebSockets ? "(native)" : "(flashbridge)" );
 					},
 
 					// OnClose callback
@@ -159,6 +171,9 @@
 						lWSC.stopKeepAlive();
 						log( SYS, IN, "Disconnected from " + lJWSID + "." );
 						doFocus( eUsername );
+
+						jws.$("simgStatus").src = "../../images/disconnected.png";
+						jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;-";
 					}
 
 				});
@@ -285,7 +300,13 @@
 			}
 		</script>
 -->		
-		<h1>jWebSocket Client Gaming</h1>
+		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="tdHeader" width="">jWebSocket Client Gaming</td>
+				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
+				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
+			</tr>
+		</table>
 		<p>This demo shows how to implement a pure client based game without any 
 		server side plug-in. Events like key strokes or mouse clicks on a client 
 		are distributed to all other clients, e.g. to synchronize the location 
@@ -299,13 +320,25 @@
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="anonymous" size="20"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogin" type="button" value="Login" onclick="connect();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogout" type="button" value="Logout" onclick="disconnect();"></td>
+					<td class="stdDlg" width="5">
+						<input class="stxfDlg" id="stxfUsername" type="text" value="Guest" size="20"
+							   title="jWebSocket username or 'Guest' for demo.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLogin" type="button" value="Login" onclick="connect();"
+							   title="Authenticates you against the jWebSocket Server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLogout" type="button" value="Logout" onclick="disconnect();"
+							   title="Logs you out and disconnects from the jWebSocket server.">
+					</td>
 					<td class="stdDlg" width="" align="right">
-						<input id="schkKeepAlive" type="checkbox" value="off" onclick="checkKeepAlive();">&nbsp;Keep-Alive&nbsp;
-						<input id="schkDebug" type="checkbox" value="off" >&nbsp;Debug&nbsp;
-						<input class="sbtnDlg" id="sbtnClearLog" type="button" value="Clear Log" onclick="clearLog();">
+						<input id="schkKeepAlive" type="checkbox" value="off" onclick="checkKeepAlive();"
+							   title="Sends keep-alive pings to the jWebSocket Server to not loose the connection.">&nbsp;Keep-Alive&nbsp;
+						<input id="schkDebug" type="checkbox" value="off"
+							   title="Turns the debug messages in the log below on or off.">&nbsp;Debug&nbsp;
+						<input class="sbtnDlg" id="sbtnClearLog" type="button" value="Clear Log" onclick="clearLog();"
+							   title="Clears the result and event log below.">
 					</td>
 				</tr>
 			</table>

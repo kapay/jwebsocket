@@ -29,6 +29,7 @@ import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -96,18 +97,18 @@ public class JettyConnector extends BaseConnector {
 		RequestHeader lHeader = new RequestHeader();
 		// set default sub protocol if none passed
 
-		if (lArgs.get("prot") == null) {
-			lArgs.put("prot", JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
+		if (aProtocol == null) {
+			aProtocol = JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
 		}
+		lHeader.put(RequestHeader.WS_PROTOCOL, aProtocol);
 
-		// lArgs.put("prot", JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
-		// lHeader.put("host", lRespMap.get("host"));
-		// lHeader.put("origin", lRespMap.get("origin"));
-		// lHeader.put("location", lRespMap.get("location"));
+		// lHeader.put(RequestHeader.WS_HOST, lRespMap.get(RequestHeader.WS_HOST));
+		// lHeader.put(RequestHeader.WS_ORIGIN, lRespMap.get(RequestHeader.WS_ORIGIN));
+		// lHeader.put(RequestHeader.WS_LOCATION, lRespMap.get(RequestHeader.WS_LOCATION));
+		// lHeader.put(RequestHeader.WS_PATH, lRespMap.get("path"));
 
-		// lHeader.put("path", lRespMap.get("path"));
-		lHeader.put("searchString", lSearchString);
-		lHeader.put("args", lArgs);
+		lHeader.put(RequestHeader.WS_SEARCHSTRING, lSearchString);
+		lHeader.put(RequestHeader.URL_ARGS, lArgs);
 		setHeader(lHeader);
 	}
 

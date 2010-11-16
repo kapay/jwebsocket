@@ -102,7 +102,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		}
 
 		loadClassFromThirdJavaPart();
-		
+
 		// Load map of granted procs
 		Set<String> lPluginRights = SecurityFactory.getGlobalRights(getNamespace()).getRightIdSet();
 		for (String lRightId : lPluginRights) {
@@ -120,9 +120,9 @@ public class RPCPlugIn extends TokenPlugIn {
 				}
 				String lClassName = lFullMethodName.substring(0, lFullMethodName.lastIndexOf("."));
 				String lMethodName = lFullMethodName.substring(lFullMethodName.lastIndexOf(".") + 1);
-				
+
 				if (!mRpcCallableClassLoader.containsKey(lClassName)) {
-					initRPCCallableClass (loadClassFromClassPath(lClassName), lClassName);
+					initRPCCallableClass(loadClassFromClassPath(lClassName), lClassName);
 				}
 
 				Method lMethod = getValidMethod(lClassName, lMethodName, lParameterTypes);
@@ -133,13 +133,14 @@ public class RPCPlugIn extends TokenPlugIn {
 			}
 		}
 	}
+
 	/**
 	 * Load the class from classpath with logs of needed.
 	 * @param aClassName the class to be load
 	 * @return the class loaded, or null if not found.
 	 */
 	@SuppressWarnings("rawtypes")
-	private Class loadClassFromClassPath (String aClassName) {
+	private Class loadClassFromClassPath(String aClassName) {
 		try {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Trying to load class '" + aClassName + "' from classpath...");
@@ -148,8 +149,9 @@ public class RPCPlugIn extends TokenPlugIn {
 		} catch (Exception ex) {
 			mLog.error(ex.getClass().getSimpleName() + " loading class from classpath: " + ex.getMessage() + ", hence trying to load from jar.");
 		}
-		return null ;
+		return null;
 	}
+
 	/**
 	 * Try to load the classes which are not suposed to be on the classPath, so the right definition isn't enought;
 	 */
@@ -184,10 +186,11 @@ public class RPCPlugIn extends TokenPlugIn {
 					}
 				}
 				// could the class be loaded?
-				initRPCCallableClass (lClass, lClassName);
+				initRPCCallableClass(lClass, lClassName);
 			}
 		}
 	}
+
 	/**
 	 * Try to load an instance of the RPCCallable class in parameter.
 	 * Log an error if we can't loag this class.
@@ -196,7 +199,7 @@ public class RPCPlugIn extends TokenPlugIn {
 	 * @param aClassName
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private void initRPCCallableClass (Class aClass, String aClassName) {
+	private void initRPCCallableClass(Class aClass, String aClassName) {
 		if (aClass != null) {
 			try {
 				RPCCallable lInstance = null;
@@ -213,7 +216,7 @@ public class RPCPlugIn extends TokenPlugIn {
 			}
 		}
 	}
-	
+
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 	}
@@ -223,7 +226,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+		if (lType != null && getNamespace().equals(lNS)) {
 			// remote procedure call
 			if (lType.equals("rpc")) {
 				rpc(aConnector, aToken);
@@ -528,14 +531,14 @@ public class RPCPlugIn extends TokenPlugIn {
 	@SuppressWarnings("rawtypes")
 	private boolean checkMethodParameters(Method aMethod, String[] aXmlParametersType, String aClassName) {
 		Class[] lRealParametersType = aMethod.getParameterTypes();
-		
-		List <Class> lParametersType = new FastList<Class>();
+
+		List<Class> lParametersType = new FastList<Class>();
 		for (Class lClass : lRealParametersType) {
 			if (lClass != null && lClass != WebSocketConnector.class) {
-				lParametersType.add(lClass) ;
+				lParametersType.add(lClass);
 			}
 		}
-		
+
 		//no parameters
 		if (aXmlParametersType != null && aXmlParametersType.length == 1 && "".equals(aXmlParametersType[0])) {
 			if (lParametersType.size() == 0) {
@@ -553,7 +556,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		if (aXmlParametersType != null) {
 			//If it's not the same number of parameters as expected, that's not the correct method.
 			if (aXmlParametersType.length != lParametersType.size()) {
-				return false ;
+				return false;
 			}
 			boolean methodMatch = true;
 			for (int j = 0; j < aXmlParametersType.length; j++) {

@@ -18,6 +18,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.twitter;
 
+import java.net.URL;
 import java.util.List;
 import javolution.util.FastList;
 
@@ -25,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketServerConstants;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
@@ -115,7 +117,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+		if (lType != null && getNamespace().equals(lNS)) {
 			if (lType.equals("tweet")) {
 				tweet(aConnector, aToken);
 			} else if (lType.equals("requestAccessToken")) {
@@ -146,11 +148,23 @@ public class TwitterPlugIn extends TokenPlugIn {
 	 *
 	 * @param aConnector
 	 */
-	public void connectorStopped(WebSocketConnector aConnector) {
+	@Override
+	public void connectorStopped(WebSocketConnector aConnector,
+			CloseReason aCloseReason) {
 		aConnector.removeVar(TWITTER_VAR);
-		// if still some stream is allocated release it!
-		TwitterStream lTwitterStream = (TwitterStream) aConnector.getVar(TWITTER_STREAM);
+		// if (still) some stream is allocated shut it down and release it!
+		TwitterStream lTwitterStream =
+				(TwitterStream) aConnector.getVar(TWITTER_STREAM);
 		if (lTwitterStream != null) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Cleaning up Twitter stream for connector '"
+						+ aConnector.getId() + "'...");
+			}
+			lTwitterStream.cleanUp();
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Shutting down Twitter stream for connector '"
+						+ aConnector.getId() + "'...");
+			}
 			lTwitterStream.shutdown();
 			aConnector.removeVar(TWITTER_STREAM);
 		}
@@ -622,21 +636,61 @@ public class TwitterPlugIn extends TokenPlugIn {
 			@Override
 			public void onStatus(Status aStatus) {
 				Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
+				lToken.setString("name", "status");
 				lToken.setString("status", aStatus.getText());
+				User lUser = aStatus.getUser();
+				if (lUser != null) {
+					lToken.setString("userName", lUser.getName());
+					lToken.setInteger("userId", lUser.getId());
+					URL lURL = lUser.getURL();
+					if (lURL != null) {
+						lToken.setString("userURL", lURL.toString());
+					} else {
+						lToken.setString("userURL", "");
+					}
+					lURL = lUser.getProfileImageURL();
+					if (lURL != null) {
+						lToken.setString("userImgURL", lURL.toString());
+					} else {
+						lToken.setString("userImgURL", "");
+					}
+					lToken.setString("userBckImgURL", lUser.getProfileBackgroundImageUrl());
+					lToken.setString("userBckCol", lUser.getProfileBackgroundColor());
+				} else {
+					lToken.setString("userName", "");
+					lToken.setInteger("userId", -1);
+					lToken.setString("userURL", "");
+					lToken.setString("userImgURL", "");
+					lToken.setString("userBckImgURL", "");
+					lToken.setString("userBckCol", "");
+				}
 				lServer.sendToken(aConnector, lToken);
-				// System.out.println(status.getUser().getName() + " : " + status.getText());
 			}
 
 			@Override
-			public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
+			public void onDeletionNotice(StatusDeletionNotice aStatusDeletionNotice) {
+				Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
+				lToken.setString("name", "deletion");
+				lToken.setInteger("userId", aStatusDeletionNotice.getUserId());
+				// lToken.setInteger("statusId", aStatusDeletionNotice.getStatusId());
+				lServer.sendToken(aConnector, lToken);
 			}
 
 			@Override
-			public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
+			public void onTrackLimitationNotice(int aNumberOfLimitedStatuses) {
+				Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
+				lToken.setString("name", "trackLimit");
+				lToken.setInteger("limit", aNumberOfLimitedStatuses);
+				lServer.sendToken(aConnector, lToken);
 			}
 
 			@Override
-			public void onException(Exception ex) {
+			public void onException(Exception aEx) {
+				Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
+				lToken.setString("name", "exception");
+				lToken.setString("message", aEx.getMessage());
+				lToken.setString("exception", aEx.getClass().getSimpleName());
+				lServer.sendToken(aConnector, lToken);
 			}
 		};
 
@@ -648,29 +702,25 @@ public class TwitterPlugIn extends TokenPlugIn {
 		try {
 			TwitterStream lTwitterStream = (TwitterStream) aConnector.getVar(TWITTER_STREAM);
 			if (lTwitterStream == null) {
-				lTwitterStream = new TwitterStreamFactory(lListener).getInstance("username", "password");
+				lTwitterStream = new TwitterStreamFactory(lListener).getInstance();
+				lTwitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+				AccessToken lAccessToken = new AccessToken(ACCESSTOKEN_KEY, ACCESSTOKEN_SECRET);
+				lTwitterStream.setOAuthAccessToken(lAccessToken);
 				aConnector.setVar(TWITTER_STREAM, lTwitterStream);
 			}
-			/*
+
 			FilterQuery lFilter = new FilterQuery(
-			20,
-			new int[]{},
-			new String[]{
-			"jWebSocket", "WebSockets", "WebSocket",
-			"Android", "iPhone", "iOS", "Symbian",
-			"Apple", "Google", "Innotrade",
-			"AJAX", "Comet", "TCP", "HTTP", "XHR", "XMLHttpRequest",
-			"Atmosphere", "Kaazing"});
-			 */
-			FilterQuery lFilter = new FilterQuery();
-			lFilter.count(1).track(new String[]{
-						"jWebSocket", "WebSockets", "WebSocket",
-						"Android", "iPhone", "iOS", "Symbian",
-						"Apple", "Google", "Innotrade",
-						"AJAX", "Comet", "TCP", "HTTP", "XHR", "XMLHttpRequest",
-						"Atmosphere", "Kaazing"});
-			//lTwitterStream.filter(lFilter);
-			lTwitterStream.sample();
+					0,
+					new int[]{},
+					new String[]{
+						"#jWebSocket", "#WebSockets", "#WebSocket",
+						"#Android", "i#Phone", "#iOS", "#Symbian",
+						"#Apple", "#Google", "#Innotrade",
+						"#JAX", "#Comet", "#TCP", "#HTTP", "#XHR", "#XMLHttpRequest",
+						"#Atmosphere", "#Kaazing"});
+
+			lTwitterStream.filter(lFilter);
+
 		} catch (Exception lEx) {
 			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
 			mLog.error(lMsg);

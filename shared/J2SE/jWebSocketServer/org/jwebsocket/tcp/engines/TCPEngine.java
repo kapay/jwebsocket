@@ -204,12 +204,12 @@ public class TCPEngine extends BaseEngine {
 		byte[] lReq = new byte[lRead];
 		System.arraycopy(lBuff, 0, lReq, 0, lRead);
 
-/* please keep comment for debugging purposes!
+		/* please keep comment for debugging purposes!
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Handshake Request:\n" + new String(lReq));
-			mLog.debug("Parsing initial WebSocket handshake...");
+		mLog.debug("Handshake Request:\n" + new String(lReq));
+		mLog.debug("Parsing initial WebSocket handshake...");
 		}
- */
+		 */
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(lReq);
 		// maybe the request is a flash policy-file-request
 		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
@@ -218,25 +218,22 @@ public class TCPEngine extends BaseEngine {
 					+ lFlashBridgeReq
 					+ "'), check for FlashBridge plug-in.");
 		}
-        
-        // Check for draft. If it is present and if it's something unrecognizable, force disconnect (return null).
-        String lDraft = (String) lRespMap.get("draft");
-        if(lDraft != null) {
-            // Since this field was introduced in draft 02, we can safely assume that
-            // it will only be supplied with clients that use draft #02 and greater.
-            if(JWebSocketCommonConstants.WS_DRAFT_02.equals(lDraft)
-                    || JWebSocketCommonConstants.WS_DRAFT_03.equals(lDraft)) {
-                if(mLog.isDebugEnabled())
-                {
-                    mLog.debug("Client uses draft -" + lDraft + "- for protocol communication");
-                }
-            }
-            else
-            {
-                mLog.warn("Illegal handshake: header 'Sec-WebSocket-Draft' contains unrecognized value: " + lDraft);
-                return null;
-            }
-        }
+
+		// Check for draft. If it is present and if it's something unrecognizable, force disconnect (return null).
+		String lDraft = (String) lRespMap.get(RequestHeader.WS_DRAFT);
+		if (lDraft != null) {
+			// Since this field was introduced in draft 02, we can safely assume that
+			// it will only be supplied with clients that use draft #02 and greater.
+			if (JWebSocketCommonConstants.WS_DRAFT_02.equals(lDraft)
+					|| JWebSocketCommonConstants.WS_DRAFT_03.equals(lDraft)) {
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Client uses draft -" + lDraft + "- for protocol communication");
+				}
+			} else {
+				mLog.warn("Illegal handshake: header 'Sec-WebSocket-Draft' contains unrecognized value: " + lDraft);
+				return null;
+			}
+		}
 
 		// generate the websocket handshake
 		// if policy-file-request is found answer it
@@ -248,12 +245,12 @@ public class TCPEngine extends BaseEngine {
 			return null;
 		}
 
-/* please keep comment for debugging purposes!
+		/* please keep comment for debugging purposes!
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Handshake Response:\n" + new String(lBA));
-			mLog.debug("Flushing initial WebSocket handshake...");
+		mLog.debug("Handshake Response:\n" + new String(lBA));
+		mLog.debug("Flushing initial WebSocket handshake...");
 		}
- */
+		 */
 		lOut.write(lBA);
 		lOut.flush();
 
@@ -299,19 +296,25 @@ public class TCPEngine extends BaseEngine {
 			mLog.debug("Handshake flushed.");
 		}
 
-		// set default sub protocol if none passed
-		if (lArgs.get("prot") == null) {
-			lArgs.put("prot", JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
+		// if no sub protocol given in request header , try
+		String lSubProt = (String) lRespMap.get(RequestHeader.WS_PROTOCOL);
+		if (lSubProt == null) {
+			lSubProt = lArgs.get(RequestHeader.WS_PROTOCOL);
 		}
-
-		lHeader.put("host", lRespMap.get("host"));
-		lHeader.put("origin", lRespMap.get("origin"));
-		lHeader.put("location", lRespMap.get("location"));
-
-		lHeader.put("path", lRespMap.get("path"));
-		lHeader.put("searchString", lSearchString);
-		lHeader.put("args", lArgs);
-        lHeader.put("draft", lDraft == null ? JWebSocketCommonConstants.WS_DRAFT_DEFAULT : lDraft);
+		if (lSubProt == null) {
+			lSubProt = JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
+		}
+		lHeader.put(RequestHeader.WS_HOST, lRespMap.get(RequestHeader.WS_HOST));
+		lHeader.put(RequestHeader.WS_ORIGIN, lRespMap.get(RequestHeader.WS_ORIGIN));
+		lHeader.put(RequestHeader.WS_LOCATION, lRespMap.get(RequestHeader.WS_LOCATION));
+		lHeader.put(RequestHeader.WS_PROTOCOL, lSubProt);
+		lHeader.put(RequestHeader.WS_PATH, lRespMap.get(RequestHeader.WS_PATH));
+		lHeader.put(RequestHeader.WS_SEARCHSTRING, lSearchString);
+		lHeader.put(RequestHeader.URL_ARGS, lArgs);
+		lHeader.put(RequestHeader.WS_DRAFT,
+				lDraft == null
+				? JWebSocketCommonConstants.WS_DRAFT_DEFAULT
+				: lDraft);
 
 		return lHeader;
 	}

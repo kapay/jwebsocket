@@ -200,6 +200,17 @@
 			<url>file://${basedir}/li</url>
 		</repository>
 		-->
+		<repository>
+			<id>twitter4j.org</id>
+			<name>twitter4j.org Repository</name>
+			<url>http://twitter4j.org/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
 
 		<repository>
 			<id>repository.jboss.org</id>

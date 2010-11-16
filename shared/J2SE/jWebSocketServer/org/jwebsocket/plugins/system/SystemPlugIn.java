@@ -138,14 +138,14 @@ public class SystemPlugIn extends TokenPlugIn {
 	public void connectorStarted(WebSocketConnector aConnector) {
 		// set session id first, so that it can be processed in the connectorStarted
 		// method
-		Random rand = new Random(System.nanoTime());
+		Random lRand = new Random(System.nanoTime());
 
 		// TODO: if unique node id is passed check if already assigned in the
 		// network and reject connect if so!
 
-		aConnector.getSession().setSessionId(Tools.getMD5(aConnector.generateUID() + "." + rand.nextInt()));
-		// call super connectorStarted
-		super.connectorStarted(aConnector);
+		aConnector.getSession().setSessionId(
+				Tools.getMD5(aConnector.generateUID() + "." + lRand.nextInt()));
+		
 		// and send the welcome message incl. the session id
 		sendWelcome(aConnector);
 		// if new connector is active broadcast this event to then network
@@ -154,7 +154,6 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-		super.connectorStopped(aConnector, aCloseReason);
 		// notify other clients that client disconnected
 		broadcastDisconnectEvent(aConnector);
 	}

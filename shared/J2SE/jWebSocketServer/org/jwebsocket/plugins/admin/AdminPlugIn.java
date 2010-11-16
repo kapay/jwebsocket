@@ -66,7 +66,7 @@ public class AdminPlugIn extends TokenPlugIn {
     String lType = aToken.getType();
     String lNS = aToken.getNS();
 
-    if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+    if (lType != null && getNamespace().equals(lNS)) {
       // remote shut down server
       if (lType.equals("shutdown")) {
         shutdown(aConnector, aToken);

@@ -59,10 +59,10 @@ public class TokenServer extends BaseServer {
 	private static ExecutorService mCachedThreadPool;
 	private final static int TIME_OUT_TERMINATION_THREAD = 10;
 
-	private int corePoolSize ;
-	private int maximumPoolSize ;
-	private int keepAliveTime ;
-	private int blockingQueueSize ;
+	private int mCorePoolSize ;
+	private int mMaximumPoolSize ;
+	private int mKeepAliveTime ;
+	private int mBlockingQueueSize ;
 	
 	public TokenServer(ServerConfiguration aServerConfig) {
 		super(aServerConfig);
@@ -70,17 +70,17 @@ public class TokenServer extends BaseServer {
 		mFilterChain = new TokenFilterChain(this);
 		mFilterChain = new TokenFilterChain(this);
 		
-		corePoolSize = aServerConfig.getThreadPoolConfig().getCorePoolSize() ;
-		maximumPoolSize = aServerConfig.getThreadPoolConfig().getMaximumPoolSize() ;
-		keepAliveTime = aServerConfig.getThreadPoolConfig().getKeepAliveTime() ;
-		blockingQueueSize = aServerConfig.getThreadPoolConfig().getBlockingQueueSize() ;
+		mCorePoolSize = aServerConfig.getThreadPoolConfig().getCorePoolSize() ;
+		mMaximumPoolSize = aServerConfig.getThreadPoolConfig().getMaximumPoolSize() ;
+		mKeepAliveTime = aServerConfig.getThreadPoolConfig().getKeepAliveTime() ;
+		mBlockingQueueSize = aServerConfig.getThreadPoolConfig().getBlockingQueueSize() ;
 	}
 
 	@Override
 	public void startServer() throws WebSocketException {
 		// Create the thread pool.
-		 mCachedThreadPool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, 
-				new ArrayBlockingQueue<Runnable>(blockingQueueSize));
+		 mCachedThreadPool = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAliveTime, TimeUnit.SECONDS,
+				new ArrayBlockingQueue<Runnable>(mBlockingQueueSize));
 		mIsAlive = true;
 		if (mLog.isInfoEnabled()) {
 			mLog.info("Token server '" + getId() + "' started.");

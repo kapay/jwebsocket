@@ -63,7 +63,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-		if (lType != null && (lNS == null || lNS.equals(getNamespace()))) {
+	    if (lType != null && getNamespace().equals(lNS)) {
 			// select from database
 			if (lType.equals("select")) {
 				select(aConnector, aToken);

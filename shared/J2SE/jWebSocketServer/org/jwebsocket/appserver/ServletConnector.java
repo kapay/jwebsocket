@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
@@ -46,7 +47,7 @@ public class ServletConnector extends BaseConnector {
 		// TODO: Overhaul this hardcoded reference! See TokenServer class!
 		setBoolean("org.jwebsocket.tokenserver.isTS", true);
 		RequestHeader lHeader = new RequestHeader();
-		lHeader.put("prot", "json");
+		lHeader.put(RequestHeader.WS_PROTOCOL, JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
 		setHeader(lHeader);
 	}
 

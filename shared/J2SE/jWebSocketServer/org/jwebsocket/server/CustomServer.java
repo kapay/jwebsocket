@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - WebSocket Token Server (abstract)
+//	jWebSocket - WebSocket Custom Server (abstract)
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -36,7 +36,7 @@ import org.jwebsocket.plugins.BasePlugInChain;
  */
 public class CustomServer extends BaseServer {
 
-	private static Logger log = Logging.getLogger(CustomServer.class);
+	private static Logger mLog = Logging.getLogger(CustomServer.class);
 
 	/**
 	 * Creates a new instance of the CustomeServer. The custom server is a
@@ -51,8 +51,8 @@ public class CustomServer extends BaseServer {
 
 	@Override
 	public void processPacket(WebSocketEngine aEngine, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing data packet '" + aDataPacket.getUTF8() + "'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing data packet '" + aDataPacket.getUTF8() + "'...");
 		}
 		RequestHeader lHeader = aConnector.getHeader();
 		String lSubProt = (lHeader != null ? lHeader.getSubProtocol(null) : null);
@@ -62,10 +62,14 @@ public class CustomServer extends BaseServer {
 		if (lSubProt != null
 				&& (lSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_CUSTOM)
 				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CUSTOM)))  {
+
 			// send a modified echo packet back to sender.
+			//
+			// sendPacket(aConnector, aDataPacket);
 
 			// you also could broadcast the packet here...
 			// broadcastPacket(aDataPacket);
+
 			// ...or forward it to your custom specific plug-in chain
 			// PlugInResponse response = new PlugInResponse();
 			// mPlugInChain.processPacket(response, aConnector, aDataPacket);
@@ -91,25 +95,25 @@ public class CustomServer extends BaseServer {
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing engine started...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing engine '" + aEngine.getId() + "' started...");
 		}
 		mPlugInChain.engineStarted(aEngine);
 	}
 
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing engine stopped...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing engine '" + aEngine.getId() + "' stopped...");
 		}
 		mPlugInChain.engineStopped(aEngine);
 	}
 
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing connector started...");
-		}
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Processing connector '" + aConnector.getId() + "' started...");
+			}
 		// notify plugins that a connector has started,
 		// i.e. a client was sconnected.
 		mPlugInChain.connectorStarted(aConnector);
@@ -118,9 +122,9 @@ public class CustomServer extends BaseServer {
 
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing connector stopped...");
-		}
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Processing connector '" + aConnector.getId() + "' stopped...");
+			}
 		// notify plugins that a connector has stopped,
 		// i.e. a client was disconnected.
 		mPlugInChain.connectorStopped(aConnector, aCloseReason);

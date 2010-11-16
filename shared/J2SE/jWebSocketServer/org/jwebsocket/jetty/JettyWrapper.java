@@ -37,25 +37,24 @@ aschulze-dt1:~ alexanderschulze$ keytool -keystore keystore -alias jWebSocket -g
 Enter keystore password:
 Re-enter new password:
 What is your first and last name?
-  [Unknown]:  Alexander Schulze
+[Unknown]:  Alexander Schulze
 What is the name of your organizational unit?
-  [Unknown]:  jWebSocket
+[Unknown]:  jWebSocket
 What is the name of your organization?
-  [Unknown]:  Innotrade GmbH
+[Unknown]:  Innotrade GmbH
 What is the name of your City or Locality?
-  [Unknown]:  Herzogenrath
+[Unknown]:  Herzogenrath
 What is the name of your State or Province?
-  [Unknown]:  NRW
+[Unknown]:  NRW
 What is the two-letter country code for this unit?
-  [Unknown]:  DE
+[Unknown]:  DE
 Is CN=Alexander Schulze, OU=jWebSocket, O=Innotrade GmbH, L=Herzogenrath, ST=NRW, C=DE correct?
-  [no]:  yes
+[no]:  yes
 
 Enter key password for <jWebSocket>
-	(RETURN if same as keystore password):
+(RETURN if same as keystore password):
 aschulze-dt1:~ alexanderschulze$
-*/
-
+ */
 /**
  *
  * @author alexanderschulze
@@ -101,12 +100,12 @@ public class JettyWrapper implements WebSocket {
 	}
 
 	@Override
-	public void onMessage(byte frame, byte[] data, int offset, int length) {
+	public void onMessage(byte aFrame, byte[] aData, int aOffset, int aLength) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Message (binary) from Jetty client...");
 		}
 		if (mConnector != null) {
-			WebSocketPacket lDataPacket = new RawPacket(data);
+			WebSocketPacket lDataPacket = new RawPacket(aData);
 			mEngine.processPacket(mConnector, lDataPacket);
 		}
 	}

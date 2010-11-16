@@ -17,6 +17,7 @@ package org.jwebsocket.kit;
 
 import java.util.Map;
 import javolution.util.FastMap;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 
 /**
  * Holds the header of the initial WebSocket request from the client
@@ -25,88 +26,93 @@ import javolution.util.FastMap;
  * @author aschulze
  * @version $Id: RequestHeader.java 596 2010-06-22 17:09:54Z fivefeetfurther $
  */
-public final class
-        RequestHeader {
+public final class RequestHeader {
 
-    private Map<String, Object> mArgs = new FastMap<String, Object>();
-    private static final String URL_ARGS = "args";
-    private static final String PROT = "prot";
-    private static final String TIMEOUT = "timeout";
-    private static final String DRAFT = "draft";
+	private Map<String, Object> mFields = new FastMap<String, Object>();
+	public static final String WS_PROTOCOL = "subprot";
+	public static final String WS_DRAFT = "draft";
+	public static final String WS_ORIGIN = "origin";
+	public static final String WS_LOCATION = "location";
+	public static final String WS_PATH = "path";
+	public static final String WS_SEARCHSTRING = "searchString";
+	public static final String WS_HOST = "host";
+	public static final String WS_SECKEY1 = "secKey1";
+	public static final String WS_SECKEY2 = "secKey2";
+	public static final String URL_ARGS = "args";
+	public static final String TIMEOUT = "timeout";
 
-    /**
-     * Puts a new object value to the request header.
-     * @param aKey
-     * @param aValue
-     */
-    public void put(String aKey, Object aValue) {
-        mArgs.put(aKey, aValue);
-    }
+	/**
+	 * Puts a new object value to the request header.
+	 * @param aKey
+	 * @param aValue
+	 */
+	public void put(String aKey, Object aValue) {
+		mFields.put(aKey, aValue);
+	}
 
-    /**
-     * Returns the object value for the given key or {@code null} if the
-     * key does not exist in the header.
-     * @param aKey
-     * @return object value for the given key or {@code null}.
-     */
-    public Object get(String aKey) {
-        return mArgs.get(aKey);
-    }
+	/**
+	 * Returns the object value for the given key or {@code null} if the
+	 * key does not exist in the header.
+	 * @param aKey
+	 * @return object value for the given key or {@code null}.
+	 */
+	public Object get(String aKey) {
+		return mFields.get(aKey);
+	}
 
-    /**
-     * Returns the string value for the given key or {@code null} if the
-     * key does not exist in the header.
-     * @param aKey
-     * @return String value for the given key or {@code null}.
-     */
-    public String getString(String aKey) {
-        return (String) mArgs.get(aKey);
-    }
+	/**
+	 * Returns the string value for the given key or {@code null} if the
+	 * key does not exist in the header.
+	 * @param aKey
+	 * @return String value for the given key or {@code null}.
+	 */
+	public String getString(String aKey) {
+		return (String) mFields.get(aKey);
+	}
 
-    /**
-     * Returns a Map of the optional URL arguments passed by the client.
-     * @return Map of the optional URL arguments.
-     */
-    public Map getArgs() {
-        return (Map) mArgs.get(URL_ARGS);
-    }
+	/**
+	 * Returns a Map of the optional URL arguments passed by the client.
+	 * @return Map of the optional URL arguments.
+	 */
+	public Map getArgs() {
+		return (Map) mFields.get(URL_ARGS);
+	}
 
-    /**
-     * Returns the sub protocol passed by the client or a default value
-     * if no sub protocol has been passed either in the header or in the
-     * URL arguments.
-     * @param aDefault
-     * @return Sub protocol passed by the client or default value.
-     */
-    public String getSubProtocol(String aDefault) {
-        Map lArgs = getArgs();
-        String lSubProt = null;
-        if (lArgs != null) {
-            lSubProt = (String) lArgs.get(PROT);
-        }
-        return (lSubProt != null ? lSubProt : aDefault);
-    }
+	/**
+	 * Returns the sub protocol passed by the client or a default value
+	 * if no sub protocol has been passed either in the header or in the
+	 * URL arguments.
+	 * @param aDefault
+	 * @return Sub protocol passed by the client or default value.
+	 */
+	public String getSubProtocol(String aDefault) {
+		String lSubProt = (String) mFields.get(WS_PROTOCOL);
+		if (lSubProt == null) {
+			lSubProt = JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
+		}
+		return lSubProt;
+	}
 
-    /**
-     * Returns the session timeout passed by the client or a default value
-     * if no session timeout has been passed either in the header or in the
-     * URL arguments.
-     * @param aDefault
-     * @return Session timeout passed by the client or default value.
-     */
-    public Integer getTimeout(Integer aDefault) {
-        Map lArgs = getArgs();
-        Integer lTimeout = null;
-        if (lArgs != null) {
-            try {
-                lTimeout = Integer.parseInt((String) (lArgs.get(TIMEOUT)));
-            } catch (Exception ex) {
-            }
-        }
-        return (lTimeout != null ? lTimeout : aDefault);
-    }
+	/**
+	 * Returns the session timeout passed by the client or a default value
+	 * if no session timeout has been passed either in the header or in the
+	 * URL arguments.
+	 * @param aDefault
+	 * @return Session timeout passed by the client or default value.
+	 */
+	public Integer getTimeout(Integer aDefault) {
+		Map lArgs = getArgs();
+		Integer lTimeout = null;
+		if (lArgs != null) {
+			try {
+				lTimeout = Integer.parseInt((String) (lArgs.get(TIMEOUT)));
+			} catch (Exception lEx) {
+			}
+		}
+		return (lTimeout != null ? lTimeout : aDefault);
+	}
 
-    public String getDraft() {
-        return (String) mArgs.get(DRAFT);
-    }
+	public String getDraft() {
+		return (String) mFields.get(WS_DRAFT);
+	}
 }

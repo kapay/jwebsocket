@@ -120,7 +120,7 @@ public final class WebSocketHandshake {
 		String lLocation = null;
 		String lPath = null;
 		String lSubProt = null;
-        String lDraft = null;
+		String lDraft = null;
 		String lSecKey1 = null;
 		String lSecKey2 = null;
 		byte[] lSecKey3 = new byte[8];
@@ -184,25 +184,24 @@ public final class WebSocketHandshake {
 			lSubProt = lSubProt.substring(0, lPos);
 		}
 
-        // Sec-WebSocket-Draft: This field was introduced with hybi-03 web socket protocol draft.
-        // See: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-03
-        //
-        // Specification proposes the use of draft number (without any prefixes or suffixes) as a value
-        // for this field. For example: "Sec-WebSocket-Draft: 3" indicates that the communication will proceed
-        // according to #03 draft. If the value is something that the server doesn't recognize,
-        // then the handshake should fail and web socket connection must be aborted.
-        //
-        // If present, then BaseEngine & BaseConnector (their subclasses) should process further
-        // packets according to this field. If it's not present, then all the logic defaults to hixie drafts
-        // (see: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76).
-        lPos = lRequest.indexOf("Sec-WebSocket-Draft:");
-        if(lPos > 0)
-        {
-            lPos += 21;
-            lDraft = lRequest.substring(lPos);
-            lPos = lSubProt.indexOf("\r\n");
-            lDraft = lDraft.substring(0, lPos);
-        }
+		// Sec-WebSocket-Draft: This field was introduced with hybi-03 web socket protocol draft.
+		// See: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-03
+		//
+		// Specification proposes the use of draft number (without any prefixes or suffixes) as a value
+		// for this field. For example: "Sec-WebSocket-Draft: 3" indicates that the communication will proceed
+		// according to #03 draft. If the value is something that the server doesn't recognize,
+		// then the handshake should fail and web socket connection must be aborted.
+		//
+		// If present, then BaseEngine & BaseConnector (their subclasses) should process further
+		// packets according to this field. If it's not present, then all the logic defaults to hixie drafts
+		// (see: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76).
+		lPos = lRequest.indexOf("Sec-WebSocket-Draft:");
+		if (lPos > 0) {
+			lPos += 21;
+			lDraft = lRequest.substring(lPos);
+			lPos = lSubProt.indexOf("\r\n");
+			lDraft = lDraft.substring(0, lPos);
+		}
 
 		// the following section implements the sec-key process in WebSocket
 		// Draft 76
@@ -296,13 +295,13 @@ public final class WebSocketHandshake {
 			}
 		}
 
-		lRes.put("path", lPath);
-		lRes.put("host", lHost);
-		lRes.put("origin", lOrigin);
-		lRes.put("location", lLocation);
-		lRes.put("subprot", lSubProt);
-		lRes.put("secKey1", lSecKey1);
-		lRes.put("secKey2", lSecKey2);
+		lRes.put(RequestHeader.WS_PATH, lPath);
+		lRes.put(RequestHeader.WS_HOST, lHost);
+		lRes.put(RequestHeader.WS_ORIGIN, lOrigin);
+		lRes.put(RequestHeader.WS_LOCATION, lLocation);
+		lRes.put(RequestHeader.WS_PROTOCOL, lSubProt);
+		lRes.put(RequestHeader.WS_SECKEY1, lSecKey1);
+		lRes.put(RequestHeader.WS_SECKEY2, lSecKey2);
 
 		lRes.put("isSecure", lIsSecure);
 		lRes.put("secKeyResponse", lSecKeyResp);
@@ -335,9 +334,9 @@ public final class WebSocketHandshake {
 		// now that we have parsed the header send handshake...
 		// since 0.9.0.0609 considering Sec-WebSocket-Key processing
 		Boolean lIsSecure = (Boolean) aRequest.get("isSecure");
-		String lOrigin = (String) aRequest.get("origin");
-		String lLocation = (String) aRequest.get("location");
-		String lSubProt = (String) aRequest.get("subprot");
+		String lOrigin = (String) aRequest.get(RequestHeader.WS_ORIGIN);
+		String lLocation = (String) aRequest.get(RequestHeader.WS_LOCATION);
+		String lSubProt = (String) aRequest.get(RequestHeader.WS_PROTOCOL);
 		String lRes =
 				// since IETF draft 76 "WebSocket Protocol" not "Web Socket Protocol"
 				// change implemented since v0.9.5.0701
