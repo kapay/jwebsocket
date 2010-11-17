@@ -164,12 +164,27 @@
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnect" type="button" value="Connect" onclick="connect();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Disconnect" onclick="disconnect();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnConnect" type="button" value="Connect" onclick="connect();"
+							   title="Connects to the jWebSocket using a custom (i.e. non-token based) sub protocol.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Disconnect" onclick="disconnect();"
+							   title="Disconnects from the jWebSocket Server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"
+							   title="Clears the result and event log above.">
+					</td>
 					<td class="stdDlg" width="5">Message</td>
-					<td class="stdDlg" width=""><input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSend" type="button" value="Echo" onclick="send();"></td>
+					<td class="stdDlg" width="">
+						<input class="stxfDlg" id="stxfMsg" type="text" value="Please type your message here!" style="width:100%"
+							   title="Message send to the server to be echoed back with a prefix.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnSend" type="button" value="Echo" onclick="send();"
+							   title="Send the message to the jWebSocket Server and retrieve the echo.">
+					</td>
 				</tr>
 			</table>
 		</div>

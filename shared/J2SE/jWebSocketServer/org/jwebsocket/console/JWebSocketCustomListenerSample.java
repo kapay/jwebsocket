@@ -36,7 +36,7 @@ public class JWebSocketCustomListenerSample implements WebSocketServerListener {
 	@Override
 	public void processOpened(WebSocketServerEvent aEvent) {
 		if (log.isDebugEnabled()) {
-			log.debug("Client '" + aEvent.getSessionId() + "' connected.");
+			log.debug("Client '" + aEvent.getConnector() + "' connected.");
 		}
 	}
 
@@ -68,7 +68,7 @@ public class JWebSocketCustomListenerSample implements WebSocketServerListener {
 	@Override
 	public void processClosed(WebSocketServerEvent aEvent) {
 		if (log.isDebugEnabled()) {
-			log.debug("Client '" + aEvent.getSessionId() + "' disconnected.");
+			log.debug("Client '" + aEvent.getConnector() + "' disconnected.");
 		}
 	}
 }

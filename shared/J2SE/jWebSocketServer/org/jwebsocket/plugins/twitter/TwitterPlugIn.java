@@ -77,6 +77,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_TWITTER = JWebSocketServerConstants.NS_BASE + ".plugins.twitter";
 	private Twitter mTwitter = null;
+	private final static int MAX_STREAM_KEYWORDS = 5;
 
 	/**
 	 *
@@ -151,23 +152,9 @@ public class TwitterPlugIn extends TokenPlugIn {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector,
 			CloseReason aCloseReason) {
+		// stop Twitter stream if used for this connection
+		mStopStream(aConnector);
 		aConnector.removeVar(TWITTER_VAR);
-		// if (still) some stream is allocated shut it down and release it!
-		TwitterStream lTwitterStream =
-				(TwitterStream) aConnector.getVar(TWITTER_STREAM);
-		if (lTwitterStream != null) {
-			if (mLog.isDebugEnabled()) {
-				mLog.debug("Cleaning up Twitter stream for connector '"
-						+ aConnector.getId() + "'...");
-			}
-			lTwitterStream.cleanUp();
-			if (mLog.isDebugEnabled()) {
-				mLog.debug("Shutting down Twitter stream for connector '"
-						+ aConnector.getId() + "'...");
-			}
-			lTwitterStream.shutdown();
-			aConnector.removeVar(TWITTER_STREAM);
-		}
 	}
 
 	private boolean mCheckAuth(Token aToken) {
@@ -623,6 +610,25 @@ public class TwitterPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
+	private void mStopStream(final WebSocketConnector aConnector) {
+		// if (still) some stream is allocated shut it down and release it!
+		TwitterStream lTwitterStream =
+				(TwitterStream) aConnector.getVar(TWITTER_STREAM);
+		if (lTwitterStream != null) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Cleaning up Twitter stream for connector '"
+						+ aConnector.getId() + "'...");
+			}
+			lTwitterStream.cleanUp();
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Shutting down Twitter stream for connector '"
+						+ aConnector.getId() + "'...");
+			}
+			lTwitterStream.shutdown();
+			aConnector.removeVar(TWITTER_STREAM);
+		}
+	}
+
 	private void setStream(final WebSocketConnector aConnector, Token aToken) {
 
 		final TokenServer lServer = getServer();
@@ -694,36 +700,56 @@ public class TwitterPlugIn extends TokenPlugIn {
 			}
 		};
 
-		/*
-		Configuration lConfig = new Configuration();
-		Authorization lAuth = new OAuthAuthorization();
-		// sample() method internally creates a thread which manipulates TwitterStream and calls these adequate listener methods continuously.
-		 */
-		try {
-			TwitterStream lTwitterStream = (TwitterStream) aConnector.getVar(TWITTER_STREAM);
-			if (lTwitterStream == null) {
-				lTwitterStream = new TwitterStreamFactory(lListener).getInstance();
-				lTwitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-				AccessToken lAccessToken = new AccessToken(ACCESSTOKEN_KEY, ACCESSTOKEN_SECRET);
-				lTwitterStream.setOAuthAccessToken(lAccessToken);
-				aConnector.setVar(TWITTER_STREAM, lTwitterStream);
+		String lKeyWords = aToken.getString("keywords");
+		String[] lKeyWordArray;
+		List<String> lTracks = new FastList<String>();
+		if (lKeyWords != null) {
+			lKeyWordArray = lKeyWords.split(" ");
+			int lAccepted = 0;
+			for (int lIdx = 0, lCnt = lKeyWordArray.length;
+					lIdx < lCnt && lAccepted < MAX_STREAM_KEYWORDS;
+					lIdx++) {
+				String lKeyword = lKeyWordArray[lIdx];
+				// validate keyword
+				if (lKeyword != null && lKeyword.length() >= 4) {
+					lTracks.add(lKeyword);
+					lAccepted++;
+				}
 			}
-
-			FilterQuery lFilter = new FilterQuery(
-					0,
-					new int[]{},
-					new String[]{
-						"#jWebSocket", "#WebSockets", "#WebSocket",
-						"#Android", "i#Phone", "#iOS", "#Symbian",
-						"#Apple", "#Google", "#Innotrade",
-						"#JAX", "#Comet", "#TCP", "#HTTP", "#XHR", "#XMLHttpRequest",
-						"#Atmosphere", "#Kaazing"});
-
-			lTwitterStream.filter(lFilter);
-
-		} catch (Exception lEx) {
-			lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
-			mLog.error(lMsg);
+			if (lTracks.size() > 0) {
+				lKeyWordArray = new String[lTracks.size()];
+				int lIdx = 0;
+				for (String lKeyword : lTracks) {
+					lKeyWordArray[lIdx] = lKeyword;
+					lIdx++;
+				}
+				try {
+					FilterQuery lFilter = new FilterQuery(
+							0,
+							new int[]{},
+							lKeyWordArray);
+					TwitterStream lTwitterStream = (TwitterStream) aConnector.getVar(TWITTER_STREAM);
+					if (lTwitterStream == null) {
+						lTwitterStream = new TwitterStreamFactory(lListener).getInstance();
+						lTwitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+						AccessToken lAccessToken = new AccessToken(ACCESSTOKEN_KEY, ACCESSTOKEN_SECRET);
+						lTwitterStream.setOAuthAccessToken(lAccessToken);
+						aConnector.setVar(TWITTER_STREAM, lTwitterStream);
+					}
+					lTwitterStream.filter(lFilter);
+				} catch (Exception lEx) {
+					lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+					mLog.error(lMsg);
+					lResponse.setInteger("code", -1);
+					lResponse.setString("msg", lMsg);
+				}
+			} else {
+				lMsg = "No keywords passed to Twitter stream, kept current state.";
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", lMsg);
+			}
+		} else {
+			lMsg = "No keywords passed to Twitter stream, kept current state.";
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", lMsg);
 		}

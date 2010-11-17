@@ -20,7 +20,6 @@
 package org.jwebsocket.plugins.filesystem;
 
 import java.io.File;
-import java.io.IOException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -59,8 +58,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		this(null);
 	}
 
-	public FileSystemPlugIn(PluginConfiguration configuration) {
-		super(configuration);
+	public FileSystemPlugIn(PluginConfiguration aConfiguration) {
+		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Instantiating file system plug-in...");
 		}
@@ -73,7 +72,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-		if (lType != null && lNS.equals(getNamespace())) {
+		if (lType != null && getNamespace().equals(lNS)) {
 			// select from database
 			if (lType.equals("save")) {
 				save(aConnector, aToken);
@@ -160,8 +159,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			} else {
 				lBA = lData.getBytes("UTF-8");
 			}
-		} catch (Exception ex) {
-			mLog.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + " on save: " + lEx.getMessage());
 		}
 
 		// complete the response token
@@ -179,9 +178,11 @@ public class FileSystemPlugIn extends TokenPlugIn {
 					FileUtils.writeStringToFile(lFile, lData, "UTF-8");
 				}
 			}
-		} catch (IOException ex) {
+		} catch (Exception lEx) {
 			lResponse.setInteger("code", -1);
-			lResponse.setString("msg", ex.getMessage());
+			lMsg = lEx.getClass().getSimpleName() + " on save: " + lEx.getMessage();
+			lResponse.setString("msg", lMsg);
+			mLog.error(lMsg);
 		}
 
 		// send response to requester
@@ -273,9 +274,11 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				lData = new String(Base64.encodeBase64(lBA), "UTF-8");
 			}
 			lResponse.setString("data", lData);
-		} catch (IOException ex) {
+		} catch (Exception lEx) {
 			lResponse.setInteger("code", -1);
-			lResponse.setString("msg", ex.getMessage());
+			lMsg = lEx.getClass().getSimpleName() + " on load: " + lEx.getMessage();
+			lResponse.setString("msg", lMsg);
+			mLog.error(lMsg);
 		}
 
 		// send response to requester

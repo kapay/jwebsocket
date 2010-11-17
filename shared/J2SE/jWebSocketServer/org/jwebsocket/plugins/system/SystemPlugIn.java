@@ -145,7 +145,7 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		aConnector.getSession().setSessionId(
 				Tools.getMD5(aConnector.generateUID() + "." + lRand.nextInt()));
-		
+
 		// and send the welcome message incl. the session id
 		sendWelcome(aConnector);
 		// if new connector is active broadcast this event to then network
@@ -342,7 +342,9 @@ public class SystemPlugIn extends TokenPlugIn {
 		Boolean lReturnRights = aToken.getBoolean("getRights", Boolean.FALSE);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'login' (username='" + lUsername + "', group='" + lGroup + "') from '" + aConnector + "'...");
+			log.debug("Processing 'login' (username='" + lUsername
+					+ "', group='" + lGroup
+					+ "') from '" + aConnector + "'...");
 		}
 
 		if (lUsername != null) {
@@ -389,7 +391,9 @@ public class SystemPlugIn extends TokenPlugIn {
 		Token lResponse = createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'logout' (username='" + getUsername(aConnector) + "') from '" + aConnector + "'...");
+			log.debug("Processing 'logout' (username='"
+					+ getUsername(aConnector)
+					+ "') from '" + aConnector + "'...");
 		}
 
 		if (getUsername(aConnector) != null) {
@@ -433,7 +437,10 @@ public class SystemPlugIn extends TokenPlugIn {
 		 */
 		if (lTargetConnector != null) {
 			if (log.isDebugEnabled()) {
-				log.debug("Processing 'send' (username='" + getUsername(aConnector) + "') from '" + aConnector + "' to " + lTargetId + "...");
+				log.debug("Processing 'send' (username='"
+						+ getUsername(aConnector)
+						+ "') from '" + aConnector
+						+ "' to " + lTargetId + "...");
 			}
 			aToken.setString("sourceId", aConnector.getId());
 			sendToken(aConnector, lTargetConnector, aToken);
@@ -531,15 +538,16 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void ping(WebSocketConnector aConnector, Token aToken) {
-		String lEcho = aToken.getString("echo");
+		Boolean lEcho = aToken.getBoolean("echo", Boolean.TRUE);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'Ping' (echo='" + lEcho + "') from '" + aConnector + "'...");
+			log.debug("Processing 'Ping' (echo='" + lEcho
+					+ "') from '" + aConnector + "'...");
 		}
 
-		if (lEcho.equalsIgnoreCase("true")) {
+		if (lEcho) {
 			Token lResponseToken = createResponse(aToken);
-			// TODO: here could optionally send a time stamp
+			// TODO: here could we optionally send a time stamp
 			// TODO: implement response time on client!
 			// lResponseToken.put("","");
 			sendToken(aConnector, aConnector, lResponseToken);
@@ -555,7 +563,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		Token lResponseToken = createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'getClients' from '" + aConnector + "'...");
+			log.debug("Processing 'getClients' from '"
+					+ aConnector + "'...");
 		}
 
 		if (getUsername(aConnector) != null) {
@@ -587,7 +596,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		Token lResponseToken = createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'allocChannel' from '" + aConnector + "'...");
+			log.debug("Processing 'allocChannel' from '"
+					+ aConnector + "'...");
 		}
 	}
 
@@ -602,7 +612,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		Token lResponseToken = createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
-			log.debug("Processing 'deallocChannel' from '" + aConnector + "'...");
+			log.debug("Processing 'deallocChannel' from '"
+					+ aConnector + "'...");
 		}
 	}
 }

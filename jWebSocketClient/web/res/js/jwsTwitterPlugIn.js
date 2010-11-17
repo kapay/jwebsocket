@@ -177,12 +177,14 @@ jws.TwitterPlugIn = {
 		return lRes;
 	},
 
-	twitterSetStream: function( aOptions ) {
+	twitterSetStream: function( aFollowers, aKeywords, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			var lToken = {
 				ns: jws.TwitterPlugIn.NS,
-				type: "setStream"
+				type: "setStream",
+				keywords: aKeywords,
+				followers: aFollowers
 			};
 			this.sendToken( lToken,	aOptions );
 		}

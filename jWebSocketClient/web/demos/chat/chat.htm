@@ -4,23 +4,23 @@
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<!-- If Google's chrome frame installed, use it! -->
 		<!-- Comment needs to be BELOW this meta tag! -->
-<!--
-//	****************************************************************************
-//	jWebSocket Simple Chat (uses jWebSocket Client and Server)
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
-//	****************************************************************************
-//	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU Lesser General Public License as published by the
-//	Free Software Foundation; either version 3 of the License, or (at your
-//	option) any later version.
-//	This program is distributed in the hope that it will be useful, but WITHOUT
-//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-//	more details.
-//	You should have received a copy of the GNU Lesser General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
-//	****************************************************************************
--->
+		<!--
+		//	****************************************************************************
+		//	jWebSocket Simple Chat (uses jWebSocket Client and Server)
+		//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
+		//	****************************************************************************
+		//	This program is free software; you can redistribute it and/or modify it
+		//	under the terms of the GNU Lesser General Public License as published by the
+		//	Free Software Foundation; either version 3 of the License, or (at your
+		//	option) any later version.
+		//	This program is distributed in the hope that it will be useful, but WITHOUT
+		//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+		//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+		//	more details.
+		//	You should have received a copy of the GNU Lesser General Public License along
+		//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+		//	****************************************************************************
+		-->
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket Chat Demo</title>
@@ -78,7 +78,7 @@
 				aElement.select();
 			}
 
-			function doOpen() {
+			function logon() {
 				// adjust this URL to your jWebSocket server
 				var lURL = jws.JWS_SERVER_URL + "/;timeout=360000";
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
@@ -168,7 +168,7 @@
 				log( SYS, OUT, "getClients: " + lRes.msg );
 			}
 
-			function doClose() {
+			function logoff() {
 				// disconnect automatically logs out!
 				lWSC.stopKeepAlive();
 				var lRes = lWSC.close({
@@ -219,7 +219,7 @@
 			function usrKeyDnLsnr( aEvent ) {
 				// on enter in username field try to login
 				if( aEvent.keyCode == 13 ) {
-					doOpen();
+					logon();
 				}
 			}
 
@@ -271,12 +271,12 @@
 					jws.events.addEventListener( eMessage, "keydown", msgKeyDnLsnr );
 					jws.events.addEventListener( eUsername, "focus", elemFocusLsnr );
 					jws.events.addEventListener( eMessage, "focus", elemFocusLsnr );
-/*
+					/*
 					eUsername.addEventListener( "keydown", usrKeyDnLsnr, false );
 					eMessage.addEventListener( "keydown", msgKeyDnLsnr, false );
 					eUsername.addEventListener( "focus", elemFocusLsnr, false );
 					eMessage.addEventListener( "focus", elemFocusLsnr, false );
-*/
+					 */
 					eUsername.focus();
 					eUsername.select();
 				} else {
@@ -316,14 +316,14 @@
 		onload="initPage();"
 		onunload="exitPage();"
 		>
-<!--	remarked temporarily due to chrome 5 browser bug
+		<!--	remarked temporarily due to chrome 5 browser bug
 		<script type="text/javascript">
 			var lFrameElem = this.frameElement;
 			if( !lFrameElem ) {
 				location.replace( "../../index.htm?page=demos/chat/chat.htm" );
 			}
 		</script>
--->
+		-->
 
 		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
 			<tr>
@@ -332,12 +332,12 @@
 				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
 			</tr>
 		</table>
-<!--
+		<!--
 		<h1>jWebSocket Chat Demo</h1>
--->
+		-->
 		<p>This demo shows how to easily set up a very simple jWebSocket based chat system.
 		To run the chat on a single system you can
-			<a href="javascript:openSubWindow();">open multiple windows</a>. If 
+			<a href="javascript:openSubWindow();">open multiple windows</a>. If
 		you are not sure that your favorite browser supports WebSockets please 
 		refer to our <a target="_top" href="http://jwebsocket.org/jws_for_all.htm">jWebSocket Cross-Browser
 		Compatibility</a> page.</p>
@@ -345,15 +345,38 @@
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="anonymous" size="20"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogin" type="button" value="Login" onclick="doOpen();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogout" type="button" value="Logout" onclick="doClose();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetClients" type="button" value="Clients" onclick="getClients();"></td>
+					<td class="stdDlg" width="5">
+						<input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px"
+							   title="jWebSocket username or 'Guest' for demo.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"
+							   title="Authenticates you against the jWebSocket Server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"
+							   title="Clears the result and event log above.">
+					</td>
 					<td class="stdDlg" width="" align="right">
 						<input id="schkKeepAlive" type="checkbox" value="off" onclick="checkKeepAlive();">&nbsp;Keep-Alive&nbsp;
 						<input id="schkDebug" type="checkbox" value="on" checked="checked">&nbsp;Debug&nbsp;
 						<input class="sbtnDlg" id="sbtnClearLog" type="button" value="Clear Log" onclick="clearLog();">
 					</td>
+				</tr>
+
+				<tr>
+					<td class="stdDlg" width="5">Password</td>
+					<td class="stdDlg" width="5">
+						<input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:150px"
+							   title="jWebSocket password or 'guest' for demo."></td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logout" onclick="logoff();"
+							   title="Logs you out and disconnects from the jWebSocket server."></td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnGetClients" type="button" value="Clients" onclick="getClients();"
+							   title="Retrieve all clients that are currently connected to the chat."
+							   ></td>
+					<td class="stdDlg" width="">&nbsp;</td>
 				</tr>
 			</table>
 		</div>

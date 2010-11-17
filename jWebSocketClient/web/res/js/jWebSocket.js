@@ -1021,6 +1021,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		var lRes = this.checkLoggedIn();
 		if( lRes.code == 0 ) {
 			this.sendToken({
+				ns: jws.NS_SYSTEM,
 				type: "send",
 				targetId: aTarget,
 				sourceId: this.fClientId,
@@ -1058,6 +1059,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		}
 		if( lRes.code == 0 ) {
 			this.sendToken({
+				ns: jws.NS_SYSTEM,
 				type: "broadcast",
 				sourceId: this.fClientId,
 				sender: this.fUsername,
@@ -1081,6 +1083,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		var lRes = this.checkConnected();
 		if( lRes.code == 0 ) {
 			this.sendToken({
+				ns: jws.NS_SYSTEM,
 				type: "echo",
 				data: aData
 			});

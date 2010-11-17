@@ -39,7 +39,7 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	@Override
 	public void processOpened(WebSocketServerEvent aEvent) {
 		if (log.isDebugEnabled()) {
-			log.debug("Client '" + aEvent.getSessionId() + "' connected.");
+			log.debug("Client '" + aEvent.getConnector() + "' connected.");
 		}
 	}
 
@@ -68,7 +68,7 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	@Override
 	public void processToken(WebSocketServerTokenEvent aEvent, Token aToken) {
 		if (log.isDebugEnabled()) {
-			log.debug("Client '" + aEvent.getSessionId() + "' sent Token: '" + aToken.toString() + "'.");
+			log.debug("Client '" + aEvent.getConnector() + "' sent Token: '" + aToken.toString() + "'.");
 		}
 		// here you can simply interpret the token type sent from the client
 		// according to your needs.
@@ -100,7 +100,7 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	@Override
 	public void processClosed(WebSocketServerEvent aEvent) {
 		if (log.isDebugEnabled()) {
-			log.debug("Client '" + aEvent.getSessionId() + "' disconnected.");
+			log.debug("Client '" + aEvent.getConnector() + "' disconnected.");
 		}
 	}
 }

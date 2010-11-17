@@ -17,7 +17,6 @@ package org.jwebsocket.kit;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServer;
-import org.jwebsocket.kit.WebSocketSession;
 
 /**
  *
@@ -25,8 +24,8 @@ import org.jwebsocket.kit.WebSocketSession;
  */
 public class WebSocketServerEvent {
 
-	private WebSocketServer server = null;
-	private WebSocketConnector connector = null;
+	private WebSocketServer mServer = null;
+	private WebSocketConnector mConnector = null;
 
 	/**
 	 *
@@ -34,36 +33,36 @@ public class WebSocketServerEvent {
 	 * @param aServer
 	 */
 	public WebSocketServerEvent(WebSocketConnector aConnector, WebSocketServer aServer) {
-		connector = aConnector;
-		server = aServer;
+		mConnector = aConnector;
+		mServer = aServer;
 	}
 
 	/**
 	 * @return the sessionId
 	 */
 	public String getSessionId() {
-		return connector.getSession().getSessionId();
+		return mConnector.getSession().getSessionId();
 	}
 
 	/**
 	 * @return the session
 	 */
 	public WebSocketSession getSession() {
-		return connector.getSession();
+		return mConnector.getSession();
 	}
 
 	/**
 	 * @return the server
 	 */
 	public WebSocketServer getServer() {
-		return server;
+		return mServer;
 	}
 
 	/**
 	 * @return the connector
 	 */
 	public WebSocketConnector getConnector() {
-		return connector;
+		return mConnector;
 	}
 
 	/**
@@ -71,7 +70,6 @@ public class WebSocketServerEvent {
 	 * @param aPacket
 	 */
 	public void sendPacket(WebSocketPacket aPacket) {
-		server.sendPacket(connector, aPacket);
+		mServer.sendPacket(mConnector, aPacket);
 	}
-
 }

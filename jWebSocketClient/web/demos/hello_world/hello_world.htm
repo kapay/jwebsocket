@@ -4,23 +4,23 @@
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<!-- If Google's chrome frame installed, use it! -->
 		<!-- Comment needs to be BELOW this meta tag! -->
-<!--
-//	****************************************************************************
-//	jWebSocket Hello World (uses jWebSocket Client and Server)
-//	(C) 2010 Alexander Schulze, jWebSocket.org, Innotrade GmbH, Herzogenrath
-//	****************************************************************************
-//	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU Lesser General Public License as published by the
-//	Free Software Foundation; either version 3 of the License, or (at your
-//	option) any later version.
-//	This program is distributed in the hope that it will be useful, but WITHOUT
-//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-//	more details.
-//	You should have received a copy of the GNU Lesser General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
-//	****************************************************************************
--->
+		<!--
+		//	****************************************************************************
+		//	jWebSocket Hello World (uses jWebSocket Client and Server)
+		//	(C) 2010 Alexander Schulze, jWebSocket.org, Innotrade GmbH, Herzogenrath
+		//	****************************************************************************
+		//	This program is free software; you can redistribute it and/or modify it
+		//	under the terms of the GNU Lesser General Public License as published by the
+		//	Free Software Foundation; either version 3 of the License, or (at your
+		//	option) any later version.
+		//	This program is distributed in the hope that it will be useful, but WITHOUT
+		//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+		//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+		//	more details.
+		//	You should have received a copy of the GNU Lesser General Public License along
+		//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+		//	****************************************************************************
+		-->
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket Hello World</title>
@@ -112,13 +112,13 @@
 				if( lMsg.length > 0 ) {
 					log( "Broadcasting '" + lMsg + "'..." );
 					var lRes = lWSC.broadcastText(
-						"",		// broadcast to all clients (not limited to a certain pool)
-						lMsg	// broadcast this message
-					);
+					"",		// broadcast to all clients (not limited to a certain pool)
+					lMsg	// broadcast this message
+				);
 					// you may want log error only,
 					// on success don't confuse the user
 					// if( lRes.code != 0 ) {
-						log( lWSC.resultToString( lRes ) );
+					log( lWSC.resultToString( lRes ) );
 					//  }
 					eMessage.value = "";
 				}
@@ -165,7 +165,7 @@
 							log("Server responded: "
 								+ "vendor: " + aToken.vendor
 								+ ", version: " + aToken.version
-							);
+						);
 						}
 					});
 				} else {
@@ -209,11 +209,11 @@
 			function loadFile() {
 				log( "Loading a file from the server via WebSockets..." );
 				// call the getTime method of the client side plug-in
-				var lRes = lWSC.fileLoad( 
-					"test.txt",
-					{	scope: jws.SCOPE_PUBLIC
-					}
-				);
+				var lRes = lWSC.fileLoad(
+				"test.txt",
+				{	scope: jws.SCOPE_PUBLIC
+				}
+			);
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
 					log( lWSC.resultToString( lRes ) );
@@ -224,11 +224,11 @@
 				log( "Saving a file from the server via WebSockets..." );
 				// call the getTime method of the client side plug-in
 				var lRes = lWSC.fileSave(
-					"test.txt",
-					eMessage.value,
-					{	scope: jws.SCOPE_PUBLIC
-					}
-				);
+				"test.txt",
+				eMessage.value,
+				{	scope: jws.SCOPE_PUBLIC
+				}
+			);
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
 					log( lWSC.resultToString( lRes ) );
@@ -312,7 +312,7 @@
 		onload="initPage();"
 		onunload="exitPage();"
 		>
-<!--	remarked temporarily due to chrome 5 browser bug
+		<!--	remarked temporarily due to chrome 5 browser bug
 		<script type="text/javascript">
 			var lFrameElem = this.frameElement;
 			if( !lFrameElem ) {
@@ -320,7 +320,7 @@
 				// location.href = "../../index.htm?page=demos/hello_world/hello_world.htm" ;
 			}
 		</script>
--->
+		-->
 		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
 			<tr>
 				<td class="tdHeader" width="">jWebSocket Hello World</td>
@@ -338,26 +338,67 @@
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px" title="jWebSocket username or 'Guest' for demo."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();" title="Authenticates you against the jWebSocket Server."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();" title="Clears the result and event log above."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();" title="Retreives a 'complex' JSON object from the jWebSocket server."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();" title="Retreives a result (copyright and license token) from a server side listener."></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSaveFile" type="button" value="Save File" onclick="saveFile();" title="Saves the message below into a shared file on the jWebSocket server."></td>
-					<td class="stdDlg" width=""><!--<input class="sbtnDlg" id="sbtnCGITest" type="button" value="CGI Test" onclick="cgiTest();">--></td>
+					<td class="stdDlg" width="5">
+						<input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px"
+							   title="jWebSocket username or 'Guest' for demo.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"
+							   title="Authenticates you against the jWebSocket Server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"
+							   title="Clears the result and event log above.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnExCmObj" type="button" value="Complex Obj." onclick="exchangeComplexObjects();"
+							   title="Retreives a 'complex' JSON object from the jWebSocket server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();"
+							   title="Retreives a result (copyright and license token) from a server side listener.">
+					</td>
+					<td class="stdDlg" width="">
+						<input class="sbtnDlg" id="sbtnSaveFile" type="button" value="Save File" onclick="saveFile();"
+							   title="Saves the message below into a shared file on the jWebSocket server.">
+					</td>
+					<td class="stdDlg" width="">
+						<!--<input class="sbtnDlg" id="sbtnCGITest" type="button" value="CGI Test" onclick="cgiTest();">-->
+					</td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Password</td>
-					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:150px" title="jWebSocket password or 'guest' for demo."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logout" onclick="logoff();" title="Logs you out and disconnects from the jWebSocket server."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();" title="Broadcasts the message below to all connected clients."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetTime" type="button" value="GetTime" onclick="sampleGetTime();" title="Retreives the current system time from the jWebSocket server."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSelect" type="button" value="Select" onclick="sampleSelect();" title="Retreives a single record from a JDBC datasource on the server."></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnLoadFile" type="button" value="Load File" onclick="loadFile();" title="Loads a shared file on the jWebSocket server and displays it below."></td>
+					<td class="stdDlg" width="5">
+						<input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:150px"
+							   title="jWebSocket password or 'guest' for demo.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logout" onclick="logoff();"
+							   title="Logs you out and disconnects from the jWebSocket server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnBroadcast" type="button" value="Broadcast" onclick="broadcast();"
+							   title="Broadcasts the message below to all connected clients.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnGetTime" type="button" value="GetTime" onclick="sampleGetTime();"
+							   title="Retreives the current system time from the jWebSocket server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnSelect" type="button" value="Select" onclick="sampleSelect();"
+							   title="Retreives a single record from a JDBC datasource on the server.">
+					</td>
+					<td class="stdDlg" width="">
+						<input class="sbtnDlg" id="sbtnLoadFile" type="button" value="Load File" onclick="loadFile();"
+							   title="Loads a shared file on the jWebSocket server and displays it below.">
+					</td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Message</td>
-					<td class="stdDlg" width="" colspan="7"><input class="stxfDlg" id="stxfMessage" type="text" value="Your Message" style="width:99%" title="Message to be broadcasted or save to file on the jWebSocket Server."></td>
+					<td class="stdDlg" width="" colspan="7">
+						<input class="stxfDlg" id="stxfMessage" type="text" value="Your Message" style="width:99%"
+							   title="Message to be broadcasted or save to file on the jWebSocket Server.">
+					</td>
 				</tr>
 			</table>
 		</div>

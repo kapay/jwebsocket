@@ -35,6 +35,7 @@
 			var lTwitterAuthenticationURL = null;
 			var lTwitterAccessVerifier = null;
 			var eTwitterLoginLink = null;
+			var eTwitterKeywords = null;
 			var lTwitterOAuthWinId = "twAuth";
 			var hTwAuth = null;
 
@@ -145,8 +146,10 @@
 			}
 
 			function twitterSetStream() {
-				log( "Setting Stream..." );
+				log( "Setting Stream with keywords..." );
 				var lRes = lWSC.twitterSetStream(
+					"", // followers (for future use)
+					eTwitterKeywords.value
 				);
 				log( lWSC.resultToString( lRes ) );
 			}
@@ -259,6 +262,7 @@
 
 				eTwitterUsername = jws.$( "stxfTwitterUsername" );
 				eTwitterMessage = jws.$( "stxfTwitterMessage" );
+				eTwitterKeywords = jws.$( "stxfTwitterKeywords" );
 
 				eUsername = jws.$( "stxfUsername" );
 				ePassword = jws.$( "spwfPassword" );
@@ -329,36 +333,101 @@ Testing our new #jWebSocket Twitter-Plugin, tweet via #WebSockets! http://jwebso
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
-					<td class="stdDlg" width="5">jWebSocket&nbsp;Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px" title="jWebSocket username or 'Guest' for demo."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();" title="Authenticates you against the jWebSocket Server."></td>
+					<td class="stdDlg" width="5">Username</td>
+					<td class="stdDlg" width="5">
+						<input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:110px"
+							   title="jWebSocket username or 'Guest' for demo.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"
+							   title="Authenticates you against the jWebSocket Server.">
+					</td>
 					<!-- use link instead of button here to prevent blocked pop-ups -->
 					<!-- <td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLoginTwitter" type="button" value="Twitter Login" onclick="twitterLogin();"></td> -->
-					<td class="stdDlg" width="5"><a class="sancDlg" id="sancTwitterOAuth" onclick="twitterLogin();" title="Authenticates you against Twitter using OAuth.">Twitter&nbsp;Login&nbsp;</a></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetUser" type="button" value="Get User" onclick="getUserData();" title="Retreives the user data for the given Twitter user."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnQuery" type="button" value="Query" onclick="query();" title="Searches for tweets matching the query."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnTrends" type="button" value="Trends" onclick="twitterGetTrends();" title="Searches for tweets matching the query."></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnPublTimel" type="button" value="Publ.Timel." onclick="twitterGetPublicTimeline();" title="Retrieves the public timeline."></td>
+					<td class="stdDlg" width="5">
+						<a class="sancDlg" id="sancTwitterOAuth" onclick="twitterLogin();"
+						   title="Authenticates you against Twitter using OAuth.">Twitter&nbsp;Login&nbsp;</a>
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnQuery" type="button" value="Query" onclick="query();"
+							   title="Searches for tweets matching the query.">
+					</td>
+					<td class="stdDlg" width="">
+						<input class="sbtnDlg" id="sbtnTrends" type="button" value="Trends" onclick="twitterGetTrends();"
+							   title="Searches for tweets matching the query.">
+					</td>
+					<td class="stdDlg" width="">
+						&nbsp;
+					</td>
 				</tr>
 				<tr class="strDlg">
-					<td class="stdDlg" width="5">jWebSocket&nbsp;Password</td>
-					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:150px" title="jWebSocket password or 'guest' for demo."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logout" onclick="logoff();" title="Logs you out and disconnects from the jWebSocket server."></td>
-					<td class="stdDlg" width="5"><a class="sancDlg" id="sancTwitterLogout" onclick="twitterLogout();" title="Logs you out from Twitter so that you can re-login e.g. with another account.">Twitter&nbsp;Logout</a></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetTimeline" type="button" value="getTimeline" onclick="getTimeline();" title="Retreives the timeline (message) for the given Twitter user."></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnTweet" type="button" value="Tweet" onclick="tweet();" title="Updates your twitter status, i.e. sends a new tweet to Twitter."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnStream" type="button" value="Stream" onclick="twitterSetStream();" title="Searches for tweets matching the query."></td>
+					<td class="stdDlg" width="5">Password</td>
+					<td class="stdDlg" width="5">
+						<input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:110px"
+							   title="jWebSocket password or 'guest' for demo.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logout" onclick="logoff();"
+							   title="Logs you out and disconnects from the jWebSocket server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<a class="sancDlg" id="sancTwitterLogout" onclick="twitterLogout();"
+						   title="Logs you out from Twitter so that you can re-login e.g. with another account.">Twitter&nbsp;Logout</a>
+					</td>
+					<td class="stdDlg" width="">
+						<input class="sbtnDlg" id="sbtnPublTimel" type="button" value="Publ.Timel." onclick="twitterGetPublicTimeline();"
+							   title="Retrieves the public timeline.">
+					</td>
+					<td class="stdDlg" width="">
+						&nbsp;
+					</td>
+					<td class="stdDlg" width="">
+						&nbsp;
+					</td>
 				</tr>
 				<tr class="strDlg">
-					<td class="stdDlg" width="5">Twitter&nbsp;Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfTwitterUsername" type="text" value="jwebsocket" style="width:150px" title="Twitter username used for getTimeline and getUserData, not for Twitter authentication done with OAuth."></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();" title="Clears the result and event log below."></td>
+					<td class="stdDlg" width="5">Twitter&nbsp;Id</td>
+					<td class="stdDlg" width="5">
+						<input class="stxfDlg" id="stxfTwitterUsername" type="text" value="jwebsocket" style="width:110px"
+							   title="Twitter username used for getTimeline and getUserData, not for Twitter authentication done with OAuth.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"
+							   title="Clears the result and event log below.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnGetUser" type="button" value="Get User" onclick="getUserData();"
+							   title="Retreives the user data for the given Twitter user.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnGetTimeline" type="button" value="getTimeline" onclick="getTimeline();"
+							   title="Retreives the timeline (message) for the given Twitter user.">
+					</td>
+					<td class="stdDlg" width="">
+						&nbsp;
+					</td>
+					<td class="stdDlg" width="">
+						&nbsp;
+					</td>
 				</tr>
 				<tr class="strDlg">
-					<td class="stdDlg" width="5">Twitter&nbsp;Message</td>
+					<td class="stdDlg" width="5">Status</td>
 					<td class="stdDlg" width="" colspan="5">
 						<input class="stxfDlg" id="stxfTwitterMessage" type="text" value="Successfully running jWebSocket Twitter Service!" style="width:99%"
 						title="The Twitter status message to send, the tweet.">
+					</td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnTweet" type="button" value="Tweet" onclick="tweet();"
+													   title="Updates your twitter status, i.e. sends a new tweet to Twitter."></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5">Keywords</td>
+					<td class="stdDlg" width="" colspan="5">
+						<input class="stxfDlg" id="stxfTwitterKeywords" type="text" value="#jWebSocket #WebSockets #WebSocket #Apple #Google" style="width:99%"
+						title="Keywords for Twitter stream (for demo max. 5 items accepted, min. length 4 digits, separate with spaces).">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnStream" type="button" value="Stream" onclick="twitterSetStream();"
+							   title="Searches for tweets matching the query.">
 					</td>
 				</tr>
 			</table>
