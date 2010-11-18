@@ -37,13 +37,14 @@
 					// create low level jWebSocket client, using custom
 					// low level sub protocol (ie. no JSON, CSV or XML token)
 					
-					var lURL = jws.JWS_SERVER_URL; 
-					// deprecated: + "/;prot=" + jws.WS_SUBPROT_CUSTOM;
+					// URL is ws[s]://[hostname|localhost]:8787[/context][/servlet/][;args...]
+					// deprecated: JWS_SERVER_URL;
+					var lURL = jws.getDefaultServerURL();
 
 					// further URLs for various test purposes:
 					// var lURL = "wss://yaws.hyber.org/";
 					// var lURL = "wss://websockets.org:9797";
-					// var lURL = "wss://localhost:9797/jWebSocket/jWebSocket"; // for Jetty Servlet
+					// var lURL = "wss://localhost:9797/jWebSocket/jWebSocket"; // for Jetty SSL Servlet
 
 					// console.log( "Connecting to " + lURL + " ..." );
 					try {

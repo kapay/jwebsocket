@@ -40,10 +40,28 @@ var jws = {
 	//:const:*:CUR_TOKEN_ID:Integer:0
 	//:d:en:Current token id, incremented per token exchange to assign results.
 	CUR_TOKEN_ID: 0,
-	//:const:*:JWS_SERVER_URL:String:ws://[hostname]:8787
+	//:const:*:JWS_SERVER_SCHEMA:String:[ws|wss]
+	//:d:en:Default schema, [tt]ws[/tt] for un-secured and [tt]wss[/tt] for secured WebSocket-Connections.
+	JWS_SERVER_SCHEMA: "ws",
+	//:const:*:JWS_SERVER_HOST:String:[hostname|localhost]
+	//:d:en:Default hostname of current webbite or [tt]localhost[/tt] if no hostname can be detected.
+	JWS_SERVER_HOST: ( self.location.hostname ? self.location.hostname : "localhost" ),
+	//:const:*:JWS_SERVER_PORT:Integer:8787
+	//:d:en:Default port number, 8787 for stand-alone un-secured or 9797 for stand-alone SSL secured servers, _
+	//:d:en:80[80] for Jetty or Glassfish un-secured or [8]443 for embedded SSL secured servers.
+	JWS_SERVER_PORT: 8787,
+	//:const:*:JWS_SERVER_CONTEXT:String:jWebSocket
+	//:d:en:Default application context in web application servers or servlet containers like Jetty or GlassFish.
+	JWS_SERVER_CONTEXT: "/jWebSocket",
+	//:const:*:JWS_SERVER_SERVLET:String:jWebSocket
+	//:d:en:Default servlet in web application servers or servlet containers like Jetty or GlassFish.
+	JWS_SERVER_SERVLET: "/jWebSocket",
+	//:const:*:JWS_SERVER_URL:String:ws://[hostname]/jWebSocket/jWebSocket:8787
 	//:d:en:Current token id, incremented per token exchange to assign results.
+	//:@deprecated:en:Use [tt]getDefaultServerURL()[/tt] instead.
 	JWS_SERVER_URL:
-		"ws://" + ( self.location.hostname ? self.location.hostname : "localhost" ) + ":8787",
+		"ws://" + ( self.location.hostname ? self.location.hostname : "localhost" ) + ":8787/jWebSocket/jWebSocket",
+
 	JWS_FLASHBRIDGE: null,
 
 	//:const:*:CONNECTING:Integer:0
@@ -87,6 +105,28 @@ var jws = {
 	//:r:*:::void:none
 	$: function( aId ) {
 		return document.getElementById( aId );
+	},
+	
+	//:m:*:getDefaultServerURL
+	//:d:en:Returns the default URL to the jWebSocket Server. This is a convenience _
+	//:d:en:method used in all jWebSocket demo dialogs. In case of changes to the _
+	//:d:en:server URL you only need to change to above JWS_SERVER_xxx constants.
+	//:a:en::voide::
+	//:r:*:::void:Default jWebSocket server URL consisting of schema://host:port/context/servlet
+	getDefaultServerURL: function() {
+		var lURL =  
+			jws.JWS_SERVER_SCHEMA + "://"
+			+ jws.JWS_SERVER_HOST + ":" +
+			+ jws.JWS_SERVER_PORT;
+			
+		if( jws.JWS_SERVER_CONTEXT && jws.JWS_SERVER_CONTEXT.length > 0 ) {
+			lURL += jws.JWS_SERVER_CONTEXT;
+			
+			if( jws.JWS_SERVER_SERVLET && jws.JWS_SERVER_SERVLET.length > 0 ) {
+				lURL += jws.JWS_SERVER_SERVLET;
+			}
+		}
+		return lURL;
 	},
 
 	//:m:*:browserSupportsWebSockets
@@ -510,7 +550,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 						delete lThis.hDisconnectTimeout;
 					}
 					lValue = lThis.processClosed( aEvent );
-					// give application change to handle event
+					// give application chance to handle event
 					if( aOptions.OnClose ) {
 						aOptions.OnClose( aEvent, lValue, lThis );
 					}
@@ -864,6 +904,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				this.notifyPlugInsOpened();
 			} else if( aToken.type == "goodBye" ) {
 				this.fSessionId = null;
+				this.fUsername = null;
 			} else if( aToken.type == "close" ) {
 				// if the server closes the connection close immediately too.
 				this.close({

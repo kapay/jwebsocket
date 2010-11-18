@@ -67,8 +67,10 @@
 			var gUsername = null;
 
 			function logon() {
-				// URL is ws://[yourhostname|localhost]:8787
-				var lURL = jws.JWS_SERVER_URL; // "/;arg1=value1,arg2=value2";
+				// URL is ws[s]://[hostname|localhost]:8787[/context][/servlet/][;args...]
+				// deprecated: JWS_SERVER_URL;
+				var lURL = jws.getDefaultServerURL();
+
 				gUsername = eJWSUsername.value;
 				var lPassword = eJWSPassword.value;
 				eJWSPassword.value = "";

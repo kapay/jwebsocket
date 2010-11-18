@@ -70,8 +70,10 @@
 			}
 
 			function doOpen() {
-				// adjust this URL to your jWebSocket server
-				var lURL = jws.JWS_SERVER_URL + "/;prot=json,timeout=360000";
+				// URL is ws[s]://[hostname|localhost][:port][/context][/servlet/][;args...]
+				// deprecated: JWS_SERVER_URL;
+				var lURL = jws.getDefaultServerURL() + "/;timeout=360000";
+
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
 				// try to establish connection to jWebSocket server

@@ -51,7 +51,9 @@
 			var lWSC = null;
 
 			function connect() {
-				var lURL = jws.JWS_SERVER_URL;
+				// URL is ws[s]://[hostname|localhost]:8787[/context][/servlet/][;args...]
+				// deprecated: JWS_SERVER_URL;
+				var lURL = jws.getDefaultServerURL();
 
 				log( "Connecting to " + lURL + " ..." );
 				try {

@@ -59,6 +59,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String TT_CLOSE = "close";
 	private static final String TT_GETCLIENTS = "getClients";
 	private static final String TT_PING = "ping";
+	private static final String TT_ECHO = "echo";
 	private static final String TT_ALLOC_CHANNEL = "alloc";
 	private static final String TT_DEALLOC_CHANNEL = "dealloc";
 	// specify shared connector variables
@@ -126,6 +127,8 @@ public class SystemPlugIn extends TokenPlugIn {
 				aResponse.abortChain();
 			} else if (lType.equals(TT_PING)) {
 				ping(aConnector, aToken);
+			} else if (lType.equals(TT_ECHO)) {
+				echo(aConnector, aToken);
 			} else if (lType.equals(TT_ALLOC_CHANNEL)) {
 				allocChannel(aConnector, aToken);
 			} else if (lType.equals(TT_DEALLOC_CHANNEL)) {
@@ -397,8 +400,11 @@ public class SystemPlugIn extends TokenPlugIn {
 		}
 
 		if (getUsername(aConnector) != null) {
+			// send normal answer token, good bye is for close!
+			sendToken(aConnector, aConnector, lResponse);
 			// send good bye token as response to client
-			sendGoodBye(aConnector, CloseReason.CLIENT);
+			// sendGoodBye(aConnector, CloseReason.CLIENT);
+
 			// and broadcast the logout event
 			broadcastLogoutEvent(aConnector);
 			// resetting the username is the only required signal for logout
@@ -493,12 +499,13 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	private void close(WebSocketConnector aConnector, Token aToken) {
 		int lTimeout = aToken.getInteger("timeout", 0);
+
+		// only send a good bye message if timeout is > 0
+		if (lTimeout > 0) {
+			sendGoodBye(aConnector, CloseReason.CLIENT);
+		}
 		// if logged in...
 		if (getUsername(aConnector) != null) {
-			// only send a good bye message if timeout is > 0
-			if (lTimeout > 0) {
-				sendGoodBye(aConnector, CloseReason.CLIENT);
-			}
 			// broadcast the logout event.
 			broadcastLogoutEvent(aConnector);
 		}
@@ -519,18 +526,20 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	private void echo(WebSocketConnector aConnector, Token aToken) {
-		Token lResponseToken = createResponse(aToken);
+		Token lResponse = createResponse(aToken);
 
 		String lData = aToken.getString("data");
 		if (lData != null) {
 			if (log.isDebugEnabled()) {
 				log.debug("echo " + lData);
 			}
+			lResponse.setString("data", lData);
 		} else {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "missing 'data' argument for 'echo' command");
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "missing 'data' argument for 'echo' command");
 		}
-		sendToken(aConnector, aConnector, lResponseToken);
+
+		sendToken(aConnector, aConnector, lResponse);
 	}
 
 	/**
@@ -547,11 +556,11 @@ public class SystemPlugIn extends TokenPlugIn {
 		}
 
 		if (lEcho) {
-			Token lResponseToken = createResponse(aToken);
+			Token lResponse = createResponse(aToken);
 			// TODO: here could we optionally send a time stamp
 			// TODO: implement response time on client!
 			// lResponseToken.put("","");
-			sendToken(aConnector, aConnector, lResponseToken);
+			sendToken(aConnector, aConnector, lResponse);
 		}
 	}
 
@@ -561,7 +570,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void getClients(WebSocketConnector aConnector, Token aToken) {
-		Token lResponseToken = createResponse(aToken);
+		Token lResponse = createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
 			log.debug("Processing 'getClients' from '"
@@ -577,14 +586,14 @@ public class SystemPlugIn extends TokenPlugIn {
 			for (WebSocketConnector lConnector : getServer().selectConnectors(lFilter).values()) {
 				listOut.add(getUsername(lConnector) + "@" + lConnector.getRemotePort());
 			}
-			lResponseToken.setList("clients", listOut);
-			lResponseToken.setInteger("count", listOut.size());
+			lResponse.setList("clients", listOut);
+			lResponse.setInteger("count", listOut.size());
 		} else {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "not logged in");
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "not logged in");
 		}
 
-		sendToken(aConnector, aConnector, lResponseToken);
+		sendToken(aConnector, aConnector, lResponse);
 	}
 
 	/**
@@ -594,7 +603,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void allocChannel(WebSocketConnector aConnector, Token aToken) {
-		Token lResponseToken = createResponse(aToken);
+		Token lResponse = createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
 			log.debug("Processing 'allocChannel' from '"
@@ -610,7 +619,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void deallocChannel(WebSocketConnector aConnector, Token aToken) {
-		Token lResponseToken = createResponse(aToken);
+		Token lResponse = createResponse(aToken);
 
 		if (log.isDebugEnabled()) {
 			log.debug("Processing 'deallocChannel' from '"
