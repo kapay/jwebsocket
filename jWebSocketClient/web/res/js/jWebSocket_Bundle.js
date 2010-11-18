@@ -29,6 +29,8 @@ var jws = {
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
 	NS_BASE: "org.jwebsocket",
+	NS_SYSTEM: "org.jwebsocket.plugins.system",
+	
 	MSG_WS_NOT_SUPPORTED:
 		"Unfortunately your browser does neither natively support WebSockets\n" +
 		"nor you have the Adobe Flash-PlugIn 9+ installed.",
@@ -57,18 +59,25 @@ var jws = {
 	//:d:en:The connection has been closed or could not be opened.
 	CLOSED: 3,
 
-	//:const:*:WS_SUBPROT_JSON:String:jWebSocket-JSON"
+	//:const:*:WS_SUBPROT_JSON:String:jWebSocket-JSON
 	//:d:en:jWebSocket sub protocol JSON
 	WS_SUBPROT_JSON: "jWebSocket-JSON",
-	//:const:*:WS_SUBPROT_XML:String:jWebSocket-XML"
+	//:const:*:WS_SUBPROT_XML:String:jWebSocket-XML
 	//:d:en:jWebSocket sub protocol XML
 	WS_SUBPROT_XML: "jWebSocket-XML",
-	//:const:*:WS_SUBPROT_CSV:String:jWebSocket-CSV"
+	//:const:*:WS_SUBPROT_CSV:String:jWebSocket-CSV
 	//:d:en:jWebSocket sub protocol CSV
 	WS_SUBPROT_CSV: "jWebSocket-CSV",
-	//:const:*:WS_SUBPROT_CUSTOM:String:jWebSocket-Custom"
+	//:const:*:WS_SUBPROT_CUSTOM:String:jWebSocket-Custom
 	//:d:en:jWebSocket sub protocol Custom
 	WS_SUBPROT_CUSTOM: "jWebSocket-Custom",
+
+	//:const:*:SCOPE_PRIVATE:String:private
+	//:d:en:private scope, only authenticated user can read and write his personal items
+	SCOPE_PRIVATE: "private",
+	//:const:*:SCOPE_PUBLIC:String:public
+	//:d:en:public scope, everybody can read and write items from this scope
+	SCOPE_PUBLIC: "public",
 
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
@@ -720,8 +729,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::::none
 	//:r:*:::void:none
 	checkLoggedIn: function() {
-		var lRes = this.createDefaultResult();
-		if( !this.isLoggedIn() ) {
+		var lRes = this.checkConnected();
+		if( lRes.code == 0 && !this.isLoggedIn() ) {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notLoggedIn";
 			lRes.msg = "Not logged in.";
@@ -846,36 +855,43 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::aToken:Object:Token to be processed by the plug-ins in the plug-in chain.
 	//:r:*:::void:none
 	processToken: function( aToken ) {
-		// check welcome and goodBye tokens to manage the session
-		if( aToken.type == "welcome" && aToken.usid ) {
-			this.fSessionId = aToken.usid;
-			this.fClientId = aToken.sourceId;
-			this.notifyPlugInsOpened();
-		} else if( aToken.type == "goodBye" ) {
-			this.fSessionId = null;
-		} else if( aToken.type == "close" ) {
-			// if the server closes the connection close immediately too.
-			this.close({
-				timeout: 0
-			});
-		// check if we got a response from a previous request
-		} else if( aToken.type == "response" ) {
-			// check login and logout manage the username
-			if( aToken.reqType == "login" ) {
-				this.fUsername = aToken.username;
-			}
-			if( aToken.reqType == "logout" ) {
-				this.fUsername = null;
-			}
-			// check if some requests need to be answered
-			this.checkCallbacks( aToken );
-		} else if( aToken.type == "event" ) {
-			// check login and logout manage the username
-			if( aToken.name == "connect" ) {
-				this.processConnected( aToken );
-			}
-			if( aToken.name == "disconnect" ) {
-				this.processDisconnected( aToken );
+		// is it a token from the system plug-in at all?
+		if( jws.NS_SYSTEM == aToken.ns ) {
+			// check welcome and goodBye tokens to manage the session
+			if( aToken.type == "welcome" && aToken.usid ) {
+				this.fSessionId = aToken.usid;
+				this.fClientId = aToken.sourceId;
+				this.notifyPlugInsOpened();
+			} else if( aToken.type == "goodBye" ) {
+				this.fSessionId = null;
+			} else if( aToken.type == "close" ) {
+				// if the server closes the connection close immediately too.
+				this.close({
+					timeout: 0
+				});
+			// check if we got a response from a previous request
+			} else if( aToken.type == "response" ) {
+				// check login and logout manage the username
+				if( aToken.reqType == "login" ) {
+					this.fUsername = aToken.username;
+					// if re-login used previous session-id re-assign it here!
+					if( aToken.usid ) {
+						this.fSessionId = aToken.usid;
+					}
+				}
+				if( aToken.reqType == "logout" ) {
+					this.fUsername = null;
+				}
+				// check if some requests need to be answered
+				this.checkCallbacks( aToken );
+			} else if( aToken.type == "event" ) {
+				// check login and logout manage the username
+				if( aToken.name == "connect" ) {
+					this.processConnected( aToken );
+				}
+				if( aToken.name == "disconnect" ) {
+					this.processDisconnected( aToken );
+				}
 			}
 		}
 
@@ -1005,6 +1021,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		var lRes = this.checkLoggedIn();
 		if( lRes.code == 0 ) {
 			this.sendToken({
+				ns: jws.NS_SYSTEM,
 				type: "send",
 				targetId: aTarget,
 				sourceId: this.fClientId,
@@ -1042,6 +1059,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		}
 		if( lRes.code == 0 ) {
 			this.sendToken({
+				ns: jws.NS_SYSTEM,
 				type: "broadcast",
 				sourceId: this.fClientId,
 				sender: this.fUsername,
@@ -1065,6 +1083,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		var lRes = this.checkConnected();
 		if( lRes.code == 0 ) {
 			this.sendToken({
+				ns: jws.NS_SYSTEM,
 				type: "echo",
 				data: aData
 			});
@@ -1126,6 +1145,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 						navigator.userAgent.indexOf( "Safari" ) >= 0 &&
 						navigator.userAgent.indexOf( "Chrome" ) < 0 ) ) {
 					this.sendToken({
+						ns: jws.NS_SYSTEM,
 						type: "close",
 						timeout: lTimeout
 					});
@@ -1171,7 +1191,7 @@ jws.SystemClientPlugIn = {
 	//:const:*:NS:String:org.jwebsocket.plugins.system (jws.NS_BASE + ".plugins.system")
 	//:d:en:Namespace for SystemClientPlugIn
 	// if namespace changed update server plug-in accordingly!
-	NS: jws.NS_BASE + ".plugins.system",
+	NS: jws.NS_SYSTEM,
 
 	//:const:*:ALL_CLIENTS:Number:0
 	//:d:en:For [tt]getClients[/tt] method: Returns all currently connected clients irrespective of their authentication state.
@@ -1206,6 +1226,7 @@ jws.SystemClientPlugIn = {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
+				ns: jws.SystemClientPlugIn.NS,
 				type: "login",
 				username: aUsername,
 				password: aPassword,
@@ -1280,6 +1301,7 @@ jws.SystemClientPlugIn = {
 		var lRes = this.checkConnected();
 		if( lRes.code == 0 ) {
 			this.sendToken({
+				ns: jws.SystemClientPlugIn.NS,
 				type: "logout"
 			});
 		}
@@ -2071,6 +2093,189 @@ jws.ChatPlugIn = {
 // add the JWebSocket Chat PlugIn into the TokenClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.ChatPlugIn );
 //	---------------------------------------------------------------------------
+//	jWebSocket Client Gaming Plug-In
+//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
+
+
+//	---------------------------------------------------------------------------
+//  jWebSocket Client Gaming Plug-In
+//	---------------------------------------------------------------------------
+
+jws.ClientGamingPlugIn = {
+
+	// namespace for client gaming plugin
+	// not yet used because here we use the system broadcast only
+	NS: jws.NS_BASE + ".plugins.clientGaming",
+
+
+	// this places a div on the current document when a new client connects
+	addPlayer: function( aId, aUsername, aColor ) {
+		aId = "player" + aId;
+		var lDiv = document.getElementById( aId );
+		if( !lDiv ) {
+			lDiv = document.createElement( "div" );
+		}
+		lDiv.id = aId;
+		lDiv.style.position = "absolute";
+		lDiv.style.overflow = "hidden";
+		lDiv.style.opacity = 0.85;
+		lDiv.style.left = "100px";
+		lDiv.style.top = "100px";
+		lDiv.style.width = "75px";
+		lDiv.style.height = "75px";
+		lDiv.style.border = "1px solid black";
+		lDiv.style.background = "url(img/player_" + aColor + ".png) 15px 18px no-repeat";
+		lDiv.style.backgroundColor = aColor;
+		lDiv.style.color = "white";
+		lDiv.innerHTML = "<font style=\"font-size:8pt\">Player " + aUsername + "</font>";
+		document.body.appendChild( lDiv );
+
+		if( !this.players ) {
+			this.players = {};
+		}
+		this.players[ aId ] = lDiv;
+	},
+
+	removeAllPlayers: function() {
+		if( this.players ) {
+			for( var lId in this.players) {
+				document.body.removeChild( this.players[ lId ] );
+			}
+		}
+		delete this.players;
+	},
+
+	// this removes a div from the document when a client logs out
+	removePlayer: function( aId ) {
+		aId = "player" + aId;
+		var lDiv = document.getElementById( aId );
+		if( lDiv ) {
+			document.body.removeChild( lDiv );
+			if( this.players ) {
+				delete this.players[ aId ];
+			}
+		}
+	},
+
+	// this moves a div when the user presses one of the arrow keys
+	movePlayer: function( aId, aX, aY ) {
+		aId = "player" + aId;
+		var lDiv = document.getElementById( aId );
+		if( lDiv ) {
+			lDiv.style.left = aX + "px";
+			lDiv.style.top = aY + "px";
+		}
+	},
+
+	// this method is called when the server connection was established
+	processOpened: function( aToken ) {
+		// console.log( "jws.ClientGamingPlugIn: Opened " + aToken.sourceId );
+
+		// add own player to playground
+		this.addPlayer( aToken.sourceId, aToken.sourceId, "green" );
+
+		// broadcast an identify request to all clients to initialize game.
+		aToken.ns = jws.SystemClientPlugIn.NS;
+		aToken.type = "broadcast";
+		aToken.request = "identify";
+		this.sendToken( aToken );
+	},
+
+	// this method is called when the server connection was closed
+	processClosed: function( aToken ) {
+		// console.log( "jws.ClientGamingPlugIn: Closed " + aToken.sourceId );
+
+		// if disconnected remove ALL players from playground
+		this.removeAllPlayers();
+	},
+
+	// this method is called when another client connected to the network
+	processConnected: function( aToken ) {
+		// console.log( "jws.ClientGamingPlugIn: Connected " + aToken.sourceId );
+		this.addPlayer( aToken.sourceId, aToken.sourceId, "red" );
+	},
+
+	// this method is called when another client disconnected from the network
+	processDisconnected: function( aToken ) {
+		// console.log( "jws.ClientGamingPlugIn: Disconnected " + aToken.sourceId );
+		this.removePlayer( aToken.sourceId );
+	},
+
+	// this method processes an incomng token from another client or the server
+	processToken: function( aToken ) {
+		// Clients use system broadcast, so there's no special namespace here
+		if( aToken.ns == jws.SystemClientPlugIn.NS ) {
+			// process a move from another client
+			var lX, lY;
+			if( aToken.event == "move" ) {
+				lX = aToken.x;
+				lY = aToken.y;
+				this.movePlayer( aToken.sourceId, lX, lY );
+			// process a move from another client
+			} else if( aToken.event == "identification" ) {
+				this.addPlayer( aToken.sourceId, aToken.sourceId, "red" );
+				lX = aToken.x;
+				lY = aToken.y;
+				this.movePlayer( aToken.sourceId, lX, lY );
+			// process an identification request from another client
+			} else if( aToken.request == "identify" ) {
+				var lDiv = document.getElementById( "player" + this.getId() );
+				lX = 100;
+				lY = 100;
+				if( lDiv ) {
+					lX = parseInt( lDiv.style.left );
+					lY = parseInt( lDiv.style.top );
+				}
+				var lToken = {
+					ns: jws.SystemClientPlugIn.NS,
+					type: "broadcast",
+					event: "identification",
+					x: lX,
+					y: lY,
+					username: this.getUsername()
+				}
+				this.sendToken( lToken );
+			}
+		}
+	},
+
+	// this method broadcasts a token to all other clients on the server
+	broadcastGamingEvent: function( aToken, aOptions ) {
+		var lRes = this.checkConnected();
+		if( lRes.code == 0 ) {
+			// use name space of system plug in here because 
+			// there's no server side plug-in for the client-pluh-in
+			aToken.ns = jws.SystemClientPlugIn.NS;
+			aToken.type = "broadcast";
+			aToken.event = "move";
+			// explicitely include sender,
+			// default is false on the server
+			aToken.senderIncluded = true;
+			// do not need a response here, save some time ;-)
+			aToken.responseRequested = false;
+			aToken.username = this.getUsername();
+			this.sendToken( aToken, aOptions );
+		}
+		return lRes;
+	}
+
+};
+
+// add the JWebSocket Client Gaming PlugIn into the TokenClient class
+jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.ClientGamingPlugIn );
+//	---------------------------------------------------------------------------
 //	jWebSocket Filesyste, Client PlugIn (uses jWebSocket Client and Server)
 //	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	---------------------------------------------------------------------------
@@ -2125,10 +2330,18 @@ jws.FileSystemPlugIn = {
 
 	fileLoad: function( aFilename, aOptions ) {
 		var lRes = this.createDefaultResult();
+		var lScope = jws.SCOPE_PRIVATE;
+
+		if( aOptions ) {
+			if( aOptions.scope != undefined ) {
+				lScope = aOptions.scope;
+			}
+		}
 		if( this.isConnected() ) {
 			var lToken = {
 				ns: jws.FileSystemPlugIn.NS,
 				type: "load",
+				scope: lScope,
 				filename: aFilename
 			};
 			this.sendToken( lToken,	aOptions );
@@ -2144,7 +2357,11 @@ jws.FileSystemPlugIn = {
 		var lRes = this.createDefaultResult();
 		var lEncoding = "base64";
 		var lSuppressEncoder = false;
+		var lScope = jws.SCOPE_PRIVATE;
 		if( aOptions ) {
+			if( aOptions.scope != undefined ) {
+				lScope = aOptions.scope;
+			}
 			if( aOptions.encoding != undefined ) {
 				lEncoding = aOptions.encoding;
 			}
@@ -2161,7 +2378,7 @@ jws.FileSystemPlugIn = {
 			var lToken = {
 				ns: jws.FileSystemPlugIn.NS,
 				type: "save",
-				scope: "public",
+				scope: lScope,
 				encoding: lEncoding,
 				notify: true,
 				data: aData,
@@ -2546,7 +2763,7 @@ jws.RPCClientPlugIn = {
 			}
 		} else {
 			//TODO: send back the error under a better format
-			lRes = ex
+			lRes =
 			+ "\nAcces not granted to the="
 			+ lMethod;
 		}
@@ -2941,9 +3158,9 @@ jws.TwitterPlugIn = {
 				if( this.OnGotTwitterTimeline ) {
 					this.OnGotTwitterTimeline( aToken );
 				}
-			} else if( "login" == aToken.reqType ) {
-				if( this.onTwitterRequestToken ) {
-					this.onTwitterRequestToken( aToken );
+			} else if( "requestAccessToken" == aToken.reqType ) {
+				if( this.OnTwitterAccessToken ) {
+					this.OnTwitterAccessToken( aToken );
 				}
 			}
 		}
@@ -2962,6 +3179,41 @@ jws.TwitterPlugIn = {
 		return lRes;
 	},
 
+	twitterRequestAccessToken: function( aCallbackURL, aOptions ) {
+		// check websocket connection status
+		var lRes = this.checkConnected();
+		// if connected to websocket network...
+		if( 0 == lRes.code ) {
+			// Twitter API calls Twitter Login screen,
+			// hence here no user name or password are required.
+			// Pass the callbackURL to notify Web App on successfull connection
+			// and to obtain OAuth verifier for user.
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "requestAccessToken",
+				callbackURL: aCallbackURL
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	twitterSetVerifier: function( aVerifier, aOptions ) {
+		// check websocket connection status
+		var lRes = this.checkConnected();
+		// if connected to websocket network...
+		if( 0 == lRes.code ) {
+			// passes the verifier from the OAuth window
+			// to the jWebSocket server.
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "setVerifier",
+				verifier: aVerifier
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
 
 	twitterLogin: function( aCallbackURL, aOptions ) {
 		// check websocket connection status
@@ -3007,6 +3259,57 @@ jws.TwitterPlugIn = {
 		return lRes;
 	},
 
+	twitterQuery: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "query",
+				query: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	twitterTrends: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "getTrends"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	twitterPublicTimeline: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "getPublicTimeline"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	twitterSetStream: function( aFollowers, aKeywords, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "setStream",
+				keywords: aKeywords,
+				followers: aFollowers
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	twitterUserData: function( aUsername, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
@@ -3027,8 +3330,8 @@ jws.TwitterPlugIn = {
 		if( aListeners.OnGotTwitterTimeline !== undefined ) {
 			this.OnGotTwitterTimeline = aListeners.OnGotTwitterTimeline;
 		}
-		if( aListeners.onTwitterRequestToken !== undefined ) {
-			this.onTwitterRequestToken = aListeners.onTwitterRequestToken;
+		if( aListeners.OnTwitterAccessToken !== undefined ) {
+			this.OnTwitterAccessToken = aListeners.OnTwitterAccessToken;
 		}
 	}
 

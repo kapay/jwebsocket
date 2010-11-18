@@ -474,7 +474,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		aToken.setString("sourceId", aConnector.getId());
 		// don't distribute session id here!
 		aToken.remove("usid");
-		Boolean lIsSenderIncluded = aToken.getBoolean("senderIncluded", true);
+		// keep senderIncluded beging false as default, apps rely on this!
+		Boolean lIsSenderIncluded = aToken.getBoolean("senderIncluded", false);
 		Boolean lIsResponseRequested = aToken.getBoolean("responseRequested", true);
 		// broadcast the token
 		broadcastToken(aConnector, aToken,

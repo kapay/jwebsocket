@@ -28,6 +28,7 @@
 		<script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
 		<script type="text/javascript" language="JavaScript">
 
+			var MAX_IFRAMES_FOR_STRESS_TEST = 10;
 			var lJWSID = "jWebSocket Canvas";
 			var lWSC = null;
 			var eLog = null;
@@ -150,8 +151,7 @@
 
 			function stressTest() {
 				eStressBtn.setAttribute("disabled", "disabled");
-				var MAX = 10;
-				for( var i = 0; i < MAX; i++) {
+				for( var i = 0; i < MAX_IFRAMES_FOR_STRESS_TEST; i++) {
 					var lIframe = document.createElement( "iframe" );
 					lIframe.src = "iframe.htm";
 					lIframe.id = "iframe" + i;
@@ -218,7 +218,8 @@
 						<input style="display:none" class="sbtnDlg" id="sbtnClearLog" type="button" value="Clear Log" onclick="clearLog();">
 					</td>
 					<td class="stdDlg" width="" align="right">
-						<input class="sbtnDlg" id="sbtnStressTest" type="button" value="Stress Test" onclick="stressTest();">
+						<input class="sbtnDlg" id="sbtnStressTest" type="button" value="Stress Test" onclick="stressTest();"
+							   title="Opens a configurable amount of iframes with canvas elements, to draw on. Change the JavaScript code to adjust the number of iframes (MAX_IFRAMES_FOR_STRESS_TEST).">
 					</td>
 				</tr>
 			</table>

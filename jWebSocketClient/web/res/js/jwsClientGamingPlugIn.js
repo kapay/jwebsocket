@@ -166,7 +166,11 @@ jws.ClientGamingPlugIn = {
 			aToken.ns = jws.SystemClientPlugIn.NS;
 			aToken.type = "broadcast";
 			aToken.event = "move";
+			// explicitely include sender,
+			// default is false on the server
 			aToken.senderIncluded = true;
+			// do not need a response here, save some time ;-)
+			aToken.responseRequested = false;
 			aToken.username = this.getUsername();
 			this.sendToken( aToken, aOptions );
 		}
