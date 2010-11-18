@@ -116,8 +116,9 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 		try {
 			ChannelFuture lHandshakeFuture = sslHandler.handshake();
 			lHandshakeFuture.addListener(new SecureWebSocketConnectionListener(sslHandler));
-		} catch (Exception es) {
-			es.printStackTrace();
+		} catch (Exception lEx) {
+			// TODO: Avoid printing stack trace!
+			lEx.printStackTrace();
 		}
 	}
 
@@ -458,7 +459,7 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 		}
 
 		// set default sub protocol if none passed
-		// if no sub protocol given in request header, 
+		// if no sub protocol given in request header,
 		// try to get it from arguments
 		String lSubProt = aReq.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
 		if (lSubProt == null) {
