@@ -603,7 +603,18 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:d:en:performed.
 	//:a:en::::none
 	//:r:*:::void:none
-	forceClose: function() {
+	forceClose: function( aOptions ) {
+		// if client closes usually no event is fired
+		// here you optionally can fire it if required in your app!
+		var lFireClose = false;
+		if( aOptions ) {
+			if( aOptions.fireClose && this.fConn.onclose ) {
+				// TODO: Adjust to event fields 
+				// if such are delivered in real event
+				var lEvent = {};
+				this.fConn.onclose( lEvent );
+			}
+		}
 		if( this.fConn ) {
 			// if( window.console ) { console.log( "forcing close...." ); }
 			// reset listeners to prevent any kind of potential memory leaks.
@@ -640,12 +651,12 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		// TODO: Shouldn't we test for ready state here?
 		if( this.fConn ) {
 			if( lTimeout <= 0 ) {
-				this.forceClose();
+				this.forceClose( aOptions );
 			} else {
 				var lThis = this;
 				this.hDisconnectTimeout = setTimeout(
 					function() {
-						lThis.forceClose();
+						lThis.forceClose( aOptions );
 					},
 					lTimeout
 				);
@@ -1190,8 +1201,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 						type: "close",
 						timeout: lTimeout
 					});
-					// call inherited disconnect, catching potential exception
 				}
+				// call inherited disconnect, catching potential exception
 				arguments.callee.inherited.call( this, aOptions );
 			} else {
 				lRes.code = -1;

@@ -57,21 +57,33 @@
 
 				log( "Connecting to " + lURL + " ..." );
 				try {
-					lWSC.open( lURL, {
+					var lRes = lWSC.logon( lURL, "Guest", "guest", {
 
 						// OnOpen callback
 						OnOpen: function( aEvent ) {
 							log( "<font style='color:#888'>jWebSocket connection established.</font>" );
+							jws.$("simgStatus").src = "../../images/connected.png";
 						},
 
 						// OnMessage callback
 						OnMessage: function( aEvent ) {
 							log( "<font style='color:#888'>jWebSocket message received: '" + aEvent.data + "'</font>" );
+							if( lWSC.isLoggedIn() ) {
+								jws.$("simgStatus").src = "../../images/authenticated.png";
+							} else {
+								jws.$("simgStatus").src = "../../images/connected.png";
+							}
+							jws.$("slblClientId").innerHTML =
+								"&nbsp;Client&#x2011;Id:&nbsp;"
+								+ lWSC.getId() + "&nbsp;"
+								+ ( jws.browserSupportsNativeWebSockets ? "(native)" : "(flashbridge)" );
 						},
 
 						// OnClose callback
 						OnClose: function( aEvent ) {
 							log( "<font style='color:#888'>jWebSocket connection closed.</font>" );
+							jws.$("simgStatus").src = "../../images/disconnected.png";
+							jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;-";
 						}
 
 					});
@@ -153,10 +165,16 @@
 			}
 		</script>
 -->		
-		<h1>jWebSocket Streaming Demo</h1>
-		<p>This demo shows how to easily register at a jWebSocket data feed.
-		This example is based on the <code>org.jwebsocket.streaming.TimeStream</code> class which simply 
-		sends a timestamp token every second to the client. If you are not sure 
+		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="tdHeader" width="">jWebSocket Streaming Demo</td>
+				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
+				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
+			</tr>
+		</table>
+		<p>This demo shows how to easily register at a jWebSocket data feed (stream).
+		This example is based on the <code>org.jwebsocket.streaming</code> package which simply
+		sends a tokens in a certain interval to the client. If you are not sure
 		whether your favorite browser supports WebSockets please refer to our
 		<a target="_top" href="http://jwebsocket.org/jws_for_all.htm">jWebSocket Cross-Browser Compatibility</a>
 		page.</p>

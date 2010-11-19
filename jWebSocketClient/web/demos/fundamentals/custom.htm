@@ -61,16 +61,25 @@
 						// OnOpen callback
 						OnOpen: function( aEvent ) {
 							log( "jWebSocket connection established." );
+							// no authentication here! Anyway, show green
+							// icon when using custom protocol.
+							jws.$("simgStatus").src = "../../images/authenticated.png";
 						},
 
 						// OnMessage callback
 						OnMessage: function( aEvent ) {
 							log( "jWebSocket message received: '" + aEvent.data + "'" );
+							jws.$("slblClientId").innerHTML =
+								"&nbsp;Client&#x2011;Id:&nbsp;"
+								+ lWSC.getId() + "&nbsp;"
+								+ ( jws.browserSupportsNativeWebSockets ? "(native)" : "(flashbridge)" );
 						},
 
 						// OnClose callback
 						OnClose: function( aEvent ) {
 							log( "jWebSocket connection closed." );
+							jws.$("simgStatus").src = "../../images/disconnected.png";
+							jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;-";
 						}
 
 					});
@@ -83,7 +92,9 @@
 				if( lWSC ) {
 					log( "Disconnecting..." );
 					try {
-						lWSC.close();
+						// closing from client side does not fire onclose event!
+						// hence fire event explicitly here!
+						lWSC.close({ fireClose: true });
 						log( "Disconnected." );
 					} catch( ex ) {
 						log( "Exception: " + ex.message );
@@ -95,12 +106,6 @@
 				var lMsg = eMessage.value;
 				log( "Sending '" + lMsg + "'..." );
 				try {
-					/*
-					lMsg = "";
-					for (var i = 0; i < 1000; i++) {
-						lMsg += "<br>" + i + ": 1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<br>";
-					}
-					 */
 					lWSC.sendStream( lMsg );
 					log( "Message sent." );
 				} catch( ex ) {

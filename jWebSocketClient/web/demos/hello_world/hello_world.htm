@@ -67,6 +67,7 @@
 
 				log( "Connecting to " + lURL + " and logging in as '" + gUsername + "'..." );
 				var lRes = lWSC.logon( lURL, gUsername, lPassword, {
+
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection established.</font>" );
@@ -103,7 +104,8 @@
 			function logoff() {
 				if( lWSC ) {
 					log( "Logging off " + ( gUsername != null ? "'" + gUsername + "'" : "" ) + " and disconnecting..." );
-					// the timeout below  is optional, if you use it you'll get a good-bye message.
+					// the timeout below  is optional,
+					// if you use it you'll get a good-bye message.
 					var lRes = lWSC.close({ timeout: 3000 });
 					log( lWSC.resultToString( lRes ) );
 				}
@@ -122,7 +124,9 @@
 					// if( lRes.code != 0 ) {
 					log( lWSC.resultToString( lRes ) );
 					//  }
-					eMessage.value = "";
+					//
+					// optionally clear message to not accidentally send it twice
+					// eMessage.value = "";
 				}
 			}
 
