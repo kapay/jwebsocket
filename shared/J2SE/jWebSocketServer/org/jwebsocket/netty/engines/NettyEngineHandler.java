@@ -82,7 +82,8 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	private ChannelHandlerContext mContext = null;
 	private static final ChannelGroup mChannels = new DefaultChannelGroup();
 	private static final String CONTENT_LENGTH = "Content-Length";
-/*
+
+/*	Removed by Alex because these constants now are maintained in RequestHeader
 	private static final String ARGS = "args";
 	private static final String ORIGIN = "origin";
 	private static final String LOCATION = "location";
