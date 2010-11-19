@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Copyright (c) 2010 jwebsocket.org
+//	jWebSocket - Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -12,6 +12,7 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
+
 package org.jwebsocket.netty.engines;
 
 import java.security.MessageDigest;
@@ -81,12 +82,14 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	private ChannelHandlerContext mContext = null;
 	private static final ChannelGroup mChannels = new DefaultChannelGroup();
 	private static final String CONTENT_LENGTH = "Content-Length";
+/*
 	private static final String ARGS = "args";
 	private static final String ORIGIN = "origin";
 	private static final String LOCATION = "location";
 	private static final String PATH = "path";
 	private static final String SEARCH_STRING = "searchString";
 	private static final String HOST = "host";
+*/
 
 	public NettyEngineHandler(NettyEngine aEngine) {
 		this.mEngine = aEngine;

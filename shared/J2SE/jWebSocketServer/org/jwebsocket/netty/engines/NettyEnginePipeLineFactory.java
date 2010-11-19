@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Copyright (c) 2010
+//	jWebSocket - Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -12,6 +12,7 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
+
 package org.jwebsocket.netty.engines;
 
 import javax.net.ssl.SSLEngine;
