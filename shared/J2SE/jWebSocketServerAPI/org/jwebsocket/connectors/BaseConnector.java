@@ -22,6 +22,7 @@ import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.async.IOFuture;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketSession;
@@ -203,7 +204,9 @@ public class BaseConnector implements WebSocketConnector {
 
 	@Override
 	public String getId() {
-		return String.valueOf(getRemotePort());
+		String lNodeId = JWebSocketConfig.getConfig().getNodeId();
+		return ((lNodeId != null && lNodeId.length() > 0) ? lNodeId + "." : "")
+				+ String.valueOf(getRemotePort());
 	}
 
 	@Override

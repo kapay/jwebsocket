@@ -17,6 +17,7 @@ package org.jwebsocket.config;
 import static org.jwebsocket.config.JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
 import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
 import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATION;
+import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_NODE_ID;
 import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_HOME;
 import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_XML;
 
@@ -50,6 +51,7 @@ public final class JWebSocketConfig implements Config {
 	// DON'T SET LOGGER HERE! NEEDS TO BE INITIALIZED FIRST!
 	private static Logger mLog = null;
 	private final String mInstallation;
+	private final String mNodeId;
 	private final String mProtocol;
 	private final String jWebSocketHome;
 	private final String mLibraryFolder;
@@ -83,6 +85,16 @@ public final class JWebSocketConfig implements Config {
 			return WS_SUBPROT_DEFAULT;
 		}
 		return mProtocol;
+	}
+
+	/**
+	 * @return the node-id
+	 */
+	public String getNodeId() {
+		if (mNodeId == null || mNodeId.length() == 0) {
+			return DEFAULT_NODE_ID;
+		}
+		return mNodeId;
 	}
 
 	/**
@@ -129,6 +141,7 @@ public final class JWebSocketConfig implements Config {
 		}
 		mInstallation = aBuilder.mInstallation;
 		mProtocol = aBuilder.mProtocol;
+		mNodeId = aBuilder.mNodeId;
 		jWebSocketHome = aBuilder.jWebSocketHome;
 		mLibraryFolder = aBuilder.mLibraryFolder;
 		mInitializer = aBuilder.mInitializer;
@@ -156,6 +169,7 @@ public final class JWebSocketConfig implements Config {
 
 		private String mInstallation;
 		private String mProtocol;
+		private String mNodeId;
 		private String jWebSocketHome;
 		private String mLibraryFolder;
 		private String mInitializer;
@@ -176,6 +190,11 @@ public final class JWebSocketConfig implements Config {
 
 		public Builder setProtocol(String aProtocol) {
 			mProtocol = aProtocol;
+			return this;
+		}
+
+		public Builder setNodeId(String aNodeId) {
+			mNodeId = aNodeId;
 			return this;
 		}
 

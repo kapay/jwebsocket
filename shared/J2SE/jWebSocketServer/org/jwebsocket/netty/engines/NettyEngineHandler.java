@@ -69,7 +69,7 @@ import org.jwebsocket.netty.http.HttpHeaders;
  * WebSocketFrameEncoder} as WebSocket frame data encoder. Also it starts the
  * <tt>NettyConnector</tt>.
  * </p>
- * 
+ *
  * @author <a href="http://www.purans.net/">Puran Singh</a>
  * @version $Id: NettyEngineHandler.java 613 2010-07-01 07:13:29Z mailtopuran@gmail.com $
  */
@@ -81,6 +81,12 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	private ChannelHandlerContext mContext = null;
 	private static final ChannelGroup mChannels = new DefaultChannelGroup();
 	private static final String CONTENT_LENGTH = "Content-Length";
+	private static final String ARGS = "args";
+	private static final String ORIGIN = "origin";
+	private static final String LOCATION = "location";
+	private static final String PATH = "path";
+	private static final String SEARCH_STRING = "searchString";
+	private static final String HOST = "host";
 
 	public NettyEngineHandler(NettyEngine aEngine) {
 		this.mEngine = aEngine;
@@ -113,12 +119,19 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 		// Get the SslHandler in the current pipeline.
 		final SslHandler sslHandler = aCtx.getPipeline().get(SslHandler.class);
 		// Get notified when SSL handshake is done.
-		try {
-			ChannelFuture lHandshakeFuture = sslHandler.handshake();
-			lHandshakeFuture.addListener(new SecureWebSocketConnectionListener(sslHandler));
-		} catch (Exception lEx) {
-			// TODO: Avoid printing stack trace!
-			lEx.printStackTrace();
+
+		// Added by Alex to prevent exceptions
+		// TODO: Fix this exceptions on connect!
+		// ADD-START
+		if (sslHandler != null) 
+		// ADD-END
+		{
+			try {
+				ChannelFuture lHandshakeFuture = sslHandler.handshake();
+				lHandshakeFuture.addListener(new SecureWebSocketConnectionListener(sslHandler));
+			} catch (Exception es) {
+				es.printStackTrace();
+			}
 		}
 	}
 

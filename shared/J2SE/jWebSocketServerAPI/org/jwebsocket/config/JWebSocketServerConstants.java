@@ -48,11 +48,16 @@ public final class JWebSocketServerConstants {
 	 */
 	public static final String JWEBSOCKET_XML = "jWebSocket.xml";
 	/**
-  * Constant for jWebSocket.xml configuration file
-  */
- public static final String JWEBSOCKET_OVERRIDE_XML = "jWebSocket-override.xml";
+	 * Constant for jWebSocket.xml configuration file
+	 */
+	public static final String JWEBSOCKET_OVERRIDE_XML = "jWebSocket-override.xml";
 	/**
 	 * Default engine for jWebSocket server.
 	 */
 	public static String DEFAULT_ENGINE = "tcp";
+	/**
+	 * Default node id if non given in jWebSocket.xml.
+	 * Empty means do not use node-id for single stand-alone systems
+	 */
+	public static String DEFAULT_NODE_ID = "";
 }
