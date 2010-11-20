@@ -1192,16 +1192,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			// if connected and timeout is passed give server a chance to
 			// register the disconnect properly and send a good bye response.
 			if( lRes.code == 0 ) {
-				// TODO: Work-around for Safari 5! Check in versions after 5.0.7533.16!
-				if( !(	/* lTimeout > 0 && */
-						navigator.userAgent.indexOf( "Safari" ) >= 0 &&
-						navigator.userAgent.indexOf( "Chrome" ) < 0 ) ) {
-					this.sendToken({
-						ns: jws.NS_SYSTEM,
-						type: "close",
-						timeout: lTimeout
-					});
-				}
+				this.sendToken({
+					ns: jws.NS_SYSTEM,
+					type: "close",
+					timeout: lTimeout
+				});
 				// call inherited disconnect, catching potential exception
 				arguments.callee.inherited.call( this, aOptions );
 			} else {
