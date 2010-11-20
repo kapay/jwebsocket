@@ -165,6 +165,18 @@ jws.TwitterPlugIn = {
 		return lRes;
 	},
 
+	twitterStatistics: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "getStatistics"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	twitterPublicTimeline: function( aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {

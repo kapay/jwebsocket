@@ -140,6 +140,13 @@
 				log( lWSC.resultToString( lRes ) );
 			}
 
+			function twitterGetStatistics() {
+				log( "Searching for Twitter statistics..." );
+				var lRes = lWSC.twitterStatistics(
+				);
+				log( lWSC.resultToString( lRes ) );
+			}
+
 			function twitterGetPublicTimeline() {
 				log( "Retrieving public timeline..." );
 				var lRes = lWSC.twitterPublicTimeline(
@@ -359,7 +366,7 @@ Testing our new #jWebSocket Twitter-Plugin, tweet via #WebSockets! http://jwebso
 					</td>
 					<td class="stdDlg" width="">
 						<input class="sbtnDlg" id="sbtnTrends" type="button" value="Trends" onclick="twitterGetTrends();"
-							   title="Searches for tweets matching the query.">
+							   title="Returns the most trendy keywords from Twitter. You can use them to check for the Twitter stream.">
 					</td>
 					<td class="stdDlg" width="">
 						&nbsp;
@@ -384,7 +391,8 @@ Testing our new #jWebSocket Twitter-Plugin, tweet via #WebSockets! http://jwebso
 							   title="Retrieves the public timeline.">
 					</td>
 					<td class="stdDlg" width="">
-						&nbsp;
+						<input class="sbtnDlg" id="sbtnTrends" type="button" value="Stats" onclick="twitterGetStatistics();"
+							   title="Returns the current Twitter Stream usage statistics - for demo purposes only.">
 					</td>
 					<td class="stdDlg" width="">
 						&nbsp;

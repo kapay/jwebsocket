@@ -20,11 +20,16 @@ package org.jwebsocket.plugins.twitter;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javolution.util.FastList;
+import javolution.util.FastMap;
+import javolution.util.FastSet;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
@@ -77,7 +82,18 @@ public class TwitterPlugIn extends TokenPlugIn {
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_TWITTER = JWebSocketServerConstants.NS_BASE + ".plugins.twitter";
 	private Twitter mTwitter = null;
-	private final static int MAX_STREAM_KEYWORDS = 5;
+	private final static int MAX_STREAM_KEYWORDS_PER_CONNECTION = 5;
+	private final static int MAX_STREAM_KEYWORDS_TOTAL = 50;
+	private static int mStatsMaxConnectors = 0;
+	private static int mStatsMaxKeywords = 0;
+	private TwitterStream mTwitterStream = null;
+	// connections registered to the twitter stream, 
+	// list contains the keywords per connection
+	private Map<WebSocketConnector, Set<String>> mConnectors = new FastMap<WebSocketConnector, Set<String>>();
+	// for every keyword the connectors are counted,
+	// if connectors are 0 the keyword gets deleted
+	private Map<String, Integer> mKeywords = new FastMap<String, Integer>();
+	private TokenServer mServer = null;
 
 	/**
 	 *
@@ -129,6 +145,8 @@ public class TwitterPlugIn extends TokenPlugIn {
 				logout(aConnector, aToken);
 			} else if (lType.equals("getTimeline")) {
 				getTimeline(aConnector, aToken);
+			} else if (lType.equals("getStatistics")) {
+				getStatistics(aConnector, aToken);
 			} else if (lType.equals("getTrends")) {
 				getTrends(aConnector, aToken);
 			} else if (lType.equals("getPublicTimeline")) {
@@ -152,9 +170,16 @@ public class TwitterPlugIn extends TokenPlugIn {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector,
 			CloseReason aCloseReason) {
-		// stop Twitter stream if used for this connection
-		mStopStream(aConnector);
+		mRemoveConnector(aConnector);
 		aConnector.removeVar(TWITTER_VAR);
+	}
+
+	@Override
+	public void engineStopped(WebSocketEngine aEngine) {
+		super.engineStopped(aEngine);
+
+		// stop Twitter stream if used for this connection
+		mStopStream();
 	}
 
 	private boolean mCheckAuth(Token aToken) {
@@ -572,6 +597,27 @@ public class TwitterPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
+	private void getStatistics(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+		String lMsg = "";
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Retreiving statistics...");
+		}
+
+		lResponse.setInteger("listenerCount", mConnectors.size());
+		lResponse.setInteger("keywordCount", mKeywords.size());
+		lResponse.setString("keywords", mKeywords.toString());
+		lResponse.setInteger("listenerMax", mStatsMaxConnectors);
+		lResponse.setInteger("keywordMax", mStatsMaxKeywords);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
 	private void getPublicTimeline(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
@@ -609,140 +655,209 @@ public class TwitterPlugIn extends TokenPlugIn {
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 	}
+	StatusListener mTwitterStreamListener = new StatusListener() {
 
-	private void mStopStream(final WebSocketConnector aConnector) {
+		@Override
+		public void onStatus(Status aStatus) {
+			Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
+			lToken.setString("name", "status");
+			String lStatus = aStatus.getText();
+			lToken.setString("status", lStatus);
+			User lUser = aStatus.getUser();
+			if (lUser != null) {
+				lToken.setString("userName", lUser.getName());
+				lToken.setInteger("userId", lUser.getId());
+				URL lURL = lUser.getURL();
+				if (lURL != null) {
+					lToken.setString("userURL", lURL.toString());
+				} else {
+					lToken.setString("userURL", "");
+				}
+				lURL = lUser.getProfileImageURL();
+				if (lURL != null) {
+					lToken.setString("userImgURL", lURL.toString());
+				} else {
+					lToken.setString("userImgURL", "");
+				}
+				lToken.setString("userBckImgURL", lUser.getProfileBackgroundImageUrl());
+				lToken.setString("userBckCol", lUser.getProfileBackgroundColor());
+			} else {
+				lToken.setString("userName", "");
+				lToken.setInteger("userId", -1);
+				lToken.setString("userURL", "");
+				lToken.setString("userImgURL", "");
+				lToken.setString("userBckImgURL", "");
+				lToken.setString("userBckCol", "");
+			}
+
+			if (null != lStatus) {
+				lStatus = lStatus.toLowerCase();
+				for (WebSocketConnector lConnector : mConnectors.keySet()) {
+					Set<String> lKeywords = mConnectors.get(lConnector);
+					boolean lMatch = false;
+					for (String lKeyword : lKeywords) {
+						lMatch = lStatus.indexOf(lKeyword) >= 0;
+						if (lMatch) {
+							break;
+						}
+					}
+					if (lMatch) {
+						mServer.sendToken(lConnector, lToken);
+					}
+				}
+			}
+
+		}
+
+		@Override
+		public void onDeletionNotice(StatusDeletionNotice aStatusDeletionNotice) {
+			Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
+			lToken.setString("name", "deletion");
+			lToken.setInteger("userId", aStatusDeletionNotice.getUserId());
+			// lToken.setInteger("statusId", aStatusDeletionNotice.getStatusId());
+			// lServer.sendToken(aConnector, lToken);
+		}
+
+		@Override
+		public void onTrackLimitationNotice(int aNumberOfLimitedStatuses) {
+			Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
+			lToken.setString("name", "trackLimit");
+			lToken.setInteger("limit", aNumberOfLimitedStatuses);
+			// lServer.sendToken(aConnector, lToken);
+		}
+
+		@Override
+		public void onException(Exception aEx) {
+			Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
+			lToken.setString("name", "exception");
+			lToken.setString("message", aEx.getMessage());
+			lToken.setString("exception", aEx.getClass().getSimpleName());
+			// lServer.sendToken(aConnector, lToken);
+		}
+	};
+
+	private void mAddConnector(WebSocketConnector aConnector, Set<String> aKeywords) {
+		if (null == aConnector || null == aKeywords) {
+			return;
+		}
+		// put the connector as a listener to lthe list
+		mConnectors.put(aConnector, aKeywords);
+		// increment counts for the keyowrds list
+		for (String lKeyword : aKeywords) {
+			Integer lCount = mKeywords.get(lKeyword);
+			if (null == lCount) {
+				mKeywords.put(lKeyword, 1);
+			} else {
+				mKeywords.put(lKeyword, lCount + 1);
+			}
+		}
+		if (mConnectors.size() > mStatsMaxConnectors) {
+			mStatsMaxConnectors = mConnectors.size();
+		}
+	}
+
+	private void mRemoveConnector(WebSocketConnector aConnector) {
+		if (null == aConnector) {
+			return;
+		}
+		Set<String> lKeywords = mConnectors.get(aConnector);
+		if (null == lKeywords) {
+			return;
+		}
+		for (String lKeyword : lKeywords) {
+			Integer lCount = mKeywords.get(lKeyword);
+			if (null == lCount || 1 == lCount) {
+				mKeywords.remove(lKeyword);
+			} else {
+				mKeywords.put(lKeyword, lCount - 1);
+			}
+		}
+		mConnectors.remove(aConnector);
+	}
+
+	private void mUpdateStream(Token aToken) {
+		try {
+			String[] lKeywordArray = new String[mKeywords.size()];
+			int lIdx = 0;
+			for (String lKeyword : mKeywords.keySet()) {
+				lKeywordArray[lIdx] = lKeyword;
+				lIdx++;
+				if (lIdx >= MAX_STREAM_KEYWORDS_TOTAL) {
+					break;
+				}
+			}
+			if (lIdx > mStatsMaxKeywords) {
+				mStatsMaxKeywords = lIdx;
+			}
+
+			FilterQuery lFilter = new FilterQuery(
+					0,
+					new int[]{},
+					lKeywordArray);
+			// if no TwitterStream object created up to now, create one...
+			if (mTwitterStream == null) {
+				mTwitterStream = new TwitterStreamFactory(mTwitterStreamListener).getInstance();
+				mTwitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+				AccessToken lAccessToken = new AccessToken(ACCESSTOKEN_KEY, ACCESSTOKEN_SECRET);
+				mTwitterStream.setOAuthAccessToken(lAccessToken);
+			}
+			// apply the filter to the stream object
+			mTwitterStream.filter(lFilter);
+		} catch (Exception lEx) {
+			String lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+			mLog.error(lMsg);
+			aToken.setInteger("code", -1);
+			aToken.setString("msg", lMsg);
+		}
+	}
+
+	private void mStopStream() {
 		// if (still) some stream is allocated shut it down and release it!
-		TwitterStream lTwitterStream =
-				(TwitterStream) aConnector.getVar(TWITTER_STREAM);
-		if (lTwitterStream != null) {
+		if (mTwitterStream != null) {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Cleaning up Twitter stream for connector '"
-						+ aConnector.getId() + "'...");
+				mLog.debug("Cleaning up Twitter stream...");
 			}
-			lTwitterStream.cleanUp();
+			mTwitterStream.cleanUp();
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Shutting down Twitter stream for connector '"
-						+ aConnector.getId() + "'...");
+				mLog.debug("Shutting down Twitter stream...");
 			}
-			lTwitterStream.shutdown();
-			aConnector.removeVar(TWITTER_STREAM);
+			mTwitterStream.shutdown();
 		}
 	}
 
 	private void setStream(final WebSocketConnector aConnector, Token aToken) {
 
-		final TokenServer lServer = getServer();
+		if (null == mServer) {
+			mServer = getServer();
+		}
 
 		// instantiate response token
-		Token lResponse = lServer.createResponse(aToken);
+		Token lResponse = mServer.createResponse(aToken);
 		String lMsg = "";
 
-		StatusListener lListener = new StatusListener() {
-
-			@Override
-			public void onStatus(Status aStatus) {
-				Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
-				lToken.setString("name", "status");
-				lToken.setString("status", aStatus.getText());
-				User lUser = aStatus.getUser();
-				if (lUser != null) {
-					lToken.setString("userName", lUser.getName());
-					lToken.setInteger("userId", lUser.getId());
-					URL lURL = lUser.getURL();
-					if (lURL != null) {
-						lToken.setString("userURL", lURL.toString());
-					} else {
-						lToken.setString("userURL", "");
-					}
-					lURL = lUser.getProfileImageURL();
-					if (lURL != null) {
-						lToken.setString("userImgURL", lURL.toString());
-					} else {
-						lToken.setString("userImgURL", "");
-					}
-					lToken.setString("userBckImgURL", lUser.getProfileBackgroundImageUrl());
-					lToken.setString("userBckCol", lUser.getProfileBackgroundColor());
-				} else {
-					lToken.setString("userName", "");
-					lToken.setInteger("userId", -1);
-					lToken.setString("userURL", "");
-					lToken.setString("userImgURL", "");
-					lToken.setString("userBckImgURL", "");
-					lToken.setString("userBckCol", "");
-				}
-				lServer.sendToken(aConnector, lToken);
-			}
-
-			@Override
-			public void onDeletionNotice(StatusDeletionNotice aStatusDeletionNotice) {
-				Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
-				lToken.setString("name", "deletion");
-				lToken.setInteger("userId", aStatusDeletionNotice.getUserId());
-				// lToken.setInteger("statusId", aStatusDeletionNotice.getStatusId());
-				lServer.sendToken(aConnector, lToken);
-			}
-
-			@Override
-			public void onTrackLimitationNotice(int aNumberOfLimitedStatuses) {
-				Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
-				lToken.setString("name", "trackLimit");
-				lToken.setInteger("limit", aNumberOfLimitedStatuses);
-				lServer.sendToken(aConnector, lToken);
-			}
-
-			@Override
-			public void onException(Exception aEx) {
-				Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
-				lToken.setString("name", "exception");
-				lToken.setString("message", aEx.getMessage());
-				lToken.setString("exception", aEx.getClass().getSimpleName());
-				lServer.sendToken(aConnector, lToken);
-			}
-		};
-
-		String lKeyWords = aToken.getString("keywords");
+		String lKeyWordString = aToken.getString("keywords");
 		String[] lKeyWordArray;
-		List<String> lTracks = new FastList<String>();
-		if (lKeyWords != null) {
-			lKeyWordArray = lKeyWords.split(" ");
+		Set<String> lKeywordSet = new FastSet<String>();
+		if (lKeyWordString != null) {
+			lKeyWordArray = lKeyWordString.split(" ");
 			int lAccepted = 0;
 			for (int lIdx = 0, lCnt = lKeyWordArray.length;
-					lIdx < lCnt && lAccepted < MAX_STREAM_KEYWORDS;
+					lIdx < lCnt && lAccepted < MAX_STREAM_KEYWORDS_PER_CONNECTION;
 					lIdx++) {
 				String lKeyword = lKeyWordArray[lIdx];
-				// validate keyword
+				// validate keywords
 				if (lKeyword != null && lKeyword.length() >= 4) {
-					lTracks.add(lKeyword);
+					lKeywordSet.add(lKeyword.toLowerCase());
 					lAccepted++;
 				}
 			}
-			if (lTracks.size() > 0) {
-				lKeyWordArray = new String[lTracks.size()];
-				int lIdx = 0;
-				for (String lKeyword : lTracks) {
-					lKeyWordArray[lIdx] = lKeyword;
-					lIdx++;
-				}
-				try {
-					FilterQuery lFilter = new FilterQuery(
-							0,
-							new int[]{},
-							lKeyWordArray);
-					TwitterStream lTwitterStream = (TwitterStream) aConnector.getVar(TWITTER_STREAM);
-					if (lTwitterStream == null) {
-						lTwitterStream = new TwitterStreamFactory(lListener).getInstance();
-						lTwitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-						AccessToken lAccessToken = new AccessToken(ACCESSTOKEN_KEY, ACCESSTOKEN_SECRET);
-						lTwitterStream.setOAuthAccessToken(lAccessToken);
-						aConnector.setVar(TWITTER_STREAM, lTwitterStream);
-					}
-					lTwitterStream.filter(lFilter);
-				} catch (Exception lEx) {
-					lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
-					mLog.error(lMsg);
-					lResponse.setInteger("code", -1);
-					lResponse.setString("msg", lMsg);
-				}
+			if (lKeywordSet.size() > 0) {
+				// remove existing connector from listener list
+				mRemoveConnector(aConnector);
+				// add connector with new keywords to listener list
+				mAddConnector(aConnector, lKeywordSet);
+				// and update the stream using ALL keywords from all clients
+				mUpdateStream(aToken);
 			} else {
 				lMsg = "No keywords passed to Twitter stream, kept current state.";
 				lResponse.setInteger("code", -1);
@@ -755,6 +870,6 @@ public class TwitterPlugIn extends TokenPlugIn {
 		}
 
 		// send response to requester
-		lServer.sendToken(aConnector, lResponse);
+		mServer.sendToken(aConnector, lResponse);
 	}
 }
