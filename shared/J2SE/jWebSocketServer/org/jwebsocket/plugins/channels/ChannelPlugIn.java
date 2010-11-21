@@ -210,7 +210,7 @@ public class ChannelPlugIn extends TokenPlugIn {
             } else if (type.equals(SUBSCRIBER)) {
                 handleSubscriber(aConnector, aToken);
             } else {
-                // ignore
+                //ignore
             }
         }
     }
@@ -274,7 +274,7 @@ public class ChannelPlugIn extends TokenPlugIn {
             dataToken.setString("data", data);
             
             channelManager.publishToLoggerChannel(dataToken);
-            channel.broadcastAsync(dataToken);
+            channel.broadcastToken(dataToken);
             
         } else if (STOP.equals(event)) {
             Publisher publisher = channelManager.getPublisher(aConnector.getId());
@@ -516,7 +516,7 @@ public class ChannelPlugIn extends TokenPlugIn {
         }
         welcome.setInteger("timeout", aConnector.getEngine().getConfiguration().getTimeout());
 
-        channelManager.getLoggerChannel().broadcastAsync(welcome);
+        channelManager.getLoggerChannel().broadcastToken(welcome);
         sendToken(aConnector, aConnector, welcome);
     }
 

@@ -29,20 +29,20 @@ public interface ChannelListener {
 	 * Called when the channel is started.
 	 * @param channel the started channel
 	 */
-	void channelStarted(Channel channel, String user) throws ChannelException;
+	void channelStarted(Channel channel, String user);
 
 	/**
 	 * called when the channel is stopped for receiving/sending any data
 	 * @param channel the stopped channel object
 	 */
-	void channelStopped(Channel channel, String user) throws ChannelException;
+	void channelStopped(Channel channel, String user);
 
 	/**
 	 * called when the channel is suspended that means the channel suspended
 	 * can no longer be used to send and receive data unless it is started again
 	 * @param channel the suspended channel
 	 */
-	void channelSuspended(Channel channel, String user) throws ChannelException;
+	void channelSuspended(Channel channel, String user);
 
 	/**
 	 * called when a new subscriber subscribes the channel

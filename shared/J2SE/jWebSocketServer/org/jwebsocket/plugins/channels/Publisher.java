@@ -23,8 +23,7 @@ import org.jwebsocket.api.WebSocketConnector;
  * Represents the single publisher connected the the particular channel
  * 
  * @author puran
- * @version $Id: Publisher.java 1120 2010-10-24 06:03:08Z mailtopuran@gmail.com
- *          $
+ * @version $Id: Publisher.java 1120 2010-10-24 06:03:08Z mailtopuran@gmail.com$
  */
 public final class Publisher {
     private String id;
@@ -46,13 +45,24 @@ public final class Publisher {
         this.authorized = authorized;
     }
 
+    public Publisher(String id, String login, String channel, Date authorizedDate, Date lastPublishedDate,
+            boolean authorized) {
+        this.id = id;
+        this.login = login;
+        this.channel = channel;
+        this.connector = null;
+        this.authorizedDate = authorizedDate;
+        this.lastPublishedDate = lastPublishedDate;
+        this.authorized = authorized;
+    }
+
     /**
      * @return the id
      */
     public String getId() {
         return id;
     }
-    
+
     /**
      * @return the login name
      */
