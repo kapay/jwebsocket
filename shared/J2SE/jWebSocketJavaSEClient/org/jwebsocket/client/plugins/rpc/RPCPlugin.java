@@ -18,21 +18,38 @@ public class RPCPlugin {
 	public static void setAnnotationAllowed (boolean aAnnotationAllowedValue){
 		annotationAllowed = aAnnotationAllowedValue;
 	}
-	private static Map<String, Map<String, List<Method>>> mListOfMethod = new FastMap<String, Map<String, List<Method>>>();
+	private static Map<String, Map<String, List<MethodRPCCallable>>> mListOfMethod = new FastMap<String, Map<String, List<MethodRPCCallable>>>();
+	
 	
 	/**
-	 * Add a Method to the list of rrpc granted method.
+	 * Add a Method to the list of rpc granted. rrpc authorization is default: false.
 	 * @param aMethod
 	 */
-	public synchronized static void addRrpcMethod (Method aMethod) {
+	public static void addRrpcMethod (Method aMethod) {
+		addRrpcMethod (aMethod, false);
+	}
+	
+	/**
+	 * Add a Method to the list of rrpc granted method. 
+	 * If aRrpcCallable is true, allow other client to access to this method using a rrpc.
+	 * If false, only server rpc will be allowed
+	 * @param aMethod
+	 * @param aRrpcCallable 
+	 */
+	public synchronized static void addRrpcMethod (Method aMethod, boolean aRrpcCallable) {
 		String lClassName = aMethod.getDeclaringClass().getName();
 		if (!mListOfMethod.containsKey(lClassName)) {
-			mListOfMethod.put(lClassName, new FastMap<String, List<Method>>());
+			mListOfMethod.put(lClassName, new FastMap<String, List<MethodRPCCallable>>());
 		}
-		if (!mListOfMethod.get(lClassName).containsKey(aMethod.getName())) {
-			mListOfMethod.get(lClassName).put(aMethod.getName(), new FastList<Method>());
+		Map<String, List<MethodRPCCallable>> lMap = mListOfMethod.get(lClassName) ;
+		if (!lMap.containsKey(aMethod.getName())) {
+			lMap.put(aMethod.getName(), new FastList<MethodRPCCallable>());
 		}
-		mListOfMethod.get(lClassName).get(aMethod.getName()).add(aMethod);
+		List<MethodRPCCallable> lList = lMap.get(aMethod.getName());
+		MethodRPCCallable lMethodRPCCallable = new MethodRPCCallable(aMethod, aRrpcCallable);
+		if(!lList.contains(lMethodRPCCallable)) {
+			lList.add(lMethodRPCCallable);
+		}
 	}
 	/**
 	 * Process a rrpc call.
@@ -41,13 +58,14 @@ public class RPCPlugin {
 	 * @param aMethodName
 	 * @param aArgs
 	 */
-	public static Token processRrpc(String aClassName, String aMethodName, List aArgs) {
+	public static Token processRrpc(String aClassName, String aMethodName, List aArgs, String aSourceId) {
+		boolean lRrpcFromServer = CommonRpcPlugin.SERVER_ID.equals(aSourceId);
 		Token lResponseToken = null; 
 		String lMsg = "";
 		if (aClassName != null && aMethodName != null) {
 			if (mListOfMethod.containsKey(aClassName)) {
 				if (mListOfMethod.get(aClassName).containsKey(aMethodName))
-				return call(aClassName, aMethodName, aArgs);
+				return call(aClassName, aMethodName, aArgs, lRrpcFromServer);
 			} 
 			
 			if (annotationAllowed){
@@ -57,11 +75,11 @@ public class RPCPlugin {
 					Method[] lMethods = lClass.getMethods();
 					for (Method lMethod : lMethods) {
 						if (lMethod.getName().equals(aMethodName) && lMethod.isAnnotationPresent(RPCCallable.class)) {
-							addRrpcMethod(lMethod);
+							addRrpcMethod(lMethod, lMethod.getAnnotation(RPCCallable.class).C2CAuthorized());
+							//Add the method to the list to grant a faster access.
 							MethodMatcher lMethodMatcher = new MethodMatcher(lMethod);
 							if (lMethodMatcher.isMethodMatchingAgainstParameter(aArgs)) {
-								//Add the method to the list to grant a faster access.
-								lResponseToken = call(aClassName, aMethodName, aArgs);
+								lResponseToken = call(aClassName, aMethodName, aArgs, lRrpcFromServer);
 							}
 						}
 					}
@@ -84,32 +102,75 @@ public class RPCPlugin {
 		return lResponseToken;
 	}
 	
-	private static Token call (String aClassName, String aMethodName, List aArgs) {
+	private static Token call (String aClassName, String aMethodName, List aArgs, boolean lRrpcFromServer) {
 		Token lResponseToken = TokenFactory.createToken(CommonRpcPlugin.NS_RPC_DEFAULT, CommonRpcPlugin.RPC_TYPE);
 		String lMsg = "";
-		List<Method> lListOfMethod = mListOfMethod.get(aClassName).get(aMethodName);
-		for (Method lMethod : lListOfMethod) {
-			MethodMatcher lMethodMatcher = new MethodMatcher(lMethod);
-	    //If lArg is not null, means the method match
-	    if (lMethodMatcher.isMethodMatchingAgainstParameter(aArgs)) {
-	      //We cast the intance to the correct class.
-	      try {
-					Object lObj = lMethod.invoke(null, lMethodMatcher.getMethodParameters());
-					lResponseToken.setValidated("result", lObj);
-					return lResponseToken;
-				} catch (IllegalArgumentException ex) {
-		      lMsg = "IllegalAccessException calling '" + aMethodName + "' for class " + aClassName + ": " + ex.getMessage();
-				} catch (IllegalAccessException ex) {
-		      lMsg = "IllegalAccessException calling '" + aMethodName + "' for class " + aClassName + ": " + ex.getMessage();
-				} catch (InvocationTargetException ex) {
-		      lMsg = "InvocationTargetException calling '" + aMethodName + "' for class " + aClassName + ": " + ex.getMessage();
-				} catch (Exception ex) {
-		      lMsg = "InvocationTargetException calling '" + aMethodName + "' for class " + aClassName + ": " + ex.getMessage();
-				}
-	    }
-	  }
+		List<MethodRPCCallable> lListOfMethod = mListOfMethod.get(aClassName).get(aMethodName);
+    try {
+			for (MethodRPCCallable lMethod : lListOfMethod) {
+				MethodMatcher lMethodMatcher = new MethodMatcher(lMethod.getMethod());
+		    //If lArg is not null, means the method match
+		    if (lMethodMatcher.isMethodMatchingAgainstParameter(aArgs)) {
+		    	if (lRrpcFromServer || (!lRrpcFromServer && lMethod.isRrpcCallable())) {
+			      //We cast the intance to the correct class.
+							Object lObj = lMethod.getMethod().invoke(null, lMethodMatcher.getMethodParameters());
+							lResponseToken.setValidated("result", lObj);
+							return lResponseToken;
+		    	} else {
+		    		lMsg = "Only the server can invoke this method. Right isn't granted for a C2C call (only S2C).";
+		    		break;
+		    	}
+		    }
+		  }
+		} catch (IllegalArgumentException ex) {
+      lMsg = "IllegalAccessException calling '" + aMethodName + "' for class " + aClassName + ": " + ex.getMessage();
+		} catch (IllegalAccessException ex) {
+      lMsg = "IllegalAccessException calling '" + aMethodName + "' for class " + aClassName + ": " + ex.getMessage();
+		} catch (InvocationTargetException ex) {
+      lMsg = "InvocationTargetException calling '" + aMethodName + "' for class " + aClassName + ": " + ex.getMessage();
+		} catch (Exception ex) {
+      lMsg = "InvocationTargetException calling '" + aMethodName + "' for class " + aClassName + ": " + ex.getMessage();
+		}
     lResponseToken.setInteger("code", -1);
     lResponseToken.setString("msg", lMsg);
     return lResponseToken;
+	}
+	
+	private static class MethodRPCCallable {
+		private boolean rrpcCallable;
+		private Method method;
+		MethodRPCCallable (Method aMethod, boolean aRrpcCallable) {
+			method = aMethod ;
+			rrpcCallable = aRrpcCallable ;
+		}
+		public boolean isRrpcCallable() {
+			return rrpcCallable;
+		}
+		public Method getMethod() {
+			return method;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((method == null) ? 0 : method.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			MethodRPCCallable other = (MethodRPCCallable) obj;
+			if (method == null) {
+				if (other.method != null)
+					return false;
+			} else if (!method.equals(other.method))
+				return false;
+			return true;
+		}
 	}
 }

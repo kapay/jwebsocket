@@ -55,7 +55,6 @@ public class RPCDemoActivity extends Activity implements
 	private EditText resultTxt;
 	private Button invokeBtn;
 	private TextView targetLabel;
-	private RadioGroup targetRadioGroup;
 	private Boolean useRRPC = false;
 	private ImageView statusImage;
 	private Target selectedTarget = Target.ANDROID;
@@ -247,7 +246,7 @@ public class RPCDemoActivity extends Activity implements
 	};
 	private static Context mContext;
 
-	@RPCCallable
+	@RPCCallable(C2CAuthorized=true)
 	public static void rrpcTest1() {
 		Bundle b = new Bundle();
 		b.putString("method", "rrpcTest1");
@@ -257,7 +256,7 @@ public class RPCDemoActivity extends Activity implements
 		handler.sendMessage(msg);
 	}
 
-	@RPCCallable
+	@RPCCallable(C2CAuthorized=true)
 	public static void rrpcTest1(String arg1) {
 		Bundle b = new Bundle();
 		b.putString("method", "rrpcTest1");
@@ -267,7 +266,7 @@ public class RPCDemoActivity extends Activity implements
 		handler.sendMessage(msg);
 	}
 
-	@RPCCallable
+	@RPCCallable(C2CAuthorized=true)
 	public static void rrpcTest1(int arg1) {
 		Bundle b = new Bundle();
 		b.putString("method", "rrpcTest1");
@@ -277,7 +276,7 @@ public class RPCDemoActivity extends Activity implements
 		handler.sendMessage(msg);
 	}
 
-	@RPCCallable
+	@RPCCallable(C2CAuthorized=true)
 	public static void rrpcTest2(List<String> aList, List<List<Integer>> aList2) {
 		Bundle b = new Bundle();
 		b.putString("method", "rrpcTest2");
@@ -287,7 +286,7 @@ public class RPCDemoActivity extends Activity implements
 		handler.sendMessage(msg);
 	}
 	
-	@RPCCallable
+	@RPCCallable(C2CAuthorized=true)
 	public static void receiveMessage(String aMessage) {
 		Bundle b = new Bundle();
 		b.putString("method", "receiveMessage");

@@ -54,6 +54,7 @@ public class MethodMatcher {
 			    // Try to guess the object type.
 			    // Only support primitive type+wrapper, String, List and Token.
 			    // String and Token
+			    //TODO: with the new Tokens, we don't need anymore to check every arguments. Just need to take care of Float/Double and specific types.
 			    if (lParameterType == String.class) {
 			      mMethodParameters[j] = (String) aArgs.get(k);
 			    } else if (lParameterType == Token.class) {

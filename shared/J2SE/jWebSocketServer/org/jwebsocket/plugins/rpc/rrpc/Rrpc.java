@@ -118,7 +118,7 @@ public class Rrpc extends AbstractRrpc {//implements RpcInterface, RpcInterfaceC
 			Token lToken = super.call();
       String idConnectorFrom ;
 			if (mConnectorFrom == null) {
-        idConnectorFrom = "server";
+        idConnectorFrom = CommonRpcPlugin.SERVER_ID;
       } else {
         idConnectorFrom = mConnectorFrom.getId();
       }

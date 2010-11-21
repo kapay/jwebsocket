@@ -1,7 +1,6 @@
 package org.jwebsocket.plugins.rpc;
 
 public class CommonRpcPlugin {
-
 	//RpcPlugin namespace
 	public static final String NS_RPC_DEFAULT = "org.jwebsocket.plugins.rpc";
 	public static final String RRPC_KEY_TARGET_ID = "targetId";
@@ -14,4 +13,5 @@ public class CommonRpcPlugin {
 	public static final String RRPC_TYPE = "rrpc";
 	public static final String RPC_RIGHT_ID = "rpc";
 	public static final String RRPC_RIGHT_ID = "rrpc";
-}
+  public static final String SERVER_ID = "__server";
+ }

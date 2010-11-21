@@ -225,8 +225,9 @@ public class RPCPlugIn extends TokenPlugIn {
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
-
 		if (lType != null && getNamespace().equals(lNS)) {
+			//Set the sourceId in the token.
+			aToken.setString(CommonRpcPlugin.RRPC_KEY_SOURCE_ID, aConnector.getId());
 			// remote procedure call
 			if (lType.equals("rpc")) {
 				rpc(aConnector, aToken);

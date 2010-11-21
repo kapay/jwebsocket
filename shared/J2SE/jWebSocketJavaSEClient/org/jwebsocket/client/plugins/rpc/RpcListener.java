@@ -33,8 +33,9 @@ public class RpcListener implements WebSocketClientTokenListener {
 		if (CommonRpcPlugin.RRPC_TYPE.equals(aToken.getType())) {
 			String lClassName = aToken.getString(CommonRpcPlugin.RRPC_KEY_CLASSNAME);
 			String lMethodName = aToken.getString(CommonRpcPlugin.RRPC_KEY_METHOD);
+			String lSourceId = aToken.getString(CommonRpcPlugin.RRPC_KEY_SOURCE_ID);
 			List largs = aToken.getList(CommonRpcPlugin.RRPC_KEY_ARGS);
-			Token lRespToken = RPCPlugin.processRrpc(lClassName, lMethodName, largs);
+			Token lRespToken = RPCPlugin.processRrpc(lClassName, lMethodName, largs, lSourceId);
 //			try {
 //				if (mBaseTokenClient == null) {
 //					// TODO add some beautiful log compatible with all clients here ?
