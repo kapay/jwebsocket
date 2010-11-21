@@ -86,7 +86,10 @@
 					},
 					// OnMessage callback
 					OnMessage: function( aEvent, aToken ) {
-						log( "<font style='color:#888'>jWebSocket '" + aToken.type + "' token received, full message: '" + aEvent.data + "</font>" );
+						// exclude stream messages, they are processed in a separate event
+						if( !("event" == aToken.type && "status" == aToken.name )) {
+							log( "<font style='color:#888'>jWebSocket '" + aToken.type + "' token received, full message: '" + aEvent.data + "</font>" );
+						}
 						if( lWSC.isLoggedIn() ) {
 							jws.$("simgStatus").src = "../../images/authenticated.png";
 						} else {
@@ -184,6 +187,16 @@
 				}
 			}
 
+			function mCalcRest() {
+				var lRest = 140 - eTwitterMessage.value.length;
+				sbtnTweet.value = "Tweet " + lRest;
+			}
+
+
+			function onMessageKeyDown() {
+				mCalcRest();
+			}
+
 			function tweet() {
 				log( "Sending tweet '" + eTwitterMessage.value + "'..." );
 				var lRes = lWSC.tweet(
@@ -202,6 +215,24 @@
 
 			function onGotTwitterTimeline( aToken ) {
 				log( "Timeline: " + aToken.msg );
+			}
+
+			function onTwitterStatus( aToken ) {
+
+
+
+				log(
+					"<table width='100%' border='0' cellpadding='2' cellspacing='2'><tr>"
+					+ "<td valign='top' align='left' width='150' style='border: 1px solid; border-color: #fff #777 #777 #fff'>"
+					+   "<div style='position:relative; width:140px; overflow:hidden'>"
+					+	"<img width'48' height='48' src='" + aToken.userImgURL + "'><br>"
+					+   "<span>" + aToken.userName + "</span></div>"
+					+ "</td>"
+					+ "<td valign='top' align='left' style='border: 1px solid; border-color: #fff #777 #777 #fff'>"
+					+   "<p style='text-align:left'>" + aToken.status + "</p>"
+					+ "</td>"
+					+ "</tr></table>"
+				);
 			}
 
 			// this method is called as call back from the Twitter API
@@ -287,9 +318,11 @@
 					lWSC = new jws.jWebSocketJSONClient();
 					lWSC.setTwitterCallbacks({
 						OnGotTwitterTimeline: onGotTwitterTimeline,
+						OnTwitterStatus: onTwitterStatus,
 						OnTwitterAccessToken: onTwitterAccessToken
 					});
 					eUsername.focus();
+					mCalcRest();
 				} else {
 					jws.$( "sbtnLogon" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnLogoff" ).setAttribute( "disabled", "disabled" );
@@ -426,7 +459,7 @@ Testing our new #jWebSocket Twitter-Plugin, tweet via #WebSockets! http://jwebso
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Status</td>
 					<td class="stdDlg" width="" colspan="5">
-						<input class="stxfDlg" id="stxfTwitterMessage" type="text" value="Successfully running jWebSocket Twitter Service!" style="width:99%"
+						<input class="stxfDlg" id="stxfTwitterMessage" type="text" maxlength="140" onkeydown="onMessageKeyDown();" value="Successfully running #jWebSocket Twitter Service! #WebSockets #WebSocket" style="width:99%"
 						title="The Twitter status message to send, the tweet.">
 					</td>
 					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnTweet" type="button" value="Tweet" onclick="tweet();"

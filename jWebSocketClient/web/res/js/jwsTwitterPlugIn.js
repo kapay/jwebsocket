@@ -43,6 +43,10 @@ jws.TwitterPlugIn = {
 				if( this.OnTwitterAccessToken ) {
 					this.OnTwitterAccessToken( aToken );
 				}
+			} else if( "event" == aToken.type ) {
+				if( "status" == aToken.name && this.OnTwitterStatus ) {
+					this.OnTwitterStatus( aToken );
+				}
 			}
 		}
 	},
@@ -222,6 +226,9 @@ jws.TwitterPlugIn = {
 		}
 		if( aListeners.OnGotTwitterTimeline !== undefined ) {
 			this.OnGotTwitterTimeline = aListeners.OnGotTwitterTimeline;
+		}
+		if( aListeners.OnTwitterStatus !== undefined ) {
+			this.OnTwitterStatus = aListeners.OnTwitterStatus;
 		}
 		if( aListeners.OnTwitterAccessToken !== undefined ) {
 			this.OnTwitterAccessToken = aListeners.OnTwitterAccessToken;

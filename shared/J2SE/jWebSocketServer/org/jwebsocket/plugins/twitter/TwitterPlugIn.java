@@ -714,8 +714,10 @@ public class TwitterPlugIn extends TokenPlugIn {
 			Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
 			lToken.setString("name", "deletion");
 			lToken.setInteger("userId", aStatusDeletionNotice.getUserId());
-			// lToken.setInteger("statusId", aStatusDeletionNotice.getStatusId());
-			// lServer.sendToken(aConnector, lToken);
+			lToken.setInteger("statusId", (int) aStatusDeletionNotice.getStatusId());
+			for (WebSocketConnector lConnector : mConnectors.keySet()) {
+				mServer.sendToken(lConnector, lToken);
+			}
 		}
 
 		@Override
@@ -723,7 +725,9 @@ public class TwitterPlugIn extends TokenPlugIn {
 			Token lToken = TokenFactory.createToken(NS_TWITTER, "event");
 			lToken.setString("name", "trackLimit");
 			lToken.setInteger("limit", aNumberOfLimitedStatuses);
-			// lServer.sendToken(aConnector, lToken);
+			for (WebSocketConnector lConnector : mConnectors.keySet()) {
+				mServer.sendToken(lConnector, lToken);
+			}
 		}
 
 		@Override
@@ -732,7 +736,9 @@ public class TwitterPlugIn extends TokenPlugIn {
 			lToken.setString("name", "exception");
 			lToken.setString("message", aEx.getMessage());
 			lToken.setString("exception", aEx.getClass().getSimpleName());
-			// lServer.sendToken(aConnector, lToken);
+			for (WebSocketConnector lConnector : mConnectors.keySet()) {
+				mServer.sendToken(lConnector, lToken);
+			}
 		}
 	};
 
