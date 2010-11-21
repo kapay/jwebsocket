@@ -58,28 +58,27 @@ public class TokenServer extends BaseServer {
 	private volatile boolean mIsAlive = false;
 	private static ExecutorService mCachedThreadPool;
 	private final static int TIME_OUT_TERMINATION_THREAD = 10;
+	private int mCorePoolSize;
+	private int mMaximumPoolSize;
+	private int mKeepAliveTime;
+	private int mBlockingQueueSize;
 
-	private int mCorePoolSize ;
-	private int mMaximumPoolSize ;
-	private int mKeepAliveTime ;
-	private int mBlockingQueueSize ;
-	
 	public TokenServer(ServerConfiguration aServerConfig) {
 		super(aServerConfig);
 		mPlugInChain = new TokenPlugInChain(this);
 		mFilterChain = new TokenFilterChain(this);
 		mFilterChain = new TokenFilterChain(this);
-		
-		mCorePoolSize = aServerConfig.getThreadPoolConfig().getCorePoolSize() ;
-		mMaximumPoolSize = aServerConfig.getThreadPoolConfig().getMaximumPoolSize() ;
-		mKeepAliveTime = aServerConfig.getThreadPoolConfig().getKeepAliveTime() ;
-		mBlockingQueueSize = aServerConfig.getThreadPoolConfig().getBlockingQueueSize() ;
+
+		mCorePoolSize = aServerConfig.getThreadPoolConfig().getCorePoolSize();
+		mMaximumPoolSize = aServerConfig.getThreadPoolConfig().getMaximumPoolSize();
+		mKeepAliveTime = aServerConfig.getThreadPoolConfig().getKeepAliveTime();
+		mBlockingQueueSize = aServerConfig.getThreadPoolConfig().getBlockingQueueSize();
 	}
 
 	@Override
 	public void startServer() throws WebSocketException {
 		// Create the thread pool.
-		 mCachedThreadPool = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAliveTime, TimeUnit.SECONDS,
+		mCachedThreadPool = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAliveTime, TimeUnit.SECONDS,
 				new ArrayBlockingQueue<Runnable>(mBlockingQueueSize));
 		mIsAlive = true;
 		if (mLog.isInfoEnabled()) {
@@ -200,6 +199,18 @@ public class TokenServer extends BaseServer {
 		return TokenFactory.tokenToPacket(lSubProt, aToken);
 	}
 
+	public void processFilteredToken(WebSocketConnector aConnector, Token aToken) {
+		getPlugInChain().processToken(aConnector, aToken);
+		// forward the token to the listener chain
+		List<WebSocketServerListener> lListeners = getListeners();
+		WebSocketServerTokenEvent lEvent = new WebSocketServerTokenEvent(aConnector, this);
+		for (WebSocketServerListener lListener : lListeners) {
+			if (lListener != null && lListener instanceof WebSocketServerTokenListener) {
+				((WebSocketServerTokenListener) lListener).processToken(lEvent, aToken);
+			}
+		}
+	}
+
 	private void processToken(WebSocketConnector aConnector, Token aToken) {
 		// before forwarding the token to the plug-ins push it through filter
 		// chain
@@ -208,15 +219,7 @@ public class TokenServer extends BaseServer {
 		// only forward the token to the plug-in chain
 		// if filter chain does not response "aborted"
 		if (!lFilterResponse.isRejected()) {
-			getPlugInChain().processToken(aConnector, aToken);
-			// forward the token to the listener chain
-			List<WebSocketServerListener> lListeners = getListeners();
-			WebSocketServerTokenEvent lEvent = new WebSocketServerTokenEvent(aConnector, this);
-			for (WebSocketServerListener lListener : lListeners) {
-				if (lListener != null && lListener instanceof WebSocketServerTokenListener) {
-					((WebSocketServerTokenListener) lListener).processToken(lEvent, aToken);
-				}
-			}
+			processFilteredToken(aConnector, aToken);
 		}
 	}
 
