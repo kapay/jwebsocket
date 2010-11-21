@@ -176,6 +176,15 @@ public class SecurityFactory {
 		return lUser;
 	}
 	
+	public static boolean isValidUser(String aLoginname) {
+	    User lUser = mUsers.getUserByLoginName(aLoginname);
+	    if (lUser != null) {
+	        return true;
+	    } else {
+	        return false;
+	    }
+	}
+	
 	/**
 	 * Returns the root user for the jWebSocket system.
 	 */
