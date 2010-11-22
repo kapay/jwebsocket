@@ -226,6 +226,20 @@ jws.events = {
 			function( aEvent ) {
 				return aEvent.target;
 			}
+	),
+	
+	preventDefault : (
+		jws.isIE ?
+			function( aEvent ) {
+				aEvent = window.event;
+				if( aEvent ) {
+					aEvent.returnValue = false;
+				}
+			}
+		:
+			function( aEvent ) {
+				return aEvent.preventDefault();
+			}
 	)
 
 };

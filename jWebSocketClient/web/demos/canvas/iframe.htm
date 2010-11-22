@@ -32,7 +32,8 @@
 			lWSC = null,
 			eCanvas = null;
 			eStatus = null;
-			lIsConnected = false;
+			lIsConnected = false,
+			lColor = "black",
 			CANVAS_ID = "c1";
 
 			var IN = 0;
@@ -81,18 +82,16 @@
 
 			var ctx;
 			var lPainting = false;
-			var lX = -1;
-			var lX = -1;
+			var lX1 = -1;
+			var lY1 = -1;
 
 			function mouseDownLsnr( aEvent ) {
-				aEvent.preventDefault();
+				// aEvent.preventDefault();
+				jws.events.preventDefault( aEvent );
 				if( lIsConnected ) {
 					lPainting = true;
-					lX = aEvent.clientX - eCanvas.offsetLeft;
-					lY = aEvent.clientY - eCanvas.offsetTop;
-					lWSC.canvasBeginPath( CANVAS_ID );
-					lWSC.canvasMoveTo( CANVAS_ID, lX, lY );
-					// console.log( "Start x: " + lX + ", y: " + lY );
+					lX1 = aEvent.clientX - eCanvas.offsetLeft;
+					lY1 = aEvent.clientY - eCanvas.offsetTop;
 				}
 			}
 
@@ -101,17 +100,21 @@
 			var total = 0;
 
 			function mouseMoveLsnr( aEvent ) {
-				aEvent.preventDefault();
+				// aEvent.preventDefault();
+				jws.events.preventDefault( aEvent );
 				if( lIsConnected && lPainting ) {
-					// console.log( "Drawing x: " + lX + ", y: " + lY );
-					lX = aEvent.clientX - eCanvas.offsetLeft;
-					lY = aEvent.clientY - eCanvas.offsetTop;
+					var lX2 = aEvent.clientX - eCanvas.offsetLeft;
+					var lY2 = aEvent.clientY - eCanvas.offsetTop;
 
 					loops++;
 					start = new Date().getTime();
 
-					lWSC.canvasLineTo( CANVAS_ID, lX, lY );
-					// lWSC.canvasStroke( CANVAS_ID );
+					lWSC.canvasLine( CANVAS_ID, lX1, lY1, lX2, lY2, {
+						color: lColor
+					});
+
+					lX1 = lX2;
+					lY1 = lY2;
 
 					total += ( new Date().getTime() - start );
 					eAvg.innerHTML = ( total / loops + "ms" );
@@ -119,19 +122,25 @@
 			}
 
 			function mouseUpLsnr( aEvent ) {
-				aEvent.preventDefault();
+				// aEvent.preventDefault();
+				jws.events.preventDefault( aEvent );
 				if( lIsConnected && lPainting ) {
-					lX = aEvent.clientX - eCanvas.offsetLeft;
-					lY = aEvent.clientY - eCanvas.offsetTop;
-					lWSC.canvasLineTo( lX, lY );
-					lWSC.canvasClosePath( CANVAS_ID );
-					// console.log( "Stop x: " + lX + ", y: " + lY );
+					lX2 = aEvent.clientX - eCanvas.offsetLeft;
+					lY2 = aEvent.clientY - eCanvas.offsetTop;
+					lWSC.canvasLine( CANVAS_ID, lX1, lY1, lX2, lY2, {
+						color: lColor
+					});
 					lPainting = false;
 				}
 			}
 
 			function mouseOutLsnr( aEvent ) {
 				mouseUpLsnr( aEvent );
+			}
+
+			function selectColor(aColor ) {
+				lColor = aColor;
+				jws.$( "spanSettings" ).style.borderColor = lColor;
 			}
 
 			function doClear() {
@@ -148,15 +157,15 @@
 				eStatus = jws.$( "simgStatus" );
 				ctx = eCanvas.getContext( "2d" );
 
+				jws.events.addEventListener( eCanvas, "mousedown", mouseDownLsnr );
+				jws.events.addEventListener( eCanvas, "mousemove", mouseMoveLsnr );
+				jws.events.addEventListener( eCanvas, "mouseup", mouseUpLsnr );
+				jws.events.addEventListener( eCanvas, "mouseout", mouseOutLsnr );
+/*
 				eCanvas.addEventListener( "mousedown", mouseDownLsnr, false );
 				eCanvas.addEventListener( "mousemove", mouseMoveLsnr, false );
 				eCanvas.addEventListener( "mouseup", mouseUpLsnr, false );
 				eCanvas.addEventListener( "mouseout", mouseOutLsnr, false );
-/*
-				ctx.fillStyle = "rgb(200,0,0)";
-				ctx.fillRect (10, 10, 55, 50);
-				ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
-				ctx.fillRect (30, 30, 55, 50);
 */
 				// check if WebSockets are supported by the browser
 				if( jws.browserSupportsWebSockets() ) {
@@ -164,11 +173,6 @@
 					lWSC = new jws.jWebSocketJSONClient();
 
 					lWSC.canvasOpen( CANVAS_ID, "cnvDemo" );
-/*
-					lWSC.canvasBeginPath( CANVAS_ID );
-					lWSC.canvasMoveTo( CANVAS_ID, 10, 10 );
-					lWSC.canvasLineTo( CANVAS_ID, 20, 20 );
-*/
 					doOpen();
 
 				} else {
@@ -204,8 +208,28 @@
 				<img id="simgStatus" alt="status"  src="../../images/disconnected.png"/>
 			</p>
 			<p id="spnAvg" style="display:none">0ms</p>
-			<canvas id="cnvDemo" width="300" height="140" style="border:1px solid green; cursor:crosshair" >
+			<canvas id="cnvDemo" width="250" height="142"
+					style="width:250px; height:142px; overflow:hidden; border:1px solid gray; cursor:crosshair; float:left" >
 			</canvas>
+			<div id="spanSettings" style="border:1px solid gray; position:relative; top: 0px; left: 5px; width:20px; height:142px; overflow:hidden">
+				<table border="0" cellspacing="2" cellpadding="1">
+					<colgroup><col width="20px"></colgroup>
+					<tr><td style="cursor: pointer; background-color: black" onclick="selectColor('black');"
+							title="black">&nbsp;</td></tr>
+					<tr><td style="cursor: pointer; background-color: gray" onclick="selectColor('gray');"
+							title="gray">&nbsp;</td></tr>
+					<tr><td style="cursor: pointer; background-color: red" onclick="selectColor('red');"
+							title="red">&nbsp;</td></tr>
+					<tr><td style="cursor: pointer; background-color: magenta" onclick="selectColor('magenta');"
+							title="magenta">&nbsp;</td></tr>
+					<tr><td style="cursor: pointer; background-color: green" onclick="selectColor('green');"
+							title="green">&nbsp;</td></tr>
+					<tr><td style="cursor: pointer; background-color: blue" onclick="selectColor('blue');"
+							title="blue">&nbsp;;</td></tr>
+					<tr><td style="cursor: pointer; background-color: orange" onclick="selectColor('orange');"
+							title="cyan">&nbsp;</td></tr>
+				</table>
+			</div>
 		</div>
 	</body>
 </html>

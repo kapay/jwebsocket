@@ -4,23 +4,23 @@
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<!-- If Google's chrome frame installed, use it! -->
 		<!-- Comment needs to be BELOW this meta tag! -->
-<!--
-//	****************************************************************************
-//	jWebSocket RPC Demo (uses jWebSocket Client and Server)
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
-//	****************************************************************************
-//	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU Lesser General Public License as published by the
-//	Free Software Foundation; either version 3 of the License, or (at your
-//	option) any later version.
-//	This program is distributed in the hope that it will be useful, but WITHOUT
-//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-//	more details.
-//	You should have received a copy of the GNU Lesser General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
-//	****************************************************************************
--->
+		<!--
+		//	****************************************************************************
+		//	jWebSocket RPC Demo (uses jWebSocket Client and Server)
+		//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
+		//	****************************************************************************
+		//	This program is free software; you can redistribute it and/or modify it
+		//	under the terms of the GNU Lesser General Public License as published by the
+		//	Free Software Foundation; either version 3 of the License, or (at your
+		//	option) any later version.
+		//	This program is distributed in the hope that it will be useful, but WITHOUT
+		//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+		//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+		//	more details.
+		//	You should have received a copy of the GNU Lesser General Public License along
+		//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+		//	****************************************************************************
+		-->
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket Mobile Snapshot Demo</title>
@@ -62,16 +62,31 @@
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection established.</font>" );
+						jws.$("simgStatus").src = "../../images/connected.png";
 					},
 
 					// OnMessage callback
 					OnMessage: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket message received: '" + aEvent.data + "'</font>" );
+						jws.$("simgStatus").src = "../../images/authenticated.png";
+						/*
+						if( lWSC.isLoggedIn() ) {
+							jws.$("simgStatus").src = "../../images/authenticated.png";
+						} else {
+							jws.$("simgStatus").src = "../../images/connected.png";
+						}
+						 */
+						jws.$("slblClientId").innerHTML =
+							"&nbsp;Client&#x2011;Id:&nbsp;"
+							+ lWSC.getId() + "&nbsp;"
+							+ ( jws.browserSupportsNativeWebSockets ? "(native)" : "(flashbridge)" );
 					},
 
 					// OnClose callback
 					OnClose: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket connection closed.</font>" );
+						jws.$("simgStatus").src = "../../images/disconnected.png";
+						jws.$("slblClientId").innerHTML = "&nbsp;Client&#x2011;Id:&nbsp;-";
 					}
 
 				});
@@ -116,7 +131,7 @@
 					|| lLC.indexOf( ".jpeg" ) > 0
 					|| lLC.indexOf( ".png" ) > 0
 					|| lLC.indexOf( ".gif" ) > 0
-				) {
+			) {
 					log( "Picture received: '" + lFilename + "':" );
 					// aToken.url = aToken.url.replace("foto.jpg", "flowers_1280x1024.jpg");
 					lHTML = "<img onload=\"checkImageSize()\" src=\"" + aToken.url + "\"/>";
@@ -127,20 +142,31 @@
 			}
 			
 			function uploadFile() {
+				log( "Uploading file..." );
+				if( undefined == window.FileReader ) {
+					log( "This browser does unfortunately not (yet) support the HTML5 FileReader Object." );
+					return;
+				}
 				var lReader = new FileReader();
 				var lFile = jws.$( "sinpUpload" ).files[ 0 ];
-				lReader.onloadend = function() {
-					lWSC.fileSave(
+				if( !lWSC.isConnected() ) {
+					log( "Not connected" );
+				} else if( lFile != null ) {
+					lReader.onloadend = function() {
+						lWSC.fileSave(
 						lFile.fileName,
 						lReader.result,
 						{	encoding: "base64",
 							// lReader.result is already base64 encoded!
-							suppressEncoder: true, 
+							suppressEncoder: true,
 							scope: "public"
 						}
 					);
-				};
-				lReader.readAsDataURL(lFile);
+					};
+					lReader.readAsDataURL(lFile);
+				} else {
+					log( "No file selected" );
+				}
 			}
 
 			function initPage() {
@@ -160,7 +186,9 @@
 					alert( lMsg );
 					log( lMsg );
 				}
-				connect();
+
+				// optionally auto-connect
+				// connect();
 			}
 
 			function exitPage() {
@@ -174,26 +202,35 @@
 		onload="initPage();"
 		onunload="exitPage();"
 		>
-<!--	remarked temporarily due to chrome 5 browser bug
+		<!--	remarked temporarily due to chrome 5 browser bug
 		<script type="text/javascript">
 			var lFrameElem = this.frameElement;
 			if( !lFrameElem ) {
 				location.replace( "../../index.htm?page=demos/rpc_rrpc/rpc_rrpc.htm" );
 			}
 		</script>
--->		
-		
+		-->
+		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="tdHeader" width="">jWebSocket Hello World</td>
+				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
+				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
+			</tr>
+		</table>
+		<!--
 		<h1>jWebSocket Mobile Snapshot Demo<img src="images/phone.png" align="right"/></h1>
+		-->
 		<p>This demo shows how to take a picture from a jWebSocket enabled Android or Java ME application and send it to a browser.
 		Please connect both this dialog and your Android or Java ME mobile device (also working with the corresponding emulators)
-		to the same server (e.g. ws://jwebsocket.org:8787) and run the Camera Demo on the mobile device and view the incoming images.</p>
+		to the same server (e.g. ws://jwebsocket.org:8787) and run the Camera Demo on the mobile device and view the incoming images.
+		If you do now have an appropriate mobile device you can also use the WebSocket enabled file-upload function.</p>
 		<div id="sdivLog" class="sdivContainer"
 			 style="position:relative; height:300px; overflow:auto;">
 		</div>
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
-					<td class="stdDlg" colspan ="4"><input id="sinpUpload" type="file" style="width:100%"></td>
+					<td class="stdDlg" colspan ="4"><input class="sbtnDlg" id="sinpUpload" type="file" style="width:100%"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnect" type="button" value="Connect" onclick="connect();"></td>
@@ -204,5 +241,15 @@
 			</table>
 		</div>
 
-	</body>
+		<p>To start chatting, select a video camera:
+			<device style="border:1px solid green;"  type="media" onchange="update(this.data);">
+			</device>
+		</p>
+		<video style="border:1px solid red;" autoplay></video>
+		<script>
+			function update(stream) {
+				document.getElementsByTagName('video')[0].src = stream.url;
+		}
+</script>
+</body>
 </html>
