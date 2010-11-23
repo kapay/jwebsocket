@@ -88,7 +88,7 @@ public class BaseWebSocket implements WebSocketClient {
 	private WebSocketStatus mStatus = WebSocketStatus.CLOSED;
 	private List<SubProtocol> mSubprotocols;
 	private SubProtocol mNegotiatedSubprotocol;
-	private String mDraft;
+	private String mDraft = JWebSocketCommonConstants.WS_DRAFT_DEFAULT;
 
 	/**
 	 * Base constructor
