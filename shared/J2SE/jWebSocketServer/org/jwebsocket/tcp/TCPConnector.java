@@ -29,12 +29,14 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
+import org.jwebsocket.kit.WebSocketProtocolHandler;
 import org.jwebsocket.logging.Logging;
 
 /**
  * Implementation of the jWebSocket TCP socket connector.
- * 
+ *
  * @author aschulze
+ * @author jang
  */
 public class TCPConnector extends BaseConnector {
 
@@ -274,8 +276,8 @@ public class TCPConnector extends BaseConnector {
 		 */
 		private void readHybi(ByteArrayOutputStream aBuff,
 				WebSocketEngine aEngine) throws IOException {
-			int lPacketType = -1;
-			// utilize data input stream, because it has convenience methods for reading
+			int lPacketType;
+			// utilize data input stream, because it has convenient methods for reading
 			// signed/unsigned bytes, shorts, ints and longs
 			DataInputStream lDis = new DataInputStream(mIn);
 
@@ -287,38 +289,7 @@ public class TCPConnector extends BaseConnector {
 					boolean lFragmented = (0x01 & lFlags) == 0x01;
 					// shift 4 bits to skip the first bit and three RSVx bits
 					int lType = lFlags >> 4;
-					switch (lType) {
-						// continuation frame (if we have fragmented packets)
-						case 0:
-							lPacketType = RawPacket.FRAMETYPE_FRAGMENT;
-							break;
-						// connection close
-						case 1: {
-							lPacketType = RawPacket.FRAMETYPE_CLOSE;
-							mCloseReason = CloseReason.CLIENT;
-							mIsRunning = false;
-							break;
-						}
-						// ping, respond with pong!
-						case 2:
-							lPacketType = RawPacket.FRAMETYPE_PING;
-							break;
-						// pong,
-						case 3:
-							lPacketType = RawPacket.FRAMETYPE_PONG;
-							break;
-						// text data
-						case 4:
-							lPacketType = RawPacket.FRAMETYPE_UTF8;
-							break;
-						// binary data
-						case 5:
-							lPacketType = RawPacket.FRAMETYPE_BINARY;
-							break;
-						// other types are reserved for future use
-						default:
-							break;
-					}
+					lPacketType = WebSocketProtocolHandler.toRawPacketType(lType);
 
 					if (lPacketType == -1) {
 						// Could not determine packet type, ignore the packet.
@@ -352,6 +323,8 @@ public class TCPConnector extends BaseConnector {
 								lPong.setFrameType(RawPacket.FRAMETYPE_PONG);
 								sendPacket(lPong);
 							} else if (lPacketType == RawPacket.FRAMETYPE_CLOSE) {
+								mCloseReason = CloseReason.CLIENT;
+								mIsRunning = false;
 								// As per spec, server must respond to CLOSE with acknowledgment CLOSE (maybe
 								// this should be handled higher up in the hierarchy?)
 								WebSocketPacket lClose = new RawPacket(aBuff.toByteArray());
@@ -432,72 +405,8 @@ public class TCPConnector extends BaseConnector {
 
 	// TODO: implement fragmentation for packet sending
 	private void sendHybi(WebSocketPacket aDataPacket) throws IOException {
-		int lType = aDataPacket.getFrameType();
-		int lTargetType;
-		switch (lType) {
-			case RawPacket.FRAMETYPE_CLOSE:
-				lTargetType = 0x01;
-				break;
-			case RawPacket.FRAMETYPE_PING:
-				lTargetType = 0x02;
-				break;
-			case RawPacket.FRAMETYPE_PONG:
-				lTargetType = 0x03;
-				break;
-			case RawPacket.FRAMETYPE_UTF8:
-				lTargetType = 0x04;
-				break;
-			case RawPacket.FRAMETYPE_BINARY:
-				lTargetType = 0x05;
-				break;
-			default:
-				throw new IOException("Cannot construct a packet with unknown packet type: " + lType);
-		}
-
-		// just shift four bits to the left (MORE and RSVx bits are not set)
-		lTargetType = lTargetType << 4;
-		mOut.write(lTargetType);
-
-		int lPayloadLen = aDataPacket.getByteArray().length;
-
-		// Here, the spec allows payload length with up to 64-bit integer
-		// in size (that is long data type in java):
-		// ----
-		//   The length of the payload: if 0-125, that is the payload length.
-		//   If 126, the following 2 bytes interpreted as a 16 bit unsigned
-		//   integer are the payload length.  If 127, the following 8 bytes
-		//   interpreted as a 64-bit unsigned integer (the high bit must be 0)
-		//   are the payload length.
-		// ----
-		// However, arrays in java may only have Integer.MAX_VALUE(32-bit) elements.
-		// Therefore, we never set target payload length greater than 32-bit number
-		// (more than 0xffff or 65535 in decimal)
-		if (lPayloadLen < 126) {
-			mOut.write(lPayloadLen << 1); // just write the payload length
-		} else if (lPayloadLen > 126 && lPayloadLen < 0xFFFF) {
-			// first write 126 (meaning, there will follow two bytes for actual length)
-			mOut.write(126 << 1);
-			mOut.write((lPayloadLen >>> 8) & 0xFF);
-			// comment Alex: pointless bit operation
-			mOut.write((lPayloadLen /* >>> 0 */) & 0xFF);
-		} else if (lPayloadLen > 0xffff) {
-			// first write 127 (meaning, there will follow eight bytes for actual length)
-			mOut.write(127 << 1);
-			long len = lPayloadLen;
-			byte[] lWriteBuffer = new byte[8];
-			lWriteBuffer[0] = (byte) (len >>> 56);
-			lWriteBuffer[1] = (byte) (len >>> 48);
-			lWriteBuffer[2] = (byte) (len >>> 40);
-			lWriteBuffer[3] = (byte) (len >>> 32);
-			lWriteBuffer[4] = (byte) (len >>> 24);
-			lWriteBuffer[5] = (byte) (len >>> 16);
-			lWriteBuffer[6] = (byte) (len >>> 8);
-			// comment Alex: pointless bit operation
-			lWriteBuffer[7] = (byte) (len /* >>> 0 */);
-			mOut.write(lWriteBuffer, 0, 8);
-		}
-
-		mOut.write(aDataPacket.getByteArray());
+		byte[] lPacket = WebSocketProtocolHandler.toProtocolPacket(aDataPacket);
+		mOut.write(lPacket);
 	}
 
 	private boolean isHixieDraft() {

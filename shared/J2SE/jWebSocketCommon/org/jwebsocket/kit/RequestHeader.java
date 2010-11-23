@@ -24,6 +24,7 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
  * to the server. The RequestHeader internally maintains a FastMap to store
  * key/values pairs.
  * @author aschulze
+ * @author jang
  * @version $Id: RequestHeader.java 596 2010-06-22 17:09:54Z fivefeetfurther $
  */
 public final class RequestHeader {
@@ -82,15 +83,55 @@ public final class RequestHeader {
 	 * Returns the sub protocol passed by the client or a default value
 	 * if no sub protocol has been passed either in the header or in the
 	 * URL arguments.
-	 * @param aDefault
 	 * @return Sub protocol passed by the client or default value.
 	 */
-	public String getSubProtocol(String aDefault) {
+	public String getSubProtocol() {
+		return resolveSubprotocol()[0];
+	}
+
+	/**
+	 * Returns the subprotocol format in which messages are exchanged between client and server.
+	 * @return subprotocol format passed by the client or default value
+	 */
+	public String getFormat() {
+		return resolveSubprotocol()[1];
+	}
+
+	/**
+	 * Tries to resolve correct subprotocol & format regardless of
+	 * client version (old, new, hixie, hybi, browser, java).
+	 * TODO: deprecate this method once majority of clients switch to new 'subprotocol/format' scheme
+	 * @return array with two members: protocol and format
+	 */
+	private String[] resolveSubprotocol() {
 		String lSubProt = (String) mFields.get(WS_PROTOCOL);
 		if (lSubProt == null) {
-			lSubProt = JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
+			return new String[] {
+					JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT,
+					JWebSocketCommonConstants.WS_FORMAT_DEFAULT};
+		} else {
+			if(lSubProt.indexOf('/') != -1) {
+				// expecting 'subprotocol/format' scheme
+				return lSubProt.split("/");
+			} else {
+				String format = JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
+				if(JWebSocketCommonConstants.WS_SUBPROT_JSON.equals(lSubProt)
+						|| JWebSocketCommonConstants.SUB_PROT_JSON.equals(lSubProt)) {
+					format = JWebSocketCommonConstants.WS_FORMAT_JSON;
+				} else if(JWebSocketCommonConstants.WS_SUBPROT_XML.equals(lSubProt)
+						|| JWebSocketCommonConstants.SUB_PROT_XML.equals(lSubProt)) {
+					format = JWebSocketCommonConstants.WS_FORMAT_XML;
+				} else if(JWebSocketCommonConstants.WS_SUBPROT_CSV.equals(lSubProt)
+						|| JWebSocketCommonConstants.SUB_PROT_CSV.equals(lSubProt)) {
+					format = JWebSocketCommonConstants.WS_FORMAT_CSV;
+				} else if(JWebSocketCommonConstants.WS_SUBPROT_CUSTOM.equals(lSubProt)
+						|| JWebSocketCommonConstants.SUB_PROT_CUSTOM.equals(lSubProt)) {
+					format = JWebSocketCommonConstants.WS_FORMAT_CUSTOM;
+				}
+
+				return new String[] { lSubProt, format };
+			}
 		}
-		return lSubProt;
 	}
 
 	/**

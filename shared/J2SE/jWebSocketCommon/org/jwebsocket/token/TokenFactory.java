@@ -13,6 +13,7 @@ import org.jwebsocket.packetProcessors.XMLProcessor;
 /**
  *
  * @author aschulze
+ * @author jang
  */
 public class TokenFactory {
 
@@ -45,20 +46,17 @@ public class TokenFactory {
 
 	/**
 	 *
-	 * @param aSubProt
+	 * @param aFormat
 	 * @param aDataPacket
 	 * @return
 	 */
-	public static Token packetToToken(String aSubProt, WebSocketPacket aDataPacket) {
+	public static Token packetToToken(String aFormat, WebSocketPacket aDataPacket) {
 		Token lToken = null;
-		if (aSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_JSON)
-				|| aSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
+		if (JWebSocketCommonConstants.WS_FORMAT_JSON.equals(aFormat)) {
 			lToken = JSONProcessor.packetToToken(aDataPacket);
-		} else if (aSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_CSV)
-				|| aSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(aFormat)) {
 			lToken = CSVProcessor.packetToToken(aDataPacket);
-		} else if (aSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_XML)
-				|| aSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_XML.equals(aFormat)) {
 			lToken = XMLProcessor.packetToToken(aDataPacket);
 		}
 		return lToken;
@@ -66,21 +64,17 @@ public class TokenFactory {
 
 	/**
 	 *
-	 * @param aSubProt
+	 * @param aFormat
 	 * @param aToken
 	 * @return
 	 */
-	public static WebSocketPacket tokenToPacket(String aSubProt, Token aToken) {
+	public static WebSocketPacket tokenToPacket(String aFormat, Token aToken) {
 		WebSocketPacket lPacket = null;
-		// TODO: Remove deprecated sub protocol constants one day, when browsers have been updated
-		if (aSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_JSON)
-				|| aSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
+		if (JWebSocketCommonConstants.WS_FORMAT_JSON.equals(aFormat)) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
-		} else if (aSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_CSV)
-				|| aSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(aFormat)) {
 			lPacket = CSVProcessor.tokenToPacket(aToken);
-		} else if (aSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_XML)
-				|| aSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_XML.equals(aFormat)) {
 			lPacket = XMLProcessor.tokenToPacket(aToken);
 		}
 		return lPacket;

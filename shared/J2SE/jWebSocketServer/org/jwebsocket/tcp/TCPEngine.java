@@ -41,6 +41,7 @@ import org.jwebsocket.kit.WebSocketHandshake;
  * Implementation of the jWebSocket TCP engine. The TCP engine provide a Java
  * Socket implementation of the WebSocket protocol. It contains the handshake
  * @author aschulze
+ * @author jang
  */
 public class TCPEngine extends BaseEngine {
 
@@ -302,7 +303,8 @@ public class TCPEngine extends BaseEngine {
 			lSubProt = lArgs.get(RequestHeader.WS_PROTOCOL);
 		}
 		if (lSubProt == null) {
-			lSubProt = JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
+			lSubProt = JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/' +
+					JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
 		}
 		lHeader.put(RequestHeader.WS_HOST, lRespMap.get(RequestHeader.WS_HOST));
 		lHeader.put(RequestHeader.WS_ORIGIN, lRespMap.get(RequestHeader.WS_ORIGIN));

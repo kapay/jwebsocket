@@ -42,14 +42,20 @@ public final class WebSocketHandshake {
 	private URI mURL = null;
 	private String mOrigin = null;
 	private String mProtocol = null;
+	private String mDraft = null;
 
 	public WebSocketHandshake(URI aURL) {
-		this(aURL, null);
+		this(aURL, null, null);
 	}
 
 	public WebSocketHandshake(URI aURL, String aProtocol) {
+		this(aURL, aProtocol, null);
+	}
+
+	public WebSocketHandshake(URI aURL, String aProtocol, String aDraft) {
 		this.mURL = aURL;
-		this.mProtocol = null;
+		this.mProtocol = aProtocol;
+		this.mDraft = aDraft;
 		generateKeys();
 	}
 
@@ -302,6 +308,7 @@ public final class WebSocketHandshake {
 		lRes.put(RequestHeader.WS_PROTOCOL, lSubProt);
 		lRes.put(RequestHeader.WS_SECKEY1, lSecKey1);
 		lRes.put(RequestHeader.WS_SECKEY2, lSecKey2);
+		lRes.put(RequestHeader.WS_DRAFT, lDraft);
 
 		lRes.put("isSecure", lIsSecure);
 		lRes.put("secKeyResponse", lSecKeyResp);
@@ -337,6 +344,7 @@ public final class WebSocketHandshake {
 		String lOrigin = (String) aRequest.get(RequestHeader.WS_ORIGIN);
 		String lLocation = (String) aRequest.get(RequestHeader.WS_LOCATION);
 		String lSubProt = (String) aRequest.get(RequestHeader.WS_PROTOCOL);
+		String lDraft = (String) aRequest.get(RequestHeader.WS_DRAFT);
 		String lRes =
 				// since IETF draft 76 "WebSocket Protocol" not "Web Socket Protocol"
 				// change implemented since v0.9.5.0701
@@ -439,6 +447,10 @@ public final class WebSocketHandshake {
 			lHandshake += "Sec-WebSocket-Protocol: " + mProtocol + "\r\n";
 		}
 
+		if(mDraft != null) {
+			lHandshake += "Sec-WebSocket-Draft: " + mDraft + "\r\n";
+		}
+
 		lHandshake +=
 				"Upgrade: WebSocket\r\n"
 				+ "Sec-WebSocket-Key1: " + mKey1 + "\r\n"
@@ -476,6 +488,11 @@ public final class WebSocketHandshake {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Connection");
 		} else if (!aHeaders.get("Sec-WebSocket-Origin").equals(mOrigin)) {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Sec-WebSocket-Origin");
+		} else if(aHeaders.containsKey("Sec-WebSocket-Protocol") && !(mProtocol.indexOf(aHeaders.get("Sec-WebSocket-Protocol")) == -1)) {
+			// server returned sub protocol that wasn't proposed by the client? Illegal answer from server.
+			throw new WebSocketException(
+					"connection failed: invalid header field in server handshake: Sec-WebSocket-Protocol," +
+					" expected one of : " + mProtocol + ", but got: " + aHeaders.get("Sec-WebSocket-Protocol"));
 		}
 	}
 

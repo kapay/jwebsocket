@@ -105,4 +105,38 @@ public interface WebSocketClient {
      * @return the list of all listeners.
      */
     List<WebSocketClientListener> getListeners();
+
+	/**
+	 * Adds subprotocol to the list of supported protocols which are negotiated during handshake with
+	 * web socket server.
+	 *
+	 * @param protocolName name of the subprotocol, prefferably in domain format (see section 1.9 of the hybi-03 draft).
+	 * @param protocolFormat actual formatting of the packets (json, csv, binary or something custom)
+	 */
+	void addSubProtocol(String protocolName, String protocolFormat);
+
+	/**
+	 * If subprotocol was negotiated, then this method returns sub protocol name.
+	 *
+	 * @return name of the subprotocol or null if no subprotocol was negotiated
+	 */
+	String getNegotiatedProtocolName();
+
+	/**
+	 * If subprotocol was negotiated, then this method returns sub protocol format (json, csv, binary, custom)
+	 *
+	 * @return format of the subprotocol or null if no subprotocol was negotiated
+	 */
+	String getNegotiatedProtocolFormat();
+
+	/**
+	 * Web socket protocol draft. Sepcification recommends using only draft number in
+	 * relevant header, but anything may be used as long as server undertstands it.
+	 * JWebSocket adheres to the specification and therefore understands only draft number
+	 * as valid value, e.g. "Sec-WebSocket-Draft: 3". Anything else will probably fail on
+	 * server side.
+	 *
+	 * @param aDraft which draft to use for web socket protocol communication
+	 */
+	void setDraft(String aDraft);
 }

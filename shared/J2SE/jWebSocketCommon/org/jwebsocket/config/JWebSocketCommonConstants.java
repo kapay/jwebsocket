@@ -57,6 +57,11 @@ public class JWebSocketCommonConstants {
 	 */
 	public final static String SUB_PROT_XML = "xml";
 	/**
+	 * Binary sub protocol
+	 * @deprecated
+	 */
+	public final static String SUB_PROT_BINARY = "binary";
+	/**
 	 * Custom specific sub protocol
 	 * @deprecated
 	 */
@@ -86,14 +91,45 @@ public class JWebSocketCommonConstants {
 	 * Default protocol
 	 */
 	public static String WS_SUBPROT_DEFAULT = WS_SUBPROT_JSON;
-
-    /** WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-03) */
+	/**
+	 * JSON subprotocol format
+	 */
+	public final static String WS_FORMAT_JSON = "json";
+	/**
+	 * CSV subprotocol format
+	 */
+	public final static String WS_FORMAT_CSV = "csv";
+	/**
+	 * XML subprotocol format
+	 */
+	public final static String WS_FORMAT_XML = "xml";
+	/**
+	 * Binary subprotocol format
+	 */
+	public final static String WS_FORMAT_BINARY = "binary";
+	/**
+	 * Custom specific subprotocol format
+	 */
+	public final static String WS_FORMAT_CUSTOM = "custom";
+	/**
+	 * Default subprotocol format
+	 */
+	public static String WS_FORMAT_DEFAULT = WS_FORMAT_JSON;
+	/**
+	 * Default subprotocol domain (used when client doesn't set its own subprotocol)
+	 */
+	public static String WS_SUBPROTOCOL_DEFAULT = "jwebsocket.org";
+    /**
+	 * WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-03)
+	 */
     public final static String WS_DRAFT_03 = "3";
-
-    /** WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-02) */
+    /**
+	 * WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-02)
+	 */
     public final static String WS_DRAFT_02 = "2";
-
-    /** WebSocket protocol hixie draft 76 (http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76) */
+    /**
+	 * WebSocket protocol hixie draft 76 (http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76)
+	 */
     public final static String WS_DRAFT_DEFAULT = "76";
 	/**
 	 * Separator between the path and the argument list in the URL.

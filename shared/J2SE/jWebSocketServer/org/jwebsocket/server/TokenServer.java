@@ -47,6 +47,7 @@ import org.jwebsocket.token.TokenFactory;
 
 /**
  * @author aschulze
+ * @author jang
  */
 public class TokenServer extends BaseServer {
 
@@ -154,15 +155,11 @@ public class TokenServer extends BaseServer {
 	 */
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
-		String lSubProt = aConnector.getHeader().getSubProtocol(null);
-		if ((lSubProt != null)
-				&& (lSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_JSON)
-				|| lSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_XML)
-				|| lSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_CSV)
-				// TODO: remove deprecated sub prots once all browsers use it
-				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)
-				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)
-				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML))) {
+		String lFormat = aConnector.getHeader().getFormat();
+		if ((lFormat != null)
+				&& (lFormat.equals(JWebSocketCommonConstants.WS_FORMAT_JSON)
+				|| lFormat.equals(JWebSocketCommonConstants.WS_FORMAT_XML)
+				|| lFormat.equals(JWebSocketCommonConstants.WS_FORMAT_CSV))) {
 
 			aConnector.setBoolean(VAR_IS_TOKENSERVER, true);
 
@@ -190,13 +187,13 @@ public class TokenServer extends BaseServer {
 	}
 
 	public Token packetToToken(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
-		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
-		return TokenFactory.packetToToken(lSubProt, aDataPacket);
+		String lFormat = aConnector.getHeader().getFormat();
+		return TokenFactory.packetToToken(lFormat, aDataPacket);
 	}
 
 	public WebSocketPacket tokenToPacket(WebSocketConnector aConnector, Token aToken) {
-		String lSubProt = aConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
-		return TokenFactory.tokenToPacket(lSubProt, aToken);
+		String lFormat = aConnector.getHeader().getFormat();
+		return TokenFactory.tokenToPacket(lFormat, aToken);
 	}
 
 	public void processFilteredToken(WebSocketConnector aConnector, Token aToken) {
@@ -388,17 +385,17 @@ public class TokenServer extends BaseServer {
 
 		// converting the token within the loop is removed in this method!
 		WebSocketPacket lPacket;
-		// lPackets maps protocols to appropriate converted packets:
+		// lPackets maps protocol formats to appropriate converted packets:
 		FastMap<String, WebSocketPacket> lPackets = new FastMap<String, WebSocketPacket>();
-		String lSubProt;
+		String lFormat;
 		for (WebSocketConnector lConnector : selectConnectors(aFilter).values()) {
-			lSubProt = lConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.SUB_PROT_DEFAULT);
-			lPacket = lPackets.get(lSubProt);
-			// if there is no packet for this protocol already, make one and
+			lFormat = lConnector.getHeader().getFormat();
+			lPacket = lPackets.get(lFormat);
+			// if there is no packet for this protocol format already, make one and
 			// store it in the map
 			if (lPacket == null) {
 				lPacket = tokenToPacket(lConnector, aToken);
-				lPackets.put(lSubProt, lPacket);
+				lPackets.put(lFormat, lPacket);
 			}
 			sendPacket(lConnector, lPacket);
 		}
@@ -423,17 +420,17 @@ public class TokenServer extends BaseServer {
 
 		// converting the token within the loop is removed in this method!
 		WebSocketPacket lPacket;
-		// lPackets maps protocols to appropriate converted packets:
+		// lPackets maps protocol formats to appropriate converted packets:
 		FastMap<String, WebSocketPacket> lPackets = new FastMap<String, WebSocketPacket>();
-		String lSubProt;
+		String lFormat;
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
-			lSubProt = lConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.SUB_PROT_DEFAULT);
-			lPacket = lPackets.get(lSubProt);
-			// if there is no packet for this protocol already, make one and
+			lFormat = lConnector.getHeader().getFormat();
+			lPacket = lPackets.get(lFormat);
+			// if there is no packet for this protocol format already, make one and
 			// store it in the map
 			if (lPacket == null) {
 				lPacket = tokenToPacket(lConnector, aToken);
-				lPackets.put(lSubProt, lPacket);
+				lPackets.put(lFormat, lPacket);
 			}
 			sendPacket(lConnector, lPacket);
 		}
@@ -458,18 +455,18 @@ public class TokenServer extends BaseServer {
 
 		// converting the token within the loop is removed in this method!
 		WebSocketPacket lPacket;
-		// lPackets maps protocols to appropriate converted packets:
+		// lPackets maps protocol formats to appropriate converted packets:
 		Map<String, WebSocketPacket> lPackets = new FastMap<String, WebSocketPacket>();
-		String lSubProt;
+		String lFormat;
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector)) {
-				lSubProt = lConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.SUB_PROT_DEFAULT);
-				lPacket = lPackets.get(lSubProt);
-				// if there is no packet for this protocol already, make one and
+				lFormat = lConnector.getHeader().getFormat();
+				lPacket = lPackets.get(lFormat);
+				// if there is no packet for this protocol format already, make one and
 				// store it in the map
 				if (lPacket == null) {
 					lPacket = tokenToPacket(lConnector, aToken);
-					lPackets.put(lSubProt, lPacket);
+					lPackets.put(lFormat, lPacket);
 				}
 				sendPacket(lConnector, lPacket);
 			}
@@ -499,18 +496,18 @@ public class TokenServer extends BaseServer {
 
 		// converting the token within the loop is removed in this method!
 		WebSocketPacket lPacket;
-		// lPackets maps protocols to appropriate converted packets:
+		// lPackets maps protocol formats to appropriate converted packets:
 		Map<String, WebSocketPacket> lPackets = new FastMap<String, WebSocketPacket>();
-		String lSubProt;
+		String lFormat;
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector) || aBroadcastOptions.isSenderIncluded()) {
-				lSubProt = lConnector.getHeader().getSubProtocol(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT);
-				lPacket = lPackets.get(lSubProt);
-				// if there is no packet for this protocol already, make one and
+				lFormat = lConnector.getHeader().getFormat();
+				lPacket = lPackets.get(lFormat);
+				// if there is no packet for this protocol format already, make one and
 				// store it in the map
 				if (lPacket == null) {
 					lPacket = tokenToPacket(lConnector, aToken);
-					lPackets.put(lSubProt, lPacket);
+					lPackets.put(lFormat, lPacket);
 				}
 				sendPacket(lConnector, lPacket);
 			}

@@ -33,6 +33,7 @@ import org.jwebsocket.plugins.BasePlugInChain;
 /**
  *
  * @author aschulze
+ * @author jang
  */
 public class CustomServer extends BaseServer {
 
@@ -55,13 +56,11 @@ public class CustomServer extends BaseServer {
 			mLog.debug("Processing data packet '" + aDataPacket.getUTF8() + "'...");
 		}
 		RequestHeader lHeader = aConnector.getHeader();
-		String lSubProt = (lHeader != null ? lHeader.getSubProtocol(null) : null);
+		String lFormat = (lHeader != null ? lHeader.getFormat() : null);
 
 		// the custom server here answers with a simple echo packet.
 		// this section can be used as an example for your own protol handling.
-		if (lSubProt != null
-				&& (lSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_CUSTOM)
-				|| lSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CUSTOM)))  {
+		if (lFormat != null && JWebSocketCommonConstants.WS_FORMAT_CUSTOM.equals(lFormat))  {
 
 			// send a modified echo packet back to sender.
 			//

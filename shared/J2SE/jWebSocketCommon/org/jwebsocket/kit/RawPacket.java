@@ -144,7 +144,7 @@ public class RawPacket implements WebSocketPacket {
 	}
 
 	/**
-	 * @param frameType the frameType to set
+	 * @param aFrameType the frameType to set
 	 */
 	@Override
 	public void setFrameType(int aFrameType) {

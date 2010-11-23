@@ -33,6 +33,7 @@ import org.jwebsocket.token.TokenFactory;
  * Token based implementation of {@code JWebSocketClient}
  * @author aschulze
  * @author puran
+ * @author jang
  * @version $Id:$
  */
 public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClient {
@@ -51,7 +52,8 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	/** token id */
 	private int CUR_TOKEN_ID = 0;
 	/** subprotocol value */
-	private String mSubProt = JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
+	private String mSubProt;
+	private String mFormat;
 	private String fUsername = null;
 	private String fClientId = null;
 	private String fSessionId = null;
@@ -60,6 +62,13 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	 * Default constructor
 	 */
 	public BaseTokenClient() {
+		this(JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT, JWebSocketCommonConstants.WS_FORMAT_DEFAULT);
+	}
+
+	public BaseTokenClient(String subprotocol, String format) {
+		mSubProt = subprotocol;
+		mFormat = format;
+		addSubProtocol(mSubProt, mFormat);
 		addListener(new TokenClientListener());
 	}
 
@@ -184,17 +193,14 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	 */
 	public Token packetToToken(WebSocketPacket aPacket) {
 		Token lToken = null;
-		// TODO: remove deprecated sub protocols once all browsers support it
-		if (mSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_JSON)
-				|| mSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
+		if(JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mFormat)) {
 			lToken = JSONProcessor.packetToToken(aPacket);
-		} else if (mSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_CSV)
-				|| mSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(mFormat)) {
 			lToken = CSVProcessor.packetToToken(aPacket);
-		} else if (mSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_XML)
-				|| mSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_XML.equals(mFormat)) {
 			lToken = XMLProcessor.packetToToken(aPacket);
 		}
+
 		return lToken;
 	}
 
@@ -207,16 +213,14 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	public WebSocketPacket tokenToPacket(Token aToken) {
 		WebSocketPacket lPacket = null;
 
-		if (mSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_JSON)
-				|| mSubProt.equals(JWebSocketCommonConstants.SUB_PROT_JSON)) {
+		if(JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mFormat)) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
-		} else if (mSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_CSV)
-				|| mSubProt.equals(JWebSocketCommonConstants.SUB_PROT_CSV)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(mFormat)) {
 			lPacket = CSVProcessor.tokenToPacket(aToken);
-		} else if (mSubProt.equals(JWebSocketCommonConstants.WS_SUBPROT_XML)
-				|| mSubProt.equals(JWebSocketCommonConstants.SUB_PROT_XML)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_XML.equals(mFormat)) {
 			lPacket = XMLProcessor.tokenToPacket(aToken);
 		}
+
 		return lPacket;
 	}
 
