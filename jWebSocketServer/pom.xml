@@ -108,6 +108,37 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+
+			<!-- to compile groovy code in this project 
+			Refer to: http://docs.codehaus.org/display/GMAVEN/Executing+Groovy+Code
+			-->
+			<!--
+			<plugin>
+				<groupId>org.codehaus.groovy.maven</groupId>
+				<artifactId>gmaven-plugin</artifactId>
+				<version>1.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generateStubs</goal>
+							<goal>compile</goal>
+							<goal>generateTestStubs</goal>
+							<goal>testCompile</goal>
+						</goals>
+						<configuration>
+                            <tasks>
+
+							</tasks>
+							<scriptpath>
+								<element>C:/svn/jWebsocket/trunk/shared/J2SE/jWebSocketServer/org/jwebsocket</element>
+							</scriptpath>
+							<source>C:/svn/jWebsocket/trunk/shared/J2SE/jWebSocketServer/org/jwebsocket/eventmodel/api/IEventModelFilter.groovy</source>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			-->
+
 		</plugins>
 	</build>
 
@@ -180,6 +211,22 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!-- to compile groovy code in this project 
+		Refer to: http://docs.codehaus.org/display/GMAVEN/Home
+		-->
+		<!--
+		<dependency>
+			<groupId>org.codehaus.groovy.maven</groupId>
+			<artifactId>gmaven-mojo</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.groovy.maven.runtime</groupId>
+			<artifactId>gmaven-runtime-1.6</artifactId>
+			<version>1.0</version>
+		</dependency>
+		-->
+
 		<!-- to import MS SQL Server JDBC Driver w/o maven support
 			(do not remove this comment)
 		<dependency>
@@ -197,7 +244,7 @@
 			(do not remove this comment)
 		<repository>
 			<id>Local-Repository</id>
-			<url>file://${basedir}/li</url>
+			<url>file://${basedir}/lib</url>
 		</repository>
 		-->
 		<repository>
