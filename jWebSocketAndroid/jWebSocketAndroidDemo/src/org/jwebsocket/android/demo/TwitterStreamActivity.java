@@ -17,11 +17,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  *
@@ -45,15 +48,6 @@ public class TwitterStreamActivity extends ListActivity implements
         
     }
 
-    private void fillDemoTweets()
-    {
-        tweetAdapter.add(new Tweet("Tweet 1"));
-        tweetAdapter.add(new Tweet("Tweet 2"));
-        tweetAdapter.add(new Tweet("Tweet 3"));
-        tweetAdapter.add(new Tweet("Tweet 4"));
-        tweetAdapter.notifyDataSetChanged();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu aMenu) {
             MenuInflater lMenInfl = getMenuInflater();
@@ -70,6 +64,13 @@ public class TwitterStreamActivity extends ListActivity implements
 
             public void setSettings(String keywords) {
                     //TODO:use the keywords specified to get the twitter stream
+                    Token token = TokenFactory.createToken("org.jwebsocket.plugins.twitter", "setStream");
+                    token.setString("keywords", keywords);
+                    try {
+                        JWC.sendToken(token);
+                    } catch (WebSocketException ex) {
+                        Logger.getLogger(TwitterStreamActivity.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             });
             settingsialog.show();
@@ -111,7 +112,11 @@ public class TwitterStreamActivity extends ListActivity implements
     }
 
     public void processToken(WebSocketClientEvent aEvent, Token aToken) {
-        fillDemoTweets();
+        if(aToken.getNS().equals("org.jwebsocket.plugins.twitter") && aToken.getType().equals("event") && aToken.getString("name").equals("status")){
+            tweetAdapter.add(new Tweet(aToken.getString("status")));
+            tweetAdapter.notifyDataSetChanged();
+        }
+        //fillDemoTweets();
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -120,6 +125,7 @@ public class TwitterStreamActivity extends ListActivity implements
     }
 
     public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+        
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
