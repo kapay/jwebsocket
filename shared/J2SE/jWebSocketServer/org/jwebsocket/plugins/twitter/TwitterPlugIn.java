@@ -857,20 +857,19 @@ public class TwitterPlugIn extends TokenPlugIn {
 					lAccepted++;
 				}
 			}
+			mRemoveConnector(aConnector);
 			if (lKeywordSet.size() > 0) {
 				// remove existing connector from listener list
-				mRemoveConnector(aConnector);
 				// add connector with new keywords to listener list
 				mAddConnector(aConnector, lKeywordSet);
 				// and update the stream using ALL keywords from all clients
 				mUpdateStream(aToken);
 			} else {
-				lMsg = "No keywords passed to Twitter stream, kept current state.";
-				lResponse.setInteger("code", -1);
+				lMsg = "Twitter stream stopped.";
 				lResponse.setString("msg", lMsg);
 			}
 		} else {
-			lMsg = "No keywords passed to Twitter stream, kept current state.";
+			lMsg = "No keywords argument passed, remaining in current state.";
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", lMsg);
 		}

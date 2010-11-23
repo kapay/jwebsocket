@@ -102,11 +102,12 @@ public class NettyEngine extends BaseEngine {
 		// Added by Alex 2010-08-09
 		if (channel != null) {
 			channel.close();
+			// Moved from last line to here by Alex 2010-11-23
+			// to prevent exceptions
+			channel.getFactory().releaseExternalResources();
 		}
 		ChannelGroupFuture future = allChannels.close();
 		future.awaitUninterruptibly();
-		channel.getFactory().releaseExternalResources();
-		
 	}
 
 	/**

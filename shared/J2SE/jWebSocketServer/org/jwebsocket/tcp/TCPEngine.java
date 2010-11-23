@@ -32,7 +32,6 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.tcp.connectors.TCPConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketException;
@@ -151,7 +150,8 @@ public class TCPEngine extends BaseEngine {
 		// now wait until all connectors have been closed properly
 		// or timeout exceeds...
 		try {
-			while (getConnectors().size() > 0 && new Date().getTime() - lStarted < 10000) {
+			while (getConnectors().size() > 0
+					&& new Date().getTime() - lStarted < 10000) {
 				Thread.sleep(250);
 			}
 		} catch (Exception lEx) {

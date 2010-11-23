@@ -32,7 +32,7 @@ import org.jwebsocket.plugins.TokenPlugInChain;
 import org.jwebsocket.plugins.flashbridge.FlashBridgePlugIn;
 import org.jwebsocket.plugins.system.SystemPlugIn;
 import org.jwebsocket.server.TokenServer;
-import org.jwebsocket.tcp.engines.TCPEngine;
+import org.jwebsocket.tcp.TCPEngine;
 
 /**
  * Example of a pure programmatic embedded jWebSocket server.

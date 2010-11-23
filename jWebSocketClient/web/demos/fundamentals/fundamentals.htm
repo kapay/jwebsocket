@@ -47,7 +47,7 @@
 
 			function connect() {
 				// URL is ws[s]://[hostname|localhost][:port][/context][/servlet/][;args...]
-				// deprecated: JWS_SERVER_URL;
+				// var lURL = "wss://localhost:9797/jWebSocket/jWebSocket"; // for Jetty SSL Servlet
 				var lURL = jws.getDefaultServerURL();
 
 				log( "Connecting to " + lURL + " ..." );
@@ -151,8 +151,12 @@
 				var lMsg = eMessage.value;
 				log( "Sending '" + lMsg + "', waiting for echo..." );
 				try {
-					lWSC.echo( lMsg );
-					log( "Message sent." );
+					var lRes = lWSC.echo( lMsg );
+					if( lRes.code == 0 ) {
+						log( "Message sent." );
+					} else {
+						log( lRes.msg );
+					}
 				} catch( ex ) {
 					log( "Exception: " + ex.message );
 				}
