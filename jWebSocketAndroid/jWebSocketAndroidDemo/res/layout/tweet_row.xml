@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : tweet_row.xml
+    Created on : November 22, 2010, 5:23 PM
+    Author     : Prashant
+    Description:
+        layout to display row in a tweet list
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    >
+    <TextView
+        android:id="@+id/tweetTxt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+    />
+</LinearLayout>
