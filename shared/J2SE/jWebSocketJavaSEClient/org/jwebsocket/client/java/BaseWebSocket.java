@@ -462,8 +462,8 @@ public class BaseWebSocket implements WebSocketClient {
 	 */
 	private String makeSubprotocolHeader() {
 		if (mSubprotocols == null || mSubprotocols.size() < 1) {
-//			return JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/' + JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
-			return "jwebsocket.org/json jwebsocket.org/xml chat.example.com/custom"; 
+			//return JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/' + JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
+			return null;
 		} else {
 			StringBuilder buff = new StringBuilder();
 			for (SubProtocol prot : mSubprotocols) {
@@ -525,7 +525,6 @@ public class BaseWebSocket implements WebSocketClient {
 
 		@Override
 		public void run() {
-			ByteArrayOutputStream lOS = new ByteArrayOutputStream();
 			try {
 				if (isHixieDraft()) {
 					readHixie();
