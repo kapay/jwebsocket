@@ -77,18 +77,18 @@ var jws = {
 	//:d:en:The connection has been closed or could not be opened.
 	CLOSED: 3,
 
-	//:const:*:WS_SUBPROT_JSON:String:jWebSocket-JSON
+	//:const:*:WS_SUBPROT_JSON:String:jwebsocket.org/json
 	//:d:en:jWebSocket sub protocol JSON
-	WS_SUBPROT_JSON: "jWebSocket-JSON",
-	//:const:*:WS_SUBPROT_XML:String:jWebSocket-XML
+	WS_SUBPROT_JSON: "jwebsocket.org/json",
+	//:const:*:WS_SUBPROT_XML:String:jwebsocket.org/xml
 	//:d:en:jWebSocket sub protocol XML
-	WS_SUBPROT_XML: "jWebSocket-XML",
-	//:const:*:WS_SUBPROT_CSV:String:jWebSocket-CSV
+	WS_SUBPROT_XML: "jwebsocket.org/xml",
+	//:const:*:WS_SUBPROT_CSV:String:jwebsocket.org/csv
 	//:d:en:jWebSocket sub protocol CSV
-	WS_SUBPROT_CSV: "jWebSocket-CSV",
-	//:const:*:WS_SUBPROT_CUSTOM:String:jWebSocket-Custom
+	WS_SUBPROT_CSV: "jwebsocket.org/csv",
+	//:const:*:WS_SUBPROT_CUSTOM:String:jwebsocket.org/custom
 	//:d:en:jWebSocket sub protocol Custom
-	WS_SUBPROT_CUSTOM: "jWebSocket-Custom",
+	WS_SUBPROT_CUSTOM: "jwebsocket.org/custom",
 
 	//:const:*:SCOPE_PRIVATE:String:private
 	//:d:en:private scope, only authenticated user can read and write his personal items
