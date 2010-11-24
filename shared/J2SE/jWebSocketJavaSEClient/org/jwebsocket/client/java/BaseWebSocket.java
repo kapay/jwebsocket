@@ -180,7 +180,7 @@ public class BaseWebSocket implements WebSocketClient {
 			mReceiver = new WebSocketReceiver(mInput);
 
 			// TODO: Add event parameter
-			// notifyOpened(null);
+			notifyOpened(null);
 
 			mReceiver.start();
 			mConnected = true;
