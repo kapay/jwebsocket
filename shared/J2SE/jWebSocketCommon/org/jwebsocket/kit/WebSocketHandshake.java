@@ -205,7 +205,7 @@ public final class WebSocketHandshake {
 		if (lPos > 0) {
 			lPos += 21;
 			lDraft = lRequest.substring(lPos);
-			lPos = lSubProt.indexOf("\r\n");
+			lPos = lDraft.indexOf("\r\n");
 			lDraft = lDraft.substring(0, lPos);
 		}
 
@@ -344,7 +344,6 @@ public final class WebSocketHandshake {
 		String lOrigin = (String) aRequest.get(RequestHeader.WS_ORIGIN);
 		String lLocation = (String) aRequest.get(RequestHeader.WS_LOCATION);
 		String lSubProt = (String) aRequest.get(RequestHeader.WS_PROTOCOL);
-		String lDraft = (String) aRequest.get(RequestHeader.WS_DRAFT);
 		String lRes =
 				// since IETF draft 76 "WebSocket Protocol" not "Web Socket Protocol"
 				// change implemented since v0.9.5.0701
@@ -488,7 +487,7 @@ public final class WebSocketHandshake {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Connection");
 		} else if (!aHeaders.get("Sec-WebSocket-Origin").equals(mOrigin)) {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Sec-WebSocket-Origin");
-		} else if(aHeaders.containsKey("Sec-WebSocket-Protocol") && !(mProtocol.indexOf(aHeaders.get("Sec-WebSocket-Protocol")) == -1)) {
+		} else if(aHeaders.containsKey("Sec-WebSocket-Protocol") && (mProtocol.indexOf(aHeaders.get("Sec-WebSocket-Protocol")) == -1)) {
 			// server returned sub protocol that wasn't proposed by the client? Illegal answer from server.
 			throw new WebSocketException(
 					"connection failed: invalid header field in server handshake: Sec-WebSocket-Protocol," +

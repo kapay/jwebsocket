@@ -3,11 +3,6 @@ package org.jwebsocket.kit;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -52,7 +47,7 @@ public class WebSocketProtocolHandler {
 		byte[] lBuff = new byte[2]; // resulting packet will have at least 2 bytes
 		int lType = aDataPacket.getFrameType();
 		int lTargetType = toWebSocketFrameType(lType);
-		if(lTargetType == -1) {
+		if (lTargetType == -1) {
 			throw new WebSocketRuntimeException("Cannot construct a packet with unknown packet type: " + lType);
 		}
 
@@ -80,7 +75,7 @@ public class WebSocketProtocolHandler {
 			// first write 126 (meaning, there will follow two bytes for actual length)
 			lBuff[1] = (byte) (126 << 1);
 			int lSize = lBuff.length;
-			lBuff = Arrays.copyOf(lBuff, lSize + 2);
+			lBuff = copyOf(lBuff, lSize + 2);
 			lBuff[lSize] = (byte) ((lPayloadLen >>> 8) & 0xFF);
 			lBuff[lSize + 1] = (byte) (lPayloadLen & 0xFF);
 		} else if (lPayloadLen > 0xFFFF) {
@@ -88,7 +83,7 @@ public class WebSocketProtocolHandler {
 			lBuff[1] = (byte) (127 << 1);
 			long len = (long) lPayloadLen;
 			int lSize = lBuff.length;
-			lBuff = Arrays.copyOf(lBuff, lSize + 8);
+			lBuff = copyOf(lBuff, lSize + 8);
 			lBuff[lSize] = (byte) (len >>> 56);
 			lBuff[lSize + 1] = (byte) (len >>> 48);
 			lBuff[lSize + 2] = (byte) (len >>> 40);
@@ -100,26 +95,34 @@ public class WebSocketProtocolHandler {
 		}
 
 		int lSize = lBuff.length;
-		lBuff = Arrays.copyOf(lBuff, lSize + aDataPacket.getByteArray().length);
+		lBuff = copyOf(lBuff, lSize + aDataPacket.getByteArray().length);
 		System.arraycopy(aDataPacket.getByteArray(), 0, lBuff, lSize, aDataPacket.getByteArray().length);
 		return lBuff;
 	}
 
 	/* TODO: implement fragmentation */
+
 	public static List<byte[]> toProtocolPacketFragmented(WebSocketPacket src, int fragmentSize) {
 		throw new UnsupportedOperationException("Fragmentation is currently not supported");
 	}
 
 	public static int toRawPacketType(int webSocketFrameType) {
 		switch (webSocketFrameType) {
-			case FRAGMENT_PT: return RawPacket.FRAMETYPE_FRAGMENT;
-			case CLOSE_PT: return RawPacket.FRAMETYPE_CLOSE;
-			case PING_PT: return RawPacket.FRAMETYPE_PING;
-			case PONG_PT: return RawPacket.FRAMETYPE_PONG;
-			case UTF8_PT: return RawPacket.FRAMETYPE_UTF8;
-			case BINARY_PT: return RawPacket.FRAMETYPE_BINARY;
+			case FRAGMENT_PT:
+				return RawPacket.FRAMETYPE_FRAGMENT;
+			case CLOSE_PT:
+				return RawPacket.FRAMETYPE_CLOSE;
+			case PING_PT:
+				return RawPacket.FRAMETYPE_PING;
+			case PONG_PT:
+				return RawPacket.FRAMETYPE_PONG;
+			case UTF8_PT:
+				return RawPacket.FRAMETYPE_UTF8;
+			case BINARY_PT:
+				return RawPacket.FRAMETYPE_BINARY;
 			// other types are reserved for future use
-			default: return -1;
+			default:
+				return -1;
 		}
 	}
 
@@ -132,12 +135,24 @@ public class WebSocketProtocolHandler {
 
 	public static int toWebSocketFrameType(int rawPacketType) {
 		switch (rawPacketType) {
-			case RawPacket.FRAMETYPE_CLOSE: return CLOSE_PT;
-			case RawPacket.FRAMETYPE_PING: return PING_PT;
-			case RawPacket.FRAMETYPE_PONG: return PONG_PT;
-			case RawPacket.FRAMETYPE_UTF8: return UTF8_PT;
-			case RawPacket.FRAMETYPE_BINARY: return BINARY_PT;
-			default: return -1;
+			case RawPacket.FRAMETYPE_CLOSE:
+				return CLOSE_PT;
+			case RawPacket.FRAMETYPE_PING:
+				return PING_PT;
+			case RawPacket.FRAMETYPE_PONG:
+				return PONG_PT;
+			case RawPacket.FRAMETYPE_UTF8:
+				return UTF8_PT;
+			case RawPacket.FRAMETYPE_BINARY:
+				return BINARY_PT;
+			default:
+				return -1;
 		}
+	}
+
+	private static byte[] copyOf(byte[] original, int newLength) {
+		byte[] copy = new byte[newLength];
+		System.arraycopy(original, 0, copy, 0, Math.min(original.length, newLength));
+		return copy;
 	}
 }

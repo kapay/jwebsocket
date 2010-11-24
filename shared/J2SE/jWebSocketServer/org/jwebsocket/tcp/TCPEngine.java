@@ -226,42 +226,15 @@ public class TCPEngine extends BaseEngine {
 			// Since this field was introduced in draft 02, we can safely assume that
 			// it will only be supplied with clients that use draft #02 and greater.
 			if (JWebSocketCommonConstants.WS_DRAFT_02.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_DRAFT_03.equals(lDraft)) {
+					|| JWebSocketCommonConstants.WS_DRAFT_03.equals(lDraft)
+					|| JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(lDraft)) {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug("Client uses draft -" + lDraft + "- for protocol communication");
+					mLog.debug("Client uses draft-" + lDraft + " for protocol communication");
 				}
 			} else {
 				mLog.warn("Illegal handshake: header 'Sec-WebSocket-Draft' contains unrecognized value: " + lDraft);
 				return null;
 			}
-		}
-
-		// generate the websocket handshake
-		// if policy-file-request is found answer it
-		byte[] lBA = WebSocketHandshake.generateS2CResponse(lRespMap);
-		if (lBA == null) {
-			if (mLog.isDebugEnabled()) {
-				mLog.warn("TCPEngine detected illegal handshake.");
-			}
-			return null;
-		}
-
-		/* please keep comment for debugging purposes!
-		if (mLog.isDebugEnabled()) {
-		mLog.debug("Handshake Response:\n" + new String(lBA));
-		mLog.debug("Flushing initial WebSocket handshake...");
-		}
-		 */
-		lOut.write(lBA);
-		lOut.flush();
-
-		// if we detected a flash policy-file-request return "null"
-		// (no websocket header detected)
-		if (lFlashBridgeReq != null) {
-			mLog.warn("TCPEngine returned policy file response ('"
-					+ new String(lBA, "US-ASCII")
-					+ "'), check for FlashBridge plug-in.");
-			return null;
 		}
 
 		RequestHeader lHeader = new RequestHeader();
@@ -293,10 +266,6 @@ public class TCPEngine extends BaseEngine {
 			}
 		}
 
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Handshake flushed.");
-		}
-
 		// if no sub protocol given in request header , try
 		String lSubProt = (String) lRespMap.get(RequestHeader.WS_PROTOCOL);
 		if (lSubProt == null) {
@@ -306,6 +275,50 @@ public class TCPEngine extends BaseEngine {
 			lSubProt = JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/' +
 					JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
 		}
+
+		// Sub protocol header might contain multiple entries
+		// (e.g. 'jwebsocket.org/json jwebsocket.org/xml chat.example.com/custom').
+		// So, someone has to decide, which entry to use and send the client appropriate
+		// choice. Right now, we will just choose the first one if more than one are
+		// available.
+		// TODO: implement subprotocol choice handling by deferring the decision to plugins/listeners
+		if(lSubProt.indexOf(' ') != -1) {
+			lSubProt = lSubProt.split(" ")[0];
+			lRespMap.put(RequestHeader.WS_PROTOCOL, lSubProt);
+		}
+
+		// generate the websocket handshake
+		// if policy-file-request is found answer it
+		byte[] lBA = WebSocketHandshake.generateS2CResponse(lRespMap);
+		if (lBA == null) {
+			if (mLog.isDebugEnabled()) {
+				mLog.warn("TCPEngine detected illegal handshake.");
+			}
+			return null;
+		}
+
+		/* please keep comment for debugging purposes!
+		if (mLog.isDebugEnabled()) {
+		mLog.debug("Handshake Response:\n" + new String(lBA));
+		mLog.debug("Flushing initial WebSocket handshake...");
+		}
+		 */
+		lOut.write(lBA);
+		lOut.flush();
+
+		// if we detected a flash policy-file-request return "null"
+		// (no websocket header detected)
+		if (lFlashBridgeReq != null) {
+			mLog.warn("TCPEngine returned policy file response ('"
+					+ new String(lBA, "US-ASCII")
+					+ "'), check for FlashBridge plug-in.");
+			return null;
+		}
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Handshake flushed.");
+		}
+
 		lHeader.put(RequestHeader.WS_HOST, lRespMap.get(RequestHeader.WS_HOST));
 		lHeader.put(RequestHeader.WS_ORIGIN, lRespMap.get(RequestHeader.WS_ORIGIN));
 		lHeader.put(RequestHeader.WS_LOCATION, lRespMap.get(RequestHeader.WS_LOCATION));
