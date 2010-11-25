@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Token Implementation
+//	jWebSocket - Map Token Implementation
 //	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -102,8 +102,8 @@ public class MapToken extends BaseToken implements Token {
 		} else if (aValue instanceof Object[]) {
 			List lList = new FastList();
 			Object[] lOA = (Object[]) aValue;
-			for (int i = 0; i < lOA.length; i++) {
-				lList.add(getValue(lOA[i]));
+			for (int lIdx = 0; lIdx < lOA.length; lIdx++) {
+				lList.add(getValue(lOA[lIdx]));
 			}
 			aValue = lList;
 		}
@@ -153,7 +153,7 @@ public class MapToken extends BaseToken implements Token {
 			if (lResult == null) {
 				lResult = aDefault;
 			}
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -167,7 +167,7 @@ public class MapToken extends BaseToken implements Token {
 	public void setString(String aKey, String aValue) {
 		try {
 			mData.put(aKey, aValue);
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -196,7 +196,7 @@ public class MapToken extends BaseToken implements Token {
 			if (lResult == null) {
 				lResult = aDefault;
 			}
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -216,7 +216,7 @@ public class MapToken extends BaseToken implements Token {
 	public void setInteger(String aKey, Integer aValue) {
 		try {
 			mData.put(aKey, aValue);
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -235,14 +235,14 @@ public class MapToken extends BaseToken implements Token {
 			if (lObj instanceof String) {
 				lResult = Double.parseDouble((String) lObj);
 			} else if (lObj instanceof Integer) {
-				lResult = (Integer)lObj / 1.0;
+				lResult = (Integer) lObj / 1.0;
 			} else {
 				lResult = (Double) lObj;
 			}
 			if (lResult == null) {
 				lResult = aDefault;
 			}
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -262,7 +262,7 @@ public class MapToken extends BaseToken implements Token {
 	public void setDouble(String aKey, Double aValue) {
 		try {
 			mData.put(aKey, aValue);
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -281,7 +281,7 @@ public class MapToken extends BaseToken implements Token {
 			if (lResult == null) {
 				lResult = aDefault;
 			}
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -305,7 +305,7 @@ public class MapToken extends BaseToken implements Token {
 	public void setBoolean(String aKey, Boolean aValue) {
 		try {
 			mData.put(aKey, aValue);
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -319,6 +319,7 @@ public class MapToken extends BaseToken implements Token {
 	public List getList(String aKey) {
 		return getList(aKey, null);
 	}
+
 	/**
 	 *
 	 * @param aKey
@@ -333,7 +334,7 @@ public class MapToken extends BaseToken implements Token {
 			if (lResult == null) {
 				lResult = aDefault;
 			}
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -348,7 +349,7 @@ public class MapToken extends BaseToken implements Token {
 	public void setList(String aKey, List aList) {
 		try {
 			mData.put(aKey, aList);
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -367,7 +368,7 @@ public class MapToken extends BaseToken implements Token {
 			if (lResult == null) {
 				lResult = aDefault;
 			}
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			lResult = aDefault;
 		}
 		return lResult;
@@ -392,7 +393,7 @@ public class MapToken extends BaseToken implements Token {
 	public void setMap(String aKey, Map aMap) {
 		try {
 			mData.put(aKey, aMap);
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			// TODO: handle exception
 		}
 	}
@@ -419,6 +420,7 @@ public class MapToken extends BaseToken implements Token {
 	 *
 	 * @return
 	 */
+	@Override
 	public Iterator<String> getKeyIterator() {
 		return mData.keySet().iterator();
 	}
@@ -428,11 +430,12 @@ public class MapToken extends BaseToken implements Token {
 	 * @param aKey
 	 * @return
 	 */
+	@Override
 	public Object getObject(String aKey) {
 		Object lObj = null;
 		try {
 			lObj = mData.get(aKey);
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			//
 		}
 		return lObj;

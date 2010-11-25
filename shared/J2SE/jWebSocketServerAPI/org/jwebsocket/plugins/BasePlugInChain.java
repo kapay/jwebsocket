@@ -23,6 +23,7 @@ import java.util.List;
 import javolution.util.FastList;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
@@ -77,7 +78,7 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Notifying plug-ins of server '" + getServer().getId() 
+			mLog.debug("Notifying plug-ins of server '" + getServer().getId()
 					+ "' that engine '" + aEngine.getId()
 					+ "' stopped...");
 		}
@@ -86,22 +87,22 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 				try {
 					/*
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Notifying plug-in '" 
-								+ lPlugIn.getClass().getSimpleName()
-								+ "' of server '" + getServer().getId()
-								+ "' that engine '" + aEngine.getId()
-								+ "' stopped...");
+					mLog.debug("Notifying plug-in '"
+					+ lPlugIn.getClass().getSimpleName()
+					+ "' of server '" + getServer().getId()
+					+ "' that engine '" + aEngine.getId()
+					+ "' stopped...");
 					}
 					 */
 					lPlugIn.engineStopped(aEngine);
 				} catch (Exception lEx) {
-					mLog.error("Engine '" + aEngine.getId() 
+					mLog.error("Engine '" + aEngine.getId()
 							+ "' stopped (1): " + lEx.getClass().getSimpleName()
 							+ ": " + lEx.getMessage());
 				}
 			}
 		} catch (Exception lEx) {
-			mLog.error("Engine '" + aEngine.getId() 
+			mLog.error("Engine '" + aEngine.getId()
 					+ "' stopped (2): " + lEx.getClass().getSimpleName()
 					+ ": " + lEx.getMessage());
 		}
@@ -205,6 +206,22 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 	public void removePlugIn(WebSocketPlugIn aPlugIn) {
 		mPlugins.remove(aPlugIn);
 		aPlugIn.setPlugInChain(null);
+	}
+
+	/**
+	 * returns a plug-in identified by the given id.
+	 */
+	@Override
+	public WebSocketPlugIn getPlugIn(String aId) {
+		if (aId != null) {
+			for (WebSocketPlugIn lPlugIn : mPlugins) {
+				PluginConfiguration lConfig = lPlugIn.getPluginConfiguration();
+				if (lConfig != null && aId.equals(lConfig.getId())) {
+					return lPlugIn;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

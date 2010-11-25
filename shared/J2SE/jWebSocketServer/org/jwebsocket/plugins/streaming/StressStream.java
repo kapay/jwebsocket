@@ -33,10 +33,10 @@ import org.jwebsocket.token.TokenFactory;
  */
 public class StressStream extends TokenStream {
 
-	private static Logger log = Logging.getLogger(StressStream.class);
-	private Boolean isRunning = false;
-	private StressProcess stressProcess = null;
-	private Thread stressThread = null;
+	private static Logger mLog = Logging.getLogger(StressStream.class);
+	private Boolean mIsRunning = false;
+	private StressProcess mStressProcess = null;
+	private Thread mStressThread = null;
 
 	/**
 	 *
@@ -56,12 +56,12 @@ public class StressStream extends TokenStream {
 	public void startStream(long aTimeout) {
 		super.startStream(aTimeout);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Starting stress stream...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Starting stress stream...");
 		}
-		stressProcess = new StressProcess();
-		stressThread = new Thread(stressProcess);
-		stressThread.start();
+		mStressProcess = new StressProcess();
+		mStressThread = new Thread(mStressProcess);
+		mStressThread.start();
 	}
 
 	/**
@@ -69,22 +69,22 @@ public class StressStream extends TokenStream {
 	 */
 	@Override
 	public void stopStream(long aTimeout) {
-		if (log.isDebugEnabled()) {
-			log.debug("Stopping stress stream...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Stopping stress stream...");
 		}
 		long lStarted = new Date().getTime();
-		isRunning = false;
+		mIsRunning = false;
 		try {
-			stressThread.join(aTimeout);
-		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			mStressThread.join(aTimeout);
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
-		if (log.isDebugEnabled()) {
+		if (mLog.isDebugEnabled()) {
 			long lDuration = new Date().getTime() - lStarted;
-			if (stressThread.isAlive()) {
-				log.warn("stress stream did not stopped after " + lDuration + "ms.");
+			if (mStressThread.isAlive()) {
+				mLog.warn("stress stream did not stopped after " + lDuration + "ms.");
 			} else {
-				log.debug("stress stream stopped after " + lDuration + "ms.");
+				mLog.debug("stress stream stopped after " + lDuration + "ms.");
 			}
 		}
 
@@ -95,11 +95,11 @@ public class StressStream extends TokenStream {
 
 		@Override
 		public void run() {
-			if (log.isDebugEnabled()) {
-				log.debug("Running stress stream...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Running stress stream...");
 			}
-			isRunning = true;
-			while (isRunning) {
+			mIsRunning = true;
+			while (mIsRunning) {
 				try {
 					Thread.sleep(50);
 
@@ -108,12 +108,12 @@ public class StressStream extends TokenStream {
 					lToken.setString("msg", String.valueOf(new Date().getTime()));
 
 					put(lToken);
-				} catch (InterruptedException ex) {
-					log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				} catch (InterruptedException lEx) {
+					mLog.error("(run) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 				}
 			}
-			if (log.isDebugEnabled()) {
-				log.debug("stress stream stopped.");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("stress stream stopped.");
 			}
 		}
 	}

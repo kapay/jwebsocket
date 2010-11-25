@@ -19,7 +19,6 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import java.util.List;
 
-
 /**
  * A plug-in chain maintains a map of plug-ins. A server in the jWebSocket model
  * usually does not process data packets directly but forwards them to a chain
@@ -101,9 +100,16 @@ public interface WebSocketPlugInChain {
 	void removePlugIn(WebSocketPlugIn aPlugIn);
 
 	/**
+	 * returns the plug-in from the plug-in chain that matches the given
+	 * plug-in id.
+	 * @param aId
+	 * @return plug-in from the plug-in chain that matches the given plug-in id.
+	 */
+	public WebSocketPlugIn getPlugIn(String aId);
+
+	/**
 	 * 
 	 * @return
 	 */
 	WebSocketServer getServer();
-
 }

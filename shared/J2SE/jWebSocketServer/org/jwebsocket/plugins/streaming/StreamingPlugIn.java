@@ -15,12 +15,14 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.streaming;
 
+import java.util.Collections;
 import java.util.Map;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketStream;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
@@ -47,6 +49,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 	private MonitorStream mMonitorStream = null;
 	private StressStream mStressStream = null;
 	private JDBCStream mJDBCStream = null;
+	private StatisticStream mStatisticStream = null;
 
 	/**
 	 * create a new instance of the streaming plug-in and set the default name
@@ -59,6 +62,8 @@ public class StreamingPlugIn extends TokenPlugIn {
 	/**
 	 * create a new instance of the streaming plug-in and set the default name
 	 * space for the plug-in.
+	 *
+	 * @param configuration
 	 */
 	public StreamingPlugIn(PluginConfiguration configuration) {
 		super(configuration);
@@ -89,6 +94,9 @@ public class StreamingPlugIn extends TokenPlugIn {
 				// create the stream for the monitor stream demo
 				mJDBCStream = new JDBCStream("jdbcStream", lTokenServer);
 				addStream(mJDBCStream);
+				// create the stream for the statistics stream demo
+				mStatisticStream = new StatisticStream("statisticStream", lTokenServer);
+				addStream(mStatisticStream);
 				mStreamsInitialized = true;
 			}
 		}
@@ -117,10 +125,15 @@ public class StreamingPlugIn extends TokenPlugIn {
 				if (mJDBCStream != null) {
 					mJDBCStream.stopStream(3000);
 				}
+				// stop the stream for the statisticStream stream demo
+				if (mStatisticStream != null) {
+					mStatisticStream.stopStream(3000);
+				}
 				mTimeStream = null;
 				mMonitorStream = null;
 				mStressStream = null;
 				mJDBCStream = null;
+				mStatisticStream = null;
 				mStreamsInitialized = false;
 			}
 		}
@@ -136,6 +149,15 @@ public class StreamingPlugIn extends TokenPlugIn {
 		if (aStream != null && aStream.getStreamID() != null) {
 			mStreams.put(aStream.getStreamID(), aStream);
 		}
+	}
+
+	/**
+	 *
+	 * @param aStreamId
+	 * @return
+	 */
+	public WebSocketStream getStream(String aStreamId) {
+		return mStreams.get(aStreamId);
 	}
 
 	@Override
@@ -235,4 +257,12 @@ public class StreamingPlugIn extends TokenPlugIn {
 	public void engineStopped(WebSocketEngine aEngine) {
 		stopStreams();
 	}
+
+	/**
+	 * @return the map streams
+	 */
+	public Map<String, BaseStream> getStreams() {
+		return Collections.unmodifiableMap(mStreams);
+	}
+
 }

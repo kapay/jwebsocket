@@ -1,5 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Copyright (c) 2010 jwebsocket.org
+//	jWebSocket - WebSocket Handshake
+//	Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -34,6 +35,9 @@ import javolution.util.FastMap;
  */
 public final class WebSocketHandshake {
 
+	/**
+	 *
+	 */
 	public static int MAX_HEADER_SIZE = 16834;
 	private String mKey1 = null;
 	private String mKey2 = null;
@@ -44,14 +48,29 @@ public final class WebSocketHandshake {
 	private String mProtocol = null;
 	private String mDraft = null;
 
+	/**
+	 *
+	 * @param aURL
+	 */
 	public WebSocketHandshake(URI aURL) {
 		this(aURL, null, null);
 	}
 
+	/**
+	 *
+	 * @param aURL
+	 * @param aProtocol
+	 */
 	public WebSocketHandshake(URI aURL, String aProtocol) {
 		this(aURL, aProtocol, null);
 	}
 
+	/**
+	 *
+	 * @param aURL
+	 * @param aProtocol
+	 * @param aDraft
+	 */
 	public WebSocketHandshake(URI aURL, String aProtocol, String aDraft) {
 		this.mURL = aURL;
 		this.mProtocol = aProtocol;
@@ -64,7 +83,8 @@ public final class WebSocketHandshake {
 	 * Server. This is send from a Java client to the server when a connection
 	 * is about to be established. The browser's implement that internally.
 	 *
-	 * @param aURI
+	 * @param aHost
+	 * @param aPath
 	 * @return
 	 */
 	// public static byte[] generateC2SRequest(URI aURI) {
@@ -418,6 +438,11 @@ public final class WebSocketHandshake {
 	 *
 	 * @return
 	 */
+	/**
+	 *
+	 * @param aResp
+	 * @return
+	 */
 	public static Map parseS2CResponse(byte[] aResp) {
 		Map lRes = new FastMap();
 		String lResp = null;
@@ -429,6 +454,10 @@ public final class WebSocketHandshake {
 		return lRes;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public byte[] getHandshake() {
 		String lPath = mURL.getPath();
 		String lHost = mURL.getHost();
@@ -462,12 +491,22 @@ public final class WebSocketHandshake {
 		return lHandshakeBytes;
 	}
 
+	/**
+	 *
+	 * @param aBytes
+	 * @throws WebSocketException
+	 */
 	public void verifyServerResponse(byte[] aBytes) throws WebSocketException {
 		if (!Arrays.equals(aBytes, mExpectedServerResponse)) {
 			throw new WebSocketException("not a WebSocket Server");
 		}
 	}
 
+	/**
+	 *
+	 * @param aStatusLine
+	 * @throws WebSocketException
+	 */
 	public void verifyServerStatusLine(String aStatusLine) throws WebSocketException {
 		int lStatusCode = Integer.valueOf(aStatusLine.substring(9, 12));
 
@@ -480,6 +519,11 @@ public final class WebSocketHandshake {
 		}
 	}
 
+	/**
+	 *
+	 * @param aHeaders
+	 * @throws WebSocketException
+	 */
 	public void verifyServerHandshakeHeaders(Map<String, String> aHeaders) throws WebSocketException {
 		if (!aHeaders.get("Upgrade").equals("WebSocket")) {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Upgrade");

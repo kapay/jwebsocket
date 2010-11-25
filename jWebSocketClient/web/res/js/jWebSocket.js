@@ -920,6 +920,16 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::aToken:Object:Token to be processed by the plug-ins in the plug-in chain.
 	//:r:*:::void:none
 	processToken: function( aToken ) {
+
+		// TODO: Remove this temporary hack with final release 1.0
+		// TODO: this was required to ensure upward compatibility from 0.10 to 0.11
+		var lNS = aToken.ns;
+		if ( lNS != null && lNS.indexOf( "org.jWebSocket" ) == 1 ) {
+			aToken.ns = "org.jwebsocket" + lNS.substring( 15 );
+		} else if( lNS == null ) {
+			aToken.ns = "org.jwebsocket.plugins.system";
+		}
+
 		// is it a token from the system plug-in at all?
 		if( jws.NS_SYSTEM == aToken.ns ) {
 			// check welcome and goodBye tokens to manage the session

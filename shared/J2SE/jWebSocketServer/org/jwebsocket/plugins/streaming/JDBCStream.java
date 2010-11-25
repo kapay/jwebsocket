@@ -16,7 +16,6 @@
 package org.jwebsocket.plugins.streaming;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -34,10 +33,10 @@ import org.jwebsocket.token.TokenFactory;
  */
 public class JDBCStream extends TokenStream {
 
-	private static Logger log = Logging.getLogger(JDBCStream.class);
-	private Boolean isRunning = false;
-	private DBPollingProcess dbPollingProcess = null;
-	private Thread dbPollingThread = null;
+	private static Logger mLog = Logging.getLogger(JDBCStream.class);
+	private Boolean mIsRunning = false;
+	private DBPollingProcess mDbPollingProcess = null;
+	private Thread mDbPollingThread = null;
 	private Connection mConnection = null;
 
 	/**
@@ -58,23 +57,25 @@ public class JDBCStream extends TokenStream {
 	public void startStream(long aTimeout) {
 		super.startStream(aTimeout);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Starting Time stream...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Starting JDBC stream...");
 		}
 		/*
 		dbPollingProcess = new DBPollingProcess();
 		dbPollingThread = new Thread(dbPollingProcess);
 		dbPollingThread.start();
 		 */
+		/*
 		try {
-			// load the class
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			mConnection = DriverManager.getConnection(
-					"jdbc:sqlserver://host:15001;database=dbname;integratedSecurity=false;user=username;password=password;",
-					"username", "password");
-		} catch (Exception ex) {
-			log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		// load the class
+		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		mConnection = DriverManager.getConnection(
+		"jdbc:sqlserver://host:15001;database=dbname;integratedSecurity=false;user=username;password=password;",
+		"username", "password");
+		} catch (Exception lEx) {
+		log.error("(run) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
+		 */
 	}
 
 	/**
@@ -82,22 +83,22 @@ public class JDBCStream extends TokenStream {
 	 */
 	@Override
 	public void stopStream(long aTimeout) {
-		if (log.isDebugEnabled()) {
-			log.debug("Stopping Time stream...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Stopping Time stream...");
 		}
 		long lStarted = new Date().getTime();
-		isRunning = false;
+		mIsRunning = false;
 
 		try {
 			mConnection.close();
-		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
 		/*
 		try {
 		dbPollingThread.join(aTimeout);
-		} catch (Exception ex) {
-		log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (Exception lEx) {
+		log.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
 		if (log.isDebugEnabled()) {
 		long lDuration = new Date().getTime() - lStarted;
@@ -115,11 +116,11 @@ public class JDBCStream extends TokenStream {
 
 		@Override
 		public void run() {
-			if (log.isDebugEnabled()) {
-				log.debug("Running JDBC stream...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Running JDBC stream...");
 			}
-			isRunning = true;
-			while (isRunning) {
+			mIsRunning = true;
+			while (mIsRunning) {
 				try {
 					Thread.sleep(1000);
 
@@ -130,12 +131,12 @@ public class JDBCStream extends TokenStream {
 
 					// log.debug("Time streamer queues '" + lData + "'...");
 					put(lToken);
-				} catch (InterruptedException ex) {
-					log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				} catch (InterruptedException lEx) {
+					mLog.error("(run) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 				}
 			}
-			if (log.isDebugEnabled()) {
-				log.debug("JDBC stream stopped.");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("JDBC stream stopped.");
 			}
 		}
 	}

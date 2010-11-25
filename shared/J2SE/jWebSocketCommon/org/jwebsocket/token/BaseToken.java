@@ -15,16 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.token;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javolution.util.FastList;
-import javolution.util.FastMap;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  *

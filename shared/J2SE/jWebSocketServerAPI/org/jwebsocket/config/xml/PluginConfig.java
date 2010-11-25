@@ -30,98 +30,108 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  * 
  */
 public final class PluginConfig implements Config, PluginConfiguration {
-  private final String id;
-  private final String name;
-  private final String jar;
-  private final String packageName;
-  private final String namespace;
-  private final List<String> servers;
-  private final Map<String, String> settings;
 
-  /**
-   * default constructor
-   * 
-   * @param aId
-   *          the plugin id
-   * @param aName
-   *          the plugin name
-   * @param aJar
-   *          the plugin jar
-   * @param aNamespace
-   *          the namespace
-   * @param settings
-   *          FastMap of settings key and value
-   */
-  public PluginConfig(String aId, String aName, String aPackage, String aJar, String aNamespace, List<String> servers, Map<String, String> settings) {
-    this.id = aId;
-    this.name = aName;
-    this.packageName = aPackage;
-    this.jar = aJar;
-    this.namespace = aNamespace;
-    this.servers = servers;
-    this.settings = settings;
-    validate();
-  }
+	private final String mId;
+	private final String mName;
+	private final String mJar;
+	private final String mPackageName;
+	private final String mNamespace;
+	private final List<String> mServers;
+	private final Map<String, String> mSettings;
 
-  /**
-   * @return the id
-   */
-  public String getId() {
-    return id;
-  }
+	/**
+	 * default constructor
+	 *
+	 * @param aId
+	 *          the plugin id
+	 * @param aName
+	 *          the plugin name
+	 * @param aPackage
+	 * @param aJar
+	 *          the plugin jar
+	 * @param aNamespace
+	 *          the namespace
+	 * @param aServers
+	 * @param aSettings
+	 *          FastMap of settings key and value
+	 */
+	public PluginConfig(String aId, String aName, String aPackage, String aJar,
+			String aNamespace, List<String> aServers, Map<String, String> aSettings) {
+		this.mId = aId;
+		this.mName = aName;
+		this.mPackageName = aPackage;
+		this.mJar = aJar;
+		this.mNamespace = aNamespace;
+		this.mServers = aServers;
+		this.mSettings = aSettings;
+		validate();
+	}
 
-  /**
-   * @return the name
-   */
-  public String getName() {
-    return name;
-  }
+	/**
+	 * @return the id
+	 */
+	@Override
+	public String getId() {
+		return mId;
+	}
 
-  /**
-   * @return the package
-   */
-  public String getPackage() {
-    return packageName;
-  }
+	/**
+	 * @return the name
+	 */
+	@Override
+	public String getName() {
+		return mName;
+	}
 
-  /**
-   * @return the jar
-   */
-  public String getJar() {
-    return jar;
-  }
+	/**
+	 * @return the package
+	 */
+	@Override
+	public String getPackage() {
+		return mPackageName;
+	}
 
-  /**
-   * @return the namespace
-   */
-  public String getNamespace() {
-    return namespace;
-  }
+	/**
+	 * @return the jar
+	 */
+	@Override
+	public String getJar() {
+		return mJar;
+	}
 
-  /**
-   * @return the list of servers
-   */
-  public List<String> getServers() {
-    return Collections.unmodifiableList(servers);
-  }
+	/**
+	 * @return the namespace
+	 */
+	@Override
+	public String getNamespace() {
+		return mNamespace;
+	}
 
-  /**
-   * @return the settings
-   */
-  public Map<String, String> getSettings() {
-    return settings; // (FastMap)(settings.unmodifiable());
-  }
+	/**
+	 * @return the list of servers
+	 */
+	@Override
+	public List<String> getServers() {
+		return Collections.unmodifiableList(mServers);
+	}
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void validate() {
-    if ((id != null && id.length() > 0) && (name != null && name.length() > 0) && (jar != null && jar.length() > 0) 
-        && (namespace != null && namespace.length() > 0)) {
-      return;
-    }
-    throw new WebSocketRuntimeException("Missing one of the plugin configuration, please check your configuration file");
-  }
+	/**
+	 * @return the settings
+	 */
+	@Override
+	public Map<String, String> getSettings() {
+		return mSettings; // (FastMap)(settings.unmodifiable());
+	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void validate() {
+		if ((mId != null && mId.length() > 0) && (mName != null && mName.length() > 0) && (mJar != null && mJar.length() > 0)
+				&& (mNamespace != null && mNamespace.length() > 0)) {
+			return;
+		}
+		throw new WebSocketRuntimeException("Missing one of the plugin configuration, please check your configuration file");
+	}
 }

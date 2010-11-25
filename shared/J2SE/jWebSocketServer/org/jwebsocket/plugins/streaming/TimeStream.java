@@ -33,9 +33,9 @@ import org.jwebsocket.token.TokenFactory;
 public class TimeStream extends TokenStream {
 
 	private static Logger log = Logging.getLogger(TimeStream.class);
-	private Boolean isRunning = false;
-	private TimerProcess timeProcess = null;
-	private Thread timeThread = null;
+	private Boolean mIsRunning = false;
+	private TimerProcess mTimeProcess = null;
+	private Thread mTimeThread = null;
 
 	/**
 	 *
@@ -58,9 +58,9 @@ public class TimeStream extends TokenStream {
 		if (log.isDebugEnabled()) {
 			log.debug("Starting Time stream...");
 		}
-		timeProcess = new TimerProcess();
-		timeThread = new Thread(timeProcess);
-		timeThread.start();
+		mTimeProcess = new TimerProcess();
+		mTimeThread = new Thread(mTimeProcess);
+		mTimeThread.start();
 	}
 
 	/**
@@ -72,15 +72,15 @@ public class TimeStream extends TokenStream {
 			log.debug("Stopping Time stream...");
 		}
 		long lStarted = new Date().getTime();
-		isRunning = false;
+		mIsRunning = false;
 		try {
-			timeThread.join(aTimeout);
-		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			mTimeThread.join(aTimeout);
+		} catch (Exception lEx) {
+			log.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
 		if (log.isDebugEnabled()) {
 			long lDuration = new Date().getTime() - lStarted;
-			if (timeThread.isAlive()) {
+			if (mTimeThread.isAlive()) {
 				log.warn("Time stream did not stopped after " + lDuration + "ms.");
 			} else {
 				log.debug("Time stream stopped after " + lDuration + "ms.");
@@ -97,8 +97,8 @@ public class TimeStream extends TokenStream {
 			if (log.isDebugEnabled()) {
 				log.debug("Running time stream...");
 			}
-			isRunning = true;
-			while (isRunning) {
+			mIsRunning = true;
+			while (mIsRunning) {
 				try {
 					Thread.sleep(1000);
 
@@ -114,12 +114,12 @@ public class TimeStream extends TokenStream {
 					lRecord.put("int_field", 4711);
 
 					lToken.setMap("record", lRecord);
-					*/
-					
+					 */
+
 					// log.debug("Time streamer queues '" + lData + "'...");
 					put(lToken);
-				} catch (InterruptedException ex) {
-					log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				} catch (InterruptedException lEx) {
+					log.error("(run) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 				}
 			}
 			if (log.isDebugEnabled()) {

@@ -179,7 +179,8 @@ public class TokenServer extends BaseServer {
 		// i.e. a client was disconnected.
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Processing connector '" + aConnector.getId() + "' stopped...");
+				mLog.debug("Processing connector '"
+						+ aConnector.getId() + "' stopped...");
 			}
 			mPlugInChain.connectorStopped(aConnector, aCloseReason);
 		}
@@ -211,6 +212,14 @@ public class TokenServer extends BaseServer {
 	private void processToken(WebSocketConnector aConnector, Token aToken) {
 		// before forwarding the token to the plug-ins push it through filter
 		// chain
+
+		// TODO: Remove this temporary hack with final release 1.0
+		// this was required to ensure upward compatibility from 0.10 to 0.11
+		String lNS = aToken.getNS();
+		if (lNS != null && lNS.startsWith("org.jWebSocket")) {
+			aToken.setNS("org.jwebsocket" + lNS.substring(14));
+		}
+
 		FilterResponse lFilterResponse = getFilterChain().processTokenIn(aConnector, aToken);
 
 		// only forward the token to the plug-in chain

@@ -32,10 +32,10 @@ import org.jwebsocket.token.TokenFactory;
  */
 public class MonitorStream extends TokenStream {
 
-	private static Logger log = Logging.getLogger(MonitorStream.class);
-	private Boolean isRunning = false;
-	private MonitorProcess monitorProcess = null;
-	private Thread monitorThread = null;
+	private static Logger mLog = Logging.getLogger(MonitorStream.class);
+	private Boolean mIsRunning = false;
+	private MonitorProcess mMonitorProcess = null;
+	private Thread mMonitorThread = null;
 
 	/**
 	 * creates a new instance of the monitor stream.
@@ -55,12 +55,12 @@ public class MonitorStream extends TokenStream {
 	public void startStream(long aTimeout) {
 		super.startStream(aTimeout);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Starting Monitor stream...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Starting Monitor stream...");
 		}
-		monitorProcess = new MonitorProcess();
-		monitorThread = new Thread(monitorProcess);
-		monitorThread.start();
+		mMonitorProcess = new MonitorProcess();
+		mMonitorThread = new Thread(mMonitorProcess);
+		mMonitorThread.start();
 	}
 
 	/**
@@ -68,22 +68,22 @@ public class MonitorStream extends TokenStream {
 	 */
 	@Override
 	public void stopStream(long aTimeout) {
-		if (log.isDebugEnabled()) {
-			log.debug("Stopping Monitor stream...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Stopping Monitor stream...");
 		}
 		long lStarted = new Date().getTime();
-		isRunning = false;
+		mIsRunning = false;
 		try {
-			monitorThread.join(aTimeout);
-		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			mMonitorThread.join(aTimeout);
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
-		if (log.isDebugEnabled()) {
+		if (mLog.isDebugEnabled()) {
 			long lDuration = new Date().getTime() - lStarted;
-			if (monitorThread.isAlive()) {
-				log.warn("Monitor stream did not stopped after " + lDuration + "ms.");
+			if (mMonitorThread.isAlive()) {
+				mLog.warn("Monitor stream did not stopped after " + lDuration + "ms.");
 			} else {
-				log.debug("Monitor stream stopped after " + lDuration + "ms.");
+				mLog.debug("Monitor stream stopped after " + lDuration + "ms.");
 			}
 		}
 
@@ -94,11 +94,11 @@ public class MonitorStream extends TokenStream {
 
 		@Override
 		public void run() {
-			if (log.isDebugEnabled()) {
-				log.debug("Running monitor stream...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Running monitor stream...");
 			}
-			isRunning = true;
-			while (isRunning) {
+			mIsRunning = true;
+			while (mIsRunning) {
 				try {
 					Thread.sleep(1000);
 
@@ -108,27 +108,27 @@ public class MonitorStream extends TokenStream {
 
 					// collect some data to monitor
 					Runtime lRT = Runtime.getRuntime();
-					lToken.setInteger("totalMem", (int)(lRT.totalMemory() >> 10));
-					lToken.setInteger("freeMem", (int)(lRT.totalMemory() >> 10));
+					lToken.setInteger("totalMem", (int) (lRT.totalMemory() >> 10));
+					lToken.setInteger("freeMem", (int) (lRT.totalMemory() >> 10));
 
 					TokenServer lServer = getServer();
 					lToken.setInteger("clientCount", lServer.getAllConnectors().size());
 
 					File lFile = new File(".");
-					lToken.setInteger("freeDisk", (int)(lFile.getFreeSpace() >> 10));
-					lToken.setInteger("totalDisk", (int)(lFile.getTotalSpace() >> 10));
-					lToken.setInteger("usableDisk", (int)(lFile.getUsableSpace() >> 10));
+					lToken.setInteger("freeDisk", (int) (lFile.getFreeSpace() >> 10));
+					lToken.setInteger("totalDisk", (int) (lFile.getTotalSpace() >> 10));
+					lToken.setInteger("usableDisk", (int) (lFile.getUsableSpace() >> 10));
 
 					// : further tags to be continued....
 
 					put(lToken);
-				} catch (InterruptedException ex) {
-					log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				} catch (InterruptedException lEx) {
+					mLog.error("(run) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 				}
 			}
 
-			if (log.isDebugEnabled()) {
-				log.debug("Monitor stream stopped.");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Monitor stream stopped.");
 			}
 		}
 	}

@@ -38,53 +38,53 @@ import org.jwebsocket.server.BaseServer;
  */
 public class BaseStream implements WebSocketStream {
 
-	private static Logger log = Logging.getLogger(BaseStream.class);
+	private static Logger mLog = Logging.getLogger(BaseStream.class);
 	private List<WebSocketConnector> mConnectors = new FastList<WebSocketConnector>();
-	private boolean isRunning = false;
-	private String streamID = null;
+	private boolean mIsRunning = false;
+	private String mStreamID = null;
 	private final List<Object> mQueue = new FastList<Object>();
-	private Thread queueThread = null;
+	private Thread mQueueThread = null;
 
 	/**
 	 * creates a new stream with a certain id.
 	 * @param aStreamID
 	 */
 	public BaseStream(String aStreamID) {
-		this.streamID = aStreamID;
+		this.mStreamID = aStreamID;
 	}
 
 	@Override
 	public void startStream(long aTimeout) {
-		if (log.isDebugEnabled()) {
-			log.debug("Starting base stream...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Starting base stream...");
 		}
-		QueueProcessor queueProcessor = new QueueProcessor();
-		queueThread = new Thread(queueProcessor);
-		queueThread.start();
+		QueueProcessor lQueueProcessor = new QueueProcessor();
+		mQueueThread = new Thread(lQueueProcessor);
+		mQueueThread.start();
 	}
 
 	@Override
 	public void stopStream(long aTimeout) {
-		if (log.isDebugEnabled()) {
-			log.debug("Stopping base stream...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Stopping base stream...");
 		}
 		long lStarted = new Date().getTime();
-		isRunning = false;
+		mIsRunning = false;
 		synchronized (mQueue) {
 			// trigger sender thread to terminate
 			mQueue.notify();
 		}
 		try {
-			queueThread.join(aTimeout);
-		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			mQueueThread.join(aTimeout);
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
-		if (log.isDebugEnabled()) {
+		if (mLog.isDebugEnabled()) {
 			long lDuration = new Date().getTime() - lStarted;
-			if (queueThread.isAlive()) {
-				log.warn("Base stream did not stopped after " + lDuration + "ms.");
+			if (mQueueThread.isAlive()) {
+				mLog.warn("Base stream did not stopped after " + lDuration + "ms.");
 			} else {
-				log.debug("Base stream stopped after " + lDuration + "ms.");
+				mLog.debug("Base stream stopped after " + lDuration + "ms.");
 			}
 		}
 	}
@@ -161,8 +161,8 @@ public class BaseStream implements WebSocketStream {
 	protected void processConnector(WebSocketConnector aConnector, Object aObject) {
 		try {
 			aConnector.sendPacket(new RawPacket(aObject.toString()));
-		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
 	}
 
@@ -181,8 +181,8 @@ public class BaseStream implements WebSocketStream {
 
 		@Override
 		public void run() {
-			isRunning = true;
-			while (isRunning) {
+			mIsRunning = true;
+			while (mIsRunning) {
 				synchronized (mQueue) {
 					if (mQueue.size() > 0) {
 						Object lObject = mQueue.remove(0);
@@ -190,8 +190,8 @@ public class BaseStream implements WebSocketStream {
 					} else {
 						try {
 							mQueue.wait();
-						} catch (InterruptedException ex) {
-							log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+						} catch (InterruptedException lEx) {
+							mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 						}
 					}
 				}
@@ -205,6 +205,6 @@ public class BaseStream implements WebSocketStream {
 	 * @return the streamID
 	 */
 	public String getStreamID() {
-		return streamID;
+		return mStreamID;
 	}
 }

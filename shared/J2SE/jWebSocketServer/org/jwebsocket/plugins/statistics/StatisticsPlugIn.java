@@ -21,12 +21,19 @@ package org.jwebsocket.plugins.statistics;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketPlugIn;
+import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.config.JWebSocketServerConstants;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.plugins.streaming.BaseStream;
+import org.jwebsocket.plugins.streaming.StreamingPlugIn;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  *
@@ -35,10 +42,14 @@ import org.jwebsocket.token.Token;
 public class StatisticsPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(StatisticsPlugIn.class);
+	/*
 	private static String SMTP_HOST = null;
 	private static final String SMTP_HOST_KEY = "smtp_host";
+	 */
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_STATISTICS = JWebSocketServerConstants.NS_BASE + ".plugins.statistics";
+	private WebSocketPlugIn mStreamingPlugin = null;
+	private BaseStream mStream = null;
 
 	public StatisticsPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
@@ -47,11 +58,34 @@ public class StatisticsPlugIn extends TokenPlugIn {
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_STATISTICS);
-		mGetSettings();
+	//	mGetSettings();
 	}
 
 	private void mGetSettings() {
-		SMTP_HOST = getSetting(SMTP_HOST_KEY, null);
+		// SMTP_HOST = getSetting(SMTP_HOST_KEY, null);
+		// TODO: remove this hardcoded stuff!
+		WebSocketPlugInChain lPluginChain = getPlugInChain();
+		mStreamingPlugin = lPluginChain.getPlugIn("jws.streaming");
+		if (mStreamingPlugin != null) {
+			mStream = (BaseStream) ((StreamingPlugIn) mStreamingPlugin).getStream("statisticStream");
+		}
+	}
+
+	@Override
+	public void connectorStarted(WebSocketConnector aConnector) {
+		mGetSettings();
+		Token lToken = TokenFactory.createToken(NS_STATISTICS, BaseToken.TT_EVENT);
+		lToken.setString("msg", "client connected");
+		lToken.setString("connId", aConnector.getId());
+		mStream.put(lToken);
+	}
+
+	@Override
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseRease) {
+		Token lToken = TokenFactory.createToken(NS_STATISTICS, BaseToken.TT_EVENT);
+		lToken.setString("msg", "client disconnected");
+		lToken.setString("connId", aConnector.getId());
+		mStream.put(lToken);
 	}
 
 	@Override
@@ -60,7 +94,7 @@ public class StatisticsPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-	    if (lType != null && getNamespace().equals(lNS)) {
+		if (lType != null && getNamespace().equals(lNS)) {
 			// select from database
 			if (lType.equals("sendStatistics")) {
 				sendStatistics(aConnector, aToken);
@@ -76,7 +110,7 @@ public class StatisticsPlugIn extends TokenPlugIn {
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
 
-		try{
+		try {
 			lResponse.setString("id", "");
 		} catch (Exception lEx) {
 			String lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();

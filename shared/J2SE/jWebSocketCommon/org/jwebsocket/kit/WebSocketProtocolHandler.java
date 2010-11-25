@@ -1,3 +1,18 @@
+//	---------------------------------------------------------------------------
+//	jWebSocket - WebSocket Protocol Handler
+//	Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
 package org.jwebsocket.kit;
 
 import org.jwebsocket.api.WebSocketPacket;
@@ -36,13 +51,37 @@ import java.util.List;
  */
 public class WebSocketProtocolHandler {
 	// web socket protocol packet types
+
+	/**
+	 *
+	 */
 	public static final int FRAGMENT_PT = 0x00;
+	/**
+	 *
+	 */
 	public static final int CLOSE_PT = 0x01;
+	/**
+	 *
+	 */
 	public static final int PING_PT = 0x02;
+	/**
+	 *
+	 */
 	public static final int PONG_PT = 0x03;
+	/**
+	 *
+	 */
 	public static final int UTF8_PT = 0x04;
+	/**
+	 * 
+	 */
 	public static final int BINARY_PT = 0x05;
 
+	/**
+	 *
+	 * @param aDataPacket
+	 * @return
+	 */
 	public static byte[] toProtocolPacket(WebSocketPacket aDataPacket) {
 		byte[] lBuff = new byte[2]; // resulting packet will have at least 2 bytes
 		int lType = aDataPacket.getFrameType();
@@ -101,13 +140,23 @@ public class WebSocketProtocolHandler {
 	}
 
 	/* TODO: implement fragmentation */
-
-	public static List<byte[]> toProtocolPacketFragmented(WebSocketPacket src, int fragmentSize) {
+	/**
+	 *
+	 * @param aSrc
+	 * @param aFragmentSize
+	 * @return
+	 */
+	public static List<byte[]> toProtocolPacketFragmented(WebSocketPacket aSrc, int aFragmentSize) {
 		throw new UnsupportedOperationException("Fragmentation is currently not supported");
 	}
 
-	public static int toRawPacketType(int webSocketFrameType) {
-		switch (webSocketFrameType) {
+	/**
+	 *
+	 * @param aWebSocketFrameType
+	 * @return
+	 */
+	public static int toRawPacketType(int aWebSocketFrameType) {
+		switch (aWebSocketFrameType) {
 			case FRAGMENT_PT:
 				return RawPacket.FRAMETYPE_FRAGMENT;
 			case CLOSE_PT:
@@ -126,15 +175,25 @@ public class WebSocketProtocolHandler {
 		}
 	}
 
-	public static int toRawPacketType(String jWebSocketFormatConstant) {
-		return JWebSocketCommonConstants.WS_FORMAT_BINARY.equals(jWebSocketFormatConstant)
+	/**
+	 *
+	 * @param aJWebSocketFormatConstant
+	 * @return
+	 */
+	public static int toRawPacketType(String aJWebSocketFormatConstant) {
+		return JWebSocketCommonConstants.WS_FORMAT_BINARY.equals(aJWebSocketFormatConstant)
 				? RawPacket.FRAMETYPE_BINARY
 				// treat everything else as utf8 packet type
 				: RawPacket.FRAMETYPE_UTF8;
 	}
 
-	public static int toWebSocketFrameType(int rawPacketType) {
-		switch (rawPacketType) {
+	/**
+	 *
+	 * @param aRawPacketType
+	 * @return
+	 */
+	public static int toWebSocketFrameType(int aRawPacketType) {
+		switch (aRawPacketType) {
 			case RawPacket.FRAMETYPE_CLOSE:
 				return CLOSE_PT;
 			case RawPacket.FRAMETYPE_PING:
@@ -150,9 +209,9 @@ public class WebSocketProtocolHandler {
 		}
 	}
 
-	private static byte[] copyOf(byte[] original, int newLength) {
-		byte[] copy = new byte[newLength];
-		System.arraycopy(original, 0, copy, 0, Math.min(original.length, newLength));
-		return copy;
+	private static byte[] copyOf(byte[] aOriginal, int aNewLength) {
+		byte[] lCopy = new byte[aNewLength];
+		System.arraycopy(aOriginal, 0, lCopy, 0, Math.min(aOriginal.length, aNewLength));
+		return lCopy;
 	}
 }

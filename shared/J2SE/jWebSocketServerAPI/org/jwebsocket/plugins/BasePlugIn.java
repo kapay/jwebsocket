@@ -45,7 +45,6 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	public BasePlugIn() {
 	}
 	 */
-
 	/**
 	 * Constructor
 	 *
@@ -60,12 +59,12 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	/**
 	 * {@inheritDoc}
 	 */
-/*
+	/*
 	@Override
 	public void setPluginConfiguration(PluginConfiguration aConfiguration) {
-		this.mConfiguration = aConfiguration;
+	this.mConfiguration = aConfiguration;
 	}
-*/
+	 */
 	/**
 	 * {@inheritDoc}
 	 */

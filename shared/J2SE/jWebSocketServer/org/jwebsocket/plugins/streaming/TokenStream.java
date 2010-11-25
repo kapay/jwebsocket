@@ -36,8 +36,8 @@ import org.jwebsocket.token.Token;
  */
 public class TokenStream extends BaseStream {
 
-	private static Logger log = Logging.getLogger(TokenStream.class);
-	private TokenServer server = null;
+	private static Logger mLog = Logging.getLogger(TokenStream.class);
+	private TokenServer mServer = null;
 
 	/**
 	 * creates a new instance of the TokenStream. In Addition to the
@@ -48,15 +48,15 @@ public class TokenStream extends BaseStream {
 	 */
 	public TokenStream(String aStreamID, TokenServer aServer) {
 		super(aStreamID);
-		server = aServer;
+		mServer = aServer;
 	}
 
 	@Override
 	protected void processConnector(WebSocketConnector aConnector, Object aObject) {
 		try {
 			getServer().sendToken(aConnector, (Token) aObject);
-		} catch (Exception ex) {
-			log.error("(processConnector) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		} catch (Exception lEx) {
+			mLog.error("(processConnector) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
 	}
 
@@ -65,6 +65,6 @@ public class TokenStream extends BaseStream {
 	 * @return the server
 	 */
 	public TokenServer getServer() {
-		return server;
+		return mServer;
 	}
 }
