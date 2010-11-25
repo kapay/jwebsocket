@@ -44,29 +44,30 @@ import org.jwebsocket.util.Tools;
  * 
  ************************ PUBLISHER OPERATION***********************************
  * 
- * Token Type : <tt>publisher</tt> Namespace :
- * <tt>org.jwebsocket.plugins.channel</tt>
+ * Token Type : <tt>publisher</tt> 
+ * Namespace :  <tt>org.jwebsocket.plugins.channel</tt>
  * 
- * Token Key : <tt>event</tt> Token Value : <tt>[authorize][publish][stop]</tt>
+ * Token Key :  <tt>event</tt> 
+ * Token Value : <tt>[authorize][publish][stop]</tt>
  * 
  * <tt>authorize</tt> event command is used for authorization of client before
- * publishing a data to the channel publisher client has to authorize itself
+ * publishing a data to the channel, publisher client has to authorize itself
  * using <tt>secret_key</tt>, <tt>access_key</tt> and <tt>login</tt> which is
  * registered in the jWebSocket server system via configuration file or from
  * other jWebSocket components.
  * 
  * <tt>Token Request Includes:</tt>
  * 
- * Token Key : <tt>channel<tt>
+ * Token Key    : <tt>channel<tt>
  * Token Value  : <tt>channel id to authorize for</tt>
  * 
- * Token Key : <tt>secret_key<tt>
+ * Token Key    : <tt>secret_key<tt>
  * Token Value  : <tt>value of the secret key</tt>
  * 
- * Token Key : <tt>access_key<tt>
+ * Token Key    : <tt>access_key<tt>
  * Token Value  : <tt>value of the access key</tt>
  * 
- * Token Key : <tt>login<tt>
+ * Token Key    : <tt>login<tt>
  * Token Value  : <tt>login name or id of the jWebSocket registered user</tt>
  * 
  * <tt>publish</tt>: publish event means publisher client has been authorized
@@ -74,10 +75,12 @@ import org.jwebsocket.util.Tools;
  * <tt>data</tt>. If the channel registered is not started then it is started
  * when publish command is received for the first time.
  * 
- * <tt>Token Request Includes:</tt> Token Key : <tt>channel<tt>
+ * <tt>Token Request Includes:</tt> 
+ * 
+ * Token Key    : <tt>channel<tt>
  * Token Value  : <tt>channel id to publish the data</tt>
  * 
- * Token Key : <tt>data<tt>
+ * Token Key    : <tt>data<tt>
  * Token Value  : <tt>data to publish to the channel</tt>
  * 
  * <tt>stop</tt>: stop event means proper shutdown of channel and no more data
@@ -516,8 +519,8 @@ public class ChannelPlugIn extends TokenPlugIn {
         }
         welcome.setInteger("timeout", aConnector.getEngine().getConfiguration().getTimeout());
 
-        channelManager.getLoggerChannel().broadcastToken(welcome);
-        sendToken(aConnector, aConnector, welcome);
+        ChannelManager.getLoggerChannel().broadcastToken(welcome);
+        sendTokenAsync(aConnector, aConnector, welcome);
     }
 
 }
