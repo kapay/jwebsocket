@@ -65,14 +65,13 @@ public class JDBCStream extends TokenStream {
 		dbPollingProcess = new DBPollingProcess();
 		dbPollingThread = new Thread(dbPollingProcess);
 		dbPollingThread.start();
-		*/
+		 */
 		try {
 			// load the class
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			mConnection = DriverManager.getConnection(
-					"jdbc:sqlserver://logikmedia.no-ip.org:15001;database=PennyAuction;integratedSecurity=false;user=sa;password=mjhy6tfc;",
-					"sa",
-					"mjhy6tfc");
+					"jdbc:sqlserver://host:15001;database=dbname;integratedSecurity=false;user=username;password=password;",
+					"username", "password");
 		} catch (Exception ex) {
 			log.error("(run) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
@@ -96,19 +95,19 @@ public class JDBCStream extends TokenStream {
 		}
 		/*
 		try {
-			dbPollingThread.join(aTimeout);
+		dbPollingThread.join(aTimeout);
 		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		}
 		if (log.isDebugEnabled()) {
-			long lDuration = new Date().getTime() - lStarted;
-			if (dbPollingThread.isAlive()) {
-				log.warn("JDBC stream did not stopped after " + lDuration + "ms.");
-			} else {
-				log.debug("JDBC stream stopped after " + lDuration + "ms.");
-			}
+		long lDuration = new Date().getTime() - lStarted;
+		if (dbPollingThread.isAlive()) {
+		log.warn("JDBC stream did not stopped after " + lDuration + "ms.");
+		} else {
+		log.debug("JDBC stream stopped after " + lDuration + "ms.");
 		}
-		*/
+		}
+		 */
 		super.stopStream(aTimeout);
 	}
 
