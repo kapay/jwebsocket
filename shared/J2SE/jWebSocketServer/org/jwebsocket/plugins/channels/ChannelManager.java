@@ -22,8 +22,6 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.config.xml.ChannelConfig;
-import org.jwebsocket.security.Right;
-import org.jwebsocket.security.Rights;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.security.User;
 import org.jwebsocket.token.Token;
@@ -72,9 +70,6 @@ public class ChannelManager {
     /** setting to check if new channel creation or registration is allowed */
     public static boolean allowNewChannels;
 
-    /**
-     * don't allow this
-     */
     private ChannelManager(Map<String, String> settings) {
         this.channelPluginSettings = new ConcurrentHashMap<String, String>(settings);
         String value1 = channelPluginSettings.get(USE_PERSISTENT_STORE);
@@ -121,21 +116,6 @@ public class ChannelManager {
                     systemChannels.put(channel.getId(), channel);
                 }
             }
-        }
-    }
-
-    /**
-     * Starts the given channel for the given owner. This method first checks if
-     * the given channel can be started based on owner information
-     * 
-     * @param channel
-     * @param user
-     * @throws ChannelLifeCycleException
-     */
-    public void start(Channel channel, String user) throws ChannelLifeCycleException {
-        if (!allowNewChannels) {
-            throw new ChannelLifeCycleException(
-                    "New channels are not allowed to start. Please check the configuration or contact admin");
         }
     }
 
@@ -358,43 +338,4 @@ public class ChannelManager {
 
         return token;
     }
-
-    public void channelStopped(Channel channel, String user) throws ChannelException {
-        User userObj = SecurityFactory.getUser(user);
-        if (userObj == null) {
-            throw new ChannelException("User:[" + user + "] doesn't exist, please check the configuration");
-        } else {
-            Rights rights = SecurityFactory.getUserRights(user);
-            Right right = rights.get("org.jwebsocket.plugins.channel.stop");
-            if (right == null) {
-                throw new ChannelException("User:[" + user + "] does not have rights to stop the channel");
-            } else {
-                // verify the owner
-                if (!channel.getOwner().equals(user)) {
-                    throw new ChannelException("User:[" + user + "] is not a owner of this channel,"
-                            + "Only owner of the channel can stop the channel");
-                }
-            }
-        }
-    }
-
-    public void channelSuspended(Channel channel, String user) throws ChannelException {
-        User userObj = SecurityFactory.getUser(user);
-        if (userObj == null) {
-            throw new ChannelException("User:[" + user + "] doesn't exist, please check the configuration");
-        } else {
-            Rights rights = SecurityFactory.getUserRights(user);
-            Right right = rights.get("org.jwebsocket.plugins.channel.suspend");
-            if (right == null) {
-                throw new ChannelException("User:[" + user + "] does not have rights to suspend the channel");
-            } else {
-                // verify the owner
-                if (!channel.getOwner().equals(user)) {
-                    throw new ChannelException("User:[" + user + "] is not a owner of this channel,"
-                            + "Only owner of the channel can suspend the channel");
-                }
-            }
-        }
-    }
-
 }

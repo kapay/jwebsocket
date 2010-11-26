@@ -36,7 +36,7 @@ public final class Publisher {
 
     public Publisher(WebSocketConnector connector, String login, String channel, Date authorizedDate,
             Date lastPublishedDate, boolean authorized) {
-        this.id = connector.getId();
+        this.id = connector.getSession().getSessionId();
         this.login = login;
         this.channel = channel;
         this.connector = connector;

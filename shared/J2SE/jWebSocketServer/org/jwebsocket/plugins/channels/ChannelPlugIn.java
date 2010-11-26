@@ -265,7 +265,7 @@ public class ChannelPlugIn extends TokenPlugIn {
             
         } else if (PUBLISH.equals(event)) {
             Channel channel = channelManager.getChannel(channelId);
-            Publisher publisher = channelManager.getPublisher(aConnector.getId());
+            Publisher publisher = channelManager.getPublisher(aConnector.getSession().getSessionId());
             
             if (publisher == null || !publisher.isAuthorized()) {
                 sendError(aConnector, channelId, "[" + aConnector.getId()
@@ -280,7 +280,7 @@ public class ChannelPlugIn extends TokenPlugIn {
             channel.broadcastToken(dataToken);
             
         } else if (STOP.equals(event)) {
-            Publisher publisher = channelManager.getPublisher(aConnector.getId());
+            Publisher publisher = channelManager.getPublisher(aConnector.getSession().getSessionId());
             Channel channel = channelManager.getChannel(channelId);
             if (channel == null) {
                 sendError(aConnector, channelId, "[" + aConnector.getId() + "] channel not found for given channelId:["
@@ -304,6 +304,7 @@ public class ChannelPlugIn extends TokenPlugIn {
                 Token errorToken = channelManager.getErrorToken(aConnector, channelId, "[" + aConnector.getId()
                         + "] Error stopping channel:[" + channelId + "] from publisher:[" + publisher.getId() + "]");
                 channelManager.publishToLoggerChannel(errorToken);
+                sendTokenAsync(aConnector, aConnector, errorToken);
             }
         }
     }

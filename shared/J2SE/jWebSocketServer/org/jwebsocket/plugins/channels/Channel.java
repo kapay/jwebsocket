@@ -71,7 +71,7 @@ public final class Channel implements ChannelLifeCycle {
     private String accessKey;
     private long createdDate;
     private String owner;
-    private boolean authenticated = false;
+    private volatile boolean authenticated = false;
 
     private List<Subscriber> subscribers;
     private List<Publisher> publishers;
