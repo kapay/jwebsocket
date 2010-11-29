@@ -1,4 +1,3 @@
-
 package org.jwebsocket.eventmodel.factory;
 
 import org.jwebsocket.eventmodel.events.WebSocketEvent;
@@ -9,102 +8,105 @@ import org.jwebsocket.logging.Logging;
 import org.apache.log4j.Logger;
 import org.jwebsocket.eventmodel.context.EventModel;
 
-
 /**
  *
  * @author Itachi
  */
 public class EventFactory {
 
-  private EventModel em;
-  private EventsMap events;
-  public static final String CONNECTOR_KEY = "CONNECTOR";
-  private static Logger mLog = Logging.getLogger(EventFactory.class);
+	private EventModel em;
+	private EventsMap events;
+	
+	private static Logger mLog = Logging.getLogger(EventFactory.class);
 
-  public Token eventToToken(WebSocketEvent aEvent){
-    return aEvent.getToken();
-  }
+	public Token eventToToken(WebSocketEvent aEvent) {
+		return aEvent.getToken();
+	}
 
-  public Token eventToToken(WebSocketResponseEvent aEvent){
-    return aEvent.getToken();
-  }
+	public Token eventToToken(WebSocketResponseEvent aEvent) {
+		return aEvent.getToken();
+	}
 
-  public WebSocketEvent tokenToEvent(Token aToken) throws Exception{
-    String aType = aToken.getType();
-    WebSocketEvent event = stringToEvent(aType);
-    event.setSubject(aToken.getNS());
-    event.setToken(aToken);
+	public WebSocketEvent tokenToEvent(Token aToken) throws Exception {
+		String aType = aToken.getType();
+		WebSocketEvent event = stringToEvent(aType);
+		event.setSubject(aToken.getNS());
+		event.setToken(aToken);
 
-    return event;
-  }
+		return event;
+	}
 
-  public WebSocketEvent stringToEvent(String aEventId) throws Exception{
-    if (mLog.isDebugEnabled())
-      mLog.debug(">> Creating instance for event: '" + aEventId + "'...");
-    
-    WebSocketEvent e  = getEvents().getMap().get(aEventId).getClass().newInstance();
-    e.setId(aEventId);
-    e.initialize();
-    
-    return e;
-  }
+	public WebSocketEvent stringToEvent(String aEventId) throws Exception {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug(">> Creating instance for event: '" + aEventId + "'...");
+		}
 
-  public String eventToString(WebSocketEvent aEvent){
-    return aEvent.getId();
-  }
+		WebSocketEvent e = getEvents().getMap().get(aEventId).getClass().newInstance();
+		e.setId(aEventId);
+		e.initialize();
 
-  public String eventToString(Class aEventClass){
-    Object[] keys   = getEvents().getMap().keySet().toArray();
-    Object[] values = getEvents().getMap().values().toArray();
+		return e;
+	}
 
-    int index = 0;
-    for (Object o : values){
-      if (o.getClass().equals(aEventClass))
-        return (String)keys[index];
+	public String eventToString(WebSocketEvent aEvent) {
+		return aEvent.getId();
+	}
 
-      index++;
-    }
-    throw new IndexOutOfBoundsException();
-  }
+	public String eventToString(Class aEventClass) throws Exception {
+		Object[] keys = getEvents().getMap().keySet().toArray();
+		Object[] values = getEvents().getMap().values().toArray();
 
-  public WebSocketResponseEvent createResponseEvent(WebSocketEvent aEvent){
-    WebSocketResponseEvent aResponse = new WebSocketResponseEvent();
-    aResponse.setId(aEvent.getId());
-    aResponse.setToken(getEm().getParent().getServer().createResponse(aEvent.getToken()));
+		int index = 0;
+		for (Object o : values) {
+			if (o.getClass().equals(aEventClass)) {
+				return (String) keys[index];
+			}
 
-    return aResponse;
-  }
+			index++;
+		}
+		throw new IndexOutOfBoundsException();
+	}
 
-  /**
-   * @return the events
-   */
-  public EventsMap getEvents() {
-    return events;
-  }
+	public WebSocketResponseEvent createResponseEvent(WebSocketEvent aEvent) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug(">> Creating instance for response event: '" + aEvent.getId() + "'...");
+		}
+		WebSocketResponseEvent aResponse = new WebSocketResponseEvent();
+		aResponse.setId(aEvent.getId());
+		aResponse.setToken(getEm().getParent().getServer().createResponse(aEvent.getToken()));
 
-  /**
-   * @param events the events to set
-   */
-  public void setEvents(EventsMap events) {
-    this.events = events;
-  }
+		return aResponse;
+	}
 
-  public boolean hasEvent(String aEventId){
-    return events.getMap().containsKey(aEventId);
-  }
+	/**
+	 * @return the events
+	 */
+	public EventsMap getEvents() {
+		return events;
+	}
 
-  /**
-   * @return the em
-   */
-  public EventModel getEm() {
-    return em;
-  }
+	/**
+	 * @param events the events to set
+	 */
+	public void setEvents(EventsMap events) {
+		this.events = events;
+	}
 
-  /**
-   * @param em the em to set
-   */
-  public void setEm(EventModel em) {
-    this.em = em;
-  }
+	public boolean hasEvent(String aEventId) {
+		return events.getMap().containsKey(aEventId);
+	}
+
+	/**
+	 * @return the em
+	 */
+	public EventModel getEm() {
+		return em;
+	}
+
+	/**
+	 * @param em the em to set
+	 */
+	public void setEm(EventModel em) {
+		this.em = em;
+	}
 }
-

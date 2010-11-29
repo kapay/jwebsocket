@@ -1,4 +1,3 @@
-
 package org.jwebsocket.eventmodel.api;
 
 import org.jwebsocket.eventmodel.observable.Event;
@@ -10,6 +9,5 @@ import org.jwebsocket.eventmodel.observable.ResponseEvent;
  */
 public interface IListener {
 
-  public void processEvent(Event aEvent, ResponseEvent aResponseEvent);
-
+	public void processEvent(Event aEvent, ResponseEvent aResponseEvent);
 }

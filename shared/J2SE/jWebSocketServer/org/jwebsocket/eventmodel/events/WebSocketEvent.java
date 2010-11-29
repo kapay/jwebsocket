@@ -1,4 +1,3 @@
-
 package org.jwebsocket.eventmodel.events;
 
 import org.jwebsocket.eventmodel.observable.Event;
@@ -12,74 +11,74 @@ import org.jwebsocket.token.Token;
  *
  * @author Itachi
  */
- public class WebSocketEvent extends Event implements IInitializable{
+public abstract class WebSocketEvent extends Event implements IInitializable {
 
-   private Set<Argument> argsValidation     = new HashSet<Argument>();
-   private Set<Argument> responseValidation = new HashSet<Argument>();
-   private boolean responseRequired         = false;
-   private Token token;
+	private Set<Argument> argsValidation = new HashSet<Argument>();
+	private Set<Argument> responseValidation = new HashSet<Argument>();
+	private boolean responseRequired = false;
+	private Token token;
 
-   @Override
-   public void initialize(){}
+	@Override
+	public void initialize() {
+	}
 
-   @Override
-   public void shutdown(){}
+	@Override
+	public void shutdown() {
+	}
 
-   
-  /**
-   * @return the argsValidation
-   */
-  public Set<Argument> getArgsValidation() {
-    return argsValidation;
-  }
+	/**
+	 * @return the argsValidation
+	 */
+	public Set<Argument> getArgsValidation() {
+		return argsValidation;
+	}
 
-  /**
-   * @param argsValidation the argsValidation to set
-   */
-  public void setArgsValidation(Set<Argument> argsValidation) {
-    this.argsValidation = argsValidation;
-  }
+	/**
+	 * @param argsValidation the argsValidation to set
+	 */
+	public void setArgsValidation(Set<Argument> argsValidation) {
+		this.argsValidation = argsValidation;
+	}
 
-  /**
-   * @return the responseValidation
-   */
-  public Set<Argument> getResponseValidation() {
-    return responseValidation;
-  }
+	/**
+	 * @return the responseValidation
+	 */
+	public Set<Argument> getResponseValidation() {
+		return responseValidation;
+	}
 
-  /**
-   * @param responseValidation the responseValidation to set
-   */
-  public void setResponseValidation(Set<Argument> responseValidation) {
-    this.responseValidation = responseValidation;
-  }
+	/**
+	 * @param responseValidation the responseValidation to set
+	 */
+	public void setResponseValidation(Set<Argument> responseValidation) {
+		this.responseValidation = responseValidation;
+	}
 
-  /**
-   * @return the responseRequired
-   */
-  public boolean isResponseRequired() {
-    return responseRequired;
-  }
+	/**
+	 * @return the responseRequired
+	 */
+	public boolean isResponseRequired() {
+		return responseRequired;
+	}
 
-  /**
-   * @param responseRequired the responseRequired to set
-   */
-  public void setResponseRequired(boolean responseRequired) {
-    this.responseRequired = responseRequired;
-  }
+	/**
+	 * @param responseRequired the responseRequired to set
+	 */
+	public void setResponseRequired(boolean responseRequired) {
+		this.responseRequired = responseRequired;
+	}
 
-  /**
-   * @return the token
-   */
-  public Token getToken() {
-    return token;
-  }
+	/**
+	 * @return the token
+	 */
+	public Token getToken() {
+		return token;
+	}
 
-  /**
-   * @param token the token to set
-   */
-  public void setToken(Token token) {
-    this.token = token;
-  }
-
+	/**
+	 * @param token the token to set
+	 */
+	public void setToken(Token token) {
+		this.token = token;
+	}
 }

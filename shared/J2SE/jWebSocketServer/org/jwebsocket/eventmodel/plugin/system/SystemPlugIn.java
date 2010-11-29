@@ -3,7 +3,6 @@ package org.jwebsocket.eventmodel.plugin.system;
 
 import org.jwebsocket.eventmodel.plugin.EventModelPlugIn;
 import org.jwebsocket.eventmodel.events.GetPlugInAPI;
-import org.jwebsocket.eventmodel.factory.EventFactory;
 import java.util.LinkedList;
 import java.util.HashMap;
 import javolution.util.FastMap;
@@ -13,6 +12,7 @@ import org.jwebsocket.eventmodel.events.WebSocketEvent;
 import org.jwebsocket.eventmodel.events.WebSocketResponseEvent;
 import org.jwebsocket.logging.Logging;
 import org.apache.log4j.Logger;
+import org.jwebsocket.eventmodel.util.EmConstants;
 
 /**
  *
@@ -61,7 +61,7 @@ public class SystemPlugIn extends EventModelPlugIn{
         api.put(key, temp);
       }
       aResponseEvent = (WebSocketResponseEvent)aResponseEvent;
-      aResponseEvent.getTo().add((WebSocketConnector)aEvent.getArgs().get(EventFactory.CONNECTOR_KEY));
+      aResponseEvent.getTo().add((WebSocketConnector)aEvent.getArgs().get(EmConstants.CONNECTOR_KEY));
       aResponseEvent.getToken().setMap("api", api);
       aResponseEvent.setCode(WebSocketResponseEvent.OK);
     }

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+  <!-- Core -->
+	<bean id="EventModel" class="org.jwebsocket.eventmodel.context.EventModel" destroy-method="shutdown">
+		<property name="eventFactory" ref="EventFactory" />
+		<property name="filterChain">
+			<set>
+				<ref bean="RouterFilter" />
+				<ref bean="SecurityFilter" />
+				<ref bean="CacheFilter" />
+				<ref bean="ValidatorFilter" />
+			</set>
+		</property>
+		<property name="plugIns">
+			<set>
+				<ref bean="AuthPlugIn" />
+				<ref bean="SystemPlugIn" />
+			</set>
+		</property>
+		<property name="maxExecutionTime" value="60" />
+	</bean>
+
+	<bean id="EventFactory" class="org.jwebsocket.eventmodel.factory.EventFactory">
+		<property name="events" ref="EventsMap" />
+		<property name="em" ref="EventModel" />
+		
+	</bean>
+
+	<bean id="EventsMap" class="org.jwebsocket.eventmodel.events.EventsMap" init-method="initialize">
+		<property name="map">
+			<map>
+				<entry key="connector.started" value-ref="eConnectorStarted"/>
+				<entry key="connector.stopped" value-ref="eConnectorStopped"/>
+				<entry key="engine.started" value-ref="eEngineStarted"/>
+				<entry key="engine.stopped" value-ref="eEngineStopped"/>
+				<entry key="before.process.event" value-ref="eBeforeProcessEvent"/>
+				<entry key="after.process.event" value-ref="eAfterProcessEvent"/>
+				<entry key="auth.logon" value-ref="eLogon"/>
+				<entry key="auth.logoff" value-ref="eLogoff"/>
+				<entry key="plugin.getapi" value-ref="eGetPlugInAPI"/>
+			</map>
+		</property>
+	</bean>
+
+  <!--  Filters-->
+	<bean id="RouterFilter" class="org.jwebsocket.eventmodel.filter.router.RouterFilter">
+		<property name="id" value="router" />
+		<property name="em" ref="EventModel" />
+	</bean>
+	<bean id="SecurityFilter" class="org.jwebsocket.eventmodel.filter.security.SecurityFilter">
+		<property name="id" value="security" />
+		<property name="em" ref="EventModel" />
+	</bean>
+	<bean id="ValidatorFilter" class="org.jwebsocket.eventmodel.filter.validator.ValidatorFilter">
+		<property name="id" value="validator" />
+		<property name="em" ref="EventModel" />
+	</bean>
+	<bean id="CacheFilter" class="org.jwebsocket.eventmodel.filter.cache.CacheFilter">
+		<property name="id" value="cache" />
+		<property name="em" ref="EventModel" />
+	</bean>
+
+  <!--  PlugIns-->
+	<bean id="AuthPlugIn" class="org.jwebsocket.eventmodel.plugin.auth.AuthPlugIn"
+        init-method="initialize" destroy-method="shutdown">
+		<property name="id" value="auth" />
+		<property name="em" ref="EventModel" />
+	</bean>
+	<bean id="SystemPlugIn" class="org.jwebsocket.eventmodel.plugin.system.SystemPlugIn"
+        init-method="initialize" destroy-method="shutdown">
+		<property name="id" value="system" />
+		<property name="em" ref="EventModel" />
+	</bean>
+
+<!--  Events-->
+	<bean id="eConnectorStarted" class="org.jwebsocket.eventmodel.events.ConnectorStarted" />
+	<bean id="eConnectorStopped" class="org.jwebsocket.eventmodel.events.ConnectorStopped" />
+	<bean id="eEngineStarted" class="org.jwebsocket.eventmodel.events.EngineStarted" />
+	<bean id="eEngineStopped" class="org.jwebsocket.eventmodel.events.EngineStopped" />
+	<bean id="eBeforeProcessEvent" class="org.jwebsocket.eventmodel.events.BeforeProcessEvent" />
+	<bean id="eAfterProcessEvent" class="org.jwebsocket.eventmodel.events.AfterProcessEvent" />
+	<bean id="eLogon" class="org.jwebsocket.eventmodel.events.Logon" />
+	<bean id="eLogoff" class="org.jwebsocket.eventmodel.events.Logoff" />
+	<bean id="eGetPlugInAPI" class="org.jwebsocket.eventmodel.events.GetPlugInAPI" />
+  
+</beans>

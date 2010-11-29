@@ -1,4 +1,3 @@
-
 package org.jwebsocket.eventmodel.api;
 
 /**
@@ -7,9 +6,7 @@ package org.jwebsocket.eventmodel.api;
  */
 public interface IInitializable {
 
-  public void initialize() throws Exception;
+	public void initialize() throws Exception;
 
-  public void shutdown() throws Exception;
-
+	public void shutdown() throws Exception;
 }
-
