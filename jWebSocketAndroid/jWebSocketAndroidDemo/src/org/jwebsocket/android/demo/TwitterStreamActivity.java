@@ -113,7 +113,7 @@ public class TwitterStreamActivity extends ListActivity implements
 
     public void processToken(WebSocketClientEvent aEvent, Token aToken) {
         if(aToken.getNS().equals("org.jwebsocket.plugins.twitter") && aToken.getType().equals("event") && aToken.getString("name").equals("status")){
-            tweetAdapter.add(new Tweet(aToken.getString("status")));
+            tweets.add(0, new Tweet(aToken.getString("status")));            
             tweetAdapter.notifyDataSetChanged();
         }
         //fillDemoTweets();
