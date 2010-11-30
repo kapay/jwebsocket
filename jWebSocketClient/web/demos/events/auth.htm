@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD html 4.01//EN" "http://www.w3.org/TR/html4/transitional.dtd">
+<!-- saved from url=(0076)file:///D:/Work/java/EventServer/jWebSocketClient-0.11/demos/events/auth.htm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
+		<!-- If Google's chrome frame installed, use it! -->
+		<!-- Comment needs to be BELOW this meta tag! -->
+<!--
+//	****************************************************************************
+//	jWebSocket Mail Demo (uses jWebSocket Client and Server)
+//	(C) 2010 Alexander Schulze, jWebSocket.org, Innotrade GmbH, Herzogenrath
+//	****************************************************************************
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	****************************************************************************
+-->
+<meta http-equiv="Content-Language" content="en">
+
+<title>Events Auth PlugIn Demo</title>
+<link rel="stylesheet" type="text/css" href="./Events Auth PlugIn Demo_files/jwebsocket.css">
+<!-- load the jWebSocket JavaScript client library -->
+<script type="text/javascript" src="./Events Auth PlugIn Demo_files/jWebSocket.js"></script>
+<!--load the ExtJs core library-->
+<script type="text/javascript" src="./Events Auth PlugIn Demo_files/extCore311.js"></script>
+<!-- this one imports the client side twitter plug-in -->
+<script type="text/javascript" src="./Events Auth PlugIn Demo_files/jwsEventsAuthPlugIn.js"></script>
+<script type="text/javascript" language="JavaScript">
+
+  var eLog = null;
+
+  function log( aString ) {
+    eLog.innerHTML += aString + "<br>";
+    if( eLog.scrollHeight > eLog.clientHeight ) {
+      eLog.scrollTop = eLog.scrollHeight - eLog.clientHeight;
+    }
+  }
+
+  function clearLog() {
+    eLog.innerHTML = "";
+    eLog.scrollTop = 0;
+  }
+
+  function logon() {
+    eUsername = jws.$( "stxfUsername" )
+    ePassword = jws.$( "spwfPassword" )
+
+    jws.AuthPlugInInstance.notify(jws.AuthPlugInInstance.events.LOGON, {
+      args: {
+        username: eUsername.value,
+        password: ePassword.value
+      },
+      OnResponse: function(aResponseToken){
+        log(aResponseToken.toString())
+      }
+    })
+  }
+
+  function getAPI() {
+    jws.AuthPlugInInstance.notify("plugin.getapi", {
+      args: {
+        plugin_id: "system"
+      },
+      OnResponse: function(aResponseToken){
+        log(aResponseToken.toString())
+      }
+    })
+  }
+
+  function logoff() {
+    jws.AuthPlugInInstance.notify(jws.AuthPlugInInstance.events.LOGOFF, {
+      OnResponse: function(aResponseToken){
+        log(aResponseToken.toString())
+      }
+    })
+  }
+
+  function initPage() {
+    eLog = jws.$( "sdivLog" );
+
+    if(jws.browserSupportsWebSockets()){
+      jws.myConn = new jws.jWebSocketJSONClient();
+      jws.myConn.open(jws.JWS_SERVER_URL, {
+        OnOpen: function (){
+          log(">>> Connected successfully!")
+        }
+      })
+
+      jws.AuthPlugInInstance = new jws.EventsAuthPlugIn({
+        client: jws.myConn
+        ,ns    : jws.NS_BASE + ".eventmodel.plugin.auth"
+        ,events: {
+          LOGON : "auth.logon",
+          LOGOFF: "auth.logoff"
+        }
+      })
+      jws.AuthPlugInInstance.initialize()
+      
+    } else {
+      jws.$( "sbtnLogon" ).setAttribute( "disabled", "disabled" );
+      jws.$( "sbtnLogoff" ).setAttribute( "disabled", "disabled" );
+      jws.$( "sbtnClear" ).setAttribute( "disabled", "disabled" );
+
+      jws.$( "stxfUsername" ).setAttribute( "disabled", "disabled" );
+      jws.$( "spwfPassword" ).setAttribute( "disabled", "disabled" );
+
+      var lMsg = jws.MSG_WS_NOT_SUPPORTED;
+      alert( lMsg );
+      log( lMsg );
+    }
+
+  }
+
+  function exitPage() {
+    logoff();
+  }
+
+</script>
+        </head>
+
+        <body onload="initPage();" onunload="exitPage();">
+
+          <h1>Events Auth Demo</h1>
+          <p>Simple demo for authentication using the Events Auth PluIn.</p>
+          <!-- <iframe id="sifrtwitterLogin" style="width:100%; height:200px"></iframe> -->
+      
+          <div class="sdivContainer">
+            <table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
+              <tbody><tr class="strDlg">
+                <td class="stdDlg" width="5">jWebSocket&nbsp;Username</td>
+                <td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="YourUsername" style="width:150px"></td>
+                <td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
+              </tr>
+              <tr class="strDlg">
+                <td class="stdDlg" width="5">jWebSocket&nbsp;Password</td>
+                <td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="" style="width:150px"></td>
+                <td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
+              </tr>
+              <tr class="strDlg">
+                <td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+                <td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnGetAPI" type="button" value="Get API" onclick="getAPI();"></td>
+              </tr>
+              <tr class="strDlg">
+              </tr>
+            </tbody></table>
+          </div>
+          <div id="sdivLog" class="sdivContainer" style="position:relative; height:300px; overflow:auto;">
+          </div>
+
+        
+
+</body></html>
