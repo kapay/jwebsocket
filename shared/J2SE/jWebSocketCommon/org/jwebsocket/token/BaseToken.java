@@ -29,25 +29,26 @@ public abstract class BaseToken implements Token {
 	 */
 	public static final String TT_EVENT = "event";
 
-	
+	@Override
 	public void setDouble(String aKey, Float aValue) {
 		setDouble(aKey, Double.valueOf(aValue));
 	}
-		
+
+	@Override
 	public boolean setValidated(String aKey, Object aObj) {
 		boolean lRes = true;
-		if( aObj instanceof Boolean) {
-			setBoolean(aKey, (Boolean)aObj);
-		} else if( aObj instanceof Integer) {
-			setInteger(aKey, (Integer)aObj);
-		} else if( aObj instanceof Double) {
-			setDouble(aKey, (Double)aObj);
-		} else if( aObj instanceof String) {
-			setString(aKey, (String)aObj);
-		} else if( aObj instanceof List) {
-			setList(aKey, (List)aObj);
-		} else if( aObj instanceof Map) {
-			setMap(aKey, (Map)aObj);
+		if (aObj instanceof Boolean) {
+			setBoolean(aKey, (Boolean) aObj);
+		} else if (aObj instanceof Integer) {
+			setInteger(aKey, (Integer) aObj);
+		} else if (aObj instanceof Double) {
+			setDouble(aKey, (Double) aObj);
+		} else if (aObj instanceof String) {
+			setString(aKey, (String) aObj);
+		} else if (aObj instanceof List) {
+			setList(aKey, (List) aObj);
+		} else if (aObj instanceof Map) {
+			setMap(aKey, (Map) aObj);
 		} else {
 			lRes = false;
 		}
@@ -58,6 +59,7 @@ public abstract class BaseToken implements Token {
 	 *
 	 * @return
 	 */
+	@Override
 	public final String getType() {
 		return getString("type");
 	}
@@ -66,6 +68,7 @@ public abstract class BaseToken implements Token {
 	 *
 	 * @param aType
 	 */
+	@Override
 	public final void setType(String aType) {
 		setString("type", aType);
 	}
@@ -76,6 +79,7 @@ public abstract class BaseToken implements Token {
 	 * uniquely address a certain plug-in. Each plug-in has its own name space.
 	 * @return the name space.
 	 */
+	@Override
 	public final String getNS() {
 		return getString("ns");
 	}
@@ -86,8 +90,8 @@ public abstract class BaseToken implements Token {
 	 * uniquely address a certain plug-in. Each plug-in has its own namespace.
 	 * @param aNS the namespace to be set for the token.
 	 */
+	@Override
 	public final void setNS(String aNS) {
 		setString("ns", aNS);
 	}
-
 }

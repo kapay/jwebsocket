@@ -80,7 +80,7 @@ public class MapToken extends BaseToken implements Token {
 	 *
 	 * @return
 	 */
-	public FastMap getMap() {
+	public Map getMap() {
 		return mData;
 	}
 
