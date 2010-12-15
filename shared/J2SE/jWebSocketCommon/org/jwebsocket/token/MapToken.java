@@ -67,6 +67,10 @@ public class MapToken extends BaseToken implements Token {
 		setType(aType);
 	}
 
+	@Override
+	public void set(ITokenizable aTokenizable) {
+	}
+
 	/**
 	 *
 	 * @param aMap
@@ -132,7 +136,6 @@ public class MapToken extends BaseToken implements Token {
 	/**
 	 *
 	 * @param aKey
-	 * @return
 	 */
 	@Override
 	public void remove(String aKey) {
@@ -357,6 +360,63 @@ public class MapToken extends BaseToken implements Token {
 	/**
 	 *
 	 * @param aKey
+	 * @param aTokenizable
+	 */
+	@Override
+	public void setToken(String aKey, ITokenizable aTokenizable) {
+		Token lToken = TokenFactory.createToken();
+		aTokenizable.writeToToken(lToken);
+		setToken(aKey, lToken);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aToken
+	 */
+	@Override
+	public void setToken(String aKey, Token aToken) {
+		try {
+			mData.put(aKey, aToken);
+		} catch (Exception lEx) {
+			// TODO: handle exception
+		}
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public Token getToken(String aKey) {
+		return getToken(aKey, null);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public Token getToken(String aKey, Token aDefault) {
+		Token lResult = null;
+		try {
+			lResult = (Token) mData.get(aKey);
+			if (lResult == null) {
+				lResult = aDefault;
+			}
+		} catch (Exception lEx) {
+			lResult = aDefault;
+		}
+		return lResult;
+	}
+
+
+	/**
+	 *
+	 * @param aKey
 	 * @param aDefault
 	 * @return
 	 */
@@ -387,7 +447,6 @@ public class MapToken extends BaseToken implements Token {
 	/**
 	 *
 	 * @param aKey
-	 * @param aList
 	 */
 	@Override
 	public void setMap(String aKey, Map aMap) {

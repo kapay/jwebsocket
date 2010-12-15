@@ -25,6 +25,11 @@ import java.util.Map;
  */
 public interface Token {
 
+	/**
+	 *
+	 * @param aTokenizable
+	 */
+	void set(ITokenizable aTokenizable);
 
 	/**
 	 *
@@ -151,6 +156,34 @@ public interface Token {
 	void setList(String aKey, List aList);
 
 	// TODO: Add list access methods
+	/**
+	 *
+	 * @param aKey
+	 * @param aTokenizable
+	 */
+	void setToken(String aKey, ITokenizable aTokenizable);
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aToken
+	 */
+	void setToken(String aKey, Token aToken);
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	Token getToken(String aKey);
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	Token getToken(String aKey, Token aDefault);
 
 	/**
 	 *
@@ -170,22 +203,17 @@ public interface Token {
 	/**
 	 *
 	 * @param aKey
-	 * @param aList
+	 * @param aMap
 	 */
 	void setMap(String aKey, Map aMap);
 
 	// TODO: Add map access methods
-
 	// TODO: Add date/time fields
-
-
 	/**
 	 *
 	 * @param aKey
-	 * @return
 	 */
 	void remove(String aKey);
-
 
 	/**
 	 *
@@ -213,17 +241,21 @@ public interface Token {
 
 	/**
 	 * returns the token as a map to be used as "sub token"
-	 * @param aNS
+	 * @return
 	 */
 	Map asMap();
 
 	/**
 	 * validates the passed objects and uses the appropriate assignment method
-	 * @param aObject
+	 * @param aKey
+	 * @param aObj
 	 * @return true if value could be set otherwise false
 	 */
 	boolean setValidated(String aKey, Object aObj);
 
+	/**
+	 *
+	 * @return
+	 */
 	Iterator<String> getKeyIterator();
-
 }

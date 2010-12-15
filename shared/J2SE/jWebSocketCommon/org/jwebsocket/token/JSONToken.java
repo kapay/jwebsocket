@@ -69,6 +69,11 @@ public class JSONToken extends BaseToken implements Token {
 		setType(aType);
 	}
 
+	@Override
+	public void set(ITokenizable aTokenizable) {
+	}
+
+
 	/**
 	 *
 	 * @param aJSON
@@ -339,6 +344,45 @@ public class JSONToken extends BaseToken implements Token {
 		} catch (JSONException lEx) {
 			// TODO: handle exception
 		}
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aTokenizable
+	 */
+	@Override
+	public void setToken(String aKey, ITokenizable aTokenizable) {
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aToken
+	 */
+	@Override
+	public void setToken(String aKey, Token aToken) {
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public Token getToken(String aKey) {
+		return null;
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public Token getToken(String aKey, Token aDefault) {
+		return null;
 	}
 
 	/**
