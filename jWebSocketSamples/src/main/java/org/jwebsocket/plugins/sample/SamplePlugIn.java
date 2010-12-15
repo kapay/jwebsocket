@@ -15,12 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.sample;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import javolution.util.FastList;
-import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
@@ -31,7 +26,6 @@ import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
-import org.jwebsocket.token.TokenFactory;
 
 /**
  *

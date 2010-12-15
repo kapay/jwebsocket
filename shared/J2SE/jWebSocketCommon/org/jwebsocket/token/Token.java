@@ -26,7 +26,14 @@ import java.util.Map;
 public interface Token {
 
 	/**
-	 *
+	 * resets all fields of the token. After this operation the token is empty.
+	 */
+	void clear();
+
+	/**
+	 * copies all fields of the given ITokenizable to the token. Existing fields
+	 * do not get deleted but overwritten in case of naming conflicts. Use the
+	 * <tt>clear</tt> method to explicitely reset the token if desired.
 	 * @param aTokenizable
 	 */
 	void set(ITokenizable aTokenizable);
@@ -238,12 +245,6 @@ public interface Token {
 	 * @param aNS
 	 */
 	void setNS(String aNS);
-
-	/**
-	 * returns the token as a map to be used as "sub token"
-	 * @return
-	 */
-	Map asMap();
 
 	/**
 	 * validates the passed objects and uses the appropriate assignment method

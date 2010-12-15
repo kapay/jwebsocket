@@ -68,7 +68,13 @@ public class MapToken extends BaseToken implements Token {
 	}
 
 	@Override
+	public void clear() {
+		mData.clear();
+	}
+
+	@Override
 	public void set(ITokenizable aTokenizable) {
+		aTokenizable.writeToToken(this);
 	}
 
 	/**
@@ -464,15 +470,6 @@ public class MapToken extends BaseToken implements Token {
 	@Override
 	public String toString() {
 		return mData.toString();
-	}
-
-	/**
-	 *
-	 * @return
-	 */
-	@Override
-	public Map asMap() {
-		return mData;
 	}
 
 	/**

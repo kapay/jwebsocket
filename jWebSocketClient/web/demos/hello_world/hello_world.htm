@@ -116,9 +116,9 @@
 				if( lMsg.length > 0 ) {
 					log( "Broadcasting '" + lMsg + "'..." );
 					var lRes = lWSC.broadcastText(
-					"",		// broadcast to all clients (not limited to a certain pool)
-					lMsg	// broadcast this message
-				);
+						"",		// broadcast to all clients (not limited to a certain pool)
+						lMsg	// broadcast this message
+					);
 					// you may want log error only,
 					// on success don't confuse the user
 					// if( lRes.code != 0 ) {
@@ -172,6 +172,26 @@
 								+ "vendor: " + aToken.vendor
 								+ ", version: " + aToken.version
 						);
+						}
+					});
+				} else {
+					log( "Not connected." );
+				}
+			}
+
+			// example how to obtain any tokenizable object fro the server
+			function sampleTokenizable() {
+				log( "Retreiving a tokenizable object from the server via a jWebSocket listener..." );
+				if( lWSC.isConnected() ) {
+					var lToken = {
+						ns: "my.namespace",
+						type: "getTokenizable"
+					};
+					lWSC.sendToken( lToken,	{
+						OnResponse: function( aToken ) {
+							log("Server responded: "
+								+ "aToken: " + aToken
+							);
 						}
 					});
 				} else {
@@ -364,6 +384,10 @@
 						<input class="sbtnDlg" id="sbtnListener" type="button" value="Listener" onclick="sampleListener();"
 							   title="Retreives a result (copyright and license token) from a server side listener.">
 					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnTokenizable" type="button" value="Tokenizable" onclick="sampleTokenizable();"
+							   title="Retreives a tokenizable object from a server via a listener.">
+					</td>
 					<td class="stdDlg" width="">
 						<input class="sbtnDlg" id="sbtnSaveFile" type="button" value="Save File" onclick="saveFile();"
 							   title="Saves the message below into a shared file on the jWebSocket server.">
@@ -393,6 +417,9 @@
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnSelect" type="button" value="Select" onclick="sampleSelect();"
 							   title="Retreives a single record from a JDBC datasource on the server.">
+					</td>
+					<td class="stdDlg" width="5">
+						&nbsp;
 					</td>
 					<td class="stdDlg" width="">
 						<input class="sbtnDlg" id="sbtnLoadFile" type="button" value="Load File" onclick="loadFile();"

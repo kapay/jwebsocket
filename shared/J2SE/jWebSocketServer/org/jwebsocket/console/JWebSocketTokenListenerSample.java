@@ -84,6 +84,13 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 				lResponse.setString("version", JWebSocketServerConstants.VERSION_STR);
 				lResponse.setString("copyright", JWebSocketCommonConstants.COPYRIGHT);
 				lResponse.setString("license", JWebSocketCommonConstants.LICENSE);
+			} else if ("getTokenizable".equals(lType)) {
+				// create a new tokenizable object and put it to the token
+				SampleTokenizable aTokenizable = new SampleTokenizable(
+						"Alex", "Schulze",
+						"An Vieslapp 29",
+						"D-52134", "Herzogenrath");
+				lResponse.set(aTokenizable);
 			} else {
 				// if unknown type in this namespace, return corresponding error message
 				lResponse.setInteger("code", -1);

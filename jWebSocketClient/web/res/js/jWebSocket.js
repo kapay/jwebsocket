@@ -969,6 +969,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					this.processDisconnected( aToken );
 				}
 			}
+		} else {
+			// check the incoming token for an optional response callback
+			this.checkCallbacks( aToken );
 		}
 
 		// notify all plug-ins that a token has to be processed

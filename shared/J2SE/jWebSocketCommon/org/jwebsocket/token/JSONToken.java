@@ -70,6 +70,11 @@ public class JSONToken extends BaseToken implements Token {
 	}
 
 	@Override
+	public void clear() {
+		// TODO: implement clear for JSON token
+	}
+
+	@Override
 	public void set(ITokenizable aTokenizable) {
 	}
 
@@ -404,8 +409,18 @@ public class JSONToken extends BaseToken implements Token {
 	 */
 	@Override
 	public Map getMap(String aKey) {
-		// TODO: Implement this
-		return null;
+		Map lMap = new FastMap<String, Object>();
+		Iterator<String> lIterator = mData.keys();
+		while (lIterator.hasNext()) {
+			String lKey = (String)lIterator.next();
+			try{
+				Object lVal = mData.get(lKey);
+				lMap.put(lKey, lVal);
+			} catch(Exception lEx) {
+				// TODO: process exception
+			}
+		}
+		return lMap;
 	}
 
 	/**
@@ -429,26 +444,6 @@ public class JSONToken extends BaseToken implements Token {
 	@Override
 	public String toString() {
 		return mData.toString();
-	}
-
-	/**
-	 *
-	 * @return
-	 */
-	@Override
-	public Map asMap() {
-		Map lMap = new FastMap<String, Object>();
-		Iterator<String> lIterator = mData.keys();
-		while (lIterator.hasNext()) {
-			String lKey = (String)lIterator.next();
-			try{
-				Object lVal = mData.get(lKey);
-				lMap.put(lKey, lVal);
-			} catch(Exception lEx) {
-				// TODO: process exception
-			}
-		}
-		return lMap;
 	}
 
 	/**
