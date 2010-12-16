@@ -31,7 +31,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.Gallery;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -317,6 +316,24 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 				// if (id != getTaskId()) {
 				float lEX = new Float(aToken.getDouble("x", 0.0));
 				float lEY = new Float(aToken.getDouble("y", 0.0));
+				// draw the line
+				lCanvas.drawLine(lSX, lSY, lEX, lEY, lPaint);
+				// invalidate image view to re-draw the canvas
+
+				isDirty = true;
+
+				lSX = lEX;
+				lSY = lEY;
+				// }
+				// check "closePath" request
+			} else if ("line".equals(aToken.getString("reqType"))) {
+				// TODO: implement multiple canvas, this is what is used for
+				// int id = aToken.getInteger("identifier");
+				// if (id != getTaskId()) {
+				lSX = new Float(aToken.getDouble("x1", 0.0));
+				lSY = new Float(aToken.getDouble("y1", 0.0));
+				float lEX = new Float(aToken.getDouble("x2", 0.0));
+				float lEY = new Float(aToken.getDouble("y2", 0.0));
 				// draw the line
 				lCanvas.drawLine(lSX, lSY, lEX, lEY, lPaint);
 				// invalidate image view to re-draw the canvas
