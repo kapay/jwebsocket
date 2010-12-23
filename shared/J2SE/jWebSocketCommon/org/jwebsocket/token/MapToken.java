@@ -90,6 +90,7 @@ public class MapToken extends BaseToken implements Token {
 	 *
 	 * @return
 	 */
+	@Override
 	public Map getMap() {
 		return mData;
 	}

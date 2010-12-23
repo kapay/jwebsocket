@@ -1,3 +1,18 @@
+//  ---------------------------------------------------------------------------
+//  jWebSocket - EventsPlugIn
+//  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
+//  ---------------------------------------------------------------------------
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU Lesser General Public License as published by the
+//  Free Software Foundation; either version 3 of the License, or (at your
+//  option) any later version.
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//  more details.
+//  You should have received a copy of the GNU Lesser General Public License along
+//  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.events;
 
 import org.jwebsocket.logging.Logging;
@@ -11,9 +26,12 @@ import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.eventmodel.observable.Event;
 import org.jwebsocket.eventmodel.context.EventModel;
-import org.jwebsocket.eventmodel.events.WebSocketEvent;
+import org.jwebsocket.eventmodel.event.em.ConnectorStarted;
+import org.jwebsocket.eventmodel.event.em.ConnectorStopped;
+import org.jwebsocket.eventmodel.event.em.EngineStarted;
+import org.jwebsocket.eventmodel.event.em.EngineStopped;
+import org.jwebsocket.eventmodel.event.WebSocketEvent;
 import org.jwebsocket.eventmodel.util.EmConstants;
 
 import org.springframework.context.ApplicationContext;
@@ -29,7 +47,6 @@ public class EventsPlugIn extends TokenPlugIn {
 	private EventModel em;
 	private ApplicationContext context;
 	private static Logger mLog = Logging.getLogger(EventsPlugIn.class);
-	
 
 	public EventsPlugIn(PluginConfiguration configuration) {
 		super(configuration);
@@ -65,9 +82,10 @@ public class EventsPlugIn extends TokenPlugIn {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> 'engine.started(" + aEngine.toString() + ")' event notification...");
 			}
-			Event e = getEm().getEventFactory().stringToEvent("engine.started");
+			EngineStarted e = (EngineStarted)getEm().getEventFactory().stringToEvent("engine.started");
 			e.setSubject(this);
-			e.getArgs().put(EmConstants.ENGINE_KEY, aEngine);
+			e.setEngine(aEngine);
+			e.initialize();
 			getEm().notify(e, null, true);
 		} catch (Exception ex) {
 			mLog.error(ex.toString(), ex);
@@ -81,9 +99,10 @@ public class EventsPlugIn extends TokenPlugIn {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> 'engine.stopped(" + aEngine.toString() + ")' event notification...");
 			}
-			Event e = getEm().getEventFactory().stringToEvent("engine.stopped");
+			EngineStopped e = (EngineStopped)getEm().getEventFactory().stringToEvent("engine.stopped");
 			e.setSubject(this);
-			e.getArgs().put(EmConstants.ENGINE_KEY, aEngine);
+			e.setEngine(aEngine);
+			e.initialize();
 			getEm().notify(e, null, true);
 		} catch (Exception ex) {
 			mLog.error(ex.toString(), ex);
@@ -97,9 +116,10 @@ public class EventsPlugIn extends TokenPlugIn {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> 'connector.started(" + aConnector.toString() + ")' event notification...");
 			}
-			Event e = getEm().getEventFactory().stringToEvent("connector.started");
+			ConnectorStarted e = (ConnectorStarted)getEm().getEventFactory().stringToEvent("connector.started");
 			e.setSubject(this);
-			e.getArgs().put(EmConstants.CONNECTOR_KEY, aConnector);
+			e.setConnector(aConnector);
+			e.initialize();
 			getEm().notify(e, null, true);
 		} catch (Exception ex) {
 			mLog.error(ex.toString(), ex);
@@ -108,18 +128,26 @@ public class EventsPlugIn extends TokenPlugIn {
 
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+		boolean isEm = false;
 		try {
-			if (aToken.getBoolean(EmConstants.IS_EVENT_MODEL)) {
+			isEm = aToken.getBoolean(EmConstants.IS_EVENT_MODEL);
+		} catch (Exception ex1) {
+			//Nothing. Just is not a Event ;)
+		}
+		if (isEm) {
+			try {
 				if (mLog.isDebugEnabled()) {
 					mLog.debug(">> Processing event: '" + aToken.toString() + "'...");
 				}
 				aToken.remove(EmConstants.IS_EVENT_MODEL);
-				Event e = getEm().getEventFactory().tokenToEvent(aToken);
-				processEvent(aConnector, (WebSocketEvent) e);
+				WebSocketEvent e = getEm().getEventFactory().tokenToEvent(aToken);
+				e.setConnector(aConnector);
+				e.initialize();
+				processEvent(aConnector, e);
+				aResponse.abortChain();
+			} catch (Exception ex) {
+				mLog.error(ex.toString(), ex);
 			}
-			aResponse.abortChain();
-		} catch (Exception ex) {
-			mLog.error(ex.toString(), ex);
 		}
 	}
 
@@ -127,7 +155,7 @@ public class EventsPlugIn extends TokenPlugIn {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug(">> EventModel initialization... ");
 		}
-		aEvent.getArgs().put(EmConstants.CONNECTOR_KEY, aConnector);
+		aEvent.setConnector(aConnector);
 		getEm().processEvent(aEvent, null);
 	}
 
@@ -138,10 +166,11 @@ public class EventsPlugIn extends TokenPlugIn {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> 'connector.stopped(" + aConnector.toString() + ")' event notification...");
 			}
-			Event e = getEm().getEventFactory().stringToEvent("connector.stopped");
+			ConnectorStopped e = (ConnectorStopped)getEm().getEventFactory().stringToEvent("connector.stopped");
 			e.setSubject(this);
-			e.getArgs().put(EmConstants.CONNECTOR_KEY, aConnector);
-			e.getArgs().put("closeReason", aCloseReason);
+			e.setConnector(aConnector);
+			e.setCloseReason(aCloseReason);
+			e.initialize();
 			getEm().notify(e, null, true);
 		} catch (Exception ex) {
 			mLog.error(ex.toString(), ex);

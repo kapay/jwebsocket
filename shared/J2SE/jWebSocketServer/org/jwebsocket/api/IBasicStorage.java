@@ -13,31 +13,20 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.observable;
-
-import java.util.concurrent.Callable;
-import org.jwebsocket.eventmodel.api.IListener;
+package org.jwebsocket.api;
+import java.util.Map;
+import java.util.Collection;
 
 /**
  *
  * @author Itachi
  */
-public class CallableListener implements Callable {
+public interface IBasicStorage<K,V> extends Map<K,V>, IInitializable{
 
-	IListener aListener;
-	Event aEvent;
-	ResponseEvent aResponseEvent;
+	public String getName();
 
-	public CallableListener(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) {
-		this.aListener = aListener;
-		this.aEvent = aEvent;
-		this.aResponseEvent = aResponseEvent;
-	}
+	public void setName(String name) throws Exception;
 
-	@Override
-	public Object call() throws Exception {
-		ObservableObject.callProcessEvent(aListener, aEvent, aResponseEvent);
+	public Map<K,V> getAll(Collection<K> keys);
 
-		return null;
-	}
 }

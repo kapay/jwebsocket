@@ -13,31 +13,46 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.observable;
+package org.jwebsocket.eventmodel.event.filter;
 
-import java.util.concurrent.Callable;
-import org.jwebsocket.eventmodel.api.IListener;
+import org.jwebsocket.eventmodel.event.WebSocketEvent;
+import org.jwebsocket.token.Token;
+import org.jwebsocket.eventmodel.observable.Event;
 
 /**
  *
  * @author Itachi
  */
-public class CallableListener implements Callable {
+public class ResponseFromCache extends Event {
 
-	IListener aListener;
-	Event aEvent;
-	ResponseEvent aResponseEvent;
+	private Token cachedResponse;
+	private WebSocketEvent event;
 
-	public CallableListener(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) {
-		this.aListener = aListener;
-		this.aEvent = aEvent;
-		this.aResponseEvent = aResponseEvent;
+	/**
+	 * @return the event
+	 */
+	public WebSocketEvent getEvent() {
+		return event;
 	}
 
-	@Override
-	public Object call() throws Exception {
-		ObservableObject.callProcessEvent(aListener, aEvent, aResponseEvent);
+	/**
+	 * @param event the event to set
+	 */
+	public void setEvent(WebSocketEvent event) {
+		this.event = event;
+	}
 
-		return null;
+	/**
+	 * @return the cachedResponse
+	 */
+	public Token getCachedResponse() {
+		return cachedResponse;
+	}
+
+	/**
+	 * @param cachedResponse the cachedResponse to set
+	 */
+	public void setCachedResponse(Token cachedResponse) {
+		this.cachedResponse = cachedResponse;
 	}
 }

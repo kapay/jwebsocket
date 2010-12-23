@@ -1,83 +1,78 @@
-
+//  ---------------------------------------------------------------------------
+//  jWebSocket - EventsPlugIn
+//  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
+//  ---------------------------------------------------------------------------
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU Lesser General Public License as published by the
+//  Free Software Foundation; either version 3 of the License, or (at your
+//  option) any later version.
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//  more details.
+//  You should have received a copy of the GNU Lesser General Public License along
+//  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.plugin.system;
 
 import org.jwebsocket.eventmodel.plugin.EventModelPlugIn;
-import org.jwebsocket.eventmodel.events.GetPlugInAPI;
-import java.util.LinkedList;
-import java.util.HashMap;
+import org.jwebsocket.eventmodel.event.system.GetPlugInAPI;
 import javolution.util.FastMap;
-import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.eventmodel.api.IEventModelPlugIn;
-import org.jwebsocket.eventmodel.events.WebSocketEvent;
-import org.jwebsocket.eventmodel.events.WebSocketResponseEvent;
+import org.jwebsocket.eventmodel.event.WebSocketResponseEvent;
 import org.jwebsocket.logging.Logging;
 import org.apache.log4j.Logger;
-import org.jwebsocket.eventmodel.util.EmConstants;
+import org.jwebsocket.eventmodel.event.WebSocketEventDefinition;
 
 /**
  *
  * @author Itachi
  */
-public class SystemPlugIn extends EventModelPlugIn{
+public class SystemPlugIn extends EventModelPlugIn {
 
-  private static Logger mLog = Logging.getLogger(SystemPlugIn.class);
+	private static Logger mLog = Logging.getLogger(SystemPlugIn.class);
 
-  @Override
-  public void initialize() throws Exception{
-    //My incomming events
-    LinkedList<Class> events = new LinkedList<Class>();
-    events.add(GetPlugInAPI.class);
+	@Override
+	public void initialize() throws Exception {
+	}
 
-    //Registering my events in the global EM for incomming events notification
-    getEm().addEvents(events);
+	public void processEvent(GetPlugInAPI aEvent, WebSocketResponseEvent aResponseEvent) throws Exception {
+		String aPlugInId = aEvent.getArgs().getString("plugin_id");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug(">> Exporting API for '" + aPlugInId + "' plugIn...");
+		}
 
-    //My registration as listener
-    getEm().on(events, this);
+		IEventModelPlugIn plugIn = getEm().getPlugIn(aPlugInId);
+		FastMap api = new FastMap();
+		FastMap temp;
+		WebSocketEventDefinition def = null;
 
-    //My API from the client
-    HashMap mAPI = new HashMap();
-    mAPI.put("getPlugInApi", GetPlugInAPI.class);
-    setClientAPI(mAPI);
-  }
+		try {
+			for (Object key : plugIn.getClientAPI().keySet()) {
+				String aEventId = getEm().getEventFactory().
+						eventToString((Class) plugIn.getClientAPI().get(key));
 
-  public void processEvent(GetPlugInAPI aEvent, WebSocketResponseEvent aResponseEvent){
-    String aPlugInId         = aEvent.getToken().getString("plugin_id");
-    if (mLog.isDebugEnabled())
-      mLog.debug(">> Exporting API for '" + aPlugInId + "' event...");
+				/**
+				 * Getting API events definition
+				 */
+				def = getEm().getEventFactory().getEventDefinitions().getDefinition(aEventId);
 
-    IEventModelPlugIn plugIn = getPlugIn(aPlugInId);
-    FastMap api              = new FastMap();
-    WebSocketEvent e;
-    FastMap temp;
+				temp = new FastMap();
+				temp.put("type", aEventId);
+				temp.put("isCacheEnabled", def.isCacheEnabled());
+				temp.put("isSecurityEnabled", def.isSecurityEnabled());
+				temp.put("cacheTime", def.getCacheTime());
+				temp.put("roles", def.getRoles());
+				temp.put("incomingArgsValidation", def.getIncomingArgsValidation());
+				temp.put("outgoingArgsValidation", def.getOutgoingArgsValidation());
+				api.put(key, temp);
+			}
+			aResponseEvent = (WebSocketResponseEvent) aResponseEvent;
+			aResponseEvent.getTo().add(aEvent.getConnector());
+			aResponseEvent.getArgs().setMap("api", api);
 
-    try{
-      for (Object key : plugIn.getClientAPI().keySet()){
-        String aEventId = getEm().getEventFactory().eventToString((Class)plugIn.getClientAPI().get(key));
-        e               = getEm().getEventFactory().stringToEvent(aEventId);
-        temp            = new FastMap();
-        temp.put("type"               , aEventId);
-        temp.put("argsValidation"     , e.getArgsValidation());
-        temp.put("responseValidation" , e.getResponseValidation());
-        api.put(key, temp);
-      }
-      aResponseEvent = (WebSocketResponseEvent)aResponseEvent;
-      aResponseEvent.getTo().add((WebSocketConnector)aEvent.getArgs().get(EmConstants.CONNECTOR_KEY));
-      aResponseEvent.getToken().setMap("api", api);
-      aResponseEvent.setCode(WebSocketResponseEvent.OK);
-    }
-    catch(Exception ex){
-      mLog.error(ex.toString(), ex);
-    }
-  }
-
-  private IEventModelPlugIn getPlugIn(String aPlugInId) throws IndexOutOfBoundsException {
-    for (IEventModelPlugIn plugIn : getEm().getPlugIns()){
-      if (plugIn.getId().equals(aPlugInId)){
-        return plugIn;
-      }
-    }
-    throw new IndexOutOfBoundsException("The plugIn with id: " + aPlugInId + ", does not exists!");
-  }
-
+		} catch (Exception ex) {
+			mLog.error(ex.toString(), ex);
+		}
+	}
 }
-

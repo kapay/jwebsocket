@@ -78,6 +78,16 @@ public class JSONToken extends BaseToken implements Token {
 	public void set(ITokenizable aTokenizable) {
 	}
 
+	/**
+	 *
+	 *
+	 * @return
+	 */
+	@Override
+	public Map getMap() {
+		// TODO: implement getMap for JSON token
+		return null;
+	}
 
 	/**
 	 *

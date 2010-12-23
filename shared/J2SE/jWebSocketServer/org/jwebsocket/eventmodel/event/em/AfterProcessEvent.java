@@ -13,31 +13,29 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.observable;
+package org.jwebsocket.eventmodel.event.em;
 
-import java.util.concurrent.Callable;
-import org.jwebsocket.eventmodel.api.IListener;
+import org.jwebsocket.eventmodel.event.WebSocketEvent;
 
 /**
  *
  * @author Itachi
  */
-public class CallableListener implements Callable {
+public class AfterProcessEvent extends WebSocketEvent {
 
-	IListener aListener;
-	Event aEvent;
-	ResponseEvent aResponseEvent;
+	private WebSocketEvent event;
 
-	public CallableListener(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) {
-		this.aListener = aListener;
-		this.aEvent = aEvent;
-		this.aResponseEvent = aResponseEvent;
+	/**
+	 * @return the event
+	 */
+	public WebSocketEvent getEvent() {
+		return event;
 	}
 
-	@Override
-	public Object call() throws Exception {
-		ObservableObject.callProcessEvent(aListener, aEvent, aResponseEvent);
-
-		return null;
+	/**
+	 * @param event the event to set
+	 */
+	public void setEvent(WebSocketEvent event) {
+		this.event = event;
 	}
 }

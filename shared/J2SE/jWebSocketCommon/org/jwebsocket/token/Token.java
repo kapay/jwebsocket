@@ -40,6 +40,13 @@ public interface Token {
 
 	/**
 	 *
+	 *
+	 * @return
+	 */
+	Map getMap();
+
+	/**
+	 *
 	 * @param aKey
 	 * @return
 	 */

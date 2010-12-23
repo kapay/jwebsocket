@@ -13,27 +13,66 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.observable;
+package org.jwebsocket.eventmodel.event;
+
+import org.jwebsocket.eventmodel.observable.ResponseEvent;
+import javolution.util.FastSet;
+import org.jwebsocket.api.WebSocketConnector;
+import java.util.Set;
+import org.jwebsocket.token.Token;
 
 /**
  *
  * @author Itachi
  */
-public class ResponseEvent extends Event {
+public class WebSocketResponseEvent extends ResponseEvent {
 
-	private long elapsedTime;
+	private int code = 0;
+	public final static int OK = 0;
+	public final static int NOT_OK = -1;
+	private Set<WebSocketConnector> to = new FastSet<WebSocketConnector>();
+	private Token token;
+	private String message;
 
 	/**
-	 * @return the elapsedTime
+	 * @return the code
 	 */
-	public long getElapsedTime() {
-		return elapsedTime;
+	public int getCode() {
+		return code;
 	}
 
 	/**
-	 * @param elapsedTime the elapsedTime to set
+	 * @param code the code to set
 	 */
-	public void setElapsedTime(long elapsedTime) {
-		this.elapsedTime = elapsedTime;
+	public void setCode(int code) {
+		this.code = code;
+	}
+
+	/**
+	 * @return the message
+	 */
+	public String getMessage() {
+		return message;
+	}
+
+	/**
+	 * @param message the message to set
+	 */
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	/**
+	 * @return the to
+	 */
+	public Set<WebSocketConnector> getTo() {
+		return to;
+	}
+
+	/**
+	 * @param to the to to set
+	 */
+	public void setTo(Set<WebSocketConnector> to) {
+		this.to = to;
 	}
 }

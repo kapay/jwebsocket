@@ -13,31 +13,30 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.observable;
+package org.jwebsocket.eventmodel.event.em;
 
-import java.util.concurrent.Callable;
-import org.jwebsocket.eventmodel.api.IListener;
+import org.jwebsocket.eventmodel.event.WebSocketEvent;
+import org.jwebsocket.kit.CloseReason;
 
 /**
  *
  * @author Itachi
  */
-public class CallableListener implements Callable {
+public class ConnectorStopped extends WebSocketEvent {
 
-	IListener aListener;
-	Event aEvent;
-	ResponseEvent aResponseEvent;
+	private CloseReason closeReason;
 
-	public CallableListener(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) {
-		this.aListener = aListener;
-		this.aEvent = aEvent;
-		this.aResponseEvent = aResponseEvent;
+	/**
+	 * @return the closeReason
+	 */
+	public CloseReason getCloseReason() {
+		return closeReason;
 	}
 
-	@Override
-	public Object call() throws Exception {
-		ObservableObject.callProcessEvent(aListener, aEvent, aResponseEvent);
-
-		return null;
+	/**
+	 * @param closeReason the closeReason to set
+	 */
+	public void setCloseReason(CloseReason closeReason) {
+		this.closeReason = closeReason;
 	}
 }

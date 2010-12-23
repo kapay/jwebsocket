@@ -13,31 +13,30 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.observable;
+package org.jwebsocket.eventmodel.event.filter;
 
-import java.util.concurrent.Callable;
-import org.jwebsocket.eventmodel.api.IListener;
+import org.jwebsocket.eventmodel.event.WebSocketEventDefinition;
+import org.jwebsocket.eventmodel.observable.Event;
 
 /**
  *
- * @author Itachi
+ * @author kyberneees
  */
-public class CallableListener implements Callable {
+public class BeforeRouteResponseToken extends Event {
 
-	IListener aListener;
-	Event aEvent;
-	ResponseEvent aResponseEvent;
+	private WebSocketEventDefinition eventDefinition;
 
-	public CallableListener(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) {
-		this.aListener = aListener;
-		this.aEvent = aEvent;
-		this.aResponseEvent = aResponseEvent;
+	/**
+	 * @return the eventDefinition
+	 */
+	public WebSocketEventDefinition getEventDefinition() {
+		return eventDefinition;
 	}
 
-	@Override
-	public Object call() throws Exception {
-		ObservableObject.callProcessEvent(aListener, aEvent, aResponseEvent);
-
-		return null;
+	/**
+	 * @param eventDefinition the eventDefinition to set
+	 */
+	public void setEventDefinition(WebSocketEventDefinition eventDefinition) {
+		this.eventDefinition = eventDefinition;
 	}
 }

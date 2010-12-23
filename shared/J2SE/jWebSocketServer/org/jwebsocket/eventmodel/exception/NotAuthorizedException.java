@@ -13,31 +13,15 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.observable;
-
-import java.util.concurrent.Callable;
-import org.jwebsocket.eventmodel.api.IListener;
+package org.jwebsocket.eventmodel.exception;
 
 /**
  *
  * @author Itachi
  */
-public class CallableListener implements Callable {
+public class NotAuthorizedException extends Exception {
 
-	IListener aListener;
-	Event aEvent;
-	ResponseEvent aResponseEvent;
-
-	public CallableListener(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) {
-		this.aListener = aListener;
-		this.aEvent = aEvent;
-		this.aResponseEvent = aResponseEvent;
-	}
-
-	@Override
-	public Object call() throws Exception {
-		ObservableObject.callProcessEvent(aListener, aEvent, aResponseEvent);
-
-		return null;
+	public NotAuthorizedException(String message) {
+		super(message);
 	}
 }
