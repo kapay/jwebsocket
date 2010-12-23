@@ -94,9 +94,9 @@ public class SecurityFactory {
 	public static void initFromConfig(JWebSocketConfig aConfig) {
 
 		// build list of rights
-		List<RightConfig> globalRights = aConfig.getGlobalRights();
+		List<RightConfig> lGlobalRights = aConfig.getGlobalRights();
 		mRights = new Rights();
-		for (RightConfig lRightConfig : globalRights) {
+		for (RightConfig lRightConfig : lGlobalRights) {
 			Right lRight = new Right(
 					lRightConfig.getNamespace(),
 					lRightConfig.getId(),

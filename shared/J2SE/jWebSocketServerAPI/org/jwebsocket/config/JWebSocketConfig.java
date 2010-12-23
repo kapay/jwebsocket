@@ -252,10 +252,10 @@ public final class JWebSocketConfig implements Config {
 			mUsers = aUsers;
 			return this;
 		}
-		
+
 		public Builder setChannels(List<ChannelConfig> aChannels) {
-		  mChannels = aChannels;
-		  return this;
+			mChannels = aChannels;
+			return this;
 		}
 
 		public synchronized JWebSocketConfig buildConfig() {
@@ -328,13 +328,13 @@ public final class JWebSocketConfig implements Config {
 	public List<RoleConfig> getGlobalRoles() {
 		return Collections.unmodifiableList(mGlobalRoles);
 	}
-	
- /**
-  * @return the channels
-  */
- public List<ChannelConfig> getChannels() {
-  return Collections.unmodifiableList(mChannels);
- }
+
+	/**
+	 * @return the channels
+	 */
+	public List<ChannelConfig> getChannels() {
+		return Collections.unmodifiableList(mChannels);
+	}
 
 	/**
 	 * {@inheritDoc}

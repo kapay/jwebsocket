@@ -514,11 +514,9 @@ public class User {
 		// the getRights method of the Roles class already delivers an
 		// unmodifiable set of rights
 		Rights lRights = new Rights();
-		if (aNamespace != null) {
-			for (Right lRight : mRoles.getRights()) {
-				if (aNamespace == null || lRight.getId().startsWith(aNamespace)) {
-					lRights.addRight(lRight);
-				}
+		for (Right lRight : mRoles.getRights()) {
+			if (aNamespace == null || lRight.getId().startsWith(aNamespace)) {
+				lRights.addRight(lRight);
 			}
 		}
 		return lRights;

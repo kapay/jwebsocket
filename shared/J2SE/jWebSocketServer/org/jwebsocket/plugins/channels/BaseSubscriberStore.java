@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.jwebsocket.data.store.JDBCStore;
 import org.jwebsocket.logging.Logging;
 
@@ -33,99 +34,110 @@ import org.jwebsocket.logging.Logging;
  * @version $Id$
  */
 public class BaseSubscriberStore extends JDBCStore implements SubscriberStore {
-  /** logger object */
-  private static Logger logger = Logging.getLogger(BaseSubscriberStore.class);
 
-  /** default table name for the channel store */
-  private static final String TABLE_NAME = "subscriber_store_table";
+	/** logger object */
+	private static Logger logger = Logging.getLogger(BaseSubscriberStore.class);
+	/** default table name for the channel store */
+	private static final String TABLE_NAME = "subscriber_store_table";
+	/** default application column name for channels data store */
+	private static final String APP_COLUMN_NAME = "subscribers";
+	/** default key column name for channel data store */
+	private static final String KEY_COLUMN_NAME = "subscriber_key";
+	/** default value column name for channel data store */
+	private static final String VALUE_COLUMN_NAME = "subscriber_value";
+	/** properties */
+	private static final String ID = "id";
+	private static final String CHANNELS = "channels";
+	private static final String LOGGED_IN_TIME = "logged_in_time";
 
-  /** default application column name for channels data store */
-  private static final String APP_COLUMN_NAME = "subscribers";
+	/**
+	 * default constructor
+	 */
+	public BaseSubscriberStore() {
+		init();
+	}
 
-  /** default key column name for channel data store */
-  private static final String KEY_COLUMN_NAME = "subscriber_key";
+	/**
+	 * initialize the JDBC store properties.
+	 */
+	private void init() {
+		super.tableName = TABLE_NAME;
+		super.appColumnName = APP_COLUMN_NAME;
+		super.keyColumnName = KEY_COLUMN_NAME;
+		super.valueColumnName = VALUE_COLUMN_NAME;
+	}
 
-  /** default value column name for channel data store */
-  private static final String VALUE_COLUMN_NAME = "subscriber_value";
+	@Override
+	public Subscriber getSubscriber(String id) {
+		// TODO: Alex: Added by Alex:
+		JSONObject subscriberObject = null;
+		try {
+			String lStr = (String) super.get(id);
+			JSONTokener lJT = new JSONTokener(lStr);
+			subscriberObject = new JSONObject(lJT);
+		} catch (Exception lEx) {
+		}
+		// JSONObject subscriberObject = (JSONObject) super.get(id);
+		// Added by Alex:
+		if (subscriberObject == null) {
+			return null;
+		}
+		List<String> channels = new ArrayList<String>();
+		Subscriber subscriber = null;
+		// TODO: fix: if subscriberObject == null => exception
+		try {
+			long loggedInTime = subscriberObject.getLong(LOGGED_IN_TIME);
+			JSONArray subscribersArray = subscriberObject.getJSONArray(CHANNELS);
+			if (subscribersArray != null) {
+				for (int i = 0; i < subscribersArray.length(); i++) {
+					JSONObject idObject = subscribersArray.getJSONObject(i);
+					String channelId = idObject.getString(ID);
+					channels.add(channelId);
+				}
+			}
+			subscriber = new Subscriber(id, new Date(loggedInTime), channels);
+		} catch (JSONException e) {
+			logger.error("Error parsing json response from the channel repository:", e);
+		}
+		return subscriber;
+	}
 
-  /** properties */
-  private static final String ID = "id";
-  private static final String CHANNELS = "channels";
-  private static final String LOGGED_IN_TIME = "logged_in_time";
+	@Override
+	public boolean storeSubscriber(Subscriber subscriber) {
+		JSONObject subscriberObject = new JSONObject();
+		try {
+			subscriberObject.put(ID, subscriber.getId());
+			// TODO: Updated by Alex: .getTime()!
+			subscriberObject.put(LOGGED_IN_TIME, subscriber.getLoggedInTime().getTime());
 
-  /**
-   * default constructor
-   */
-  public BaseSubscriberStore() {
-    init();
-  }
+			JSONArray jsonArray = new JSONArray();
+			for (String channel : subscriber.getChannels()) {
+				JSONObject channelObject = new JSONObject();
+				// TODO: Updated by Alex: channelObject!
+				channelObject.put(ID, channel);
+				jsonArray.put(channelObject);
+			}
+			subscriberObject.put(CHANNELS, jsonArray);
+			// TODO: updated by Alex: subscriberObject.toString() instead of subscriberObject (JSONObject is not serializable!)
+			return super.put(subscriber.getId(), subscriberObject.toString());
+		} catch (JSONException e) {
+			logger.error("Error constructing JSON data for the given subscriber '" + subscriber.getId() + "'", e);
+			return false;
+		}
+	}
 
-  /**
-   * initialize the JDBC store properties.
-   */
-  private void init() {
-    super.tableName = TABLE_NAME;
-    super.appColumnName = APP_COLUMN_NAME;
-    super.keyColumnName = KEY_COLUMN_NAME;
-    super.valueColumnName = VALUE_COLUMN_NAME;
-  }
+	@Override
+	public void removeSubscriber(String id) {
+		super.remove(id);
+	}
 
-  @Override
-  public Subscriber getSubscriber(String id) {
-    JSONObject subscriberObject = (JSONObject) super.get(id);
-    List<String> channels = new ArrayList<String>();
-    Subscriber subscriber = null;
-    try {
-      long loggedInTime = subscriberObject.getLong(LOGGED_IN_TIME);
-      JSONArray subscribersArray = subscriberObject.getJSONArray(CHANNELS);
-      if (subscribersArray != null) {
-        for (int i = 0; i < subscribersArray.length(); i++) {
-          JSONObject idObject = subscribersArray.getJSONObject(i);
-          String channelId = idObject.getString(ID);
-          channels.add(channelId);
-        }
-      }
-      subscriber = new Subscriber(id, new Date(loggedInTime), channels);
-    } catch (JSONException e) {
-      logger.error("Error parsing json response from the channel repository:", e);
-    }
-    return subscriber;
-  }
+	@Override
+	public void clearSubscribers() {
+		super.clear();
+	}
 
-  @Override
-  public boolean storeSubscriber(Subscriber subscriber) {
-    JSONObject subscriberObject = new JSONObject();
-    try {
-      subscriberObject.put(ID, subscriber.getId());
-      subscriberObject.put(LOGGED_IN_TIME, subscriber.getLoggedInTime());
-
-      JSONArray jsonArray = new JSONArray();
-      for (String channel : subscriber.getChannels()) {
-        JSONObject channelObject = new JSONObject();
-        subscriberObject.put(ID, channel);
-        jsonArray.put(channelObject);
-      }
-      subscriberObject.put(CHANNELS, jsonArray);
-      return super.put(subscriber.getId(), subscriberObject);
-    } catch (JSONException e) {
-      logger.error("Error constructing JSON data for the given subscriber:[" + subscriber.getId()+"]", e);
-      return false;
-    }
-  }
-
-  @Override
-  public void removeSubscriber(String id) {
-    super.remove(id);
-  }
-
-  @Override
-  public void clearSubscribers() {
-    super.clear();
-  }
-
-  @Override
-  public int getSubscribersStoreSize() {
-    return super.getSize();
-  }
-
+	@Override
+	public int getSubscribersStoreSize() {
+		return super.getSize();
+	}
 }

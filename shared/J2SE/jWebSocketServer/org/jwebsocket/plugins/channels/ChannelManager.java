@@ -72,12 +72,12 @@ public class ChannelManager {
 
     private ChannelManager(Map<String, String> settings) {
         this.channelPluginSettings = new ConcurrentHashMap<String, String>(settings);
-        String value1 = channelPluginSettings.get(USE_PERSISTENT_STORE);
-        if (value1 != null && value1.equals("true")) {
+        String lUsePersisentStore = channelPluginSettings.get(USE_PERSISTENT_STORE);
+        if (lUsePersisentStore != null && lUsePersisentStore.equals("true")) {
             usePersistentStore = true;
         }
-        String value2 = channelPluginSettings.get(ALLOW_NEW_CHANNELS);
-        if (value2 != null && value2.equals("true")) {
+        String lAllowNewChannels = channelPluginSettings.get(ALLOW_NEW_CHANNELS);
+        if (lAllowNewChannels != null && lAllowNewChannels.equals("true")) {
             allowNewChannels = true;
         }
     }
@@ -98,20 +98,20 @@ public class ChannelManager {
      *             if exception starting the system channels
      */
     public void startSystemChannels() throws ChannelLifeCycleException {
-        User root = SecurityFactory.getRootUser();
-        JWebSocketConfig config = JWebSocketConfig.getConfig();
-        for (ChannelConfig cfg : config.getChannels()) {
-            if (cfg.isSystemChannel()) {
-                cfg.validate();
-                if (LOGGER_CHANNEL_ID.equals(cfg.getId())) {
-                    loggerChannel = new Channel(cfg);
-                    loggerChannel.start(root.getLoginname());
-                } else if (ADMIN_CHANNEL_ID.equals(cfg.getId())) {
-                    adminChannel = new Channel(cfg);
-                    adminChannel.start(root.getLoginname());
+        User lRoot = SecurityFactory.getRootUser();
+        JWebSocketConfig lConfig = JWebSocketConfig.getConfig();
+        for (ChannelConfig lCfg : lConfig.getChannels()) {
+            if (lCfg.isSystemChannel()) {
+                lCfg.validate();
+                if (LOGGER_CHANNEL_ID.equals(lCfg.getId())) {
+                    loggerChannel = new Channel(lCfg);
+                    loggerChannel.start(lRoot.getLoginname());
+                } else if (ADMIN_CHANNEL_ID.equals(lCfg.getId())) {
+                    adminChannel = new Channel(lCfg);
+                    adminChannel.start(lRoot.getLoginname());
                 } else {
-                    Channel channel = new Channel(cfg);
-                    channel.start(root.getLoginname());
+                    Channel channel = new Channel(lCfg);
+                    channel.start(lRoot.getLoginname());
                     // put in system channels map
                     systemChannels.put(channel.getId(), channel);
                 }

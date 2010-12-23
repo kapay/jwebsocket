@@ -374,40 +374,45 @@ public final class Channel implements ChannelLifeCycle {
     }
 
     @Override
-    public void start(final String user) throws ChannelLifeCycleException {
+    public void start(final String aUser) throws ChannelLifeCycleException {
         if (this.state == ChannelState.STARTED) {
-            throw new ChannelLifeCycleException("Channel:[" + this.getName() + "] is already started");
+            throw new ChannelLifeCycleException(
+					"Channel '" + this.getName() + "' is already started");
         }
-        if (!SecurityFactory.isValidUser(user)) {
-            throw new ChannelLifeCycleException("Cannot start the channel:[" + this.getName()
-                    + "] for invalid user login [" + user + "]");
+        if (!SecurityFactory.isValidUser(aUser)) {
+            throw new ChannelLifeCycleException(
+					"Cannot start the channel '"
+					+ this.getName()
+                    + "' for invalid user login '" + aUser + "'");
         } else {
-            Rights rights = SecurityFactory.getUserRights(user);
-            Right right = rights.get("org.jwebsocket.plugins.channel.start");
-            if (right == null) {
-                throw new ChannelLifeCycleException("User:[" + user + "] does not have rights to start the channel");
+            Rights lRights = SecurityFactory.getUserRights(aUser);
+            Right lRight = lRights.get("org.jwebsocket.plugins.channel.start");
+            if (lRight == null) {
+                throw new ChannelLifeCycleException("User '"
+						+ aUser + "' does not have rights to start the channel");
             } else {
                 // verify the owner
-                if (!this.getOwner().equals(user)) {
-                    throw new ChannelLifeCycleException("User:[" + user + "] is not a owner of this channel,"
+                if (!this.getOwner().equals(aUser)) {
+                    throw new ChannelLifeCycleException("User '"
+							+ aUser + "' is not a owner of this channel,"
                             + "Only owner of the channel can start");
                 }
                 this.authenticated = true;
             }
         }
         this.state = ChannelState.STARTED;
-        final Channel channel = this;
+        final Channel lChannel = this;
         if (channelListeners != null) {
-            ExecutorService pool = Executors.newCachedThreadPool();
-            for (final ChannelListener listener : channelListeners) {
-                pool.submit(new Runnable() {
+            ExecutorService lPool = Executors.newCachedThreadPool();
+            for (final ChannelListener lListener : channelListeners) {
+                lPool.submit(new Runnable() {
                     @Override
                     public void run() {
-                        listener.channelStarted(channel, user);
+                        lListener.channelStarted(lChannel, aUser);
                     }
                 });
             }
-            pool.shutdown();
+            lPool.shutdown();
         }
     }
 

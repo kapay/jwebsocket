@@ -26,59 +26,58 @@ import org.jwebsocket.config.ConfigHandler;
  * @version $Id$
  */
 public class ChannelConfigHandler implements ConfigHandler {
-  
-  private static final String ELEMENT_CHANNEL = "channel";
-  private static final String ID = "id";
-  private static final String NAME = "name";
-  private static final String SYSTEM = "system";
-  private static final String PRIVATE = "private";
-  private static final String SECRET = "secret";
-  private static final String ACCESS = "access";
-  private static final String OWNER = "owner";
 
-  @Override
-  public Config processConfig(XMLStreamReader streamReader) throws XMLStreamException {
-    String id = "", name = "", secret = "", access = "", owner = "";
-    boolean isPrivate = false, isSystem = false;
-    while (streamReader.hasNext()) {
-        streamReader.next();
-        if (streamReader.isStartElement()) {
-            String elementName = streamReader.getLocalName();
-            if (elementName.equals(ID)) {
-                streamReader.next();
-                id = streamReader.getText();
-            } else if (elementName.equals(NAME)) {
-                streamReader.next();
-                name = streamReader.getText();
-            } else if (elementName.equals(SYSTEM)) {
-                streamReader.next();
-                String value = streamReader.hasText() ? streamReader.getText() : "";
-                isSystem = (!value.equals("")) ? true : false; 
-            } else if (elementName.equals(PRIVATE)) {
-                streamReader.next();
-                String value = streamReader.hasText() ? streamReader.getText() : "";
-                isPrivate = (!value.equals("")) ? true : false;
-            } else if (elementName.equals(SECRET)) {
-                streamReader.next();
-                secret = streamReader.getText();
-            } else if (elementName.equals(ACCESS)) {
-              streamReader.next();
-              access = streamReader.getText();
-            } else if (elementName.equals(OWNER)) {
-              streamReader.next();
-              owner = streamReader.getText();
-            } else {
-                //ignore
-            }
-        }
-        if (streamReader.isEndElement()) {
-            String elementName = streamReader.getLocalName();
-            if (elementName.equals(ELEMENT_CHANNEL)) {
-                break;
-            }
-        }
-    }
-    return new ChannelConfig(id, name, isPrivate, isSystem, secret, access, owner);
-  }
+	private static final String ELEMENT_CHANNEL = "channel";
+	private static final String ID = "id";
+	private static final String NAME = "name";
+	private static final String SYSTEM = "system";
+	private static final String PRIVATE = "private";
+	private static final String SECRET = "secret";
+	private static final String ACCESS = "access";
+	private static final String OWNER = "owner";
 
+	@Override
+	public Config processConfig(XMLStreamReader streamReader) throws XMLStreamException {
+		String id = "", name = "", secret = "", access = "", owner = "";
+		boolean isPrivate = false, isSystem = false;
+		while (streamReader.hasNext()) {
+			streamReader.next();
+			if (streamReader.isStartElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ID)) {
+					streamReader.next();
+					id = streamReader.getText();
+				} else if (elementName.equals(NAME)) {
+					streamReader.next();
+					name = streamReader.getText();
+				} else if (elementName.equals(SYSTEM)) {
+					streamReader.next();
+					String value = streamReader.hasText() ? streamReader.getText() : "";
+					isSystem = (!value.equals("")) ? true : false;
+				} else if (elementName.equals(PRIVATE)) {
+					streamReader.next();
+					String value = streamReader.hasText() ? streamReader.getText() : "";
+					isPrivate = (!value.equals("")) ? true : false;
+				} else if (elementName.equals(SECRET)) {
+					streamReader.next();
+					secret = streamReader.getText();
+				} else if (elementName.equals(ACCESS)) {
+					streamReader.next();
+					access = streamReader.getText();
+				} else if (elementName.equals(OWNER)) {
+					streamReader.next();
+					owner = streamReader.getText();
+				} else {
+					//ignore
+				}
+			}
+			if (streamReader.isEndElement()) {
+				String elementName = streamReader.getLocalName();
+				if (elementName.equals(ELEMENT_CHANNEL)) {
+					break;
+				}
+			}
+		}
+		return new ChannelConfig(id, name, isPrivate, isSystem, secret, access, owner);
+	}
 }

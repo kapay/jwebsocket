@@ -21,32 +21,37 @@ package org.jwebsocket.plugins.channels;
  * @version $Id$
  */
 public interface SubscriberStore {
-  /**
-   * Returns the subscriber information for the given subscriber id 
-   * @param id the subscriber id to fetch
-   * @return the subscriber object, null if the subscriber doesn't exist.
-   */
-  Subscriber getSubscriber(String id);
-  /**
-   * Store the given channel in the channel store
-   * @param channel the channel object
-   * @return {@code true} if insert successful
-   */
-  boolean storeSubscriber(Subscriber subscriber);
-  /**
-   * Removes the subscriber from the store based on given id
-   * @param key the key of the data to remove from the store
-   */
-  void removeSubscriber(String id);
-  /**
-   * Clears the subscriber store, use this method with care since it removes
-   * all the channel information from the store physically and cannot be
-   * rolled back.
-   */
-  void clearSubscribers();
-  /**
-   * Returns the size of the subscriber store
-   * @return the size value
-   */
-  int getSubscribersStoreSize();
+
+	/**
+	 * Returns the subscriber information for the given subscriber id
+	 * @param id the subscriber id to fetch
+	 * @return the subscriber object, null if the subscriber doesn't exist.
+	 */
+	Subscriber getSubscriber(String id);
+
+	/**
+	 * Store the given channel in the channel store
+	 * @param channel the channel object
+	 * @return {@code true} if insert successful
+	 */
+	boolean storeSubscriber(Subscriber subscriber);
+
+	/**
+	 * Removes the subscriber from the store based on given id
+	 * @param key the key of the data to remove from the store
+	 */
+	void removeSubscriber(String id);
+
+	/**
+	 * Clears the subscriber store, use this method with care since it removes
+	 * all the channel information from the store physically and cannot be
+	 * rolled back.
+	 */
+	void clearSubscribers();
+
+	/**
+	 * Returns the size of the subscriber store
+	 * @return the size value
+	 */
+	int getSubscribersStoreSize();
 }
