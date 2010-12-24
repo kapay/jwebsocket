@@ -325,9 +325,9 @@
 			<id>spy</id>
 			<name>Spy Repository</name>
 			<layout>default</layout>
-			<url>http://code.google.com/p/spymemcached/</url>
+			<url>http://code.google.com/p/spymemcached/wiki/Maven</url>
 <!--
-			http://code.google.com/p/spymemcached/wiki/Maven
+			<url>http://code.google.com/p/spymemcached/</url>
 			<url>http://bleu.west.spy.net/~dustin/m2repo/</url>
 -->
 			<snapshots>
