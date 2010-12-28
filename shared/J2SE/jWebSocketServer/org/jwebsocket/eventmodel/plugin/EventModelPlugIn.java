@@ -53,22 +53,16 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	 * @param emEvents
 	 * @throws Exception
 	 */
-	public void setEmEvents(Collection<Class> emEvents) throws Exception{
-		getEm().addEvents(emEvents);
-		getEm().on(emEvents, this);
+	public void setEmEvents(Object emEvents) throws Exception {
+		if (emEvents instanceof Collection) {
+			getEm().addEvents((Collection)emEvents);
+			getEm().on((Collection)emEvents, this);
+		}
+		if (emEvents instanceof Map) {
+			setClientAPI((Map)emEvents);
+		}
 	}
 
-	/**
-	 * Event Model events registration & Client API definition
-	 *
-	 * @param emEvents
-	 * @throws Exception
-	 */
-	public void setEmEvents(Map<String, Class> emEvents) throws Exception{
-		setEmEvents(emEvents.values());
-		setClientAPI(emEvents);
-	}
-	
 	/**
 	 * @return the id
 	 */
@@ -112,7 +106,7 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	}
 
 	@Override
-	public String toString(){
+	public String toString() {
 		return getId();
 	}
 }
