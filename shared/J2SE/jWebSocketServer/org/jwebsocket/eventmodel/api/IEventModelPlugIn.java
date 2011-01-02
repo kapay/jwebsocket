@@ -16,12 +16,14 @@
 package org.jwebsocket.eventmodel.api;
 
 import org.jwebsocket.api.IInitializable;
-import org.jwebsocket.eventmodel.context.EventModel;
+import org.jwebsocket.eventmodel.core.EventModel;
 import java.util.Map;
+import org.jwebsocket.eventmodel.observable.Event;
+import org.jwebsocket.eventmodel.plugin.EventNotification;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public interface IEventModelPlugIn extends IListener, IInitializable {
 
@@ -33,7 +35,9 @@ public interface IEventModelPlugIn extends IListener, IInitializable {
 
 	public void setEm(EventModel em);
 
-	public Map getClientAPI();
+	public Map<String, Class<? extends Event>> getClientAPI();
 
-	public void setClientAPI(Map clientAPI);
+	public void setClientAPI(Map<String, Class<? extends Event>> clientAPI);
+
+	public EventNotification notifyEvent(Event aEvent);
 }

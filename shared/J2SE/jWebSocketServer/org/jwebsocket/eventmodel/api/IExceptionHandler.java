@@ -13,20 +13,19 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel;
+package org.jwebsocket.eventmodel.api;
 
-import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.api.IInitializable;
 
 /**
  *
- * @author Itachi
+ * @author kyberneees
  */
-public class Main {
+public interface IExceptionHandler extends IInitializable {
 
-	public static void main(String[] args) {
-
-		JWebSocketFactory.start();
-
-		//JWebSocketFactory.stop()
-	}
+	/**
+	 * Process uncaught exceptions
+	 * @param ex
+	 */
+	public void process(Exception ex);
 }

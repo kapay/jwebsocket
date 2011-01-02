@@ -25,6 +25,11 @@ import org.jwebsocket.eventmodel.observable.Event;
 public class BeforeRouteResponseToken extends Event {
 
 	private WebSocketEventDefinition eventDefinition;
+	private int requestId;
+
+	public BeforeRouteResponseToken(int requestId) {
+		this.requestId = requestId;
+	}
 
 	/**
 	 * @return the eventDefinition
@@ -38,5 +43,12 @@ public class BeforeRouteResponseToken extends Event {
 	 */
 	public void setEventDefinition(WebSocketEventDefinition eventDefinition) {
 		this.eventDefinition = eventDefinition;
+	}
+
+	/**
+	 * @return the requestId
+	 */
+	public int getRequestId() {
+		return requestId;
 	}
 }

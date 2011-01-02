@@ -31,7 +31,7 @@ import org.jwebsocket.token.Token;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class CacheFilter extends EventModelFilter implements IListener {
 
@@ -44,7 +44,7 @@ public class CacheFilter extends EventModelFilter implements IListener {
 
 		if (def.isCacheEnabled() && def.getCacheTime() > 0) {
 			//Getting the cached response Token
-			Element e = getCache().get(aEvent.getId());
+			Element e = getCache(aEvent.getId()).get(aEvent.getRequestId());
 
 			if (e != null && !e.isExpired()) {
 				//ResponseFromCache event notification
@@ -67,12 +67,12 @@ public class CacheFilter extends EventModelFilter implements IListener {
 	/**
 	 * @return the filter cache
 	 */
-	public Cache getCache() {
-		if (!getCacheManager().cacheExists(cacheNamespace)) {
-			getCacheManager().addCache(cacheNamespace);
+	public Cache getCache(String aEventId) {
+		if (!getCacheManager().cacheExists(cacheNamespace + aEventId)) {
+			getCacheManager().addCache(cacheNamespace + aEventId);
 		}
 
-		return getCacheManager().getCache(cacheNamespace);
+		return getCacheManager().getCache(cacheNamespace + aEventId);
 	}
 
 	public void processEvent(BeforeRouteResponseToken aEvent, ResponseEvent aResponseEvent) {
@@ -80,8 +80,8 @@ public class CacheFilter extends EventModelFilter implements IListener {
 				&& aEvent.getEventDefinition().getCacheTime() > 0) {
 
 			//Putting the response token in cache using the event cache time
-			getCache().put(new Element(
-					aEvent.getArgs().getString("reqType"),
+			getCache(aEvent.getEventDefinition().getId()).put(new Element(
+					aEvent.getRequestId(),
 					aEvent.getArgs(),
 					false,
 					aEvent.getEventDefinition().getCacheTime(),

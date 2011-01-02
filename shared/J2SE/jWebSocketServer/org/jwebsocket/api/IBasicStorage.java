@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - EventsPlugIn
+//  jWebSocket - IBasicStorage
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -19,14 +19,14 @@ import java.util.Collection;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public interface IBasicStorage<K,V> extends Map<K,V>, IInitializable{
 
-	public String getName();
+	String getName();
 
-	public void setName(String name) throws Exception;
+	void setName(String name) throws Exception;
 
-	public Map<K,V> getAll(Collection<K> keys);
+	Map<K,V> getAll(Collection<K> keys);
 
 }

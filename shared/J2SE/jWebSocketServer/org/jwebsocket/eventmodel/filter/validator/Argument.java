@@ -20,24 +20,24 @@ import org.springframework.validation.Validator;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class Argument {
 
 	private String name;
-	private Class type;
+	private Class<? extends Object> type;
 	private boolean optional;
 	private Object value;
 	private Validator validator;
 
-	public Argument(String name, Class type, boolean optional, Validator validator) {
+	public Argument(String name, Class<? extends Object> type, boolean optional, Validator validator) {
 		setName(name);
 		setType(type);
 		setOptional(optional);
 		setValidator(validator);
 	}
 
-	public Argument(String name, Class type, boolean optional) {
+	public Argument(String name, Class<? extends Object> type, boolean optional) {
 		setName(name);
 		setType(type);
 		setOptional(optional);
@@ -60,14 +60,14 @@ public class Argument {
 	/**
 	 * @return the type
 	 */
-	public Class getType() {
+	public Class<? extends Object> getType() {
 		return type;
 	}
 
 	/**
 	 * @param type the type to set
 	 */
-	public void setType(Class type) {
+	public void setType(Class<? extends Object> type) {
 		this.type = type;
 	}
 
@@ -86,8 +86,8 @@ public class Argument {
 	}
 
 	@Override
-	public String toString(){
-		FastMap m = new FastMap();
+	public String toString() {
+		FastMap<String, Object> m = new FastMap<String, Object>();
 		m.put("name", getName());
 		m.put("type", getType().toString());
 		m.put("optional", isOptional());
@@ -97,25 +97,29 @@ public class Argument {
 
 	/**
 	 * @return the value
-	 */ public Object getValue() {
+	 */
+	public Object getValue() {
 		return value;
 	}
 
 	/**
 	 * @param value the value to set
-	 */ public void setValue(Object value) {
+	 */
+	public void setValue(Object value) {
 		this.value = value;
 	}
 
 	/**
 	 * @return the validator
-	 */ public Validator getValidator() {
+	 */
+	public Validator getValidator() {
 		return validator;
 	}
 
 	/**
 	 * @param validator the validator to set
-	 */ public void setValidator(Validator validator) {
+	 */
+	public void setValidator(Validator validator) {
 		this.validator = validator;
 	}
 }

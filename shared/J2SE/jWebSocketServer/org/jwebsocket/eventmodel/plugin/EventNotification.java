@@ -13,15 +13,31 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.api;
+package org.jwebsocket.eventmodel.plugin;
 
-import org.jwebsocket.eventmodel.context.EventModel;
+import java.util.Collection;
+import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.eventmodel.observable.Event;
 
-/**
- *
- * @author kyberneees
- */
-public interface IEventModelRef {
+public class EventNotification {
 
-	public EventModel getEm();
+	private Event event;
+	private EventModelPlugIn plugIn;
+
+	public EventNotification(EventModelPlugIn plugIn, Event aEvent) {
+		this.plugIn = plugIn;
+		this.event = aEvent;
+		this.event.getArgs().setType("s2c.event_notification.to(" + plugIn.getId() + ")");
+		this.event.getArgs().setString("eventName", aEvent.getId());
+	}
+
+	public void to(WebSocketConnector aConnector) {
+		plugIn.getEm().getParent().getServer().sendTokenAsync(aConnector, plugIn.getEm().getEventFactory().eventToToken(event));
+	}
+
+	public void to(Collection<WebSocketConnector> aConnectorCollection) {
+		for (WebSocketConnector c : aConnectorCollection) {
+			to(c);
+		}
+	}
 }

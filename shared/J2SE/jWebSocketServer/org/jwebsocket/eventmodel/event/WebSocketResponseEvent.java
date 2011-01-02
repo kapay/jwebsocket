@@ -19,11 +19,10 @@ import org.jwebsocket.eventmodel.observable.ResponseEvent;
 import javolution.util.FastSet;
 import org.jwebsocket.api.WebSocketConnector;
 import java.util.Set;
-import org.jwebsocket.token.Token;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class WebSocketResponseEvent extends ResponseEvent {
 
@@ -31,8 +30,14 @@ public class WebSocketResponseEvent extends ResponseEvent {
 	public final static int OK = 0;
 	public final static int NOT_OK = -1;
 	private Set<WebSocketConnector> to = new FastSet<WebSocketConnector>();
-	private Token token;
 	private String message;
+	private int requestId;
+
+	public WebSocketResponseEvent(int requestId) {
+		super();
+
+		this.requestId = requestId;
+	}
 
 	/**
 	 * @return the code
@@ -75,4 +80,12 @@ public class WebSocketResponseEvent extends ResponseEvent {
 	public void setTo(Set<WebSocketConnector> to) {
 		this.to = to;
 	}
+
+	/**
+	 * @return the requestId
+	 */
+	public int getRequestId() {
+		return requestId;
+	}
+
 }

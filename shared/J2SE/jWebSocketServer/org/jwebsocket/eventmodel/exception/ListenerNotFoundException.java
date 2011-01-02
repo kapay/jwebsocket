@@ -17,7 +17,7 @@ package org.jwebsocket.eventmodel.exception;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class ListenerNotFoundException extends Exception {
 

@@ -129,7 +129,9 @@ public class BaseChannelStore extends JDBCStore implements ChannelStore {
 			jsonObject.put(OWNER, channel.getOwner());
 
 			// now save
-			return super.put(channel.getId(), jsonObject);
+			// TODO: Need to think about how to return potential error (Exception?)
+			super.put(channel.getId(), jsonObject);
+			return true;
 		} catch (JSONException e) {
 			logger.error("Error constructing JSON data for the given channel:" + channel.getName(), e);
 		}
@@ -157,6 +159,6 @@ public class BaseChannelStore extends JDBCStore implements ChannelStore {
 	 */
 	@Override
 	public int getChannelStoreSize() {
-		return super.getSize();
+		return size();
 	}
 }

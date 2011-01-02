@@ -21,11 +21,12 @@ import org.jwebsocket.token.Token;
 import org.jwebsocket.eventmodel.event.EventDefinitionManager;
 import org.jwebsocket.logging.Logging;
 import org.apache.log4j.Logger;
-import org.jwebsocket.eventmodel.context.EventModel;
+import org.jwebsocket.eventmodel.core.EventModel;
+import org.jwebsocket.eventmodel.observable.Event;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class EventFactory {
 
@@ -33,11 +34,7 @@ public class EventFactory {
 	private EventDefinitionManager eventDefinitions;
 	private static Logger mLog = Logging.getLogger(EventFactory.class);
 
-	public Token eventToToken(WebSocketEvent aEvent) {
-		return aEvent.getArgs();
-	}
-
-	public Token eventToToken(WebSocketResponseEvent aEvent) {
+	public Token eventToToken(Event aEvent) {
 		return aEvent.getArgs();
 	}
 
@@ -65,7 +62,7 @@ public class EventFactory {
 		return aEvent.getId();
 	}
 
-	public String eventToString(Class aEventClass) throws Exception {
+	public String eventToString(Class<? extends Event> aEventClass) throws Exception {
 		return getEventDefinitions().getIdByClass(aEventClass);
 	}
 
@@ -73,7 +70,7 @@ public class EventFactory {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug(">> Creating instance for response event: '" + aEvent.getId() + "'...");
 		}
-		WebSocketResponseEvent aResponse = new WebSocketResponseEvent();
+		WebSocketResponseEvent aResponse = new WebSocketResponseEvent(aEvent.getRequestId());
 		aResponse.setId(aEvent.getId());
 		aResponse.setArgs(getEm().getParent().getServer().createResponse(aEvent.getArgs()));
 

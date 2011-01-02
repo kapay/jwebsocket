@@ -1,7 +1,6 @@
 package org.jwebsocket.data.store;
 
 import java.beans.PropertyChangeSupport;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,10 +13,12 @@ import java.sql.Driver;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
-
-import org.jwebsocket.api.data.Store;
+import java.util.Set;
+import javolution.util.FastSet;
+import org.jwebsocket.api.IBasicStorage;
 
 /**
  * Implementation of the <code>Store</code> interface that stores jWebSocket
@@ -26,8 +27,9 @@ import org.jwebsocket.api.data.Store;
  * @author puran
  * @version $Id$
  */
-public class JDBCStore implements Store {
+public class JDBCStore implements IBasicStorage<Object, Object> {
 
+	private String mName = null;
 	/** default connection url for the channels data store */
 	private static final String CONNECTION_URL = "jdbc:mysql://127.0.0.1:3306/jwebsocketdb";
 	/** default connection user name for channels data store */
@@ -118,10 +120,19 @@ public class JDBCStore implements Store {
 	 */
 	protected PropertyChangeSupport support = new PropertyChangeSupport(this);
 
+	@Override
+	public String getName() {
+		return mName;
+	}
+
+	@Override
+	public void setName(String aName) throws Exception {
+		mName = aName;
+	}
+
 	/**
 	 * Return the info for this Store.
 	 */
-	@Override
 	public String getInfo() {
 		return (info);
 	}
@@ -268,45 +279,45 @@ public class JDBCStore implements Store {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String[] keys() {
-		ResultSet rst = null;
-		String keys[] = null;
+	public Set keySet() {
+		ResultSet lRst = null;
+		Set lKey = new FastSet();
 		synchronized (this) {
 			int numberOfTries = 2;
 			while (numberOfTries > 0) {
 
 				Connection _conn = getConnection();
 				if (_conn == null) {
-					return (new String[0]);
+					return null;
 				}
 				try {
 					if (preparedKeysSql == null) {
-						String keysSql = "SELECT " + keyColumnName + " FROM " + tableName + " WHERE " + appColumnName + " = ?";
+						String keysSql =
+								"SELECT " + keyColumnName
+								+ " FROM " + tableName
+								+ " WHERE " + appColumnName + " = ?";
 						preparedKeysSql = _conn.prepareStatement(keysSql);
 					}
 
 					preparedKeysSql.setString(1, getAppColumnName());
-					rst = preparedKeysSql.executeQuery();
-					ArrayList<String> tmpkeys = new ArrayList<String>();
-					if (rst != null) {
-						while (rst.next()) {
-							tmpkeys.add(rst.getString(1));
+					lRst = preparedKeysSql.executeQuery();
+					if (lRst != null) {
+						while (lRst.next()) {
+							lKey.add(lRst.getString(1));
 						}
 					}
-					keys = tmpkeys.toArray(new String[tmpkeys.size()]);
 					// Break out after the finally block
 					numberOfTries = 0;
 				} catch (SQLException e) {
 					// TODO: LOG ERROR
-					keys = new String[0];
 					// Close the connection so that it gets reopened next time
 					if (dbConnection != null) {
 						close(dbConnection);
 					}
 				} finally {
 					try {
-						if (rst != null) {
-							rst.close();
+						if (lRst != null) {
+							lRst.close();
 						}
 					} catch (SQLException e) {
 						// Ignore
@@ -316,14 +327,14 @@ public class JDBCStore implements Store {
 				numberOfTries--;
 			}
 		}
-		return (keys);
+		return lKey;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getSize() {
+	public int size() {
 		int size = 0;
 		ResultSet rst = null;
 		synchronized (this) {
@@ -372,7 +383,7 @@ public class JDBCStore implements Store {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Object get(String key) {
+	public Object get(Object key) {
 		ResultSet rst = null;
 		ObjectInputStream ois = null;
 		// TODO: Alex: see below
@@ -387,10 +398,14 @@ public class JDBCStore implements Store {
 				}
 				try {
 					if (preparedLoadSql == null) {
-						String loadSql = "SELECT " + valueColumnName + " FROM " + tableName + " WHERE " + keyColumnName + " = ? AND " + appColumnName + " = ?";
+						String loadSql = 
+								"SELECT " + valueColumnName
+								+ " FROM " + tableName
+								+ " WHERE " + keyColumnName + " = ?"
+								+ " AND " + appColumnName + " = ?";
 						preparedLoadSql = _conn.prepareStatement(loadSql);
 					}
-					preparedLoadSql.setString(1, key);
+					preparedLoadSql.setString(1, (String) key);
 					preparedLoadSql.setString(2, getAppColumnName());
 					rst = preparedLoadSql.executeQuery();
 					if (rst.next()) {
@@ -435,23 +450,26 @@ public class JDBCStore implements Store {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void remove(String key) {
+	public Object remove(Object key) {
 		synchronized (this) {
 			int numberOfTries = 2;
 			while (numberOfTries > 0) {
 				Connection _conn = getConnection();
 
 				if (_conn == null) {
-					return;
+					return null;
 				}
 
 				try {
 					if (preparedRemoveSql == null) {
-						String removeSql = "DELETE FROM " + tableName + " WHERE " + keyColumnName + " = ?  AND " + appColumnName + " = ?";
+						String removeSql =
+								"DELETE FROM " + tableName
+								+ " WHERE " + keyColumnName + " = ?"
+								+ " AND " + appColumnName + " = ?";
 						preparedRemoveSql = _conn.prepareStatement(removeSql);
 					}
 
-					preparedRemoveSql.setString(1, key);
+					preparedRemoveSql.setString(1, (String) key);
 					preparedRemoveSql.setString(2, getAppColumnName());
 					preparedRemoveSql.execute();
 					// Break out after the finally block
@@ -467,6 +485,7 @@ public class JDBCStore implements Store {
 				numberOfTries--;
 			}
 		}
+		return null;
 	}
 
 	/**
@@ -512,7 +531,7 @@ public class JDBCStore implements Store {
 	 *              if an input/output error occurs
 	 */
 	@Override
-	public boolean put(String aKey, Object aData) {
+	public Object put(Object aKey, Object aData) {
 		ObjectOutputStream oos = null;
 		ByteArrayOutputStream bos = null;
 		ByteArrayInputStream bis = null;
@@ -536,7 +555,7 @@ public class JDBCStore implements Store {
 					byte[] obs = bos.toByteArray();
 					// TODO: Alex: see below:
 					// int size = obs.length;
- 					// bis = new ByteArrayInputStream(obs, 0, size);
+					// bis = new ByteArrayInputStream(obs, 0, size);
 					// in = new BufferedInputStream(bis, size);
 
 					if (preparedSaveSql == null) {
@@ -547,7 +566,7 @@ public class JDBCStore implements Store {
 						preparedSaveSql = lConn.prepareStatement(saveSql);
 					}
 
-					preparedSaveSql.setString(1, aKey);
+					preparedSaveSql.setString(1, (String) aKey);
 					// TODO: Alex: Why the complex stream conversions here?
 					preparedSaveSql.setBytes(2, obs); // setBinaryStream(2, in, size);
 					preparedSaveSql.setString(3, getAppColumnName());
@@ -733,5 +752,47 @@ public class JDBCStore implements Store {
 	 */
 	protected void release(Connection conn) {
 		// NOOP
+	}
+
+	@Override
+	public Map getAll(Collection keys) {
+		return null;
+	}
+
+	@Override
+	public void putAll(Map aAll) {
+	}
+
+	@Override
+	public Set entrySet() {
+		return null;
+	}
+
+	@Override
+	public Collection values() {
+		return null;
+	}
+
+	@Override
+	public boolean containsValue(Object aValue) {
+		return false;
+	}
+
+	@Override
+	public boolean containsKey(Object aKey) {
+		return false;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return size() <= 0;
+	}
+
+	@Override
+	public void initialize() {
+	}
+
+	@Override
+	public void shutdown() {
 	}
 }

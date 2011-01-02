@@ -102,6 +102,33 @@ jws.ChannelPlugIn = {
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
 	// TODO: Use checkConnected()
+	channelAuth: function( aChannel, aUsername, aAccessKey, aSecretKey ) {
+		var lRes = this.createDefaultResult();
+		if( this.isConnected() ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.PUBLISHER,
+				event: jws.ChannelPlugIn.AUTHORIZE,
+				channel: aChannel,
+				login: aUsername,
+				access_key: aAccessKey,
+				secret_key: aSecretKey
+			});
+		} else {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	//:m:*:channelPublish
+	//:d:en:Sends a message to the guven channel on the server,
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:a:en::aData:String:Data to be sent to the server side data channel.
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get noticed on error or success.
+	// TODO: Use checkConnected()
 	channelPublish: function( aChannel, aData ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {

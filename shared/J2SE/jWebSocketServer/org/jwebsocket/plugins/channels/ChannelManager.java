@@ -35,307 +35,306 @@ import org.jwebsocket.token.TokenFactory;
  * @version $Id$
  */
 public class ChannelManager {
-    /** id for the logger channel */
-    private static final String LOGGER_CHANNEL_ID = "jws.logger.channel";
-    /** id for the admin channel */
-    private static final String ADMIN_CHANNEL_ID = "jws.admin.channel";
 
-    /** settings key strings */
-    private static final String USE_PERSISTENT_STORE = "use_persistent_store";
-    private static final String ALLOW_NEW_CHANNELS = "allow_new_channels";
+	/** id for the logger channel */
+	private static final String LOGGER_CHANNEL_ID = "jws.logger.channel";
+	/** id for the admin channel */
+	private static final String ADMIN_CHANNEL_ID = "jws.admin.channel";
+	/** settings key strings */
+	private static final String USE_PERSISTENT_STORE = "use_persistent_store";
+	private static final String ALLOW_NEW_CHANNELS = "allow_new_channels";
+	/** persistent storage objects */
+	private final ChannelStore mChannelStore = new BaseChannelStore();
+	private final SubscriberStore mSubscriberStore = new BaseSubscriberStore();
+	private final PublisherStore mPublisherStore = new BasePublisherStore();
+	/** in-memory store maps */
+	private final Map<String, Channel> mSystemChannels = new ConcurrentHashMap<String, Channel>();
+	private final Map<String, Channel> mPrivateChannels = new ConcurrentHashMap<String, Channel>();
+	private final Map<String, Channel> mPublicChannels = new ConcurrentHashMap<String, Channel>();
+	private Map<String, String> channelPluginSettings = null;
+	/**
+	 * Logger channel that publish all the logs in jWebSocket system
+	 */
+	private static Channel mLoggerChannel = null;
+	/**
+	 * admin channel to monitor channel plugin activity
+	 */
+	private static Channel mAdminChannel = null;
+	/** setting to check for persistent storage or not */
+	public static boolean usePersistentStore;
+	/** setting to check if new channel creation or registration is allowed */
+	public static boolean allowNewChannels;
 
-    /** persistent storage objects */
-    private final ChannelStore channelStore = new BaseChannelStore();
-    private final SubscriberStore subscriberStore = new BaseSubscriberStore();
-    private final PublisherStore publisherStore = new BasePublisherStore();
+	private ChannelManager(Map<String, String> aSettings) {
+		this.channelPluginSettings = new ConcurrentHashMap<String, String>(aSettings);
+		String lUsePersisentStore = channelPluginSettings.get(USE_PERSISTENT_STORE);
+		if (lUsePersisentStore != null && lUsePersisentStore.equals("true")) {
+			usePersistentStore = true;
+		}
+		String lAllowNewChannels = channelPluginSettings.get(ALLOW_NEW_CHANNELS);
+		if (lAllowNewChannels != null && lAllowNewChannels.equals("true")) {
+			allowNewChannels = true;
+		}
+	}
 
-    /** in-memory store maps */
-    private final Map<String, Channel> systemChannels = new ConcurrentHashMap<String, Channel>();
-    private final Map<String, Channel> privateChannels = new ConcurrentHashMap<String, Channel>();
-    private final Map<String, Channel> publicChannels = new ConcurrentHashMap<String, Channel>();
+	/**
+	 * @return the static manager instance
+	 */
+	public static ChannelManager getChannelManager(Map<String, String> aSettings) {
+		return new ChannelManager(aSettings);
+	}
 
-    private Map<String, String> channelPluginSettings = null;
-    /**
-     * Logger channel that publish all the logs in jWebSocket system
-     */
-    private static Channel loggerChannel = null;
-    /**
-     * admin channel to monitor channel plugin activity
-     */
-    private static Channel adminChannel = null;
+	/**
+	 * Starts the system channels within the jWebSocket system configured via
+	 * jWebSocket.xml, Note that it doesn't insert the system channels to the
+	 * channel store.
+	 *
+	 * @throws ChannelLifeCycleException
+	 *             if exception starting the system channels
+	 */
+	public void startSystemChannels() throws ChannelLifeCycleException {
+		User lRoot = SecurityFactory.getRootUser();
+		JWebSocketConfig lConfig = JWebSocketConfig.getConfig();
+		for (ChannelConfig lCfg : lConfig.getChannels()) {
+			if (lCfg.isSystemChannel()) {
+				lCfg.validate();
+				if (LOGGER_CHANNEL_ID.equals(lCfg.getId())) {
+					mLoggerChannel = new Channel(lCfg);
+					mLoggerChannel.start(lRoot.getLoginname());
+				} else if (ADMIN_CHANNEL_ID.equals(lCfg.getId())) {
+					mAdminChannel = new Channel(lCfg);
+					mAdminChannel.start(lRoot.getLoginname());
+				} else {
+					Channel channel = new Channel(lCfg);
+					channel.start(lRoot.getLoginname());
+					// put in system channels map
+					mSystemChannels.put(channel.getId(), channel);
+				}
+			}
+		}
+	}
 
-    /** setting to check for persistent storage or not */
-    public static boolean usePersistentStore;
+	/**
+	 * Stops all the system channels running in the system and clears the system
+	 * channels map
+	 */
+	public void stopSystemChannels() throws ChannelLifeCycleException {
+		User root = SecurityFactory.getRootUser();
+		for (Map.Entry<String, Channel> entry : mSystemChannels.entrySet()) {
+			Channel channel = entry.getValue();
+			channel.stop(root.getLoginname());
+		}
+		mSystemChannels.clear();
+		if (mLoggerChannel != null) {
+			mLoggerChannel.stop(root.getLoginname());
+		}
+		if (mAdminChannel != null) {
+			mAdminChannel.stop(root.getLoginname());
+		}
+	}
 
-    /** setting to check if new channel creation or registration is allowed */
-    public static boolean allowNewChannels;
+	/**
+	 * Returns the channel registered in the jWebSocket system based on channel
+	 * id it does a various lookup and then if it doesn't find anywhere from the
+	 * memory it loads the channel from the database. If it doesn' find anything
+	 * then it returns the null object
+	 *
+	 * @param aChannelId
+	 * @return channel object, null if not found
+	 */
+	public Channel getChannel(String aChannelId) {
+		if (mSystemChannels.containsKey(aChannelId)) {
+			return mSystemChannels.get(aChannelId);
+		}
+		if (mPrivateChannels.containsKey(aChannelId)) {
+			return mPrivateChannels.get(aChannelId);
+		}
+		if (mPublicChannels.containsKey(aChannelId)) {
+			return mPublicChannels.get(aChannelId);
+		}
+		if (usePersistentStore) {
+			// if not anywhere then look in the channel store
+			Channel channel = mChannelStore.getChannel(aChannelId);
+			if (channel != null) {
+				mPublicChannels.put(aChannelId, channel);
+			}
+			return channel;
+		}
+		return null;
+	}
 
-    private ChannelManager(Map<String, String> settings) {
-        this.channelPluginSettings = new ConcurrentHashMap<String, String>(settings);
-        String lUsePersisentStore = channelPluginSettings.get(USE_PERSISTENT_STORE);
-        if (lUsePersisentStore != null && lUsePersisentStore.equals("true")) {
-            usePersistentStore = true;
-        }
-        String lAllowNewChannels = channelPluginSettings.get(ALLOW_NEW_CHANNELS);
-        if (lAllowNewChannels != null && lAllowNewChannels.equals("true")) {
-            allowNewChannels = true;
-        }
-    }
+	/**
+	 * Register the given channel to the list of channels maintained by the
+	 * jWebSocket system.
+	 *
+	 * @param aChannel
+	 *            the channel to store.
+	 */
+	public void registerChannel(Channel aChannel) {
+		if (aChannel.isSystemChannel()) {
+			mSystemChannels.put(aChannel.getId(), aChannel);
+		} else if (aChannel.isPrivateChannel()) {
+			mPrivateChannels.put(aChannel.getId(), aChannel);
+		} else {
+			mPublicChannels.put(aChannel.getId(), aChannel);
+		}
+		if (usePersistentStore) {
+			mChannelStore.storeChannel(aChannel);
+		}
+	}
 
-    /**
-     * @return the static manager instance
-     */
-    public static ChannelManager getChannelManager(Map<String, String> settings) {
-        return new ChannelManager(settings);
-    }
+	/**
+	 * Returns the registered subscriber object for the given subscriber id
+	 *
+	 * @param aSubscriberId
+	 *            the subscriber id
+	 * @return the subscriber object
+	 */
+	public Subscriber getSubscriber(String aSubscriberId) {
+		return mSubscriberStore.getSubscriber(aSubscriberId);
+	}
 
-    /**
-     * Starts the system channels within the jWebSocket system configured via
-     * jWebSocket.xml, Note that it doesn't insert the system channels to the
-     * channel store.
-     * 
-     * @throws ChannelLifeCycleException
-     *             if exception starting the system channels
-     */
-    public void startSystemChannels() throws ChannelLifeCycleException {
-        User lRoot = SecurityFactory.getRootUser();
-        JWebSocketConfig lConfig = JWebSocketConfig.getConfig();
-        for (ChannelConfig lCfg : lConfig.getChannels()) {
-            if (lCfg.isSystemChannel()) {
-                lCfg.validate();
-                if (LOGGER_CHANNEL_ID.equals(lCfg.getId())) {
-                    loggerChannel = new Channel(lCfg);
-                    loggerChannel.start(lRoot.getLoginname());
-                } else if (ADMIN_CHANNEL_ID.equals(lCfg.getId())) {
-                    adminChannel = new Channel(lCfg);
-                    adminChannel.start(lRoot.getLoginname());
-                } else {
-                    Channel channel = new Channel(lCfg);
-                    channel.start(lRoot.getLoginname());
-                    // put in system channels map
-                    systemChannels.put(channel.getId(), channel);
-                }
-            }
-        }
-    }
+	/**
+	 * Stores the registered subscriber information in the channel store
+	 *
+	 * @param aSubscriber
+	 *            the subscriber to register
+	 */
+	public void storeSubscriber(Subscriber aSubscriber) {
+		mSubscriberStore.storeSubscriber(aSubscriber);
+	}
 
-    /**
-     * Stops all the system channels running in the system and clears the system
-     * channels map
-     */
-    public void stopSystemChannels() throws ChannelLifeCycleException {
-        User root = SecurityFactory.getRootUser();
-        for (Map.Entry<String, Channel> entry : systemChannels.entrySet()) {
-            Channel channel = entry.getValue();
-            channel.stop(root.getLoginname());
-        }
-        systemChannels.clear();
-        if (loggerChannel != null) {
-            loggerChannel.stop(root.getLoginname());
-        }
-        if (adminChannel != null) {
-            adminChannel.stop(root.getLoginname());
-        }
-    }
+	/**
+	 * Removes the given subscriber information from channel store
+	 *
+	 * @param aSubscriber
+	 *            the subscriber object
+	 */
+	public void removeSubscriber(Subscriber aSubscriber) {
+		mSubscriberStore.removeSubscriber(aSubscriber.getId());
+	}
 
-    /**
-     * Returns the channel registered in the jWebSocket system based on channel
-     * id it does a various lookup and then if it doesn't find anywhere from the
-     * memory it loads the channel from the database. If it doesn' find anything
-     * then it returns the null object
-     * 
-     * @param channelId
-     * @return channel object, null if not found
-     */
-    public Channel getChannel(String channelId) {
-        if (systemChannels.containsKey(channelId)) {
-            return systemChannels.get(channelId);
-        }
-        if (privateChannels.containsKey(channelId)) {
-            return privateChannels.get(channelId);
-        }
-        if (publicChannels.containsKey(channelId)) {
-            return publicChannels.get(channelId);
-        }
-        if (usePersistentStore) {
-            // if not anywhere then look in the channel store
-            Channel channel = channelStore.getChannel(channelId);
-            if (channel != null) {
-                publicChannels.put(channelId, channel);
-            }
-            return channel;
-        }
-        return null;
-    }
+	/**
+	 * Returns the registered publisher for the given publisher id
+	 *
+	 * @param publisherId
+	 *            the publisher id
+	 * @return the publisher object
+	 */
+	public Publisher getPublisher(String publisherId) {
+		return mPublisherStore.getPublisher(publisherId);
+	}
 
-    /**
-     * Register the given channel to the list of channels maintained by the
-     * jWebSocket system.
-     * 
-     * @param channel
-     *            the channel to store.
-     */
-    public void registerChannel(Channel channel) {
-        if (channel.isSystemChannel()) {
-            systemChannels.put(channel.getId(), channel);
-        } else if (channel.isPrivateChannel()) {
-            privateChannels.put(channel.getId(), channel);
-        } else {
-            publicChannels.put(channel.getId(), channel);
-        }
-        if (usePersistentStore) {
-            channelStore.storeChannel(channel);
-        }
-    }
+	/**
+	 * Stores the given publisher to the channel store
+	 *
+	 * @param publisher
+	 *            the publisher object to store
+	 */
+	public void storePublisher(Publisher publisher) {
+		mPublisherStore.storePublisher(publisher);
+	}
 
-    /**
-     * Returns the registered subscriber object for the given subscriber id
-     * 
-     * @param subscriberId
-     *            the subscriber id
-     * @return the subscriber object
-     */
-    public Subscriber getSubscriber(String subscriberId) {
-        return subscriberStore.getSubscriber(subscriberId);
-    }
+	/**
+	 * Removes the publisher from the channel store permanently
+	 *
+	 * @param publisher
+	 *            the publisher to remove
+	 */
+	public void removePublisher(Publisher publisher) {
+		mPublisherStore.removePublisher(publisher.getId());
+	}
 
-    /**
-     * Stores the registered subscriber information in the channel store
-     * 
-     * @param subscriber
-     *            the subscriber to register
-     */
-    public void storeSubscriber(Subscriber subscriber) {
-        subscriberStore.storeSubscriber(subscriber);
-    }
+	/**
+	 * Returns the instance of the logger channel.If not initialized for some
+	 * reason returns null.
+	 *
+	 * @return the logger channel
+	 */
+	public static Channel getLoggerChannel() {
+		return mLoggerChannel;
+	}
 
-    /**
-     * Removes the given subscriber information from channel store
-     * 
-     * @param subscriber
-     *            the subscriber object
-     */
-    public void removeSubscriber(Subscriber subscriber) {
-        subscriberStore.removeSubscriber(subscriber.getId());
-    }
+	/**
+	 * Returns the instance of the admin channel. If not initialized for some
+	 * reasons returns null.
+	 *
+	 * @return the admin channel
+	 */
+	public static Channel getAdminChannel() {
+		return mAdminChannel;
+	}
 
-    /**
-     * Returns the registered publisher for the given publisher id
-     * 
-     * @param publisherId
-     *            the publisher id
-     * @return the publisher object
-     */
-    public Publisher getPublisher(String publisherId) {
-        return publisherStore.getPublisher(publisherId);
-    }
+	public void publishToLoggerChannel(Token aToken) {
+		Channel lLoggerChannel = getLoggerChannel();
+		// Added by Alex:
+		if (lLoggerChannel != null) {
+			lLoggerChannel.broadcastToken(aToken);
+		}
+	}
 
-    /**
-     * Stores the given publisher to the channel store
-     * 
-     * @param publisher
-     *            the publisher object to store
-     */
-    public void storePublisher(Publisher publisher) {
-        publisherStore.storePublisher(publisher);
-    }
+	/**
+	 * Returns the error token
+	 *
+	 * @param aConnector
+	 *            the target connector object
+	 * @param channelId
+	 *            the channelId
+	 * @param message
+	 *            the error message
+	 * @return the error token
+	 */
+	public Token getErrorToken(WebSocketConnector aConnector, String channelId, String message) {
+		Token logToken = getBaseChannelResponse(aConnector, channelId);
+		logToken.setString("event", "error");
+		logToken.setString("error", message);
 
-    /**
-     * Removes the publisher from the channel store permanently
-     * 
-     * @param publisher
-     *            the publisher to remove
-     */
-    public void removePublisher(Publisher publisher) {
-        publisherStore.removePublisher(publisher.getId());
-    }
+		return logToken;
+	}
 
-    /**
-     * Returns the instance of the logger channel.If not initialized for some
-     * reason returns null.
-     * 
-     * @return the logger channel
-     */
-    public static Channel getLoggerChannel() {
-        return loggerChannel;
-    }
+	/**
+	 * Returns the basic response token for a channel
+	 *
+	 * @param aConnector
+	 *            the target connector object
+	 * @param channel
+	 *            the target channel
+	 * @return the base token of type channel
+	 */
+	public Token getBaseChannelResponse(WebSocketConnector aConnector, String channel) {
+		Token channelToken = TokenFactory.createToken("channel");
+		channelToken.setString("vendor", JWebSocketCommonConstants.VENDOR);
+		channelToken.setString("version", JWebSocketServerConstants.VERSION_STR);
+		channelToken.setString("sourceId", aConnector.getId());
+		channelToken.setString("channelId", channel);
 
-    /**
-     * Returns the instance of the admin channel. If not initialized for some
-     * reasons returns null.
-     * 
-     * @return the admin channel
-     */
-    public static Channel getAdminChannel() {
-        return adminChannel;
-    }
+		return channelToken;
+	}
 
-    public void publishToLoggerChannel(Token token) {
-        getLoggerChannel().broadcastToken(token);
-    }
+	public Token getChannelSuccessToken(WebSocketConnector aConnector, String channel, ChannelEventEnum eventType) {
+		Token token = getBaseChannelResponse(aConnector, channel);
+		String event = "";
+		switch (eventType) {
+			case LOGIN:
+				event = "login";
+				break;
+			case AUTHORIZE:
+				event = "authorize";
+				break;
+			case PUBLISH:
+				event = "publish";
+				break;
+			case SUSCRIBE:
+				event = "subscribe";
+			case UNSUSCRIBE:
+				event = "unsuscribe";
+				break;
+			default:
+				break;
+		}
+		token.setString("event", event);
+		token.setString("status", "ok");
 
-    /**
-     * Returns the error token
-     * 
-     * @param aConnector
-     *            the target connector object
-     * @param channelId
-     *            the channelId
-     * @param message
-     *            the error message
-     * @return the error token
-     */
-    public Token getErrorToken(WebSocketConnector aConnector, String channelId, String message) {
-        Token logToken = getBaseChannelResponse(aConnector, channelId);
-        logToken.setString("event", "error");
-        logToken.setString("error", message);
-
-        return logToken;
-    }
-
-    /**
-     * Returns the basic response token for a channel
-     * 
-     * @param aConnector
-     *            the target connector object
-     * @param channel
-     *            the target channel
-     * @return the base token of type channel
-     */
-    public Token getBaseChannelResponse(WebSocketConnector aConnector, String channel) {
-        Token channelToken = TokenFactory.createToken("channel");
-        channelToken.setString("vendor", JWebSocketCommonConstants.VENDOR);
-        channelToken.setString("version", JWebSocketServerConstants.VERSION_STR);
-        channelToken.setString("sourceId", aConnector.getId());
-        channelToken.setString("channelId", channel);
-
-        return channelToken;
-    }
-
-    public Token getChannelSuccessToken(WebSocketConnector aConnector, String channel, ChannelEventEnum eventType) {
-        Token token = getBaseChannelResponse(aConnector, channel);
-        String event = "";
-        switch (eventType) {
-        case LOGIN:
-            event = "login";
-            break;
-        case AUTHORIZE:
-            event = "authorize";
-            break;
-        case PUBLISH:
-            event = "publish";
-            break;
-        case SUSCRIBE:
-            event = "subscribe";
-        case UNSUSCRIBE:
-            event = "unsuscribe";
-            break;
-        default:
-            break;
-        }
-        token.setString("event", event);
-        token.setString("status", "ok");
-
-        return token;
-    }
+		return token;
+	}
 }

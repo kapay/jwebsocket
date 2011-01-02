@@ -19,7 +19,7 @@ import org.jwebsocket.eventmodel.event.WebSocketEvent;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class ConnectorStarted extends WebSocketEvent {
 }

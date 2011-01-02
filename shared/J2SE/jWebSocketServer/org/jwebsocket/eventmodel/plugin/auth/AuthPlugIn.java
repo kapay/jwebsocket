@@ -15,6 +15,7 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.plugin.auth;
 
+import javolution.util.FastList;
 import org.jwebsocket.eventmodel.plugin.EventModelPlugIn;
 import org.jwebsocket.eventmodel.event.WebSocketResponseEvent;
 import org.jwebsocket.eventmodel.event.auth.Logon;
@@ -22,11 +23,12 @@ import org.jwebsocket.eventmodel.event.auth.Logoff;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class AuthPlugIn extends EventModelPlugIn {
 
@@ -52,6 +54,13 @@ public class AuthPlugIn extends EventModelPlugIn {
 
 		aResponseEvent.getTo().add(aEvent.getConnector());
 		aResponseEvent.setMessage(">> Login process has finished successfully. Username: '" + username + "'");
+
+		//Adding roles in the response
+		FastList<String> roles = new FastList<String>();
+		for (GrantedAuthority ga: SecurityContextHolder.getContext().getAuthentication().getAuthorities()){
+			roles.add(ga.getAuthority());
+		}
+		aResponseEvent.getArgs().setList("roles", roles);
 	}
 
 	/**

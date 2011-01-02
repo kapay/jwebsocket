@@ -18,33 +18,34 @@ package org.jwebsocket.eventmodel.plugin;
 import java.util.Collection;
 import org.jwebsocket.eventmodel.observable.ObservableObject;
 import org.jwebsocket.eventmodel.api.IEventModelPlugIn;
-import org.jwebsocket.eventmodel.context.EventModel;
+import org.jwebsocket.eventmodel.core.EventModel;
 import org.jwebsocket.eventmodel.observable.Event;
 import org.jwebsocket.eventmodel.observable.ResponseEvent;
 import java.util.Map;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public abstract class EventModelPlugIn extends ObservableObject implements IEventModelPlugIn {
 
 	private String id;
 	private EventModel em;
-	private Map clientAPI;
+	private Map<String, Class<? extends Event>> clientAPI;
 
-	@Override
 	public void initialize() throws Exception {
 	}
 
 	//Just for compatibility with the IObservable interface
-	@Override
 	public void processEvent(Event aEvent, ResponseEvent aResponseEvent) {
 		System.out.println(">> Response from '" + this.getClass().getName() + "', please override this method!");
 	}
 
-	@Override
 	public void shutdown() throws Exception {
+	}
+
+	public EventNotification notifyEvent(Event aEvent) {
+		return new EventNotification(this, aEvent);
 	}
 
 	/**
@@ -53,14 +54,21 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	 * @param emEvents
 	 * @throws Exception
 	 */
-	public void setEmEvents(Object emEvents) throws Exception {
-		if (emEvents instanceof Collection) {
-			getEm().addEvents((Collection)emEvents);
-			getEm().on((Collection)emEvents, this);
-		}
-		if (emEvents instanceof Map) {
-			setClientAPI((Map)emEvents);
-		}
+	public void setEmEvents(Collection<Class<? extends Event>> emEvents) throws Exception {
+		getEm().addEvents(emEvents);
+		getEm().on(emEvents, this);
+	}
+
+	/**
+	 * Event Model events registration & Client API definition
+	 *
+	 * @param emEvents
+	 * @throws Exception
+	 */
+	public void setEmEventsAndClientAPI(Map<String, Class<? extends Event>> emEvents) throws Exception {
+		setClientAPI(emEvents);
+		getEm().addEvents(emEvents.values());
+		getEm().on(emEvents.values(), this);
 	}
 
 	/**
@@ -94,14 +102,14 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	/**
 	 * @return the clientAPI
 	 */
-	public Map getClientAPI() {
+	public Map<String, Class<? extends Event>> getClientAPI() {
 		return clientAPI;
 	}
 
 	/**
 	 * @param clientAPI the clientAPI to set
 	 */
-	public void setClientAPI(Map clientAPI) {
+	public void setClientAPI(Map<String, Class<? extends Event>> clientAPI) {
 		this.clientAPI = clientAPI;
 	}
 

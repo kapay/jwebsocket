@@ -15,15 +15,14 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.observable;
 
-import java.io.Serializable;
 import org.jwebsocket.token.MapToken;
 import org.jwebsocket.token.Token;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
-public class Event implements Serializable {
+public class Event {
 
 	private String id;
 	private Token args = new MapToken();
@@ -49,13 +48,13 @@ public class Event implements Serializable {
 			return false;
 		}
 		final Event other = (Event) obj;
-		if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+		if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId())) {
 			return false;
 		}
-		if (this.args != other.args && (this.args == null || !this.args.equals(other.args))) {
+		if (this.args != other.getArgs() && (this.getArgs() == null || !this.getArgs().equals(other.getArgs()))) {
 			return false;
 		}
-		if (this.subject != other.subject && (this.subject == null || !this.subject.equals(other.subject))) {
+		if (this.subject != other.getSubject() && (this.subject == null || !this.subject.equals(other.getSubject()))) {
 			return false;
 		}
 		return true;

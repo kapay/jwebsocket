@@ -32,20 +32,20 @@ import org.jwebsocket.token.Token;
  */
 public class Subscriber {
 
-	private String id;
-	private WebSocketConnector connector;
-	private TokenServer tokenServer;
-	private Date loggedInTime;
-	private List<String> channels = new ArrayList<String>();
+	private String mId;
+	private WebSocketConnector mConnector;
+	private TokenServer mTokenServer;
+	private Date mLoggedInTime;
+	private List<String> mChannels = new ArrayList<String>();
 
 	/**
 	 * Default constructor
 	 */
 	public Subscriber(String id, Date loggedInTime, List<String> channels) {
-		this.id = id;
-		this.loggedInTime = loggedInTime;
-		this.channels = channels;
-		this.connector = null;
+		this.mId = id;
+		this.mLoggedInTime = loggedInTime;
+		this.mChannels = channels;
+		this.mConnector = null;
 	}
 
 	/**
@@ -55,31 +55,31 @@ public class Subscriber {
 	 * @param loggedInTime the first time the subscriber logged in
 	 */
 	public Subscriber(WebSocketConnector theConnector, TokenServer theServer, Date loggedInTime) {
-		this.id = theConnector.getId();
-		this.connector = theConnector;
-		this.tokenServer = theServer;
-		this.loggedInTime = loggedInTime;
+		this.mId = theConnector.getId();
+		this.mConnector = theConnector;
+		this.mTokenServer = theServer;
+		this.mLoggedInTime = loggedInTime;
 	}
 
 	/**
 	 * @return the id
 	 */
 	public String getId() {
-		return id;
+		return mId;
 	}
 
 	/**
 	 * @return the connector
 	 */
 	public WebSocketConnector getConnector() {
-		return connector;
+		return mConnector;
 	}
 
 	/**
 	 * @return the channels
 	 */
 	public List<String> getChannels() {
-		return channels;
+		return mChannels;
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class Subscriber {
 	 * @param channel the channel object
 	 */
 	public void addChannel(String channel) {
-		this.channels.add(channel);
+		this.mChannels.add(channel);
 	}
 
 	/**
@@ -96,8 +96,8 @@ public class Subscriber {
 	 * @param channel the channel id to remove.
 	 */
 	public void removeChannel(String channel) {
-		if (this.channels != null) {
-			this.channels.remove(channel);
+		if (this.mChannels != null) {
+			this.mChannels.remove(channel);
 		}
 	}
 
@@ -105,7 +105,7 @@ public class Subscriber {
 	 * @return the loggedInTime
 	 */
 	public Date getLoggedInTime() {
-		return loggedInTime;
+		return mLoggedInTime;
 	}
 
 	/**
@@ -114,11 +114,11 @@ public class Subscriber {
 	 * @return future object for IO status
 	 */
 	public IOFuture sendTokenAsync(Token token) {
-		return tokenServer.sendTokenAsync(connector, token);
+		return mTokenServer.sendTokenAsync(mConnector, token);
 	}
 
 	public void sendToken(Token token) {
-		tokenServer.sendToken(connector, token);
+		mTokenServer.sendToken(mConnector, token);
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class Subscriber {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		return result;
 	}
 
@@ -147,11 +147,11 @@ public class Subscriber {
 			return false;
 		}
 		Subscriber other = (Subscriber) obj;
-		if (id == null) {
-			if (other.id != null) {
+		if (mId == null) {
+			if (other.mId != null) {
 				return false;
 			}
-		} else if (!id.equals(other.id)) {
+		} else if (!mId.equals(other.mId)) {
 			return false;
 		}
 		return true;

@@ -30,7 +30,7 @@ import org.springframework.validation.Errors;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class ValidatorFilter extends EventModelFilter {
 
@@ -41,7 +41,7 @@ public class ValidatorFilter extends EventModelFilter {
 		Set<Argument> args = getEm().getEventFactory().getEventDefinitions().
 				getDefinition(aEvent.getId()).getIncomingArgsValidation();
 
-		if (args.size() > 0){
+		if (args.size() > 0) {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> Validating incoming arguments for '" + aEvent.getId() + "' event ...");
 			}
@@ -51,7 +51,7 @@ public class ValidatorFilter extends EventModelFilter {
 			for (Argument aArg : args) {
 				validateArg(aArg, aEvent, errors);
 			}
-			if (errors.hasErrors()){
+			if (errors.hasErrors()) {
 				throw new Exception(errors.getAllErrors().toString());
 			}
 
@@ -67,13 +67,13 @@ public class ValidatorFilter extends EventModelFilter {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> Validating outgoing arguments for '" + aResponseEvent.getId() + "' event ...");
 			}
-			
+
 			//Response event args validation
 			MapBindingResult errors = new MapBindingResult(aResponseEvent.getArgs().getMap(), "response.errors");
 			for (Argument aArg : def.getOutgoingArgsValidation()) {
 				validateArg(aArg, aResponseEvent, errors);
 			}
-			if (errors.hasErrors()){
+			if (errors.hasErrors()) {
 				throw new Exception(errors.getAllErrors().toString());
 			}
 
@@ -93,14 +93,14 @@ public class ValidatorFilter extends EventModelFilter {
 		} else if (!aArg.getType().isInstance(aEvent.getArgs().getObject(aArg.getName()))) {
 			throw new Exception("The argument: '" + aArg.getName() + "', needs to be type of " + aArg.getType().toString());
 		}
-		
+
 		//Hydrating the argument with the value
 		aArg.setValue(aEvent.getArgs().getObject(aArg.getName()));
 
 		//Spring validation mechanism compatibility
-		if (null != aArg.getValidator()){
-			if (aArg.getValidator().supports(aArg.getType())){
-				aArg.getValidator().validate(aArg, errors);//Fix this
+		if (null != aArg.getValidator()) {
+			if (aArg.getValidator().supports(aArg.getType())) {
+				aArg.getValidator().validate(aArg, errors);
 			}
 		}
 	}

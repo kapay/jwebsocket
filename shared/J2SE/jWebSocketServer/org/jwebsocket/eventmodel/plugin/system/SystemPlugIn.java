@@ -15,6 +15,7 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.plugin.system;
 
+import java.util.Map;
 import org.jwebsocket.eventmodel.plugin.EventModelPlugIn;
 import org.jwebsocket.eventmodel.event.system.GetPlugInAPI;
 import javolution.util.FastMap;
@@ -26,7 +27,7 @@ import org.jwebsocket.eventmodel.event.WebSocketEventDefinition;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class SystemPlugIn extends EventModelPlugIn {
 
@@ -43,21 +44,21 @@ public class SystemPlugIn extends EventModelPlugIn {
 		}
 
 		IEventModelPlugIn plugIn = getEm().getPlugIn(aPlugInId);
-		FastMap api = new FastMap();
-		FastMap temp;
+		FastMap<String, Map<String, Object>> api = new FastMap<String, Map<String, Object>>();
+		FastMap<String, Object> temp;
 		WebSocketEventDefinition def = null;
 
 		try {
-			for (Object key : plugIn.getClientAPI().keySet()) {
+			for (String key : plugIn.getClientAPI().keySet()) {
 				String aEventId = getEm().getEventFactory().
-						eventToString((Class) plugIn.getClientAPI().get(key));
+						eventToString(plugIn.getClientAPI().get(key));
 
 				/**
 				 * Getting API events definition
 				 */
 				def = getEm().getEventFactory().getEventDefinitions().getDefinition(aEventId);
 
-				temp = new FastMap();
+				temp = new FastMap<String, Object>();
 				temp.put("type", aEventId);
 				temp.put("isCacheEnabled", def.isCacheEnabled());
 				temp.put("isSecurityEnabled", def.isSecurityEnabled());
@@ -67,8 +68,11 @@ public class SystemPlugIn extends EventModelPlugIn {
 				temp.put("outgoingArgsValidation", def.getOutgoingArgsValidation());
 				api.put(key, temp);
 			}
-			aResponseEvent = (WebSocketResponseEvent) aResponseEvent;
+
 			aResponseEvent.getTo().add(aEvent.getConnector());
+			//PlugIn id
+			aResponseEvent.getArgs().setString("id", this.getId());
+			//PlugIn API
 			aResponseEvent.getArgs().setMap("api", api);
 
 		} catch (Exception ex) {

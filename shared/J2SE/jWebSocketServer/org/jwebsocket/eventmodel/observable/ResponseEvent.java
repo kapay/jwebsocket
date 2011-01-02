@@ -17,7 +17,7 @@ package org.jwebsocket.eventmodel.observable;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class ResponseEvent extends Event {
 

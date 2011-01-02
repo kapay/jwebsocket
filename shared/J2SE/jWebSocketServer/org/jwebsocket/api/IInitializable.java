@@ -17,7 +17,7 @@ package org.jwebsocket.api;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public interface IInitializable {
 

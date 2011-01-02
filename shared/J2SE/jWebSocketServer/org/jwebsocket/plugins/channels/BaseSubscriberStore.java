@@ -68,60 +68,63 @@ public class BaseSubscriberStore extends JDBCStore implements SubscriberStore {
 	}
 
 	@Override
-	public Subscriber getSubscriber(String id) {
+	public Subscriber getSubscriber(String aId) {
 		// TODO: Alex: Added by Alex:
-		JSONObject subscriberObject = null;
+		JSONObject lSubscriberObject = null;
 		try {
-			String lStr = (String) super.get(id);
+			String lStr = (String) super.get(aId);
 			JSONTokener lJT = new JSONTokener(lStr);
-			subscriberObject = new JSONObject(lJT);
+			lSubscriberObject = new JSONObject(lJT);
 		} catch (Exception lEx) {
 		}
 		// JSONObject subscriberObject = (JSONObject) super.get(id);
 		// Added by Alex:
-		if (subscriberObject == null) {
+		if (lSubscriberObject == null) {
 			return null;
 		}
-		List<String> channels = new ArrayList<String>();
-		Subscriber subscriber = null;
+		List<String> lChannels = new ArrayList<String>();
+		Subscriber lSubscriber = null;
 		// TODO: fix: if subscriberObject == null => exception
 		try {
-			long loggedInTime = subscriberObject.getLong(LOGGED_IN_TIME);
-			JSONArray subscribersArray = subscriberObject.getJSONArray(CHANNELS);
-			if (subscribersArray != null) {
-				for (int i = 0; i < subscribersArray.length(); i++) {
-					JSONObject idObject = subscribersArray.getJSONObject(i);
-					String channelId = idObject.getString(ID);
-					channels.add(channelId);
+			long lLoggedInTime = lSubscriberObject.getLong(LOGGED_IN_TIME);
+			JSONArray lSubscribersArray = lSubscriberObject.getJSONArray(CHANNELS);
+			if (lSubscribersArray != null) {
+				for (int lIdx = 0; lIdx < lSubscribersArray.length(); lIdx++) {
+					JSONObject lObj = lSubscribersArray.getJSONObject(lIdx);
+					String lChannelId = lObj.getString(ID);
+					lChannels.add(lChannelId);
 				}
 			}
-			subscriber = new Subscriber(id, new Date(loggedInTime), channels);
-		} catch (JSONException e) {
-			logger.error("Error parsing json response from the channel repository:", e);
+			lSubscriber = new Subscriber(aId, new Date(lLoggedInTime), lChannels);
+		} catch (JSONException lEx) {
+			logger.error("Error parsing json response from the channel repository:", lEx);
 		}
-		return subscriber;
+		return lSubscriber;
 	}
 
 	@Override
-	public boolean storeSubscriber(Subscriber subscriber) {
-		JSONObject subscriberObject = new JSONObject();
+	public boolean storeSubscriber(Subscriber aSubscriber) {
+		JSONObject lSubscriberObject = new JSONObject();
 		try {
-			subscriberObject.put(ID, subscriber.getId());
+			lSubscriberObject.put(ID, aSubscriber.getId());
 			// TODO: Updated by Alex: .getTime()!
-			subscriberObject.put(LOGGED_IN_TIME, subscriber.getLoggedInTime().getTime());
+			lSubscriberObject.put(LOGGED_IN_TIME, aSubscriber.getLoggedInTime().getTime());
 
-			JSONArray jsonArray = new JSONArray();
-			for (String channel : subscriber.getChannels()) {
-				JSONObject channelObject = new JSONObject();
+			JSONArray lJSONArray = new JSONArray();
+			for (String lChannel : aSubscriber.getChannels()) {
+				JSONObject lChannelObject = new JSONObject();
 				// TODO: Updated by Alex: channelObject!
-				channelObject.put(ID, channel);
-				jsonArray.put(channelObject);
+				lChannelObject.put(ID, lChannel);
+				lJSONArray.put(lChannelObject);
 			}
-			subscriberObject.put(CHANNELS, jsonArray);
+			lSubscriberObject.put(CHANNELS, lJSONArray);
 			// TODO: updated by Alex: subscriberObject.toString() instead of subscriberObject (JSONObject is not serializable!)
-			return super.put(subscriber.getId(), subscriberObject.toString());
-		} catch (JSONException e) {
-			logger.error("Error constructing JSON data for the given subscriber '" + subscriber.getId() + "'", e);
+			// TODO: Need to think about how to return potential error (Exception?)
+			super.put(aSubscriber.getId(), lSubscriberObject.toString());
+			return true;
+		} catch (JSONException lEx) {
+			logger.error("Error constructing JSON data for the given subscriber '"
+					+ aSubscriber.getId() + "'", lEx);
 			return false;
 		}
 	}
@@ -138,6 +141,6 @@ public class BaseSubscriberStore extends JDBCStore implements SubscriberStore {
 
 	@Override
 	public int getSubscribersStoreSize() {
-		return super.getSize();
+		return super.size();
 	}
 }

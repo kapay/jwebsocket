@@ -23,13 +23,13 @@ import org.jwebsocket.eventmodel.event.WebSocketEvent;
 import org.jwebsocket.eventmodel.event.WebSocketResponseEvent;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.eventmodel.api.IListener;
-import org.jwebsocket.eventmodel.context.EventModel;
+import org.jwebsocket.eventmodel.core.EventModel;
 import org.jwebsocket.eventmodel.observable.Event;
 import org.jwebsocket.eventmodel.observable.ResponseEvent;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public abstract class EventModelFilter extends ObservableObject implements IEventModelFilter, IInitializable, IListener {
 
@@ -61,7 +61,7 @@ public abstract class EventModelFilter extends ObservableObject implements IEven
 	 * @param emEvents
 	 * @throws Exception
 	 */
-	public void setEmEvents(Set<Class> emEvents) throws Exception{
+	public void setEmEvents(Set<Class<? extends Event>> emEvents) throws Exception{
 		getEm().addEvents(emEvents);
 		getEm().on(emEvents, this);
 	}

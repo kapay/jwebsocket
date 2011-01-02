@@ -18,7 +18,6 @@ package org.jwebsocket.eventmodel.observable;
 import java.lang.reflect.InvocationTargetException;
 import org.jwebsocket.eventmodel.api.IObservable;
 import org.jwebsocket.eventmodel.api.IListener;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.Collection;
@@ -31,65 +30,49 @@ import org.jwebsocket.eventmodel.util.CommonUtil;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public abstract class ObservableObject implements IObservable {
 
 	private Integer maxExecutionTime = 60;
-	private Set<Class> events = new FastSet<Class>();
-	private Map<Class, Set> listeners = new FastMap<Class, Set>();
+	private Set<Class<? extends Event>> events = new FastSet<Class<? extends Event>>();
+	private Map<Class<? extends Event>, Set<IListener>> listeners = new FastMap<Class<? extends Event>, Set<IListener>>();
 
-	private void checkEvent(Class aEventClass) throws Exception {
+	private void checkEvent(Class<? extends Event> aEventClass) throws Exception {
 		if (!events.contains(aEventClass)) {
 			throw new IndexOutOfBoundsException("The event '" + aEventClass + "' is not registered. Add it first!");
 		}
 	}
 
-	public void on(Collection<Class> aEventClassCollection, Callable aCallable) throws Exception {
-		for (Class c : aEventClassCollection) {
-			on(c, aCallable);
-		}
-	}
-
-	public void on(Class aEventClass, Callable aCallable) throws Exception {
-		checkEvent(aEventClass);
-		if (getListeners().containsKey(aEventClass)) {
-			getListeners().get(aEventClass).add(aCallable);
-		} else {
-			getListeners().put(aEventClass, new FastSet());
-			on(aEventClass, aCallable);
-		}
-	}
-
-	public void on(Class aEventClass, IListener aListener) throws Exception {
+	public void on(Class<? extends Event> aEventClass, IListener aListener) throws Exception {
 		checkEvent(aEventClass);
 		if (getListeners().containsKey(aEventClass)) {
 			getListeners().get(aEventClass).add(aListener);
 		} else {
-			getListeners().put(aEventClass, new FastSet());
+			getListeners().put(aEventClass, new FastSet<IListener>());
 			on(aEventClass, aListener);
 		}
 	}
 
-	public void on(Collection<Class> aEventClassCollection, IListener aListener) throws Exception {
-		for (Class c : aEventClassCollection) {
+	public void on(Collection<Class<? extends Event>> aEventClassCollection, IListener aListener) throws Exception {
+		for (Class<? extends Event> c : aEventClassCollection) {
 			on(c, aListener);
 		}
 	}
 
-	public void addEvents(Class aEventClass) {
+	public void addEvents(Class<? extends Event> aEventClass) {
 		if (!getEvents().contains(aEventClass)) {
 			getEvents().add(aEventClass);
 		}
 	}
 
-	public void addEvents(Collection<Class> aEventClassCollection) {
-		for (Class c : aEventClassCollection) {
+	public void addEvents(Collection<Class<? extends Event>> aEventClassCollection) {
+		for (Class<? extends Event> c : aEventClassCollection) {
 			addEvents(c);
 		}
 	}
 
-	public void removeEvents(Class aEventClass) {
+	public void removeEvents(Class<? extends Event> aEventClass) {
 		if (getEvents().contains(aEventClass)) {
 			getEvents().remove(aEventClass);
 		}
@@ -99,38 +82,27 @@ public abstract class ObservableObject implements IObservable {
 		}
 	}
 
-	public void removeEvents(Collection<Class> aEventClassCollection) {
-		for (Class c : aEventClassCollection) {
+	public void removeEvents(Collection<Class<? extends Event>> aEventClassCollection) {
+		for (Class<? extends Event> c : aEventClassCollection) {
 			removeEvents(c);
 		}
 	}
 
-	public void un(Class aEventClass, Callable aCallable) {
-		if (getListeners().containsKey(aEventClass)) {
-			getListeners().get(aEventClass).remove(aCallable);
-		}
-	}
-
-	public void un(Class aEventClass, IListener aListener) {
+	public void un(Class<? extends Event> aEventClass, IListener aListener) {
 		if (getListeners().containsKey(aEventClass)) {
 			getListeners().get(aEventClass).remove(aListener);
 		}
 	}
 
-	public void un(Collection<Class> aEventClassCollection, Callable aCallable) {
-		for (Class c : aEventClassCollection) {
-			un(c, aCallable);
-		}
-	}
-
-	public void un(Collection<Class> aEventClassCollection, IListener aListener) {
-		for (Class c : aEventClassCollection) {
+	public void un(Collection<Class<? extends Event>> aEventClassCollection, IListener aListener) {
+		for (Class<? extends Event> c : aEventClassCollection) {
 			un(c, aListener);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public ResponseEvent notify(Event aEvent, ResponseEvent aResponseEvent, boolean useThreads) throws Exception {
-		checkEvent(aEvent.getClass());
+		checkEvent((Class<? extends Event>)aEvent.getClass());
 
 		if (null == aResponseEvent) {
 			aResponseEvent = new ResponseEvent();
@@ -141,29 +113,19 @@ public abstract class ObservableObject implements IObservable {
 
 		if (getListeners().containsKey(aEvent.getClass()) && null != getListeners().get(aEvent.getClass())) {
 			if (getListeners().get(aEvent.getClass()).size() > 0) {
-				Set calls = getListeners().get(aEvent.getClass());
+				Set<IListener> calls = getListeners().get(aEvent.getClass());
 				if (true == useThreads) {
 					ExecutorService pool = Executors.newCachedThreadPool();
 					//Running in Threads
-					for (Object it : calls) {
-						if (it instanceof IListener) {
-							IListener aListener = (IListener) it;
-							pool.submit(new CallableListener(aListener, aEvent, aResponseEvent));
-						} else {
-							pool.submit((Callable) it);
-						}
+					for (IListener it : calls) {
+						pool.submit(new CallableListener(it, aEvent, aResponseEvent));
 					}
 					//Wait for ThreadPool termination
 					CommonUtil.shutdownThreadPoolAndAwaitTermination(pool, getMaxExecutionTime());
 				} else {
 					//Iterative execution
-					for (Object it : calls) {
-						if (it instanceof IListener) {
-							ObservableObject.callProcessEvent((IListener) it, aEvent, aResponseEvent);
-						} else {
-							Callable c = (Callable) it;
-							c.call();
-						}
+					for (IListener it : calls) {
+							ObservableObject.callProcessEvent(it, aEvent, aResponseEvent);
 					}
 				}
 			}
@@ -174,9 +136,9 @@ public abstract class ObservableObject implements IObservable {
 	}
 
 	public static void callProcessEvent(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) throws Exception {
-		Class aEventClass = aEvent.getClass();
-		Class aListenerClass = aListener.getClass();
-		Class aResponseClass = aResponseEvent.getClass();
+		Class<? extends Event> aEventClass = aEvent.getClass();
+		Class<? extends IListener> aListenerClass = aListener.getClass();
+		Class<? extends ResponseEvent> aResponseClass = aResponseEvent.getClass();
 
 		try {
 			Method aMethod = aListenerClass.getMethod("processEvent", aEventClass, aResponseClass);
@@ -200,15 +162,10 @@ public abstract class ObservableObject implements IObservable {
 
 		if (getListeners().containsKey(aEvent.getClass()) && null != getListeners().get(aEvent.getClass())) {
 			if (getListeners().get(aEvent.getClass()).size() > 0) {
-				Set calls = getListeners().get(aEvent.getClass());
+				Set<IListener> calls = getListeners().get(aEvent.getClass());
 
-				for (Object it : calls) {
-					if (it instanceof IListener) {
-						ObservableObject.callProcessEvent((IListener) it, aEvent, aResponseEvent);
-					} else {
-						Callable c = (Callable) it;
-						c.call();
-					}
+				for (IListener it : calls) {
+					ObservableObject.callProcessEvent(it, aEvent, aResponseEvent);
 
 					if (aEvent.isProcessed()) {
 						break;
@@ -221,7 +178,7 @@ public abstract class ObservableObject implements IObservable {
 		return aResponseEvent;
 	}
 
-	public boolean hasListeners(Class aEventClass) throws Exception {
+	public boolean hasListeners(Class<? extends Event> aEventClass) throws Exception {
 		checkEvent(aEventClass);
 		if (getListeners().containsKey(aEventClass) && getListeners().get(aEventClass).size() > 0) {
 			return true;
@@ -230,16 +187,7 @@ public abstract class ObservableObject implements IObservable {
 		return false;
 	}
 
-	public boolean hasListener(Class aEventClass, Callable aCallable) throws Exception {
-		checkEvent(aEventClass);
-		if (getListeners().containsKey(aEventClass) && getListeners().get(aEventClass).contains(aCallable)) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean hasListener(Class aEventClass, IListener aListener) throws Exception {
+	public boolean hasListener(Class<? extends Event> aEventClass, IListener aListener) throws Exception {
 		checkEvent(aEventClass);
 		if (getListeners().containsKey(aEventClass) && getListeners().get(aEventClass).contains(aListener)) {
 			return true;
@@ -257,7 +205,7 @@ public abstract class ObservableObject implements IObservable {
 		purgeListeners();
 	}
 
-	public boolean hasEvent(Class aEventClass) {
+	public boolean hasEvent(Class<? extends Event> aEventClass) {
 		return getEvents().contains(aEventClass);
 	}
 
@@ -278,28 +226,28 @@ public abstract class ObservableObject implements IObservable {
 	/**
 	 * @return the listeners
 	 */
-	public Map<Class, Set> getListeners() {
+	public Map<Class<? extends Event>, Set<IListener>> getListeners() {
 		return listeners;
 	}
 
 	/**
 	 * @param listeners the listeners to set
 	 */
-	public void setListeners(Map<Class, Set> listeners) {
+	public void setListeners(Map<Class<? extends Event>, Set<IListener>> listeners) {
 		this.listeners = listeners;
 	}
 
 	/**
 	 * @return the events
 	 */
-	public Set<Class> getEvents() {
+	public Set<Class<? extends Event>> getEvents() {
 		return events;
 	}
 
 	/**
 	 * @param events the events to set
 	 */
-	public void setEvents(Set<Class> events) {
+	public void setEvents(Set<Class<? extends Event>> events) {
 		this.events = events;
 	}
 }

@@ -18,11 +18,11 @@ package org.jwebsocket.eventmodel.api;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.eventmodel.event.WebSocketEvent;
 import org.jwebsocket.eventmodel.event.WebSocketResponseEvent;
-import org.jwebsocket.eventmodel.context.EventModel;
+import org.jwebsocket.eventmodel.core.EventModel;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public interface IEventModelFilter {
 

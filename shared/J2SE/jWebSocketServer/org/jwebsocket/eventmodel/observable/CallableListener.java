@@ -20,13 +20,13 @@ import org.jwebsocket.eventmodel.api.IListener;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
-public class CallableListener implements Callable {
+public class CallableListener implements Callable<Object> {
 
-	IListener aListener;
-	Event aEvent;
-	ResponseEvent aResponseEvent;
+	private IListener aListener;
+	private Event aEvent;
+	private ResponseEvent aResponseEvent;
 
 	public CallableListener(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) {
 		this.aListener = aListener;

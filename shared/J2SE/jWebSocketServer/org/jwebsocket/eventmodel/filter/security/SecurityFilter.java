@@ -26,7 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class SecurityFilter extends EventModelFilter {
 
@@ -35,8 +35,7 @@ public class SecurityFilter extends EventModelFilter {
 		WebSocketEventDefinition def = getEm().getEventFactory().getEventDefinitions().getDefinition(aEvent.getId());
 		if (def.isSecurityEnabled() && def.getRoles().size() > 0) {
 			if (null != SecurityContextHolder.getContext().getAuthentication()) {
-				Collection<GrantedAuthority> connectorRoles = 
-						(Collection<GrantedAuthority>) SecurityContextHolder.getContext().
+				Collection<GrantedAuthority> connectorRoles = SecurityContextHolder.getContext().
 						getAuthentication().getAuthorities();
 
 				for (GrantedAuthority role : connectorRoles) {

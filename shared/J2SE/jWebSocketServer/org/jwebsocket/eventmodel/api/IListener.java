@@ -20,7 +20,7 @@ import org.jwebsocket.eventmodel.observable.ResponseEvent;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public interface IListener {
 

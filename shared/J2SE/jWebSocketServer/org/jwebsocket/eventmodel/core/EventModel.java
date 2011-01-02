@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.context;
+package org.jwebsocket.eventmodel.core;
 
 import org.jwebsocket.eventmodel.api.IEventModelFilter;
 import org.jwebsocket.eventmodel.api.IEventModelPlugIn;
@@ -27,20 +27,19 @@ import org.jwebsocket.eventmodel.observable.Event;
 import org.jwebsocket.eventmodel.event.WebSocketEvent;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
-
 import org.jwebsocket.eventmodel.event.em.BeforeProcessEvent;
 import org.jwebsocket.eventmodel.event.em.AfterProcessEvent;
-
 import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
-
 import java.util.Set;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.eventmodel.api.IExceptionHandler;
 import org.jwebsocket.eventmodel.exception.CachedResponseException;
+import org.jwebsocket.eventmodel.exception.ExceptionHandler;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class EventModel extends ObservableObject implements IInitializable, IListener {
 
@@ -49,8 +48,9 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 	private TokenPlugIn parent;
 	private EventFactory eventFactory;
 	private static Logger mLog = Logging.getLogger(EventModel.class);
+	private IExceptionHandler exceptionHandler;
 
-	public void initialize() {
+	public void initialize() throws Exception {
 	}
 
 	/**
@@ -104,7 +104,6 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 				mLog.info(">> The 'event' workflow has finished successfully!");
 			}
 		} catch (Exception ex) {
-			trace(ex);
 
 			//Creating error response for connector notification
 			Token aToken = getParent().getServer().createResponse(aEvent.getArgs());
@@ -117,21 +116,17 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 			if (mLog.isInfoEnabled()) {
 				mLog.info(">> The 'event' workflow has finished with errors: " + ex.toString());
 			}
+
+			//Calling the exception handler 'process' method
+			ExceptionHandler.callProcessException(getExceptionHandler(), ex);
+
 		}
 	}
 
 	/**
 	 *
-	 * @param ex
 	 */
-	private void trace(Exception ex) {
-		mLog.error(ex.toString(), ex);
-	}
-
-	/**
-	 *
-	 */
-	public void shutdown() {
+	public void shutdown() throws Exception {
 	}
 
 	/**
@@ -262,7 +257,21 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 	 * @param events the events to set
 	 */
 	@Override
-	public void setEvents(Set<Class> events) {
+	public void setEvents(Set<Class<? extends Event>> events) {
 		addEvents(events);
+	}
+
+	/**
+	 * @return the exceptionHandler
+	 */
+	public IExceptionHandler getExceptionHandler() {
+		return exceptionHandler;
+	}
+
+	/**
+	 * @param exceptionHandler the exceptionHandler to set
+	 */
+	public void setExceptionHandler(IExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
 	}
 }

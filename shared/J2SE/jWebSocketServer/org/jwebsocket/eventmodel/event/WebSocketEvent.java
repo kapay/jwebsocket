@@ -15,20 +15,30 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.event;
 
+import javolution.util.FastMap;
 import org.jwebsocket.eventmodel.observable.Event;
 import org.jwebsocket.api.IInitializable;
 import org.jwebsocket.api.WebSocketConnector;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public abstract class WebSocketEvent extends Event implements IInitializable {
 
 	private WebSocketConnector connector;
+	private int requestId;
 
 	@Override
 	public void initialize() {
+		FastMap<Object, Object> m = new FastMap<Object, Object>();
+		for (Object key : getArgs().getMap().keySet()) {
+			if (!"utid".equals(key)) {
+				m.put(key, getArgs().getMap().get(key));
+			}
+		}
+
+		requestId = m.hashCode();
 	}
 
 	@Override
@@ -47,5 +57,12 @@ public abstract class WebSocketEvent extends Event implements IInitializable {
 	 */
 	public void setConnector(WebSocketConnector connector) {
 		this.connector = connector;
+	}
+
+	/**
+	 * @return the requestId
+	 */
+	public int getRequestId() {
+		return requestId;
 	}
 }

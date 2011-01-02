@@ -19,11 +19,10 @@ import org.jwebsocket.config.JWebSocketServerConstants;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class EmConstants {
 
 	public static final String IS_EVENT_MODEL = "_IS_EM_";
 	public static final String NS_EVENT_MODEL = JWebSocketServerConstants.NS_BASE + ".eventmodel";
-	public static final String CONNECTOR_ROLES_KEY = "_CONNECTOR_ROLES_";
 }

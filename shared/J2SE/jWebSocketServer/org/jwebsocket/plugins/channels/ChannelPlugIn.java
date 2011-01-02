@@ -216,12 +216,12 @@ public class ChannelPlugIn extends TokenPlugIn {
 	 */
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-		String type = aToken.getType();
-		String namespace = aToken.getNS();
-		if (type != null && (namespace == null || namespace.equals(getNamespace()))) {
-			if (type.equals(PUBLISHER)) {
+		String lType = aToken.getType();
+		String lNS = aToken.getNS();
+		if (lType != null && getNamespace().equals(lNS)) {
+			if (lType.equals(PUBLISHER)) {
 				handlePublisher(aConnector, aToken);
-			} else if (type.equals(SUBSCRIBER)) {
+			} else if (lType.equals(SUBSCRIBER)) {
 				handleSubscriber(aConnector, aToken);
 			} else {
 				// ignore
@@ -260,69 +260,69 @@ public class ChannelPlugIn extends TokenPlugIn {
 	 *            the token data
 	 */
 	private void handlePublisher(WebSocketConnector aConnector, Token aToken) {
-		String channelId = aToken.getString(CHANNEL);
-		if (channelId == null || EMPTY_STRING.equals(channelId)) {
-			sendError(aConnector, channelId, "Channel value not specified.");
+		String lChannelId = aToken.getString(CHANNEL);
+		if (lChannelId == null || EMPTY_STRING.equals(lChannelId)) {
+			sendError(aConnector, lChannelId, "Channel value not specified.");
 			return;
 		}
 		if (!aToken.getNS().equals(getNamespace())) {
-			sendError(aConnector, channelId, "Namespace '" + aToken.getNS() + "' not correct.");
+			sendError(aConnector, lChannelId, "Namespace '" + aToken.getNS() + "' not correct.");
 			return;
 		}
-		String event = aToken.getString(EVENT);
-		if (AUTHORIZE.equals(event)) {
+		String lEvent = aToken.getString(EVENT);
+		if (AUTHORIZE.equals(lEvent)) {
 			// perform the authorization
-			authorize(aConnector, aToken, channelId);
+			authorize(aConnector, aToken, lChannelId);
 
-		} else if (PUBLISH.equals(event)) {
-			Channel channel = mChannelManager.getChannel(channelId);
-			Publisher publisher = mChannelManager.getPublisher(
+		} else if (PUBLISH.equals(lEvent)) {
+			Channel lChannel = mChannelManager.getChannel(lChannelId);
+			Publisher lPublisher = mChannelManager.getPublisher(
 					aConnector.getSession().getSessionId());
 
-			if (publisher == null || !publisher.isAuthorized()) {
-				sendError(aConnector, channelId, "Connector '" + aConnector.getId()
+			if (lPublisher == null || !lPublisher.isAuthorized()) {
+				sendError(aConnector, lChannelId, "Connector '" + aConnector.getId()
 						+ "': access denied, publisher not authorized for channelId '"
-						+ channelId + "'");
+						+ lChannelId + "'");
 				return;
 			}
-			String data = aToken.getString(DATA);
-			Token dataToken = mChannelManager.getChannelSuccessToken(
-					aConnector, channelId, ChannelEventEnum.PUBLISH);
-			dataToken.setString("data", data);
+			String lData = aToken.getString(DATA);
+			Token lToken = mChannelManager.getChannelSuccessToken(
+					aConnector, lChannelId, ChannelEventEnum.PUBLISH);
+			lToken.setString("data", lData);
 
-			mChannelManager.publishToLoggerChannel(dataToken);
-			channel.broadcastToken(dataToken);
+			mChannelManager.publishToLoggerChannel(lToken);
+			lChannel.broadcastToken(lToken);
 
-		} else if (STOP.equals(event)) {
+		} else if (STOP.equals(lEvent)) {
 			Publisher publisher = mChannelManager.getPublisher(
 					aConnector.getSession().getSessionId());
-			Channel channel = mChannelManager.getChannel(channelId);
+			Channel channel = mChannelManager.getChannel(lChannelId);
 			if (channel == null) {
-				sendError(aConnector, channelId, "'" + aConnector.getId()
+				sendError(aConnector, lChannelId, "'" + aConnector.getId()
 						+ "' channel not found for given channelId '"
-						+ channelId + "'");
+						+ lChannelId + "'");
 				return;
 			}
 			if (publisher == null || !publisher.isAuthorized()) {
-				sendError(aConnector, channelId, "Connector: " + aConnector.getId()
+				sendError(aConnector, lChannelId, "Connector: " + aConnector.getId()
 						+ ": access denied, publisher not authorized for channelId '"
-						+ channelId + "'");
+						+ lChannelId + "'");
 				return;
 			}
 			try {
 				channel.stop(publisher.getLogin());
 				Token successToken = mChannelManager.getChannelSuccessToken(
-						aConnector, channelId, ChannelEventEnum.STOP);
+						aConnector, lChannelId, ChannelEventEnum.STOP);
 				sendTokenAsync(aConnector, aConnector, successToken);
 			} catch (ChannelLifeCycleException e) {
-				mLog.error("Error stopping channel '" + channelId
+				mLog.error("Error stopping channel '" + lChannelId
 						+ "' from publisher "
 						+ publisher.getId() + "'", e);
 
 				//publish to logger channel
 				Token errorToken = mChannelManager.getErrorToken(aConnector,
-						channelId, "'" + aConnector.getId()
-						+ "' Error stopping channel '" + channelId
+						lChannelId, "'" + aConnector.getId()
+						+ "' Error stopping channel '" + lChannelId
 						+ "' from publisher '" + publisher.getId() + "'");
 				mChannelManager.publishToLoggerChannel(errorToken);
 				sendTokenAsync(aConnector, aConnector, errorToken);
@@ -334,38 +334,44 @@ public class ChannelPlugIn extends TokenPlugIn {
 	 * Authorize the publisher before publishing the data to the channel
 	 * @param aConnector the connector associated with the publisher
 	 * @param aToken the token received from the publisher client
-	 * @param channelId the channel id
+	 * @param aChannelId the channel id
 	 */
-	private void authorize(WebSocketConnector aConnector, Token aToken, String channelId) {
-		String accessKey = aToken.getString(ACCESS_KEY);
-		String secretKey = aToken.getString(SECRET_KEY);
-		String login = aToken.getString("login");
+	private void authorize(WebSocketConnector aConnector, Token aToken,
+			String aChannelId) {
+		String lAccessKey = aToken.getString(ACCESS_KEY);
+		String lSecretKey = aToken.getString(SECRET_KEY);
+		String lLogin = aToken.getString("login");
 
-		User user = SecurityFactory.getUser(login);
-		if (user == null) {
-			sendError(aConnector, channelId, "[" + aConnector.getId() + "] Authorization failed for channel:["
-					+ channelId + "], channel owner is not registered in the jWebSocket server system");
+		User lUser = SecurityFactory.getUser(lLogin);
+		if (lUser == null) {
+			sendError(aConnector, aChannelId,
+					"'" + aConnector.getId()
+					+ "' Authorization failed for channel '"
+					+ aChannelId
+					+ "', channel owner is not registered in the jWebSocket server system");
 			return;
 		}
-		if (secretKey == null || accessKey == null) {
-			sendError(aConnector, channelId, "[" + aConnector.getId()
+		if (lSecretKey == null || lAccessKey == null) {
+			sendError(aConnector, aChannelId, "[" + aConnector.getId()
 					+ "] Authorization failed, secret_key/access_key pair value is not correct");
 			return;
 		} else {
-			Channel channel = mChannelManager.getChannel(channelId);
+			Channel channel = mChannelManager.getChannel(aChannelId);
 			if (channel == null) {
-				sendError(aConnector, channelId, "[" + aConnector.getId()
-						+ "] channel not found for given channelId:[" + channelId + "]");
+				sendError(aConnector, aChannelId, "[" + aConnector.getId()
+						+ "] channel not found for given channelId:[" + aChannelId + "]");
 				return;
 			}
-			Publisher publisher = authorizePublisher(aConnector, channel, user, secretKey, accessKey);
-			if (!publisher.isAuthorized()) {
+			Publisher lPublisher = authorizePublisher(aConnector, channel, lUser, lSecretKey, lAccessKey);
+			if (!lPublisher.isAuthorized()) {
 				// couldn't authorize the publisher
-				sendError(aConnector, channelId, "[" + aConnector.getId() + "] Authorization failed for channel:["
-						+ channelId + "]");
+				sendError(aConnector, aChannelId,
+						"'" + aConnector.getId()
+						+ "' Authorization failed for channel '"
+						+ aChannelId + "'");
 			} else {
-				channel.addPublisher(publisher);
-				Token responseToken = mChannelManager.getChannelSuccessToken(aConnector, channelId,
+				channel.addPublisher(lPublisher);
+				Token responseToken = mChannelManager.getChannelSuccessToken(aConnector, aChannelId,
 						ChannelEventEnum.AUTHORIZE);
 				mChannelManager.publishToLoggerChannel(responseToken);
 				// send the success response
@@ -379,30 +385,32 @@ public class ChannelPlugIn extends TokenPlugIn {
 	 * authorization fails the publisher object will have flag authorized set to
 	 * false.
 	 *
-	 * @param connector
+	 * @param aConnector
 	 *            the connector for the publisher
-	 * @param channel
+	 * @param aChannel
 	 *            the channel to publish
-	 * @param user
+	 * @param aUser
 	 *            the user object that represents the publisher
-	 * @param secretKey
+	 * @param aSecretKey
 	 *            the secretKey value from the publisher
-	 * @param accessKey
+	 * @param aAccessKey
 	 *            the accessKey value from the publisher
 	 * @return the publisher object
 	 */
-	private Publisher authorizePublisher(WebSocketConnector connector, Channel channel, User user, String secretKey,
-			String accessKey) {
-		Publisher publisher = null;
-		Date now = new Date();
-		if (channel.getAccessKey().equals(accessKey) && channel.getSecretKey().equals(secretKey)
-				&& user.getLoginname().equals(channel.getOwner())) {
-			publisher = new Publisher(connector, user.getLoginname(), channel.getId(), now, now, true);
-			mChannelManager.storePublisher(publisher);
+	private Publisher authorizePublisher(WebSocketConnector aConnector,
+			Channel aChannel, User aUser, String aSecretKey,
+			String aAccessKey) {
+		Publisher lPublisher = null;
+		Date lNow = new Date();
+		if (aChannel.getAccessKey().equals(aAccessKey) && aChannel.getSecretKey().equals(aSecretKey)
+				// Commented our by Alex: Why may only the owner publish ?
+				/* && user.getLoginname().equals(channel.getOwner())*/) {
+			lPublisher = new Publisher(aConnector, aUser.getLoginname(), aChannel.getId(), lNow, lNow, true);
+			mChannelManager.storePublisher(lPublisher);
 		} else {
-			publisher = new Publisher(connector, user.getLoginname(), channel.getId(), now, now, false);
+			lPublisher = new Publisher(aConnector, aUser.getLoginname(), aChannel.getId(), lNow, lNow, false);
 		}
-		return publisher;
+		return lPublisher;
 	}
 
 	/**
@@ -450,9 +458,17 @@ public class ChannelPlugIn extends TokenPlugIn {
 		if (lSubscriber == null) {
 			lSubscriber = new Subscriber(aConnector, getServer(), lDate);
 		}
-		lChannel.subscribe(lSubscriber, mChannelManager);
+		// Added by Alex: If already subscribed, return error message
 		Token lResponseToken = createResponse(aToken);
-		lResponseToken.setString("subscribe", "ok");
+		if (lSubscriber.getChannels().contains(lChannelId)) {
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg",
+					"Client already subscribed to channel '"
+					+ lChannelId + "'.");
+		} else {
+			lChannel.subscribe(lSubscriber, mChannelManager);
+			lResponseToken.setString("subscribe", "ok");
+		}
 		// send the success response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
@@ -472,12 +488,14 @@ public class ChannelPlugIn extends TokenPlugIn {
 			mLog.debug("Processing 'unsubscribe'...");
 		}
 		String lChannelId = aToken.getString(CHANNEL);
-		if (lChannelId == null || EMPTY_STRING.equals(lChannelId)) {
+		if (lChannelId == null
+				|| EMPTY_STRING.equals(lChannelId)) {
 			sendError(aConnector, null, "Channel value is null");
 			return;
 		}
 		Token lResponseToken = createResponse(aToken);
-		Subscriber lSubscriber = mChannelManager.getSubscriber(aConnector.getId());
+		Subscriber lSubscriber =
+				mChannelManager.getSubscriber(aConnector.getId());
 		if (lSubscriber != null) {
 			Channel lChannel = mChannelManager.getChannel(lChannelId);
 			if (lChannel != null) {
@@ -486,7 +504,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			}
 		} else {
 			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "Client not subscribed to channel '"
+			lResponseToken.setString("msg",
+					"Client not subscribed to channel '"
 					+ lChannelId + "'.");
 		}
 		// send the success response
@@ -515,14 +534,15 @@ public class ChannelPlugIn extends TokenPlugIn {
 	 *
 	 * @param aConnector
 	 *            the target connector object
-	 * @param channel
+	 * @param aChannel
 	 *            the target channel id, can be null if channel is not
 	 *            initialized
 	 * @param error
 	 *            the error message
 	 */
-	private void sendError(WebSocketConnector aConnector, String channel, String error) {
-		Token lErrorToken = mChannelManager.getErrorToken(aConnector, channel, error);
+	private void sendError(WebSocketConnector aConnector, String aChannel, String aError) {
+		Token lErrorToken = mChannelManager.getErrorToken(
+				aConnector, aChannel, aError);
 
 		// publish to logger channel
 		mChannelManager.publishToLoggerChannel(lErrorToken);

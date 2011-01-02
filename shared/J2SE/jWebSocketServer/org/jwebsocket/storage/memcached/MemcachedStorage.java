@@ -28,146 +28,162 @@ import java.util.Arrays;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
-public class MemcachedStorage<K extends Object, V extends Object> implements IBasicStorage<K, V> {
+public class MemcachedStorage<K extends Object, V extends Object>
+		implements IBasicStorage<K, V> {
 
-	private MemcachedClient memcachedClient;
-	private String name;
+	private MemcachedClient mMemcachedClient;
+	private String mName;
 	private final static String KEYS_LOCATION = ".KEYS::1234567890";
 	private final static String KEY_SEPARATOR = "::-::";
 	private final static int NOT_EXPIRE = 0;
 
-	public MemcachedStorage(String name, MemcachedClient memcachedClient) {
-		this.name = name;
-		this.memcachedClient = memcachedClient;
+	public MemcachedStorage(String aName, MemcachedClient aMemcachedClient) {
+		this.mName = aName;
+		this.mMemcachedClient = aMemcachedClient;
 	}
 
+	@Override
 	public void initialize() throws Exception {
 		//Key index support
-		if (null == get(name + KEYS_LOCATION)) {
-			memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, "");
+		if (null == get(mName + KEYS_LOCATION)) {
+			mMemcachedClient.set(mName + KEYS_LOCATION, NOT_EXPIRE, "");
 		}
 	}
 
+	@Override
 	public void clear() {
 		for (Object key : keySet()) {
 			remove((K) key);
 		}
 		//Removing the index
-		memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, "");
+		mMemcachedClient.set(mName + KEYS_LOCATION, NOT_EXPIRE, "");
 	}
 
+	@Override
 	public Set<K> keySet() {
-		String index = (String) get(name + KEYS_LOCATION);
-		if (index.equals("")) {
-			return new FastSet();
+		String index = (String) get(mName + KEYS_LOCATION);
+		if (index.length() == 0) {
+			return new FastSet<K>();
 		} else {
-			String[] keys = index.split(KEY_SEPARATOR);
-			FastSet set = new FastSet();
-			set.addAll(Arrays.asList(keys));
+			String[] lKeys = index.split(KEY_SEPARATOR);
+			Set set = new FastSet();
+			set.addAll(Arrays.asList(lKeys));
 
 			return set;
 		}
 	}
 
+	@Override
 	public Collection<V> values() {
 		return getAll(keySet()).values();
 	}
 
-	public boolean containsKey(Object key) {
-		return keySet().contains((K) key);
+	@Override
+	public boolean containsKey(Object aKey) {
+		return keySet().contains((K) aKey);
 	}
 
-	public boolean containsValue(Object value) {
-		return values().contains((V) value);
+	@Override
+	public boolean containsValue(Object aValue) {
+		return values().contains((V) aValue);
 	}
 
-	public Map<K, V> getAll(Collection<K> keys) {
-		FastMap<K, V> m = new FastMap<K, V>();
-		for (K key : keys) {
-			m.put(key, (V) get(key));
+	@Override
+	public Map<K, V> getAll(Collection<K> aKeys) {
+		Map<K, V> m = new FastMap<K, V>();
+		for (K key : aKeys) {
+			m.put(key, get(key));
 		}
-
 		return m;
 	}
 
-	public V get(Object key) {
-		V myObj = null;
-		myObj = (V) memcachedClient.get(key.toString());
-
-		return myObj;
+	@Override
+	public V get(Object aKey) {
+		V lObj = null;
+		lObj = (V) mMemcachedClient.get(aKey.toString());
+		return lObj;
 	}
 
-	public V remove(Object key) {
-		V myObj = (V) get(key);
-		memcachedClient.delete(key.toString());
+	@Override
+	public V remove(Object aKey) {
+		V lObj = (V) get(aKey);
+		mMemcachedClient.delete(aKey.toString());
 
 		//Key index update
-		String index = (String) get(name + KEYS_LOCATION);
-		index = index.replace(key.toString() + KEY_SEPARATOR, "");
-		memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, index);
+		String lIndex = (String) get(mName + KEYS_LOCATION);
+		lIndex = lIndex.replace(aKey.toString() + KEY_SEPARATOR, "");
+		mMemcachedClient.set(mName + KEYS_LOCATION, NOT_EXPIRE, lIndex);
 
-		return myObj;
+		return lObj;
 	}
 
-	public V put(K key, V value) {
-		memcachedClient.set(key.toString(), NOT_EXPIRE, value);
+	@Override
+	public V put(K aKey, V aValue) {
+		mMemcachedClient.set(aKey.toString(), NOT_EXPIRE, aValue);
 
 		//Key index update
-		if (!keySet().contains(key)) {
-			String index = (String) get(name + KEYS_LOCATION);
-			index = index + key.toString() + KEY_SEPARATOR;
-			memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, index);
+		if (!keySet().contains(aKey)) {
+			String lIndex = (String) get(mName + KEYS_LOCATION);
+			lIndex = lIndex + aKey.toString() + KEY_SEPARATOR;
+			mMemcachedClient.set(mName + KEYS_LOCATION, NOT_EXPIRE, lIndex);
 		}
 
-		return value;
+		return aValue;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return keySet().isEmpty();
 	}
 
+	@Override
 	public void putAll(Map<? extends K, ? extends V> m) {
-		for (K key : m.keySet()) {
-			put(key, m.get(key));
+		for (K lKey : m.keySet()) {
+			put(lKey, m.get(lKey));
 		}
 	}
 
 	public MemcachedClient getMemcachedClient() {
-		return memcachedClient;
+		return mMemcachedClient;
 	}
 
-	public void setMemcachedClient(MemcachedClient memcachedClient) {
-		this.memcachedClient = memcachedClient;
+	public void setMemcachedClient(MemcachedClient aMemcachedClient) {
+		this.mMemcachedClient = aMemcachedClient;
 	}
 
+	@Override
 	public String getName() {
-		return name;
+		return mName;
 	}
 
-	public void setName(String name) throws Exception {
-		if (name.equals("")) {
+	@Override
+	public void setName(String aName) throws Exception {
+		if (aName.length() == 0) {
 			throw new InvalidParameterException();
 		}
-		Map<K, V> all = getAll(keySet());
+		Map<K, V> lAll = getAll(keySet());
 		clear();
 
-		this.name = name;
+		this.mName = aName;
 		initialize();
-		for (K key : all.keySet()) {
-			put(key, all.get(key));
+		for (K lKey : lAll.keySet()) {
+			put(lKey, lAll.get(lKey));
 		}
 	}
 
+	@Override
 	public int size() {
 		return keySet().size();
 	}
 
+	@Override
 	public Set<Entry<K, V>> entrySet() {
 		return getAll(keySet()).entrySet();
 	}
 
+	@Override
 	public void shutdown() {
 	}
 }

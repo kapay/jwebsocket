@@ -26,7 +26,7 @@ import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.eventmodel.context.EventModel;
+import org.jwebsocket.eventmodel.core.EventModel;
 import org.jwebsocket.eventmodel.event.em.ConnectorStarted;
 import org.jwebsocket.eventmodel.event.em.ConnectorStopped;
 import org.jwebsocket.eventmodel.event.em.EngineStarted;
@@ -39,13 +39,13 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
- * @author itachi
+ ** @author kyberneees
  */
 public class EventsPlugIn extends TokenPlugIn {
 
 	private String xmlConfigPath;
 	private EventModel em;
-	private ApplicationContext context;
+	private static ApplicationContext context;
 	private static Logger mLog = Logging.getLogger(EventsPlugIn.class);
 
 	public EventsPlugIn(PluginConfiguration configuration) {
@@ -208,14 +208,14 @@ public class EventsPlugIn extends TokenPlugIn {
 	/**
 	 * @return the context
 	 */
-	public ApplicationContext getContext() {
+	public static ApplicationContext getContext() {
 		return context;
 	}
 
 	/**
 	 * @param context the context to set
 	 */
-	public void setContext(ApplicationContext context) {
-		this.context = context;
+	public void setContext(ApplicationContext aContext) {
+		context = aContext;
 	}
 }

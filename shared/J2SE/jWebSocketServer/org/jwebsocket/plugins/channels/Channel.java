@@ -63,468 +63,474 @@ import org.jwebsocket.token.Token;
  * @version $Id$
  */
 public final class Channel implements ChannelLifeCycle {
-    private String id;
-    private String name;
-    private boolean privateChannel;
-    private boolean systemChannel;
-    private String secretKey;
-    private String accessKey;
-    private long createdDate;
-    private String owner;
-    private volatile boolean authenticated = false;
 
-    private List<Subscriber> subscribers;
-    private List<Publisher> publishers;
+	private String mId;
+	private String mName;
+	private boolean mIsPrivate;
+	private boolean mIsSystem;
+	private String mSecretKey;
+	private String mAccessKey;
+	private long mCreatedDate;
+	private String mOwner;
+	private volatile boolean mAuthenticated = false;
+	private List<Subscriber> mSubscribers;
+	private List<Publisher> mPublishers;
+	private ChannelState mState = ChannelState.STOPPED;
+	private List<ChannelListener> mChannelListeners;
 
-    private ChannelState state = ChannelState.STOPPED;
+	public enum ChannelState {
 
-    private List<ChannelListener> channelListeners;
+		STOPPED(0), INITIALIZED(1), STARTED(2), SUSPENDED(3);
+		private int value;
 
-    public enum ChannelState {
+		ChannelState(int value) {
+			this.value = value;
+		}
 
-        STOPPED(0), INITIALIZED(1), STARTED(2), SUSPENDED(3);
-        private int value;
+		public int getValue() {
+			return value;
+		}
+	}
 
-        ChannelState(int value) {
-            this.value = value;
-        }
+	/**
+	 * Initialize the new channel but it doesn't start.
+	 *
+	 * @param config
+	 *            the channel config
+	 */
+	public Channel(ChannelConfig config) {
+		this.mId = config.getId();
+		this.mName = config.getName();
+		this.mIsPrivate = config.isPrivateChannel();
+		this.mIsSystem = config.isSystemChannel();
+		this.mSecretKey = config.getSecretKey();
+		this.mAccessKey = config.getAccessKey();
+		this.mOwner = config.getOwner();
+		this.mCreatedDate = System.currentTimeMillis();
+		this.mState = ChannelState.INITIALIZED;
+		this.mAuthenticated = false;
+	}
 
-        public int getValue() {
-            return value;
-        }
-    }
+	public Channel(String id, String name, int subscriberCount, boolean privateChannel, boolean systemChannel,
+			String secretKey, String accessKey, String owner, long createdDate, ChannelState state,
+			List<Subscriber> subscribers, List<Publisher> publishers) {
+		this.mId = id;
+		this.mName = name;
+		this.mIsPrivate = privateChannel;
+		this.mIsSystem = systemChannel;
+		this.mSecretKey = secretKey;
+		this.mAccessKey = accessKey;
+		this.mOwner = owner;
+		this.mCreatedDate = createdDate;
+		this.mSubscribers = subscribers;
+		this.mState = state;
+	}
 
-    /**
-     * Initialize the new channel but it doesn't start.
-     * 
-     * @param config
-     *            the channel config
-     */
-    public Channel(ChannelConfig config) {
-        this.id = config.getId();
-        this.name = config.getName();
-        this.privateChannel = config.isPrivateChannel();
-        this.systemChannel = config.isSystemChannel();
-        this.secretKey = config.getSecretKey();
-        this.accessKey = config.getAccessKey();
-        this.owner = config.getOwner();
-        this.createdDate = System.currentTimeMillis();
-        this.state = ChannelState.INITIALIZED;
-        this.authenticated = false;
-    }
+	/**
+	 * Returns the channel unique id.
+	 *
+	 * @return the id
+	 */
+	public String getId() {
+		return mId;
+	}
 
-    public Channel(String id, String name, int subscriberCount, boolean privateChannel, boolean systemChannel,
-            String secretKey, String accessKey, String owner, long createdDate, ChannelState state,
-            List<Subscriber> subscribers, List<Publisher> publishers) {
-        this.id = id;
-        this.name = name;
-        this.privateChannel = privateChannel;
-        this.systemChannel = systemChannel;
-        this.secretKey = secretKey;
-        this.accessKey = accessKey;
-        this.owner = owner;
-        this.createdDate = createdDate;
-        this.subscribers = subscribers;
-        this.state = state;
-    }
+	public String getName() {
+		return mName;
+	}
 
-    /**
-     * Returns the channel unique id.
-     * 
-     * @return the id
-     */
-    public String getId() {
-        return id;
-    }
+	public int getSubscriberCount() {
+		return mSubscribers.size();
+	}
 
-    public String getName() {
-        return name;
-    }
+	public boolean isPrivateChannel() {
+		return mIsPrivate;
+	}
 
-    public int getSubscriberCount() {
-        return subscribers.size();
-    }
+	/**
+	 * @return the systemChannel
+	 */
+	public boolean isSystemChannel() {
+		return mIsSystem;
+	}
 
-    public boolean isPrivateChannel() {
-        return privateChannel;
-    }
+	/**
+	 * @return the secretKey
+	 */
+	public String getSecretKey() {
+		return mSecretKey;
+	}
 
-    /**
-     * @return the systemChannel
-     */
-    public boolean isSystemChannel() {
-        return systemChannel;
-    }
+	/**
+	 * @return the accessKey
+	 */
+	public String getAccessKey() {
+		return mAccessKey;
+	}
 
-    /**
-     * @return the secretKey
-     */
-    public String getSecretKey() {
-        return secretKey;
-    }
+	/**
+	 * @return the createdDate
+	 */
+	public long getCreatedDate() {
+		return mCreatedDate;
+	}
 
-    /**
-     * @return the accessKey
-     */
-    public String getAccessKey() {
-        return accessKey;
-    }
+	/**
+	 * @return the owner
+	 */
+	public String getOwner() {
+		return mOwner;
+	}
 
-    /**
-     * @return the createdDate
-     */
-    public long getCreatedDate() {
-        return createdDate;
-    }
+	/**
+	 * Returns the unmodifiable list of all the subscribers to this channel
+	 *
+	 * @return the list of subscribers
+	 */
+	public List<Subscriber> getSubscribers() {
+		return Collections.unmodifiableList(mSubscribers);
+	}
 
-    /**
-     * @return the owner
-     */
-    public String getOwner() {
-        return owner;
-    }
+	/**
+	 * Set the subscribers to this channel. Note that this method simply
+	 * replaces the existing list of subscribers.
+	 *
+	 * @param subscribers
+	 *            the list of subscribers
+	 */
+	public void setSubscribers(List<Subscriber> subscribers) {
+		this.mSubscribers = subscribers;
+	}
 
-    /**
-     * Returns the unmodifiable list of all the subscribers to this channel
-     * 
-     * @return the list of subscribers
-     */
-    public List<Subscriber> getSubscribers() {
-        return Collections.unmodifiableList(subscribers);
-    }
+	/**
+	 * @return the publishers who is currently publishing to this channel
+	 */
+	public List<Publisher> getPublishers() {
+		return Collections.unmodifiableList(mPublishers);
+	}
 
-    /**
-     * Set the subscribers to this channel. Note that this method simply
-     * replaces the existing list of subscribers.
-     * 
-     * @param subscribers
-     *            the list of subscribers
-     */
-    public void setSubscribers(List<Subscriber> subscribers) {
-        this.subscribers = subscribers;
-    }
+	/**
+	 * @param publishers
+	 *            the publishers to set
+	 */
+	public void setPublishers(List<Publisher> publishers) {
+		if (this.mPublishers == null) {
+			this.mPublishers = new CopyOnWriteArrayList<Publisher>();
+		}
+		this.mPublishers = publishers;
+	}
 
-    /**
-     * @return the publishers who is currently publishing to this channel
-     */
-    public List<Publisher> getPublishers() {
-        return Collections.unmodifiableList(publishers);
-    }
+	/**
+	 * Add the publisher to the list of publishers.
+	 *
+	 * @param publisher
+	 *            the publisher to add
+	 */
+	public void addPublisher(Publisher publisher) {
+		if (this.mPublishers == null) {
+			this.mPublishers = new CopyOnWriteArrayList<Publisher>();
+		}
+		this.mPublishers.add(publisher);
+	}
 
-    /**
-     * @param publishers
-     *            the publishers to set
-     */
-    public void setPublishers(List<Publisher> publishers) {
-        if (this.publishers == null) {
-            this.publishers = new CopyOnWriteArrayList<Publisher>();
-        }
-        this.publishers = publishers;
-    }
+	/**
+	 * Subscribe to this channel
+	 *
+	 * @param subscriber
+	 *            the subscriber which wants to subscribe
+	 */
+	public void subscribe(Subscriber subscriber, ChannelManager aChannelManager) {
+		if (this.mSubscribers == null) {
+			this.mSubscribers = new CopyOnWriteArrayList<Subscriber>();
+		}
+		if (!mSubscribers.contains(subscriber)) {
+			mSubscribers.add(subscriber);
+			subscriber.addChannel(this.getId());
 
-    /**
-     * Add the publisher to the list of publishers.
-     * 
-     * @param publisher
-     *            the publisher to add
-     */
-    public void addPublisher(Publisher publisher) {
-        if (this.publishers == null) {
-            this.publishers = new CopyOnWriteArrayList<Publisher>();
-        }
-        this.publishers.add(publisher);
-    }
+			// persist the subscriber
+			aChannelManager.storeSubscriber(subscriber);
+			if (mChannelListeners != null) {
+				for (ChannelListener listener : mChannelListeners) {
+					try {
+						listener.subscribed(this, subscriber);
+					} catch (Exception es) {
+						// trap for any exception so that if any of the
+						// listener implementation fails or throws exception
+						// we continue with others.
+					}
+				}
+			}
+		}
+	}
 
-    /**
-     * Subscribe to this channel
-     * 
-     * @param subscriber
-     *            the subscriber which wants to subscribe
-     */
-    public void subscribe(Subscriber subscriber, ChannelManager channelManager) {
-        if (this.subscribers == null) {
-            this.subscribers = new CopyOnWriteArrayList<Subscriber>();
-        }
-        if (!subscribers.contains(subscriber)) {
-            subscribers.add(subscriber);
-            subscriber.addChannel(this.getId());
+	/**
+	 * Unsubscribe from this channel, and updates the channel store information
+	 *
+	 * @param aSubscriber
+	 *            the subscriber to unsubscribe
+	 * @param aChannelManager
+	 *            the channel manager
+	 */
+	public void unsubscribe(Subscriber aSubscriber, ChannelManager aChannelManager) {
+		if (this.mSubscribers == null) {
+			return;
+		}
+		if (mSubscribers.contains(aSubscriber)) {
+			mSubscribers.remove(aSubscriber);
+			// Alex: Also remove from persistent storage.
+			aChannelManager.removeSubscriber(aSubscriber);
+			if (mChannelListeners != null) {
+				for (ChannelListener listener : mChannelListeners) {
+					listener.unsubscribed(this, aSubscriber);
+				}
+			}
+		}
+	}
 
-            // persist the subscriber
-            channelManager.storeSubscriber(subscriber);
-            if (channelListeners != null) {
-                for (ChannelListener listener : channelListeners) {
-                    try {
-                        listener.subscribed(this, subscriber);
-                    } catch (Exception es) {
-                        // trap for any exception so that if any of the
-                        // listener implementation fails or throws exception
-                        // we continue with others.
-                    }
-                }
-            }
-        }
-    }
+	/**
+	 * Sends the data to the given subscriber. Note that this send operation
+	 * will block the current thread until the send operation is complete. for
+	 * asynchronous send operation use <tt>sendAsync</tt> method.
+	 *
+	 * @param token
+	 *            the token data to send
+	 * @param subscriber
+	 *            the target subscriber
+	 */
+	public void send(Token token, Subscriber subscriber) {
+		subscriber.sendToken(token);
+	}
 
-    /**
-     * Unsubscribe from this channel, and updates the channel store information
-     * 
-     * @param subscriber
-     *            the subscriber to unsubscribe
-     * @param channelManager
-     *            the channel manager
-     */
-    public void unsubscribe(Subscriber subscriber, ChannelManager channelManager) {
-        if (this.subscribers == null) {
-            return;
-        }
-        if (subscribers.contains(subscriber)) {
-            subscribers.remove(subscriber);
-            if (channelListeners != null) {
-                for (ChannelListener listener : channelListeners) {
-                    listener.unsubscribed(this, subscriber);
-                }
-            }
-        }
-    }
+	/**
+	 * Sends the data to the given target subscriber asynchronously.
+	 *
+	 * @param token
+	 *            the token data to send
+	 * @param subscriber
+	 *            the target subscriber
+	 * @return the future object to keep track of send operation
+	 */
+	public IOFuture sendAsync(Token token, Subscriber subscriber) {
+		return subscriber.sendTokenAsync(token);
+	}
 
-    /**
-     * Sends the data to the given subscriber. Note that this send operation
-     * will block the current thread until the send operation is complete. for
-     * asynchronous send operation use <tt>sendAsync</tt> method.
-     * 
-     * @param token
-     *            the token data to send
-     * @param subscriber
-     *            the target subscriber
-     */
-    public void send(Token token, Subscriber subscriber) {
-        subscriber.sendToken(token);
-    }
+	/**
+	 * broadcasts data to the subscribers asynchronously. It performs the
+	 * concurrent broadcast to all the subscribers and wait for the all the
+	 * broadcast task to complete only for 1 second maximum.
+	 *
+	 * @param aToken
+	 *            the token data for the subscribers
+	 */
+	public void broadcastToken(final Token aToken) {
+		// Added by Alex: If no subscribers exist do nothing!
+		if (mSubscribers != null && mSubscribers.size() > 0) {
+			ExecutorService executor = Executors.newCachedThreadPool();
+			for (final Subscriber subscriber : mSubscribers) {
+				executor.submit(new Runnable() {
 
-    /**
-     * Sends the data to the given target subscriber asynchronously.
-     * 
-     * @param token
-     *            the token data to send
-     * @param subscriber
-     *            the target subscriber
-     * @return the future object to keep track of send operation
-     */
-    public IOFuture sendAsync(Token token, Subscriber subscriber) {
-        return subscriber.sendTokenAsync(token);
-    }
+					@Override
+					public void run() {
+						subscriber.sendTokenAsync(aToken);
+					}
+				});
+			}
+			try {
+				executor.awaitTermination(1, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				// just ignore and return
+			}
+		}
+	}
 
-    /**
-     * broadcasts data to the subscribers asynchronously. It performs the
-     * concurrent broadcast to all the subscribers and wait for the all the
-     * broadcast task to complete only for 1 second maximum.
-     * 
-     * @param token
-     *            the token data for the subscribers
-     */
-    public void broadcastToken(final Token token) {
-        ExecutorService executor = Executors.newCachedThreadPool();
-        for (final Subscriber subscriber : subscribers) {
-            executor.submit(new Runnable() {
+	/**
+	 * Returns the channel state
+	 *
+	 * @return the state
+	 */
+	public ChannelState getState() {
+		return mState;
+	}
 
-                @Override
-                public void run() {
-                    subscriber.sendTokenAsync(token);
-                }
-            });
-        }
-        try {
-            executor.awaitTermination(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            // just ignore and return
-        }
-    }
+	/**
+	 * Register the channel listener to the list of listeners
+	 *
+	 * @param channelListener
+	 *            the channel listener to register
+	 */
+	public void registerListener(ChannelListener channelListener) {
+		if (mChannelListeners == null) {
+			mChannelListeners = new CopyOnWriteArrayList<ChannelListener>();
+		}
+		mChannelListeners.add(channelListener);
+	}
 
-    /**
-     * Returns the channel state
-     * 
-     * @return the state
-     */
-    public ChannelState getState() {
-        return state;
-    }
+	public void removeListener(ChannelListener channelListener) {
+		if (mChannelListeners != null) {
+			mChannelListeners.remove(channelListener);
+		}
+	}
 
-    /**
-     * Register the channel listener to the list of listeners
-     * 
-     * @param channelListener
-     *            the channel listener to register
-     */
-    public void registerListener(ChannelListener channelListener) {
-        if (channelListeners == null) {
-            channelListeners = new CopyOnWriteArrayList<ChannelListener>();
-        }
-        channelListeners.add(channelListener);
-    }
+	@Override
+	public void init() {
+		this.mState = ChannelState.INITIALIZED;
+	}
 
-    public void removeListener(ChannelListener channelListener) {
-        if (channelListeners != null) {
-            channelListeners.remove(channelListener);
-        }
-    }
-
-    @Override
-    public void init() {
-        this.state = ChannelState.INITIALIZED;
-    }
-
-    @Override
-    public void start(final String aUser) throws ChannelLifeCycleException {
-        if (this.state == ChannelState.STARTED) {
-            throw new ChannelLifeCycleException(
+	@Override
+	public void start(final String aUser) throws ChannelLifeCycleException {
+		if (this.mState == ChannelState.STARTED) {
+			throw new ChannelLifeCycleException(
 					"Channel '" + this.getName() + "' is already started");
-        }
-        if (!SecurityFactory.isValidUser(aUser)) {
-            throw new ChannelLifeCycleException(
+		}
+		if (!SecurityFactory.isValidUser(aUser)) {
+			throw new ChannelLifeCycleException(
 					"Cannot start the channel '"
 					+ this.getName()
-                    + "' for invalid user login '" + aUser + "'");
-        } else {
-            Rights lRights = SecurityFactory.getUserRights(aUser);
-            Right lRight = lRights.get("org.jwebsocket.plugins.channel.start");
-            if (lRight == null) {
-                throw new ChannelLifeCycleException("User '"
+					+ "' for invalid user login '" + aUser + "'");
+		} else {
+			Rights lRights = SecurityFactory.getUserRights(aUser);
+			Right lRight = lRights.get("org.jwebsocket.plugins.channel.start");
+			if (lRight == null) {
+				throw new ChannelLifeCycleException("User '"
 						+ aUser + "' does not have rights to start the channel");
-            } else {
-                // verify the owner
-                if (!this.getOwner().equals(aUser)) {
-                    throw new ChannelLifeCycleException("User '"
+			} else {
+				// verify the owner
+				if (!this.getOwner().equals(aUser)) {
+					throw new ChannelLifeCycleException("User '"
 							+ aUser + "' is not a owner of this channel,"
-                            + "Only owner of the channel can start");
-                }
-                this.authenticated = true;
-            }
-        }
-        this.state = ChannelState.STARTED;
-        final Channel lChannel = this;
-        if (channelListeners != null) {
-            ExecutorService lPool = Executors.newCachedThreadPool();
-            for (final ChannelListener lListener : channelListeners) {
-                lPool.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        lListener.channelStarted(lChannel, aUser);
-                    }
-                });
-            }
-            lPool.shutdown();
-        }
-    }
+							+ "Only owner of the channel can start");
+				}
+				this.mAuthenticated = true;
+			}
+		}
+		this.mState = ChannelState.STARTED;
+		final Channel lChannel = this;
+		if (mChannelListeners != null) {
+			ExecutorService lPool = Executors.newCachedThreadPool();
+			for (final ChannelListener lListener : mChannelListeners) {
+				lPool.submit(new Runnable() {
 
-    @Override
-    public void suspend(final String user) throws ChannelLifeCycleException {
-        if (this.state == ChannelState.SUSPENDED) {
-            throw new ChannelLifeCycleException("Channel:[" + this.getName() + "] is already suspended");
-        }
-        if (!SecurityFactory.isValidUser(user) && !authenticated) {
-            throw new ChannelLifeCycleException("Cannot suspend the channel:[" + this.getName()
-                    + "] for invalid user login [" + user + "]");
-        } else {
-            Rights rights = SecurityFactory.getUserRights(user);
-            Right right = rights.get("org.jwebsocket.plugins.channel.suspend");
-            if (right == null) {
-                throw new ChannelLifeCycleException("User:[" + user + "] does not have rights to suspend the channel");
-            } else {
-                // verify the owner
-                if (!this.getOwner().equals(user)) {
-                    throw new ChannelLifeCycleException("User:[" + user + "] is not a owner of this channel,"
-                            + "Only owner of the channel can suspend");
-                }
-            }
-        }
-        this.state = ChannelState.SUSPENDED;
-        final Channel channel = this;
-        if (channelListeners != null) {
-            ExecutorService pool = Executors.newCachedThreadPool();
-            for (final ChannelListener listener : channelListeners) {
-                pool.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.channelSuspended(channel, user);
-                    }
-                });
-            }
-            pool.shutdown();
-        }
-    }
+					@Override
+					public void run() {
+						lListener.channelStarted(lChannel, aUser);
+					}
+				});
+			}
+			lPool.shutdown();
+		}
+	}
 
-    @Override
-    public void stop(final String user) throws ChannelLifeCycleException {
-        if (this.state == ChannelState.STOPPED) {
-            throw new ChannelLifeCycleException("Channel:[" + this.getName() + "] is already stopped");
-        }
-        if (!SecurityFactory.isValidUser(user) && !authenticated) {
-            throw new ChannelLifeCycleException("Cannot stop the channel:[" + this.getName()
-                    + "] for invalid user login [" + user + "]");
-        } else {
-            Rights rights = SecurityFactory.getUserRights(user);
-            Right right = rights.get("org.jwebsocket.plugins.channel.stop");
-            if (right == null) {
-                throw new ChannelLifeCycleException("User:[" + user + "] does not have rights to stop the channel");
-            } else {
-                // verify the owner
-                if (!this.getOwner().equals(user)) {
-                    throw new ChannelLifeCycleException("User:[" + user + "] is not a owner of this channel,"
-                            + "Only owner of the channel can stop");
-                }
-            }
-        }
-        if (this.state == ChannelState.INITIALIZED || this.state == ChannelState.STARTED) {
-            this.state = ChannelState.STOPPED;
-        }
-        final Channel channel = this;
-        if (channelListeners != null) {
-            ExecutorService pool = Executors.newCachedThreadPool();
-            for (final ChannelListener listener : channelListeners) {
-                pool.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.channelStopped(channel, user);
-                    }
-                });
-            }
-            pool.shutdown();
-        }
-    }
+	@Override
+	public void suspend(final String user) throws ChannelLifeCycleException {
+		if (this.mState == ChannelState.SUSPENDED) {
+			throw new ChannelLifeCycleException("Channel:[" + this.getName() + "] is already suspended");
+		}
+		if (!SecurityFactory.isValidUser(user) && !mAuthenticated) {
+			throw new ChannelLifeCycleException("Cannot suspend the channel:[" + this.getName()
+					+ "] for invalid user login [" + user + "]");
+		} else {
+			Rights rights = SecurityFactory.getUserRights(user);
+			Right right = rights.get("org.jwebsocket.plugins.channel.suspend");
+			if (right == null) {
+				throw new ChannelLifeCycleException("User:[" + user + "] does not have rights to suspend the channel");
+			} else {
+				// verify the owner
+				if (!this.getOwner().equals(user)) {
+					throw new ChannelLifeCycleException("User:[" + user + "] is not a owner of this channel,"
+							+ "Only owner of the channel can suspend");
+				}
+			}
+		}
+		this.mState = ChannelState.SUSPENDED;
+		final Channel channel = this;
+		if (mChannelListeners != null) {
+			ExecutorService pool = Executors.newCachedThreadPool();
+			for (final ChannelListener listener : mChannelListeners) {
+				pool.submit(new Runnable() {
 
-    /**
-     * @param id
-     *            the id to set
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
+					@Override
+					public void run() {
+						listener.channelSuspended(channel, user);
+					}
+				});
+			}
+			pool.shutdown();
+		}
+	}
 
-    /**
-     * @param secretKey
-     *            the secretKey to set
-     */
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
+	@Override
+	public void stop(final String user) throws ChannelLifeCycleException {
+		if (this.mState == ChannelState.STOPPED) {
+			throw new ChannelLifeCycleException("Channel:[" + this.getName() + "] is already stopped");
+		}
+		if (!SecurityFactory.isValidUser(user) && !mAuthenticated) {
+			throw new ChannelLifeCycleException("Cannot stop the channel:[" + this.getName()
+					+ "] for invalid user login [" + user + "]");
+		} else {
+			Rights rights = SecurityFactory.getUserRights(user);
+			Right right = rights.get("org.jwebsocket.plugins.channel.stop");
+			if (right == null) {
+				throw new ChannelLifeCycleException("User:[" + user + "] does not have rights to stop the channel");
+			} else {
+				// verify the owner
+				if (!this.getOwner().equals(user)) {
+					throw new ChannelLifeCycleException("User:[" + user + "] is not a owner of this channel,"
+							+ "Only owner of the channel can stop");
+				}
+			}
+		}
+		if (this.mState == ChannelState.INITIALIZED || this.mState == ChannelState.STARTED) {
+			this.mState = ChannelState.STOPPED;
+		}
+		final Channel channel = this;
+		if (mChannelListeners != null) {
+			ExecutorService pool = Executors.newCachedThreadPool();
+			for (final ChannelListener listener : mChannelListeners) {
+				pool.submit(new Runnable() {
 
-    /**
-     * @param accessKey
-     *            the accessKey to set
-     */
-    public void setAccessKey(String accessKey) {
-        this.accessKey = accessKey;
-    }
+					@Override
+					public void run() {
+						listener.channelStopped(channel, user);
+					}
+				});
+			}
+			pool.shutdown();
+		}
+	}
 
-    /**
-     * @param owner
-     *            the owner to set
-     */
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(String id) {
+		this.mId = id;
+	}
 
-    public boolean isAuthenticated() {
-        return authenticated;
-    }
+	/**
+	 * @param secretKey
+	 *            the secretKey to set
+	 */
+	public void setSecretKey(String secretKey) {
+		this.mSecretKey = secretKey;
+	}
+
+	/**
+	 * @param accessKey
+	 *            the accessKey to set
+	 */
+	public void setAccessKey(String accessKey) {
+		this.mAccessKey = accessKey;
+	}
+
+	/**
+	 * @param owner
+	 *            the owner to set
+	 */
+	public void setOwner(String owner) {
+		this.mOwner = owner;
+	}
+
+	public boolean isAuthenticated() {
+		return mAuthenticated;
+	}
 }

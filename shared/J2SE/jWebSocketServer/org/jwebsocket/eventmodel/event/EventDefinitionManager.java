@@ -17,10 +17,11 @@ package org.jwebsocket.eventmodel.event;
 
 import org.jwebsocket.api.IInitializable;
 import java.util.Set;
+import org.jwebsocket.eventmodel.observable.Event;
 
 /**
  *
- * @author Itachi
+ ** @author kyberneees
  */
 public class EventDefinitionManager implements IInitializable {
 
@@ -68,7 +69,7 @@ public class EventDefinitionManager implements IInitializable {
 		throw new IndexOutOfBoundsException("The event definition with id '" + aEventId + "' does not exists!");
 	}
 
-	public String getIdByClass(Class aEventClass) throws Exception {
+	public String getIdByClass(Class<? extends Event> aEventClass) throws Exception {
 		for (WebSocketEventDefinition def : set) {
 			if (def.getEventClass().equals(aEventClass)) {
 				return def.getId();
