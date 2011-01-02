@@ -37,17 +37,29 @@ public class EhCacheStorage implements IBasicStorage {
 	CacheManager mCacheManager = null;
 	Cache mCache = null;
 
+	/**
+	 *
+	 */
 	public EhCacheStorage() {
 		mInstanceCounter++;
 		mName = "EhCacheStorage" + mInstanceCounter;
 		initialize();
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	@Override
 	public String getName() {
 		return mName;
 	}
 
+	/**
+	 *
+	 * @param aName
+	 * @throws Exception
+	 */
 	@Override
 	public void setName(String aName) throws Exception {
 		mName = aName;
@@ -55,6 +67,8 @@ public class EhCacheStorage implements IBasicStorage {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @return
 	 */
 	@Override
 	public Set keySet() {
@@ -65,6 +79,8 @@ public class EhCacheStorage implements IBasicStorage {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @return
 	 */
 	@Override
 	public int size() {
@@ -73,6 +89,9 @@ public class EhCacheStorage implements IBasicStorage {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param aKey
+	 * @return
 	 */
 	@Override
 	public Object get(Object aKey) {
@@ -82,6 +101,9 @@ public class EhCacheStorage implements IBasicStorage {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param aKey
+	 * @return
 	 */
 	@Override
 	public Object remove(Object aKey) {
@@ -98,12 +120,11 @@ public class EhCacheStorage implements IBasicStorage {
 	}
 
 	/**
-	 * Save a session to the Store.
+	 * Save a key/value pair to the Store.
 	 *
-	 * @param session
-	 *          the session to be stored
-	 * @exception IOException
-	 *              if an input/output error occurs
+	 * @param aKey 
+	 * @param aData
+	 * @return
 	 */
 	@Override
 	public Object put(Object aKey, Object aData) {
@@ -112,45 +133,79 @@ public class EhCacheStorage implements IBasicStorage {
 		return null;
 	}
 
+	/**
+	 *
+	 * @param keys
+	 * @return
+	 */
 	@Override
 	public Map getAll(Collection keys) {
 		// TODO: to be implemented
 		return null;
 	}
 
+	/**
+	 *
+	 * @param aAll
+	 */
 	@Override
 	public void putAll(Map aAll) {
 		// TODO: to be implemented
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	@Override
 	public Set entrySet() {
 		// TODO: to be implemented
 		return null;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	@Override
 	public Collection values() {
 		// TODO: to be implemented
 		return null;
 	}
 
+	/**
+	 *
+	 * @param aValue
+	 * @return
+	 */
 	@Override
 	public boolean containsValue(Object aValue) {
 		// TODO: to be implemented
 		return false;
 	}
 
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
 	@Override
 	public boolean containsKey(Object aKey) {
 		return mCache.get(aKey) != null;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	@Override
 	public boolean isEmpty() {
 		return size() <= 0;
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public void initialize() {
 		if (mCacheManager == null) {
@@ -162,6 +217,9 @@ public class EhCacheStorage implements IBasicStorage {
 		}
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public void shutdown() {
 		mCacheManager.shutdown();
