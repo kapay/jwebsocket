@@ -352,14 +352,14 @@ public class ChannelPlugIn extends TokenPlugIn {
 			return;
 		}
 		if (lSecretKey == null || lAccessKey == null) {
-			sendError(aConnector, aChannelId, "[" + aConnector.getId()
-					+ "] Authorization failed, secret_key/access_key pair value is not correct");
+			sendError(aConnector, aChannelId, "'" + aConnector.getId()
+					+ "' Authorization failed, secret_key/access_key pair value is not correct");
 			return;
 		} else {
 			Channel channel = mChannelManager.getChannel(aChannelId);
 			if (channel == null) {
-				sendError(aConnector, aChannelId, "[" + aConnector.getId()
-						+ "] channel not found for given channelId:[" + aChannelId + "]");
+				sendError(aConnector, aChannelId, "'" + aConnector.getId()
+						+ "' channel not found for given channelId '" + aChannelId + "'");
 				return;
 			}
 			Publisher lPublisher = authorizePublisher(aConnector, channel, lUser, lSecretKey, lAccessKey);

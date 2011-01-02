@@ -95,8 +95,8 @@ jws.ChannelPlugIn = {
 		return lRes;
 	},
 
-	//:m:*:channelPublish
-	//:d:en:Sends a message to the guven channel on the server,
+	//:m:*:channelAuth
+	//:d:en:Authenticates the client at a certain channel to publish messages.
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:a:en::aData:String:Data to be sent to the server side data channel.
 	//:r:*:::void:none
@@ -123,7 +123,7 @@ jws.ChannelPlugIn = {
 	},
 
 	//:m:*:channelPublish
-	//:d:en:Sends a message to the guven channel on the server,
+	//:d:en:Sends a message to the given channel on the server,
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:a:en::aData:String:Data to be sent to the server side data channel.
 	//:r:*:::void:none
