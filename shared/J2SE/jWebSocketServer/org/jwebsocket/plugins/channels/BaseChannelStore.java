@@ -21,7 +21,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jwebsocket.data.store.JDBCStore;
+import org.jwebsocket.storage.JDBCStorage;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -30,7 +30,7 @@ import org.jwebsocket.logging.Logging;
  * @author puran
  * @version $Id: BaseChannelStore.java 1101 2010-10-19 12:36:12Z fivefeetfurther$
  */
-public class BaseChannelStore extends JDBCStore implements ChannelStore {
+public class BaseChannelStore extends JDBCStorage implements ChannelStore {
 
 	/** logger object */
 	private static Logger logger = Logging.getLogger(BaseChannelStore.class);

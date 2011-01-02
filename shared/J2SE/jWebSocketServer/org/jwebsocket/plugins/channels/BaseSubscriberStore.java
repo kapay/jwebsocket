@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - ChannelManager
+//  jWebSocket - BaseSubscriberStore
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -24,8 +24,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.jwebsocket.data.store.JDBCStore;
 import org.jwebsocket.logging.Logging;
+import org.jwebsocket.storage.EhCacheStorage;
 
 /**
  * JDBC store based extension of SubscriberStore interface.
@@ -33,18 +33,21 @@ import org.jwebsocket.logging.Logging;
  * @author puran
  * @version $Id$
  */
-public class BaseSubscriberStore extends JDBCStore implements SubscriberStore {
+public class BaseSubscriberStore
+		extends EhCacheStorage
+		implements SubscriberStore {
 
 	/** logger object */
 	private static Logger logger = Logging.getLogger(BaseSubscriberStore.class);
+
 	/** default table name for the channel store */
-	private static final String TABLE_NAME = "subscriber_store_table";
+	// private static final String TABLE_NAME = "subscriber_store_table";
 	/** default application column name for channels data store */
-	private static final String APP_COLUMN_NAME = "subscribers";
+	// private static final String APP_COLUMN_NAME = "subscribers";
 	/** default key column name for channel data store */
-	private static final String KEY_COLUMN_NAME = "subscriber_key";
+	// private static final String KEY_COLUMN_NAME = "subscriber_key";
 	/** default value column name for channel data store */
-	private static final String VALUE_COLUMN_NAME = "subscriber_value";
+	// private static final String VALUE_COLUMN_NAME = "subscriber_value";
 	/** properties */
 	private static final String ID = "id";
 	private static final String CHANNELS = "channels";
@@ -61,10 +64,12 @@ public class BaseSubscriberStore extends JDBCStore implements SubscriberStore {
 	 * initialize the JDBC store properties.
 	 */
 	private void init() {
+		/*
 		super.tableName = TABLE_NAME;
 		super.appColumnName = APP_COLUMN_NAME;
 		super.keyColumnName = KEY_COLUMN_NAME;
 		super.valueColumnName = VALUE_COLUMN_NAME;
+		 */
 	}
 
 	@Override

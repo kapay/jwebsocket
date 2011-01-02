@@ -111,19 +111,21 @@ public final class Channel implements ChannelLifeCycle {
 		this.mAuthenticated = false;
 	}
 
-	public Channel(String id, String name, int subscriberCount, boolean privateChannel, boolean systemChannel,
-			String secretKey, String accessKey, String owner, long createdDate, ChannelState state,
-			List<Subscriber> subscribers, List<Publisher> publishers) {
-		this.mId = id;
-		this.mName = name;
-		this.mIsPrivate = privateChannel;
-		this.mIsSystem = systemChannel;
-		this.mSecretKey = secretKey;
-		this.mAccessKey = accessKey;
-		this.mOwner = owner;
-		this.mCreatedDate = createdDate;
-		this.mSubscribers = subscribers;
-		this.mState = state;
+	public Channel(String aId, String aName, int aSubscriberCount,
+			boolean aPrivateChannel, boolean aSystemChannel,
+			String aSecretKey, String aAccessKey, String aOwner,
+			long aCreatedDate, ChannelState aState,
+			List<Subscriber> aSubscribers, List<Publisher> aPublishers) {
+		this.mId = aId;
+		this.mName = aName;
+		this.mIsPrivate = aPrivateChannel;
+		this.mIsSystem = aSystemChannel;
+		this.mSecretKey = aSecretKey;
+		this.mAccessKey = aAccessKey;
+		this.mOwner = aOwner;
+		this.mCreatedDate = aCreatedDate;
+		this.mSubscribers = aSubscribers;
+		this.mState = aState;
 	}
 
 	/**
@@ -195,11 +197,11 @@ public final class Channel implements ChannelLifeCycle {
 	 * Set the subscribers to this channel. Note that this method simply
 	 * replaces the existing list of subscribers.
 	 *
-	 * @param subscribers
+	 * @param aSubscribers
 	 *            the list of subscribers
 	 */
-	public void setSubscribers(List<Subscriber> subscribers) {
-		this.mSubscribers = subscribers;
+	public void setSubscribers(List<Subscriber> aSubscribers) {
+		this.mSubscribers = aSubscribers;
 	}
 
 	/**
@@ -210,49 +212,49 @@ public final class Channel implements ChannelLifeCycle {
 	}
 
 	/**
-	 * @param publishers
+	 * @param aPublishers
 	 *            the publishers to set
 	 */
-	public void setPublishers(List<Publisher> publishers) {
+	public void setPublishers(List<Publisher> aPublishers) {
 		if (this.mPublishers == null) {
 			this.mPublishers = new CopyOnWriteArrayList<Publisher>();
 		}
-		this.mPublishers = publishers;
+		this.mPublishers = aPublishers;
 	}
 
 	/**
 	 * Add the publisher to the list of publishers.
 	 *
-	 * @param publisher
+	 * @param aPublisher
 	 *            the publisher to add
 	 */
-	public void addPublisher(Publisher publisher) {
+	public void addPublisher(Publisher aPublisher) {
 		if (this.mPublishers == null) {
 			this.mPublishers = new CopyOnWriteArrayList<Publisher>();
 		}
-		this.mPublishers.add(publisher);
+		this.mPublishers.add(aPublisher);
 	}
 
 	/**
 	 * Subscribe to this channel
 	 *
-	 * @param subscriber
+	 * @param aSubscriber
 	 *            the subscriber which wants to subscribe
 	 */
-	public void subscribe(Subscriber subscriber, ChannelManager aChannelManager) {
+	public void subscribe(Subscriber aSubscriber, ChannelManager aChannelManager) {
 		if (this.mSubscribers == null) {
 			this.mSubscribers = new CopyOnWriteArrayList<Subscriber>();
 		}
-		if (!mSubscribers.contains(subscriber)) {
-			mSubscribers.add(subscriber);
-			subscriber.addChannel(this.getId());
+		if (!mSubscribers.contains(aSubscriber)) {
+			mSubscribers.add(aSubscriber);
+			aSubscriber.addChannel(this.getId());
 
 			// persist the subscriber
-			aChannelManager.storeSubscriber(subscriber);
+			aChannelManager.storeSubscriber(aSubscriber);
 			if (mChannelListeners != null) {
-				for (ChannelListener listener : mChannelListeners) {
+				for (ChannelListener lListener : mChannelListeners) {
 					try {
-						listener.subscribed(this, subscriber);
+						lListener.subscribed(this, aSubscriber);
 					} catch (Exception es) {
 						// trap for any exception so that if any of the
 						// listener implementation fails or throws exception
@@ -292,26 +294,26 @@ public final class Channel implements ChannelLifeCycle {
 	 * will block the current thread until the send operation is complete. for
 	 * asynchronous send operation use <tt>sendAsync</tt> method.
 	 *
-	 * @param token
+	 * @param aToken
 	 *            the token data to send
-	 * @param subscriber
+	 * @param aSubscriber
 	 *            the target subscriber
 	 */
-	public void send(Token token, Subscriber subscriber) {
-		subscriber.sendToken(token);
+	public void send(Token aToken, Subscriber aSubscriber) {
+		aSubscriber.sendToken(aToken);
 	}
 
 	/**
 	 * Sends the data to the given target subscriber asynchronously.
 	 *
-	 * @param token
+	 * @param aToken
 	 *            the token data to send
 	 * @param subscriber
 	 *            the target subscriber
 	 * @return the future object to keep track of send operation
 	 */
-	public IOFuture sendAsync(Token token, Subscriber subscriber) {
-		return subscriber.sendTokenAsync(token);
+	public IOFuture sendAsync(Token aToken, Subscriber aSubscriber) {
+		return aSubscriber.sendTokenAsync(aToken);
 	}
 
 	/**
@@ -355,19 +357,19 @@ public final class Channel implements ChannelLifeCycle {
 	/**
 	 * Register the channel listener to the list of listeners
 	 *
-	 * @param channelListener
+	 * @param aChannelListener
 	 *            the channel listener to register
 	 */
-	public void registerListener(ChannelListener channelListener) {
+	public void registerListener(ChannelListener aChannelListener) {
 		if (mChannelListeners == null) {
 			mChannelListeners = new CopyOnWriteArrayList<ChannelListener>();
 		}
-		mChannelListeners.add(channelListener);
+		mChannelListeners.add(aChannelListener);
 	}
 
-	public void removeListener(ChannelListener channelListener) {
+	public void removeListener(ChannelListener aChannelListener) {
 		if (mChannelListeners != null) {
-			mChannelListeners.remove(channelListener);
+			mChannelListeners.remove(aChannelListener);
 		}
 	}
 
@@ -421,22 +423,22 @@ public final class Channel implements ChannelLifeCycle {
 	}
 
 	@Override
-	public void suspend(final String user) throws ChannelLifeCycleException {
+	public void suspend(final String aUser) throws ChannelLifeCycleException {
 		if (this.mState == ChannelState.SUSPENDED) {
 			throw new ChannelLifeCycleException("Channel:[" + this.getName() + "] is already suspended");
 		}
-		if (!SecurityFactory.isValidUser(user) && !mAuthenticated) {
+		if (!SecurityFactory.isValidUser(aUser) && !mAuthenticated) {
 			throw new ChannelLifeCycleException("Cannot suspend the channel:[" + this.getName()
-					+ "] for invalid user login [" + user + "]");
+					+ "] for invalid user login [" + aUser + "]");
 		} else {
-			Rights rights = SecurityFactory.getUserRights(user);
+			Rights rights = SecurityFactory.getUserRights(aUser);
 			Right right = rights.get("org.jwebsocket.plugins.channel.suspend");
 			if (right == null) {
-				throw new ChannelLifeCycleException("User:[" + user + "] does not have rights to suspend the channel");
+				throw new ChannelLifeCycleException("User:[" + aUser + "] does not have rights to suspend the channel");
 			} else {
 				// verify the owner
-				if (!this.getOwner().equals(user)) {
-					throw new ChannelLifeCycleException("User:[" + user + "] is not a owner of this channel,"
+				if (!this.getOwner().equals(aUser)) {
+					throw new ChannelLifeCycleException("User:[" + aUser + "] is not a owner of this channel,"
 							+ "Only owner of the channel can suspend");
 				}
 			}
@@ -450,7 +452,7 @@ public final class Channel implements ChannelLifeCycle {
 
 					@Override
 					public void run() {
-						listener.channelSuspended(channel, user);
+						listener.channelSuspended(channel, aUser);
 					}
 				});
 			}
@@ -459,22 +461,22 @@ public final class Channel implements ChannelLifeCycle {
 	}
 
 	@Override
-	public void stop(final String user) throws ChannelLifeCycleException {
+	public void stop(final String aUser) throws ChannelLifeCycleException {
 		if (this.mState == ChannelState.STOPPED) {
 			throw new ChannelLifeCycleException("Channel:[" + this.getName() + "] is already stopped");
 		}
-		if (!SecurityFactory.isValidUser(user) && !mAuthenticated) {
+		if (!SecurityFactory.isValidUser(aUser) && !mAuthenticated) {
 			throw new ChannelLifeCycleException("Cannot stop the channel:[" + this.getName()
-					+ "] for invalid user login [" + user + "]");
+					+ "] for invalid user login [" + aUser + "]");
 		} else {
-			Rights rights = SecurityFactory.getUserRights(user);
+			Rights rights = SecurityFactory.getUserRights(aUser);
 			Right right = rights.get("org.jwebsocket.plugins.channel.stop");
 			if (right == null) {
-				throw new ChannelLifeCycleException("User:[" + user + "] does not have rights to stop the channel");
+				throw new ChannelLifeCycleException("User:[" + aUser + "] does not have rights to stop the channel");
 			} else {
 				// verify the owner
-				if (!this.getOwner().equals(user)) {
-					throw new ChannelLifeCycleException("User:[" + user + "] is not a owner of this channel,"
+				if (!this.getOwner().equals(aUser)) {
+					throw new ChannelLifeCycleException("User:[" + aUser + "] is not a owner of this channel,"
 							+ "Only owner of the channel can stop");
 				}
 			}
@@ -490,7 +492,7 @@ public final class Channel implements ChannelLifeCycle {
 
 					@Override
 					public void run() {
-						listener.channelStopped(channel, user);
+						listener.channelStopped(channel, aUser);
 					}
 				});
 			}
@@ -499,35 +501,35 @@ public final class Channel implements ChannelLifeCycle {
 	}
 
 	/**
-	 * @param id
+	 * @param aId
 	 *            the id to set
 	 */
-	public void setId(String id) {
-		this.mId = id;
+	public void setId(String aId) {
+		this.mId = aId;
 	}
 
 	/**
-	 * @param secretKey
+	 * @param aSecretKey
 	 *            the secretKey to set
 	 */
-	public void setSecretKey(String secretKey) {
-		this.mSecretKey = secretKey;
+	public void setSecretKey(String aSecretKey) {
+		this.mSecretKey = aSecretKey;
 	}
 
 	/**
-	 * @param accessKey
+	 * @param aAccessKey
 	 *            the accessKey to set
 	 */
-	public void setAccessKey(String accessKey) {
-		this.mAccessKey = accessKey;
+	public void setAccessKey(String aAccessKey) {
+		this.mAccessKey = aAccessKey;
 	}
 
 	/**
-	 * @param owner
+	 * @param aOwner
 	 *            the owner to set
 	 */
-	public void setOwner(String owner) {
-		this.mOwner = owner;
+	public void setOwner(String aOwner) {
+		this.mOwner = aOwner;
 	}
 
 	public boolean isAuthenticated() {

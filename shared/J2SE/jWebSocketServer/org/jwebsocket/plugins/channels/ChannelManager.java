@@ -217,12 +217,12 @@ public class ChannelManager {
 	/**
 	 * Returns the registered publisher for the given publisher id
 	 *
-	 * @param publisherId
+	 * @param aPublisherId
 	 *            the publisher id
 	 * @return the publisher object
 	 */
-	public Publisher getPublisher(String publisherId) {
-		return mPublisherStore.getPublisher(publisherId);
+	public Publisher getPublisher(String aPublisherId) {
+		return mPublisherStore.getPublisher(aPublisherId);
 	}
 
 	/**
@@ -231,18 +231,18 @@ public class ChannelManager {
 	 * @param publisher
 	 *            the publisher object to store
 	 */
-	public void storePublisher(Publisher publisher) {
-		mPublisherStore.storePublisher(publisher);
+	public void storePublisher(Publisher aPublisher) {
+		mPublisherStore.storePublisher(aPublisher);
 	}
 
 	/**
 	 * Removes the publisher from the channel store permanently
 	 *
-	 * @param publisher
+	 * @param aPublisher
 	 *            the publisher to remove
 	 */
-	public void removePublisher(Publisher publisher) {
-		mPublisherStore.removePublisher(publisher.getId());
+	public void removePublisher(Publisher aPublisher) {
+		mPublisherStore.removePublisher(aPublisher.getId());
 	}
 
 	/**
