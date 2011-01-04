@@ -27,9 +27,9 @@
 //:d:en:channel sn the server.
 jws.ChannelPlugIn = {
 
-	//:const:*:NS:String:org.jwebsocket.plugins.channeling (jws.NS_BASE + ".plugins.channeling")
+	//:const:*:NS:String:org.jwebsocket.plugins.channels (jws.NS_BASE + ".plugins.channels")
 	//:d:en:Namespace for the [tt]ChannelPlugIn[/tt] class.
-	// if namespace changed update server plug-in accordingly!
+	// if namespace changes update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.channels",
 
 	PUBLISHER: "publisher",
@@ -40,57 +40,49 @@ jws.ChannelPlugIn = {
 	STOP: "stop",
 	SUBSCRIBE: "subscribe",
 	UNSUBSCRIBE: "unsubscribe",
+	GET_CHANNELS:  "getChannels",
 
 	EVENT: "event",
 	
-
 	//:m:*:channelSubscribe
 	//:d:en:Registers the client at the given channel on the server. _
-	//:d:en:After this operation the client obtains all messages in this _
-	//:d:en:channel. Basically a client can subscribe at multiple channels.
+	//:d:en:After this operation the client obtains all messages on this _
+	//:d:en:channel. Basically, a client can subscribe at multiple channels.
 	//:d:en:If no channel with the given ID exists on the server an error token _
 	//:d:en:is returned. Depending on the type of the channel it may take more _
 	//:d:en:or less time until you get the first token from the channel.
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:r:*:::void:none
-	// TODO: introduce OnResponse here too to get noticed on error or success.
-	// TODO: Use checkConnected()
+	// TODO: introduce OnResponse here too to get notified on error or success.
 	channelSubscribe: function( aChannel ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.SUBSCRIBER,
 				event: jws.ChannelPlugIn.SUBSCRIBE,
 				channel: aChannel
 			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
 		}
 		return lRes;
 	},
 
 	//:m:*:channelUnsubscribe
 	//:d:en:Unsubscribes the client from the given channel on the server.
+	//:d:en:From this point in time the client does not receive any messages _
+	//:d:en:on this channel anymore.
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:r:*:::void:none
-	// TODO: introduce OnResponse here too to get noticed on error or success.
-	// TODO: Use checkConnected()
+	// TODO: introduce OnResponse here too to get notified on error or success.
 	channelUnsubscribe: function( aChannel ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.SUBSCRIBER,
 				event: jws.ChannelPlugIn.UNSUBSCRIBE,
 				channel: aChannel
 			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
 		}
 		return lRes;
 	},
@@ -98,40 +90,38 @@ jws.ChannelPlugIn = {
 	//:m:*:channelAuth
 	//:d:en:Authenticates the client at a certain channel to publish messages.
 	//:a:en::aChannel:String:The id of the server side data channel.
-	//:a:en::aData:String:Data to be sent to the server side data channel.
+	//:a:en::aAccessKey:String:Access key configured for the channel.
+	//:a:en::aSecretKey:String:Secret key configured for the channel.
 	//:r:*:::void:none
-	// TODO: introduce OnResponse here too to get noticed on error or success.
-	// TODO: Use checkConnected()
-	channelAuth: function( aChannel, aUsername, aAccessKey, aSecretKey ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+	// TODO: introduce OnResponse here too to get notified on error or success.
+	channelAuth: function( aChannel, aAccessKey, aSecretKey ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.PUBLISHER,
 				event: jws.ChannelPlugIn.AUTHORIZE,
 				channel: aChannel,
-				login: aUsername,
+				login: this.getUsername(),
 				access_key: aAccessKey,
 				secret_key: aSecretKey
 			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
 		}
 		return lRes;
 	},
 
 	//:m:*:channelPublish
-	//:d:en:Sends a message to the given channel on the server,
+	//:d:en:Sends a message to the given channel on the server.
+	//:d:en:The client needs to be authenticated against the server and the
+	//:d:en:channel to publish data. All clients that subscribed to the channel
+	//:d:en:will receive the message.
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:a:en::aData:String:Data to be sent to the server side data channel.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
-	// TODO: Use checkConnected()
 	channelPublish: function( aChannel, aData ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.PUBLISHER,
@@ -139,10 +129,23 @@ jws.ChannelPlugIn = {
 				channel: aChannel,
 				data: aData
 			});
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	//:m:*:channelPublish
+	//:d:en:Tries to obtain all id of the channels
+	//:a:en:::none
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get noticed on error or success.
+	channelGetIds: function() {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.SUBSCRIBER,
+				event: jws.ChannelPlugIn.GET_CHANNELS
+			});
 		}
 		return lRes;
 	}

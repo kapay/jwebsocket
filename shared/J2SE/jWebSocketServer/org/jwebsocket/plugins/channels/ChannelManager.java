@@ -14,6 +14,7 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -51,7 +52,7 @@ public class ChannelManager {
 	private final Map<String, Channel> mSystemChannels = new ConcurrentHashMap<String, Channel>();
 	private final Map<String, Channel> mPrivateChannels = new ConcurrentHashMap<String, Channel>();
 	private final Map<String, Channel> mPublicChannels = new ConcurrentHashMap<String, Channel>();
-	private Map<String, String> channelPluginSettings = null;
+	private Map<String, String> mChannelPluginSettings = null;
 	/**
 	 * Logger channel that publish all the logs in jWebSocket system
 	 */
@@ -66,12 +67,12 @@ public class ChannelManager {
 	public static boolean allowNewChannels;
 
 	private ChannelManager(Map<String, String> aSettings) {
-		this.channelPluginSettings = new ConcurrentHashMap<String, String>(aSettings);
-		String lUsePersisentStore = channelPluginSettings.get(USE_PERSISTENT_STORE);
+		this.mChannelPluginSettings = new ConcurrentHashMap<String, String>(aSettings);
+		String lUsePersisentStore = mChannelPluginSettings.get(USE_PERSISTENT_STORE);
 		if (lUsePersisentStore != null && lUsePersisentStore.equals("true")) {
 			usePersistentStore = true;
 		}
-		String lAllowNewChannels = channelPluginSettings.get(ALLOW_NEW_CHANNELS);
+		String lAllowNewChannels = mChannelPluginSettings.get(ALLOW_NEW_CHANNELS);
 		if (lAllowNewChannels != null && lAllowNewChannels.equals("true")) {
 			allowNewChannels = true;
 		}
@@ -94,6 +95,7 @@ public class ChannelManager {
 	 */
 	public void startSystemChannels() throws ChannelLifeCycleException {
 		User lRoot = SecurityFactory.getRootUser();
+		// TODO: Process if no root user could be found!
 		JWebSocketConfig lConfig = JWebSocketConfig.getConfig();
 		for (ChannelConfig lCfg : lConfig.getChannels()) {
 			if (lCfg.isSystemChannel()) {
@@ -105,10 +107,10 @@ public class ChannelManager {
 					mAdminChannel = new Channel(lCfg);
 					mAdminChannel.start(lRoot.getLoginname());
 				} else {
-					Channel channel = new Channel(lCfg);
-					channel.start(lRoot.getLoginname());
+					Channel lChannel = new Channel(lCfg);
+					lChannel.start(lRoot.getLoginname());
 					// put in system channels map
-					mSystemChannels.put(channel.getId(), channel);
+					mSystemChannels.put(lChannel.getId(), lChannel);
 				}
 			}
 		}
@@ -278,16 +280,16 @@ public class ChannelManager {
 	 *
 	 * @param aConnector
 	 *            the target connector object
-	 * @param channelId
+	 * @param aChannelId
 	 *            the channelId
-	 * @param message
+	 * @param aMessage
 	 *            the error message
 	 * @return the error token
 	 */
-	public Token getErrorToken(WebSocketConnector aConnector, String channelId, String message) {
-		Token logToken = getBaseChannelResponse(aConnector, channelId);
+	public Token getErrorToken(WebSocketConnector aConnector, String aChannelId, String aMessage) {
+		Token logToken = getBaseChannelResponse(aConnector, aChannelId);
 		logToken.setString("event", "error");
-		logToken.setString("error", message);
+		logToken.setString("error", aMessage);
 
 		return logToken;
 	}
@@ -297,44 +299,69 @@ public class ChannelManager {
 	 *
 	 * @param aConnector
 	 *            the target connector object
-	 * @param channel
+	 * @param aChannel
 	 *            the target channel
 	 * @return the base token of type channel
 	 */
-	public Token getBaseChannelResponse(WebSocketConnector aConnector, String channel) {
+	public Token getBaseChannelResponse(WebSocketConnector aConnector, String aChannel) {
 		Token channelToken = TokenFactory.createToken("channel");
-		channelToken.setString("vendor", JWebSocketCommonConstants.VENDOR);
-		channelToken.setString("version", JWebSocketServerConstants.VERSION_STR);
+
+		// TODO: In clusters, especially for service nodes we will post these fields on a lower level!
+		// check! Commented out by Alex
+		// channelToken.setString("vendor", JWebSocketCommonConstants.VENDOR);
+		// channelToken.setString("version", JWebSocketServerConstants.VERSION_STR);
+		// Alex: These fields are mandatory
 		channelToken.setString("sourceId", aConnector.getId());
-		channelToken.setString("channelId", channel);
+		channelToken.setString("channelId", aChannel);
 
 		return channelToken;
 	}
 
-	public Token getChannelSuccessToken(WebSocketConnector aConnector, String channel, ChannelEventEnum eventType) {
-		Token token = getBaseChannelResponse(aConnector, channel);
-		String event = "";
-		switch (eventType) {
+	public Token getChannelSuccessToken(WebSocketConnector aConnector, String aChannel, ChannelEventEnum aEventType) {
+		Token lToken = getBaseChannelResponse(aConnector, aChannel);
+		String lEvent = "";
+		switch (aEventType) {
 			case LOGIN:
-				event = "login";
+				lEvent = "login";
 				break;
 			case AUTHORIZE:
-				event = "authorize";
+				lEvent = "authorize";
 				break;
 			case PUBLISH:
-				event = "publish";
+				lEvent = "publish";
 				break;
 			case SUSCRIBE:
-				event = "subscribe";
+				lEvent = "subscribe";
 			case UNSUSCRIBE:
-				event = "unsuscribe";
+				lEvent = "unsuscribe";
 				break;
 			default:
 				break;
 		}
-		token.setString("event", event);
-		token.setString("status", "ok");
+		lToken.setString("event", lEvent);
+		lToken.setString("status", "ok");
 
-		return token;
+		return lToken;
+	}
+
+	/**
+	 * @return the system channels
+	 */
+	public Map<String, Channel> getSystemChannels() {
+		return Collections.unmodifiableMap(mSystemChannels);
+	}
+
+	/**
+	 * @return the private channels
+	 */
+	public Map<String, Channel> getPrivateChannels() {
+		return Collections.unmodifiableMap(mPrivateChannels);
+	}
+
+	/**
+	 * @return the public channels
+	 */
+	public Map<String, Channel> getPublicChannels() {
+		return Collections.unmodifiableMap(mPublicChannels);
 	}
 }

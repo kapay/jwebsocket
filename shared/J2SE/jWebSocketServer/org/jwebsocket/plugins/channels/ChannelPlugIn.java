@@ -16,7 +16,9 @@
 package org.jwebsocket.plugins.channels;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
+import javolution.util.FastList;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
@@ -132,6 +134,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 	private static final String STOP = "stop";
 	private static final String SUBSCRIBE = "subscribe";
 	private static final String UNSUBSCRIBE = "unsubscribe";
+	private static final String GET_CHANNELS = "getChannels";
 	/** channel plugin handshake protocol parameters */
 	private static final String DATA = "data";
 	private static final String EVENT = "event";
@@ -170,8 +173,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			if (mLog.isInfoEnabled()) {
 				mLog.info("System channels started.");
 			}
-		} catch (ChannelLifeCycleException e) {
-			mLog.error("Failed to start system channels", e);
+		} catch (ChannelLifeCycleException lEx) {
+			mLog.error("Failed to start system channels", lEx);
 		}
 	}
 
@@ -189,8 +192,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			if (mLog.isInfoEnabled()) {
 				mLog.info("System channels stopped.");
 			}
-		} catch (ChannelLifeCycleException e) {
-			mLog.error("Error stopping system channels", e);
+		} catch (ChannelLifeCycleException lEx) {
+			mLog.error("Error stopping system channels", lEx);
 		}
 	}
 
@@ -202,9 +205,9 @@ public class ChannelPlugIn extends TokenPlugIn {
 		// set session id first, so that it can be processed in the
 		// connectorStarted method set session id first, so that it can be
 		// processed in the connectorStarted method
-		Random rand = new Random(System.nanoTime());
+		Random lRand = new Random(System.nanoTime());
 
-		aConnector.getSession().setSessionId(Tools.getMD5(aConnector.generateUID() + "." + rand.nextInt()));
+		aConnector.getSession().setSessionId(Tools.getMD5(aConnector.generateUID() + "." + lRand.nextInt()));
 		// call super connectorStarted
 		super.connectorStarted(aConnector);
 		// and send the welcome message incl. the session id
@@ -244,6 +247,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			subscribe(aConnector, aToken);
 		} else if (UNSUBSCRIBE.equals(lEvent)) {
 			unsubscribe(aConnector, aToken);
+		} else if (GET_CHANNELS.equals(lEvent)) {
+			getChannels(aConnector, aToken);
 		} else {
 			// no command, close the connector
 			// TODO: Don't close connection here! We'll introduce a "not processed" token.
@@ -294,38 +299,38 @@ public class ChannelPlugIn extends TokenPlugIn {
 			lChannel.broadcastToken(lToken);
 
 		} else if (STOP.equals(lEvent)) {
-			Publisher publisher = mChannelManager.getPublisher(
+			Publisher lPublisher = mChannelManager.getPublisher(
 					aConnector.getSession().getSessionId());
-			Channel channel = mChannelManager.getChannel(lChannelId);
-			if (channel == null) {
+			Channel lChannel = mChannelManager.getChannel(lChannelId);
+			if (lChannel == null) {
 				sendError(aConnector, lChannelId, "'" + aConnector.getId()
 						+ "' channel not found for given channelId '"
 						+ lChannelId + "'");
 				return;
 			}
-			if (publisher == null || !publisher.isAuthorized()) {
+			if (lPublisher == null || !lPublisher.isAuthorized()) {
 				sendError(aConnector, lChannelId, "Connector: " + aConnector.getId()
 						+ ": access denied, publisher not authorized for channelId '"
 						+ lChannelId + "'");
 				return;
 			}
 			try {
-				channel.stop(publisher.getLogin());
-				Token successToken = mChannelManager.getChannelSuccessToken(
+				lChannel.stop(lPublisher.getLogin());
+				Token lSuccessToken = mChannelManager.getChannelSuccessToken(
 						aConnector, lChannelId, ChannelEventEnum.STOP);
-				sendTokenAsync(aConnector, aConnector, successToken);
-			} catch (ChannelLifeCycleException e) {
+				sendTokenAsync(aConnector, aConnector, lSuccessToken);
+			} catch (ChannelLifeCycleException lEx) {
 				mLog.error("Error stopping channel '" + lChannelId
 						+ "' from publisher "
-						+ publisher.getId() + "'", e);
+						+ lPublisher.getId() + "'", lEx);
 
 				//publish to logger channel
-				Token errorToken = mChannelManager.getErrorToken(aConnector,
+				Token lErrorToken = mChannelManager.getErrorToken(aConnector,
 						lChannelId, "'" + aConnector.getId()
 						+ "' Error stopping channel '" + lChannelId
-						+ "' from publisher '" + publisher.getId() + "'");
-				mChannelManager.publishToLoggerChannel(errorToken);
-				sendTokenAsync(aConnector, aConnector, errorToken);
+						+ "' from publisher '" + lPublisher.getId() + "'");
+				mChannelManager.publishToLoggerChannel(lErrorToken);
+				sendTokenAsync(aConnector, aConnector, lErrorToken);
 			}
 		}
 	}
@@ -356,13 +361,13 @@ public class ChannelPlugIn extends TokenPlugIn {
 					+ "' Authorization failed, secret_key/access_key pair value is not correct");
 			return;
 		} else {
-			Channel channel = mChannelManager.getChannel(aChannelId);
-			if (channel == null) {
+			Channel lChannel = mChannelManager.getChannel(aChannelId);
+			if (lChannel == null) {
 				sendError(aConnector, aChannelId, "'" + aConnector.getId()
 						+ "' channel not found for given channelId '" + aChannelId + "'");
 				return;
 			}
-			Publisher lPublisher = authorizePublisher(aConnector, channel, lUser, lSecretKey, lAccessKey);
+			Publisher lPublisher = authorizePublisher(aConnector, lChannel, lUser, lSecretKey, lAccessKey);
 			if (!lPublisher.isAuthorized()) {
 				// couldn't authorize the publisher
 				sendError(aConnector, aChannelId,
@@ -370,12 +375,12 @@ public class ChannelPlugIn extends TokenPlugIn {
 						+ "' Authorization failed for channel '"
 						+ aChannelId + "'");
 			} else {
-				channel.addPublisher(lPublisher);
-				Token responseToken = mChannelManager.getChannelSuccessToken(aConnector, aChannelId,
+				lChannel.addPublisher(lPublisher);
+				Token lResponseToken = mChannelManager.getChannelSuccessToken(aConnector, aChannelId,
 						ChannelEventEnum.AUTHORIZE);
-				mChannelManager.publishToLoggerChannel(responseToken);
+				mChannelManager.publishToLoggerChannel(lResponseToken);
 				// send the success response
-				sendToken(aConnector, aConnector, responseToken);
+				sendToken(aConnector, aConnector, lResponseToken);
 			}
 		}
 	}
@@ -402,8 +407,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			String aAccessKey) {
 		Publisher lPublisher = null;
 		Date lNow = new Date();
-		if (aChannel.getAccessKey().equals(aAccessKey) && aChannel.getSecretKey().equals(aSecretKey)
-				// Commented our by Alex: Why may only the owner publish ?
+		// TODO: Commented our by Alex: Why may only the owner publish something ?
+		if (aChannel.getAccessKey().equals(aAccessKey) && aChannel.getSecretKey().equals(aSecretKey) 
 				/* && user.getLoginname().equals(channel.getOwner())*/) {
 			lPublisher = new Publisher(aConnector, aUser.getLoginname(), aChannel.getId(), lNow, lNow, true);
 			mChannelManager.storePublisher(lPublisher);
@@ -513,19 +518,52 @@ public class ChannelPlugIn extends TokenPlugIn {
 	}
 
 	/**
+	 * Returns all channels available to the client
+	 *
+	 * @param aConnector
+	 *            the connector for this client
+	 * @param aToken
+	 *            the request token object
+	 */
+	private void getChannels(WebSocketConnector aConnector, Token aToken) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'getChannels'...");
+		}
+
+		// TODO: Here we probably have to introduce restrictions
+		// not all clients should be allowed to retreive system or private channels
+		Token lResponseToken = createResponse(aToken);
+
+		List lPublic = new FastList();
+		lPublic.addAll(mChannelManager.getPublicChannels().keySet());
+		lResponseToken.setList("publicChannels", lPublic);
+
+		List lSystem = new FastList();
+		lSystem.addAll(mChannelManager.getSystemChannels().keySet());
+		lResponseToken.setList("systemChannels", lSystem);
+
+		List lPrivate = new FastList();
+		lPrivate.addAll(mChannelManager.getPrivateChannels().keySet());
+		lResponseToken.setList("privateChannels", lPrivate);
+
+		// send the response
+		sendToken(aConnector, aConnector, lResponseToken);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void connectorStopped(WebSocketConnector aConnector, CloseReason closeReason) {
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// unsubscribe from the channel
-		Subscriber subscriber = mChannelManager.getSubscriber(aConnector.getId());
-		for (String channelId : subscriber.getChannels()) {
-			Channel channel = mChannelManager.getChannel(channelId);
-			if (channel != null) {
-				channel.unsubscribe(subscriber, mChannelManager);
+		Subscriber lSubscriber = mChannelManager.getSubscriber(aConnector.getId());
+		for (String lChannelId : lSubscriber.getChannels()) {
+			Channel lChannel = mChannelManager.getChannel(lChannelId);
+			if (lChannel != null) {
+				lChannel.unsubscribe(lSubscriber, mChannelManager);
 			}
 		}
-		mChannelManager.removeSubscriber(subscriber);
+		mChannelManager.removeSubscriber(lSubscriber);
 	}
 
 	/**
@@ -564,20 +602,20 @@ public class ChannelPlugIn extends TokenPlugIn {
 			mLog.debug("Sending connected message to the channels");
 		}
 		// send "welcome" token to client
-		Token welcome = TokenFactory.createToken(CONNECTED);
-		welcome.setString("vendor", JWebSocketCommonConstants.VENDOR);
-		welcome.setString("version", JWebSocketServerConstants.VERSION_STR);
+		Token lWelcome = TokenFactory.createToken(CONNECTED);
+		lWelcome.setString("vendor", JWebSocketCommonConstants.VENDOR);
+		lWelcome.setString("version", JWebSocketServerConstants.VERSION_STR);
 		// here the session id is MANDATORY! to pass to the client!
-		welcome.setString("usid", aConnector.getSession().getSessionId());
-		welcome.setString("sourceId", aConnector.getId());
+		lWelcome.setString("usid", aConnector.getSession().getSessionId());
+		lWelcome.setString("sourceId", aConnector.getId());
 		// if a unique node id is specified for the client include that
 		String lNodeId = aConnector.getNodeId();
 		if (lNodeId != null) {
-			welcome.setString("unid", lNodeId);
+			lWelcome.setString("unid", lNodeId);
 		}
-		welcome.setInteger("timeout", aConnector.getEngine().getConfiguration().getTimeout());
+		lWelcome.setInteger("timeout", aConnector.getEngine().getConfiguration().getTimeout());
 
-		ChannelManager.getLoggerChannel().broadcastToken(welcome);
-		sendTokenAsync(aConnector, aConnector, welcome);
+		ChannelManager.getLoggerChannel().broadcastToken(lWelcome);
+		sendTokenAsync(aConnector, aConnector, lWelcome);
 	}
 }

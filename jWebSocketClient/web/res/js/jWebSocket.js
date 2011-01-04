@@ -737,7 +737,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		// console.log("checking result for utid: " + aToken.utid + "...");
 		var lClbkRec = this.fRequestCallbacks[ lField ];
 		if( lClbkRec ) {
-			lClbkRec.callback.call( this, aToken );
+			// TODO: Approve update by Rolando 2010-01-04
+			lClbkRec.callback.OnResponse( aToken );
+			// lClbkRec.callback.call( this, aToken );
 			delete this.fRequestCallbacks[ lField ];
 		}
 		// TODO: delete timed out requests and optionally fire timeout callbacks
@@ -1045,7 +1047,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			var lSpawnThread = false;
 			if( aOptions ) {
 				if( aOptions.OnResponse ) {
-					lOnResponse = aOptions.OnResponse;
+					// TODO: Approve update by Rolando 2010-01-04
+					lOnResponse = aOptions;
+					// lOnResponse = aOptions.OnResponse;
 				}
 				if( aOptions.spawnThread ) {
 					lSpawnThread  = aOptions.spawnThread;

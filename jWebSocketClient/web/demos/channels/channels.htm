@@ -125,7 +125,15 @@
 			function auth() {
 				var lChannel = eChannel.value;
 				log( "Authenticating against channel '" + lChannel + "'..." );
-				var lRes = lWSC.channelAuth( lChannel, "Guest", "access", "secret" );
+				// use access key and secret key for this channel to authenticate
+				// required to publish data only
+				var lRes = lWSC.channelAuth( lChannel, "access", "secret" );
+				log( lWSC.resultToString( lRes ) );
+			}
+
+			function getChannels() {
+				log( "Trying to obtain channels..." );
+				var lRes = lWSC.channelGetIds();
 				log( lWSC.resultToString( lRes ) );
 			}
 
@@ -200,10 +208,13 @@
 							   title="Message to be broadcasted on the selected channel."></td>
 					<td width=""><input class="sbtnDlg" id="sbtnPublish" type="button" value="Publish" onclick="publish();"></td>
 					<td width="5"><input class="sbtnDlg" id="sbtnAuth" type="button" value="Auth" onclick="auth();"></td>
+					<td width="5"><input class="sbtnDlg" id="sbtnGetChannels" type="button" value="Get Channels" onclick="getChannels();"></td>
 					<td class="stdDlg" align="right" width="">
 						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleKeepAlive();">&nbsp;Keep-Alive&nbsp;
 						<select id="sselChannel">
-							<option selected="selected" value="monitorChannel">Monitor Channel</option>
+							<option selected="selected" value="channelA">Channel A</option>
+							<option selected="selected" value="channelB">Channel B</option>
+							<option selected="selected" value="channelC">Channel C</option>
 							<option value="jws.logger.channel">Logger Channel</option>
 							<option value="jws.admin.channel">Admin Channel</option>
 						</select>
