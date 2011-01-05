@@ -340,7 +340,7 @@ public final class Channel implements ChannelLifeCycle {
 			try {
 				executor.awaitTermination(1, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
-				// just ignore and return
+				Thread.currentThread().interrupt();
 			}
 		}
 	}
