@@ -184,7 +184,9 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 //GEN-LINE:|7-commandAction|6|23-postAction
 				// write post-action user code here
 				try {
+					stiLog.setText("Connecting... (start)");
 					mJWC.open(txfURL.getString());
+					stiLog.setText("Connecting... (done)");
 				} catch (WebSocketException ex) {
 					stiLog.setText(ex.getMessage());
 				}
@@ -289,7 +291,7 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 		if (stiLog == null) {//GEN-END:|16-getter|0|16-preInit
 			// write pre-init user code here
 			stiLog = new StringItem("", "...", Item.PLAIN);//GEN-BEGIN:|16-getter|1|16-postInit
-			stiLog.setLayout(ImageItem.LAYOUT_DEFAULT | Item.LAYOUT_EXPAND | Item.LAYOUT_VEXPAND | Item.LAYOUT_2);//GEN-END:|16-getter|1|16-postInit
+			stiLog.setLayout(ImageItem.LAYOUT_DEFAULT | ImageItem.LAYOUT_NEWLINE_BEFORE | Item.LAYOUT_EXPAND | Item.LAYOUT_VEXPAND | Item.LAYOUT_2);//GEN-END:|16-getter|1|16-postInit
 			// write post-init user code here
 		}//GEN-BEGIN:|16-getter|2|
 		return stiLog;
@@ -394,9 +396,9 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 	public TextField getTxfTarget() {
 		if (txfTarget == null) {//GEN-END:|35-getter|0|35-preInit
 			// write pre-init user code here
-			txfTarget = new TextField("Target", "Demo", 10, TextField.ANY);//GEN-BEGIN:|35-getter|1|35-postInit
-			txfTarget.setLayout(ImageItem.LAYOUT_DEFAULT | Item.LAYOUT_SHRINK | Item.LAYOUT_VSHRINK | Item.LAYOUT_2);
-			txfTarget.setPreferredSize(30, -1);//GEN-END:|35-getter|1|35-postInit
+			txfTarget = new TextField("Target:", "*", 10, TextField.ANY);//GEN-BEGIN:|35-getter|1|35-postInit
+			txfTarget.setLayout(ImageItem.LAYOUT_DEFAULT);
+			txfTarget.setPreferredSize(-1, -1);//GEN-END:|35-getter|1|35-postInit
 			// write post-init user code here
 		}//GEN-BEGIN:|35-getter|2|
 		return txfTarget;
@@ -411,9 +413,9 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 	public TextField getTxfMessage() {
 		if (txfMessage == null) {//GEN-END:|36-getter|0|36-preInit
 			// write pre-init user code here
-			txfMessage = new TextField("Message", "Hello!", 10, TextField.ANY);//GEN-BEGIN:|36-getter|1|36-postInit
-			txfMessage.setLayout(ImageItem.LAYOUT_DEFAULT | Item.LAYOUT_SHRINK | Item.LAYOUT_VSHRINK | Item.LAYOUT_2);
-			txfMessage.setPreferredSize(30, -1);//GEN-END:|36-getter|1|36-postInit
+			txfMessage = new TextField("Message:", "Hello from BlackBerry Device!", 50, TextField.ANY);//GEN-BEGIN:|36-getter|1|36-postInit
+			txfMessage.setLayout(ImageItem.LAYOUT_DEFAULT);
+			txfMessage.setPreferredSize(-1, -1);//GEN-END:|36-getter|1|36-postInit
 			// write post-init user code here
 		}//GEN-BEGIN:|36-getter|2|
 		return txfMessage;
@@ -459,9 +461,9 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 	public TextField getTxfURL() {
 		if (txfURL == null) {//GEN-END:|47-getter|0|47-preInit
 			// write pre-init user code here
-			txfURL = new TextField("URL", "socket://10.21.68.111:8787", 32, TextField.ANY);//GEN-BEGIN:|47-getter|1|47-postInit
-			txfURL.setLayout(ImageItem.LAYOUT_DEFAULT | Item.LAYOUT_SHRINK | Item.LAYOUT_VSHRINK | Item.LAYOUT_2);
-			txfURL.setPreferredSize(50, -1);//GEN-END:|47-getter|1|47-postInit
+			txfURL = new TextField("URL:", "ws://jwebsocket.org:8787", 50, TextField.ANY);//GEN-BEGIN:|47-getter|1|47-postInit
+			txfURL.setLayout(ImageItem.LAYOUT_DEFAULT);
+			txfURL.setPreferredSize(-1, -1);//GEN-END:|47-getter|1|47-postInit
 			// write post-init user code here
 		}//GEN-BEGIN:|47-getter|2|
 		return txfURL;
@@ -476,7 +478,7 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 	public ImageItem getImgStatus() {
 		if (imgStatus == null) {//GEN-END:|48-getter|0|48-preInit
 			// write pre-init user code here
-			imgStatus = new ImageItem("", getImgDisconnected(), ImageItem.LAYOUT_DEFAULT | ImageItem.LAYOUT_NEWLINE_BEFORE | Item.LAYOUT_SHRINK | Item.LAYOUT_VSHRINK | Item.LAYOUT_2, "<Missing Image>");//GEN-LINE:|48-getter|1|48-postInit
+			imgStatus = new ImageItem("", getImgDisconnected(), ImageItem.LAYOUT_DEFAULT, "<Missing Image>");//GEN-LINE:|48-getter|1|48-postInit
 			// write post-init user code here
 		}//GEN-BEGIN:|48-getter|2|
 		return imgStatus;

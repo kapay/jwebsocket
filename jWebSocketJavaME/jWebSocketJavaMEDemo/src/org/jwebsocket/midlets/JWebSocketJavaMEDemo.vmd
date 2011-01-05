@@ -138,8 +138,8 @@
                         <Property name="layout" typeID="Pint" value="V19456"/>
                         <Property name="preferredWidth" typeID="Pint" value="V30"/>
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
-                        <Property name="text" typeID="Pjava.lang.String" value="VDemo"/>
-                        <Property name="maxSize" typeID="Pint" value="V10"/>
+                        <Property name="text" typeID="Pjava.lang.String" value="V*"/>
+                        <Property name="maxSize" typeID="Pint" value="V255"/>
                         <Property name="constraints" typeID="Pint" value="V0"/>
                     </Component>
                     <Component componentID="33" typeID="C#CommandEventSource">
@@ -158,7 +158,7 @@
                         <Property name="preferredWidth" typeID="Pint" value="V30"/>
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
                         <Property name="text" typeID="Pjava.lang.String" value="VHello!"/>
-                        <Property name="maxSize" typeID="Pint" value="V10"/>
+                        <Property name="maxSize" typeID="Pint" value="V255"/>
                         <Property name="constraints" typeID="Pint" value="V0"/>
                     </Component>
                     <Component componentID="47" typeID="Cjavax.microedition.lcdui.TextField">

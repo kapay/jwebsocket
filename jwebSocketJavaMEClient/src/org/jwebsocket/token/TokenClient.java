@@ -44,7 +44,7 @@ public class TokenClient {
 	public final static int AUTHENTICATED = 2;
 	private int CUR_TOKEN_ID = 0;
 	private BaseClientJ2ME client = null;
-	private String lSubProt = "json"; // is hardcoded for java me
+	private String lSubProt = "jwebsocket.org/json"; // currently hardcoded for java me
 	private final static String NS_BASE = "org.jwebsocket";
 	private String fUsername = null;
 	private String fClientId = null;

@@ -189,37 +189,70 @@
 -->		
 		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
 			<tr>
-				<td class="tdHeader" width="">jWebSocket Channels Demo</td>
+				<td class="tdHeader" width="">jWebSocket Channels Demo (Preview)</td>
 				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
 				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
 			</tr>
 		</table>
-		<p>This demo shows ...</p>
+		<p>This demo shows how messages can be retrieved and broadcasted using a publish/subscribe mechanism based on multiple channels.</p>
 		<div id="sdivChat" class="sdivContainer"
 			 style="position:relative; height:300px; overflow:auto;">
 		</div>
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnect" type="button" value="Login" onclick="login();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Logout" onclick="logout();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
-					<td><input class="stxfDlg" id="stxfMsg" type="text" value="Your Message" style="width:99%"
-							   title="Message to be broadcasted on the selected channel."></td>
-					<td width=""><input class="sbtnDlg" id="sbtnPublish" type="button" value="Publish" onclick="publish();"></td>
-					<td width="5"><input class="sbtnDlg" id="sbtnAuth" type="button" value="Auth" onclick="auth();"></td>
-					<td width="5"><input class="sbtnDlg" id="sbtnGetChannels" type="button" value="Get Channels" onclick="getChannels();"></td>
-					<td class="stdDlg" align="right" width="">
-						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleKeepAlive();">&nbsp;Keep-Alive&nbsp;
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnConnect" type="button" value="Login" onclick="login();"
+							   title="Authenticates you against the jWebSocket Server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"
+							   title="Clears the result and event log above.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnSubscribe" type="button" value="Subscribe" onclick="subscribeChannel();"
+							   title="Subscribes this client to the selected channel.">
+					</td>
+					<td width="5">
+						<input class="sbtnDlg" id="sbtnAuth" type="button" value="Auth" onclick="auth();"
+							   title="Authenticates the user against the selected channel to publish messages on it.">
+					</td>
+					<td width="">
 						<select id="sselChannel">
 							<option selected="selected" value="channelA">Channel A</option>
-							<option selected="selected" value="channelB">Channel B</option>
-							<option selected="selected" value="channelC">Channel C</option>
+							<option value="channelB">Channel B</option>
+							<option value="channelC">Channel C</option>
+							<!--
 							<option value="jws.logger.channel">Logger Channel</option>
 							<option value="jws.admin.channel">Admin Channel</option>
+							-->
 						</select>
-						<input class="sbtnDlg" id="sbtnSubscribe" type="button" value="Subscribe" onclick="subscribeChannel();"></td>
-					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnUnsubscribe" type="button" value="Unsubscribe" onclick="unsubscribeChannel();"></td>
+					</td>
+					<td class="stdDlg" width="5">
+						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleKeepAlive();">&nbsp;Keep-Alive&nbsp;
+					</td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Logout" onclick="logout();"
+							   title="Logs you out and disconnects from the jWebSocket server.">
+					</td>
+					<td width="5">
+						<input class="sbtnDlg" id="sbtnGetChannels" type="button" value="Get Channels" onclick="getChannels();"
+							   title="Returns a list of available channels on the server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnUnsubscribe" type="button" value="Unsubscribe" onclick="unsubscribeChannel();"
+							   title="Unsubscribes this client from the selected channel.">
+					</td>
+					<td colspan="2">
+						<input class="stxfDlg" id="stxfMsg" type="text" value="Your Message" style="width:99%"
+							   title="Message to be broadcasted on the selected channel.">
+					</td>
+					<td width="">
+						<input class="sbtnDlg" id="sbtnPublish" type="button" value="Publish" onclick="publish();"
+							   title="Broadcasts the message on the selected channel.">
+					</td>
 				</tr>
 			</table>
 		</div>

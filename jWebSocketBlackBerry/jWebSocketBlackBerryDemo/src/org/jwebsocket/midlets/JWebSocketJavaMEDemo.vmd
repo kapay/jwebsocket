@@ -97,7 +97,7 @@
                         <Property name="instanceName" typeID="Pjava.lang.String" value="VstiLog"/>
                         <Property name="codeGenerated" typeID="Pboolean" value="Vtrue"/>
                         <Property name="label" typeID="Pjava.lang.String" value="V"/>
-                        <Property name="layout" typeID="Pint" value="V28672"/>
+                        <Property name="layout" typeID="Pint" value="V28928"/>
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
                         <Property name="text" typeID="Pjava.lang.String" value="V..."/>
                         <Property name="appearanceMode" typeID="Pint" value="V0"/>
@@ -134,11 +134,11 @@
                     <Component componentID="35" typeID="Cjavax.microedition.lcdui.TextField">
                         <Property name="instanceName" typeID="Pjava.lang.String" value="VtxfTarget"/>
                         <Property name="codeGenerated" typeID="Pboolean" value="Vtrue"/>
-                        <Property name="label" typeID="Pjava.lang.String" value="VTarget"/>
-                        <Property name="layout" typeID="Pint" value="V19456"/>
-                        <Property name="preferredWidth" typeID="Pint" value="V30"/>
+                        <Property name="label" typeID="Pjava.lang.String" value="VTarget:"/>
+                        <Property name="layout" typeID="Pint" value="V0"/>
+                        <Property name="preferredWidth" typeID="Pint" value="V-1"/>
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
-                        <Property name="text" typeID="Pjava.lang.String" value="VDemo"/>
+                        <Property name="text" typeID="Pjava.lang.String" value="V*"/>
                         <Property name="maxSize" typeID="Pint" value="V10"/>
                         <Property name="constraints" typeID="Pint" value="V0"/>
                     </Component>
@@ -153,30 +153,30 @@
                     <Component componentID="36" typeID="Cjavax.microedition.lcdui.TextField">
                         <Property name="instanceName" typeID="Pjava.lang.String" value="VtxfMessage"/>
                         <Property name="codeGenerated" typeID="Pboolean" value="Vtrue"/>
-                        <Property name="label" typeID="Pjava.lang.String" value="VMessage"/>
-                        <Property name="layout" typeID="Pint" value="V19456"/>
-                        <Property name="preferredWidth" typeID="Pint" value="V30"/>
+                        <Property name="label" typeID="Pjava.lang.String" value="VMessage:"/>
+                        <Property name="layout" typeID="Pint" value="V0"/>
+                        <Property name="preferredWidth" typeID="Pint" value="V-1"/>
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
-                        <Property name="text" typeID="Pjava.lang.String" value="VHello!"/>
-                        <Property name="maxSize" typeID="Pint" value="V10"/>
+                        <Property name="text" typeID="Pjava.lang.String" value="VHello from BlackBerry Device!"/>
+                        <Property name="maxSize" typeID="Pint" value="V50"/>
                         <Property name="constraints" typeID="Pint" value="V0"/>
                     </Component>
                     <Component componentID="47" typeID="Cjavax.microedition.lcdui.TextField">
                         <Property name="instanceName" typeID="Pjava.lang.String" value="VtxfURL"/>
                         <Property name="codeGenerated" typeID="Pboolean" value="Vtrue"/>
-                        <Property name="label" typeID="Pjava.lang.String" value="VURL"/>
-                        <Property name="layout" typeID="Pint" value="V19456"/>
-                        <Property name="preferredWidth" typeID="Pint" value="V50"/>
+                        <Property name="label" typeID="Pjava.lang.String" value="VURL:"/>
+                        <Property name="layout" typeID="Pint" value="V0"/>
+                        <Property name="preferredWidth" typeID="Pint" value="V-1"/>
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
-                        <Property name="text" typeID="Pjava.lang.String" value="Vsocket://10.21.68.111:8787"/>
-                        <Property name="maxSize" typeID="Pint" value="V32"/>
+                        <Property name="text" typeID="Pjava.lang.String" value="Vws://jwebsocket.org:8787"/>
+                        <Property name="maxSize" typeID="Pint" value="V50"/>
                         <Property name="constraints" typeID="Pint" value="V0"/>
                     </Component>
                     <Component componentID="48" typeID="Cjavax.microedition.lcdui.ImageItem">
                         <Property name="instanceName" typeID="Pjava.lang.String" value="VimgStatus"/>
                         <Property name="codeGenerated" typeID="Pboolean" value="Vtrue"/>
                         <Property name="label" typeID="Pjava.lang.String" value="V"/>
-                        <Property name="layout" typeID="Pint" value="V19712"/>
+                        <Property name="layout" typeID="Pint" value="V0"/>
                         <Property name="itemCommandListener" typeID="C#ItemCommandListener" value="R17"/>
                         <Property name="image" typeID="Cjavax.microedition.lcdui.Image" value="R51"/>
                         <Property name="altText" typeID="Pjava.lang.String" value="V&lt;Missing Image&gt;"/>
@@ -208,7 +208,7 @@
         </Component>
     </Document>
     <FlowScene version="1">
-        <Node componentID="2" descriptorID="componentNode2" x="34" y="32"/>
         <Node componentID="14" descriptorID="componentNode14" x="268" y="181"/>
+        <Node componentID="2" descriptorID="componentNode2" x="34" y="32"/>
     </FlowScene>
 </VisualDesign>

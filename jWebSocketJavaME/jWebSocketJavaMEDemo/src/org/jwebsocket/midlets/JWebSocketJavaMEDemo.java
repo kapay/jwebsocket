@@ -394,7 +394,7 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 	public TextField getTxfTarget() {
 		if (txfTarget == null) {//GEN-END:|35-getter|0|35-preInit
 			// write pre-init user code here
-			txfTarget = new TextField("Target", "Demo", 10, TextField.ANY);//GEN-BEGIN:|35-getter|1|35-postInit
+			txfTarget = new TextField("Target", "*", 255, TextField.ANY);//GEN-BEGIN:|35-getter|1|35-postInit
 			txfTarget.setLayout(ImageItem.LAYOUT_DEFAULT | Item.LAYOUT_SHRINK | Item.LAYOUT_VSHRINK | Item.LAYOUT_2);
 			txfTarget.setPreferredSize(30, -1);//GEN-END:|35-getter|1|35-postInit
 			// write post-init user code here
@@ -411,7 +411,7 @@ public class JWebSocketJavaMEDemo extends MIDlet implements CommandListener, Web
 	public TextField getTxfMessage() {
 		if (txfMessage == null) {//GEN-END:|36-getter|0|36-preInit
 			// write pre-init user code here
-			txfMessage = new TextField("Message", "Hello!", 10, TextField.ANY);//GEN-BEGIN:|36-getter|1|36-postInit
+			txfMessage = new TextField("Message", "Hello!", 255, TextField.ANY);//GEN-BEGIN:|36-getter|1|36-postInit
 			txfMessage.setLayout(ImageItem.LAYOUT_DEFAULT | Item.LAYOUT_SHRINK | Item.LAYOUT_VSHRINK | Item.LAYOUT_2);
 			txfMessage.setPreferredSize(30, -1);//GEN-END:|36-getter|1|36-postInit
 			// write post-init user code here

@@ -212,7 +212,8 @@ public class EhCacheStorage implements IBasicStorage {
 			mCacheManager = new CacheManager(/*"conf/ehcache.xml"*/);
 			// TODO: currenly hard coded, make configurable!
 			mCache = new Cache(
-					new CacheConfiguration(mName, 1000).memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU).overflowToDisk(true).eternal(true).timeToLiveSeconds(60).timeToIdleSeconds(30).diskPersistent(false).diskExpiryThreadIntervalSeconds(0));
+					new CacheConfiguration(mName, 1000).memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU).overflowToDisk(false).eternal(true).diskPersistent(false).diskExpiryThreadIntervalSeconds(0));
+			// makes no sense for eteral setting: timeToLiveSeconds(60).timeToIdleSeconds(30).
 			mCacheManager.addCache(mCache);
 		}
 	}
