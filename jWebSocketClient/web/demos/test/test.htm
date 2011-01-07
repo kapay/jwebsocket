@@ -91,7 +91,7 @@
 
 				// URL is ws[s]://[hostname|localhost]:8787[/context][/servlet/][;args...]
 				// deprecated: JWS_SERVER_URL;
-				var lURL = jws.getDefaultServerURL() + "/;timeout=120000";;
+				var lURL = jws.getDefaultServerURL();
 
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
@@ -357,6 +357,22 @@
 				}
 			}
 
+			// ----------------------------------------- PERFORMANCE
+
+			function testS2CPerformance() {
+				var lCount = parseInt( eLoopCount.value );
+				var lMessage = eMessage.value;
+
+				var lRes = lWSC.sendToken({
+					ns: "org.jwebsocket.plugins.test",
+					type: "testS2CPerformance",
+					count: lCount,
+					message: lMessage
+				});
+				
+			}
+
+
 			// ----------------------------------------- INIT
 
 			function initPage() {
@@ -475,6 +491,14 @@
 						<input class="sbtnDlg" id="sbtnPing2" type="button" value="Ping" onclick="testCSPerf2();">
 						<input class="sbtnDlg" id="sbtnRPC2" type="button" value="RPC" onclick="testRPCPerf2();">
 						<input class="sbtnDlg" id="sbtnBroadcast2" type="button" value="Broadcast" onclick="broadcast2();">
+					</td>
+				</tr>
+				<tr class="strDlg">
+					<th class="sthDlg" colspan="4">Pure Performance Tests</th>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" colspan="4" align="center">
+						<input class="sbtnDlg" id="sbtnS2CPerf" type="button" value="S2C Performance" onclick="testS2CPerformance();">
 					</td>
 				</tr>
 			</table>

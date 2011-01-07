@@ -408,8 +408,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 		Publisher lPublisher = null;
 		Date lNow = new Date();
 		// TODO: Commented our by Alex: Why may only the owner publish something ?
-		if (aChannel.getAccessKey().equals(aAccessKey) && aChannel.getSecretKey().equals(aSecretKey) 
-				/* && user.getLoginname().equals(channel.getOwner())*/) {
+		if (aChannel.getAccessKey().equals(aAccessKey)
+				&& aChannel.getSecretKey().equals(aSecretKey) /* && user.getLoginname().equals(channel.getOwner())*/) {
 			lPublisher = new Publisher(aConnector, aUser.getLoginname(), aChannel.getId(), lNow, lNow, true);
 			mChannelManager.storePublisher(lPublisher);
 		} else {

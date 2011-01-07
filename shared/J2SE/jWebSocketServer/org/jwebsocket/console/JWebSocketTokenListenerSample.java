@@ -30,7 +30,7 @@ import org.jwebsocket.token.Token;
  */
 public class JWebSocketTokenListenerSample implements WebSocketServerTokenListener {
 
-	private static Logger log = Logging.getLogger(JWebSocketTokenListenerSample.class);
+	private static Logger mLog = Logging.getLogger(JWebSocketTokenListenerSample.class);
 
 	/**
 	 *
@@ -38,8 +38,8 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	 */
 	@Override
 	public void processOpened(WebSocketServerEvent aEvent) {
-		if (log.isDebugEnabled()) {
-			log.debug("Client '" + aEvent.getConnector() + "' connected.");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Client '" + aEvent.getConnector() + "' connected.");
 		}
 	}
 
@@ -50,8 +50,8 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	 */
 	@Override
 	public void processPacket(WebSocketServerEvent aEvent, WebSocketPacket aPacket) {
-		if (log.isDebugEnabled()) {
-			log.debug("Processing data packet '" + aPacket.getUTF8() + "'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing data packet '" + aPacket.getUTF8() + "'...");
 		}
 		// Here you can answer an arbitrary text package...
 		// this is how to easily respond to a previous client's request
@@ -67,8 +67,8 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	 */
 	@Override
 	public void processToken(WebSocketServerTokenEvent aEvent, Token aToken) {
-		if (log.isDebugEnabled()) {
-			log.debug("Client '" + aEvent.getConnector() + "' sent Token: '" + aToken.toString() + "'.");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Client '" + aEvent.getConnector() + "' sent Token: '" + aToken.toString() + "'.");
 		}
 		// here you can simply interpret the token type sent from the client
 		// according to your needs.
@@ -86,11 +86,11 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 				lResponse.setString("license", JWebSocketCommonConstants.LICENSE);
 			} else if ("getTokenizable".equals(lType)) {
 				// create a new tokenizable object and put it to the token
-				SampleTokenizable aTokenizable = new SampleTokenizable(
+				SampleTokenizable lTokenizable = new SampleTokenizable(
 						"Alex", "Schulze",
 						"An Vieslapp 29",
 						"D-52134", "Herzogenrath");
-				lResponse.set(aTokenizable);
+				lResponse.set(lTokenizable);
 			} else {
 				// if unknown type in this namespace, return corresponding error message
 				lResponse.setInteger("code", -1);
@@ -106,8 +106,8 @@ public class JWebSocketTokenListenerSample implements WebSocketServerTokenListen
 	 */
 	@Override
 	public void processClosed(WebSocketServerEvent aEvent) {
-		if (log.isDebugEnabled()) {
-			log.debug("Client '" + aEvent.getConnector() + "' disconnected.");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Client '" + aEvent.getConnector() + "' disconnected.");
 		}
 	}
 }
