@@ -53,7 +53,8 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			lblTitle.setText(lblTitle.getText().replace("{ver}", JWebSocketClientConstants.VERSION_STR));
 			client = new BaseTokenClient();
-			// uncomment following line to test #03 draft
+			// uncomment following line to test #03 draft 
+            // (nothing else is required, because server-side orients itself according to client request)
 			//client.setDraft(JWebSocketCommonConstants.WS_DRAFT_03);
 			client.addListener(this);
 			icoDisconnected = new ImageIcon(getClass().getResource("/images/disconnected.png"));
