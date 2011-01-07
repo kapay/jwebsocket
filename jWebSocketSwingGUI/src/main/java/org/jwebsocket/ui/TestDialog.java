@@ -29,6 +29,7 @@ import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.client.token.BaseTokenClient;
 import org.jwebsocket.config.JWebSocketClientConstants;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.token.Token;
 
@@ -52,6 +53,8 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			lblTitle.setText(lblTitle.getText().replace("{ver}", JWebSocketClientConstants.VERSION_STR));
 			client = new BaseTokenClient();
+			// uncomment following line to test #03 draft
+			//client.setDraft(JWebSocketCommonConstants.WS_DRAFT_03);
 			client.addListener(this);
 			icoDisconnected = new ImageIcon(getClass().getResource("/images/disconnected.png"));
 			icoConnected = new ImageIcon(getClass().getResource("/images/connected.png"));
