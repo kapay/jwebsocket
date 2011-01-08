@@ -40,7 +40,7 @@
 				<!-- <version>2.1-beta-1</version> -->
 				<configuration>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
-					<outputDirectory>${project.build.directory}/../../jWebSocketRTE/jWebSocket-${project.version}/libs</outputDirectory>
+					<outputDirectory>${project.build.directory}/../../../rte/jWebSocket-${project.version}/libs</outputDirectory>
 					<webResources>
 						<resource>
 							<!-- this is relative to the pom.xml directory -->
