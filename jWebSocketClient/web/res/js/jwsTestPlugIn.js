@@ -36,7 +36,7 @@ jws.TestPlugIn = {
 			// here you can handle incoming tokens from the server
 			// directy in the plug-in if desired.
 			if( "event" == aToken.type ) {
-				if( "testStartet" == aToken.name && this.OnTestStarted ) {
+				if( "testStarted" == aToken.name && this.OnTestStarted ) {
 					this.OnTestStarted( aToken );
 				} else if( "testStopped" == aToken.name && this.OnTestStopped ) {
 					this.OnTestStopped( aToken );

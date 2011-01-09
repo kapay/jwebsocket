@@ -16,6 +16,9 @@
 package org.jwebsocket.util;
 
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Formatter;
 
 /**
@@ -103,5 +106,35 @@ public class Tools {
 			lRes = aDefault;
 		}
 		return lRes;
+	}
+
+	/**
+	 * 
+	 * @param aISO8601Date
+	 * @return
+	 */
+	public static Date ISO8601ToDate(String aISO8601Date) {
+		Calendar lCal = javax.xml.bind.DatatypeConverter.parseDateTime(aISO8601Date);
+		return lCal.getTime();
+	}
+
+	/**
+	 *
+	 * @param aDate
+	 * @return
+	 */
+	public static String DateToISO8601(Date aDate) {
+		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		return lSDF.format(aDate);
+	}
+
+	/**
+	 *
+	 * @param aDate
+	 * @return
+	 */
+	public static String DateToISO8601WithMillis(Date aDate) {
+		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		return lSDF.format(aDate);
 	}
 }

@@ -27,8 +27,10 @@ import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
+import org.jwebsocket.util.Tools;
 
 /**
  *
@@ -40,6 +42,10 @@ public class TestPlugIn extends TokenPlugIn {
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_TEST = JWebSocketServerConstants.NS_BASE + ".plugins.test";
 
+	/**
+	 *
+	 * @param aConfiguration
+	 */
 	public TestPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
@@ -62,6 +68,26 @@ public class TestPlugIn extends TokenPlugIn {
 		}
 	}
 
+	private Date mSendTestStarted(WebSocketConnector aConnector, String aTest) {
+		Token lToken = TokenFactory.createToken(NS_TEST, BaseToken.TT_EVENT);
+		lToken.setString("name", "testStarted");
+		lToken.setString("test", aTest);
+		Date lDate = new Date();
+		lToken.setString("timestamp", Tools.DateToISO8601WithMillis(lDate));
+		getServer().sendToken(aConnector, lToken);
+		return lDate;
+	}
+
+	private Date mSendTestStopped(WebSocketConnector aConnector, String aTest) {
+		Token lToken = TokenFactory.createToken(NS_TEST, BaseToken.TT_EVENT);
+		lToken.setString("name", "testStopped");
+		lToken.setString("test", aTest);
+		Date lDate = new Date();
+		lToken.setString("timestamp", Tools.DateToISO8601WithMillis(lDate));
+		getServer().sendToken(aConnector, lToken);
+		return lDate;
+	}
+
 	private void testS2CPerformance(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
@@ -70,15 +96,20 @@ public class TestPlugIn extends TokenPlugIn {
 
 		Token lTestToken = TokenFactory.createToken();
 		lTestToken.setString("data", lMessage);
-		long lStartMillis = (new Date()).getTime();
+
+		// send test stopped event
+		long lStartMillis = mSendTestStarted(aConnector, "testS2CPerformance").getTime();
+
+		// run the test
 		for (int lLoop = 0; lLoop < lCount; lLoop++) {
 			lServer.sendToken(aConnector, lTestToken);
 		}
-		long lStopMillis = (new Date()).getTime();
+		// send test stopped event
+		long lStopMillis = mSendTestStopped(aConnector, "testS2CPerformance").getTime();
 
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
-		lResponse.setInteger("duration", (int)(lStopMillis - lStartMillis));
+		lResponse.setInteger("duration", (int) (lStopMillis - lStartMillis));
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 	}
