@@ -336,6 +336,11 @@ public class TCPConnector extends BaseConnector {
 							WebSocketPacket lPacket = new RawPacket(aBuff.toByteArray());
 							lPacket.setFrameType(lPacketType);
 							try {
+								/* Please keep this comment for debug purposes
+								if (mLog.isDebugEnabled()) {
+									mLog.debug("Received packet: '" + lPacket.getUTF8() + "'");
+								}
+								 */
 								aEngine.processPacket(mConnector, lPacket);
 							} catch (Exception lEx) {
 								mLog.error(lEx.getClass().getSimpleName() + " in processPacket of connector "

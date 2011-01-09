@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - jWebSocket Test Plug-In
+//	jWebSocket - jWebSocket Cluster Plug-In
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //	---------------------------------------------------------------------------
 //  THIS CODE IS FOR RESEARCH, EVALUATION AND TEST PURPOSES ONLY!
@@ -16,9 +16,8 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.plugins.test;
+package org.jwebsocket.plugins.cluster;
 
-import java.util.Date;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
@@ -27,29 +26,26 @@ import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.server.TokenServer;
-import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
-import org.jwebsocket.token.TokenFactory;
-import org.jwebsocket.util.Tools;
 
 /**
  *
  * @author aschulze
  */
-public class TestPlugIn extends TokenPlugIn {
+public class ClusterPlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(TestPlugIn.class);
+	private static Logger mLog = Logging.getLogger(ClusterPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
-	private static final String NS_TEST = JWebSocketServerConstants.NS_BASE + ".plugins.test";
+	private static final String NS_TEST = JWebSocketServerConstants.NS_BASE + ".plugins.cluster";
 
 	/**
 	 *
 	 * @param aConfiguration
 	 */
-	public TestPlugIn(PluginConfiguration aConfiguration) {
+	public ClusterPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating test plug-in...");
+			mLog.debug("Instantiating cluster plug-in...");
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_TEST);
@@ -62,54 +58,22 @@ public class TestPlugIn extends TokenPlugIn {
 		String lNS = aToken.getNS();
 
 		if (lType != null && getNamespace().equals(lNS)) {
-			if ("testS2CPerformance".equals(lType)) {
-				testS2CPerformance(aConnector, aToken);
+			if ("".equals(lType)) {
+				mthd(aConnector, aToken);
 			}
 		}
 	}
 
-	private Date mSendTestStarted(WebSocketConnector aConnector, String aTest) {
-		Token lToken = TokenFactory.createToken(NS_TEST, BaseToken.TT_EVENT);
-		lToken.setString("name", "testStarted");
-		lToken.setString("test", aTest);
-		Date lDate = new Date();
-		lToken.setString("timestamp", Tools.DateToISO8601WithMillis(lDate));
-		getServer().sendToken(aConnector, lToken);
-		return lDate;
-	}
-
-	private Date mSendTestStopped(WebSocketConnector aConnector, String aTest) {
-		Token lToken = TokenFactory.createToken(NS_TEST, BaseToken.TT_EVENT);
-		lToken.setString("name", "testStopped");
-		lToken.setString("test", aTest);
-		Date lDate = new Date();
-		lToken.setString("timestamp", Tools.DateToISO8601WithMillis(lDate));
-		getServer().sendToken(aConnector, lToken);
-		return lDate;
-	}
-
-	private void testS2CPerformance(WebSocketConnector aConnector, Token aToken) {
+	private void mthd(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
-		String lMessage = aToken.getString("message", "Default Text Message");
-		Integer lCount = aToken.getInteger("count", 50);
-
-		Token lTestToken = TokenFactory.createToken();
-		lTestToken.setString("data", lMessage);
-
-		// send test stopped event
-		long lStartMillis = mSendTestStarted(aConnector, "testS2CPerformance").getTime();
-
-		// run the test
-		for (int lLoop = 0; lLoop < lCount; lLoop++) {
-			lServer.sendToken(aConnector, lTestToken);
-		}
-		// send test stopped event
-		long lStopMillis = mSendTestStopped(aConnector, "testS2CPerformance").getTime();
+		// String lMessage = aToken.getString("message", "Default Text Message");
+		// Integer lCount = aToken.getInteger("count", 50);
 
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
-		lResponse.setInteger("duration", (int) (lStopMillis - lStartMillis));
+
+
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 	}
