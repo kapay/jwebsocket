@@ -36,10 +36,15 @@ jws.TestPlugIn = {
 			// here you can handle incoming tokens from the server
 			// directy in the plug-in if desired.
 			if( "event" == aToken.type ) {
+				// callback when a server started a certain test
 				if( "testStarted" == aToken.name && this.OnTestStarted ) {
 					this.OnTestStarted( aToken );
+				// callback when a server stopped a certain test
 				} else if( "testStopped" == aToken.name && this.OnTestStopped ) {
 					this.OnTestStopped( aToken );
+				// event used to run a test triggered by the server
+				} else if( "startTest" == aToken.name && this.OnStartTest ) {
+					this.OnStartTest( aToken );
 				}
 			}
 		}
@@ -63,9 +68,15 @@ jws.TestPlugIn = {
 		if( !aListeners ) {
 			aListeners = {};
 		}
+		// event used to run a test triggered by the server
+		if( aListeners.OnStartTest !== undefined ) {
+			this.OnStartTest = aListeners.OnStartTest;
+		}
+		// callback when a server started a certain test
 		if( aListeners.OnTestStarted !== undefined ) {
 			this.OnTestStarted = aListeners.OnTestStarted;
 		}
+		// callback when a server stopped a certain test
 		if( aListeners.OnTestStopped !== undefined ) {
 			this.OnTestStopped = aListeners.OnTestStopped;
 		}

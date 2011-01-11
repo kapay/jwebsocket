@@ -414,6 +414,19 @@
 				});
 			}
 
+			function createFrames() {
+				for( var i = 0; i < 1; i++ ) {
+					var lIframe = document.createElement( "iframe" );
+					lIframe.src = "iframe.htm";
+					lIframe.id = "iframe" + i;
+					lIframe.setAttribute( "frameborder", "0" );
+					lIframe.style.width = "320px";
+					lIframe.style.height = "240px";
+					lIframe.style.border = "1px solid #ccc";
+					lIframe.style.margin = "2px";
+					document.body.appendChild( lIframe );
+				}
+			}
 
 			// ----------------------------------------- INIT
 
@@ -490,7 +503,13 @@
 			}
 		</script>
 -->
-		<h1>jWebSocket Test Suite</h1>
+		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="tdHeader" width="">jWebSocket Test Suite</td>
+				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
+				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
+			</tr>
+		</table>
 		<p>This page is intended to be run for local test purposes only. Please avoid to stress our online-server
 		too much. If you are not sure whether your favorite browser supports 
 		WebSockets please refer to our <a target="_top" href="http://jwebsocket.org/jws_for_all.htm">
@@ -510,7 +529,7 @@
 			</table>
 		</div>
 		<div id="sdivChat" class="sdivContainer"
-			 style="position:relative; height:300px; overflow:auto;">
+			 style="position:relative; height:200px; overflow:auto;">
 		</div>
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
@@ -546,6 +565,7 @@
 				<tr class="strDlg">
 					<td class="stdDlg" colspan="4" align="center">
 						<input class="sbtnDlg" id="sbtnS2CPerf" type="button" value="S2C Perf." onclick="testS2CPerformance();">
+						<input class="sbtnDlg" id="sbtnOpenFrame" type="button" value="Frames" onclick="createFrames();">
 					</td>
 				</tr>
 			</table>

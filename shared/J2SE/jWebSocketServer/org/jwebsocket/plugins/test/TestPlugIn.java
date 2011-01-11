@@ -102,7 +102,8 @@ public class TestPlugIn extends TokenPlugIn {
 
 		// run the test
 		for (int lLoop = 0; lLoop < lCount; lLoop++) {
-			lServer.sendToken(aConnector, lTestToken);
+			// lServer.sendToken(aConnector, lTestToken);
+			lServer.broadcastToken(lTestToken);
 		}
 		// send test stopped event
 		long lStopMillis = mSendTestStopped(aConnector, "testS2CPerformance").getTime();
