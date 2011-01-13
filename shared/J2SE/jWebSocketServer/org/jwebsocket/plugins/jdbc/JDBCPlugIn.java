@@ -34,6 +34,7 @@ import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * 
@@ -63,10 +64,26 @@ public class JDBCPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-	    if (lType != null && getNamespace().equals(lNS)) {
+		if (lType != null && getNamespace().equals(lNS)) {
 			// select from database
 			if (lType.equals("select")) {
 				select(aConnector, aToken);
+			} else if (lType.equals("update")) {
+				// update(aConnector, aToken);
+			} else if (lType.equals("delete")) {
+				// delete(aConnector, aToken);
+			} else if (lType.equals("insert")) {
+				// insert(aConnector, aToken);
+			} else if (lType.equals("startTA")) {
+				// startTA(aConnector, aToken);
+			} else if (lType.equals("commit")) {
+				// commit(aConnector, aToken);
+			} else if (lType.equals("rollback")) {
+				// rollback(aConnector, aToken);
+			} else if (lType.equals("execSQL")) {
+				// execSQL(aConnector, aToken);
+			} else if (lType.equals("querySQL")) {
+				// querySQL(aConnector, aToken);
 			}
 		}
 	}
@@ -89,44 +106,9 @@ public class JDBCPlugIn extends TokenPlugIn {
 		return lDataRow;
 	}
 
-	/**
-	 * shutdown server
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 */
-	public void select(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'select'...");
-		}
-
-		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
-		}
-
-		// obtain required parameters for query
-		String lTable = aToken.getString("table");
-		String lFields = aToken.getString("fields");
-		String lOrder = aToken.getString("order");
-		String lWhere = aToken.getString("where");
-		String lGroup = aToken.getString("group");
-		String lHaving = aToken.getString("having");
-
-		// buld SQL string
-		String lSQL = "select " + lFields + " from " + lTable;
-		if (lWhere != null && lWhere.length() > 0) {
-			lSQL += " where " + lWhere;
-		}
-		if (lOrder != null && lOrder.length() > 0) {
-			lSQL += " order by " + lOrder;
-		}
-
+	private Token mQuerySQL(String aSQL) {
 		// instantiate response token
-		Token lResponse = lServer.createResponse(aToken);
+		Token lResponse = TokenFactory.createToken();
 		// TODO: should work with usual arrays as well!
 		// Object[] lColumns = null;
 		int lRowCount = 0;
@@ -134,7 +116,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		List<Map> lColumns = new FastList<Map>();
 		List lData = new FastList<Map>();
 		try {
-			DBQueryResult lRes = DBConnectSingleton.querySQL(DBConnectSingleton.USR_SYSTEM, lSQL);
+			DBQueryResult lRes = DBConnectSingleton.querySQL(DBConnectSingleton.USR_SYSTEM, aSQL);
 
 			// TODO: metadata should be optional to save bandwidth!
 			// generate the meta data for the response
@@ -169,7 +151,110 @@ public class JDBCPlugIn extends TokenPlugIn {
 		lResponse.setList("columns", lColumns);
 		lResponse.setList("data", lData);
 
+		return lResponse;
+	}
+
+	private Token mExecSQL(String aSQL) {
+		// instantiate response token
+		Token lResponse = TokenFactory.createToken();
+
+		// complete the response token
+		lResponse.setInteger("rowsAffected", -1);
+
+		return lResponse;
+	}
+
+	/**
+	 * shutdown server
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void select(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'select'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		// obtain required parameters for query
+		String lTable = aToken.getString("table");
+		String lFields = aToken.getString("fields");
+		String lOrder = aToken.getString("order");
+		String lWhere = aToken.getString("where");
+		String lGroup = aToken.getString("group");
+		String lHaving = aToken.getString("having");
+
+		// build SQL string
+		String lSQL = 
+				"select "
+				+ lFields
+				+ " from "
+				+ lTable;
+
+		// add where condition
+		if (lWhere != null && lWhere.length() > 0) {
+			lSQL += " where " + lWhere;
+		}
+		// add order options
+		if (lOrder != null && lOrder.length() > 0) {
+			lSQL += " order by " + lOrder;
+		}
+
+		Token lResponse = mQuerySQL(lSQL);
+
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 	}
+
+	public void querySQL(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'querySQL'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".querySQL")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		// load SQL string
+		String lSQL = aToken.getString("sql");
+
+		Token lResponse = mQuerySQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	public void execSQL(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'execSQL'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".execSQL")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		// load SQL string
+		String lSQL = aToken.getString("sql");
+
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
 }
