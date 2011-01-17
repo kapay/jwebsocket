@@ -21,7 +21,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jwebsocket.storage.JDBCStorage;
+import org.jwebsocket.storage.jdbc.JDBCStorage;
 import org.jwebsocket.logging.Logging;
 
 /**

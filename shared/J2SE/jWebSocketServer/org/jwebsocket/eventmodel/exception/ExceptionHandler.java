@@ -16,9 +16,11 @@
 package org.jwebsocket.eventmodel.exception;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 import org.jwebsocket.eventmodel.api.IExceptionHandler;
 import org.jwebsocket.logging.Logging;
 import org.apache.log4j.Logger;
+import org.jwebsocket.eventmodel.api.IExceptionNotifierProvider;
 
 /**
  *
@@ -27,6 +29,7 @@ import org.apache.log4j.Logger;
 public class ExceptionHandler implements IExceptionHandler {
 
 	private static Logger mLog = Logging.getLogger(ExceptionHandler.class);
+	private Set<IExceptionNotifierProvider> notifierProviders;
 
 	public void initialize() throws Exception {
 	}
@@ -40,6 +43,13 @@ public class ExceptionHandler implements IExceptionHandler {
 			mLog.error(ex.toString(), ex);
 		} else {
 			mLog.error(ex.getMessage());
+		}
+
+		//Executing notifications
+		if (null != notifierProviders) {
+			for (IExceptionNotifierProvider p : notifierProviders) {
+				p.notify(ex);
+			}
 		}
 	}
 
@@ -59,5 +69,19 @@ public class ExceptionHandler implements IExceptionHandler {
 	}
 
 	public void shutdown() throws Exception {
+	}
+
+	/**
+	 * @return the notifierProviders
+	 */
+	public Set<IExceptionNotifierProvider> getNotifierProviders() {
+		return notifierProviders;
+	}
+
+	/**
+	 * @param notifierProviders the notifierProviders to set
+	 */
+	public void setNotifierProviders(Set<IExceptionNotifierProvider> notifierProviders) {
+		this.notifierProviders = notifierProviders;
 	}
 }

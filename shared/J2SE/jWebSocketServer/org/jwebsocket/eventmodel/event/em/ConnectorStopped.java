@@ -20,7 +20,7 @@ import org.jwebsocket.kit.CloseReason;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class ConnectorStopped extends WebSocketEvent {
 

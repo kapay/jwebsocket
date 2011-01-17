@@ -27,8 +27,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
- *
- ** @author kyberneees
+ * 
+ * @author kyberneees
  */
 public class AuthPlugIn extends EventModelPlugIn {
 
@@ -52,15 +52,14 @@ public class AuthPlugIn extends EventModelPlugIn {
 		Authentication result = getAm().authenticate(request);
 		SecurityContextHolder.getContext().setAuthentication(result);
 
-		aResponseEvent.getTo().add(aEvent.getConnector());
-		aResponseEvent.setMessage(">> Login process has finished successfully. Username: '" + username + "'");
-
 		//Adding roles in the response
 		FastList<String> roles = new FastList<String>();
 		for (GrantedAuthority ga: SecurityContextHolder.getContext().getAuthentication().getAuthorities()){
 			roles.add(ga.getAuthority());
 		}
+		aResponseEvent.getArgs().setString("username", username);
 		aResponseEvent.getArgs().setList("roles", roles);
+		aResponseEvent.setMessage(">> Login process has finished successfully. Username: '" + username + "'");
 	}
 
 	/**
@@ -72,7 +71,6 @@ public class AuthPlugIn extends EventModelPlugIn {
 	public void processEvent(Logoff aEvent, WebSocketResponseEvent aResponseEvent) {
 		SecurityContextHolder.clearContext();
 
-		aResponseEvent.getTo().add(aEvent.getConnector());
 		aResponseEvent.setMessage("<< Logout process has finished successfully!");
 	}
 

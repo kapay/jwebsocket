@@ -34,12 +34,13 @@ import org.jwebsocket.logging.Logging;
 import java.util.Set;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.eventmodel.api.IExceptionHandler;
+import org.jwebsocket.eventmodel.event.WebSocketEventDefinition;
 import org.jwebsocket.eventmodel.exception.CachedResponseException;
 import org.jwebsocket.eventmodel.exception.ExceptionHandler;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class EventModel extends ObservableObject implements IInitializable, IListener {
 
@@ -74,7 +75,6 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 				mLog.debug(">> 'before.process.event' notification...");
 			}
 			BeforeProcessEvent e = (BeforeProcessEvent) getEventFactory().stringToEvent("before.process.event");
-			e.setSubject(this);
 			e.setEvent(aEvent);
 			notify(e, null, true);
 
@@ -82,14 +82,18 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> Executing EM listeners notifications...");
 			}
-			notify(aEvent, aResponseEvent, false);
+			WebSocketEventDefinition def = getEventFactory().getEventDefinitions().getDefinition(aEvent.getId());
+			if (def.isNotificationConcurrent()){
+				notify(aEvent, aResponseEvent, true);
+			}else {
+				notify(aEvent, aResponseEvent, false);
+			}
 
 			//"after.process.event" notification
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> 'after.process.event' notification...");
 			}
 			AfterProcessEvent e2 = (AfterProcessEvent) getEventFactory().stringToEvent("after.process.event");
-			e2.setSubject(this);
 			e2.setEvent(aEvent);
 			notify(e2, aResponseEvent, true);
 

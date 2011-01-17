@@ -21,7 +21,7 @@ import org.jwebsocket.eventmodel.observable.Event;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class EventDefinitionManager implements IInitializable {
 

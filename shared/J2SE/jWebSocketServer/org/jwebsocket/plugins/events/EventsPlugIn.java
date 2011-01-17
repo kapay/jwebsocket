@@ -39,7 +39,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class EventsPlugIn extends TokenPlugIn {
 
@@ -82,8 +82,7 @@ public class EventsPlugIn extends TokenPlugIn {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> 'engine.started(" + aEngine.toString() + ")' event notification...");
 			}
-			EngineStarted e = (EngineStarted)getEm().getEventFactory().stringToEvent("engine.started");
-			e.setSubject(this);
+			EngineStarted e = (EngineStarted) getEm().getEventFactory().stringToEvent("engine.started");
 			e.setEngine(aEngine);
 			e.initialize();
 			getEm().notify(e, null, true);
@@ -99,8 +98,7 @@ public class EventsPlugIn extends TokenPlugIn {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> 'engine.stopped(" + aEngine.toString() + ")' event notification...");
 			}
-			EngineStopped e = (EngineStopped)getEm().getEventFactory().stringToEvent("engine.stopped");
-			e.setSubject(this);
+			EngineStopped e = (EngineStopped) getEm().getEventFactory().stringToEvent("engine.stopped");
 			e.setEngine(aEngine);
 			e.initialize();
 			getEm().notify(e, null, true);
@@ -116,8 +114,7 @@ public class EventsPlugIn extends TokenPlugIn {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> 'connector.started(" + aConnector.toString() + ")' event notification...");
 			}
-			ConnectorStarted e = (ConnectorStarted)getEm().getEventFactory().stringToEvent("connector.started");
-			e.setSubject(this);
+			ConnectorStarted e = (ConnectorStarted) getEm().getEventFactory().stringToEvent("connector.started");
 			e.setConnector(aConnector);
 			e.initialize();
 			getEm().notify(e, null, true);
@@ -166,8 +163,7 @@ public class EventsPlugIn extends TokenPlugIn {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> 'connector.stopped(" + aConnector.toString() + ")' event notification...");
 			}
-			ConnectorStopped e = (ConnectorStopped)getEm().getEventFactory().stringToEvent("connector.stopped");
-			e.setSubject(this);
+			ConnectorStopped e = (ConnectorStopped) getEm().getEventFactory().stringToEvent("connector.stopped");
 			e.setConnector(aConnector);
 			e.setCloseReason(aCloseReason);
 			e.initialize();

@@ -22,10 +22,12 @@ import org.jwebsocket.eventmodel.core.EventModel;
 import org.jwebsocket.eventmodel.observable.Event;
 import org.jwebsocket.eventmodel.observable.ResponseEvent;
 import java.util.Map;
+import java.util.Set;
+import org.jwebsocket.eventmodel.event.WebSocketEventDefinition;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public abstract class EventModelPlugIn extends ObservableObject implements IEventModelPlugIn {
 
@@ -36,6 +38,14 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	public void initialize() throws Exception {
 	}
 
+	/**
+	 * Short cut to set the plugIn events definitions
+	 * @param defs
+	 */
+	public void setEventsDefinitions(Set<WebSocketEventDefinition> defs) {
+		getEm().getEventFactory().getEventDefinitions().getSet().addAll(defs);
+	}
+
 	//Just for compatibility with the IObservable interface
 	public void processEvent(Event aEvent, ResponseEvent aResponseEvent) {
 		System.out.println(">> Response from '" + this.getClass().getName() + "', please override this method!");
@@ -44,6 +54,12 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	public void shutdown() throws Exception {
 	}
 
+	/**
+	 * Notify an event in the client-side
+	 * 
+	 * @param aEvent The event to be sent
+	 * @return
+	 */
 	public EventNotification notifyEvent(Event aEvent) {
 		return new EventNotification(this, aEvent);
 	}

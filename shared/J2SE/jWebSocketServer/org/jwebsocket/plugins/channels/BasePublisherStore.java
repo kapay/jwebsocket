@@ -22,7 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.storage.EhCacheStorage;
+import org.jwebsocket.storage.ehcache.EhCacheStorage;
 
 public class BasePublisherStore 
 		extends EhCacheStorage

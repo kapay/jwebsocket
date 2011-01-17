@@ -22,7 +22,7 @@ import org.jwebsocket.eventmodel.core.EventModel;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public interface IEventModelFilter {
 

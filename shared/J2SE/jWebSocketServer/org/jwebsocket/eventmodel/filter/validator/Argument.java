@@ -15,32 +15,31 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.filter.validator;
 
-import javolution.util.FastMap;
 import org.springframework.validation.Validator;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class Argument {
 
 	private String name;
-	private Class<? extends Object> type;
+	private String type;
 	private boolean optional;
 	private Object value;
 	private Validator validator;
 
-	public Argument(String name, Class<? extends Object> type, boolean optional, Validator validator) {
-		setName(name);
-		setType(type);
-		setOptional(optional);
-		setValidator(validator);
+	public Argument(String name, String type, boolean optional, Validator validator) {
+		this.name = name;
+		this.type = type;
+		this.optional = optional;
+		this.validator = validator;
 	}
 
-	public Argument(String name, Class<? extends Object> type, boolean optional) {
-		setName(name);
-		setType(type);
-		setOptional(optional);
+	public Argument(String name, String type, boolean optional) {
+		this.name = name;
+		this.type = type;
+		this.optional = optional;
 	}
 
 	/**
@@ -60,14 +59,14 @@ public class Argument {
 	/**
 	 * @return the type
 	 */
-	public Class<? extends Object> getType() {
+	public String getType() {
 		return type;
 	}
 
 	/**
 	 * @param type the type to set
 	 */
-	public void setType(Class<? extends Object> type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 
@@ -83,16 +82,6 @@ public class Argument {
 	 */
 	public void setOptional(boolean optional) {
 		this.optional = optional;
-	}
-
-	@Override
-	public String toString() {
-		FastMap<String, Object> m = new FastMap<String, Object>();
-		m.put("name", getName());
-		m.put("type", getType().toString());
-		m.put("optional", isOptional());
-
-		return m.toString();
 	}
 
 	/**

@@ -30,7 +30,7 @@ import org.jwebsocket.eventmodel.util.CommonUtil;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public abstract class ObservableObject implements IObservable {
 
@@ -100,9 +100,10 @@ public abstract class ObservableObject implements IObservable {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public ResponseEvent notify(Event aEvent, ResponseEvent aResponseEvent, boolean useThreads) throws Exception {
-		checkEvent((Class<? extends Event>)aEvent.getClass());
+		checkEvent((Class<? extends Event>) aEvent.getClass());
+
+		aEvent.setSubject(this);
 
 		if (null == aResponseEvent) {
 			aResponseEvent = new ResponseEvent();
@@ -125,7 +126,7 @@ public abstract class ObservableObject implements IObservable {
 				} else {
 					//Iterative execution
 					for (IListener it : calls) {
-							ObservableObject.callProcessEvent(it, aEvent, aResponseEvent);
+						ObservableObject.callProcessEvent(it, aEvent, aResponseEvent);
 					}
 				}
 			}
@@ -147,12 +148,15 @@ public abstract class ObservableObject implements IObservable {
 			//Calling the base method
 			aListener.processEvent(aEvent, aResponseEvent);
 		} catch (InvocationTargetException ex) {
-			throw (Exception)ex.getTargetException();
+			throw (Exception) ex.getTargetException();
 		}
 	}
 
 	public ResponseEvent notifyUntil(Event aEvent, ResponseEvent aResponseEvent) throws Exception {
 		checkEvent(aEvent.getClass());
+
+		aEvent.setSubject(this);
+
 		if (null == aResponseEvent) {
 			aResponseEvent = new ResponseEvent();
 			aResponseEvent.setId(aEvent.getId());

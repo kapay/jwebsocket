@@ -19,6 +19,10 @@ import java.util.Collection;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.eventmodel.observable.Event;
 
+/**
+ *
+ * @author kyberneees
+ */
 public class EventNotification {
 
 	private Event event;
@@ -27,8 +31,9 @@ public class EventNotification {
 	public EventNotification(EventModelPlugIn plugIn, Event aEvent) {
 		this.plugIn = plugIn;
 		this.event = aEvent;
-		this.event.getArgs().setType("s2c.event_notification.to(" + plugIn.getId() + ")");
-		this.event.getArgs().setString("eventName", aEvent.getId());
+		this.event.getArgs().setType("s2c.event_notification");
+		this.event.getArgs().setString("event_name", aEvent.getId());
+		this.event.getArgs().setString("plugin_id", plugIn.getId());
 	}
 
 	public void to(WebSocketConnector aConnector) {

@@ -22,7 +22,7 @@ import java.util.Set;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class WebSocketResponseEvent extends ResponseEvent {
 

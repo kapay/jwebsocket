@@ -18,6 +18,22 @@
 	</bean>
 	<bean id="ValidatorFilter" class="org.jwebsocket.eventmodel.filter.validator.ValidatorFilter" parent="AbstractFilter">
 		<property name="id" value="validator" />
+		<property name="types">
+			<bean class="org.jwebsocket.eventmodel.filter.validator.TypesMap">
+				<property name="table">
+					<map>
+						<entry key="string" value="java.lang.String" />
+						<entry key="boolean" value="java.lang.Boolean" />
+						<entry key="number" value="java.lang.Double" />
+						<entry key="double" value="java.lang.Double" />
+						<entry key="integer" value="java.lang.Integer" />
+						<entry key="array" value="java.util.Collection" />
+						<entry key="object" value="org.jwebsocket.token.Token" />
+						<entry key="list" value="java.util.List" />
+					</map>
+				</property>
+			</bean>
+		</property>
 	</bean>
 	<bean id="CacheFilter" class="org.jwebsocket.eventmodel.filter.cache.CacheFilter" parent="AbstractFilter">
 		<property name="id" value="cache" />

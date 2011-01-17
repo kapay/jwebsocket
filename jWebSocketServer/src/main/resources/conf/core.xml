@@ -30,6 +30,7 @@
 			<set>
 				<ref bean="AuthPlugIn" />
 				<ref bean="SystemPlugIn" />
+				<ref bean="TestPlugIn" />
 			</set>
 		</property>
 		<property name="events">
@@ -54,7 +55,7 @@
 
 	<!-- Cache Manager (Ehcache) -->
 	<bean id="CacheManager" class="net.sf.ehcache.CacheManager" scope="singleton" >
-	<!--	<constructor-arg value="conf/ehcache.xml" /> -->
+		<!-- <constructor-arg value="conf/ehcache.xml" /> -->
 	</bean>
 
 </beans>

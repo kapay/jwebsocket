@@ -23,7 +23,7 @@ import org.jwebsocket.eventmodel.plugin.EventNotification;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public interface IEventModelPlugIn extends IListener, IInitializable {
 

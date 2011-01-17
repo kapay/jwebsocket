@@ -23,7 +23,20 @@
 		<property name="id" value="system" />
 		<property name="emEventsAndClientAPI">
 			<map>
-				<entry key="getPlugInApi" value="org.jwebsocket.eventmodel.event.system.GetPlugInAPI"/>
+				<entry key="getPlugInAPI" value="org.jwebsocket.eventmodel.event.system.GetPlugInAPI"/>
+				<entry key="getPlugInList" value="org.jwebsocket.eventmodel.event.system.GetPlugInList"/>
+				<entry key="hasPlugIn" value="org.jwebsocket.eventmodel.event.system.HasPlugIn"/>
+			</map>
+		</property>
+	</bean>
+	<bean id="TestPlugIn" class="org.jwebsocket.eventmodel.plugin.test.TestPlugIn" parent="AbstractPlugIn">
+		<property name="id" value="test" />
+		<property name="emEventsAndClientAPI">
+			<map>
+				<entry key="getHashCode" value="org.jwebsocket.eventmodel.event.test.GetHashCode"/>
+				<entry key="getEventsInfo" value="org.jwebsocket.eventmodel.event.test.GetEventsInfo"/>
+				<entry key="s2cNotification" value="org.jwebsocket.eventmodel.event.test.S2CNotification"/>
+				<entry key="secureEvent" value="org.jwebsocket.eventmodel.event.test.SecureEvent"/>
 			</map>
 		</property>
 	</bean>

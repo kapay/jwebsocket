@@ -17,7 +17,7 @@ package org.jwebsocket.eventmodel.exception;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class NotAuthorizedException extends Exception {
 

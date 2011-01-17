@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.event.auth;
+package org.jwebsocket.eventmodel.event.system;
 
 import org.jwebsocket.eventmodel.event.WebSocketEvent;
 
@@ -21,5 +21,5 @@ import org.jwebsocket.eventmodel.event.WebSocketEvent;
  *
  * @author kyberneees
  */
-public class Logon extends WebSocketEvent {
+public class GetPlugInList extends WebSocketEvent {
 }

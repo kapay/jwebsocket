@@ -30,11 +30,12 @@ import org.springframework.validation.Errors;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class ValidatorFilter extends EventModelFilter {
 
 	private static Logger mLog = Logging.getLogger(ValidatorFilter.class);
+	private TypesMap types;
 
 	@Override
 	public void firstCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
@@ -77,6 +78,11 @@ public class ValidatorFilter extends EventModelFilter {
 				throw new Exception(errors.getAllErrors().toString());
 			}
 
+			//Adding owner connector in the response if checked
+			if (def.isResponseToOwnerConnector()){
+				aResponseEvent.getTo().add(aConnector);
+			}
+
 			//At least 1 connector is needed for delivery
 			if (aResponseEvent.getTo().isEmpty()) {
 				throw new NullPointerException("A 'WebSocketConnector' set with > 0 size is required for delivery the response!");
@@ -90,7 +96,7 @@ public class ValidatorFilter extends EventModelFilter {
 			if (!aArg.isOptional()) {
 				throw new Exception("The argument: '" + aArg.getName() + "' is required!");
 			}
-		} else if (!aArg.getType().isInstance(aEvent.getArgs().getObject(aArg.getName()))) {
+		} else if (!types.swapType(aArg.getType()).isInstance(aEvent.getArgs().getObject(aArg.getName()))) {
 			throw new Exception("The argument: '" + aArg.getName() + "', needs to be type of " + aArg.getType().toString());
 		}
 
@@ -99,9 +105,23 @@ public class ValidatorFilter extends EventModelFilter {
 
 		//Spring validation mechanism compatibility
 		if (null != aArg.getValidator()) {
-			if (aArg.getValidator().supports(aArg.getType())) {
+			if (aArg.getValidator().supports(types.swapType(aArg.getType()))) {
 				aArg.getValidator().validate(aArg, errors);
 			}
 		}
+	}
+
+	/**
+	 * @return the types
+	 */
+	public TypesMap getTypes() {
+		return types;
+	}
+
+	/**
+	 * @param types the types to set
+	 */
+	public void setTypes(TypesMap types) {
+		this.types = types;
 	}
 }

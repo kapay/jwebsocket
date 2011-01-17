@@ -29,7 +29,7 @@ import org.jwebsocket.logging.Logging;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class RouterFilter extends EventModelFilter {
 
@@ -63,7 +63,6 @@ public class RouterFilter extends EventModelFilter {
 		//BeforeSendResponseToken event notification
 		BeforeRouteResponseToken event = new BeforeRouteResponseToken(aEvent.getRequestId());
 		event.setId("before.route.response.token");
-		event.setSubject(this);
 		event.setArgs(aToken);
 		event.setEventDefinition(def);
 		getEm().notify(event, null, true);

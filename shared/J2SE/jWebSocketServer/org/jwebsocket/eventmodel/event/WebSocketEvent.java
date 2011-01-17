@@ -22,7 +22,7 @@ import org.jwebsocket.api.WebSocketConnector;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public abstract class WebSocketEvent extends Event implements IInitializable {
 
@@ -33,7 +33,7 @@ public abstract class WebSocketEvent extends Event implements IInitializable {
 	public void initialize() {
 		FastMap<Object, Object> m = new FastMap<Object, Object>();
 		for (Object key : getArgs().getMap().keySet()) {
-			if (!"utid".equals(key)) {
+			if (!"utid".equals(key) && !"usid".equals(key)) {
 				m.put(key, getArgs().getMap().get(key));
 			}
 		}

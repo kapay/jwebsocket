@@ -19,7 +19,7 @@ import org.jwebsocket.config.JWebSocketServerConstants;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class EmConstants {
 

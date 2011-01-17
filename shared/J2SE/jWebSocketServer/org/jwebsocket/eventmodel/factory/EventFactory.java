@@ -26,7 +26,7 @@ import org.jwebsocket.eventmodel.observable.Event;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class EventFactory {
 
@@ -41,7 +41,6 @@ public class EventFactory {
 	public WebSocketEvent tokenToEvent(Token aToken) throws Exception {
 		String aType = aToken.getType();
 		WebSocketEvent event = stringToEvent(aType);
-		event.setSubject(aToken.getNS());
 		event.setArgs(aToken);
 
 		return event;
@@ -52,7 +51,7 @@ public class EventFactory {
 			mLog.debug(">> Creating instance for event: '" + aEventId + "'...");
 		}
 
-		WebSocketEvent e = (WebSocketEvent)getEventDefinitions().getDefinition(aEventId).getEventClass().newInstance();
+		WebSocketEvent e = (WebSocketEvent) getEventDefinitions().getDefinition(aEventId).getEventClass().newInstance();
 		e.setId(aEventId);
 
 		return e;

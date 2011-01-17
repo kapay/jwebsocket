@@ -26,7 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class SecurityFilter extends EventModelFilter {
 

@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - MemcachedStorage
+//  jWebSocket - EventsPlugIn
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.storage;
+package org.jwebsocket.storage.memcached;
 
 import java.security.InvalidParameterException;
 import java.util.Map.Entry;
@@ -27,163 +27,147 @@ import javolution.util.FastSet;
 import java.util.Arrays;
 
 /**
- *
- ** @author kyberneees
+ * 
+ * @author kyberneees
  */
-public class MemcachedStorage<K extends Object, V extends Object>
-		implements IBasicStorage<K, V> {
+public class MemcachedStorage<K extends Object, V extends Object> implements IBasicStorage<K, V> {
 
-	private MemcachedClient mMemcachedClient;
-	private String mName;
+	private MemcachedClient memcachedClient;
+	private String name;
 	private final static String KEYS_LOCATION = ".KEYS::1234567890";
 	private final static String KEY_SEPARATOR = "::-::";
 	private final static int NOT_EXPIRE = 0;
 
-	public MemcachedStorage(String aName, MemcachedClient aMemcachedClient) {
-		this.mName = aName;
-		this.mMemcachedClient = aMemcachedClient;
+	public MemcachedStorage(String name, MemcachedClient memcachedClient) {
+		this.name = name;
+		this.memcachedClient = memcachedClient;
 	}
 
-	@Override
 	public void initialize() throws Exception {
 		//Key index support
-		if (null == get(mName + KEYS_LOCATION)) {
-			mMemcachedClient.set(mName + KEYS_LOCATION, NOT_EXPIRE, "");
+		if (null == get(name + KEYS_LOCATION)) {
+			memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, "");
 		}
 	}
 
-	@Override
 	public void clear() {
 		for (Object key : keySet()) {
 			remove((K) key);
 		}
 		//Removing the index
-		mMemcachedClient.set(mName + KEYS_LOCATION, NOT_EXPIRE, "");
+		memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, "");
 	}
 
-	@Override
 	public Set<K> keySet() {
-		String index = (String) get(mName + KEYS_LOCATION);
+		String index = (String) get(name + KEYS_LOCATION);
 		if (index.length() == 0) {
 			return new FastSet<K>();
 		} else {
-			String[] lKeys = index.split(KEY_SEPARATOR);
-			Set set = new FastSet();
-			set.addAll(Arrays.asList(lKeys));
+			String[] keys = index.split(KEY_SEPARATOR);
+			FastSet set = new FastSet();
+			set.addAll(Arrays.asList(keys));
 
 			return set;
 		}
 	}
 
-	@Override
 	public Collection<V> values() {
 		return getAll(keySet()).values();
 	}
 
-	@Override
-	public boolean containsKey(Object aKey) {
-		return keySet().contains((K) aKey);
+	public boolean containsKey(Object key) {
+		return keySet().contains((K) key);
 	}
 
-	@Override
-	public boolean containsValue(Object aValue) {
-		return values().contains((V) aValue);
+	public boolean containsValue(Object value) {
+		return values().contains((V) value);
 	}
 
-	@Override
-	public Map<K, V> getAll(Collection<K> aKeys) {
-		Map<K, V> m = new FastMap<K, V>();
-		for (K key : aKeys) {
+	public Map<K, V> getAll(Collection<K> keys) {
+		FastMap<K, V> m = new FastMap<K, V>();
+		for (K key : keys) {
 			m.put(key, get(key));
 		}
+
 		return m;
 	}
 
-	@Override
-	public V get(Object aKey) {
-		V lObj = null;
-		lObj = (V) mMemcachedClient.get(aKey.toString());
-		return lObj;
+	public V get(Object key) {
+		V myObj = null;
+		myObj = (V) memcachedClient.get(key.toString());
+
+		return myObj;
 	}
 
-	@Override
-	public V remove(Object aKey) {
-		V lObj = (V) get(aKey);
-		mMemcachedClient.delete(aKey.toString());
+	public V remove(Object key) {
+		V myObj = (V) get(key);
+		memcachedClient.delete(key.toString());
 
 		//Key index update
-		String lIndex = (String) get(mName + KEYS_LOCATION);
-		lIndex = lIndex.replace(aKey.toString() + KEY_SEPARATOR, "");
-		mMemcachedClient.set(mName + KEYS_LOCATION, NOT_EXPIRE, lIndex);
+		String index = (String) get(name + KEYS_LOCATION);
+		index = index.replace(key.toString() + KEY_SEPARATOR, "");
+		memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, index);
 
-		return lObj;
+		return myObj;
 	}
 
-	@Override
-	public V put(K aKey, V aValue) {
-		mMemcachedClient.set(aKey.toString(), NOT_EXPIRE, aValue);
+	public V put(K key, V value) {
+		memcachedClient.set(key.toString(), NOT_EXPIRE, value);
 
 		//Key index update
-		if (!keySet().contains(aKey)) {
-			String lIndex = (String) get(mName + KEYS_LOCATION);
-			lIndex = lIndex + aKey.toString() + KEY_SEPARATOR;
-			mMemcachedClient.set(mName + KEYS_LOCATION, NOT_EXPIRE, lIndex);
+		if (!keySet().contains(key)) {
+			String index = (String) get(name + KEYS_LOCATION);
+			index = index + key.toString() + KEY_SEPARATOR;
+			memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, index);
 		}
 
-		return aValue;
+		return value;
 	}
 
-	@Override
 	public boolean isEmpty() {
 		return keySet().isEmpty();
 	}
 
-	@Override
 	public void putAll(Map<? extends K, ? extends V> m) {
-		for (K lKey : m.keySet()) {
-			put(lKey, m.get(lKey));
+		for (K key : m.keySet()) {
+			put(key, m.get(key));
 		}
 	}
 
 	public MemcachedClient getMemcachedClient() {
-		return mMemcachedClient;
+		return memcachedClient;
 	}
 
-	public void setMemcachedClient(MemcachedClient aMemcachedClient) {
-		this.mMemcachedClient = aMemcachedClient;
+	public void setMemcachedClient(MemcachedClient memcachedClient) {
+		this.memcachedClient = memcachedClient;
 	}
 
-	@Override
 	public String getName() {
-		return mName;
+		return name;
 	}
 
-	@Override
-	public void setName(String aName) throws Exception {
-		if (aName.length() == 0) {
+	public void setName(String name) throws Exception {
+		if (name.length() == 0) {
 			throw new InvalidParameterException();
 		}
-		Map<K, V> lAll = getAll(keySet());
+		Map<K, V> all = getAll(keySet());
 		clear();
 
-		this.mName = aName;
+		this.name = name;
 		initialize();
-		for (K lKey : lAll.keySet()) {
-			put(lKey, lAll.get(lKey));
+		for (K key : all.keySet()) {
+			put(key, all.get(key));
 		}
 	}
 
-	@Override
 	public int size() {
 		return keySet().size();
 	}
 
-	@Override
 	public Set<Entry<K, V>> entrySet() {
 		return getAll(keySet()).entrySet();
 	}
 
-	@Override
 	public void shutdown() {
 	}
 }

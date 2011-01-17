@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class CommonUtil {
 

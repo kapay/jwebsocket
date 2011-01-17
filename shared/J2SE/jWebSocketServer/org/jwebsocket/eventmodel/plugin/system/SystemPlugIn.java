@@ -15,19 +15,23 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.plugin.system;
 
-import java.util.Map;
+import javolution.util.FastList;
 import org.jwebsocket.eventmodel.plugin.EventModelPlugIn;
 import org.jwebsocket.eventmodel.event.system.GetPlugInAPI;
-import javolution.util.FastMap;
 import org.jwebsocket.eventmodel.api.IEventModelPlugIn;
 import org.jwebsocket.eventmodel.event.WebSocketResponseEvent;
 import org.jwebsocket.logging.Logging;
 import org.apache.log4j.Logger;
 import org.jwebsocket.eventmodel.event.WebSocketEventDefinition;
+import org.jwebsocket.eventmodel.event.system.GetPlugInList;
+import org.jwebsocket.eventmodel.event.system.HasPlugIn;
+import org.jwebsocket.eventmodel.filter.validator.Argument;
+import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class SystemPlugIn extends EventModelPlugIn {
 
@@ -37,6 +41,32 @@ public class SystemPlugIn extends EventModelPlugIn {
 	public void initialize() throws Exception {
 	}
 
+	public void processEvent(GetPlugInList aEvent, WebSocketResponseEvent aResponseEvent) throws Exception {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug(">> Exporting the plugIns identifiers list...");
+		}
+
+		FastList<String> plugInIdentifiers = new FastList<String>();
+		for (IEventModelPlugIn p : getEm().getPlugIns()) {
+			plugInIdentifiers.add(p.getId());
+		}
+
+		aResponseEvent.getArgs().setList("identifiers", plugInIdentifiers);
+	}
+
+	public void processEvent(HasPlugIn aEvent, WebSocketResponseEvent aResponseEvent) throws Exception {
+		boolean has = false;
+		String id = aEvent.getArgs().getString("plugin_id");
+		for (IEventModelPlugIn p : getEm().getPlugIns()) {
+			if (p.getId().equals(id)) {
+				has = true;
+				break;
+			}
+		}
+
+		aResponseEvent.getArgs().setBoolean("has", has);
+	}
+
 	public void processEvent(GetPlugInAPI aEvent, WebSocketResponseEvent aResponseEvent) throws Exception {
 		String aPlugInId = aEvent.getArgs().getString("plugin_id");
 		if (mLog.isDebugEnabled()) {
@@ -44,9 +74,11 @@ public class SystemPlugIn extends EventModelPlugIn {
 		}
 
 		IEventModelPlugIn plugIn = getEm().getPlugIn(aPlugInId);
-		FastMap<String, Map<String, Object>> api = new FastMap<String, Map<String, Object>>();
-		FastMap<String, Object> temp;
+		Token api = TokenFactory.createToken();
+		Token method, arg;
 		WebSocketEventDefinition def = null;
+		FastList<String> roles;
+		FastList<Token> incomingArgs, outgoingArgs;
 
 		try {
 			for (String key : plugIn.getClientAPI().keySet()) {
@@ -58,22 +90,45 @@ public class SystemPlugIn extends EventModelPlugIn {
 				 */
 				def = getEm().getEventFactory().getEventDefinitions().getDefinition(aEventId);
 
-				temp = new FastMap<String, Object>();
-				temp.put("type", aEventId);
-				temp.put("isCacheEnabled", def.isCacheEnabled());
-				temp.put("isSecurityEnabled", def.isSecurityEnabled());
-				temp.put("cacheTime", def.getCacheTime());
-				temp.put("roles", def.getRoles());
-				temp.put("incomingArgsValidation", def.getIncomingArgsValidation());
-				temp.put("outgoingArgsValidation", def.getOutgoingArgsValidation());
-				api.put(key, temp);
+				method = TokenFactory.createToken();
+				method.setString("type", aEventId);
+				method.setBoolean("isCacheEnabled", def.isCacheEnabled());
+				method.setBoolean("isSecurityEnabled", def.isSecurityEnabled());
+				method.setInteger("cacheTime", def.getCacheTime());
+				roles = new FastList<String>();
+				for (String r : def.getRoles()) {
+					roles.add(r);
+				}
+				method.setList("roles", roles);
+
+				incomingArgs = new FastList<Token>();
+				for (Argument a : def.getIncomingArgsValidation()) {
+					arg = TokenFactory.createToken();
+					arg.setString("name", a.getName());
+					arg.setString("type", a.getType());
+					arg.setBoolean("optional", a.isOptional());
+
+					incomingArgs.add(arg);
+				}
+				method.setList("incomingArgsValidation", incomingArgs);
+
+				outgoingArgs = new FastList<Token>();
+				for (Argument a : def.getOutgoingArgsValidation()) {
+					arg = TokenFactory.createToken();
+					arg.setString("name", a.getName());
+					arg.setString("type", a.getType());
+					arg.setBoolean("optional", a.isOptional());
+
+					outgoingArgs.add(arg);
+				}
+				method.setList("outgoingArgsValidation", outgoingArgs);
+				api.setToken(key, method);
 			}
 
-			aResponseEvent.getTo().add(aEvent.getConnector());
 			//PlugIn id
-			aResponseEvent.getArgs().setString("id", this.getId());
+			aResponseEvent.getArgs().setString("id", plugIn.getId());
 			//PlugIn API
-			aResponseEvent.getArgs().setMap("api", api);
+			aResponseEvent.getArgs().setToken("api", api);
 
 		} catch (Exception ex) {
 			mLog.error(ex.toString(), ex);

@@ -1,3 +1,27 @@
+//  ---------------------------------------------------------------------------
+//  jWebSocket - EventsPlugIn
+//  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
+//  ---------------------------------------------------------------------------
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU Lesser General Public License as published by the
+//  Free Software Foundation; either version 3 of the License, or (at your
+//  option) any later version.
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//  more details.
+//  You should have received a copy of the GNU Lesser General Public License along
+//  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//  ---------------------------------------------------------------------------
+
+//:file:*:jwsEventsPlugIn.js
+//:d:en:Implements the EventsPlugIn in the client side
+
+//:package:*:jws
+//:class:*:jws.EventsNotifier
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.EventsNotifier[/tt] class. _
+//:d:en:This class handle raw events notifications to/from the server side.
 jws.oop.declareClass( "jws", "EventsNotifier", null, {
 	jwsClient: {}
 	,
@@ -5,10 +29,19 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 	,
 	plugIns: []
 	,
+	//:m:*:initialize
+	//:d:en:Initialize this component. 
+	//:a:en::::none
+	//:r:*:::void:none
 	initialize : function(){
 		jws.oop.addPlugIn(jws.jWebSocketTokenClient, this);
 	}
 	,
+	//:m:*:notify
+	//:d:en:Notify an event in the server side
+	//:a:en::aEventName:String:The event name.
+	//:a:en::aOptions:Object:Contains the event arguments and the OnResponse, OnSuccess and OnFailure callbacks.
+	//:r:*:::void:none
 	notify: function(aEventName, aOptions){
 		if (this.jwsClient.isConnected()){
 			var lToken = {};
@@ -38,10 +71,10 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 						{
 							case "stop_filter_chain":
 								return;
-							break;
+								break;
 							default:
 								throw err;
-							break;
+								break;
 						}
 					}
 					
@@ -52,8 +85,14 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 		}
 		else
 			throw "client:not_connected";
-    }
+	}
 	,
+	//:m:*:processToken
+	//:d:en:Processes an incoming token. Used to support S2C events notifications. _
+	//:d:en:Use the "event_name" and "plugin_id" information to execute _
+	//:d:en:a targered method in a plug-in.
+	//:a:en::aToken:Object:Token to be processed
+	//:r:*:::void:none
 	processToken: function (aToken) {
 		if ("s2c.event_notification" == aToken.type){
 			var event_name = aToken.event_name;
@@ -69,6 +108,11 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 	}
 });
 
+//:package:*:jws
+//:class:*:jws.OnResponseObject
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.OnResponseObject[/tt] class. _
+//:d:en:This class offer support for the "OnSuccess" and "OnFailure" callbacks
 jws.oop.declareClass( "jws", "OnResponseObject", null, {
 	request: {}
 	,
@@ -88,10 +132,10 @@ jws.oop.declareClass( "jws", "OnResponseObject", null, {
 					{
 						case "stop_filter_chain":
 							return;
-						break;
+							break;
 						default:
 							throw err;
-						break;
+							break;
 					}
 				}
 				index--;
@@ -112,10 +156,23 @@ jws.oop.declareClass( "jws", "OnResponseObject", null, {
 			if (undefined != this.request.OnFailure)
 				this.request.OnFailure(aResponseToken);
 		}
-    }
+	}
 });
 
+//:package:*:jws
+//:class:*:jws.EventsPlugInGenerator
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.EventsPlugInGenerator[/tt] class. _
+//:d:en:This class handle the generation of server plug-ins as _
+//:d:en:Javascript objects.
 jws.oop.declareClass( "jws", "EventsPlugInGenerator", null, {
+
+	//:m:*:generate
+	//:d:en:Processes an incoming token. Used to support S2C events notifications. _
+	//:a:en::aPlugInId:String:Remote plug-in "id" to generate in the client.
+	//:a:en::aNotifier:jws.EventsNotifier:The event notifier used to connect with the server.
+	//:a:en::OnReady:Function:This callback is called when the plug-in has been generated.
+	//:r:*:::void:none
 	generate: function(aPlugInId, aNotifier, OnReady){
 		var plugIn = new jws.EventsPlugIn();
 		plugIn.notifier = aNotifier;
@@ -154,6 +211,12 @@ jws.oop.declareClass( "jws", "EventsPlugInGenerator", null, {
 	}
 });
 
+//:package:*:jws
+//:class:*:jws.EventsPlugIn
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.EventsPlugIn[/tt] class. _
+//:d:en:This class represents an abstract client plug-in. The methods are _
+//:d:en:generated in runtime.
 jws.oop.declareClass( "jws", "EventsPlugIn", null, {
 	id: ""
 	,
@@ -161,19 +224,48 @@ jws.oop.declareClass( "jws", "EventsPlugIn", null, {
 	,
 	plugInAPI: {}
 	
-	//Methods are generated in runtime!
-	//Custom methods can be added using the OnReady callback
+//Methods are generated in runtime!
+//Custom methods can be added using the OnReady callback
 });
 
+//:package:*:jws
+//:class:*:jws.EventsBaseFilter
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.EventsBaseFilter[/tt] class. _
+//:d:en:This class represents an abstract client filter.
 jws.oop.declareClass( "jws", "EventsBaseFilter", null, {
+
+	//:m:*:firstCall
+	//:d:en:This method is called before every C2S event notification.
+	//:a:en::aToken:Object:The token to be filtered.
+	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
+	//:r:*:::void:none
 	firstCall: function(aToken, aOnResponseObject){}
 	,
+	//:m:*:secondCall
+	//:d:en:This method is called after every C2S event notification.
+	//:a:en::aRequest:Object:The request to be filtered.
+	//:a:en::aResponseToken:Object:The response token from the server.
+	//:r:*:::void:none
 	secondCall: function(aRequest, aResponseToken){}
 });
 
+//:package:*:jws
+//:class:*:jws.SecurityFilter
+//:ancestor:*:jws.EventsBaseFilter
+//:d:en:Implementation of the [tt]jws.SecurityFilter[/tt] class. _
+//:d:en:This class handle the security for every C2S event notification _
+//:d:en:in the client, using the server side security configuration.
 jws.oop.declareClass( "jws", "SecurityFilter", jws.EventsBaseFilter, {
 	user:[]
 	,
+	//:m:*:firstCall
+	//:d:en:This method is called before every C2S event notification. _
+	//:d:en:Checks that the logged in user has the correct roles to notify _
+	//:d:en:a custom event in the server.
+	//:a:en::aToken:Object:The token to be filtered.
+	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
+	//:r:*:::void:none
 	firstCall: function(aToken, aOnResponseObject){
 		if (aOnResponseObject.request.eventDefinition.isSecurityEnabled){
 			var roles = null;
@@ -199,16 +291,34 @@ jws.oop.declareClass( "jws", "SecurityFilter", jws.EventsBaseFilter, {
 		}
 	}
 	,
+	//:m:*:OnNotAuthorized
+	//:d:en:This method is called when a "not authorized" event notification _
+	//:d:en:is detected. Allows to define a global behiavor for this kind _
+	//:d:en:of exception.
+	//:a:en::aToken:Object:The "not authorized" token to be processed.
+	//:r:*:::void:none
 	OnNotAuthorized: function(aToken){
-		//Define a global 'OnNotAuthorized' behiavor here
 		throw "not_authorized";
 	}
 });
 
+//:package:*:jws
+//:class:*:jws.CacheFilter
+//:ancestor:*:jws.EventsBaseFilter
+//:d:en:Implementation of the [tt]jws.CacheFilter[/tt] class. _
+//:d:en:This class handle the cache for every C2S event notification _
+//:d:en:in the client, using the server side cache configuration.
 jws.oop.declareClass( "jws", "CacheFilter", jws.EventsBaseFilter, {
 	cache:{}
 	,
-	firstCall: function(lToken, aOnResponseObject){
+	//:m:*:firstCall
+	//:d:en:This method is called before every C2S event notification. _
+	//:d:en:Checks if exist a non-expired cached response for the outgoing event. _
+	//:d:en:If TRUE, the cached response is used and the server is not notified.
+	//:a:en::aToken:Object:The token to be filtered.
+	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
+	//:r:*:::void:none
+	firstCall: function(aToken, aOnResponseObject){
 		if (aOnResponseObject.request.eventDefinition.isCacheEnabled){
 			var cachedResponseToken = this.cache.getItem(aOnResponseObject.request._tokenUID);
 			if (null != cachedResponseToken){
@@ -218,6 +328,13 @@ jws.oop.declareClass( "jws", "CacheFilter", jws.EventsBaseFilter, {
 		}
 	}
 	,
+	//:m:*:secondCall
+	//:d:en:This method is called after every C2S event notification. _
+	//:d:en:Checks if a response needs to be cached. The server configuration _
+	//:d:en:for cache used.
+	//:a:en::aRequest:Object:The request to be filtered.
+	//:a:en::aResponseToken:Object:The response token from the server.
+	//:r:*:::void:none
 	secondCall: function(aRequest, aResponseToken){
 		if (aRequest.eventDefinition.isCacheEnabled){
 			this.cache.setItem(aRequest._tokenUID, aResponseToken, {
@@ -229,22 +346,32 @@ jws.oop.declareClass( "jws", "CacheFilter", jws.EventsBaseFilter, {
 	}
 });
 
+//:package:*:jws
+//:class:*:jws.ValidatorFilter
+//:ancestor:*:jws.EventsBaseFilter
+//:d:en:Implementation of the [tt]jws.ValidatorFilter[/tt] class. _
+//:d:en:This class handle the validation for every argument in the request.
 jws.oop.declareClass( "jws", "ValidatorFilter", jws.EventsBaseFilter, {
-	typesMap: {}
-	,
-	firstCall: function(lToken, aOnResponseObject){
+
+	//:m:*:firstCall
+	//:d:en:This method is called before every C2S event notification. _
+	//:d:en:Checks if the request arguments match with the validation server rules.
+	//:a:en::aToken:Object:The token to be filtered.
+	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
+	//:r:*:::void:none
+	firstCall: function(aToken, aOnResponseObject){
 		var arguments = aOnResponseObject.request.eventDefinition.incomingArgsValidation;
 		
 		for (var index = 0; index < arguments.length; index++){
-			if (!lToken[arguments[index].name] && !arguments[index].optional){
+			if (!aToken[arguments[index].name] && !arguments[index].optional){
 				aOnResponseObject.OnResponse({
 					code: -1,
 					msg: "Argument '"+arguments[index].name+"' is required!"
 				});
 				throw "stop_filter_chain";
-			}else if (lToken.hasOwnProperty(arguments[index].name)){
+			}else if (aToken.hasOwnProperty(arguments[index].name)){
 				var requiredType = arguments[index].type;
-				if (requiredType != typeof(lToken[arguments[index].name])){
+				if (requiredType != typeof(aToken[arguments[index].name])){
 					aOnResponseObject.OnResponse({
 						code: -1,
 						msg: "Argument '"+arguments[index].name+"' has invalid type. Required: '"+requiredType+"'"

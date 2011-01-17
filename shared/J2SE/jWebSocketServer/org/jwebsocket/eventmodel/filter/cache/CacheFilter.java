@@ -28,10 +28,11 @@ import org.jwebsocket.eventmodel.event.filter.ResponseFromCache;
 import org.jwebsocket.eventmodel.exception.CachedResponseException;
 import org.jwebsocket.eventmodel.observable.ResponseEvent;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class CacheFilter extends EventModelFilter implements IListener {
 
@@ -47,16 +48,21 @@ public class CacheFilter extends EventModelFilter implements IListener {
 			Element e = getCache(aEvent.getId()).get(aEvent.getRequestId());
 
 			if (e != null && !e.isExpired()) {
+				
+				//Setting the correct "utid" value in the cached response token
+				Token cachedToken = (Token) e.getObjectValue();
+				Token newtoken = getEm().getParent().createResponse(aEvent.getArgs());
+				cachedToken.setInteger("utid", newtoken.getInteger("utid"));
+
 				//ResponseFromCache event notification
 				ResponseFromCache event = new ResponseFromCache();
 				event.setId("response.from.cache");
-				event.setSubject(this);
-				event.setCachedResponse((Token) e.getObjectValue());
+				event.setCachedResponse(cachedToken);
 				event.setEvent(aEvent);
 				notify(event, null, true);
 
 				//Sending the cached response to the connector
-				getEm().getParent().sendToken(aConnector, aConnector, (Token) e.getObjectValue());
+				getEm().getParent().sendToken(aConnector, aConnector, cachedToken);
 
 				//Stopping the filter chain
 				throw new CachedResponseException();

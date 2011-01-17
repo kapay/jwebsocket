@@ -1,7 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//  ---------------------------------------------------------------------------
+//  jWebSocket - EventsPlugIn
+//  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
+//  ---------------------------------------------------------------------------
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU Lesser General Public License as published by the
+//  Free Software Foundation; either version 3 of the License, or (at your
+//  option) any later version.
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//  more details.
+//  You should have received a copy of the GNU Lesser General Public License along
+//  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.event;
 
 import org.jwebsocket.eventmodel.filter.validator.Argument;
@@ -19,14 +30,15 @@ public class WebSocketEventDefinition implements IInitializable {
 	private Set<Argument> incomingArgsValidation = new FastSet<Argument>();
 	private Set<Argument> outgoingArgsValidation = new FastSet<Argument>();
 	private boolean responseRequired = false;
+	private boolean responseToOwnerConnector = false;
 	private boolean cacheEnabled = false;
+	private boolean notificationConcurrent = true;
 	private int cacheTime = 0;
 	private boolean securityEnabled = false;
 	private Set<String> roles = new FastSet<String>();
 	private String ns;
 
 	public void initialize() {
-	
 	}
 
 	public void shutdown() {
@@ -153,13 +165,43 @@ public class WebSocketEventDefinition implements IInitializable {
 
 	/**
 	 * @return the ns
-	 */ public String getNs() {
+	 */
+	public String getNs() {
 		return ns;
 	}
 
 	/**
 	 * @param ns the ns to set
-	 */ public void setNs(String ns) {
+	 */
+	public void setNs(String ns) {
 		this.ns = ns;
+	}
+
+	/**
+	 * @return the responseToOwnerConnector
+	 */
+	public boolean isResponseToOwnerConnector() {
+		return responseToOwnerConnector;
+	}
+
+	/**
+	 * @param responseToOwnerConnector the responseToOwnerConnector to set
+	 */
+	public void setResponseToOwnerConnector(boolean responseToOwnerConnector) {
+		this.responseToOwnerConnector = responseToOwnerConnector;
+	}
+
+	/**
+	 * @return the notificationConcurrent
+	 */
+	public boolean isNotificationConcurrent() {
+		return notificationConcurrent;
+	}
+
+	/**
+	 * @param notificationConcurrent the notificationConcurrent to set
+	 */
+	public void setNotificationConcurrent(boolean notificationConcurrent) {
+		this.notificationConcurrent = notificationConcurrent;
 	}
 }

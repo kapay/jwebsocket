@@ -20,7 +20,7 @@ import org.jwebsocket.token.Token;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class Event {
 

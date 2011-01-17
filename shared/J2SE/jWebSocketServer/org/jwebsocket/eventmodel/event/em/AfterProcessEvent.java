@@ -19,7 +19,7 @@ import org.jwebsocket.eventmodel.event.WebSocketEvent;
 
 /**
  *
- ** @author kyberneees
+ * @author kyberneees
  */
 public class AfterProcessEvent extends WebSocketEvent {
 
