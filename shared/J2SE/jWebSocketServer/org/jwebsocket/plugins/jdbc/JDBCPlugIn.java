@@ -25,6 +25,7 @@ import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketServerConstants;
@@ -33,23 +34,26 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.storage.ehcache.EhCacheStorage;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
+import org.jwebsocket.util.Tools;
 
 /**
  * 
- * @author aschulze
+ * @author aschulze EhChache
  */
 public class JDBCPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(JDBCPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
+	private IBasicStorage mCache = null;
 
-	public JDBCPlugIn() {
-		super(null);
-	}
-
+	/**
+	 *
+	 * @param aConfiguration
+	 */
 	public JDBCPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
@@ -57,6 +61,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_JDBC);
+		mCache = new EhCacheStorage();
 	}
 
 	@Override
@@ -65,29 +70,57 @@ public class JDBCPlugIn extends TokenPlugIn {
 		String lNS = aToken.getNS();
 
 		if (lType != null && getNamespace().equals(lNS)) {
-			// select from database
+			// abstract select from database
 			if (lType.equals("select")) {
 				select(aConnector, aToken);
+				// abstract update from database
 			} else if (lType.equals("update")) {
-				// update(aConnector, aToken);
+				update(aConnector, aToken);
+				// abstract delete from database
 			} else if (lType.equals("delete")) {
-				// delete(aConnector, aToken);
+				delete(aConnector, aToken);
+				// abstract insert into database
 			} else if (lType.equals("insert")) {
-				// insert(aConnector, aToken);
+				insert(aConnector, aToken);
+				// abstract start transaction
 			} else if (lType.equals("startTA")) {
-				// startTA(aConnector, aToken);
+				startTA(aConnector, aToken);
+				// abstract commit transaction
 			} else if (lType.equals("commit")) {
-				// commit(aConnector, aToken);
+				commit(aConnector, aToken);
+				// abstract rollback transaction
 			} else if (lType.equals("rollback")) {
-				// rollback(aConnector, aToken);
+				rollback(aConnector, aToken);
+				// run single native exec sql command (update, delete, insert)
+				// w/o returning a result set
 			} else if (lType.equals("execSQL")) {
-				// execSQL(aConnector, aToken);
+				execSQL(aConnector, aToken);
+				// run single native query sql command (select)
+				// with returning a result set
 			} else if (lType.equals("querySQL")) {
-				// querySQL(aConnector, aToken);
+				querySQL(aConnector, aToken);
+				// run multiple abstract query sql commands (select)
+			} else if (lType.equals("getSecure")) {
+				getSecure(aConnector, aToken);
+				// run multiple abstract exec sql commands (update, delete, insert)
+			} else if (lType.equals("postSecure")) {
+				postSecure(aConnector, aToken);
+				// run multiple native query sql commands (select)
+			} else if (lType.equals("getSQL")) {
+				getSQL(aConnector, aToken);
+				// run multiple native exec sql commands (update, delete, insert)
+			} else if (lType.equals("postSQL")) {
+				postSQL(aConnector, aToken);
 			}
 		}
 	}
 
+	/**
+	 *
+	 * @param aResultSet
+	 * @param aColCount
+	 * @return
+	 */
 	public List<Object> getResultColumns(ResultSet aResultSet, int aColCount) {
 		// TODO: should work with usual arrays!
 		List<Object> lDataRow = new FastList<Object>();
@@ -98,7 +131,6 @@ public class JDBCPlugIn extends TokenPlugIn {
 				lObj = aResultSet.getObject(lColIdx);
 				lDataRow.add(lObj);
 			}
-
 		} catch (Exception lEx) {
 			System.out.println("EXCEPTION in getResultColumns");
 		}
@@ -106,15 +138,29 @@ public class JDBCPlugIn extends TokenPlugIn {
 		return lDataRow;
 	}
 
-	private Token mQuerySQL(String aSQL) {
+	private Token mQuerySQL(String aSQL, int aExpiration) {
+
+		Token lResponse;
+		String lHash = null;
+
+		// check cache before running the query.
+		if (aExpiration > 0) {
+			lHash = Tools.getMD5(aSQL);
+			lResponse = (Token) mCache.get(lHash);
+			if (lResponse != null) {
+				lResponse.setBoolean("isCached", true);
+				return lResponse;
+			}
+		}
+
 		// instantiate response token
-		Token lResponse = TokenFactory.createToken();
+		lResponse = TokenFactory.createToken();
 		// TODO: should work with usual arrays as well!
 		// Object[] lColumns = null;
 		int lRowCount = 0;
 		int lColCount = 0;
 		List<Map> lColumns = new FastList<Map>();
-		List lData = new FastList<Map>();
+		List lData = new FastList();
 		try {
 			DBQueryResult lRes = DBConnectSingleton.querySQL(DBConnectSingleton.USR_SYSTEM, aSQL);
 
@@ -127,11 +173,11 @@ public class JDBCPlugIn extends TokenPlugIn {
 				// get name of colmuns
 				String lSimpleClass = JDBCTools.extractSimpleClass(lRes.metaData.getColumnClassName(lColIdx));
 				// convert to json type
-				String lRIAType = JDBCTools.getJSONType(lSimpleClass, lRes.metaData);
+				String lJSONType = JDBCTools.getJSONType(lSimpleClass, lRes.metaData);
 
-				Map lColHeader = new FastMap<String, Object>();
+				Map<String, Object> lColHeader = new FastMap<String, Object>();
 				lColHeader.put("name", lRes.metaData.getColumnName(lColIdx));
-				lColHeader.put("jsontype", lRIAType);
+				lColHeader.put("jsontype", lJSONType);
 				lColHeader.put("jdbctype", lRes.metaData.getColumnTypeName(lColIdx));
 
 				lColumns.add(lColHeader);
@@ -151,6 +197,14 @@ public class JDBCPlugIn extends TokenPlugIn {
 		lResponse.setList("columns", lColumns);
 		lResponse.setList("data", lData);
 
+		// if to be cached, put it to cache
+		// don't save isCached flag
+		if (aExpiration > 0) {
+			mCache.put(lHash, lResponse);
+		}
+
+		lResponse.setBoolean("isCached", false);
+
 		return lResponse;
 	}
 
@@ -165,7 +219,64 @@ public class JDBCPlugIn extends TokenPlugIn {
 	}
 
 	/**
-	 * shutdown server
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void querySQL(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'querySQL'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".querySQL")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		// load SQL query string
+		String lSQL = aToken.getString("sql");
+		// load expiration, default is no cache (expiration = 0)
+		Integer lExpiration = aToken.getInteger("expiration", 0);
+
+		// run the query, optionally considering cache
+		Token lResponse = mQuerySQL(lSQL, lExpiration);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void execSQL(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'execSQL'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".execSQL")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		// load SQL string
+		String lSQL = aToken.getString("sql");
+
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	/**
+	 *
 	 *
 	 * @param aConnector
 	 * @param aToken
@@ -191,8 +302,11 @@ public class JDBCPlugIn extends TokenPlugIn {
 		String lGroup = aToken.getString("group");
 		String lHaving = aToken.getString("having");
 
+		// load expiration, default is no cache (expiration = 0)
+		Integer lExpiration = aToken.getInteger("expiration", 0);
+
 		// build SQL string
-		String lSQL = 
+		String lSQL =
 				"select "
 				+ lFields
 				+ " from "
@@ -207,54 +321,279 @@ public class JDBCPlugIn extends TokenPlugIn {
 			lSQL += " order by " + lOrder;
 		}
 
-		Token lResponse = mQuerySQL(lSQL);
+		Token lResponse = mQuerySQL(lSQL, lExpiration);
 
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 	}
 
-	public void querySQL(WebSocketConnector aConnector, Token aToken) {
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void update(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'querySQL'...");
+			mLog.debug("Processing 'update'...");
 		}
 
 		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".querySQL")) {
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".update")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			// return;
 		}
 
-		// load SQL string
+		/*
 		String lSQL = aToken.getString("sql");
-
-		Token lResponse = mQuerySQL(lSQL);
-
-		// send response to requester
-		lServer.sendToken(aConnector, lResponse);
-	}
-
-	public void execSQL(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'execSQL'...");
-		}
-
-		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".execSQL")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
-		}
-
-		// load SQL string
-		String lSQL = aToken.getString("sql");
-
 		Token lResponse = mExecSQL(lSQL);
 
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
+		 */
 	}
 
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void insert(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'insert'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".insert")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		/*
+		String lSQL = aToken.getString("sql");
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+		 */
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void delete(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'delete'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".delete")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		/*
+		String lSQL = aToken.getString("sql");
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+		 */
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void startTA(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'startTA'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".transactions")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		/*
+		String lSQL = aToken.getString("sql");
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+		 */
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void rollback(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'rollback'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".transactions")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		/*
+		String lSQL = aToken.getString("sql");
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+		 */
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void commit(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'commit'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".transactions")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		/*
+		String lSQL = aToken.getString("sql");
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+		 */
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void getSecure(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'getSecure'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".getSecure")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		/*
+		String lSQL = aToken.getString("sql");
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+		 */
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void postSecure(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'postSecure'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".postSecure")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		/*
+		String lSQL = aToken.getString("sql");
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+		 */
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void getSQL(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'getSQL'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".getSQL")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		/*
+		String lSQL = aToken.getString("sql");
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+		 */
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void postSQL(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'postSQL'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".postSQL")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		/*
+		String lSQL = aToken.getString("sql");
+		Token lResponse = mExecSQL(lSQL);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+		 */
+	}
 }

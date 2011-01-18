@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
 public class DBConnectSingleton {
 
 	private static Logger mLog = Logging.getLogger(DBConnectSingleton.class);
-	private static Map mConnections = new FastMap();
+	private static Map<String, Connection> mConnections = new FastMap<String, Connection>();
 	private static String mLastRecentException = null;
 	/**
 	 * Name of the database user for system access
@@ -95,7 +95,11 @@ public class DBConnectSingleton {
 		if (aAutoConnect) {
 			try {
 				// check if a connection already exists and re-connect if necessary
-				if (lConnection == null || lConnection.isClosed()) {
+
+				if (lConnection == null
+						|| lConnection.isClosed()
+						// TODO: make isValid timeout configurable
+						|| !lConnection.isValid(300)) {
 					try {
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Connecting '" + aUsr + "' to database...");
@@ -110,18 +114,18 @@ public class DBConnectSingleton {
 						}
 						mConnections.put(aUsr, lConnection);
 						return lConnection;
-					} catch (SQLException ex) {
+					} catch (SQLException lEx) {
 						mLastRecentException =
-								ex.getClass().getSimpleName() + " "
+								lEx.getClass().getSimpleName() + " "
 								+ " connecting '" + aUsr + "', to database"
-								+ " details: " + ex.getSQLState();
+								+ " details: " + lEx.getSQLState();
 						mLog.error(mLastRecentException);
 					}
 				}
-			} catch (Exception ex) {
+			} catch (Exception lEx) {
 				mLastRecentException =
-						ex.getClass().getSimpleName() + " "
-						+ " on database connection: " + ex.getMessage();
+						lEx.getClass().getSimpleName() + " "
+						+ " on database connection: " + lEx.getMessage();
 				mLog.error(mLastRecentException);
 			}
 		}
@@ -161,10 +165,10 @@ public class DBConnectSingleton {
 					mLog.info("'" + aUsr + "' not connected to database.");
 				}
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException lEx) {
 			mLastRecentException =
-					ex.getClass().getName()
-					+ " disconnecting '" + aUsr + "' from database, details: " + ex.getMessage();
+					lEx.getClass().getName()
+					+ " disconnecting '" + aUsr + "' from database, details: " + lEx.getMessage();
 			mLog.error(mLastRecentException);
 		}
 	}
@@ -178,8 +182,8 @@ public class DBConnectSingleton {
 	public static int execSQL(String aUsr, String aSQL) throws Exception {
 		Connection lConn = DBConnectSingleton.getConnection(aUsr);
 		if (lConn != null) {
-			Statement sql = lConn.createStatement();
-			return sql.executeUpdate(aSQL);
+			Statement lSQL = lConn.createStatement();
+			return lSQL.executeUpdate(aSQL);
 		}
 		return -1;
 	}
@@ -196,15 +200,15 @@ public class DBConnectSingleton {
 			throws SQLException {
 		Connection lConn = DBConnectSingleton.getConnection(aUsr);
 		if (lConn != null) {
-			PreparedStatement sql = lConn.prepareStatement(aSQL);
+			PreparedStatement lSQL = lConn.prepareStatement(aSQL);
 			int lParmIdx = 0;
 			while (lParmIdx < aParms.length) {
 				Object lParm = aParms[lParmIdx];
 				// Counting starts with 1 here, not with 0!
 				lParmIdx++;
-				sql.setObject(lParmIdx, lParm);
+				lSQL.setObject(lParmIdx, lParm);
 			}
-			return sql.executeUpdate();
+			return lSQL.executeUpdate();
 		}
 		return -1;
 	}
@@ -232,10 +236,10 @@ public class DBConnectSingleton {
 					&& aQueryRes.sql != null) {
 				aQueryRes.sql.close();
 			}
-		} catch (Exception ex) {
+		} catch (Exception lEx) {
 			mLog.error(
-					ex.getClass().getSimpleName()
-					+ " closing query : " + ex.getMessage());
+					lEx.getClass().getSimpleName()
+					+ " closing query : " + lEx.getMessage());
 		}
 	}
 }

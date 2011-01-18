@@ -96,7 +96,7 @@ public class EhCacheStorage implements IBasicStorage {
 	@Override
 	public Object get(Object aKey) {
 		Element lElement = mCache.get(aKey);
-		return (lElement != null ? lElement.getValue() : null );
+		return (lElement != null ? lElement.getObjectValue() : null );
 	}
 
 	/**
