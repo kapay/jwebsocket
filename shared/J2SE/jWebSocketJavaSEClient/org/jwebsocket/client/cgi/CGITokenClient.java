@@ -32,12 +32,12 @@ public class CGITokenClient extends BaseTokenClient {
     private final static char END_FRAME = 0x03; // ASCII ETX
     // used from JWebSocketCommonConstants from v0.10
     // private final static int MAX_FRAMESIZE = 16384;
-    private boolean isRunning = false;
-    private Thread inboundThread;
-    private InboundProcess inboundProcess;
-    private InputStream is = null;
-    private OutputStream os = null;
-    private OutputStream es = null;
+    private boolean mIsRunning = false;
+    private Thread mInboundThread;
+    private InboundProcess mInboundProcess;
+    private InputStream mIn = null;
+    private OutputStream mOut = null;
+    private OutputStream mError = null;
 
     /**
      *
@@ -52,20 +52,20 @@ public class CGITokenClient extends BaseTokenClient {
         super.open(aURL);
 
         // assign streams to CGI channels
-        is = System.in;
-        os = System.out;
-        es = System.err;
+        mIn = System.in;
+        mOut = System.out;
+        mError = System.err;
 
         // instantiate thread to process messages coming from stdIn
-        inboundProcess = new InboundProcess();
-        inboundThread = new Thread(inboundProcess);
-        inboundThread.start();
+        mInboundProcess = new InboundProcess();
+        mInboundThread = new Thread(mInboundProcess);
+        mInboundThread.start();
     }
 
     @Override
     public void close() throws WebSocketException {
         // stop CGI listener
-        isRunning = false;
+        mIsRunning = false;
         // and close WebSocket connection
         super.close();
     }
@@ -74,20 +74,20 @@ public class CGITokenClient extends BaseTokenClient {
 
         @Override
         public void run() {
-            isRunning = true;
+            mIsRunning = true;
             byte[] lBuff = new byte[JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE];
             int lIdx = -1;
             int lStart = -1;
 
-            while (isRunning) {
+            while (mIsRunning) {
                 try {
-                    int b = is.read();
+                    int lByte = mIn.read();
                     // start of frame
-                    if (b == START_FRAME) {
+                    if (lByte == START_FRAME) {
                         lIdx = 0;
                         lStart = 0;
                         // end of frame
-                    } else if (b == END_FRAME) {
+                    } else if (lByte == END_FRAME) {
                         if (lStart >= 0) {
                             byte[] lBA = new byte[lIdx];
                             System.arraycopy(lBuff, 0, lBA, 0, lIdx);
@@ -97,17 +97,17 @@ public class CGITokenClient extends BaseTokenClient {
                         }
                         lStart = -1;
                         // end of stream
-                    } else if (b < 0) {
-                        isRunning = false;
+                    } else if (lByte < 0) {
+                        mIsRunning = false;
                         // any other byte within or outside a frame
                     } else {
                         if (lStart >= 0) {
-                            lBuff[lIdx] = (byte) b;
+                            lBuff[lIdx] = (byte) lByte;
                         }
                         lIdx++;
                     }
-                } catch (Exception ex) {
-                    isRunning = false;
+                } catch (Exception lEx) {
+                    mIsRunning = false;
                     // throw new WebSocketException(ex.getClass().getSimpleName() + ": " + ex.getMessage());
                     // System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
                 }

@@ -104,71 +104,71 @@ public class BaseWebSocket implements WebSocketClient {
 		URI lURI = null;
 		try {
 			lURI = new URI(aURIString);
-		} catch (URISyntaxException ex) {
-			throw new WebSocketException("Error parsing WebSocket URL:" + aURIString, ex);
+		} catch (URISyntaxException lEx) {
+			throw new WebSocketException("Error parsing WebSocket URL:" + aURIString, lEx);
 		}
 		this.mURL = lURI;
 		String lSubProtocol = makeSubprotocolHeader();
-		WebSocketHandshake mHandshake = new WebSocketHandshake(mURL, lSubProtocol, mDraft);
+		WebSocketHandshake lHandshake = new WebSocketHandshake(mURL, lSubProtocol, mDraft);
 		try {
 			mSocket = createSocket();
 			mInput = mSocket.getInputStream();
 			mOutput = new PrintStream(mSocket.getOutputStream());
 
-			mOutput.write(mHandshake.getHandshake());
+			mOutput.write(lHandshake.getHandshake());
 
-			boolean handshakeComplete = false;
-			boolean header = true;
+			boolean lHandshakeComplete = false;
+			boolean lHeader = true;
 			int len = 1000;
-			byte[] buffer = new byte[len];
-			int pos = 0;
-			ArrayList<String> handshakeLines = new ArrayList<String>();
+			byte[] lBuffer = new byte[len];
+			int lPos = 0;
+			ArrayList<String> lHandshakeLines = new ArrayList<String>();
 
-			byte[] serverResponse = new byte[16];
+			byte[] lServerResponse = new byte[16];
 
-			while (!handshakeComplete) {
+			while (!lHandshakeComplete) {
 				mStatus = WebSocketStatus.CONNECTING;
-				int b = mInput.read();
-				buffer[pos] = (byte) b;
-				pos += 1;
+				int lB = mInput.read();
+				lBuffer[lPos] = (byte) lB;
+				lPos += 1;
 
-				if (!header) {
-					serverResponse[pos - 1] = (byte) b;
-					if (pos == 16) {
-						handshakeComplete = true;
+				if (!lHeader) {
+					lServerResponse[lPos - 1] = (byte) lB;
+					if (lPos == 16) {
+						lHandshakeComplete = true;
 					}
-				} else if (buffer[pos - 1] == 0x0A && buffer[pos - 2] == 0x0D) {
-					String line = new String(buffer, "UTF-8");
+				} else if (lBuffer[lPos - 1] == 0x0A && lBuffer[lPos - 2] == 0x0D) {
+					String line = new String(lBuffer, "UTF-8");
 					if (line.trim().equals("")) {
-						header = false;
+						lHeader = false;
 					} else {
-						handshakeLines.add(line.trim());
+						lHandshakeLines.add(line.trim());
 					}
 
-					buffer = new byte[len];
-					pos = 0;
+					lBuffer = new byte[len];
+					lPos = 0;
 				}
 			}
 
-			mHandshake.verifyServerStatusLine(handshakeLines.get(0));
-			mHandshake.verifyServerResponse(serverResponse);
+			lHandshake.verifyServerStatusLine(lHandshakeLines.get(0));
+			lHandshake.verifyServerResponse(lServerResponse);
 
-			handshakeLines.remove(0);
+			lHandshakeLines.remove(0);
 
-			Map<String, String> headers = new FastMap<String, String>();
-			for (String line : handshakeLines) {
-				String[] keyValue = line.split(": ", 2);
-				headers.put(keyValue[0], keyValue[1]);
+			Map<String, String> lHeaders = new FastMap<String, String>();
+			for (String lLine : lHandshakeLines) {
+				String[] lKeyVal = lLine.split(": ", 2);
+				lHeaders.put(lKeyVal[0], lKeyVal[1]);
 			}
-			mHandshake.verifyServerHandshakeHeaders(headers);
+			lHandshake.verifyServerHandshakeHeaders(lHeaders);
 
 			// set negotiated sub protocol
-			if (headers.containsKey("Sec-WebSocket-Protocol")) {
-				String lHeader = headers.get("Sec-WebSocket-Protocol");
-				if (lHeader.indexOf('/') == -1) {
-					mNegotiatedSubprotocol = new SubProtocol(lHeader, JWebSocketCommonConstants.WS_FORMAT_DEFAULT);
+			if (lHeaders.containsKey("Sec-WebSocket-Protocol")) {
+				String llHeader = lHeaders.get("Sec-WebSocket-Protocol");
+				if (llHeader.indexOf('/') == -1) {
+					mNegotiatedSubprotocol = new SubProtocol(llHeader, JWebSocketCommonConstants.WS_FORMAT_DEFAULT);
 				} else {
-					String[] lSplit = lHeader.split("/");
+					String[] lSplit = llHeader.split("/");
 					mNegotiatedSubprotocol = new SubProtocol(lSplit[0], lSplit[1]);
 				}
 			} else {
@@ -185,8 +185,8 @@ public class BaseWebSocket implements WebSocketClient {
 			mReceiver.start();
 			mConnected = true;
 			mStatus = WebSocketStatus.OPEN;
-		} catch (IOException ioe) {
-			throw new WebSocketException("error while connecting: " + ioe.getMessage(), ioe);
+		} catch (IOException lIOEx) {
+			throw new WebSocketException("error while connecting: " + lIOEx.getMessage(), lIOEx);
 		}
 	}
 
@@ -196,7 +196,7 @@ public class BaseWebSocket implements WebSocketClient {
 			sendInternal(aData);
 		} else {
 			WebSocketPacket lPacket = new RawPacket(aData);
-			lPacket.setFrameType(WebSocketProtocolHandler.toRawPacketType(mNegotiatedSubprotocol.format));
+			lPacket.setFrameType(WebSocketProtocolHandler.toRawPacketType(mNegotiatedSubprotocol.mFormat));
 			sendInternal(WebSocketProtocolHandler.toProtocolPacket(lPacket));
 		}
 	}
@@ -209,8 +209,8 @@ public class BaseWebSocket implements WebSocketClient {
 		byte[] lData;
 		try {
 			lData = aData.getBytes(aEncoding);
-		} catch (UnsupportedEncodingException e) {
-			throw new WebSocketException("Encoding exception while sending the data:" + e.getMessage(), e);
+		} catch (UnsupportedEncodingException lEx) {
+			throw new WebSocketException("Encoding exception while sending the data:" + lEx.getMessage(), lEx);
 		}
 
 		send(lData);
@@ -220,16 +220,16 @@ public class BaseWebSocket implements WebSocketClient {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void send(WebSocketPacket dataPacket) throws WebSocketException {
+	public void send(WebSocketPacket aDataPacket) throws WebSocketException {
 		if (isHixieDraft()) {
-			sendInternal(dataPacket.getByteArray());
+			sendInternal(aDataPacket.getByteArray());
 		} else {
-			if (isBinaryFormat() && (dataPacket.getFrameType() != RawPacket.FRAMETYPE_BINARY)) {
+			if (isBinaryFormat() && (aDataPacket.getFrameType() != RawPacket.FRAMETYPE_BINARY)) {
 				// we negotiated binary format with the server
 				throw new WebSocketException("Only binary packets are allowed for this connection");
 			}
 
-			sendInternal(WebSocketProtocolHandler.toProtocolPacket(dataPacket));
+			sendInternal(WebSocketProtocolHandler.toProtocolPacket(aDataPacket));
 		}
 	}
 
@@ -253,8 +253,8 @@ public class BaseWebSocket implements WebSocketClient {
 				mOutput.write(aData);
 			}
 			mOutput.flush();
-		} catch (IOException ex) {
-			throw new WebSocketException("error while sending socket data: ", ex);
+		} catch (IOException lEx) {
+			throw new WebSocketException("error while sending socket data: ", lEx);
 		}
 	}
 
@@ -265,7 +265,7 @@ public class BaseWebSocket implements WebSocketClient {
 				mStatus = WebSocketStatus.CLOSING;
 				close();
 			}
-		} catch (WebSocketException wse) {
+		} catch (WebSocketException lWSE) {
 			// TODO: don't use printStackTrace
 			// wse.printStackTrace();
 		}
@@ -287,8 +287,8 @@ public class BaseWebSocket implements WebSocketClient {
 			mSocket.shutdownOutput();
 			mSocket.close();
 			mStatus = WebSocketStatus.CLOSED;
-		} catch (IOException ioe) {
-			throw new WebSocketException("error while closing websocket connection: ", ioe);
+		} catch (IOException lIOEx) {
+			throw new WebSocketException("error while closing websocket connection: ", lIOEx);
 		}
 		// TODO: add event
 		notifyClosed(null);
@@ -309,44 +309,44 @@ public class BaseWebSocket implements WebSocketClient {
 				lPacket.setFrameType(RawPacket.FRAMETYPE_CLOSE);
 				send(lPacket);
 			}
-		} catch (IOException ioe) {
-			throw new WebSocketException("error while sending close handshake", ioe);
+		} catch (IOException lIOEx) {
+			throw new WebSocketException("error while sending close handshake", lIOEx);
 		}
 		mConnected = false;
 	}
 
 	private Socket createSocket() throws WebSocketException {
-		String scheme = mURL.getScheme();
-		String host = mURL.getHost();
-		int port = mURL.getPort();
+		String lScheme = mURL.getScheme();
+		String lHost = mURL.getHost();
+		int lPort = mURL.getPort();
 
 		mSocket = null;
 
-		if (scheme != null && scheme.equals("ws")) {
-			if (port == -1) {
-				port = 80;
+		if (lScheme != null && lScheme.equals("ws")) {
+			if (lPort == -1) {
+				lPort = 80;
 			}
 			try {
-				mSocket = new Socket(host, port);
-			} catch (UnknownHostException uhe) {
-				throw new WebSocketException("unknown host: " + host, uhe);
-			} catch (IOException ioe) {
-				throw new WebSocketException("error while creating socket to " + mURL, ioe);
+				mSocket = new Socket(lHost, lPort);
+			} catch (UnknownHostException lUHEx) {
+				throw new WebSocketException("unknown host: " + lHost, lUHEx);
+			} catch (IOException lIOEx) {
+				throw new WebSocketException("error while creating socket to " + mURL, lIOEx);
 			}
-		} else if (scheme != null && scheme.equals("wss")) {
-			if (port == -1) {
-				port = 443;
+		} else if (lScheme != null && lScheme.equals("wss")) {
+			if (lPort == -1) {
+				lPort = 443;
 			}
 			try {
-				SocketFactory factory = SSLSocketFactory.getDefault();
-				mSocket = factory.createSocket(host, port);
-			} catch (UnknownHostException uhe) {
-				throw new WebSocketException("unknown host: " + host, uhe);
-			} catch (IOException ioe) {
-				throw new WebSocketException("error while creating secure socket to " + mURL, ioe);
+				SocketFactory lFactory = SSLSocketFactory.getDefault();
+				mSocket = lFactory.createSocket(lHost, lPort);
+			} catch (UnknownHostException lUHEx) {
+				throw new WebSocketException("unknown host: " + lHost, lUHEx);
+			} catch (IOException lIOEx) {
+				throw new WebSocketException("error while creating secure socket to " + mURL, lIOEx);
 			}
 		} else {
-			throw new WebSocketException("unsupported protocol: " + scheme);
+			throw new WebSocketException("unsupported protocol: " + lScheme);
 		}
 
 		return mSocket;
@@ -429,24 +429,25 @@ public class BaseWebSocket implements WebSocketClient {
 	}
 
 	@Override
-	public void addSubProtocol(String protocolName, String protocolFormat) {
+	public void addSubProtocol(String aProtocolName, String aProtocolFormat) {
 		if (mSubprotocols == null) {
 			mSubprotocols = new ArrayList<SubProtocol>(5);
 		}
 
-		mSubprotocols.add(new SubProtocol(protocolName, protocolFormat));
+		mSubprotocols.add(new SubProtocol(aProtocolName, aProtocolFormat));
 	}
 
 	@Override
 	public String getNegotiatedProtocolName() {
-		return mNegotiatedSubprotocol == null ? null : mNegotiatedSubprotocol.name;
+		return mNegotiatedSubprotocol == null ? null : mNegotiatedSubprotocol.mName;
 	}
 
 	@Override
 	public String getNegotiatedProtocolFormat() {
-		return mNegotiatedSubprotocol == null ? null : mNegotiatedSubprotocol.format;
+		return mNegotiatedSubprotocol == null ? null : mNegotiatedSubprotocol.mFormat;
 	}
 
+	@Override
 	public void setDraft(String aDraft) {
 		this.mDraft = aDraft;
 	}
@@ -465,11 +466,11 @@ public class BaseWebSocket implements WebSocketClient {
 			//return JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/' + JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
 			return null;
 		} else {
-			StringBuilder buff = new StringBuilder();
-			for (SubProtocol prot : mSubprotocols) {
-				buff.append(prot.toString()).append(' ');
+			StringBuilder lBuff = new StringBuilder();
+			for (SubProtocol lProt : mSubprotocols) {
+				lBuff.append(lProt.toString()).append(' ');
 			}
-			return buff.toString().trim();
+			return lBuff.toString().trim();
 		}
 	}
 
@@ -479,38 +480,38 @@ public class BaseWebSocket implements WebSocketClient {
 
 	private boolean isBinaryFormat() {
 		return mNegotiatedSubprotocol != null
-				&& JWebSocketCommonConstants.WS_FORMAT_BINARY.equals(mNegotiatedSubprotocol.format);
+				&& JWebSocketCommonConstants.WS_FORMAT_BINARY.equals(mNegotiatedSubprotocol.mFormat);
 	}
 
 	class SubProtocol {
-		String name;
-		String format;
+		private String mName;
+		private String mFormat;
 
-		private SubProtocol(String name, String format) {
-			this.name = name;
-			this.format = format;
+		private SubProtocol(String aName, String aFormat) {
+			this.mName = aName;
+			this.mFormat = aFormat;
 		}
 
 		@Override
 		public int hashCode() {
-			return name.hashCode() * 31 + format.hashCode();
+			return mName.hashCode() * 31 + mFormat.hashCode();
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof SubProtocol) {
-				SubProtocol other = (SubProtocol) obj;
-				return name.equals(other.name) && format.equals(other.format);
+		public boolean equals(Object aObj) {
+			if (aObj instanceof SubProtocol) {
+				SubProtocol lOther = (SubProtocol) aObj;
+				return mName.equals(lOther.mName) && mFormat.equals(lOther.mFormat);
 			} else {
-				return super.equals(obj);
+				return super.equals(aObj);
 			}
 		}
 
 		@Override
 		public String toString() {
-			StringBuilder buff = new StringBuilder();
-			buff.append(name).append('/').append(format);
-			return buff.toString();
+			StringBuilder lBuff = new StringBuilder();
+			lBuff.append(mName).append('/').append(mFormat);
+			return lBuff.toString();
 		}
 	}
 
@@ -519,8 +520,8 @@ public class BaseWebSocket implements WebSocketClient {
 		private InputStream mIS = null;
 		private volatile boolean mStop = false;
 
-		public WebSocketReceiver(InputStream input) {
-			this.mIS = input;
+		public WebSocketReceiver(InputStream aInput) {
+			this.mIS = aInput;
 		}
 
 		@Override
@@ -531,30 +532,30 @@ public class BaseWebSocket implements WebSocketClient {
 				} else {
 					readHybi();
 				}
-			} catch (Exception e) {
+			} catch (Exception lEx) {
 				handleError();
 			}
 		}
 
 		private void readHixie() throws IOException {
 			boolean lFrameStart = false;
-			ByteArrayOutputStream aBuff = new ByteArrayOutputStream();
+			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
 			while (!mStop) {
-				int b = mIS.read();
+				int lB = mIS.read();
 				// TODO: support binary frames
-				if (b == 0x00) {
+				if (lB == 0x00) {
 					lFrameStart = true;
-				} else if (b == 0xff && lFrameStart == true) {
+				} else if (lB == 0xff && lFrameStart == true) {
 					lFrameStart = false;
 
 					WebSocketClientEvent lWSCE = new WebSocketClientTokenEvent();
-					RawPacket lPacket = new RawPacket(aBuff.toByteArray());
+					RawPacket lPacket = new RawPacket(lBuff.toByteArray());
 
-					aBuff.reset();
+					lBuff.reset();
 					notifyPacket(lWSCE, lPacket);
 				} else if (lFrameStart == true) {
-					aBuff.write(b);
-				} else if (b == -1) {
+					lBuff.write(lB);
+				} else if (lB == -1) {
 					handleError();
 				}
 			}
@@ -565,7 +566,7 @@ public class BaseWebSocket implements WebSocketClient {
 			// utilize data input stream, because it has convenient methods for reading
 			// signed/unsigned bytes, shorts, ints and longs
 			DataInputStream lDis = new DataInputStream(mIS);
-			ByteArrayOutputStream aBuff = new ByteArrayOutputStream();
+			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
 
 			while (!mStop) {
 				// begin normal packet read
@@ -596,7 +597,7 @@ public class BaseWebSocket implements WebSocketClient {
 						// than construct one byte[] array and fill it with read() method,
 						// because java does not allow longs as array size
 						while (lPayloadLen-- > 0) {
-							aBuff.write(lDis.read());
+							lBuff.write(lDis.read());
 						}
 					}
 
@@ -604,7 +605,7 @@ public class BaseWebSocket implements WebSocketClient {
 						if (lPacketType == RawPacket.FRAMETYPE_PING) {
 							// As per spec, we must respond to PING with PONG (maybe
 							// this should be handled higher up in the hierarchy?)
-							WebSocketPacket lPong = new RawPacket(aBuff.toByteArray());
+							WebSocketPacket lPong = new RawPacket(lBuff.toByteArray());
 							lPong.setFrameType(RawPacket.FRAMETYPE_PONG);
 							send(lPong);
 						} else if (lPacketType == RawPacket.FRAMETYPE_CLOSE) {
@@ -612,11 +613,11 @@ public class BaseWebSocket implements WebSocketClient {
 						}
 
 						// Packet was read, pass it forward.
-						WebSocketPacket lPacket = new RawPacket(aBuff.toByteArray());
+						WebSocketPacket lPacket = new RawPacket(lBuff.toByteArray());
 						lPacket.setFrameType(lPacketType);
 						WebSocketClientEvent lWSCE = new WebSocketClientTokenEvent();
 						notifyPacket(lWSCE, lPacket);
-						aBuff.reset();
+						lBuff.reset();
 					}
 				}
 			}
