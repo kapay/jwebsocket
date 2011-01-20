@@ -20,54 +20,54 @@ public class Test extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
-     * @param response servlet response
+     * @param aRequest servlet request
+     * @param aResponse servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+    protected void processRequest(HttpServletRequest aRequest, HttpServletResponse aResponse)
     throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
+        aResponse.setContentType("text/html;charset=UTF-8");
+        PrintWriter lOut = aResponse.getWriter();
         try {
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet Test</title>");  
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet Test at " + request.getContextPath () + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+            lOut.println("<html>");
+            lOut.println("<head>");
+            lOut.println("<title>Servlet Test</title>");
+            lOut.println("</head>");
+            lOut.println("<body>");
+            lOut.println("<h1>Servlet Test at " + aRequest.getContextPath () + "</h1>");
+            lOut.println("</body>");
+            lOut.println("</html>");
         } finally { 
-            out.close();
+            lOut.close();
         }
     } 
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /** 
      * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
-     * @param response servlet response
+     * @param aRequest servlet request
+     * @param aResponse servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest aRequest, HttpServletResponse aResponse)
     throws ServletException, IOException {
-        processRequest(request, response);
+        processRequest(aRequest, aResponse);
     } 
 
     /** 
      * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
+     * @param aRequest servlet request
+     * @param aResponse servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest aRequest, HttpServletResponse aResponse)
     throws ServletException, IOException {
-        processRequest(request, response);
+        processRequest(aRequest, aResponse);
     }
 
     /** 

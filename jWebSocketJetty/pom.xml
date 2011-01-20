@@ -42,6 +42,7 @@
 				<!-- <version>2.1-beta-1</version> -->
 				<configuration>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<warName>${project.name}-${project.version}</warName>
 					<outputDirectory>${project.build.directory}/../../../../rte/jWebSocket-${project.version}/libs</outputDirectory>
 					<webResources>
 						<resource>
