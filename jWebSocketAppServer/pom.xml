@@ -3,14 +3,14 @@
 	<parent>
 		<artifactId>jWebSocket-Parent</artifactId>
 		<groupId>org.jwebsocket</groupId>
-		<version>0.11</version>
+		<version>1.0</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
 	<artifactId>jWebSocketAppServer</artifactId>
 	<name>jWebSocketAppServer</name>
 	<description>jWebSocket Web Application Project</description>
-	<version>0.11</version>
+	<version>1.0</version>
 	<packaging>war</packaging>
 
 	<scm>

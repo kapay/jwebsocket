@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>jWebSocket-Parent</artifactId>
 		<groupId>org.jwebsocket</groupId>
-		<version>0.11</version>
+		<version>1.0</version>
 	</parent>
 	<groupId>org.jwebsocket</groupId>
 	<artifactId>jWebSocketJetty</artifactId>
@@ -12,7 +12,7 @@
 	<name>jWebSocketJetty</name>
 	<url>http://maven.apache.org</url>
 	<description>Project within jWebSocket</description>
-	<version>0.11</version>
+	<version>1.0</version>
 
 	<build>
 		<finalName>jWebSocketJetty</finalName>
