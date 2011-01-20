@@ -33,7 +33,7 @@
 						</goals>
 						<configuration>
 							<finalName>jWebSocketServer-${project.version}</finalName>
-							<outputDirectory>../../rte/jWebSocket-${project.version}/libs
+							<outputDirectory>../../../rte/jWebSocket-${project.version}/libs
 							</outputDirectory>
 							<archive>
 								<manifest>
@@ -85,7 +85,7 @@
 						<configuration>
 							<classifier>Bundle</classifier>
 							<finalName>jWebSocketServer-Bundle</finalName>
-							<outputDirectory>../../rte/jWebSocket-${project.version}/libs
+							<outputDirectory>../../../rte/jWebSocket-${project.version}/libs
 							</outputDirectory>
 							<archive>
 								<manifest>

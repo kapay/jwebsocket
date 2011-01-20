@@ -36,20 +36,20 @@ public class SessionListener implements HttpSessionListener {
 	}
 
 	@Override
-	public void sessionCreated(HttpSessionEvent hse) {
+	public void sessionCreated(HttpSessionEvent aHSE) {
 		// when a new session is created by the servlet engine
 		// add this session to the global WebSockethttpSessionMerger.
-		WebSocketHttpSessionMerger.addHttpSession(hse.getSession());
+		WebSocketHttpSessionMerger.addHttpSession(aHSE.getSession());
 		mCheckLogs();
-		mLog.info("Created Http session: '" + hse.getSession().getId() + "'");
+		mLog.info("Created Http session: '" + aHSE.getSession().getId() + "'");
 	}
 
 	@Override
-	public void sessionDestroyed(HttpSessionEvent hse) {
+	public void sessionDestroyed(HttpSessionEvent aHSE) {
 		// when an existing session is destroyed by the servlet engine
 		// remove this session from the global WebSockethttpSessionMerger.
-		WebSocketHttpSessionMerger.removeHttpSession(hse.getSession());
+		WebSocketHttpSessionMerger.removeHttpSession(aHSE.getSession());
 		mCheckLogs();
-		mLog.info("Destroyed Http session: '" + hse.getSession().getId() + "'");
+		mLog.info("Destroyed Http session: '" + aHSE.getSession().getId() + "'");
 	}
 }

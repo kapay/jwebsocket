@@ -28,20 +28,20 @@ public class ContextListener implements ServletContextListener {
 
   /**
    * initializes the web application on startup.
-   * @param sce
+   * @param aSCE
    */
   @Override
-  public void contextInitialized(ServletContextEvent sce) {
+  public void contextInitialized(ServletContextEvent aSCE) {
     // start the jWebSocket server sub system
     JWebSocketFactory.start("");
   }
 
   /**
    * cleans up the web application on termination.
-   * @param sce
+   * @param aSCE
    */
   @Override
-  public void contextDestroyed(ServletContextEvent sce) {
+  public void contextDestroyed(ServletContextEvent aSCE) {
     // stop the jWebSocket server sub system
     JWebSocketFactory.stop();
   }
