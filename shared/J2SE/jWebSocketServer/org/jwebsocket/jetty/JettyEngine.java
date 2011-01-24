@@ -42,6 +42,7 @@ public class JettyEngine extends BaseEngine {
 
 		super(aConfiguration);
 
+		// load the ports
 		int lPort = aConfiguration.getPort();
 		int lSSLPort = aConfiguration.getSSLPort();
 

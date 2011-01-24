@@ -20,7 +20,7 @@ import javax.servlet.ServletContextListener;
 import org.jwebsocket.factory.JWebSocketFactory;
 
 /**
- * Web application lifecycle listener.
+ * Web application life cycle listener.
  * @author alexanderschulze
  */
 public class ContextListener implements ServletContextListener {
@@ -32,7 +32,9 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent aSCE) {
 		// start the jWebSocket server sub system
+		System.out.println("Starting the jWebSocket sub system...");
 		JWebSocketFactory.start("");
+		System.out.println("jWebSocket sub system started.");
 	}
 
 	/**
@@ -42,6 +44,8 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextDestroyed(ServletContextEvent aSCE) {
 		// stop the jWebSocket server sub system
+		System.out.println("Stopping the jWebSocket sub system...");
 		JWebSocketFactory.stop();
+		System.out.println("jWebSocket sub system stopped.");
 	}
 }

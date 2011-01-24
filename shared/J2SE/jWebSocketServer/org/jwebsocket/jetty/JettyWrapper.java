@@ -111,6 +111,17 @@ public class JettyWrapper implements WebSocket {
 	}
 
 	@Override
+	public void onFragment(boolean more, byte opcode, byte[] data, int offset, int length) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Fragment from Jetty client...");
+		}
+		if (mConnector != null) {
+			// WebSocketPacket lDataPacket = new RawPacket(aData);
+			// mEngine.processPacket(mConnector, lDataPacket);
+		}
+	}
+
+	@Override
 	public void onMessage(byte aFrame, String aData) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Message (string, opcode "

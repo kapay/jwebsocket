@@ -29,7 +29,6 @@ import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
-import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -160,7 +159,9 @@ public class JettyConnector extends BaseConnector {
 
 		try {
 			if (aDataPacket.getFrameType() == RawPacket.FRAMETYPE_BINARY) {
-				mOutbound.sendMessage((byte) 0, aDataPacket.getByteArray());
+				// mOutbound.sendMessage((byte) 0, );
+				byte[] lBA = aDataPacket.getByteArray();
+				mOutbound.sendMessage((byte) 0, lBA, 0, lBA.length);
 			} else {
 				mOutbound.sendMessage(aDataPacket.getUTF8());
 			}
