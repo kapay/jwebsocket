@@ -28,22 +28,23 @@ import java.net.URLClassLoader;
  */
 public class JWebSocketJarClassLoader extends URLClassLoader {
 
-  /**
-   * constructor
-   */
-  public JWebSocketJarClassLoader() {
-    super(new URL[] {});
-  }
+	/**
+	 * constructor
+	 */
+	public JWebSocketJarClassLoader() {
+		// init with empty list of URLs
+		super(new URL[]{}, Thread.currentThread().getContextClassLoader());
+	}
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @param path
-   * @throws MalformedURLException
-   */
-  public void addFile(String aPath) throws MalformedURLException {
-    File file = new File(aPath);
-    URL url = file.toURI().toURL();
-    addURL(url);
-  }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param path
+	 * @throws MalformedURLException
+	 */
+	public void addFile(String aPath) throws MalformedURLException {
+		File lFile = new File(aPath);
+		URL lURL = lFile.toURI().toURL();
+		addURL(lURL);
+	}
 }

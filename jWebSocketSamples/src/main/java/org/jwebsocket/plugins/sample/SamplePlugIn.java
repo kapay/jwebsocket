@@ -62,7 +62,7 @@ public class SamplePlugIn extends TokenPlugIn {
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-		RandomData data = new RandomData();
+		// RandomData data = new RandomData();
 
 		// TODO: can the following line be ultimately removed?
 		// System.out.println(data.getRandomText());

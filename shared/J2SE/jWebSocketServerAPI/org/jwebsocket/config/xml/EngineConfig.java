@@ -33,8 +33,8 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	private final String mJar;
 	private final String mContext;
 	private final String mServlet;
-	private final int mPort;
-	private final int mSSLPort;
+	private final Integer mPort;
+	private final Integer mSSLPort;
 	private final int mTimeout;
 	private final int mMaxframesize;
 	private final List<String> mDomains;
@@ -51,7 +51,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 *						receive without closing the connection
 	 * @param aDomains      list of domain names
 	 */
-	public EngineConfig(String aId, String aName, String aJar, int aPort, int aSSLPort,
+	public EngineConfig(String aId, String aName, String aJar, Integer aPort, Integer aSSLPort,
 			String aContext, String aServlet, int aTimeout,
 			int aMaxFrameSize, List<String> aDomains) {
 		this.mId = aId;
@@ -66,7 +66,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 		this.mDomains = aDomains;
 		validate();
 	}
-	
+
 	/**
 	 * @return the id
 	 */
@@ -95,7 +95,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 * @return the port
 	 */
 	@Override
-	public int getPort() {
+	public Integer getPort() {
 		return mPort;
 	}
 
@@ -103,7 +103,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 * @return the SSL port
 	 */
 	@Override
-	public int getSSLPort() {
+	public Integer getSSLPort() {
 		return mSSLPort;
 	}
 
@@ -160,7 +160,10 @@ public final class EngineConfig implements Config, EngineConfiguration {
 				&& (mName != null && mName.length() > 0)
 				&& (mJar != null && mJar.length() > 0)
 				&& (mDomains != null && mDomains.size() > 0)
-				&& mPort > 0 && mPort < 65536
+				// leaving port empty needs to be allowed eg. for Jetty
+				// when using underlying WebSocket Servlets
+				&& (mPort == null || (mPort >= 0 && mPort < 65536))
+				&& (mSSLPort == null || (mSSLPort >= 0 && mSSLPort < 65536))
 				&& mTimeout >= 0) {
 			return;
 		}

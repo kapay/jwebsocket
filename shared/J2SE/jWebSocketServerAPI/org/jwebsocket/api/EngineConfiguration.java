@@ -48,13 +48,13 @@ public interface EngineConfiguration extends Configuration {
 	 * Returns the port at which the engine is running
 	 * @return the port number by default it's 8787 for jWebSocket
 	 */
-	int getPort();
+	Integer getPort();
 
 	/**
 	 * Returns the port at which the SSL encrypted engine is running
 	 * @return the port number by default it's 9797 for jWebSocket with SSL
 	 */
-	int getSSLPort();
+	Integer getSSLPort();
 
 	/**
 	 * Engine timeout value in milliseconds

@@ -58,7 +58,7 @@ public class StatisticsPlugIn extends TokenPlugIn {
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_STATISTICS);
-	//	mGetSettings();
+		//	mGetSettings();
 	}
 
 	private void mGetSettings() {
@@ -74,18 +74,26 @@ public class StatisticsPlugIn extends TokenPlugIn {
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		mGetSettings();
-		Token lToken = TokenFactory.createToken(NS_STATISTICS, BaseToken.TT_EVENT);
-		lToken.setString("msg", "client connected");
-		lToken.setString("connId", aConnector.getId());
-		mStream.put(lToken);
+		if (null != mStream) {
+			Token lToken = TokenFactory.createToken(NS_STATISTICS, BaseToken.TT_EVENT);
+			lToken.setString("msg", "client connected");
+			lToken.setString("connId", aConnector.getId());
+			mStream.put(lToken);
+		} else {
+			mLog.warn("'statisticStream' not yet initialized or running!");
+		}
 	}
 
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseRease) {
-		Token lToken = TokenFactory.createToken(NS_STATISTICS, BaseToken.TT_EVENT);
-		lToken.setString("msg", "client disconnected");
-		lToken.setString("connId", aConnector.getId());
-		mStream.put(lToken);
+		if (null != mStream) {
+			Token lToken = TokenFactory.createToken(NS_STATISTICS, BaseToken.TT_EVENT);
+			lToken.setString("msg", "client disconnected");
+			lToken.setString("connId", aConnector.getId());
+			mStream.put(lToken);
+		} else {
+			mLog.warn("'statisticStream' not yet initialized or running!");
+		}
 	}
 
 	@Override

@@ -56,6 +56,16 @@
     <dependencies>
         <dependency>
             <groupId>org.jwebsocket</groupId>
+            <artifactId>jWebSocketCommon</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jwebsocket</groupId>
+            <artifactId>jWebSocketServerAPI</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jwebsocket</groupId>
             <artifactId>jWebSocketServer</artifactId>
             <version>${project.version}</version>
         </dependency>

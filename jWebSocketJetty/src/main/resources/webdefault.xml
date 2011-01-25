@@ -3,42 +3,16 @@
 	xmlns="http://java.sun.com/xml/ns/javaee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-	<display-name>jWebSocket Jetty Demo</display-name>
 
+	<!-- set default settings for ALL web apps within Jetty -->
 	<session-config>
 		<session-timeout>30</session-timeout>
 	</session-config>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
-	<servlet>
-		<servlet-name>jWebSocket</servlet-name>
-		<servlet-class>org.jwebsocket.jetty.jWebSocket</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>Test</servlet-name>
-		<servlet-class>org.jwebsocket.jetty.Test</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>jWebSocket</servlet-name>
-		<url-pattern>/jWebSocket</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>Test</servlet-name>
-		<url-pattern>/Test</url-pattern>
-	</servlet-mapping>
 
-<!--
-    <listener>
-        <description>ServletContextListener</description>
-        <listener-class>org.jwebsocket.jetty.ContextListener</listener-class>
-    </listener>
-    <listener>
-        <description>HttpSessionListener</description>
-        <listener-class>org.jwebsocket.jetty.SessionListener</listener-class>
-    </listener>
--->
-
+	<!-- add default servlet to serve static content -->
 	<servlet>
 		<servlet-name>default</servlet-name>
 		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
@@ -77,4 +51,5 @@
 		<servlet-name>default</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
+
 </web-app>

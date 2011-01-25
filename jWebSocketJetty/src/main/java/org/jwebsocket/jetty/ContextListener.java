@@ -17,7 +17,9 @@ package org.jwebsocket.jetty;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import org.jwebsocket.console.JWebSocketTokenListenerSample;
 import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.server.TokenServer;
 
 /**
  * Web application life cycle listener.
@@ -32,9 +34,17 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent aSCE) {
 		// start the jWebSocket server sub system
-		System.out.println("Starting the jWebSocket sub system...");
+		System.out.println("Starting the jWebSocket sub system for Jetty...");
 		JWebSocketFactory.start("");
 		System.out.println("jWebSocket sub system started.");
+
+		// get the token server
+		// and and a listener to it (for demo purposes)
+		TokenServer lTS0 = (TokenServer) JWebSocketFactory.getServer("ts0");
+		if (lTS0 != null) {
+			// and add the sample listener to the server's listener chain
+			lTS0.addListener(new JWebSocketTokenListenerSample());
+		}
 	}
 
 	/**
@@ -44,7 +54,7 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextDestroyed(ServletContextEvent aSCE) {
 		// stop the jWebSocket server sub system
-		System.out.println("Stopping the jWebSocket sub system...");
+		System.out.println("Stopping the jWebSocket sub system for Jetty...");
 		JWebSocketFactory.stop();
 		System.out.println("jWebSocket sub system stopped.");
 	}

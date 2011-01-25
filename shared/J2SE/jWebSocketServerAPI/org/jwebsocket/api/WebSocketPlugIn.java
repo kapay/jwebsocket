@@ -24,111 +24,122 @@ import org.jwebsocket.kit.PlugInResponse;
  * @author aschulze
  */
 public interface WebSocketPlugIn {
-  /**
-   * is called by the server when the engine has been started.
-   * 
-   * @param aEngine
-   */
-  void engineStarted(WebSocketEngine aEngine);
 
-  /**
-   * is called by the server when the engine has been stopped.
-   * 
-   * @param aEngine
-   */
-  void engineStopped(WebSocketEngine aEngine);
+	/**
+	 * returns the id of the plug-in.
+	 * @return
+	 */
+	String getId();
 
-  /**
-   * 
-   * @param aConnector
-   */
-  void connectorStarted(WebSocketConnector aConnector);
+	/**
+	 * returns the name of the plug-in.
+	 * @return
+	 */
+	String getName();
 
-  /**
-   * 
-   * @param aResponse
-   * @param aConnector
-   * @param aDataPacket
-   */
-  void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
+	/**
+	 * is called by the server when the engine has been started.
+	 *
+	 * @param aEngine
+	 */
+	void engineStarted(WebSocketEngine aEngine);
 
-  /**
-   * 
-   * @param aConnector
-   * @param aCloseReason
-   */
-  void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
+	/**
+	 * is called by the server when the engine has been stopped.
+	 *
+	 * @param aEngine
+	 */
+	void engineStopped(WebSocketEngine aEngine);
 
-  /**
-   * 
-   * @param aPlugInChain
-   */
-  void setPlugInChain(WebSocketPlugInChain aPlugInChain);
+	/**
+	 *
+	 * @param aConnector
+	 */
+	void connectorStarted(WebSocketConnector aConnector);
 
-  /**
-   * @return the plugInChain
-   */
-  WebSocketPlugInChain getPlugInChain();
+	/**
+	 *
+	 * @param aResponse
+	 * @param aConnector
+	 * @param aDataPacket
+	 */
+	void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket);
 
-  /**
-   * Set the plugin configuration
-   * 
-   * @param configuration
-   *          the plugin configuration object to set
-   */
-  // void setPluginConfiguration(PluginConfiguration configuration);
+	/**
+	 *
+	 * @param aConnector
+	 * @param aCloseReason
+	 */
+	void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason);
 
-  /**
-   * Returns the plugin configuration object based on the configuration file
-   * values
-   * 
-   * @return the plugin configuration object
-   */
-  PluginConfiguration getPluginConfiguration();
+	/**
+	 *
+	 * @param aPlugInChain
+	 */
+	void setPlugInChain(WebSocketPlugInChain aPlugInChain);
 
-  /**
-   * 
-   * @param aKey
-   * @param aValue
-   */
-  void addSetting(String aKey, String aValue);
+	/**
+	 * @return the plugInChain
+	 */
+	WebSocketPlugInChain getPlugInChain();
 
-  /**
-   * 
-   * 
-   * @param aSettings
-   */
-  // void addAllSettings(Map<String, String> aSettings);
+	/**
+	 * Set the plugin configuration
+	 *
+	 * @param configuration
+	 *          the plugin configuration object to set
+	 */
+	// void setPluginConfiguration(PluginConfiguration configuration);
+	/**
+	 * Returns the plugin configuration object based on the configuration file
+	 * values
+	 *
+	 * @return the plugin configuration object
+	 */
+	PluginConfiguration getPluginConfiguration();
 
-  /**
-   * 
-   * @param aKey
-   */
-  void removeSetting(String aKey);
+	/**
+	 *
+	 * @param aKey
+	 * @param aValue
+	 */
+	void addSetting(String aKey, String aValue);
 
-  /**
+	/**
+	 *
+	 *
+	 * @param aSettings
+	 */
+	// void addAllSettings(Map<String, String> aSettings);
+	/**
+	 *
+	 * @param aKey
+	 */
+	void removeSetting(String aKey);
+
+	/**
 	 *
 	 */
-  void clearSettings();
+	void clearSettings();
 
-  /**
-   * 
-   * @param aKey
-   * @param aDefault
-   * @return
-   */
-  String getSetting(String aKey, String aDefault);
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	String getSetting(String aKey, String aDefault);
 
-  /**
-   * 
-   * @param aKey
-   * @return
-   */
-  String getSetting(String aKey);
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	String getSetting(String aKey);
 
-  /**
-   * 
-   * @return
-   */
-  Map<String, String> getSettings();
+	/**
+	 *
+	 * @return
+	 */
+	Map<String, String> getSettings();
 }

@@ -39,13 +39,6 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	private PluginConfiguration mConfiguration;
 
 	/**
-	 * default constructor
-	 */
-	/*
-	public BasePlugIn() {
-	}
-	 */
-	/**
 	 * Constructor
 	 *
 	 * @param aConfiguration
@@ -53,7 +46,9 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 */
 	public BasePlugIn(PluginConfiguration aConfiguration) {
 		this.mConfiguration = aConfiguration;
-		addAllSettings(aConfiguration.getSettings());
+		if (null != aConfiguration) {
+			addAllSettings(aConfiguration.getSettings());
+		}
 	}
 
 	/**
@@ -295,5 +290,21 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	@Override
 	public Map<String, String> getSettings() {
 		return mSettings;
+	}
+
+	/**
+	 * @return the id of the plug-in
+	 */
+	@Override
+	public String getId() {
+		return mConfiguration.getId();
+	}
+
+	/**
+	 * @return the name of the plug-in
+	 */
+	@Override
+	public String getName() {
+		return mConfiguration.getName();
 	}
 }

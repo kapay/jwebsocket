@@ -20,12 +20,14 @@ package org.jwebsocket.api;
  * @version $Id: Configuration.java 570 2010-06-20 02:41:13Z mailtopuran@gmail.com $
  */
 public interface Configuration {
-    /**
-     * @return the id 
-     */
-    String getId();
-    /**
-     * @return the name 
-     */
-    String getName();
+
+	/**
+	 * @return the id
+	 */
+	String getId();
+
+	/**
+	 * @return the name 
+	 */
+	String getName();
 }

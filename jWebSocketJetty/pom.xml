@@ -39,26 +39,18 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<!-- <version>2.1-beta-1</version> -->
 				<configuration>
+					<!-- a web.xml is mandatory here -->
 					<failOnMissingWebXml>true</failOnMissingWebXml>
+					<!-- use this particular file name for the .war -->
 					<warName>${project.name}-${project.version}</warName>
+					<!-- and put it to the desired output folder -->
 					<outputDirectory>${project.build.directory}/../../../../rte/jWebSocket-${project.version}/libs</outputDirectory>
 
-					<webResources>
-						<resource>
-							<!-- this is relative to the pom.xml directory -->
-							<directory>../jWebSocketClient/web</directory>
-							<!-- disable filtering! otherwise flash swf files get destroyed! -->
-							<filtering>false</filtering>
-							<excludes>
-								<!-- don't include documentation in the .war -->
-								<exclude>**/javadocs/**</exclude>
-								<exclude>**/quickguide/**</exclude>
-								<exclude>**/devguide/**</exclude>
-							</excludes>
-						</resource>
-					</webResources>
+					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+
+					<!-- this puts the client web into the war -->
+					<warSourceDirectory>../jWebSocketClient/web</warSourceDirectory>
 
 				</configuration>
 			</plugin>
@@ -66,20 +58,29 @@
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
+				<!-- find details on this plugin at:
+					http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin
+				-->
 				<version>8.0.0.M2</version>
 				<configuration>
+					<stopPort>9966</stopPort>
+					<stopKey>jetty-stop</stopKey>
 					<scanIntervalSeconds>5</scanIntervalSeconds>
-					<!-- <webAppSourceDirectory>../jWebSocketClient/web</webAppSourceDirectory> -->
-					<!-- <webAppSourceDirectory>${basedir}/src/staticfiles</webAppSourceDirectory> -->
-					<jettyConfig>C:/Program Files/Jetty/jetty-distribution-8.0.0.M2/etc/jetty.xml</jettyConfig>
+
+					<!-- this puts the client web into the war -->
+					<webAppSourceDirectory>../jWebSocketClient/web</webAppSourceDirectory>
+
+					<jettyConfig>src/main/resources/jetty.xml</jettyConfig>
 					<webAppConfig>
-						<contextPath>/jWebSocketJetty</contextPath>
+						<!-- update context here: http://yourhost/<your context>/... -->
+						<contextPath>/jWebSocket</contextPath>
+						<!-- take the web.xml from the Jetty webApp folder -->
+						<descriptor>src/main/webapp/WEB-INF/web.xml</descriptor>
+						<!-- this is the reference to the webdefault.xml of Jetty
+							change this according to your environment
+						-->
 						<defaultsDescriptor>src/main/resources/webdefault.xml</defaultsDescriptor>
 <!--
-						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-							<resources>src/main/webapp</resources>
-						</baseResource>
-						<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 						<tempDirectory>${project.build.directory}/work</tempDirectory>
 						<overrideDescriptor>src/main/resources/override-web.xml</overrideDescriptor>
 -->

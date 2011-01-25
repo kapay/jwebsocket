@@ -309,7 +309,7 @@ public class TCPEngine extends BaseEngine {
 		// if we detected a flash policy-file-request return "null"
 		// (no websocket header detected)
 		if (lFlashBridgeReq != null) {
-			mLog.warn("TCPEngine returned policy file response ('"
+			mLog.warn("TCP Engine returned policy file response ('"
 					+ new String(lBA, "US-ASCII")
 					+ "'), check for FlashBridge plug-in.");
 			return null;

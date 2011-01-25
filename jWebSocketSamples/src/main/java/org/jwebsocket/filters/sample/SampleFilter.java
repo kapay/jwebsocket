@@ -38,7 +38,7 @@ public class SampleFilter extends TokenFilter {
 	public SampleFilter(String aId) {
 		super(aId);
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating system filter...");
+			mLog.debug("Instantiating sample filter...");
 		}
 	}
 
@@ -52,21 +52,23 @@ public class SampleFilter extends TokenFilter {
 	public void processTokenIn(FilterResponse aResponse,
 			WebSocketConnector aConnector, Token aToken) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Checking incoming token from " 
+			mLog.debug("Checking incoming token from "
 					+ (aConnector != null ? aConnector.getId() : "[not given]")
 					+ ": " + aToken.toString() + "...");
 		}
 
 		TokenServer lServer = getServer();
-		String lUsername = lServer.getUsername(aConnector);
+		// String lUsername = lServer.getUsername(aConnector);
 
 		// TODO: very first security test, replace by user's locked state!
-		if ("locked".equals(lUsername)) {
-			Token lToken = lServer.createAccessDenied(aToken);
-			lServer.sendToken(aConnector, lToken);
-			aResponse.rejectMessage();
-			return;
+		/*
+		if (<condition>) {
+		Token lToken = lServer.createAccessDenied(aToken);
+		lServer.sendToken(aConnector, lToken);
+		aResponse.rejectMessage();
+		return;
 		}
+		 */
 	}
 
 	/**
@@ -77,11 +79,11 @@ public class SampleFilter extends TokenFilter {
 	 * @param aToken
 	 */
 	@Override
-	public void processTokenOut(FilterResponse aResponse, 
+	public void processTokenOut(FilterResponse aResponse,
 			WebSocketConnector aSource, WebSocketConnector aTarget,
 			Token aToken) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Checking outgoing token from " 
+			mLog.debug("Checking outgoing token from "
 					+ (aSource != null ? aSource.getId() : "[not given]")
 					+ " to "
 					+ (aTarget != null ? aTarget.getId() : "[not given]")

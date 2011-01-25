@@ -212,13 +212,16 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 				// if class found try to create an instance
 				if (lPluginClass != null) {
 					WebSocketPlugIn lPlugIn = null;
-					Constructor<WebSocketPlugIn> lPluginConstructor =
+
+					Constructor<WebSocketPlugIn> lPluginConstructor = null;
+					lPluginConstructor =
 							lPluginClass.getConstructor(PluginConfiguration.class);
 					if (lPluginConstructor != null) {
 						lPluginConstructor.setAccessible(true);
 						lPlugIn = lPluginConstructor.newInstance(lPluginConfig);
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Plug-in '" + lPluginConfig.getId() + "' successfully instantiated.");
+							mLog.debug("Plug-in '" + lPluginConfig.getId()
+									+ "' successfully instantiated.");
 						}
 						// now add the plugin to plugin map based on server ids
 						for (String lServerId : lPluginConfig.getServers()) {
@@ -267,7 +270,7 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 					if (lJarFilePath != null) {
 						mClassLoader.addFile(lJarFilePath);
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Loading filter '" 
+							mLog.debug("Loading filter '"
 									+ lFilterConfig.getName()
 									+ "' from '" + lJarFilePath + "'...");
 						}

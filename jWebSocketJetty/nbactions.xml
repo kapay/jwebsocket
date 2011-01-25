@@ -3,6 +3,7 @@
         <action>
             <actionName>run</actionName>
             <goals>
+                <goal>jetty:stop</goal>
                 <goal>jetty:run</goal>
             </goals>
         </action>
@@ -23,11 +24,40 @@
         <action>
             <actionName>debug</actionName>
             <goals>
+                <goal>jetty:stop</goal>
                 <goal>jetty:run</goal>
             </goals>
             <properties>
                 
                 <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>
+                
+                <jpda.listen>maven</jpda.listen>
+            </properties>
+        </action>
+        <action>
+            <actionName>debug.single.main</actionName>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.1.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.classpathScope>${classPathScope}</exec.classpathScope>
+                <jpda.listen>true</jpda.listen>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=${jpda.address} -classpath %classpath ${packageClassName}</exec.args>
+                <jpda.stopclass>${packageClassName}</jpda.stopclass>
+                <exec.executable>java</exec.executable>
+            </properties>
+        </action>
+        <action>
+            <actionName>debug.single.deploy</actionName>
+            <goals>
+                <goal>package</goal>
+            </goals>
+            <properties>
+                <jpda.listen>maven</jpda.listen>
+                <netbeans.deploy>true</netbeans.deploy>
+                <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>
+                <netbeans.deploy.clientUrlPart>${webpagePath}</netbeans.deploy.clientUrlPart>
             </properties>
         </action>
     </actions>

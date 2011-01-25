@@ -54,19 +54,11 @@ public class StreamingPlugIn extends TokenPlugIn {
 	/**
 	 * create a new instance of the streaming plug-in and set the default name
 	 * space for the plug-in.
-	 */
-	public StreamingPlugIn() {
-		this(null);
-	}
-
-	/**
-	 * create a new instance of the streaming plug-in and set the default name
-	 * space for the plug-in.
 	 *
-	 * @param configuration
+	 * @param aConfiguration
 	 */
-	public StreamingPlugIn(PluginConfiguration configuration) {
-		super(configuration);
+	public StreamingPlugIn(PluginConfiguration aConfiguration) {
+		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Instantiating streaming plug-in...");
 		}
@@ -264,5 +256,4 @@ public class StreamingPlugIn extends TokenPlugIn {
 	public Map<String, BaseStream> getStreams() {
 		return Collections.unmodifiableMap(mStreams);
 	}
-
 }

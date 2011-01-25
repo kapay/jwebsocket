@@ -43,8 +43,18 @@ public class JettyEngine extends BaseEngine {
 		super(aConfiguration);
 
 		// load the ports
-		int lPort = aConfiguration.getPort();
-		int lSSLPort = aConfiguration.getSSLPort();
+		Integer lPort = aConfiguration.getPort();
+		Integer lSSLPort = aConfiguration.getSSLPort();
+
+		// If ports are 0 use the WebSocket Servlet capabilities
+		// of the Jetty Engine and do not instantiate a separate engine here!
+		// Caution! It is mandatory to load the jWebSocket Servlet in the
+		// web.xml or webdefault.xml of th eJetty server!
+		if (null == lPort || 0 == lPort) {
+			// fire the engine start event
+			engineStarted();
+			return;
+		}
 
 		String lContext = aConfiguration.getContext();
 		if (lContext == null) {
@@ -55,15 +65,16 @@ public class JettyEngine extends BaseEngine {
 			lServlet = "/*";
 		}
 		try {
-
 			// create Jetty server
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Instantiating Jetty server at "
+				mLog.debug("Instantiating Jetty server '"
+						+ Server.getVersion() + "' at "
 						+ "port " + lPort
 						+ ", ssl-port " + lSSLPort
 						+ ", context: '" + lContext
 						+ "', servlet: '" + lServlet + "'...");
 			}
+
 			mJettyServer = new Server(lPort);
 
 			SslSelectChannelConnector lSSLConnector = new SslSelectChannelConnector();
@@ -97,7 +108,8 @@ public class JettyEngine extends BaseEngine {
 
 			mJettyServer.setStopAtShutdown(true);
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Starting embedded Jetty server...");
+				mLog.debug("Starting embedded Jetty Server '"
+						+ Server.getVersion() + "'...");
 			}
 			mJettyServer.start();
 			// if (mLog.isDebugEnabled()) {
@@ -106,10 +118,13 @@ public class JettyEngine extends BaseEngine {
 			// mJettyServer.join();
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
-					+ "Instantiating Embedded Jetty Server: " + lEx.getMessage());
+					+ "Instantiating Embedded Jetty Server '" 
+					+ Server.getVersion() + "': "
+					+ lEx.getMessage());
 		}
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Jetty Server sucessfully instantiated at port "
+			mLog.debug("Jetty Server '" + Server.getVersion()
+					+ "' sucessfully instantiated at port "
 					+ lPort + ", SSL port " + lSSLPort + "...");
 		}
 	}
@@ -118,7 +133,7 @@ public class JettyEngine extends BaseEngine {
 	public void startEngine()
 			throws WebSocketException {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Starting Jetty engine '"
+			mLog.debug("Starting Jetty '" + Server.getVersion() + "' engine '"
 					+ getId()
 					+ "...");
 		}
@@ -126,17 +141,25 @@ public class JettyEngine extends BaseEngine {
 		super.startEngine();
 
 		if (mLog.isInfoEnabled()) {
-			mLog.info("Jetty engine '"
+			mLog.info("Jetty '"
+					+ Server.getVersion()
+					+ "' engine '"
 					+ getId()
 					+ "' started.");
 		}
+
+		// fire the engine start event
+		engineStarted();
 	}
 
 	@Override
 	public void stopEngine(CloseReason aCloseReason)
 			throws WebSocketException {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Stopping Jetty engine '" + getId() + "...");
+			mLog.debug("Stopping Jetty '" 
+					+ Server.getVersion() 
+					+ "' engine '"
+					+ getId() + "...");
 		}
 
 		// resetting "isRunning" causes engine listener to terminate
@@ -151,7 +174,9 @@ public class JettyEngine extends BaseEngine {
 			mJettyServer.stop();
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
-					+ "Stopping Embedded Jetty Server: " + lEx.getMessage());
+					+ "Stopping Embedded Jetty Server '"
+					+ Server.getVersion() + "': "
+					+ lEx.getMessage());
 		}
 
 		/*
@@ -178,12 +203,16 @@ public class JettyEngine extends BaseEngine {
 		}
 		}
 		 */
+
+		// fire the engine stopped event
+		engineStopped();
 	}
 
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Detected new connector at port " + aConnector.getRemotePort() + ".");
+			mLog.debug("Detected new connector at port "
+					+ aConnector.getRemotePort() + ".");
 		}
 		super.connectorStarted(aConnector);
 	}
@@ -191,7 +220,8 @@ public class JettyEngine extends BaseEngine {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Detected stopped connector at port " + aConnector.getRemotePort() + ".");
+			mLog.debug("Detected stopped connector at port "
+					+ aConnector.getRemotePort() + ".");
 		}
 		super.connectorStopped(aConnector, aCloseReason);
 	}

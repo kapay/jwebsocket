@@ -23,29 +23,29 @@ import java.util.Map;
  * @version $Id$
  */
 public interface PluginConfiguration extends Configuration {
-  /**
-   * @return the package
-   */
-  String getPackage();
 
-  /**
-   * @return the jar
-   */
-  String getJar();
+	/**
+	 * @return the package
+	 */
+	String getPackage();
 
-  /**
-   * @return the namespace
-   */
-  String getNamespace();
+	/**
+	 * @return the jar
+	 */
+	String getJar();
 
-  /**
-   * @return the list of servers
-   */
-  List<String> getServers();
+	/**
+	 * @return the namespace
+	 */
+	String getNamespace();
 
-  /**
-   * @return the settings
-   */
-  Map<String, String> getSettings();
+	/**
+	 * @return the list of servers
+	 */
+	List<String> getServers();
 
+	/**
+	 * @return the settings
+	 */
+	Map<String, String> getSettings();
 }
