@@ -19,9 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.config.xml.ChannelConfig;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.security.User;

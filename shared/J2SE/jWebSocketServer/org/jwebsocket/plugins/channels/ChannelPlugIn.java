@@ -120,7 +120,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 	private static Logger mLog = Logging.getLogger(ChannelPlugIn.class);
 	/** channel manager */
 	private ChannelManager mChannelManager = null;
-	/** namespace for channels */
+	/** name space for channels */
 	private static final String NS_CHANNELS_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.channels";
 	/** empty string */
 	private static final String EMPTY_STRING = "";
@@ -128,14 +128,14 @@ public class ChannelPlugIn extends TokenPlugIn {
 	private static final String PUBLISHER = "publisher";
 	/** subscriber request string */
 	private static final String SUBSCRIBER = "subscriber";
-	/** channel plugin handshake protocol operation values */
+	/** channel plug-in handshake protocol operation values */
 	private static final String AUTHORIZE = "authorize";
 	private static final String PUBLISH = "publish";
 	private static final String STOP = "stop";
 	private static final String SUBSCRIBE = "subscribe";
 	private static final String UNSUBSCRIBE = "unsubscribe";
 	private static final String GET_CHANNELS = "getChannels";
-	/** channel plugin handshake protocol parameters */
+	/** channel plug-in handshake protocol parameters */
 	private static final String DATA = "data";
 	private static final String EVENT = "event";
 	private static final String ACCESS_KEY = "access_key";
@@ -144,10 +144,10 @@ public class ChannelPlugIn extends TokenPlugIn {
 	private static final String CONNECTED = "connected";
 
 	/**
-	 * Constructor with plugin config
+	 * Constructor with plug-in config
 	 *
 	 * @param aConfiguration
-	 *            the plugin configuration for this PlugIn
+	 *            the plug-in configuration for this PlugIn
 	 */
 	public ChannelPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
@@ -210,8 +210,9 @@ public class ChannelPlugIn extends TokenPlugIn {
 		aConnector.getSession().setSessionId(Tools.getMD5(aConnector.generateUID() + "." + lRand.nextInt()));
 		// call super connectorStarted
 		super.connectorStarted(aConnector);
+
 		// and send the welcome message incl. the session id
-		sendWelcome(aConnector);
+		// sendWelcome(aConnector);
 	}
 
 	/**
@@ -367,7 +368,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 						+ "' channel not found for given channelId '" + aChannelId + "'");
 				return;
 			}
-			Publisher lPublisher = authorizePublisher(aConnector, lChannel, lUser, lSecretKey, lAccessKey);
+			Publisher lPublisher = authorizePublisher(aConnector, lChannel,
+					lUser, lSecretKey, lAccessKey);
 			if (!lPublisher.isAuthorized()) {
 				// couldn't authorize the publisher
 				sendError(aConnector, aChannelId,
@@ -376,7 +378,9 @@ public class ChannelPlugIn extends TokenPlugIn {
 						+ aChannelId + "'");
 			} else {
 				lChannel.addPublisher(lPublisher);
-				Token lResponseToken = mChannelManager.getChannelSuccessToken(aConnector, aChannelId,
+				Token lResponseToken =
+						mChannelManager.getChannelSuccessToken(
+						aConnector, aChannelId,
 						ChannelEventEnum.AUTHORIZE);
 				mChannelManager.publishToLoggerChannel(lResponseToken);
 				// send the success response
@@ -410,10 +414,12 @@ public class ChannelPlugIn extends TokenPlugIn {
 		// TODO: Commented our by Alex: Why may only the owner publish something ?
 		if (aChannel.getAccessKey().equals(aAccessKey)
 				&& aChannel.getSecretKey().equals(aSecretKey) /* && user.getLoginname().equals(channel.getOwner())*/) {
-			lPublisher = new Publisher(aConnector, aUser.getLoginname(), aChannel.getId(), lNow, lNow, true);
+			lPublisher = new Publisher(aConnector, aUser.getLoginname(),
+					aChannel.getId(), lNow, lNow, true);
 			mChannelManager.storePublisher(lPublisher);
 		} else {
-			lPublisher = new Publisher(aConnector, aUser.getLoginname(), aChannel.getId(), lNow, lNow, false);
+			lPublisher = new Publisher(aConnector, aUser.getLoginname(),
+					aChannel.getId(), lNow, lNow, false);
 		}
 		return lPublisher;
 	}
@@ -597,6 +603,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 *            the connector object
 	 */
+	// TODO: We need to implement the channel welcome a bit different!
+	// TODO: No separate session id here!
 	private void sendWelcome(WebSocketConnector aConnector) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Sending connected message to the channels");

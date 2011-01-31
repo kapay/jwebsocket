@@ -50,6 +50,7 @@ public class BasePublisherStore
 	 * default constructor
 	 */
 	public BasePublisherStore() {
+		super("channelPublishers");
 		init();
 	}
 

@@ -80,7 +80,7 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 				if (mLog.isDebugEnabled()) {
 					mLog.debug("Loading from the jar file '" + lEngineConfig.getName() + "'  ");
 				}
-				lJarFilePath = JWebSocketConfig.getLibraryFolderPath(lEngineConfig.getJar());
+				lJarFilePath = JWebSocketConfig.getLibsFolder(lEngineConfig.getJar());
 				// jarFilePath may be null if .jar is included in server bundle
 				if (lJarFilePath != null) {
 					if (mLog.isDebugEnabled()) {
@@ -135,7 +135,7 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 					if (mLog.isDebugEnabled()) {
 						mLog.debug("Load server from the jar file '" + lServerConfig.getName());
 					}
-					lJarFilePath = JWebSocketConfig.getLibraryFolderPath(lServerConfig.getJar());
+					lJarFilePath = JWebSocketConfig.getLibsFolder(lServerConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
 					if (lJarFilePath != null) {
 						if (mLog.isDebugEnabled()) {
@@ -197,7 +197,7 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 						mLog.debug("Plug-in '" + lPluginConfig.getName()
 								+ "' trying to load from file...");
 					}
-					String lJarFilePath = JWebSocketConfig.getLibraryFolderPath(lPluginConfig.getJar());
+					String lJarFilePath = JWebSocketConfig.getLibsFolder(lPluginConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
 					if (lJarFilePath != null) {
 						mClassLoader.addFile(lJarFilePath);
@@ -265,7 +265,7 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 				lFilterClass = loadFilterFromClasspath(lFilterConfig.getName());
 				if (lFilterClass == null) {
 					String lJarFilePath =
-							JWebSocketConfig.getLibraryFolderPath(lFilterConfig.getJar());
+							JWebSocketConfig.getLibsFolder(lFilterConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
 					if (lJarFilePath != null) {
 						mClassLoader.addFile(lJarFilePath);

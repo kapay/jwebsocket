@@ -23,8 +23,8 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 import org.jwebsocket.api.IBasicStorage;
+import org.jwebsocket.config.JWebSocketConfig;
 
 /**
  *
@@ -32,17 +32,15 @@ import org.jwebsocket.api.IBasicStorage;
  */
 public class EhCacheStorage implements IBasicStorage {
 
+	private static final int DEF_MAX_IN_MEMORY = 1000;
 	private static int mInstanceCounter = 0;
 	private String mName = null;
-	CacheManager mCacheManager = null;
-	Cache mCache = null;
+	private static CacheManager mCacheManager = null;
+	private Cache mCache = null;
 
-	/**
-	 *
-	 */
-	public EhCacheStorage() {
+	public EhCacheStorage(String aId) {
 		mInstanceCounter++;
-		mName = "EhCacheStorage" + mInstanceCounter;
+		mName = aId;
 		initialize();
 	}
 
@@ -96,7 +94,7 @@ public class EhCacheStorage implements IBasicStorage {
 	@Override
 	public Object get(Object aKey) {
 		Element lElement = mCache.get(aKey);
-		return (lElement != null ? lElement.getObjectValue() : null );
+		return (lElement != null ? lElement.getObjectValue() : null);
 	}
 
 	/**
@@ -209,12 +207,17 @@ public class EhCacheStorage implements IBasicStorage {
 	@Override
 	public void initialize() {
 		if (mCacheManager == null) {
-			mCacheManager = new CacheManager(/*"conf/ehcache.xml"*/);
+			mCacheManager = new CacheManager(JWebSocketConfig.getConfigFolder("ehcache.xml"));
+		}
+		if (mCacheManager != null) {
 			// TODO: currenly hard coded, make configurable!
-			mCache = new Cache(
-					new CacheConfiguration(mName, 1000).memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU).overflowToDisk(false).eternal(true).diskPersistent(false).diskExpiryThreadIntervalSeconds(0));
-			// makes no sense for eteral setting: timeToLiveSeconds(60).timeToIdleSeconds(30).
-			mCacheManager.addCache(mCache);
+			mCache = mCacheManager.getCache(mName);
+			if (mCache == null) {
+				mCache = new Cache(new CacheConfiguration(mName, DEF_MAX_IN_MEMORY));
+				mCacheManager.addCache(mCache);
+			}
+			// ;.memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU).overflowToDisk(false).eternal(true).diskPersistent(false).diskExpiryThreadIntervalSeconds(0));
+			// makes no sense for eternal setting: timeToLiveSeconds(60).timeToIdleSeconds(30).
 		}
 	}
 
@@ -223,6 +226,8 @@ public class EhCacheStorage implements IBasicStorage {
 	 */
 	@Override
 	public void shutdown() {
-		mCacheManager.shutdown();
+		if (mCacheManager != null) {
+			mCacheManager.shutdown();
+		}
 	}
 }

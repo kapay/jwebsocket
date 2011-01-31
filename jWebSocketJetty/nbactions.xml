@@ -5,6 +5,10 @@
             <goals>
                 <goal>jetty:stop</goal>
                 <goal>jetty:run</goal>
+                
+                
+                
+                
             </goals>
         </action>
         <action>

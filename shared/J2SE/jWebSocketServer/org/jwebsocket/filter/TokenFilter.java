@@ -27,10 +27,12 @@ import org.jwebsocket.token.Token;
  * @author aschulze
  */
 public class TokenFilter extends BaseFilter {
-  
+
+/*
   public TokenFilter(String theId) {
     super(theId);
   }
+*/
 
   public TokenFilter(FilterConfiguration configuration) {
     super(configuration);

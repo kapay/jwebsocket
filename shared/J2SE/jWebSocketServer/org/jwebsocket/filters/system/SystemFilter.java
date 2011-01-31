@@ -32,18 +32,11 @@ public class SystemFilter extends TokenFilter {
 
 	private static Logger mLog = Logging.getLogger(SystemFilter.class);
 
-	public SystemFilter(String aId) {
-		super(aId);
+	public SystemFilter(FilterConfiguration aConfig) {
+		super(aConfig);
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Instantiating system filter...");
 		}
-	}
-
-	/**
-	 * @param aId
-	 */
-	public SystemFilter(FilterConfiguration aConfiguration) {
-		super(aConfiguration);
 	}
 
 	/**

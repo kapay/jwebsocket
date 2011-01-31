@@ -16,6 +16,7 @@
 package org.jwebsocket.filters.sample;
 
 import org.apache.log4j.Logger;
+import org.jwebsocket.api.FilterConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.filter.TokenFilter;
 import org.jwebsocket.kit.FilterResponse;
@@ -33,10 +34,10 @@ public class SampleFilter extends TokenFilter {
 
 	/**
 	 *
-	 * @param aId
+	 * @param aConfig
 	 */
-	public SampleFilter(String aId) {
-		super(aId);
+	public SampleFilter(FilterConfiguration aConfig) {
+		super(aConfig);
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Instantiating sample filter...");
 		}

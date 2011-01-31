@@ -84,13 +84,16 @@ public class JDBCStream extends TokenStream {
 	@Override
 	public void stopStream(long aTimeout) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Stopping Time stream...");
+			mLog.debug("Stopping JDBC stream...");
 		}
 		long lStarted = new Date().getTime();
 		mIsRunning = false;
 
 		try {
-			mConnection.close();
+			if (null != mConnection
+					&& !mConnection.isClosed()) {
+				mConnection.close();
+			}
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}

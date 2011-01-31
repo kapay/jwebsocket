@@ -21,6 +21,8 @@
 package org.jwebsocket.ui;
 
 import java.awt.Toolkit;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 
@@ -29,9 +31,9 @@ import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.client.token.BaseTokenClient;
 import org.jwebsocket.config.JWebSocketClientConstants;
-import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * Java Swing client for jWebSocket
@@ -54,7 +56,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 			lblTitle.setText(lblTitle.getText().replace("{ver}", JWebSocketClientConstants.VERSION_STR));
 			client = new BaseTokenClient();
 			// uncomment following line to test #03 draft 
-            // (nothing else is required, because server-side orients itself according to client request)
+			// (nothing else is required, because server-side orients itself according to client request)
 			//client.setDraft(JWebSocketCommonConstants.WS_DRAFT_03);
 			client.addListener(this);
 			icoDisconnected = new ImageIcon(getClass().getResource("/images/disconnected.png"));
@@ -144,6 +146,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         btnGetUserRoles = new javax.swing.JButton();
         lblURL = new javax.swing.JLabel();
         txfURL = new javax.swing.JTextField();
+        btnRPC = new javax.swing.JButton();
         mnbMain = new javax.swing.JMenuBar();
         pmnFile = new javax.swing.JMenu();
         mniExit = new javax.swing.JMenuItem();
@@ -445,6 +448,22 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(txfURL, gridBagConstraints);
 
+        btnRPC.setText("RPC-Demo");
+        btnRPC.setMaximumSize(new java.awt.Dimension(100, 20));
+        btnRPC.setMinimumSize(new java.awt.Dimension(100, 20));
+        btnRPC.setPreferredSize(new java.awt.Dimension(100, 20));
+        btnRPC.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRPCActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
+        getContentPane().add(btnRPC, gridBagConstraints);
+
         pmnFile.setText("File");
 
         mniExit.setText("Exit");
@@ -528,6 +547,26 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}//GEN-LAST:event_btnGetUserRolesActionPerformed
+
+	private void btnRPCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRPCActionPerformed
+		// create a new token, use namespace of RPC plugin and "rpc" for type
+		Token lToken = TokenFactory.createToken("org.jwebsocket.plugins.rpc", "rpc");
+		// pass the path of the class
+		lToken.setString("classname", "org.jwebsocket.rpc.sample.SampleRPCLibrary");
+		// pass the method to be called
+		lToken.setString("method", "getMD5");
+		// create the list of arguments to be applied to the method
+		List lArgs = new ArrayList();
+		lArgs.add("This is a message for MD5 calculation!");
+		// pass the list of arguments to the method (automatic methods matching)
+		lToken.setList("args", lArgs);
+		try {
+			client.sendToken(lToken);
+		} catch (WebSocketException ex) {
+			// process potential exception
+			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+		}
+	}//GEN-LAST:event_btnRPCActionPerformed
 
 	private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnConnectActionPerformed
 		try {
@@ -632,6 +671,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnPing;
+    private javax.swing.JButton btnRPC;
     private javax.swing.JButton btnSend;
     private javax.swing.JButton btnShutdown;
     private javax.swing.JLabel lblMessage;

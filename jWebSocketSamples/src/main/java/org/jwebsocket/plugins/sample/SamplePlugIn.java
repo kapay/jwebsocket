@@ -38,6 +38,10 @@ public class SamplePlugIn extends TokenPlugIn {
 	private final static String NS_SAMPLE = JWebSocketServerConstants.NS_BASE + ".plugins.samples";
 	private final static String SAMPLE_VAR = NS_SAMPLE + ".started";
 
+	/**
+	 *
+	 * @param aConfiguration
+	 */
 	public SamplePlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
@@ -78,7 +82,8 @@ public class SamplePlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aResponse,
+			WebSocketConnector aConnector, Token aToken) {
 		// get the type of the token
 		// the type can be associated with a "command"
 		String lType = aToken.getType();

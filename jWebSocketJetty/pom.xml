@@ -80,8 +80,8 @@
 							change this according to your environment
 						-->
 						<defaultsDescriptor>src/main/resources/webdefault.xml</defaultsDescriptor>
+						<tempDirectory>${project.build.directory}/../../../../rte/jWebSocket-${project.version}/temp</tempDirectory>
 <!--
-						<tempDirectory>${project.build.directory}/work</tempDirectory>
 						<overrideDescriptor>src/main/resources/override-web.xml</overrideDescriptor>
 -->
 					</webAppConfig>

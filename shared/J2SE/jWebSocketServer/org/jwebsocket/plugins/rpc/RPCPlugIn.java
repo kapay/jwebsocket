@@ -172,7 +172,7 @@ public class RPCPlugIn extends TokenPlugIn {
 				if (lClass == null) {
 					String lJarFilePath = null;
 					try {
-						lJarFilePath = JWebSocketConfig.getLibraryFolderPath(lValue);
+						lJarFilePath = JWebSocketConfig.getLibsFolder(lValue);
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Trying to load class '" + lClassName + "' from jar '" + lJarFilePath + "'...");
 						}

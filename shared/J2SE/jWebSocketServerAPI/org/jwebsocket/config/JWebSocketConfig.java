@@ -183,81 +183,160 @@ public final class JWebSocketConfig implements Config {
 		private List<RoleConfig> mGlobalRoles;
 		private List<ChannelConfig> mChannels;
 
+		/**
+		 *
+		 * @param aInstallation
+		 * @return
+		 */
 		public Builder setInstallation(String aInstallation) {
 			mInstallation = aInstallation;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aProtocol
+		 * @return
+		 */
 		public Builder setProtocol(String aProtocol) {
 			mProtocol = aProtocol;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aNodeId
+		 * @return
+		 */
 		public Builder setNodeId(String aNodeId) {
 			mNodeId = aNodeId;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aJWebSocketHome
+		 * @return
+		 */
 		public Builder setJWebSocketHome(String aJWebSocketHome) {
 			jWebSocketHome = aJWebSocketHome;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aInitializer
+		 * @return
+		 */
 		public Builder setInitializer(String aInitializer) {
 			mInitializer = aInitializer;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aLibraryFolder
+		 * @return
+		 */
 		public Builder setLibraryFolder(String aLibraryFolder) {
 			mLibraryFolder = aLibraryFolder;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aEngines
+		 * @return
+		 */
 		public Builder setEngines(List<EngineConfig> aEngines) {
 			mEngines = aEngines;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aServers
+		 * @return
+		 */
 		public Builder setServers(List<ServerConfig> aServers) {
 			mServers = aServers;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aPlugins
+		 * @return
+		 */
 		public Builder setPlugins(List<PluginConfig> aPlugins) {
 			mPlugins = aPlugins;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aFilters
+		 * @return
+		 */
 		public Builder setFilters(List<FilterConfig> aFilters) {
 			mFilters = aFilters;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aLoggingConfigs
+		 * @return
+		 */
 		public Builder setLoggingConfig(List<LoggingConfig> aLoggingConfigs) {
 			mLoggingConfig = aLoggingConfigs.get(0);
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aRights
+		 * @return
+		 */
 		public Builder setGlobalRights(List<RightConfig> aRights) {
 			mGlobalRights = aRights;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aRoles
+		 * @return
+		 */
 		public Builder setGlobalRoles(List<RoleConfig> aRoles) {
 			mGlobalRoles = aRoles;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aUsers
+		 * @return
+		 */
 		public Builder setUsers(List<UserConfig> aUsers) {
 			mUsers = aUsers;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param aChannels
+		 * @return
+		 */
 		public Builder setChannels(List<ChannelConfig> aChannels) {
 			mChannels = aChannels;
 			return this;
 		}
 
+		/**
+		 *
+		 * @return
+		 */
 		public synchronized JWebSocketConfig buildConfig() {
 			if (mConfig == null) {
 				mConfig = new JWebSocketConfig(this);
@@ -376,6 +455,7 @@ public final class JWebSocketConfig implements Config {
 		File lFile;
 		// try to obtain JWEBSOCKET_HOME environment variable
 		lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
+		System.out.println("Looking for config file at %" + JWEBSOCKET_HOME + "%: " + lWebSocketHome + "...");
 		if (lWebSocketHome != null) {
 			// append trailing slash if needed
 			if (!lWebSocketHome.endsWith(lFileSep)) {
@@ -384,30 +464,35 @@ public final class JWebSocketConfig implements Config {
 			// jWebSocket.xml can be located in %JWEBSOCKET_HOME%/conf
 			lWebSocketXML = lWebSocketHome + "conf" + lFileSep + JWEBSOCKET_XML;
 			lFile = new File(lWebSocketXML);
+			System.out.println("Checking config " + lWebSocketXML);
 			if (lFile.exists()) {
 				return lWebSocketXML;
 			}
 		}
 		// try to obtain CATALINA_HOME environment variable
 		lWebSocketHome = System.getenv(CATALINA_HOME);
+		System.out.println("Looking for config file at %" + CATALINA_HOME + "%: " + lWebSocketHome + "...");
 		if (lWebSocketHome != null) {
 			// append trailing slash if needed
 			if (!lWebSocketHome.endsWith(lFileSep)) {
 				lWebSocketHome += lFileSep;
 			}
 			// jWebSocket.xml can be located in %CATALINA_HOME%/conf
-			lWebSocketXML = lWebSocketHome + "conf" + lFileSep + JWEBSOCKET_XML;
+			lWebSocketXML = lWebSocketHome + "conf" + lFileSep + JWEBSOCKET_XML + "...";
 			lFile = new File(lWebSocketXML);
+			System.out.println("Checking config " + lWebSocketXML);
 			if (lFile.exists()) {
 				return lWebSocketXML;
 			}
 		}
 		// finally try to find config file at %CLASSPATH%/conf/
 		URL lURL = Thread.currentThread().getContextClassLoader().getResource("conf/" + JWEBSOCKET_XML);
+		System.out.println("Looking for config file in classpath " + lURL.toString());
 		if (lURL != null) {
 			try {
 				URI lFilename = lURL.toURI();
 				lFile = new File(lFilename);
+				System.out.println("Checking config " + lFile.getPath());
 				if (lFile.exists()) {
 					lWebSocketXML = lFile.getPath();
 					return lWebSocketXML;
@@ -421,62 +506,115 @@ public final class JWebSocketConfig implements Config {
 	/**
 	 * private method that checks the path of the jWebSocket.xml file
 	 *
+	 * @param aSubFolder 
+	 * @param aFilename
 	 * @return the path to jWebSocket.xml
 	 */
-	public static String getLibraryFolderPath(String fileName) {
-		String lWebSocketLib = null;
-		String lWebSocketHome = null;
+	public static String getSubFolder(String aText, String aSubFolder,
+			String aSubFolderTomcat, String aFilename) {
+
+		String lPath = null;
+		String lJWebSocketHome = null;
 		String lFileSep = null;
 		File lFile = null;
 
 		checkLogs();
 
 		// try to load lib from %JWEBSOCKET_HOME%/libs folder
-		lWebSocketHome = System.getenv(JWEBSOCKET_HOME);
+		lJWebSocketHome = System.getenv(JWEBSOCKET_HOME);
 		lFileSep = System.getProperty("file.separator");
-		if (lWebSocketHome != null) {
+		if (lJWebSocketHome != null) {
 			// append trailing slash if needed
-			if (!lWebSocketHome.endsWith(lFileSep)) {
-				lWebSocketHome += lFileSep;
+			if (!lJWebSocketHome.endsWith(lFileSep)) {
+				lJWebSocketHome += lFileSep;
 			}
 			// jar can to be located in %JWEBSOCKET_HOME%/libs
-			lWebSocketLib = lWebSocketHome + "libs" + lFileSep + fileName;
-			lFile = new File(lWebSocketLib);
+			lPath = lJWebSocketHome + aSubFolder + lFileSep
+					+ (null != aFilename ? aFilename : "");
+			lFile = new File(lPath);
 			if (lFile.exists()) {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug("Found lib at " + lWebSocketLib + "...");
+					mLog.debug("Found " + aText + " at " + lPath + "...");
 				}
-				return lWebSocketLib;
+				return lPath;
 			} else {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug(fileName + " not found at %" + JWEBSOCKET_HOME + "%/libs.");
+					mLog.debug(aFilename + " not found at %"
+							+ JWEBSOCKET_HOME + "%/" + aSubFolder + ".");
 				}
 			}
 		}
 
 		// try to load lib from %CATALINA_HOME%/libs folder
-		lWebSocketHome = System.getenv(CATALINA_HOME);
+		lJWebSocketHome = System.getenv(CATALINA_HOME);
 		lFileSep = System.getProperty("file.separator");
-		if (lWebSocketHome != null) {
+		if (lJWebSocketHome != null) {
 			// append trailing slash if needed
-			if (!lWebSocketHome.endsWith(lFileSep)) {
-				lWebSocketHome += lFileSep;
+			if (!lJWebSocketHome.endsWith(lFileSep)) {
+				lJWebSocketHome += lFileSep;
 			}
 			// jars can to be located in %CATALINA_HOME%/lib
-			lWebSocketLib = lWebSocketHome + "lib" + lFileSep + fileName;
-			lFile = new File(lWebSocketLib);
+			lPath = lJWebSocketHome + aSubFolderTomcat + lFileSep
+					+ (null != aFilename ? aFilename : "");
+			lFile = new File(lPath);
 			if (lFile.exists()) {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug("Found lib at " + lWebSocketLib + "...");
+					mLog.debug("Found " + aText + " at " + lPath + "...");
 				}
-				return lWebSocketLib;
+				return lPath;
 			} else {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug(fileName + " not found at %" + CATALINA_HOME + "/lib%.");
+					mLog.debug(aFilename + " not found at %" + CATALINA_HOME
+							+ "/" + aSubFolderTomcat + "%.");
 				}
 			}
 		}
 
 		return null;
+	}
+
+	/**
+	 *
+	 * @param aFilename
+	 * @return
+	 */
+	public static String getLogsFolder(String aFilename) {
+		return getSubFolder("log file", "logs", "logs", aFilename);
+	}
+
+	/**
+	 *
+	 * @param aFilename
+	 * @return
+	 */
+	public static String getTempFolder(String aFilename) {
+		return getSubFolder("temporary file", "temp", "work", aFilename);
+	}
+
+	/**
+	 *
+	 * @param aFilename
+	 * @return
+	 */
+	public static String getBinFolder(String aFilename) {
+		return getSubFolder("binary file", "bin", "bin", aFilename);
+	}
+
+	/**
+	 *
+	 * @param aFilename
+	 * @return
+	 */
+	public static String getConfigFolder(String aFilename) {
+		return getSubFolder("config file", "conf", "conf", aFilename);
+	}
+
+	/**
+	 *
+	 * @param aFilename
+	 * @return
+	 */
+	public static String getLibsFolder(String aFilename) {
+		return getSubFolder("library", "libs", "lib", aFilename);
 	}
 }

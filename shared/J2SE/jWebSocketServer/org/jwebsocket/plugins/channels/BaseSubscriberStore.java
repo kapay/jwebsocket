@@ -57,6 +57,7 @@ public class BaseSubscriberStore
 	 * default constructor
 	 */
 	public BaseSubscriberStore() {
+		super("channelSubscribers");
 		init();
 	}
 

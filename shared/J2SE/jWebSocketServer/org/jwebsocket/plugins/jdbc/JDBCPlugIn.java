@@ -61,7 +61,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_JDBC);
-		mCache = new EhCacheStorage();
+		mCache = new EhCacheStorage(NS_JDBC);
 	}
 
 	@Override
