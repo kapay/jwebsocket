@@ -557,7 +557,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		lToken.setString("method", "getMD5");
 		// create the list of arguments to be applied to the method
 		List lArgs = new ArrayList();
-		lArgs.add("This is a message for MD5 calculation!");
+		lArgs.add(txfMessage.getText());
 		// pass the list of arguments to the method (automatic methods matching)
 		lToken.setList("args", lArgs);
 		try {

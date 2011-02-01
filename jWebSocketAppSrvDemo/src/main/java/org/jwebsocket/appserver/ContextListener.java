@@ -17,6 +17,7 @@ package org.jwebsocket.appserver;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import org.jwebsocket.console.JWebSocketTokenListenerSample;
 
 import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.server.TokenServer;
@@ -28,26 +29,36 @@ import org.jwebsocket.server.TokenServer;
  */
 public class ContextListener implements ServletContextListener {
 
-  /**
-   * initializes the web application on startup.
-   * @param aSCE
-   */
-  @Override
-  public void contextInitialized(ServletContextEvent aSCE) {
-    // start the jWebSocket server sub system
-    JWebSocketFactory.start("");
+	/**
+	 * initializes the web application on startup.
+	 * @param aSCE
+	 */
+	@Override
+	public void contextInitialized(ServletContextEvent aSCE) {
+		// start the jWebSocket server sub system
+		JWebSocketFactory.start("");
 
-	// assign web socket server to servlet bridge
-	ServletBridge.setServer((TokenServer)JWebSocketFactory.getServer("ts0"));
-  }
+		// get the token server
+		// and and a listener to it (for demo purposes)
+		TokenServer lTS0 = (TokenServer) JWebSocketFactory.getServer("ts0");
+		if (lTS0 != null) {
+			// and add the sample listener to the server's listener chain
+			lTS0.addListener(new JWebSocketTokenListenerSample());
+		}
 
-  /**
-   * cleans up the web application on termination.
-   * @param aSCE
-   */
-  @Override
-  public void contextDestroyed(ServletContextEvent aSCE) {
-    // stop the jWebSocket server sub system
-    JWebSocketFactory.stop();
-  }
+
+
+		// assign web socket server to servlet bridge
+		ServletBridge.setServer((TokenServer) JWebSocketFactory.getServer("ts0"));
+	}
+
+	/**
+	 * cleans up the web application on termination.
+	 * @param aSCE
+	 */
+	@Override
+	public void contextDestroyed(ServletContextEvent aSCE) {
+		// stop the jWebSocket server sub system
+		JWebSocketFactory.stop();
+	}
 }
