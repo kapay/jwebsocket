@@ -160,11 +160,11 @@ public class RPCPlugIn extends TokenPlugIn {
 		// TODO: move JWebSocketJarClassLoader into ServerAPI module ?
 		JWebSocketJarClassLoader lClassLoader = new JWebSocketJarClassLoader();
 		Class lClass = null;
-		Map<String, String> lSettings = getSettings();
+		Map<String, Object> lSettings = getSettings();
 		// load map of RPC libraries first
-		for (Entry<String, String> lSetting : lSettings.entrySet()) {
+		for (Entry<String, Object> lSetting : lSettings.entrySet()) {
 			String lKey = lSetting.getKey();
-			String lValue = lSetting.getValue();
+			String lValue = lSetting.getValue().toString();
 			if (lKey.startsWith("class:")) {
 				String lClassName = lKey.substring(6);
 				lClass = loadClassFromClassPath(lClassName);

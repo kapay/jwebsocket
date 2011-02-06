@@ -80,7 +80,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		handlerContext.put("right", new RightConfigHandler());
 		handlerContext.put("filter", new FilterConfigHandler());
 		handlerContext.put("log4j", new LoggingConfigHandler());
-		handlerContext.put("channel", new ChannelConfigHandler());
+		// handlerContext.put("channel", new ChannelConfigHandler());
 		handlerContext.put("threadPool", new ThreadPoolConfigHandler());
 	}
 
@@ -138,9 +138,11 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					} else if (lElementName.equals(ELEMENT_USERS)) {
 						List<UserConfig> lUsers = handleUsers(aStreamReader);
 						lConfigBuilder = lConfigBuilder.setUsers(lUsers);
+					/*
 					} else if (lElementName.equals(ELEMENT_CHANNELS)) {
 						List<ChannelConfig> lChannels = handleChannels(aStreamReader);
 						lConfigBuilder = lConfigBuilder.setChannels(lChannels);
+					 */
 					} else {
 						// ignore
 					}
@@ -425,6 +427,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	 * @throws XMLStreamException
 	 *           if exception occurs while reading
 	 */
+	/*
 	private List<ChannelConfig> handleChannels(XMLStreamReader aStreamReader) throws XMLStreamException {
 		List<ChannelConfig> lChannels = new FastList<ChannelConfig>();
 		while (aStreamReader.hasNext()) {
@@ -446,4 +449,5 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		}
 		return lChannels;
 	}
+	 */
 }

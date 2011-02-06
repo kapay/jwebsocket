@@ -117,15 +117,15 @@ public class TwitterPlugIn extends TokenPlugIn {
 	}
 
 	private void mGetSettings() {
-		CONSUMER_KEY = getSetting(CONSUMER_KEY_KEY, null);
-		CONSUMER_SECRET = getSetting(CONSUMER_SECRET_KEY, null);
+		CONSUMER_KEY = getString(CONSUMER_KEY_KEY, null);
+		CONSUMER_SECRET = getString(CONSUMER_SECRET_KEY, null);
 		try {
-			APP_ID = Integer.parseInt(getSetting(APP_ID_KEY, "0"));
+			APP_ID = Integer.parseInt(getString(APP_ID_KEY, "0"));
 		} catch (Exception lEx) {
 			APP_ID = 0;
 		}
-		ACCESSTOKEN_KEY = getSetting(ACCESSTOKEN_KEY_KEY, null);
-		ACCESSTOKEN_SECRET = getSetting(ACCESSTOKEN_SECRET_KEY, null);
+		ACCESSTOKEN_KEY = getString(ACCESSTOKEN_KEY_KEY, null);
+		ACCESSTOKEN_SECRET = getString(ACCESSTOKEN_SECRET_KEY, null);
 	}
 
 	@Override

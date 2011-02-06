@@ -55,11 +55,12 @@ public class JDBCStream extends TokenStream {
 	 */
 	@Override
 	public void startStream(long aTimeout) {
-		super.startStream(aTimeout);
-
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Starting JDBC stream...");
 		}
+
+		super.startStream(aTimeout);
+
 		/*
 		dbPollingProcess = new DBPollingProcess();
 		dbPollingThread = new Thread(dbPollingProcess);

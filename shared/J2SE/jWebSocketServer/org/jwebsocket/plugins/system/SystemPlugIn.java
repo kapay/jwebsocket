@@ -95,10 +95,10 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	private void mGetSettings() {
 		// load global settings, default to "true"
-		BROADCAST_OPEN = "true".equals(getSetting(BROADCAST_OPEN_KEY, "true"));
-		BROADCAST_CLOSE = "true".equals(getSetting(BROADCAST_CLOSE_KEY, "true"));
-		BROADCAST_LOGIN = "true".equals(getSetting(BROADCAST_LOGIN_KEY, "true"));
-		BROADCAST_LOGOUT = "true".equals(getSetting(BROADCAST_LOGOUT_KEY, "true"));
+		BROADCAST_OPEN = "true".equals(getString(BROADCAST_OPEN_KEY, "true"));
+		BROADCAST_CLOSE = "true".equals(getString(BROADCAST_CLOSE_KEY, "true"));
+		BROADCAST_LOGIN = "true".equals(getString(BROADCAST_LOGIN_KEY, "true"));
+		BROADCAST_LOGOUT = "true".equals(getString(BROADCAST_LOGOUT_KEY, "true"));
 	}
 
 	@Override

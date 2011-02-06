@@ -54,7 +54,7 @@ public class EventsPlugIn extends TokenPlugIn {
 			mLog.debug(">> Instantiating events plug-in...");
 		}
 		this.setNamespace(JWebSocketServerConstants.NS_BASE + ".plugins.events");
-		setXmlConfigPath(getSetting("SPRING_XML_CONFIG_PATH"));
+		setXmlConfigPath(getString("SPRING_XML_CONFIG_PATH"));
 
 		initialize();
 	}

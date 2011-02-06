@@ -53,11 +53,12 @@ public class MonitorStream extends TokenStream {
 	 */
 	@Override
 	public void startStream(long aTimeout) {
-		super.startStream(aTimeout);
-
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Starting Monitor stream...");
 		}
+
+		super.startStream(aTimeout);
+
 		mMonitorProcess = new MonitorProcess();
 		mMonitorThread = new Thread(mMonitorProcess);
 		mMonitorThread.start();

@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.jwebsocket.config.xml.ChannelConfig;
+// import org.jwebsocket.config.xml.ChannelConfig;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.FilterConfig;
 import org.jwebsocket.config.xml.PluginConfig;
@@ -64,7 +64,7 @@ public final class JWebSocketConfig implements Config {
 	private final LoggingConfig mLoggingConfig;
 	private final List<RightConfig> mGlobalRights;
 	private final List<RoleConfig> mGlobalRoles;
-	private final List<ChannelConfig> mChannels;
+	// private final List<ChannelConfig> mChannels;
 	private static JWebSocketConfig mConfig = null;
 
 	/**
@@ -153,7 +153,7 @@ public final class JWebSocketConfig implements Config {
 		mLoggingConfig = aBuilder.mLoggingConfig;
 		mGlobalRights = aBuilder.mGlobalRights;
 		mGlobalRoles = aBuilder.mGlobalRoles;
-		mChannels = aBuilder.mChannels;
+		// mChannels = aBuilder.mChannels;
 		// validate the config
 		validate();
 	}
@@ -181,7 +181,7 @@ public final class JWebSocketConfig implements Config {
 		private LoggingConfig mLoggingConfig;
 		private List<RightConfig> mGlobalRights;
 		private List<RoleConfig> mGlobalRoles;
-		private List<ChannelConfig> mChannels;
+		// private List<ChannelConfig> mChannels;
 
 		/**
 		 *
@@ -328,10 +328,12 @@ public final class JWebSocketConfig implements Config {
 		 * @param aChannels
 		 * @return
 		 */
+		/*
 		public Builder setChannels(List<ChannelConfig> aChannels) {
 			mChannels = aChannels;
 			return this;
 		}
+		 */
 
 		/**
 		 *
@@ -411,9 +413,11 @@ public final class JWebSocketConfig implements Config {
 	/**
 	 * @return the channels
 	 */
+	/*
 	public List<ChannelConfig> getChannels() {
 		return Collections.unmodifiableList(mChannels);
 	}
+	 */
 
 	/**
 	 * {@inheritDoc}

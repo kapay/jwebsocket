@@ -117,7 +117,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		String lBaseDir;
 		if (JWebSocketCommonConstants.SCOPE_PRIVATE.equals(lScope)) {
 			String lUsername = getUsername(aConnector);
-			lBaseDir = getSetting(PRIVATE_DIR_KEY, PRIVATE_DIR_DEF);
+			lBaseDir = getString(PRIVATE_DIR_KEY, PRIVATE_DIR_DEF);
 			if (lUsername != null) {
 				lBaseDir = lBaseDir.replace("{username}", lUsername);
 			} else {
@@ -132,7 +132,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				return;
 			}
 		} else if (JWebSocketCommonConstants.SCOPE_PUBLIC.equals(lScope)) {
-			lBaseDir = getSetting(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
+			lBaseDir = getString(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
 		} else {
 			lMsg = "invalid scope";
 			if (mLog.isDebugEnabled()) {
@@ -198,7 +198,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			lEvent.setString("name", "filesaved");
 			lEvent.setString("filename", lFilename);
 			lEvent.setString("sourceId", aConnector.getId());
-			lEvent.setString("url", getSetting(WEB_ROOT_KEY, WEB_ROOT_DEF) + lFilename);
+			lEvent.setString("url", getString(WEB_ROOT_KEY, WEB_ROOT_DEF) + lFilename);
 			// TODO: Limit notification to desired scope
 			lServer.broadcastToken(lEvent);
 		}
@@ -237,7 +237,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		String lBaseDir;
 		if (JWebSocketCommonConstants.SCOPE_PRIVATE.equals(lScope)) {
 			String lUsername = getUsername(aConnector);
-			lBaseDir = getSetting(PRIVATE_DIR_KEY, PRIVATE_DIR_DEF);
+			lBaseDir = getString(PRIVATE_DIR_KEY, PRIVATE_DIR_DEF);
 			if (lUsername != null) {
 				lBaseDir = lBaseDir.replace("{username}", lUsername);
 			} else {
@@ -252,7 +252,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				return;
 			}
 		} else if (JWebSocketCommonConstants.SCOPE_PUBLIC.equals(lScope)) {
-			lBaseDir = getSetting(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
+			lBaseDir = getString(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF);
 		} else {
 			lMsg = "invalid scope";
 			if (mLog.isDebugEnabled()) {

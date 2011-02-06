@@ -20,6 +20,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import org.json.JSONObject;
 
 import org.jwebsocket.config.Config;
 import org.jwebsocket.config.ConfigHandler;
@@ -51,7 +52,7 @@ public class PluginConfigHandler implements ConfigHandler {
 			throws XMLStreamException {
 		String lId = "", lName = "", lPackage = "", lJar = "", lNamespace = "";
 		List<String> lServers = new FastList<String>();
-		Map<String, String> lSettings = null;
+		Map<String, Object> lSettings = null;
 		while (aStreamReader.hasNext()) {
 			aStreamReader.next();
 			if (aStreamReader.isStartElement()) {
@@ -127,10 +128,10 @@ public class PluginConfigHandler implements ConfigHandler {
 	 * @throws XMLStreamException
 	 *             in case of stream exception
 	 */
-	private Map<String, String> getSettings(XMLStreamReader aStreamReader)
+	private Map<String, Object> getSettings(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
 
-		Map<String, String> lSettings = new FastMap<String, String>();
+		Map<String, Object> lSettings = new FastMap<String, Object>();
 		while (aStreamReader.hasNext()) {
 			aStreamReader.next();
 			if (aStreamReader.isStartElement()) {
@@ -138,14 +139,29 @@ public class PluginConfigHandler implements ConfigHandler {
 				if (lElementName.equals(SETTING)) {
 					// TODO: Don't just get first attribute here!
 					// Scan for key="xxx"!
-					String lKey = aStreamReader.getAttributeValue(0);
+					// String lKey = aStreamReader.getAttributeValue(0);
+					String lKey = aStreamReader.getAttributeValue(null, "key");
+					String lType = aStreamReader.getAttributeValue(null, "type");
+
 					aStreamReader.next();
 					String lValue = aStreamReader.getText();
+
 					if (lKey != null && lValue != null) {
-						lSettings.put(lKey, lValue);
+						if ("json".equalsIgnoreCase(lType)) {
+ 							JSONObject lJSON = null;
+							try{
+								lJSON = new JSONObject(lValue);
+							} catch(Exception lEx) {
+								// TODO: handle invalid JSON code in settings properly!
+							}
+							lSettings.put(lKey, lJSON);
+						} else {
+							lSettings.put(lKey, lValue);
+						}
 					}
 				}
 			}
+
 			if (aStreamReader.isEndElement()) {
 				String lElementName = aStreamReader.getLocalName();
 				if (lElementName.equals(SETTINGS)) {

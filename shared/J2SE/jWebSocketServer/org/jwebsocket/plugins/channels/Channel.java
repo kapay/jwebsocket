@@ -23,7 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.jwebsocket.async.IOFuture;
-import org.jwebsocket.config.xml.ChannelConfig;
 import org.jwebsocket.security.Right;
 import org.jwebsocket.security.Rights;
 import org.jwebsocket.security.SecurityFactory;
@@ -98,19 +97,20 @@ public final class Channel implements ChannelLifeCycle {
 	 * @param config
 	 *            the channel config
 	 */
+	/*
 	public Channel(ChannelConfig config) {
-		this.mId = config.getId();
-		this.mName = config.getName();
-		this.mIsPrivate = config.isPrivateChannel();
-		this.mIsSystem = config.isSystemChannel();
-		this.mSecretKey = config.getSecretKey();
-		this.mAccessKey = config.getAccessKey();
-		this.mOwner = config.getOwner();
-		this.mCreatedDate = System.currentTimeMillis();
-		this.mState = ChannelState.INITIALIZED;
-		this.mAuthenticated = false;
+	this.mId = config.getId();
+	this.mName = config.getName();
+	this.mIsPrivate = config.isPrivateChannel();
+	this.mIsSystem = config.isSystemChannel();
+	this.mSecretKey = config.getSecretKey();
+	this.mAccessKey = config.getAccessKey();
+	this.mOwner = config.getOwner();
+	this.mCreatedDate = System.currentTimeMillis();
+	this.mState = ChannelState.INITIALIZED;
+	this.mAuthenticated = false;
 	}
-
+	 */
 	public Channel(String aId, String aName, int aSubscriberCount,
 			boolean aPrivateChannel, boolean aSystemChannel,
 			String aSecretKey, String aAccessKey, String aOwner,
@@ -190,7 +190,9 @@ public final class Channel implements ChannelLifeCycle {
 	 * @return the list of subscribers
 	 */
 	public List<Subscriber> getSubscribers() {
-		return Collections.unmodifiableList(mSubscribers);
+		return (mSubscribers != null
+				? Collections.unmodifiableList(mSubscribers)
+				: null);
 	}
 
 	/**
@@ -242,6 +244,7 @@ public final class Channel implements ChannelLifeCycle {
 	 *            the subscriber which wants to subscribe
 	 */
 	public void subscribe(Subscriber aSubscriber, ChannelManager aChannelManager) {
+		// create new subscribers if needed
 		if (this.mSubscribers == null) {
 			this.mSubscribers = new CopyOnWriteArrayList<Subscriber>();
 		}
@@ -279,8 +282,14 @@ public final class Channel implements ChannelLifeCycle {
 		}
 		if (mSubscribers.contains(aSubscriber)) {
 			mSubscribers.remove(aSubscriber);
-			// Alex: Also remove from persistent storage.
-			aChannelManager.removeSubscriber(aSubscriber);
+			// remove channel from this subscriber (client)
+			aSubscriber.removeChannel(this.getId());
+			if (aSubscriber.getChannels().size() <= 0) {
+				aChannelManager.removeSubscriber(aSubscriber);
+			} else {
+				// TODO: upate persistent storage!
+				aChannelManager.storeSubscriber(aSubscriber);
+			}
 			if (mChannelListeners != null) {
 				for (ChannelListener listener : mChannelListeners) {
 					listener.unsubscribed(this, aSubscriber);

@@ -82,16 +82,16 @@ public class MailPlugIn extends TokenPlugIn {
 	}
 
 	private void mGetSettings() {
-		SMTP_HOST = getSetting(SMTP_HOST_KEY, null);
-		SMTP_PORT = Integer.parseInt(getSetting(SMTP_PORT_KEY, "25"));
-		SMTP_AUTH = getSetting(SMTP_AUTH_KEY, "false").equals("true");
-		SMTP_USER = getSetting(SMTP_USER_KEY, null);
-		SMTP_PASSWORD = getSetting(SMTP_PASSWORD_KEY, null);
-		SMTP_POP3BEFORE = getSetting(SMTP_POP3BEFORE_KEY, "false").equals("true");
-		POP3_HOST = getSetting(POP3_HOST_KEY, null);
-		POP3_PORT = Integer.parseInt(getSetting(POP3_PORT_KEY, "110"));
-		POP3_USER = getSetting(POP3_USER_KEY, null);
-		POP3_PASSWORD = getSetting(POP3_PASSWORD_KEY, null);
+		SMTP_HOST = getString(SMTP_HOST_KEY, null);
+		SMTP_PORT = Integer.parseInt(getString(SMTP_PORT_KEY, "25"));
+		SMTP_AUTH = getString(SMTP_AUTH_KEY, "false").equals("true");
+		SMTP_USER = getString(SMTP_USER_KEY, null);
+		SMTP_PASSWORD = getString(SMTP_PASSWORD_KEY, null);
+		SMTP_POP3BEFORE = getString(SMTP_POP3BEFORE_KEY, "false").equals("true");
+		POP3_HOST = getString(POP3_HOST_KEY, null);
+		POP3_PORT = Integer.parseInt(getString(POP3_PORT_KEY, "110"));
+		POP3_USER = getString(POP3_USER_KEY, null);
+		POP3_PASSWORD = getString(POP3_PASSWORD_KEY, null);
 	}
 
 	@Override

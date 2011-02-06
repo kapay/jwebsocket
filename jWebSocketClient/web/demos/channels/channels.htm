@@ -124,16 +124,31 @@
 
 			function auth() {
 				var lChannel = eChannel.value;
+				var lKey = eAccessKey.value;
+				var lSecret = eAccessSecret.value;
 				log( "Authenticating against channel '" + lChannel + "'..." );
 				// use access key and secret key for this channel to authenticate
 				// required to publish data only
-				var lRes = lWSC.channelAuth( lChannel, "access", "secret" );
+				var lRes = lWSC.channelAuth( lChannel, lKey, lSecret );
 				log( lWSC.resultToString( lRes ) );
 			}
 
 			function getChannels() {
 				log( "Trying to obtain channels..." );
 				var lRes = lWSC.channelGetIds();
+				log( lWSC.resultToString( lRes ) );
+			}
+
+			function getSubscribers() {
+				var lChannel = eChannel.value;
+				log( "Trying to obtain subscribers for channel '" + lChannel + "'..." );
+				var lRes = lWSC.channelGetSubscribers(lChannel);
+				log( lWSC.resultToString( lRes ) );
+			}
+
+			function getSubscriptions() {
+				log( "Trying to obtain subscriptions for client..." );
+				var lRes = lWSC.channelGetSubscriptions();
 				log( lWSC.resultToString( lRes ) );
 			}
 
@@ -148,6 +163,9 @@
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
 				eMessage = jws.$( "stxfMsg" );
+				eChannelId = jws.$( "stxfChannelId" );
+				eAccessKey = jws.$( "stxfAccessKey" );
+				eAccessSecret = jws.$( "stxfAccessSecret" );
 				eKeepAlive =  jws.$( "schkKeepAlive" );
 				eChannel = jws.$( "sselChannel" );
 
@@ -213,12 +231,12 @@
 						<input class="sbtnDlg" id="sbtnSubscribe" type="button" value="Subscribe" onclick="subscribeChannel();"
 							   title="Subscribes this client to the selected channel.">
 					</td>
-					<td width="5">
-						<input class="sbtnDlg" id="sbtnAuth" type="button" value="Auth" onclick="auth();"
-							   title="Authenticates the user against the selected channel to publish messages on it.">
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnGetSubscribers" type="button" value="Subscribers" onclick="getSubscribers();"
+							   title="Returns all subscribers of the selected channel.">
 					</td>
-					<td width="">
-						<select id="sselChannel">
+					<td width="5">
+						<select id="sselChannel" title="Channel to subscribe to or unsubscribe from.">
 							<option selected="selected" value="channelA">Channel A</option>
 							<option value="channelB">Channel B</option>
 							<option value="channelC">Channel C</option>
@@ -227,6 +245,30 @@
 							<option value="jws.admin.channel">Admin Channel</option>
 							-->
 						</select>
+					</td>
+					<td width="70">
+						<input class="stxfDlg" id="stxfAccessKey" type="text" value="AccessKey" style="width:99%"
+							   title="Access Key to authorize publish operations.">
+					</td>
+					<td width="70">
+						<input class="stxfDlg" id="stxfAccessSecret" type="text" value="AccessSecret" style="width:99%"
+							   title="Access Secret to authorize publish operations.">
+					</td>
+					<td width="5">
+						<input class="sbtnDlg" id="sbtnAuth" type="button" value="Auth" onclick="auth();"
+							   title="Authenticates the user against the selected channel to publish messages on it.">
+					</td>
+					<td width="70">
+						<input class="stxfDlg" id="stxfChannel" type="text" value="Channel" style="width:99%"
+							   title="Channel Identifier to create or remove channels.">
+					</td>
+					<td width="5">
+						<input class="sbtnDlg" id="sbtnCreate" type="button" value="Create" onclick="createChannel();"
+							   title="Creates a new channel with the given name.">
+					</td>
+					<td width="">
+						<input class="sbtnDlg" id="sbtnRemove" type="button" value="Remove" onclick="removeChannel();"
+							   title="Removes the channel with the given name.">
 					</td>
 					<td class="stdDlg" width="5">
 						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleKeepAlive();">&nbsp;Keep-Alive&nbsp;
@@ -245,7 +287,11 @@
 						<input class="sbtnDlg" id="sbtnUnsubscribe" type="button" value="Unsubscribe" onclick="unsubscribeChannel();"
 							   title="Unsubscribes this client from the selected channel.">
 					</td>
-					<td colspan="2">
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnGetSubscriptions" type="button" value="Subscriptions" onclick="getSubscriptions();"
+							   title="Returns all subscriptions of the current client.">
+					</td>
+					<td colspan="7">
 						<input class="stxfDlg" id="stxfMsg" type="text" value="Your Message" style="width:99%"
 							   title="Message to be broadcasted on the selected channel.">
 					</td>

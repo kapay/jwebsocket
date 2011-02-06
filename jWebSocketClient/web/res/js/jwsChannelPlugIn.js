@@ -32,18 +32,18 @@ jws.ChannelPlugIn = {
 	// if namespace changes update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.channels",
 
-	PUBLISHER: "publisher",
-	SUBSCRIBER: "subscriber",
+	SUBSCRIBE: "subscribe",
+	UNSUBSCRIBE: "unsubscribe",
+	GET_CHANNELS: "getChannels",
+	CREATE_CHANNEL:  "createChannel",
+	REMOVE_CHANNEL:  "removeChannel",
+	GET_SUBSCRIBERS: "getSubscribers",
+	GET_SUBSCRIPTIONS: "getSubscriptions",
 
 	AUTHORIZE: "authorize",
 	PUBLISH: "publish",
 	STOP: "stop",
-	SUBSCRIBE: "subscribe",
-	UNSUBSCRIBE: "unsubscribe",
-	GET_CHANNELS:  "getChannels",
 
-	EVENT: "event",
-	
 	//:m:*:channelSubscribe
 	//:d:en:Registers the client at the given channel on the server. _
 	//:d:en:After this operation the client obtains all messages on this _
@@ -59,8 +59,7 @@ jws.ChannelPlugIn = {
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
-				type: jws.ChannelPlugIn.SUBSCRIBER,
-				event: jws.ChannelPlugIn.SUBSCRIBE,
+				type: jws.ChannelPlugIn.SUBSCRIBE,
 				channel: aChannel
 			});
 		}
@@ -79,8 +78,7 @@ jws.ChannelPlugIn = {
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
-				type: jws.ChannelPlugIn.SUBSCRIBER,
-				event: jws.ChannelPlugIn.UNSUBSCRIBE,
+				type: jws.ChannelPlugIn.UNSUBSCRIBE,
 				channel: aChannel
 			});
 		}
@@ -99,8 +97,7 @@ jws.ChannelPlugIn = {
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
-				type: jws.ChannelPlugIn.PUBLISHER,
-				event: jws.ChannelPlugIn.AUTHORIZE,
+				type: jws.ChannelPlugIn.AUTHORIZE,
 				channel: aChannel,
 				login: this.getUsername(),
 				access_key: aAccessKey,
@@ -124,14 +121,61 @@ jws.ChannelPlugIn = {
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
-				type: jws.ChannelPlugIn.PUBLISHER,
-				event: jws.ChannelPlugIn.PUBLISH,
+				type: jws.ChannelPlugIn.PUBLISH,
 				channel: aChannel,
 				data: aData
 			});
 		}
 		return lRes;
 	},
+
+	channelCreate: function( aChannel ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.CREATE_CHANNEL,
+				channel: aChannel
+			});
+		}
+		return lRes;
+	},
+
+	channelRemove: function( aChannel ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.REMOVE_CHANNEL,
+				channel: aChannel
+			});
+		}
+		return lRes;
+	},
+
+	channelGetSubscribers: function( aChannel ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.GET_SUBSCRIBERS,
+				channel: aChannel
+			});
+		}
+		return lRes;
+	},
+
+	channelGetSubscriptions: function() {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.GET_SUBSCRIPTIONS
+			});
+		}
+		return lRes;
+	},
+
 
 	//:m:*:channelPublish
 	//:d:en:Tries to obtain all id of the channels
@@ -143,8 +187,7 @@ jws.ChannelPlugIn = {
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
-				type: jws.ChannelPlugIn.SUBSCRIBER,
-				event: jws.ChannelPlugIn.GET_CHANNELS
+				type: jws.ChannelPlugIn.GET_CHANNELS
 			});
 		}
 		return lRes;

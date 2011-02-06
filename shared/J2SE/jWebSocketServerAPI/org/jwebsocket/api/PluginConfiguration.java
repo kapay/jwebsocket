@@ -47,5 +47,5 @@ public interface PluginConfiguration extends Configuration {
 	/**
 	 * @return the settings
 	 */
-	Map<String, String> getSettings();
+	Map<String, Object> getSettings();
 }

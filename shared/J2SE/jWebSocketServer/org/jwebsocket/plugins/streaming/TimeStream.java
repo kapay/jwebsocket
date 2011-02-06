@@ -53,11 +53,12 @@ public class TimeStream extends TokenStream {
 	 */
 	@Override
 	public void startStream(long aTimeout) {
-		super.startStream(aTimeout);
-
 		if (log.isDebugEnabled()) {
 			log.debug("Starting Time stream...");
 		}
+
+		super.startStream(aTimeout);
+
 		mTimeProcess = new TimerProcess();
 		mTimeThread = new Thread(mTimeProcess);
 		mTimeThread.start();

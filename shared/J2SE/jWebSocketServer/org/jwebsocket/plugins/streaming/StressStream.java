@@ -54,11 +54,11 @@ public class StressStream extends TokenStream {
 	 */
 	@Override
 	public void startStream(long aTimeout) {
-		super.startStream(aTimeout);
-
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Starting stress stream...");
 		}
+		super.startStream(aTimeout);
+
 		mStressProcess = new StressProcess();
 		mStressThread = new Thread(mStressProcess);
 		mStressThread.start();

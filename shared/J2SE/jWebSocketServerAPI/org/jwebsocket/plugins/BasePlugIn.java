@@ -17,6 +17,7 @@ package org.jwebsocket.plugins;
 
 import java.util.Map;
 import javolution.util.FastMap;
+import org.json.JSONObject;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketPlugIn;
@@ -35,7 +36,7 @@ import org.jwebsocket.kit.CloseReason;
 public abstract class BasePlugIn implements WebSocketPlugIn {
 
 	private WebSocketPlugInChain mPlugInChain = null;
-	private Map<String, String> mSettings = new FastMap<String, String>();
+	private Map<String, Object> mSettings = new FastMap<String, Object>();
 	private PluginConfiguration mConfiguration;
 
 	/**
@@ -230,7 +231,7 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 * @param aValue
 	 */
 	@Override
-	public void addSetting(String aKey, String aValue) {
+	public void addString(String aKey, String aValue) {
 		if (aKey != null) {
 			mSettings.put(aKey, aValue);
 		}
@@ -240,7 +241,7 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 * @param aSettings
 	 */
 	// @Override
-	private void addAllSettings(Map<String, String> aSettings) {
+	private void addAllSettings(Map<String, Object> aSettings) {
 		if (aSettings != null) {
 			mSettings.putAll(aSettings);
 		}
@@ -272,8 +273,12 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 * @return
 	 */
 	@Override
-	public String getSetting(String aKey, String aDefault) {
-		String lRes = mSettings.get(aKey);
+	public String getString(String aKey, String aDefault) {
+		Object lValue = mSettings.get(aKey);
+		String lRes = null;
+		if (lValue != null && lValue instanceof String) {
+			lRes = (String) lValue;
+		}
 		return (lRes != null ? lRes : aDefault);
 	}
 
@@ -283,12 +288,38 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	 * @return
 	 */
 	@Override
-	public String getSetting(String aKey) {
-		return (aKey != null ? getSetting(aKey, null) : null);
+	public String getString(String aKey) {
+		return (aKey != null ? getString(aKey, null) : null);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public JSONObject getJSON(String aKey, JSONObject aDefault) {
+		Object lValue = mSettings.get(aKey);
+		JSONObject lRes = null;
+		if (lValue != null && lValue instanceof JSONObject) {
+			lRes = (JSONObject) lValue;
+		}
+		return (lRes != null ? lRes : aDefault);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public JSONObject getJSON(String aKey) {
+		return (aKey != null ? getJSON(aKey, null) : null);
 	}
 
 	@Override
-	public Map<String, String> getSettings() {
+	public Map<String, Object> getSettings() {
 		return mSettings;
 	}
 

@@ -62,7 +62,7 @@ public class StatisticsPlugIn extends TokenPlugIn {
 	}
 
 	private void mGetSettings() {
-		// SMTP_HOST = getSetting(SMTP_HOST_KEY, null);
+		// SMTP_HOST = getString(SMTP_HOST_KEY, null);
 		// TODO: remove this hardcoded stuff!
 		WebSocketPlugInChain lPluginChain = getPlugInChain();
 		mStreamingPlugin = lPluginChain.getPlugIn("jws.streaming");

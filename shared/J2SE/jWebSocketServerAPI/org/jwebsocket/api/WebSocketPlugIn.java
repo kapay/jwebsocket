@@ -16,6 +16,7 @@
 package org.jwebsocket.api;
 
 import java.util.Map;
+import org.json.JSONObject;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 
@@ -103,7 +104,7 @@ public interface WebSocketPlugIn {
 	 * @param aKey
 	 * @param aValue
 	 */
-	void addSetting(String aKey, String aValue);
+	void addString(String aKey, String aValue);
 
 	/**
 	 *
@@ -128,18 +129,33 @@ public interface WebSocketPlugIn {
 	 * @param aDefault
 	 * @return
 	 */
-	String getSetting(String aKey, String aDefault);
+	String getString(String aKey, String aDefault);
 
 	/**
 	 *
 	 * @param aKey
 	 * @return
 	 */
-	String getSetting(String aKey);
+	String getString(String aKey);
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	JSONObject getJSON(String aKey, JSONObject aDefault);
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	JSONObject getJSON(String aKey);
 
 	/**
 	 *
 	 * @return
 	 */
-	Map<String, String> getSettings();
+	Map<String, Object> getSettings();
 }

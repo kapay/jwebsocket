@@ -47,11 +47,10 @@ public class StatisticStream extends TokenStream {
 	 */
 	@Override
 	public void startStream(long aTimeout) {
-		super.startStream(aTimeout);
-
 		if (mog.isDebugEnabled()) {
 			mog.debug("Starting Statistics stream...");
 		}
+		super.startStream(aTimeout);
 	}
 
 	/**

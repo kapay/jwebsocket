@@ -37,7 +37,7 @@ public final class PluginConfig implements Config, PluginConfiguration {
 	private final String mPackageName;
 	private final String mNamespace;
 	private final List<String> mServers;
-	private final Map<String, String> mSettings;
+	private final Map<String, Object> mSettings;
 
 	/**
 	 * default constructor
@@ -56,7 +56,7 @@ public final class PluginConfig implements Config, PluginConfiguration {
 	 *          FastMap of settings key and value
 	 */
 	public PluginConfig(String aId, String aName, String aPackage, String aJar,
-			String aNamespace, List<String> aServers, Map<String, String> aSettings) {
+			String aNamespace, List<String> aServers, Map<String, Object> aSettings) {
 		this.mId = aId;
 		this.mName = aName;
 		this.mPackageName = aPackage;
@@ -119,7 +119,7 @@ public final class PluginConfig implements Config, PluginConfiguration {
 	 * @return the settings
 	 */
 	@Override
-	public Map<String, String> getSettings() {
+	public Map<String, Object> getSettings() {
 		return mSettings; // (FastMap)(settings.unmodifiable());
 	}
 

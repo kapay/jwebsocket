@@ -17,10 +17,14 @@ package org.jwebsocket.plugins.channels;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.config.xml.ChannelConfig;
+// import org.jwebsocket.config.xml.ChannelConfig;
+import org.jwebsocket.logging.Logging;
+import org.jwebsocket.plugins.channels.Channel.ChannelState;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.security.User;
 import org.jwebsocket.token.Token;
@@ -35,6 +39,8 @@ import org.jwebsocket.token.TokenFactory;
  */
 public class ChannelManager {
 
+	/** logger */
+	private static Logger mLog = Logging.getLogger(ChannelManager.class);
 	/** id for the logger channel */
 	private static final String LOGGER_CHANNEL_ID = "jws.logger.channel";
 	/** id for the admin channel */
@@ -47,10 +53,8 @@ public class ChannelManager {
 	private final SubscriberStore mSubscriberStore = new BaseSubscriberStore();
 	private final PublisherStore mPublisherStore = new BasePublisherStore();
 	/** in-memory store maps */
-	private final Map<String, Channel> mSystemChannels = new ConcurrentHashMap<String, Channel>();
-	private final Map<String, Channel> mPrivateChannels = new ConcurrentHashMap<String, Channel>();
-	private final Map<String, Channel> mPublicChannels = new ConcurrentHashMap<String, Channel>();
-	private Map<String, String> mChannelPluginSettings = null;
+	private final Map<String, Channel> mChannels = new ConcurrentHashMap<String, Channel>();
+	private Map<String, Object> mChannelPluginSettings = null;
 	/**
 	 * Logger channel that publish all the logs in jWebSocket system
 	 */
@@ -60,26 +64,76 @@ public class ChannelManager {
 	 */
 	private static Channel mAdminChannel = null;
 	/** setting to check for persistent storage or not */
-	public static boolean usePersistentStore;
+	private static boolean mUsePersistentStore;
 	/** setting to check if new channel creation or registration is allowed */
-	public static boolean allowNewChannels;
+	private static boolean mAllowNewChannels;
 
-	private ChannelManager(Map<String, String> aSettings) {
-		this.mChannelPluginSettings = new ConcurrentHashMap<String, String>(aSettings);
-		String lUsePersisentStore = mChannelPluginSettings.get(USE_PERSISTENT_STORE);
+	private ChannelManager(Map<String, Object> aSettings) {
+		this.mChannelPluginSettings = new ConcurrentHashMap<String, Object>(aSettings);
+		Object lUsePersisentStore = mChannelPluginSettings.get(USE_PERSISTENT_STORE);
 		if (lUsePersisentStore != null && lUsePersisentStore.equals("true")) {
-			usePersistentStore = true;
+			mUsePersistentStore = true;
 		}
-		String lAllowNewChannels = mChannelPluginSettings.get(ALLOW_NEW_CHANNELS);
+		Object lAllowNewChannels = mChannelPluginSettings.get(ALLOW_NEW_CHANNELS);
 		if (lAllowNewChannels != null && lAllowNewChannels.equals("true")) {
-			allowNewChannels = true;
+			mAllowNewChannels = true;
 		}
+
+		for (String lOption : aSettings.keySet()) {
+			if (lOption.startsWith("channel:")) {
+				String lChannelId = lOption.substring(8);
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Instantiating channel '" + lChannelId + "' by configuration...");
+				}
+				Object lObj = aSettings.get(lOption);
+				JSONObject lJSON = null;
+				if (lObj instanceof JSONObject) {
+					lJSON = (JSONObject) lObj;
+				} else {
+					lJSON = new JSONObject();
+				}
+
+				String lName = null;
+				String lKey = null;
+				String lSecret = null;
+				try {
+					lName = lJSON.getString("name");
+				} catch (Exception lEx) {
+				}
+				try {
+					lKey = lJSON.getString("key");
+				} catch (Exception lEx) {
+				}
+				try {
+					lSecret = lJSON.getString("secret");
+				} catch (Exception lEx) {
+				}
+
+				Channel lChannel = new Channel(
+						lChannelId, // String aId,
+						lName, // String aName,
+						0, // int aSubscriberCount,
+						false, // boolean aPrivateChannel,
+						false, // boolean aSystemChannel,
+						lKey, // String aSecretKey,
+						lSecret, // String aAccessKey,
+						null, // String aOwner,
+						0, // long aCreatedDate,
+						ChannelState.INITIALIZED, // ChannelState aState,
+						null, // List<Subscriber> aSubscribers,
+						null // List<Publisher> aPublishers
+						);
+				// put in channels map
+				mChannels.put(lChannel.getId(), lChannel);
+			}
+		}
+
 	}
 
 	/**
 	 * @return the static manager instance
 	 */
-	public static ChannelManager getChannelManager(Map<String, String> aSettings) {
+	public static ChannelManager getChannelManager(Map<String, Object> aSettings) {
 		return new ChannelManager(aSettings);
 	}
 
@@ -91,26 +145,12 @@ public class ChannelManager {
 	 * @throws ChannelLifeCycleException
 	 *             if exception starting the system channels
 	 */
-	public void startSystemChannels() throws ChannelLifeCycleException {
+	public void startChannels() throws ChannelLifeCycleException {
 		User lRoot = SecurityFactory.getRootUser();
 		// TODO: Process if no root user could be found!
 		JWebSocketConfig lConfig = JWebSocketConfig.getConfig();
-		for (ChannelConfig lCfg : lConfig.getChannels()) {
-			if (lCfg.isSystemChannel()) {
-				lCfg.validate();
-				if (LOGGER_CHANNEL_ID.equals(lCfg.getId())) {
-					mLoggerChannel = new Channel(lCfg);
-					mLoggerChannel.start(lRoot.getLoginname());
-				} else if (ADMIN_CHANNEL_ID.equals(lCfg.getId())) {
-					mAdminChannel = new Channel(lCfg);
-					mAdminChannel.start(lRoot.getLoginname());
-				} else {
-					Channel lChannel = new Channel(lCfg);
-					lChannel.start(lRoot.getLoginname());
-					// put in system channels map
-					mSystemChannels.put(lChannel.getId(), lChannel);
-				}
-			}
+		for (Channel lChannel : mChannels.values()) {
+			lChannel.start(lRoot.getLoginname());
 		}
 	}
 
@@ -118,18 +158,10 @@ public class ChannelManager {
 	 * Stops all the system channels running in the system and clears the system
 	 * channels map
 	 */
-	public void stopSystemChannels() throws ChannelLifeCycleException {
-		User root = SecurityFactory.getRootUser();
-		for (Map.Entry<String, Channel> entry : mSystemChannels.entrySet()) {
-			Channel channel = entry.getValue();
-			channel.stop(root.getLoginname());
-		}
-		mSystemChannels.clear();
-		if (mLoggerChannel != null) {
-			mLoggerChannel.stop(root.getLoginname());
-		}
-		if (mAdminChannel != null) {
-			mAdminChannel.stop(root.getLoginname());
+	public void stopChannels() throws ChannelLifeCycleException {
+		User lRoot = SecurityFactory.getRootUser();
+		for (Channel lChannel : mChannels.values()) {
+			lChannel.stop(lRoot.getLoginname());
 		}
 	}
 
@@ -143,42 +175,31 @@ public class ChannelManager {
 	 * @return channel object, null if not found
 	 */
 	public Channel getChannel(String aChannelId) {
-		if (mSystemChannels.containsKey(aChannelId)) {
-			return mSystemChannels.get(aChannelId);
-		}
-		if (mPrivateChannels.containsKey(aChannelId)) {
-			return mPrivateChannels.get(aChannelId);
-		}
-		if (mPublicChannels.containsKey(aChannelId)) {
-			return mPublicChannels.get(aChannelId);
-		}
-		if (usePersistentStore) {
-			// if not anywhere then look in the channel store
-			Channel channel = mChannelStore.getChannel(aChannelId);
-			if (channel != null) {
-				mPublicChannels.put(aChannelId, channel);
+		return mChannels.get(aChannelId);
+	}
+
+	public Channel removeChannel(String aChannelId) {
+		Channel lChannel = getChannel(aChannelId);
+		if (lChannel != null) {
+			mChannels.remove(aChannelId);
+			if (mUsePersistentStore) {
+				mChannelStore.removeChannel(aChannelId);
 			}
-			return channel;
+
 		}
-		return null;
+		return lChannel;
 	}
 
 	/**
-	 * Register the given channel to the list of channels maintained by the
+	 * Adds the given channel to the list of channels maintained by the
 	 * jWebSocket system.
 	 *
 	 * @param aChannel
 	 *            the channel to store.
 	 */
-	public void registerChannel(Channel aChannel) {
-		if (aChannel.isSystemChannel()) {
-			mSystemChannels.put(aChannel.getId(), aChannel);
-		} else if (aChannel.isPrivateChannel()) {
-			mPrivateChannels.put(aChannel.getId(), aChannel);
-		} else {
-			mPublicChannels.put(aChannel.getId(), aChannel);
-		}
-		if (usePersistentStore) {
+	public void addChannel(Channel aChannel) {
+		mChannels.put(aChannel.getId(), aChannel);
+		if (mUsePersistentStore) {
 			mChannelStore.storeChannel(aChannel);
 		}
 	}
@@ -343,23 +364,9 @@ public class ChannelManager {
 	}
 
 	/**
-	 * @return the system channels
+	 * @return the channels
 	 */
-	public Map<String, Channel> getSystemChannels() {
-		return Collections.unmodifiableMap(mSystemChannels);
-	}
-
-	/**
-	 * @return the private channels
-	 */
-	public Map<String, Channel> getPrivateChannels() {
-		return Collections.unmodifiableMap(mPrivateChannels);
-	}
-
-	/**
-	 * @return the public channels
-	 */
-	public Map<String, Channel> getPublicChannels() {
-		return Collections.unmodifiableMap(mPublicChannels);
+	public Map<String, Channel> getChannels() {
+		return Collections.unmodifiableMap(mChannels);
 	}
 }

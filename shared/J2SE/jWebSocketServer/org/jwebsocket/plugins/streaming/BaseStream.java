@@ -56,7 +56,7 @@ public class BaseStream implements WebSocketStream {
 	@Override
 	public void startStream(long aTimeout) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Starting base stream...");
+			mLog.debug("Starting Base stream...");
 		}
 		QueueProcessor lQueueProcessor = new QueueProcessor();
 		mQueueThread = new Thread(lQueueProcessor);
@@ -66,7 +66,7 @@ public class BaseStream implements WebSocketStream {
 	@Override
 	public void stopStream(long aTimeout) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Stopping base stream...");
+			mLog.debug("Stopping Base stream...");
 		}
 		long lStarted = new Date().getTime();
 		mIsRunning = false;
