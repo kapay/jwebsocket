@@ -99,8 +99,8 @@ public class TokenServer extends BaseServer {
 		mIsAlive = false;
 		// Shutdown the thread pool
 		if (mCachedThreadPool != null) {
-			if (mLog.isInfoEnabled()) {
-				mLog.info("Shuting down token server threadPool.");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Shutting down token server threadPool.");
 			}
 			mCachedThreadPool.shutdown(); // Disable new tasks from being
 			// submitted

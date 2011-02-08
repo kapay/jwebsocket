@@ -146,8 +146,14 @@ public class RPCPlugIn extends TokenPlugIn {
 				mLog.debug("Trying to load class '" + aClassName + "' from classpath...");
 			}
 			return Class.forName(aClassName);
-		} catch (Exception ex) {
-			mLog.error(ex.getClass().getSimpleName() + " loading class from classpath: " + ex.getMessage() + ", hence trying to load from jar.");
+		} catch (ClassNotFoundException lEx) {
+			mLog.info("Class '" + aClassName + "' not found in classpath"
+					+ ", hence trying to load from jar.");
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " loading class from classpath: "
+					+ lEx.getMessage()
+					+ ", hence trying to load from jar.");
 		}
 		return null;
 	}
@@ -540,11 +546,14 @@ public class RPCPlugIn extends TokenPlugIn {
 			}
 		}
 
-		//no parameters
-		if (aXmlParametersType != null && aXmlParametersType.length == 1 && "".equals(aXmlParametersType[0])) {
-			if (lParametersType.size() == 0) {
+		// no parameters
+		if (aXmlParametersType != null 
+				&& aXmlParametersType.length == 1
+				&& "".equals(aXmlParametersType[0])) {
+			if (lParametersType.isEmpty()) {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug("Method " + aMethod.getName() + " loaded (expect 0 parameters).");
+					mLog.debug("Method " + aMethod.getName()
+							+ " loaded (expect 0 parameters).");
 				}
 				return true;
 			} else {
@@ -561,7 +570,8 @@ public class RPCPlugIn extends TokenPlugIn {
 			}
 			boolean methodMatch = true;
 			for (int j = 0; j < aXmlParametersType.length; j++) {
-				if (!TypeConverter.matchProtocolTypeToJavaType(aXmlParametersType[j], lParametersType.get(j).getName())) {
+				if (!TypeConverter.matchProtocolTypeToJavaType(
+						aXmlParametersType[j], lParametersType.get(j).getName())) {
 					methodMatch = false;
 					break;
 				}
@@ -573,15 +583,21 @@ public class RPCPlugIn extends TokenPlugIn {
 						lParametersList.append(aXmlParametersType[k] + ", ");
 					}
 					lParametersList.setLength(lParametersList.length() - 2);
-					mLog.debug("Complex method " + aMethod.getName() + " loaded (expect " + lParametersType.size() + " parameters: " + lParametersList.toString() + ").");
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("Complex method " + aMethod.getName()
+								+ " loaded (expect " + lParametersType.size()
+								+ " parameters: " + lParametersList.toString() + ").");
+					}
 				}
 				return true;
 			}
 			return false;
 		}
 		// without parameters, always true
-		if (lParametersType.size() == 0) {
-			mLog.debug("method " + aMethod.getName() + "() loaded.");
+		if (lParametersType.isEmpty()) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("method " + aMethod.getName() + "() loaded.");
+			}
 			return true;
 		}
 
@@ -590,7 +606,10 @@ public class RPCPlugIn extends TokenPlugIn {
 		for (int j = 0; j < lParametersType.size(); j++) {
 			Class lParameterType = lParametersType.get(j);
 			if (!TypeConverter.isValidProtocolJavaType(lParameterType)) {
-				mLog.error("The method " + aMethod.getName() + " has an invalid parameter: " + lParameterType.getName() + ". " + "This method will *not* be load."
+				mLog.error("The method " + aMethod.getName()
+						+ " has an invalid parameter: "
+						+ lParameterType.getName() + ". "
+						+ "This method will *not* be load."
 						+ "Suported parameters type are primitive, primitive's wrapper, List and Token.");
 				return false;
 			}

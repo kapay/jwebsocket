@@ -52,13 +52,12 @@ public class Rights {
 	public Right get(String aKey) {
 		if (aKey != null) {
 			return mRights.get(aKey);
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**
-	 * removes a certain right indentified by its key from the FastMap of rights.
+	 * removes a certain right identified by its key from the FastMap of rights.
 	 * If the key is <tt>null</tt> or right could not be found in the FastMap no
 	 * operation is performed.
 	 * @param aKey

@@ -49,7 +49,7 @@ var jws = {
 	//:const:*:JWS_SERVER_PORT:Integer:8787
 	//:d:en:Default port number, 8787 for stand-alone un-secured or 9797 for stand-alone SSL secured servers, _
 	//:d:en:80[80] for Jetty or Glassfish un-secured or [8]443 for embedded SSL secured servers.
-	JWS_SERVER_PORT: 8787,
+	JWS_SERVER_PORT: 80,
 	//:const:*:JWS_SERVER_CONTEXT:String:jWebSocket
 	//:d:en:Default application context in web application servers or servlet containers like Jetty or GlassFish.
 	JWS_SERVER_CONTEXT: "/jWebSocket",
@@ -712,7 +712,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:d:en:to init the instance.
 	//:a:en::::none
 	//:r:*:::void:none
-	create: function() {
+	create: function( aOptions ) {
 		this.fRequestCallbacks = {};
 	},
 
@@ -939,7 +939,15 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				this.fSessionId = aToken.usid;
 				this.fClientId = aToken.sourceId;
 				this.notifyPlugInsOpened();
+				// fire OnWelcome Event if assigned
+				if( this.fOnWelcome ) {
+					this.fOnWelcome( aToken );
+				}
 			} else if( aToken.type == "goodBye" ) {
+				// fire OnGoodBye Event if assigned
+				if( this.fOnGoodBye ) {
+					this.fOnGoodBye( aToken );
+				}
 				this.fSessionId = null;
 				this.fUsername = null;
 			} else if( aToken.type == "close" ) {
@@ -1186,6 +1194,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	open: function( aURL, aOptions ) {
 		var lRes = this.createDefaultResult();
 		try {
+			if( aOptions && aOptions.OnWelcome && typeof aOptions.OnWelcome == "function" ) {
+				this.fOnWelcome = aOptions.OnWelcome;
+			}
+			if( aOptions && aOptions.OnGoodBye && typeof aOptions.OnGoodBye == "function" ) {
+				this.fOnGoodBye = aOptions.OnGoodBye;
+			}
 			// call inherited connect, catching potential exception
 			arguments.callee.inherited.call( this, aURL, aOptions );
 		} catch( ex ) {

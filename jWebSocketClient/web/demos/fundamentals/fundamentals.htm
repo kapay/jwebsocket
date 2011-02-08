@@ -68,6 +68,16 @@
 							jws.$("simgStatus").src = "../../images/connected.png";
 						},
 
+						// OnWelcome event
+						OnWelcome: function( aEvent )  {
+							log( "<font style='color:red'>jWebSocket Welcome received.</font>" );
+						},
+
+						// OnGoodBye event
+						OnGoodBye: function( aEvent )  {
+							log( "<font style='color:red'>jWebSocket GoodBye received.</font>" );
+						},
+
 						// OnMessage callback
 						OnMessage: function( aEvent ) {
 							log( "jWebSocket message received: '" + aEvent.data + "'" );

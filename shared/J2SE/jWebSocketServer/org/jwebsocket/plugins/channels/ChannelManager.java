@@ -21,8 +21,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketConfig;
-// import org.jwebsocket.config.xml.ChannelConfig;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.channels.Channel.ChannelState;
 import org.jwebsocket.security.SecurityFactory;
@@ -78,12 +76,13 @@ public class ChannelManager {
 		if (lAllowNewChannels != null && lAllowNewChannels.equals("true")) {
 			mAllowNewChannels = true;
 		}
-
+		int lSuccess = 0;
 		for (String lOption : aSettings.keySet()) {
 			if (lOption.startsWith("channel:")) {
 				String lChannelId = lOption.substring(8);
 				if (mLog.isDebugEnabled()) {
-					mLog.debug("Instantiating channel '" + lChannelId + "' by configuration...");
+					mLog.debug("Instantiating channel '"
+							+ lChannelId + "' by configuration...");
 				}
 				Object lObj = aSettings.get(lOption);
 				JSONObject lJSON = null;
@@ -96,6 +95,7 @@ public class ChannelManager {
 				String lName = null;
 				String lKey = null;
 				String lSecret = null;
+				String lOwner = null;
 				try {
 					lName = lJSON.getString("name");
 				} catch (Exception lEx) {
@@ -108,6 +108,10 @@ public class ChannelManager {
 					lSecret = lJSON.getString("secret");
 				} catch (Exception lEx) {
 				}
+				try {
+					lOwner = lJSON.getString("owner");
+				} catch (Exception lEx) {
+				}
 
 				Channel lChannel = new Channel(
 						lChannelId, // String aId,
@@ -117,7 +121,7 @@ public class ChannelManager {
 						false, // boolean aSystemChannel,
 						lKey, // String aSecretKey,
 						lSecret, // String aAccessKey,
-						null, // String aOwner,
+						lOwner, // String aOwner,
 						0, // long aCreatedDate,
 						ChannelState.INITIALIZED, // ChannelState aState,
 						null, // List<Subscriber> aSubscribers,
@@ -125,9 +129,12 @@ public class ChannelManager {
 						);
 				// put in channels map
 				mChannels.put(lChannel.getId(), lChannel);
+				lSuccess++;
 			}
 		}
-
+		if (mLog.isDebugEnabled()) {
+			mLog.debug(lSuccess + " channels successfully instantiated.");
+		}
 	}
 
 	/**
@@ -147,10 +154,14 @@ public class ChannelManager {
 	 */
 	public void startChannels() throws ChannelLifeCycleException {
 		User lRoot = SecurityFactory.getRootUser();
-		// TODO: Process if no root user could be found!
-		JWebSocketConfig lConfig = JWebSocketConfig.getConfig();
 		for (Channel lChannel : mChannels.values()) {
-			lChannel.start(lRoot.getLoginname());
+			try {
+				lChannel.start(lRoot.getLoginname());
+			} catch (Exception lEx) {
+				mLog.error(lEx.getClass().getSimpleName() 
+						+ " on starting channel '" + lChannel.getId() + "': "
+						+ lEx.getMessage());
+			}
 		}
 	}
 
@@ -161,7 +172,13 @@ public class ChannelManager {
 	public void stopChannels() throws ChannelLifeCycleException {
 		User lRoot = SecurityFactory.getRootUser();
 		for (Channel lChannel : mChannels.values()) {
-			lChannel.stop(lRoot.getLoginname());
+			try {
+				lChannel.stop(lRoot.getLoginname());
+			} catch (Exception lEx) {
+				mLog.error(lEx.getClass().getSimpleName() 
+						+ " on stopping channel '" + lChannel.getId() + "': "
+						+ lEx.getMessage());
+			}
 		}
 	}
 

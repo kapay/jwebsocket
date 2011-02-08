@@ -87,13 +87,15 @@ public class JDBCStream extends TokenStream {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Stopping JDBC stream...");
 		}
-		long lStarted = new Date().getTime();
+		// long lStarted = new Date().getTime();
 		mIsRunning = false;
 
 		try {
-			if (null != mConnection
+			if (mConnection != null
 					&& !mConnection.isClosed()) {
+				// mLog.debug("Closing connection...");
 				mConnection.close();
+				// mLog.debug("Connection closed.");
 			}
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());

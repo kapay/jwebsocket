@@ -28,10 +28,17 @@ import org.eclipse.jetty.websocket.WebSocketServlet;
  */
 public class jWebSocket extends WebSocketServlet {
 
+	/**
+	 *
+	 * @param aRequest
+	 * @param aResponse
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@Override
 	protected void doGet(HttpServletRequest aRequest, HttpServletResponse aResponse)
 			throws ServletException, IOException {
-		System.out.print("@doGet");
+		// System.out.print("@doGet");
 		getServletContext().getNamedDispatcher("default").forward(aRequest, aResponse);
 	}
 
@@ -45,12 +52,18 @@ public class jWebSocket extends WebSocketServlet {
 	@Override
 	protected void doPost(HttpServletRequest aRequest, HttpServletResponse aResponse)
 			throws ServletException, IOException {
-		System.out.println("@doPost");
+		// System.out.println("@doPost");
 	}
 
+	/**
+	 *
+	 * @param aRequest
+	 * @param aProtocol
+	 * @return
+	 */
 	@Override
 	protected WebSocket doWebSocketConnect(HttpServletRequest aRequest, String aProtocol) {
-		System.out.println("@doWebSocketConnect");
+		// System.out.println("@doWebSocketConnect");
 		return new JettyWrapper(aRequest, aProtocol);
 	}
 
@@ -60,6 +73,6 @@ public class jWebSocket extends WebSocketServlet {
 	 */
 	@Override
 	public String getServletInfo() {
-		return "Short description";
+		return "jWebSocket Jetty Servlet";
 	}
 }

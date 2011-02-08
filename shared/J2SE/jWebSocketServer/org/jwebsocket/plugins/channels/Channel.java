@@ -402,14 +402,15 @@ public final class Channel implements ChannelLifeCycle {
 			Rights lRights = SecurityFactory.getUserRights(aUser);
 			Right lRight = lRights.get("org.jwebsocket.plugins.channel.start");
 			if (lRight == null) {
-				throw new ChannelLifeCycleException("User '"
-						+ aUser + "' does not have rights to start the channel");
+				throw new ChannelLifeCycleException(
+						"User '" + aUser
+						+ "' is not granted to start the channel");
 			} else {
 				// verify the owner
-				if (!this.getOwner().equals(aUser)) {
-					throw new ChannelLifeCycleException("User '"
-							+ aUser + "' is not a owner of this channel,"
-							+ "Only owner of the channel can start");
+				if (aUser != null && !aUser.equals(getOwner())) {
+					throw new ChannelLifeCycleException(
+							"User '" + aUser + "' is not the owner of this channel"
+							+ ", only owner of the channel can start.");
 				}
 				this.mAuthenticated = true;
 			}
@@ -443,12 +444,15 @@ public final class Channel implements ChannelLifeCycle {
 			Rights rights = SecurityFactory.getUserRights(aUser);
 			Right right = rights.get("org.jwebsocket.plugins.channel.suspend");
 			if (right == null) {
-				throw new ChannelLifeCycleException("User:[" + aUser + "] does not have rights to suspend the channel");
+				throw new ChannelLifeCycleException(
+						"User '" + aUser
+						+ "' is not granted to suspend the channel");
 			} else {
 				// verify the owner
-				if (!this.getOwner().equals(aUser)) {
-					throw new ChannelLifeCycleException("User:[" + aUser + "] is not a owner of this channel,"
-							+ "Only owner of the channel can suspend");
+				if (aUser != null && !aUser.equals(getOwner())) {
+					throw new ChannelLifeCycleException(
+							"User '" + aUser + "' is not the owner of this channel"
+							+ ", only owner of the channel can suspend.");
 				}
 			}
 		}
@@ -472,21 +476,26 @@ public final class Channel implements ChannelLifeCycle {
 	@Override
 	public void stop(final String aUser) throws ChannelLifeCycleException {
 		if (this.mState == ChannelState.STOPPED) {
-			throw new ChannelLifeCycleException("Channel:[" + this.getName() + "] is already stopped");
+			throw new ChannelLifeCycleException(
+					"Channel '" + getName() + "' is already stopped");
 		}
 		if (!SecurityFactory.isValidUser(aUser) && !mAuthenticated) {
-			throw new ChannelLifeCycleException("Cannot stop the channel:[" + this.getName()
-					+ "] for invalid user login [" + aUser + "]");
+			throw new ChannelLifeCycleException(
+					"Cannot stop the channel '" + this.getName()
+					+ "' for invalid user login '" + aUser + "'");
 		} else {
 			Rights rights = SecurityFactory.getUserRights(aUser);
 			Right right = rights.get("org.jwebsocket.plugins.channel.stop");
 			if (right == null) {
-				throw new ChannelLifeCycleException("User:[" + aUser + "] does not have rights to stop the channel");
+				throw new ChannelLifeCycleException(
+						"User '" + aUser
+						+ "' is not granted to stop the channel");
 			} else {
 				// verify the owner
-				if (!this.getOwner().equals(aUser)) {
-					throw new ChannelLifeCycleException("User:[" + aUser + "] is not a owner of this channel,"
-							+ "Only owner of the channel can stop");
+				if (aUser != null && !aUser.equals(getOwner())) {
+					throw new ChannelLifeCycleException(
+							"User '" + aUser + "' is not the owner of this channel"
+							+ ", only owner of the channel can stop");
 				}
 			}
 		}

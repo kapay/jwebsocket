@@ -123,24 +123,31 @@ public class JettyConnector extends BaseConnector {
 		}
 
 		// call connectorStarted method of engine
-		getEngine().connectorStarted(this);
+		WebSocketEngine lEngine = getEngine();
+		if (lEngine != null) {
+			lEngine.connectorStarted(this);
+		}
 	}
 
 	@Override
 	public void stopConnector(CloseReason aCloseReason) {
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Stopping Jetty connector (" + aCloseReason.name() + ")...");
-		}
+		if( mIsRunning ) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Stopping Jetty connector (" + aCloseReason.name() + ")...");
+			}
+			// call client stopped method of engine
+			// (e.g. to release client from streams)
+			WebSocketEngine lEngine = getEngine();
+			if (lEngine != null) {
+				lEngine.connectorStopped(this, aCloseReason);
+			}
 
-		// call client stopped method of engine
-		// (e.g. to release client from streams)
-		// getEngine().connectorStopped(this, aCloseReason);
-
-		mOutbound.disconnect();
-		mCloseReason = aCloseReason;
-		mIsRunning = false;
-		if (mLog.isInfoEnabled()) {
-			mLog.info("Stopped Jetty connector.");
+			mOutbound.disconnect();
+			mCloseReason = aCloseReason;
+			mIsRunning = false;
+			if (mLog.isInfoEnabled()) {
+				mLog.info("Stopped Jetty connector.");
+			}
 		}
 	}
 

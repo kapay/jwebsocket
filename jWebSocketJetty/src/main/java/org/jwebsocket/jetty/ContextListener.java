@@ -34,9 +34,7 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent aSCE) {
 		// start the jWebSocket server sub system
-		System.out.println("Starting the jWebSocket sub system for Jetty...");
 		JWebSocketFactory.start("");
-		System.out.println("jWebSocket sub system started.");
 
 		// get the token server
 		// and and a listener to it (for demo purposes)
@@ -54,8 +52,6 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextDestroyed(ServletContextEvent aSCE) {
 		// stop the jWebSocket server sub system
-		System.out.println("Stopping the jWebSocket sub system for Jetty...");
 		JWebSocketFactory.stop();
-		System.out.println("jWebSocket sub system stopped.");
 	}
 }

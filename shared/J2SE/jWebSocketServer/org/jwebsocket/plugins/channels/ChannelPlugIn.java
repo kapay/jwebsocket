@@ -19,10 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import javolution.util.FastList;
 import javolution.util.FastMap;
-import javolution.util.FastSet;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
@@ -171,15 +169,15 @@ public class ChannelPlugIn extends TokenPlugIn {
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Engine started, starting system channels...");
+			mLog.debug("Engine started, starting channels...");
 		}
 		try {
 			mChannelManager.startChannels();
 			if (mLog.isInfoEnabled()) {
-				mLog.info("System channels started.");
+				mLog.info("Channels started.");
 			}
 		} catch (ChannelLifeCycleException lEx) {
-			mLog.error("Failed to start system channels", lEx);
+			mLog.error("Failed to start channels", lEx);
 		}
 	}
 
@@ -190,15 +188,22 @@ public class ChannelPlugIn extends TokenPlugIn {
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Engine stopped, stopping system channels...");
+			mLog.debug("Engine stopped, stopping channels...");
 		}
 		try {
-			mChannelManager.stopChannels();
-			if (mLog.isInfoEnabled()) {
-				mLog.info("System channels stopped.");
-			}
+			// if channel manager has started at all
+			// (maybe engine didn't come up)
+			if (mChannelManager != null) {
+				mChannelManager.stopChannels();
+				if (mLog.isInfoEnabled()) {
+					mLog.info("Channels stopped.");
+				}
+			} else
+				if (mLog.isInfoEnabled()) {
+					mLog.info("Channels were not yet started, properly terminated.");
+				}
 		} catch (ChannelLifeCycleException lEx) {
-			mLog.error("Error stopping system channels", lEx);
+			mLog.error("Error stopping channels", lEx);
 		}
 	}
 
@@ -210,9 +215,9 @@ public class ChannelPlugIn extends TokenPlugIn {
 		// set session id first, so that it can be processed in the
 		// connectorStarted method set session id first, so that it can be
 		// processed in the connectorStarted method
-		Random lRand = new Random(System.nanoTime());
-
-		aConnector.getSession().setSessionId(Tools.getMD5(aConnector.generateUID() + "." + lRand.nextInt()));
+		// Random lRand = new Random(System.nanoTime());
+		// do not set session id here!
+		// aConnector.getSession().setSessionId(Tools.getMD5(aConnector.generateUID() + "." + lRand.nextInt()));
 		// call super connectorStarted
 		super.connectorStarted(aConnector);
 
@@ -225,15 +230,17 @@ public class ChannelPlugIn extends TokenPlugIn {
 	 */
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-		// unsubscribe from the channel
+		// unsubscribe from the channel, if subscribed
 		Subscriber lSubscriber = mChannelManager.getSubscriber(aConnector.getId());
-		for (String lChannelId : lSubscriber.getChannels()) {
-			Channel lChannel = mChannelManager.getChannel(lChannelId);
-			if (lChannel != null) {
-				lChannel.unsubscribe(lSubscriber, mChannelManager);
+		if( lSubscriber != null ) {
+			for (String lChannelId : lSubscriber.getChannels()) {
+				Channel lChannel = mChannelManager.getChannel(lChannelId);
+				if (lChannel != null) {
+					lChannel.unsubscribe(lSubscriber, mChannelManager);
+				}
 			}
+			mChannelManager.removeSubscriber(lSubscriber);
 		}
-		mChannelManager.removeSubscriber(lSubscriber);
 	}
 
 	/**

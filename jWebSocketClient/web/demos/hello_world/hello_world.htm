@@ -71,6 +71,15 @@
 						log( "<font style='color:#888'>jWebSocket connection established.</font>" );
 						jws.$("simgStatus").src = "../../images/connected.png";
 					},
+					
+					OnWelcome: function( aEvent )  {
+						log( "<font style='color:red'>jWebSocket Welcome received.</font>" );
+					},
+					
+					OnGoodBye: function( aEvent )  {
+						log( "<font style='color:red'>jWebSocket GoodBye received.</font>" );
+					},
+
 					// OnMessage callback
 					OnMessage: function( aEvent, aToken ) {
 						var lDate = "";
@@ -300,7 +309,9 @@
 				// jws.browserSupportsWebSockets checks web if sockets are available
 				// either natively, by the Flash Bridge or by the Chrome Frame.
 				if( jws.browserSupportsWebSockets() ) {
-					lWSC = new jws.jWebSocketJSONClient();
+					lWSC = new jws.jWebSocketJSONClient({
+						OnWelcome: ""
+					});
 					lWSC.setSamplesCallbacks({
 						OnSamplesServerTime: getServerTimeCallback
 					});

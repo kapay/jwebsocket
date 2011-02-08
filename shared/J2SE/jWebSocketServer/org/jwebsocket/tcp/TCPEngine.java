@@ -138,7 +138,9 @@ public class TCPEngine extends BaseEngine {
 				if (mEngineThread.isAlive()) {
 					mLog.warn("TCP engine '" + getId() + "' did not stop after " + lDuration + "ms.");
 				} else {
-					mLog.debug("TCP engine '" + getId() + "' stopped after " + lDuration + "ms.");
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("TCP engine '" + getId() + "' stopped after " + lDuration + "ms.");
+					}
 				}
 			}
 		}
@@ -166,9 +168,11 @@ public class TCPEngine extends BaseEngine {
 						+ " TCP connectors '" + getId()
 						+ "' did not stop after " + lDuration + "ms.");
 			} else {
-				mLog.debug(lNumConns
-						+ " TCP connectors '" + getId()
-						+ "' stopped after " + lDuration + "ms.");
+				if (mLog.isDebugEnabled()) {
+					mLog.debug(lNumConns
+							+ " TCP connectors '" + getId()
+							+ "' stopped after " + lDuration + "ms.");
+				}
 			}
 		}
 	}
@@ -272,8 +276,8 @@ public class TCPEngine extends BaseEngine {
 			lSubProt = lArgs.get(RequestHeader.WS_PROTOCOL);
 		}
 		if (lSubProt == null) {
-			lSubProt = JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/' +
-					JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
+			lSubProt = JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/'
+					+ JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
 		}
 
 		// Sub protocol header might contain multiple entries
@@ -282,7 +286,7 @@ public class TCPEngine extends BaseEngine {
 		// choice. Right now, we will just choose the first one if more than one are
 		// available.
 		// TODO: implement subprotocol choice handling by deferring the decision to plugins/listeners
-		if(lSubProt.indexOf(' ') != -1) {
+		if (lSubProt.indexOf(' ') != -1) {
 			lSubProt = lSubProt.split(" ")[0];
 			lRespMap.put(RequestHeader.WS_PROTOCOL, lSubProt);
 		}

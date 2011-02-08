@@ -69,7 +69,8 @@ public class JettyWrapper implements WebSocket {
 
 	public JettyWrapper(HttpServletRequest aRequest, String aProtocol) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating Jetty Wrapper with subprotocol '" + aProtocol + "'...");
+			mLog.debug("Instantiating Jetty Wrapper with subprotocol '"
+					+ aProtocol + "'...");
 		}
 		mEngine = JWebSocketFactory.getEngine();
 		mRequest = aRequest;
@@ -87,6 +88,7 @@ public class JettyWrapper implements WebSocket {
 		// inherited BaseConnector.startConnector
 		// calls mEngine connector started
 
+		// TODO: Check Jetty 8.0.0.M2 for connection issues
 		// need to call startConnector in a separate thread 
 		// because Jetty does not allow to send a welcome message 
 		// during it's onConnect listener.
@@ -111,7 +113,8 @@ public class JettyWrapper implements WebSocket {
 	}
 
 	@Override
-	public void onFragment(boolean more, byte opcode, byte[] data, int offset, int length) {
+	public void onFragment(boolean aMore, byte aOpCcode, byte[] aData,
+			int aOffset, int aLength) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Fragment from Jetty client...");
 		}
@@ -143,7 +146,7 @@ public class JettyWrapper implements WebSocket {
 		if (mConnector != null) {
 			// inherited BaseConnector.stopConnector
 			// calls mEngine connector stopped
-			mConnector.stopConnector(CloseReason.SERVER);
+			mConnector.stopConnector(CloseReason.CLIENT);
 			mEngine.removeConnector(mConnector);
 		}
 	}

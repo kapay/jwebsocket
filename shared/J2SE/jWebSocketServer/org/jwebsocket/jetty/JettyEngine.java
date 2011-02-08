@@ -118,7 +118,7 @@ public class JettyEngine extends BaseEngine {
 			// mJettyServer.join();
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
-					+ "Instantiating Embedded Jetty Server '" 
+					+ "Instantiating Embedded Jetty Server '"
 					+ Server.getVersion() + "': "
 					+ lEx.getMessage());
 		}
@@ -156,8 +156,8 @@ public class JettyEngine extends BaseEngine {
 	public void stopEngine(CloseReason aCloseReason)
 			throws WebSocketException {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Stopping Jetty '" 
-					+ Server.getVersion() 
+			mLog.debug("Stopping Jetty '"
+					+ Server.getVersion()
 					+ "' engine '"
 					+ getId() + "...");
 		}
@@ -171,10 +171,23 @@ public class JettyEngine extends BaseEngine {
 		super.stopEngine(aCloseReason);
 
 		try {
-			mJettyServer.stop();
+			if (mJettyServer != null) {
+				mJettyServer.stop();
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Jetty '"
+							+ Server.getVersion()
+							+ " successfully stopped.");
+				}
+			} else {
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Jetty '"
+							+ Server.getVersion()
+							+ " not yet started, properly terminated.");
+				}
+			}
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
-					+ "Stopping Embedded Jetty Server '"
+					+ " stopping Jetty Server '"
 					+ Server.getVersion() + "': "
 					+ lEx.getMessage());
 		}
@@ -226,12 +239,12 @@ public class JettyEngine extends BaseEngine {
 		super.connectorStopped(aConnector, aCloseReason);
 	}
 
-	@Override
 	/*
 	 * Returns {@code true} if the TCP engine is running or {@code false}
 	 * otherwise. The alive status represents the state of the TCP engine
 	 * listener thread.
 	 */
+	@Override
 	public boolean isAlive() {
 		return mIsRunning;
 	}
