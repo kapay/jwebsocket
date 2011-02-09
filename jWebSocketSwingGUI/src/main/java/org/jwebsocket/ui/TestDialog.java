@@ -554,10 +554,16 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		// pass the path of the class
 		lToken.setString("classname", "org.jwebsocket.rpc.sample.SampleRPCLibrary");
 		// pass the method to be called
-		lToken.setString("method", "getMD5");
+		// lToken.setString("method", "getMD5");
+		lToken.setString("method", "runOverloadDemo");
 		// create the list of arguments to be applied to the method
 		List lArgs = new ArrayList();
-		lArgs.add(txfMessage.getText());
+		// lArgs.add(txfMessage.getText());
+		List lListArg = new ArrayList();
+		lListArg.add(1);	lListArg.add(2);	lListArg.add(3);	lListArg.add(4);
+		lListArg.add("a");	lListArg.add("b");	lListArg.add("c");	lListArg.add("d");
+		lArgs.add(lListArg);
+
 		// pass the list of arguments to the method (automatic methods matching)
 		lToken.setList("args", lArgs);
 		try {

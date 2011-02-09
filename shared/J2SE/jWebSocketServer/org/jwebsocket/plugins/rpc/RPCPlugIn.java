@@ -143,7 +143,8 @@ public class RPCPlugIn extends TokenPlugIn {
 	private Class loadClassFromClassPath(String aClassName) {
 		try {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Trying to load class '" + aClassName + "' from classpath...");
+				mLog.debug("Trying to load class '"
+						+ aClassName + "' from classpath...");
 			}
 			return Class.forName(aClassName);
 		} catch (ClassNotFoundException lEx) {
@@ -180,15 +181,21 @@ public class RPCPlugIn extends TokenPlugIn {
 					try {
 						lJarFilePath = JWebSocketConfig.getLibsFolder(lValue);
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Trying to load class '" + lClassName + "' from jar '" + lJarFilePath + "'...");
+							mLog.debug("Trying to load class '"
+									+ lClassName + "' from jar '"
+									+ lJarFilePath + "'...");
 						}
 						lClassLoader.addFile(lJarFilePath);
 						lClass = lClassLoader.loadClass(lClassName);
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Class '" + lClassName + "' successfully loaded from '" + lJarFilePath + "'.");
+							mLog.debug("Class '" + lClassName 
+									+ "' successfully loaded from '"
+									+ lJarFilePath + "'.");
 						}
 					} catch (Exception ex) {
-						mLog.error(ex.getClass().getSimpleName() + " loading jar '" + lJarFilePath + "': " + ex.getMessage());
+						mLog.error(ex.getClass().getSimpleName() 
+								+ " loading jar '" + lJarFilePath + "': "
+								+ ex.getMessage());
 					}
 				}
 				// could the class be loaded?
@@ -253,7 +260,9 @@ public class RPCPlugIn extends TokenPlugIn {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void rpc(WebSocketConnector aConnector, Token aToken) {
 		// check if user is allowed to run 'rpc' command
-		if (!SecurityFactory.hasRight(getUsername(aConnector), CommonRpcPlugin.NS_RPC_DEFAULT + "." + CommonRpcPlugin.RPC_RIGHT_ID)) {
+		if (!SecurityFactory.hasRight(
+				getUsername(aConnector),
+				CommonRpcPlugin.NS_RPC_DEFAULT + "." + CommonRpcPlugin.RPC_RIGHT_ID)) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
@@ -276,7 +285,9 @@ public class RPCPlugIn extends TokenPlugIn {
 		String lMsg = null;
 
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing RPC to class '" + lClassName + "', method '" + lMethod + "', args: '" + lArgs + "'...");
+			mLog.debug("Processing RPC to class '" 
+					+ lClassName + "', method '"
+					+ lMethod + "', args: '" + lArgs + "'...");
 		}
 
 		// class is ignored until security restrictions are finished.
@@ -296,13 +307,17 @@ public class RPCPlugIn extends TokenPlugIn {
 						Object lObj = call(aConnector, lRpcClassLoader, lInstance, lMethod, lArgs);
 						lResponseToken.setValidated("result", lObj);
 					} else {
-						lMsg = "Class '" + lClassName + "' found but get a null instance when calling the RPCCallable getInstance() method.";
+						lMsg = "Class '" + lClassName
+								+ "' found but get a null instance when calling the RPCCallable getInstance() method.";
 					}
 				} else {
-					lMsg = "Class '" + lClassName + "' found but the method " + lMethod + " is not available. Right is missing, probably a typo (call are case sensitive)";
+					lMsg = "Class '" + lClassName
+							+ "' found but the method " + lMethod
+							+ " is not available. Right is missing, probably a typo (call are case sensitive)";
 				}
 			} else {
-				lMsg = "Class '" + lClassName + "' not found in the jwebsocket.xml file, or not properly loaded. probably a typo.";
+				lMsg = "Class '" + lClassName
+						+ "' not found in the jwebsocket.xml file, or not properly loaded. probably a typo.";
 			}
 		} catch (NoSuchMethodException ex) {
 			lMsg = "NoSuchMethodException calling '" + lMethod + "' for class " + lClassName + ": " + ex.getMessage();
@@ -584,9 +599,9 @@ public class RPCPlugIn extends TokenPlugIn {
 					}
 					lParametersList.setLength(lParametersList.length() - 2);
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Complex method " + aMethod.getName()
-								+ " loaded (expect " + lParametersType.size()
-								+ " parameters: " + lParametersList.toString() + ").");
+						mLog.debug("Method '" + aMethod.getName()
+								+ "' loaded (expecting " + lParametersType.size()
+								+ " explicit parameters: " + lParametersList.toString() + ").");
 					}
 				}
 				return true;
@@ -596,7 +611,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		// without parameters, always true
 		if (lParametersType.isEmpty()) {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("method " + aMethod.getName() + "() loaded.");
+				mLog.debug("Method '" + aMethod.getName() + "' with no parameters loaded.");
 			}
 			return true;
 		}
@@ -615,7 +630,9 @@ public class RPCPlugIn extends TokenPlugIn {
 			}
 		}
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Method " + aMethod.getName() + " loaded (expect " + lParametersType.size() + " parameters).");
+			mLog.debug("Method '" + aMethod.getName()
+					+ "' loaded (expecting " + lParametersType.size()
+					+ " explicit parameters).");
 		}
 		// store the "complex" method in the Map.
 		return true;

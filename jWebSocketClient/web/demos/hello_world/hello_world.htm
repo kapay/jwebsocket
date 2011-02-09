@@ -33,6 +33,8 @@
 		<script type="text/javascript" src="../../res/js/jwsJDBCPlugIn.js"></script>
 		<!-- this one imports the client side file system plug-in -->
 		<script type="text/javascript" src="../../res/js/jwsFilesystemPlugIn.js"></script>
+		<!-- this one imports the client side rpc plug-in -->
+		<script type="text/javascript" src="../../res/js/jwsRPCPlugIn.js"></script>
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
@@ -222,6 +224,39 @@
 			}
 
 			// example how to request a result from a server side plugin
+			function sampleRPC() {
+				log( "Calling RPC via WebSockets..." );
+				// call the getMD5 method of the server
+				/*
+				var lRes = lWSC.rpc(
+					"org.jwebsocket.rpc.sample.SampleRPCLibrary", // class
+					"getMD5", // method
+					[ eMessage.value ],  // args
+					{
+						
+					}
+				);
+				*/
+				// call the getMD5 method of the server
+				var lRes = lWSC.rpc(
+					"org.jwebsocket.rpc.sample.SampleRPCLibrary", // class
+					"runListDemo", // method
+					[ // args, a list in an array of arguments
+						// 1234	// int
+						// eMessage.value // string
+						[ 1, 2, 3, 4, "a", "b", "c", "d" ] // array/list
+					],
+					{
+
+					}
+				);
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( lWSC.resultToString( lRes ) );
+				}
+			}
+
+			// example how to request a result from a server side plugin
 			function sampleSelect() {
 				log( "Requesting JDBC data via WebSockets..." );
 				// call the getTime method of the client side plug-in
@@ -243,9 +278,9 @@
 				log( "Loading a file from the server via WebSockets..." );
 				// call the getTime method of the client side plug-in
 				var lRes = lWSC.fileLoad(
-				"test.txt",
-				{	scope: jws.SCOPE_PUBLIC
-				}
+					"test.txt",
+					{	scope: jws.SCOPE_PUBLIC
+					}
 			);
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
@@ -257,11 +292,11 @@
 				log( "Saving a file from the server via WebSockets..." );
 				// call the getTime method of the client side plug-in
 				var lRes = lWSC.fileSave(
-				"test.txt",
-				eMessage.value,
-				{	scope: jws.SCOPE_PUBLIC
-				}
-			);
+					"test.txt",
+					eMessage.value,
+					{	scope: jws.SCOPE_PUBLIC
+					}
+				);
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
 					log( lWSC.resultToString( lRes ) );
@@ -428,7 +463,8 @@
 							   title="Retreives a single record from a JDBC datasource on the server.">
 					</td>
 					<td class="stdDlg" width="5">
-						&nbsp;
+						<input class="sbtnDlg" id="sbtnRPC" type="button" value="RPC" onclick="sampleRPC();"
+							   title="Shows how to call a simple RPC on the server.">
 					</td>
 					<td class="stdDlg" width="">
 						<input class="sbtnDlg" id="sbtnLoadFile" type="button" value="Load File" onclick="loadFile();"

@@ -16,6 +16,7 @@
 package org.jwebsocket.rpc.sample;
 
 import java.util.List;
+import java.util.Map;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.logging.Logging;
@@ -51,6 +52,86 @@ public class SampleRPCLibrary extends BaseRPCCallable {
 	}
 
 	/**
+	 * echos the given integer back to the client.
+	 * This method is for demonstration, test and debug purpose only.
+	 * @param aString
+	 * @return
+	 */
+	public Object runIntDemo(int aInt) {
+		return ("Successfully executed integer variant of method with unique name: " + aInt);
+	}
+
+	/**
+	 * echos the given string back to the client.
+	 * This method is for demonstration, test and debug purpose only.
+	 * @param aString
+	 * @return
+	 */
+	public Object runStringDemo(String aString) {
+		return ("Successfully executed string variant of method with unique name: " + aString);
+	}
+
+	/**
+	 * echos the given list back to the client.
+	 * This method is for demonstration, test and debug purpose only.
+	 * @param aList
+	 * @return
+	 */
+	public Object runListDemo(List aList) {
+		return (aList);
+	}
+
+	/**
+	 * echos the given map back to the client.
+	 * This method is for demonstration, test and debug purpose only.
+	 * @param aMap
+	 * @return
+	 */
+	public Object runMapDemo(Map aMap) {
+		return (aMap);
+	}
+
+	/**
+	 * echos the given integer back to the client.
+	 * This method demonstrates the use of overloaded methods.
+	 * @param aString
+	 * @return
+	 */
+	public Object runOverloadDemo(int aInt) {
+		return ("Successfully executed integer variant of overloaded method: " + aInt);
+	}
+
+	/**
+	 * echos the given string back to the client.
+	 * This method demonstrates the use of overloaded methods.
+	 * @param aString
+	 * @return
+	 */
+	public Object runOverloadDemo(String aString) {
+		return ("Successfully executed string variant of overloaded method: " + aString);
+	}
+
+	/**
+	 * echos the given list back to the client.
+	 * This method demonstrates the use of overloaded methods.
+	 * @param aList
+	 * @return
+	 */
+	public Object runOverloadDemo(List aList) {
+		return (aList);
+	}
+
+	/**
+	 * echos the given map back to the client.
+	 * This method demonstrates the use of overloaded methods.
+	 * @param aMap
+	 * @return
+	 */
+	public Object runOverloadDemo(Map aMap) {
+		return (aMap);
+	}
+
+	/**
 	 * usually protected (i.e. cannot be called from client
 	 * until explicitely granted).
 	 * @param aArg
@@ -60,6 +141,11 @@ public class SampleRPCLibrary extends BaseRPCCallable {
 		return "Protected method has now been granted for RPC";
 	}
 
+	/**
+	 *
+	 * @param aToken
+	 * @return
+	 */
 	public Token sampleTokenRPC(Token aToken) {
 		// currently simply return the same token for test purposes
 		return aToken;
@@ -87,28 +173,54 @@ public class SampleRPCLibrary extends BaseRPCCallable {
 		return aInt;
 	}
 
+	/**
+	 *
+	 * @param aList
+	 * @return
+	 */
 	public String testList(List<Integer> aList) {
 		// currently simply return the same string for test purposes
 		return "I'm the server, testList has been called";
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public String rrpcTest1() {
 		logInfo("rrpcTest1");
 		return "This is the result of 'rrpcTest1'.";
 	}
 
+	/**
+	 * 
+	 * @param arg1
+	 */
 	public void rrpcTest1(String arg1) {
 		logInfo("rrpcTest11");
 	}
 
+	/**
+	 *
+	 * @param aWebSocketConnector
+	 * @param arg1
+	 */
 	public void rrpcTest1(WebSocketConnector aWebSocketConnector, int arg1) {
 		logInfo("rrpcTest12 has been called by connector: " + aWebSocketConnector.getId());
 	}
 
+	/**
+	 *
+	 * @param aList
+	 * @param aList2
+	 */
 	public void rrpcTest2(List aList, List<List<Integer>> aList2) {
 		logInfo("rrpcTest2");
 	}
 
+	/**
+	 *
+	 */
 	public void rrpcTest3() {
 		logInfo("rrpcTest3");
 	}
