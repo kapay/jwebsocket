@@ -18,7 +18,6 @@ package org.jwebsocket.plugins.channels;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -36,7 +35,6 @@ import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.security.User;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
-import org.jwebsocket.util.Tools;
 
 /**
  * Token based implementation of the channel plugin. It's based on a
@@ -523,8 +521,6 @@ public class ChannelPlugIn extends TokenPlugIn {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'getSubscriptions'...");
 		}
-
-
 		Subscriber lSubscriber = mChannelManager.getSubscriber(aConnector.getId());
 		List<Map> lSubscriptions = new FastList<Map>();
 
@@ -544,9 +540,6 @@ public class ChannelPlugIn extends TokenPlugIn {
 
 	private void publish(WebSocketConnector aConnector, Token aToken) {
 		String lChannelId = aToken.getString(CHANNEL);
-		// String lAccessKey = aToken.getString(ACCESS_KEY);
-		// String lSecretKey = aToken.getString(SECRET_KEY);
-		// String lLogin = aToken.getString("login");
 
 		Channel lChannel = mChannelManager.getChannel(lChannelId);
 		Publisher lPublisher = mChannelManager.getPublisher(

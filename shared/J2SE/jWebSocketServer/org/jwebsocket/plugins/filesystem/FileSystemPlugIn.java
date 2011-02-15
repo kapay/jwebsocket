@@ -78,6 +78,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				save(aConnector, aToken);
 			} else if (lType.equals("load")) {
 				load(aConnector, aToken);
+			} else if (lType.equals("send")) {
+				send(aConnector, aToken);
 			}
 		}
 	}
@@ -279,6 +281,62 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			lMsg = lEx.getClass().getSimpleName() + " on load: " + lEx.getMessage();
 			lResponse.setString("msg", lMsg);
 			mLog.error(lMsg);
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	/**
+	 * send a file from one client to another client
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void send(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		String lMsg;
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'send'...");
+		}
+
+		// check if user is allowed to run 'save' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".send")) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Returning 'Access denied'...");
+			}
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
+		String lFilename = aToken.getString("filename");
+		String lData = aToken.getString("data");
+		String lTargetId = aToken.getString("targetId");
+
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+
+		WebSocketConnector lTarget = lServer.getConnector(lTargetId);
+		if( lTarget != null ) {
+			// send notification event to target client
+			// to allow to update their content (if desired)
+			// create token of type "event"
+			Token lEvent = TokenFactory.createToken(BaseToken.TT_EVENT);
+			// include name space of this plug-in
+			lEvent.setNS(NS_FILESYSTEM);
+			lEvent.setString("name", "filesent");
+			lEvent.setString("filename", lFilename);
+			lEvent.setString("sourceId", aConnector.getId());
+			lEvent.setString("data", lData);
+			// send file to target client
+			lServer.sendToken(lTarget, lEvent);
+		} else {
+			lMsg = "target '" + lTargetId + "' not found";
+			if (mLog.isDebugEnabled()) {
+				mLog.debug(lMsg);
+			}
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
 		}
 
 		// send response to requester

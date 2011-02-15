@@ -31,7 +31,7 @@
 		<script type="text/javascript" src="../../res/js/jwsFilesystemPlugIn.js"></script>
 		<script type="text/javascript" language="JavaScript">
 
-			var eLog = null;
+			var eLog = null, eTarget = null;
 
 			function scrollLogToBottom() {
 				if( eLog.scrollHeight > eLog.clientHeight ) {
@@ -140,7 +140,24 @@
 				}
 				log( lHTML );
 			}
-			
+
+			function onFileSentObs( aToken ) {
+				var lFilename = aToken.filename;
+				var lLC = lFilename.toLowerCase();
+				var lHTML;
+				if( lLC.indexOf( ".jpg" ) > 0
+					|| lLC.indexOf( ".jpeg" ) > 0
+					|| lLC.indexOf( ".png" ) > 0
+					|| lLC.indexOf( ".gif" ) > 0
+			) {
+					log( "Picture received: '" + lFilename + "':" );
+					lHTML = "<img onload=\"checkImageSize()\" src=\"" + aToken.data + "\"/>";
+				} else {
+					lHTML = "received file: " + lFilename;
+				}
+				log( lHTML );
+			}
+
 			function uploadFile() {
 				log( "Uploading file..." );
 				if( undefined == window.FileReader ) {
@@ -169,13 +186,41 @@
 				}
 			}
 
+			function sendFile() {
+				log( "Sending file..." );
+				if( undefined == window.FileReader ) {
+					log( "This browser does unfortunately not (yet) support the HTML5 FileReader Object." );
+					return;
+				}
+				var lReader = new FileReader();
+				var lFile = jws.$( "sinpUpload" ).files[ 0 ];
+				if( !lWSC.isConnected() ) {
+					log( "Not connected" );
+				} else if( lFile != null ) {
+					lReader.onloadend = function() {
+						lWSC.fileSend(
+						eTarget.value,
+						lFile.fileName,
+						lReader.result,
+						{	encoding: "base64"
+						}
+					);
+					};
+					lReader.readAsDataURL(lFile);
+				} else {
+					log( "No file selected" );
+				}
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
+				eTarget = jws.$( "stxfTarget" );
 
 				if( jws.browserSupportsWebSockets() ) {
 					lWSC = new jws.jWebSocketJSONClient();
 					lWSC.setFileSystemCallbacks({
-						OnFileSaved: onFileSavedObs
+						OnFileSaved: onFileSavedObs,
+						OnFileSent: onFileSentObs
 					});
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
@@ -189,6 +234,21 @@
 
 				// optionally auto-connect
 				// connect();
+
+				/*
+				var videoDevice = document.getElementById("video_device");
+				if (!videoDevice) {
+					console.log("unable to find device element");
+					return;
+				}
+
+				videoDevice.onchange = function (evt) {
+					var videoStream = this.data;
+					var video = document.getElementById("video");
+					video.src = videoStream.url;
+					video.play();
+				};
+				*/
 			}
 
 			function exitPage() {
@@ -227,27 +287,45 @@
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
-					<td class="stdDlg" colspan ="4"><input class="sbtnDlg" id="sinpUpload" type="file" style="width:100%"></td>
+					<td class="stdDlg" colspan ="6"><input class="sbtnDlg" id="sinpUpload" type="file" style="width:100%"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnect" type="button" value="Connect" onclick="connect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Disconnect" onclick="disconnect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnUpload" type="button" value="Upload" onclick="uploadFile();"></td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnUpload" type="button" value="Upload" onclick="uploadFile();"
+							   title="Uploads a file to the server and optionally notifies clients about URL, but does not pass the file itself.">
+					</td>
+					<td class="stdDlg" width="60">
+						<input class="stxfDlg" id="stxfTarget" type="text" value="Target-Id"
+							   title="Type the client-id of the target for this file (target-id) here.">
+					</td>
+					<td class="stdDlg" width="">
+						<input class="sbtnDlg" id="sbtnUpload" type="button" value="Send" onclick="sendFile();"
+							   title="Directly sends a file from this client to another client, the file is not stored on the server.">
+					</td>
 				</tr>
 			</table>
 		</div>
-<!--
+
+		<!--
+		<h2>Device Test</h2>
+
+		<device type="media" id="video_device"></device>
+		<video width="320" height="240" id="video" controls></video>
+		  -->
+		<!--
 		<p>To start chatting, select a video camera:
-			<device style="border:1px solid green;"  type="media" onchange="update(this.data);">
+			<device style="border:1px solid green;" type="video_capture" onchange="update(this.data);">
 			</device>
 		</p>
-		<video style="border:1px solid red;" autoplay></video>
+		<video style="border:1px solid red; width:320px; height:240px" autoplay></video>
 		<script>
 			function update(stream) {
 				document.getElementsByTagName('video')[0].src = stream.url;
 		}
--->
-</script>
+		</script>
+	-->
 </body>
 </html>

@@ -46,6 +46,10 @@ jws.FileSystemPlugIn = {
 					if( this.OnFileSaved ) {
 						this.OnFileSaved( aToken );
 					}
+				} else if( "filesent" == aToken.name ) {
+					if( this.OnFileSent ) {
+						this.OnFileSent( aToken );
+					}
 				}
 			}
 		}
@@ -116,6 +120,27 @@ jws.FileSystemPlugIn = {
 		return lRes;
 	},
 
+	fileSend: function( aTargetId, aFilename, aData, aOptions ) {
+		var lEncoding = "base64";
+		if( aOptions ) {
+			if( aOptions.encoding != undefined ) {
+				lEncoding = aOptions.encoding;
+			}
+		}
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.FileSystemPlugIn.NS,
+				type: "send",
+				data: aData,
+				targetId: aTargetId,
+				encoding: lEncoding,
+				filename: aFilename
+			});
+		}
+		return lRes;
+	},
+
 	setFileSystemCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
@@ -125,6 +150,9 @@ jws.FileSystemPlugIn = {
 		}
 		if( aListeners.OnFileSaved !== undefined ) {
 			this.OnFileSaved = aListeners.OnFileSaved;
+		}
+		if( aListeners.OnFileSent !== undefined ) {
+			this.OnFileSent = aListeners.OnFileSent;
 		}
 		if( aListeners.OnFileError !== undefined ) {
 			this.OnFileError = aListeners.OnFileError;
