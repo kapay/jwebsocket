@@ -32,6 +32,7 @@ import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.client.token.BaseTokenClient;
 import org.jwebsocket.config.JWebSocketClientConstants;
 import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.plugins.rpc.SampleRPCObject;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 
@@ -553,16 +554,35 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		Token lToken = TokenFactory.createToken("org.jwebsocket.plugins.rpc", "rpc");
 		// pass the path of the class
 		lToken.setString("classname", "org.jwebsocket.rpc.sample.SampleRPCLibrary");
+		
+		List lArgs = new ArrayList();
+
+		// getMD5
 		// pass the method to be called
-		// lToken.setString("method", "getMD5");
+		/*
+		lToken.setString("method", "getMD5");
+		lArgs.add(txfMessage.getText());
+		 */
+
+		// runOverloadDemo
+		/*
 		lToken.setString("method", "runOverloadDemo");
 		// create the list of arguments to be applied to the method
-		List lArgs = new ArrayList();
-		// lArgs.add(txfMessage.getText());
 		List lListArg = new ArrayList();
 		lListArg.add(1);	lListArg.add(2);	lListArg.add(3);	lListArg.add(4);
 		lListArg.add("a");	lListArg.add("b");	lListArg.add("c");	lListArg.add("d");
 		lArgs.add(lListArg);
+		*/
+
+		// getRPCObject
+		lToken.setString("method", "getRPCObject");
+		SampleRPCObject lObj = new SampleRPCObject(
+			"Alexander",
+			"Schulze",
+			"An Vieslapp 29",
+			"52134",
+			"Herzogenrath");
+		lArgs.add(lObj);
 
 		// pass the list of arguments to the method (automatic methods matching)
 		lToken.setList("args", lArgs);

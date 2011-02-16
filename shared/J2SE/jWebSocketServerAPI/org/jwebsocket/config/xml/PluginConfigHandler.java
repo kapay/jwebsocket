@@ -137,9 +137,6 @@ public class PluginConfigHandler implements ConfigHandler {
 			if (aStreamReader.isStartElement()) {
 				String lElementName = aStreamReader.getLocalName();
 				if (lElementName.equals(SETTING)) {
-					// TODO: Don't just get first attribute here!
-					// Scan for key="xxx"!
-					// String lKey = aStreamReader.getAttributeValue(0);
 					String lKey = aStreamReader.getAttributeValue(null, "key");
 					String lType = aStreamReader.getAttributeValue(null, "type");
 

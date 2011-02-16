@@ -188,12 +188,12 @@ public class RPCPlugIn extends TokenPlugIn {
 						lClassLoader.addFile(lJarFilePath);
 						lClass = lClassLoader.loadClass(lClassName);
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Class '" + lClassName 
+							mLog.debug("Class '" + lClassName
 									+ "' successfully loaded from '"
 									+ lJarFilePath + "'.");
 						}
 					} catch (Exception ex) {
-						mLog.error(ex.getClass().getSimpleName() 
+						mLog.error(ex.getClass().getSimpleName()
 								+ " loading jar '" + lJarFilePath + "': "
 								+ ex.getMessage());
 					}
@@ -285,7 +285,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		String lMsg = null;
 
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing RPC to class '" 
+			mLog.debug("Processing RPC to class '"
 					+ lClassName + "', method '"
 					+ lMethod + "', args: '" + lArgs + "'...");
 		}
@@ -490,7 +490,10 @@ public class RPCPlugIn extends TokenPlugIn {
 	private Method getValidMethod(String aClassName, String aMethodName, String[] aXmlParametersType) {
 		// check if the method own to a class which has been loaded.
 		if (!mRpcCallableClassLoader.containsKey(aClassName)) {
-			mLog.error("You try to grant access to a method which own to a class the server can't initialize. Make sure you didn't forget to declare it's jar file. " + aMethodName
+			mLog.error("You try to grant access to a method which own to a"
+					+ " class the server can't initialize."
+					+ " Make sure you didn't forget to declare it's jar file. "
+					+ aMethodName
 					+ " will *not* be loaded");
 			return null;
 		}
@@ -520,11 +523,13 @@ public class RPCPlugIn extends TokenPlugIn {
 //    if (aXmlParametersType != null && aXmlParametersType.length == 1 && "".equals(aXmlParametersType[0])) {
 //    	aXmlParametersType =null;
 //    }
-		//Make sure every parameter type is valid
+		// Make sure every parameter type is valid
 		if (aXmlParametersType != null) {
 			for (String parameterType : aXmlParametersType) {
 				if (!"".equals(parameterType) && !TypeConverter.isValidProtocolType(parameterType)) {
-					mLog.error(aXmlParametersType + " is not a valid parameter type. Valid parameter types are: " + TypeConverter.getValidParameterTypes());
+					mLog.error(aXmlParametersType
+							+ " is not a valid parameter type. Valid parameter types are: "
+							+ TypeConverter.getValidParameterTypes());
 					return null;
 				}
 			}
@@ -562,7 +567,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		}
 
 		// no parameters
-		if (aXmlParametersType != null 
+		if (aXmlParametersType != null
 				&& aXmlParametersType.length == 1
 				&& "".equals(aXmlParametersType[0])) {
 			if (lParametersType.isEmpty()) {
@@ -624,8 +629,8 @@ public class RPCPlugIn extends TokenPlugIn {
 				mLog.error("The method " + aMethod.getName()
 						+ " has an invalid parameter: "
 						+ lParameterType.getName() + ". "
-						+ "This method will *not* be load."
-						+ "Suported parameters type are primitive, primitive's wrapper, List and Token.");
+						+ "This method will *not* be loaded. "
+						+ "Supported parameters type are primitive, primitive's wrapper, List and Token.");
 				return false;
 			}
 		}

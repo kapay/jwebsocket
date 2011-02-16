@@ -55,6 +55,9 @@ public class TokenServer extends BaseServer {
 	// specify name space for token server
 	private static final String NS_TOKENSERVER = JWebSocketServerConstants.NS_BASE + ".tokenserver";
 	// specify shared connector variables
+	/**
+	 *
+	 */
 	public static final String VAR_IS_TOKENSERVER = NS_TOKENSERVER + ".isTS";
 	private volatile boolean mIsAlive = false;
 	private static ExecutorService mCachedThreadPool;
@@ -64,6 +67,10 @@ public class TokenServer extends BaseServer {
 	private int mKeepAliveTime;
 	private int mBlockingQueueSize;
 
+	/**
+	 *
+	 * @param aServerConfig
+	 */
 	public TokenServer(ServerConfiguration aServerConfig) {
 		super(aServerConfig);
 		mPlugInChain = new TokenPlugInChain(this);
@@ -187,16 +194,33 @@ public class TokenServer extends BaseServer {
 		super.connectorStopped(aConnector, aCloseReason);
 	}
 
+	/**
+	 *
+	 * @param aConnector
+	 * @param aDataPacket
+	 * @return
+	 */
 	public Token packetToToken(WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		String lFormat = aConnector.getHeader().getFormat();
 		return TokenFactory.packetToToken(lFormat, aDataPacket);
 	}
 
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 * @return
+	 */
 	public WebSocketPacket tokenToPacket(WebSocketConnector aConnector, Token aToken) {
 		String lFormat = aConnector.getHeader().getFormat();
 		return TokenFactory.tokenToPacket(lFormat, aToken);
 	}
 
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
 	public void processFilteredToken(WebSocketConnector aConnector, Token aToken) {
 		getPlugInChain().processToken(aConnector, aToken);
 		// forward the token to the listener chain
@@ -270,22 +294,52 @@ public class TokenServer extends BaseServer {
 		super.processPacket(aEngine, aConnector, aDataPacket);
 	}
 
+	/**
+	 *
+	 * @param aSource
+	 * @param aTarget
+	 * @param aToken
+	 */
 	public void sendToken(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
 		sendTokenData(aSource, aTarget, aToken, false);
 	}
 
+	/**
+	 *
+	 * @param aTarget
+	 * @param aToken
+	 */
 	public void sendToken(WebSocketConnector aTarget, Token aToken) {
 		sendToken(null, aTarget, aToken);
 	}
 
+	/**
+	 *
+	 * @param aTarget
+	 * @param aToken
+	 * @return
+	 */
 	public IOFuture sendTokenAsync(WebSocketConnector aTarget, Token aToken) {
 		return sendTokenData(null, aTarget, aToken, true);
 	}
 
+	/**
+	 *
+	 * @param aSource
+	 * @param aTarget
+	 * @param aToken
+	 * @return
+	 */
 	public IOFuture sendTokenAsync(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
 		return sendTokenData(aSource, aTarget, aToken, true);
 	}
 
+	/**
+	 *
+	 * @param aEngineId
+	 * @param aConnectorId
+	 * @param aToken
+	 */
 	public void sendToken(String aEngineId, String aConnectorId, Token aToken) {
 		// TODO: return meaningful result here.
 		WebSocketConnector lTargetConnector = getConnector(aEngineId, aConnectorId);
@@ -530,9 +584,14 @@ public class TokenServer extends BaseServer {
 	 * @return
 	 */
 	public Token createResponse(Token aInToken) {
-		Integer lTokenId = aInToken.getInteger("utid", -1);
-		String lType = aInToken.getString("type");
-		String lNS = aInToken.getString("ns");
+		Integer lTokenId = null;
+		String lType = null;
+		String lNS = null;
+		if( aInToken != null ) {
+			lTokenId = aInToken.getInteger("utid", -1);
+			lType = aInToken.getString("type");
+			lNS = aInToken.getString("ns");
+		}
 		Token lResToken = TokenFactory.createToken("response");
 		lResToken.setInteger("code", 0);
 		lResToken.setString("msg", "ok");
@@ -549,7 +608,7 @@ public class TokenServer extends BaseServer {
 	}
 
 	/**
-	 * creates a response with the standard "not authenticated" message
+	 * creates a response token with the standard "not authenticated" message.
 	 *
 	 * @param aInToken
 	 * @return
@@ -562,7 +621,7 @@ public class TokenServer extends BaseServer {
 	}
 
 	/**
-	 * creates a response with the standard "not granted" message
+	 * creates a response token with the standard ""access denied" message.
 	 *
 	 * @param aInToken
 	 * @return
@@ -572,6 +631,21 @@ public class TokenServer extends BaseServer {
 		lResToken.setInteger("code", -1);
 		lResToken.setString("msg", "access denied");
 		return lResToken;
+	}
+
+	/**
+	 * creates an error response token based on
+	 * @param aConnector
+	 * @param aInToken
+	 * @param aErrCode
+	 * @param aMessage
+	 */
+	public void sendErrorToken(WebSocketConnector aConnector, Token aInToken,
+			int aErrCode, String aMessage) {
+		Token lToken = createResponse(aInToken);
+		lToken.setInteger("code", aErrCode);
+		lToken.setString("msg", aMessage);
+		sendToken(aConnector, lToken);
 	}
 
 	/**

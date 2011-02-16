@@ -16,6 +16,7 @@
 package org.jwebsocket.plugins.channels;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -69,7 +70,7 @@ public final class Channel implements ChannelLifeCycle {
 	private boolean mIsSystem;
 	private String mSecretKey;
 	private String mAccessKey;
-	private long mCreatedDate;
+	private Date mCreatedDate;
 	private String mOwner;
 	private volatile boolean mAuthenticated = false;
 	private List<Subscriber> mSubscribers;
@@ -77,15 +78,37 @@ public final class Channel implements ChannelLifeCycle {
 	private ChannelState mState = ChannelState.STOPPED;
 	private List<ChannelListener> mChannelListeners;
 
+	/**
+	 *
+	 */
 	public enum ChannelState {
 
-		STOPPED(0), INITIALIZED(1), STARTED(2), SUSPENDED(3);
+		/**
+		 * 
+		 */
+		STOPPED(0),
+		/**
+		 *
+		 */
+		INITIALIZED(1),
+		/**
+		 * 
+		 */
+		STARTED(2),
+		/**
+		 *
+		 */
+		SUSPENDED(3);
 		private int value;
 
 		ChannelState(int value) {
 			this.value = value;
 		}
 
+		/**
+		 *
+		 * @return
+		 */
 		public int getValue() {
 			return value;
 		}
@@ -94,37 +117,28 @@ public final class Channel implements ChannelLifeCycle {
 	/**
 	 * Initialize the new channel but it doesn't start.
 	 *
-	 * @param config
-	 *            the channel config
+	 * @param aId
+	 * @param aName
+	 * @param aIsPrivate
+	 * @param aOwner
+	 * @param aIsSystem
+	 * @param aAccessKey
+	 * @param aSecretKey
+	 * @param aState
+	 * @param aCreatedDate
 	 */
-	/*
-	public Channel(ChannelConfig config) {
-	this.mId = config.getId();
-	this.mName = config.getName();
-	this.mIsPrivate = config.isPrivateChannel();
-	this.mIsSystem = config.isSystemChannel();
-	this.mSecretKey = config.getSecretKey();
-	this.mAccessKey = config.getAccessKey();
-	this.mOwner = config.getOwner();
-	this.mCreatedDate = System.currentTimeMillis();
-	this.mState = ChannelState.INITIALIZED;
-	this.mAuthenticated = false;
-	}
-	 */
-	public Channel(String aId, String aName, int aSubscriberCount,
-			boolean aPrivateChannel, boolean aSystemChannel,
+	public Channel(String aId, String aName,
+			boolean aIsPrivate, boolean aIsSystem,
 			String aSecretKey, String aAccessKey, String aOwner,
-			long aCreatedDate, ChannelState aState,
-			List<Subscriber> aSubscribers, List<Publisher> aPublishers) {
+			Date aCreatedDate, ChannelState aState) {
 		this.mId = aId;
 		this.mName = aName;
-		this.mIsPrivate = aPrivateChannel;
-		this.mIsSystem = aSystemChannel;
+		this.mIsPrivate = aIsPrivate;
+		this.mIsSystem = aIsSystem;
 		this.mSecretKey = aSecretKey;
 		this.mAccessKey = aAccessKey;
 		this.mOwner = aOwner;
 		this.mCreatedDate = aCreatedDate;
-		this.mSubscribers = aSubscribers;
 		this.mState = aState;
 	}
 
@@ -137,22 +151,38 @@ public final class Channel implements ChannelLifeCycle {
 		return mId;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public String getName() {
 		return mName;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public int getSubscriberCount() {
 		return mSubscribers.size();
 	}
 
-	public boolean isPrivateChannel() {
+	/**
+	 * returns if the channel is a private channel.
+	 * Private channels are not listed by getChannel requests and
+	 * require an access-key.
+	 * @return
+	 */
+	public boolean isPrivate() {
 		return mIsPrivate;
 	}
 
 	/**
+	 * returns if the channel is a system channel.
+	 * System channels cannot be removed from clients.
 	 * @return the systemChannel
 	 */
-	public boolean isSystemChannel() {
+	public boolean isSystem() {
 		return mIsSystem;
 	}
 
@@ -173,7 +203,7 @@ public final class Channel implements ChannelLifeCycle {
 	/**
 	 * @return the createdDate
 	 */
-	public long getCreatedDate() {
+	public Date getCreatedDate() {
 		return mCreatedDate;
 	}
 
@@ -242,6 +272,7 @@ public final class Channel implements ChannelLifeCycle {
 	 *
 	 * @param aSubscriber
 	 *            the subscriber which wants to subscribe
+	 * @param aChannelManager
 	 */
 	public void subscribe(Subscriber aSubscriber, ChannelManager aChannelManager) {
 		// create new subscribers if needed
@@ -317,8 +348,7 @@ public final class Channel implements ChannelLifeCycle {
 	 *
 	 * @param aToken
 	 *            the token data to send
-	 * @param subscriber
-	 *            the target subscriber
+	 * @param aSubscriber
 	 * @return the future object to keep track of send operation
 	 */
 	public IOFuture sendAsync(Token aToken, Subscriber aSubscriber) {
@@ -376,17 +406,29 @@ public final class Channel implements ChannelLifeCycle {
 		mChannelListeners.add(aChannelListener);
 	}
 
+	/**
+	 *
+	 * @param aChannelListener
+	 */
 	public void removeListener(ChannelListener aChannelListener) {
 		if (mChannelListeners != null) {
 			mChannelListeners.remove(aChannelListener);
 		}
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public void init() {
 		this.mState = ChannelState.INITIALIZED;
 	}
 
+	/**
+	 *
+	 * @param aUser
+	 * @throws ChannelLifeCycleException
+	 */
 	@Override
 	public void start(final String aUser) throws ChannelLifeCycleException {
 		if (this.mState == ChannelState.STARTED) {
@@ -432,6 +474,11 @@ public final class Channel implements ChannelLifeCycle {
 		}
 	}
 
+	/**
+	 *
+	 * @param aUser
+	 * @throws ChannelLifeCycleException
+	 */
 	@Override
 	public void suspend(final String aUser) throws ChannelLifeCycleException {
 		if (this.mState == ChannelState.SUSPENDED) {
@@ -473,6 +520,11 @@ public final class Channel implements ChannelLifeCycle {
 		}
 	}
 
+	/**
+	 *
+	 * @param aUser
+	 * @throws ChannelLifeCycleException
+	 */
 	@Override
 	public void stop(final String aUser) throws ChannelLifeCycleException {
 		if (this.mState == ChannelState.STOPPED) {
@@ -550,6 +602,10 @@ public final class Channel implements ChannelLifeCycle {
 		this.mOwner = aOwner;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public boolean isAuthenticated() {
 		return mAuthenticated;
 	}

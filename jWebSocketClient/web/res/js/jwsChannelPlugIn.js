@@ -44,6 +44,25 @@ jws.ChannelPlugIn = {
 	PUBLISH: "publish",
 	STOP: "stop",
 
+	processToken: function( aToken ) {
+		// check if namespace matches
+		if( aToken.ns == jws.ChannelPlugIn.NS ) {
+			// here you can handle incomimng tokens from the server
+			// directy in the plug-in if desired.
+			if( "event" == aToken.type ) {
+				if( "channelCreated" == aToken.name ) {
+					if( this.OnChannelCreated ) {
+						this.OnChannelCreated( aToken );
+					}
+				} else if( "channelRemoved" == aToken.name ) {
+					if( this.OnChannelRemoved ) {
+						this.OnChannelRemoved( aToken );
+					}
+				}
+			}
+		}
+	},
+
 	//:m:*:channelSubscribe
 	//:d:en:Registers the client at the given channel on the server. _
 	//:d:en:After this operation the client obtains all messages on this _
@@ -54,13 +73,14 @@ jws.ChannelPlugIn = {
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get notified on error or success.
-	channelSubscribe: function( aChannel ) {
+	channelSubscribe: function( aChannel, aAccessKey ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.SUBSCRIBE,
-				channel: aChannel
+				channel: aChannel,
+				access_key: aAccessKey
 			});
 		}
 		return lRes;
@@ -129,13 +149,14 @@ jws.ChannelPlugIn = {
 		return lRes;
 	},
 
-	channelCreate: function( aChannel ) {
+	channelCreate: function( aChannel, aName ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.CREATE_CHANNEL,
-				channel: aChannel
+				channel: aChannel,
+				name: aName
 			});
 		}
 		return lRes;
@@ -191,6 +212,18 @@ jws.ChannelPlugIn = {
 			});
 		}
 		return lRes;
+	},
+
+	setChannelCallbacks: function( aListeners ) {
+		if( !aListeners ) {
+			aListeners = {};
+		}
+		if( aListeners.OnChannelCreated !== undefined ) {
+			this.OnChannelCreated = aListeners.OnChannelCreated;
+		}
+		if( aListeners.OnChannelRemoved !== undefined ) {
+			this.OnChannelRemoved = aListeners.OnChannelRemoved;
+		}
 	}
 
 };

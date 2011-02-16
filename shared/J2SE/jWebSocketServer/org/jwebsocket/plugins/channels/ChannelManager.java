@@ -15,6 +15,7 @@
 package org.jwebsocket.plugins.channels;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
@@ -80,10 +81,6 @@ public class ChannelManager {
 		for (String lOption : aSettings.keySet()) {
 			if (lOption.startsWith("channel:")) {
 				String lChannelId = lOption.substring(8);
-				if (mLog.isDebugEnabled()) {
-					mLog.debug("Instantiating channel '"
-							+ lChannelId + "' by configuration...");
-				}
 				Object lObj = aSettings.get(lOption);
 				JSONObject lJSON = null;
 				if (lObj instanceof JSONObject) {
@@ -96,36 +93,51 @@ public class ChannelManager {
 				String lKey = null;
 				String lSecret = null;
 				String lOwner = null;
+				boolean lIsPrivate = false;
+				boolean lIsSystem = false;
 				try {
 					lName = lJSON.getString("name");
 				} catch (Exception lEx) {
 				}
 				try {
-					lKey = lJSON.getString("key");
+					lKey = lJSON.getString("access_key");
 				} catch (Exception lEx) {
 				}
 				try {
-					lSecret = lJSON.getString("secret");
+					lSecret = lJSON.getString("secret_key");
 				} catch (Exception lEx) {
 				}
 				try {
 					lOwner = lJSON.getString("owner");
 				} catch (Exception lEx) {
 				}
+				try {
+					lIsPrivate = lJSON.getBoolean("isPrivate");
+				} catch (Exception lEx) {
+				}
+				try {
+					lIsSystem = lJSON.getBoolean("isSystem");
+				} catch (Exception lEx) {
+				}
+
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Instantiating channel '"
+							+ lChannelId + "' by configuration"
+							+ " (private: "
+							+ lIsPrivate
+							+ ", system: " + lIsSystem + ")...");
+				}
 
 				Channel lChannel = new Channel(
 						lChannelId, // String aId,
 						lName, // String aName,
-						0, // int aSubscriberCount,
-						false, // boolean aPrivateChannel,
-						false, // boolean aSystemChannel,
+						lIsPrivate, // boolean aPrivateChannel,
+						lIsSystem, // boolean aSystemChannel,
 						lKey, // String aSecretKey,
 						lSecret, // String aAccessKey,
 						lOwner, // String aOwner,
-						0, // long aCreatedDate,
-						ChannelState.INITIALIZED, // ChannelState aState,
-						null, // List<Subscriber> aSubscribers,
-						null // List<Publisher> aPublishers
+						new Date(), // long aCreatedDate,
+						ChannelState.INITIALIZED // ChannelState aState,
 						);
 				// put in channels map
 				mChannels.put(lChannel.getId(), lChannel);
@@ -138,6 +150,7 @@ public class ChannelManager {
 	}
 
 	/**
+	 * @param aSettings
 	 * @return the static manager instance
 	 */
 	public static ChannelManager getChannelManager(Map<String, Object> aSettings) {
@@ -158,7 +171,7 @@ public class ChannelManager {
 			try {
 				lChannel.start(lRoot.getLoginname());
 			} catch (Exception lEx) {
-				mLog.error(lEx.getClass().getSimpleName() 
+				mLog.error(lEx.getClass().getSimpleName()
 						+ " on starting channel '" + lChannel.getId() + "': "
 						+ lEx.getMessage());
 			}
@@ -168,6 +181,8 @@ public class ChannelManager {
 	/**
 	 * Stops all the system channels running in the system and clears the system
 	 * channels map
+	 *
+	 * @throws ChannelLifeCycleException
 	 */
 	public void stopChannels() throws ChannelLifeCycleException {
 		User lRoot = SecurityFactory.getRootUser();
@@ -175,7 +190,7 @@ public class ChannelManager {
 			try {
 				lChannel.stop(lRoot.getLoginname());
 			} catch (Exception lEx) {
-				mLog.error(lEx.getClass().getSimpleName() 
+				mLog.error(lEx.getClass().getSimpleName()
 						+ " on stopping channel '" + lChannel.getId() + "': "
 						+ lEx.getMessage());
 			}
@@ -195,6 +210,11 @@ public class ChannelManager {
 		return mChannels.get(aChannelId);
 	}
 
+	/**
+	 *
+	 * @param aChannelId
+	 * @return
+	 */
 	public Channel removeChannel(String aChannelId) {
 		Channel lChannel = getChannel(aChannelId);
 		if (lChannel != null) {
@@ -205,6 +225,18 @@ public class ChannelManager {
 
 		}
 		return lChannel;
+	}
+
+	/**
+	 *
+	 * @param aChannel
+	 * @return
+	 */
+	public Channel removeChannel(Channel aChannel) {
+		if (aChannel != null) {
+			return removeChannel(aChannel.getId());
+		}
+		return null;
 	}
 
 	/**
@@ -266,8 +298,8 @@ public class ChannelManager {
 	/**
 	 * Stores the given publisher to the channel store
 	 *
-	 * @param publisher
-	 *            the publisher object to store
+	 *
+	 * @param aPublisher
 	 */
 	public void storePublisher(Publisher aPublisher) {
 		mPublisherStore.storePublisher(aPublisher);
@@ -303,6 +335,10 @@ public class ChannelManager {
 		return mAdminChannel;
 	}
 
+	/**
+	 *
+	 * @param aToken
+	 */
 	public void publishToLoggerChannel(Token aToken) {
 		Channel lLoggerChannel = getLoggerChannel();
 		// Added by Alex:
@@ -353,6 +389,13 @@ public class ChannelManager {
 		return channelToken;
 	}
 
+	/**
+	 *
+	 * @param aConnector
+	 * @param aChannel
+	 * @param aEventType
+	 * @return
+	 */
 	public Token getChannelSuccessToken(WebSocketConnector aConnector, String aChannel, ChannelEventEnum aEventType) {
 		Token lToken = getBaseChannelResponse(aConnector, aChannel);
 		String lEvent = "";

@@ -16,6 +16,7 @@
 package org.jwebsocket.plugins.channels;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -93,7 +94,7 @@ public class BaseChannelStore extends JDBCStorage implements ChannelStore {
 			String secretKey = channelObject.getString(SECRET_KEY);
 			String accessKey = channelObject.getString(ACCESS_KEY);
 			String owner = channelObject.getString(OWNER);
-			long createdDate = channelObject.getLong(CREATED_DATE);
+			Date createdDate = null; // channelObject.getLong(CREATED_DATE);
 			int stateValue = channelObject.getInt(STATE);
 			Channel.ChannelState state = null;
 			for (Channel.ChannelState ch : Channel.ChannelState.values()) {
@@ -103,8 +104,8 @@ public class BaseChannelStore extends JDBCStorage implements ChannelStore {
 				}
 			}
 			// construct the channel object
-			channel = new Channel(channelId, channelName, subscriberCount, privateChannel, systemChannel, secretKey,
-					accessKey, owner, createdDate, state, subscribers, publishers);
+			channel = new Channel(channelId, channelName, privateChannel, systemChannel, secretKey,
+					accessKey, owner, createdDate, state);
 		} catch (JSONException e) {
 			logger.error("Error parsing json response from the channel store:", e);
 		}
@@ -121,8 +122,8 @@ public class BaseChannelStore extends JDBCStorage implements ChannelStore {
 			jsonObject.put(ID, channel.getId());
 			jsonObject.put(NAME, channel.getName());
 			jsonObject.put(SUBSCRIBER_COUNT, channel.getSubscriberCount());
-			jsonObject.put(PRIVATE, channel.isPrivateChannel());
-			jsonObject.put(SYSTEM, channel.isSystemChannel());
+			jsonObject.put(PRIVATE, channel.isPrivate());
+			jsonObject.put(SYSTEM, channel.isSystem());
 			jsonObject.put(SECRET_KEY, channel.getSecretKey());
 			jsonObject.put(ACCESS_KEY, channel.getAccessKey());
 			jsonObject.put(CREATED_DATE, channel.getCreatedDate());

@@ -22,6 +22,7 @@ import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.logging.Logging;
 
 import org.jwebsocket.plugins.rpc.BaseRPCCallable;
+import org.jwebsocket.plugins.rpc.SampleRPCObject;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
 
@@ -49,6 +50,15 @@ public class SampleRPCLibrary extends BaseRPCCallable {
 	 */
 	public Object getMD5(String aArg) {
 		return (Tools.getMD5(aArg));
+	}
+
+	/**
+	 *
+	 * @param aArg
+	 * @return MD5 sum of the given string.
+	 */
+	public SampleRPCObject getRPCObject(SampleRPCObject aObject) {
+		return aObject;
 	}
 
 	/**

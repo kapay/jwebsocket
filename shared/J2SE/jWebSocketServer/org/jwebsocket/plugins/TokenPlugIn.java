@@ -38,6 +38,10 @@ public class TokenPlugIn extends BasePlugIn {
 	}
 	 */
 
+	/**
+	 *
+	 * @param aConfiguration
+	 */
 	public TokenPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 	}
@@ -172,7 +176,6 @@ public class TokenPlugIn extends BasePlugIn {
 	 * <tt>sendToken</tt> to simplify token plug-in code.
 	 *
 	 * @param aSource
-	 * @param aTarget
 	 * @param aToken
 	 */
 	public void broadcastToken(WebSocketConnector aSource, Token aToken) {
@@ -182,10 +185,31 @@ public class TokenPlugIn extends BasePlugIn {
 		}
 	}
 
+	/**
+	 *
+	 * @param aSource
+	 * @param aToken
+	 * @param aBroadcastOptions
+	 */
 	public void broadcastToken(WebSocketConnector aSource, Token aToken, BroadcastOptions aBroadcastOptions) {
 		TokenServer lServer = getServer();
 		if (lServer != null) {
 			lServer.broadcastToken(aSource, aToken, aBroadcastOptions);
+		}
+	}
+
+	/**
+	 * 
+	 * @param aConnector
+	 * @param aInToken
+	 * @param aErrCode
+	 * @param aMessage
+	 */
+	public void sendErrorToken(WebSocketConnector aConnector, Token aInToken,
+			int aErrCode, String aMessage) {
+		TokenServer lServer = getServer();
+		if (lServer != null) {
+			lServer.sendErrorToken(aConnector, aInToken, aErrCode, aMessage);
 		}
 	}
 }

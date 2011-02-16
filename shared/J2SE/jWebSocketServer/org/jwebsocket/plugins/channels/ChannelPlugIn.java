@@ -27,12 +27,15 @@ import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketServerConstants;
+import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.plugins.channels.Channel.ChannelState;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.security.User;
+import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 
@@ -121,7 +124,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 	/** channel manager */
 	private ChannelManager mChannelManager = null;
 	/** name space for channels */
-	private static final String NS_CHANNELS_DEFAULT =
+	private static final String NS_CHANNELS =
 			JWebSocketServerConstants.NS_BASE + ".plugins.channels";
 	/** empty string */
 	private static final String EMPTY_STRING = "";
@@ -156,7 +159,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			mLog.debug("Instantiating channel plug-in...");
 		}
 		// specify default name space
-		this.setNamespace(NS_CHANNELS_DEFAULT);
+		this.setNamespace(NS_CHANNELS);
+		// setting up the system channels configure in jWebSocket.xml
 		mChannelManager = ChannelManager.getChannelManager(aConfiguration.getSettings());
 	}
 
@@ -196,10 +200,9 @@ public class ChannelPlugIn extends TokenPlugIn {
 				if (mLog.isInfoEnabled()) {
 					mLog.info("Channels stopped.");
 				}
-			} else
-				if (mLog.isInfoEnabled()) {
-					mLog.info("Channels were not yet started, properly terminated.");
-				}
+			} else if (mLog.isInfoEnabled()) {
+				mLog.info("Channels were not yet started, properly terminated.");
+			}
 		} catch (ChannelLifeCycleException lEx) {
 			mLog.error("Error stopping channels", lEx);
 		}
@@ -210,17 +213,9 @@ public class ChannelPlugIn extends TokenPlugIn {
 	 */
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
-		// set session id first, so that it can be processed in the
-		// connectorStarted method set session id first, so that it can be
-		// processed in the connectorStarted method
-		// Random lRand = new Random(System.nanoTime());
-		// do not set session id here!
-		// aConnector.getSession().setSessionId(Tools.getMD5(aConnector.generateUID() + "." + lRand.nextInt()));
 		// call super connectorStarted
 		super.connectorStarted(aConnector);
-
-		// and send the welcome message incl. the session id
-		// sendWelcome(aConnector);
+		// currently no further action required here
 	}
 
 	/**
@@ -230,7 +225,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// unsubscribe from the channel, if subscribed
 		Subscriber lSubscriber = mChannelManager.getSubscriber(aConnector.getId());
-		if( lSubscriber != null ) {
+		if (lSubscriber != null) {
 			for (String lChannelId : lSubscriber.getChannels()) {
 				Channel lChannel = mChannelManager.getChannel(lChannelId);
 				if (lChannel != null) {
@@ -281,7 +276,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 	}
 
 	/**
-	 * Subscribes the connector to the channel given by the subscriber
+	 * Subscribes the connector to the channel given by the subscriber.
 	 *
 	 * @param aConnector
 	 *            the connector for this client
@@ -293,49 +288,81 @@ public class ChannelPlugIn extends TokenPlugIn {
 			mLog.debug("Processing 'subscribe'...");
 		}
 		String lChannelId = aToken.getString(CHANNEL);
+		String lAccessKey = aToken.getString(ACCESS_KEY);
+
+		// check for valid channel id
 		if (lChannelId == null || EMPTY_STRING.equals(lChannelId)) {
-			sendError(aConnector, null, "Channel value is null");
+			sendErrorToken(aConnector, aToken, -1,
+					"No or invalid channel id passed");
 			return;
 		}
-		String lAccessKey = aToken.getString(ACCESS_KEY);
+		// try to get channel
 		Channel lChannel = mChannelManager.getChannel(lChannelId);
+
+		// try to find the given channel in the channel manager
+		// and check if the channel is up
 		if (lChannel == null
 				|| lChannel.getState() == Channel.ChannelState.STOPPED) {
-			sendError(aConnector, lChannelId,
-					"Channel doesn't exists for the channelId: '"
-					+ lChannelId + "'");
+			sendErrorToken(aConnector, aToken, -1,
+					"Channel '" + lChannelId
+					+ "' doesn't exist or is not started.");
 			return;
 		}
-		if (lChannel.isPrivateChannel() && EMPTY_STRING.equals(lAccessKey)) {
-			sendError(aConnector, lChannelId,
-					"Access_key required for subscribing to a private channel: '"
-					+ lChannelId + "'");
-			return;
-		}
-		if (lChannel.isPrivateChannel() && !EMPTY_STRING.equals(lAccessKey)) {
-			if (lChannel.getAccessKey().equals(lAccessKey)) {
-				sendError(aConnector, lChannelId,
-						"Access_key not valid for the given channel id: '"
+
+		String lChannelAccessKey = lChannel.getAccessKey();
+		if (lChannel.isPrivate()) {
+			// TODO: this should be obsolete in future, validate by channel class!
+			// validation if private channel has access key
+			if (lChannelAccessKey == null || EMPTY_STRING.equals(lChannelAccessKey)) {
+				sendErrorToken(aConnector, aToken, -1,
+						"No access key assigned to private channel '"
 						+ lChannelId + "'");
 				return;
 			}
+			if (lAccessKey == null || !lAccessKey.equals(lChannelAccessKey)) {
+				sendErrorToken(aConnector, aToken, -1,
+						"Invalid access key for private channel '"
+						+ lChannelId + "'");
+				return;
+			}
+		} else {
+			// does public channel have an access key?
+			if (lChannelAccessKey != null) {
+				// if so check match
+				if (!lChannelAccessKey.equals(lAccessKey)) {
+					sendErrorToken(aConnector, aToken, -1,
+							"Invalid access key for public channel '"
+							+ lChannelId + "'");
+					return;
+				}
+			} else {
+				// if not also check if no access key was passed
+				if (lAccessKey != null) {
+					sendErrorToken(aConnector, aToken, -1,
+							"Invalid access key for public channel '"
+							+ lChannelId + "'");
+					return;
+				}
+			}
 		}
+
+		// check if client is already a subscriber in the channel manager
 		Subscriber lSubscriber = mChannelManager.getSubscriber(aConnector.getId());
-		Date lDate = new Date();
 		if (lSubscriber == null) {
-			lSubscriber = new Subscriber(aConnector, getServer(), lDate);
+			lSubscriber = new Subscriber(aConnector, getServer(), new Date());
 		}
-		// Added by Alex: If already subscribed, return error message
+
+		// If client already subscribed to given channel, return error message
 		Token lResponseToken = createResponse(aToken);
 		if (lSubscriber.getChannels().contains(lChannelId)) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg",
+			sendErrorToken(aConnector, aToken, -1,
 					"Client already subscribed to channel '"
-					+ lChannelId + "'.");
+					+ lChannelId + "'");
+			return;
 		} else {
 			lChannel.subscribe(lSubscriber, mChannelManager);
-			lResponseToken.setString("subscribe", "ok");
 		}
+
 		// send the success response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
@@ -355,26 +382,34 @@ public class ChannelPlugIn extends TokenPlugIn {
 			mLog.debug("Processing 'unsubscribe'...");
 		}
 		String lChannelId = aToken.getString(CHANNEL);
-		if (lChannelId == null
-				|| EMPTY_STRING.equals(lChannelId)) {
-			sendError(aConnector, null, "Channel value is null");
+		// check for valid channel id
+		if (lChannelId == null || EMPTY_STRING.equals(lChannelId)) {
+			sendErrorToken(aConnector, aToken, -1,
+					"No or invalid channel id passed");
 			return;
 		}
+
 		Token lResponseToken = createResponse(aToken);
+		// check if client exists as subscriber at channel manager
 		Subscriber lSubscriber =
 				mChannelManager.getSubscriber(aConnector.getId());
 		if (lSubscriber != null) {
 			Channel lChannel = mChannelManager.getChannel(lChannelId);
 			if (lChannel != null) {
 				lChannel.unsubscribe(lSubscriber, mChannelManager);
-				lResponseToken.setString("unsubscribe", "ok");
+			} else {
+				sendErrorToken(aConnector, aToken, -1,
+						"Channel '" + lChannelId
+						+ "' doesn't exist.");
+				return;
 			}
 		} else {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg",
+			sendErrorToken(aConnector, aToken, -1,
 					"Client not subscribed to channel '"
 					+ lChannelId + "'.");
+			return;
 		}
+
 		// send the success response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
@@ -401,9 +436,11 @@ public class ChannelPlugIn extends TokenPlugIn {
 		for (Map.Entry<String, Channel> lEntry : lCMChannels.entrySet()) {
 			Map lItem = new FastMap();
 			Channel lChannel = lEntry.getValue();
-			lItem.put("id", lChannel.getId());
-			lItem.put("name", lChannel.getName());
-			lChannels.add(lItem);
+			if (!lChannel.isPrivate()) {
+				lItem.put("id", lChannel.getId());
+				lItem.put("name", lChannel.getName());
+				lChannels.add(lItem);
+			}
 		}
 		lResponseToken.setList("channels", lChannels);
 
@@ -425,7 +462,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 
 		User lUser = SecurityFactory.getUser(lLogin);
 		if (lUser == null) {
-			sendError(aConnector, lChannelId,
+			sendErrorToken(aConnector, aToken, -1,
 					"'" + aConnector.getId()
 					+ "' Authorization failed for channel '"
 					+ lChannelId
@@ -433,21 +470,24 @@ public class ChannelPlugIn extends TokenPlugIn {
 			return;
 		}
 		if (lSecretKey == null || lAccessKey == null) {
-			sendError(aConnector, lChannelId, "'" + aConnector.getId()
+			sendErrorToken(aConnector, aToken, -1,
+					"'" + aConnector.getId()
 					+ "' Authorization failed, secret_key/access_key pair value is not correct");
 			return;
 		} else {
 			Channel lChannel = mChannelManager.getChannel(lChannelId);
 			if (lChannel == null) {
-				sendError(aConnector, lChannelId, "'" + aConnector.getId()
-						+ "' channel not found for given channelId '" + lChannelId + "'");
+				sendErrorToken(aConnector, aToken, -1,
+						"'" + aConnector.getId()
+						+ "' channel not found for given channelId '"
+						+ lChannelId + "'");
 				return;
 			}
 			Publisher lPublisher = authorizePublisher(aConnector, lChannel,
 					lUser, lSecretKey, lAccessKey);
 			if (!lPublisher.isAuthorized()) {
 				// couldn't authorize the publisher
-				sendError(aConnector, lChannelId,
+				sendErrorToken(aConnector, aToken, -1,
 						"'" + aConnector.getId()
 						+ "' Authorization failed for channel '"
 						+ lChannelId + "'");
@@ -470,7 +510,51 @@ public class ChannelPlugIn extends TokenPlugIn {
 		}
 
 		Token lResponseToken = createResponse(aToken);
-		lResponseToken.setString("msg", "pending...");
+
+		// get arguments from request
+		String lChannelId = aToken.getString(CHANNEL);
+		String lAccessKey = aToken.getString(ACCESS_KEY);
+		String lSecretKey = aToken.getString(SECRET_KEY);
+		String lName = aToken.getString("name");
+		boolean lIsPrivate = aToken.getBoolean("isPrivate", false);
+		boolean lIsSystem = aToken.getBoolean("isSystem", false);
+		if (lName == null) {
+			lName = lChannelId;
+		}
+		String lOwner = aToken.getString("owner");
+		// TODO: introduce validation here
+		if (lOwner == null) {
+			lOwner = "root";
+		}
+
+		// check if channel already exists
+		Channel lChannel = mChannelManager.getChannel(lChannelId);
+		if (lChannel != null) {
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", "Channel with id '" + lChannelId + "' already exists.");
+		} else {
+			lChannel = new Channel(
+					lChannelId, // String aId,
+					lName, // String aName,
+					lIsPrivate, // boolean aPrivateChannel,
+					lIsSystem, // boolean aSystemChannel,
+					lAccessKey, // String aSecretKey,
+					lSecretKey, // String aAccessKey,
+					lOwner, // String aOwner,
+					new Date(), // Date aCreatedDate,
+					ChannelState.INITIALIZED // ChannelState aState,
+					);
+			mChannelManager.addChannel(lChannel);
+
+			Token lChannelCreated = TokenFactory.createToken(NS_CHANNELS, BaseToken.TT_EVENT);
+			lChannelCreated.setString("name", "channelCreated");
+			lChannelCreated.setString("channelId", lChannelId);
+			lChannelCreated.setString("channelName", lName);
+
+			// TODO: make broadcast options optional here, not hardcoded!
+			// TODO: maybe send on admin channel only?
+			broadcastToken(aConnector, lChannelCreated, new BroadcastOptions(true, false));
+		}
 
 		// send the response
 		sendToken(aConnector, aConnector, lResponseToken);
@@ -480,9 +564,30 @@ public class ChannelPlugIn extends TokenPlugIn {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'removeChannel'...");
 		}
-
 		Token lResponseToken = createResponse(aToken);
-		lResponseToken.setString("msg", "pending...");
+
+		// get arguments from request
+		String lChannelId = aToken.getString(CHANNEL);
+		String lAccessKey = aToken.getString(ACCESS_KEY);
+		String lSecretKey = aToken.getString(SECRET_KEY);
+
+		// check if channel already exists
+		Channel lChannel = mChannelManager.getChannel(lChannelId);
+		if (lChannel == null) {
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", "Channel with id '" + lChannelId + "' does not exist.");
+		} else {
+			mChannelManager.removeChannel(lChannel);
+
+			Token lChannelCreated = TokenFactory.createToken(NS_CHANNELS, BaseToken.TT_EVENT);
+			lChannelCreated.setString("name", "channelRemoved");
+			lChannelCreated.setString("channelId", lChannelId);
+			lChannelCreated.setString("channelName", lChannel.getName());
+
+			// TODO: make broadcast options optional here, not hardcoded!
+			// TODO: maybe send on admin channel only?
+			broadcastToken(aConnector, lChannelCreated, new BroadcastOptions(true, false));
+		}
 
 		// send the response
 		sendToken(aConnector, aConnector, lResponseToken);
@@ -495,8 +600,10 @@ public class ChannelPlugIn extends TokenPlugIn {
 		String lChannelId = aToken.getString(CHANNEL);
 		Channel lChannel = mChannelManager.getChannel(lChannelId);
 		if (lChannel == null) {
-			sendError(aConnector, lChannelId, "'" + aConnector.getId()
-					+ "' channel not found for given channelId '" + lChannelId + "'");
+			sendErrorToken(aConnector, aToken, -1,
+					"'" + aConnector.getId()
+					+ "' channel not found for given channelId '"
+					+ lChannelId + "'");
 			return;
 		}
 		List<Subscriber> lChannelSubscribers = lChannel.getSubscribers();
@@ -546,7 +653,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 				aConnector.getSession().getSessionId());
 
 		if (lPublisher == null || !lPublisher.isAuthorized()) {
-			sendError(aConnector, lChannelId, "Connector '" + aConnector.getId()
+			sendErrorToken(aConnector, aToken, -1,
+					"Connector '" + aConnector.getId()
 					+ "': access denied, publisher not authorized for channelId '"
 					+ lChannelId + "'");
 			return;
@@ -571,11 +679,13 @@ public class ChannelPlugIn extends TokenPlugIn {
 	private void handlePublisher(WebSocketConnector aConnector, Token aToken) {
 		String lChannelId = aToken.getString(CHANNEL);
 		if (lChannelId == null || EMPTY_STRING.equals(lChannelId)) {
-			sendError(aConnector, lChannelId, "Channel value not specified.");
+			sendErrorToken(aConnector, aToken, -1,
+					"Channel value not specified.");
 			return;
 		}
 		if (!aToken.getNS().equals(getNamespace())) {
-			sendError(aConnector, lChannelId, "Namespace '" + aToken.getNS() + "' not correct.");
+			sendErrorToken(aConnector, aToken, -1,
+					"Namespace '" + aToken.getNS() + "' not correct.");
 			return;
 		}
 		// String lEvent = aToken.getString(EVENT);
@@ -651,29 +761,6 @@ public class ChannelPlugIn extends TokenPlugIn {
 					aChannel.getId(), lNow, lNow, false);
 		}
 		return lPublisher;
-	}
-
-	/**
-	 * Send the error response to the client as well as publish the error log to
-	 * the logger channel for monitoring
-	 *
-	 * @param aConnector
-	 *            the target connector object
-	 * @param aChannel
-	 *            the target channel id, can be null if channel is not
-	 *            initialized
-	 * @param error
-	 *            the error message
-	 */
-	private void sendError(WebSocketConnector aConnector, String aChannel, String aError) {
-		Token lErrorToken = mChannelManager.getErrorToken(
-				aConnector, aChannel, aError);
-
-		// publish to logger channel
-		mChannelManager.publishToLoggerChannel(lErrorToken);
-
-		// send the error to the client
-		sendTokenAsync(aConnector, aConnector, lErrorToken);
 	}
 
 	/**

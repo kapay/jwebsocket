@@ -4,23 +4,23 @@
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<!-- If Google's chrome frame installed, use it! -->
 		<!-- Comment needs to be BELOW this meta tag! -->
-<!--
-//	****************************************************************************
-//	jWebSocket Channel Demo (uses jWebSocket Client and Server)
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
-//	****************************************************************************
-//	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU Lesser General Public License as published by the
-//	Free Software Foundation; either version 3 of the License, or (at your
-//	option) any later version.
-//	This program is distributed in the hope that it will be useful, but WITHOUT
-//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-//	more details.
-//	You should have received a copy of the GNU Lesser General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
-//	****************************************************************************
--->
+		<!--
+		//	****************************************************************************
+		//	jWebSocket Channel Demo (uses jWebSocket Client and Server)
+		//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
+		//	****************************************************************************
+		//	This program is free software; you can redistribute it and/or modify it
+		//	under the terms of the GNU Lesser General Public License as published by the
+		//	Free Software Foundation; either version 3 of the License, or (at your
+		//	option) any later version.
+		//	This program is distributed in the hope that it will be useful, but WITHOUT
+		//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+		//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+		//	more details.
+		//	You should have received a copy of the GNU Lesser General Public License along
+		//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+		//	****************************************************************************
+		-->
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket Channels Demo</title>
@@ -32,7 +32,7 @@
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null,
-				eKeepAlive = null;
+			eKeepAlive = null;
 
 			function log( aString ) {
 				eLog.innerHTML +=
@@ -46,7 +46,6 @@
 				eLog.innerHTML = "";
 				eLog.scrollTop = 0;
 			}
-
 
 			var lWSC = null;
 
@@ -92,6 +91,7 @@
 				}
 			}
 
+			// log out the client from the jWebSocket server
 			function logout() {
 				if( lWSC ) {
 					lWSC.stopKeepAlive();
@@ -101,13 +101,34 @@
 				}
 			}
 
-			function subscribeChannel() {
-				var lChannel = eChannel.value;
-				log( "Subscribing at channel '" + lChannel + "'..." );
-				var lRes = lWSC.channelSubscribe( lChannel );
+			// try to create a new channel on the server
+			// on success the OnChannelCreated event is fired
+			function createChannel() {
+				var lChannelId = eChannelId.value;
+				log( "Creating channel '" + lChannelId + "'..." );
+				var lRes = lWSC.channelCreate( lChannelId );
 				log( lWSC.resultToString( lRes ) );
 			}
 
+			// try to remove an existing channel on the server
+			// on success the OnChannelRemoved event is fired
+			function removeChannel() {
+				var lChannelId = eChannelId.value;
+				log( "Removing channel '" + lChannelId + "'..." );
+				var lRes = lWSC.channelRemove( lChannelId );
+				log( lWSC.resultToString( lRes ) );
+			}
+
+			// try to subscribe at a certain channel
+			function subscribeChannel() {
+				var lChannel = eChannel.value;
+				var lAccessKey = eAccessKey.value;
+				log( "Subscribing at channel '" + lChannel + "'..." );
+				var lRes = lWSC.channelSubscribe( lChannel, lAccessKey );
+				log( lWSC.resultToString( lRes ) );
+			}
+
+			// try to unsubscribe from a certain channel
 			function unsubscribeChannel() {
 				var lChannel = eChannel.value;
 				log( "Unsubscribing from channel '" + lChannel + "'..." );
@@ -115,13 +136,7 @@
 				log( lWSC.resultToString( lRes ) );
 			}
 
-			function publish() {
-				var lChannel = eChannel.value;
-				log( "Publishing to channel '" + lChannel + "'..." );
-				var lRes = lWSC.channelPublish( lChannel, eMessage.value );
-				log( lWSC.resultToString( lRes ) );
-			}
-
+			// try to authenticate against a channel to publish data
 			function auth() {
 				var lChannel = eChannel.value;
 				var lKey = eAccessKey.value;
@@ -133,12 +148,22 @@
 				log( lWSC.resultToString( lRes ) );
 			}
 
+			// try to publish data on a certain channel
+			function publish() {
+				var lChannel = eChannel.value;
+				log( "Publishing to channel '" + lChannel + "'..." );
+				var lRes = lWSC.channelPublish( lChannel, eMessage.value );
+				log( lWSC.resultToString( lRes ) );
+			}
+
+			// try to obtain all available channels on the server
 			function getChannels() {
 				log( "Trying to obtain channels..." );
 				var lRes = lWSC.channelGetIds();
 				log( lWSC.resultToString( lRes ) );
 			}
 
+			// try to obtain all subscribers for a certain channel
 			function getSubscribers() {
 				var lChannel = eChannel.value;
 				log( "Trying to obtain subscribers for channel '" + lChannel + "'..." );
@@ -146,6 +171,7 @@
 				log( lWSC.resultToString( lRes ) );
 			}
 
+			// try to obtain all channels the client has subscribed to
 			function getSubscriptions() {
 				log( "Trying to obtain subscriptions for client..." );
 				var lRes = lWSC.channelGetSubscriptions();
@@ -160,10 +186,31 @@
 				}
 			}
 
+			// this method is called when a new channel has been created on the server
+			// add the new channel to the drop down box on the client as well
+			function onChannelCreatedObs( aEvent ) {
+				var lOption = document.createElement("option");
+				lOption.value = aEvent.channelId;
+				lOption.text = aEvent.channelName;
+				eChannel.appendChild(lOption);
+			}
+
+			// this method is called when a channel has been removed from the server
+			// remove the channel from the drop down box on the client as well
+			function onChannelRemovedObs( aEvent ) {
+				for( var lIdx = 0, lCnt = eChannel.options.length; lIdx < lCnt; lIdx++ ) {
+					var lOption = eChannel.options[ lIdx ];
+					if( lOption.value == aEvent.channelId ) {
+						eChannel.removeChild(lOption);
+						break;
+					}
+				}
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
 				eMessage = jws.$( "stxfMsg" );
-				eChannelId = jws.$( "stxfChannelId" );
+				eChannelId = jws.$( "stxfChannel" );
 				eAccessKey = jws.$( "stxfAccessKey" );
 				eAccessSecret = jws.$( "stxfAccessSecret" );
 				eKeepAlive =  jws.$( "schkKeepAlive" );
@@ -171,6 +218,10 @@
 
 				if( window.WebSocket ) {
 					lWSC = new jws.jWebSocketJSONClient();
+					lWSC.setChannelCallbacks({
+						OnChannelCreated: onChannelCreatedObs,
+						OnChannelRemoved: onChannelRemovedObs
+					});
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnDisconnect" ).setAttribute( "disabled", "disabled" );
@@ -197,17 +248,17 @@
 		onload="initPage();"
 		onunload="exitPage();"
 		>
-<!--	remarked temporarily due to chrome 5 browser bug
+		<!--	remarked temporarily due to chrome 5 browser bug
 		<script type="text/javascript">
 			var lFrameElem = this.frameElement;
 			if( !lFrameElem ) {
 				location.replace( "../../index.htm?page=demos/streaming/streaming.htm" );
 			}
 		</script>
--->		
+		-->
 		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
 			<tr>
-				<td class="tdHeader" width="">jWebSocket Channels Demo (Preview)</td>
+				<td class="tdHeader" width="">jWebSocket Channels Demo</td>
 				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
 				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
 			</tr>
@@ -237,13 +288,12 @@
 					</td>
 					<td width="5">
 						<select id="sselChannel" title="Channel to subscribe to or unsubscribe from.">
-							<option selected="selected" value="channelA">Channel A</option>
-							<option value="channelB">Channel B</option>
-							<option value="channelC">Channel C</option>
-							<!--
-							<option value="jws.logger.channel">Logger Channel</option>
-							<option value="jws.admin.channel">Admin Channel</option>
-							-->
+							<option selected="selected" value="publicA">Public A</option>
+							<option value="publicB">Public B</option>
+							<option value="privateA">Private A</option>
+							<option value="privateB">Private B</option>
+							<option value="systemA">System A</option>
+							<option value="systemB">System B</option>
 						</select>
 					</td>
 					<td width="70">

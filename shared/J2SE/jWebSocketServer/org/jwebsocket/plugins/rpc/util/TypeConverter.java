@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - RPC PlugIn
+//	jWebSocket - RPC PlugIn TypeConverter
 //	Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -24,6 +24,7 @@ import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.rpc.RPCPlugIn;
+import org.jwebsocket.token.ITokenizable;
 import org.jwebsocket.token.Token;
 
 /**
@@ -31,7 +32,7 @@ import org.jwebsocket.token.Token;
  * @author Quentin Ambard
  */
 public class TypeConverter {
-	
+
 	//allowed type that can be found in the .xml file
 	public final static String PROTOCOL_TYPE_INT = "int";
 	public final static String PROTOCOL_TYPE_BOOLEAN = "boolean";
@@ -39,7 +40,7 @@ public class TypeConverter {
 	public final static String PROTOCOL_TYPE_MAP = "map";
 	public final static String PROTOCOL_TYPE_DOUBLE = "double";
 	public final static String PROTOCOL_TYPE_ARRAY = "array";
-	
+	public final static String PROTOCOL_TYPE_TOKENIZABLE = "tokenizable";
 	private static Logger mLog = Logging.getLogger(RPCPlugIn.class);
 	private final static Map<String, String> mProtocolValue = new FastMap<String, String>();
 	private final static List<String> mProtocolList = new FastList<String>();
@@ -51,7 +52,8 @@ public class TypeConverter {
 		mProtocolList.add(PROTOCOL_TYPE_MAP);
 		mProtocolList.add(PROTOCOL_TYPE_DOUBLE);
 		mProtocolList.add(PROTOCOL_TYPE_ARRAY);
-		
+		mProtocolList.add(PROTOCOL_TYPE_TOKENIZABLE);
+
 		mProtocolValue.put(boolean.class.getName(), PROTOCOL_TYPE_BOOLEAN);
 		mProtocolValue.put(Boolean.class.getName(), PROTOCOL_TYPE_BOOLEAN);
 		mProtocolValue.put(double.class.getName(), PROTOCOL_TYPE_DOUBLE);
@@ -61,17 +63,18 @@ public class TypeConverter {
 		mProtocolValue.put(String.class.getName(), PROTOCOL_TYPE_STRING);
 		mProtocolValue.put(List.class.getName(), PROTOCOL_TYPE_ARRAY);
 		mProtocolValue.put(Token.class.getName(), PROTOCOL_TYPE_MAP);
+		mProtocolValue.put(ITokenizable.class.getName(), PROTOCOL_TYPE_MAP);
 	}
-	
+
 	/**
 	 * 
 	 * @param aProtocolType
 	 * @return true if "aProtocolType" (value found in the jwebsocket.xml for instance) is a correct type
 	 */
 	public static boolean isValidProtocolType(String aProtocolType) {
-		return mProtocolList.contains(aProtocolType) ;
+		return mProtocolList.contains(aProtocolType);
 	}
-	
+
 	/**
 	 * @param aJavaType
 	 * @return protocol value that match with aJavaType, for instance String ==> string, Token ==> map...
@@ -87,7 +90,7 @@ public class TypeConverter {
 	public static String getProtocolValue(Class aJavaClass) {
 		return getProtocolValue(aJavaClass.getName());
 	}
-	
+
 	/**
 	 * @param aJavaType
 	 * @return true if aJavaType is allowed in the protocol
@@ -102,7 +105,18 @@ public class TypeConverter {
 	 * @return true if aJavaClass is allowed in the protocol
 	 */
 	public static boolean isValidProtocolJavaType(Class aJavaClass) {
-		return isValidProtocolJavaType(aJavaClass.getName());
+		boolean lIsValid = isValidProtocolJavaType(aJavaClass.getName());
+		if (!lIsValid) {
+			Class[] lInterfaces = aJavaClass.getInterfaces();
+			for (int lIdx = 0; lIdx < lInterfaces.length; lIdx++) {
+				Class lIF = lInterfaces[lIdx];
+				lIsValid = lIF.getSimpleName().equals("ITokenizable");
+				if (lIsValid) {
+					break;
+				}
+			}
+		}
+		return lIsValid;
 	}
 
 	/**
@@ -128,14 +142,14 @@ public class TypeConverter {
 	public static boolean matchProtocolTypeToJavaType(String aProtocolType, Class aJavaClass) {
 		return matchProtocolTypeToJavaType(aProtocolType, aJavaClass.getName());
 	}
-	
+
 	/**
 	 * @return the list of valid parameter types that can be found in the jwebsocket.xml file
 	 */
-	public static String getValidParameterTypes(){
+	public static String getValidParameterTypes() {
 		StringBuilder lValidParameters = new StringBuilder();
 		for (String type : mProtocolList) {
-			lValidParameters.append(type+", ");
+			lValidParameters.append(type + ", ");
 		}
 		return lValidParameters.toString();
 	}
