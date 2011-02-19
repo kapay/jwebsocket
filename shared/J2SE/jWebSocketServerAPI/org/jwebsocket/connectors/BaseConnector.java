@@ -249,6 +249,12 @@ public class BaseConnector implements WebSocketConnector {
 	}
 
 	@Override
+	public boolean isLocal() {
+		// TODO: This has to be updated for the cluster approach
+		return true;
+	}
+
+	@Override
 	public String getNodeId() {
 		return getString(BaseConnector.VAR_NODEID);
 	}

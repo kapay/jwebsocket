@@ -57,7 +57,7 @@ import org.jwebsocket.token.TokenFactory;
  * 
  * <tt>authorize</tt> event command is used for authorization of client before
  * publishing a data to the channel, publisher client has to authorize itself
- * using <tt>secret_key</tt>, <tt>access_key</tt> and <tt>login</tt> which is
+ * using <tt>secretKey</tt>, <tt>accessKey</tt> and <tt>login</tt> which is
  * registered in the jWebSocket server system via configuration file or from
  * other jWebSocket components.
  * 
@@ -66,10 +66,10 @@ import org.jwebsocket.token.TokenFactory;
  * Token Key    : <tt>channel<tt>
  * Token Value  : <tt>channel id to authorize for</tt>
  * 
- * Token Key    : <tt>secret_key<tt>
+ * Token Key    : <tt>secretKey<tt>
  * Token Value  : <tt>value of the secret key</tt>
  * 
- * Token Key    : <tt>access_key<tt>
+ * Token Key    : <tt>accessKey<tt>
  * Token Value  : <tt>value of the access key</tt>
  * 
  * Token Key    : <tt>login<tt>
@@ -99,14 +99,14 @@ import org.jwebsocket.token.TokenFactory;
  * Token Key : <tt>operation</tt> Token Value : <tt>[subscribe][unsubscribe]</tt>
  * 
  * <tt>subscribe</tt> subscribe event is to register the client as a subscriber
- * for the passed in channel and access_key if the channel is private and needs
- * access_key for subscription
+ * for the passed in channel and accessKey if the channel is private and needs
+ * accessKey for subscription
  * 
  * <tt>Token Request Includes:</tt> Token Key : <tt>channel<tt>
  * Token Value  : <tt>channel id to publish the data</tt>
  * 
- * Token Key : <tt>access_key<tt>
- * Token Value  : <tt>access_key value required for subscription</tt>
+ * Token Key : <tt>accessKey<tt>
+ * Token Value  : <tt>accessKey value required for subscription</tt>
  * 
  * <tt>unsubscribe</tt> removes the client from the channel so no data will be
  * broadcasted to the unsuscribed clients.
@@ -142,8 +142,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 	/** channel plug-in handshake protocol parameters */
 	private static final String DATA = "data";
 	// private static final String EVENT = "event";
-	private static final String ACCESS_KEY = "access_key";
-	private static final String SECRET_KEY = "secret_key";
+	private static final String accessKey = "accessKey";
+	private static final String secretKey = "secretKey";
 	private static final String CHANNEL = "channel";
 	private static final String CONNECTED = "connected";
 
@@ -288,7 +288,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 			mLog.debug("Processing 'subscribe'...");
 		}
 		String lChannelId = aToken.getString(CHANNEL);
-		String lAccessKey = aToken.getString(ACCESS_KEY);
+		String lAccessKey = aToken.getString(accessKey);
 
 		// check for valid channel id
 		if (lChannelId == null || EMPTY_STRING.equals(lChannelId)) {
@@ -439,6 +439,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			if (!lChannel.isPrivate()) {
 				lItem.put("id", lChannel.getId());
 				lItem.put("name", lChannel.getName());
+				lItem.put("isPrivate", lChannel.isPrivate());
+				lItem.put("isSystem", lChannel.isSystem());
 				lChannels.add(lItem);
 			}
 		}
@@ -456,8 +458,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 	 */
 	private void authorize(WebSocketConnector aConnector, Token aToken) {
 		String lChannelId = aToken.getString(CHANNEL);
-		String lAccessKey = aToken.getString(ACCESS_KEY);
-		String lSecretKey = aToken.getString(SECRET_KEY);
+		String lAccessKey = aToken.getString(accessKey);
+		String lSecretKey = aToken.getString(secretKey);
 		String lLogin = aToken.getString("login");
 
 		User lUser = SecurityFactory.getUser(lLogin);
@@ -472,7 +474,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 		if (lSecretKey == null || lAccessKey == null) {
 			sendErrorToken(aConnector, aToken, -1,
 					"'" + aConnector.getId()
-					+ "' Authorization failed, secret_key/access_key pair value is not correct");
+					+ "' Authorization failed, secretKey/accessKey pair value is not correct");
 			return;
 		} else {
 			Channel lChannel = mChannelManager.getChannel(lChannelId);
@@ -513,8 +515,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 
 		// get arguments from request
 		String lChannelId = aToken.getString(CHANNEL);
-		String lAccessKey = aToken.getString(ACCESS_KEY);
-		String lSecretKey = aToken.getString(SECRET_KEY);
+		String lAccessKey = aToken.getString(accessKey);
+		String lSecretKey = aToken.getString(secretKey);
 		String lName = aToken.getString("name");
 		boolean lIsPrivate = aToken.getBoolean("isPrivate", false);
 		boolean lIsSystem = aToken.getBoolean("isSystem", false);
@@ -568,8 +570,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 
 		// get arguments from request
 		String lChannelId = aToken.getString(CHANNEL);
-		String lAccessKey = aToken.getString(ACCESS_KEY);
-		String lSecretKey = aToken.getString(SECRET_KEY);
+		String lAccessKey = aToken.getString(accessKey);
+		String lSecretKey = aToken.getString(secretKey);
 
 		// check if channel already exists
 		Channel lChannel = mChannelManager.getChannel(lChannelId);
@@ -598,14 +600,52 @@ public class ChannelPlugIn extends TokenPlugIn {
 			mLog.debug("Processing 'getSubscribers'...");
 		}
 		String lChannelId = aToken.getString(CHANNEL);
+		String lAccessKey = aToken.getString(accessKey);
+
 		Channel lChannel = mChannelManager.getChannel(lChannelId);
 		if (lChannel == null) {
 			sendErrorToken(aConnector, aToken, -1,
-					"'" + aConnector.getId()
-					+ "' channel not found for given channelId '"
-					+ lChannelId + "'");
+					"No channel found with id '" + lChannelId + "'");
 			return;
 		}
+
+		String lChannelAccessKey = lChannel.getAccessKey();
+		if (lChannel.isPrivate()) {
+			// TODO: this should be obsolete in future, validate by channel class!
+			// validation if private channel has access key
+			if (lChannelAccessKey == null || EMPTY_STRING.equals(lChannelAccessKey)) {
+				sendErrorToken(aConnector, aToken, -1,
+						"No access key assigned to private channel '"
+						+ lChannelId + "'");
+				return;
+			}
+			if (lAccessKey == null || !lAccessKey.equals(lChannelAccessKey)) {
+				sendErrorToken(aConnector, aToken, -1,
+						"Invalid access key for private channel '"
+						+ lChannelId + "'");
+				return;
+			}
+		} else {
+			// does public channel have an access key?
+			if (lChannelAccessKey != null) {
+				// if so check match
+				if (!lChannelAccessKey.equals(lAccessKey)) {
+					sendErrorToken(aConnector, aToken, -1,
+							"Invalid access key for public channel '"
+							+ lChannelId + "'");
+					return;
+				}
+			} else {
+				// if not also check if no access key was passed
+				if (lAccessKey != null) {
+					sendErrorToken(aConnector, aToken, -1,
+							"Invalid access key for public channel '"
+							+ lChannelId + "'");
+					return;
+				}
+			}
+		}
+
 		List<Subscriber> lChannelSubscribers = lChannel.getSubscribers();
 		List<Map> lSubscribers = new FastList<Map>();
 		if (null != lChannelSubscribers) {
@@ -616,7 +656,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 			}
 		}
 		Token lResponseToken = createResponse(aToken);
-		// return channel Id for client's convenience
+		// return channel id for client's convenience
 		lResponseToken.setString("channel", lChannelId);
 		lResponseToken.setList("subscribers", lSubscribers);
 
@@ -634,12 +674,18 @@ public class ChannelPlugIn extends TokenPlugIn {
 		if (null != lSubscriber) {
 			for (String lChannelId : lSubscriber.getChannels()) {
 				Map lItem = new FastMap();
-				lItem.put("id", lChannelId);
+				Channel lChannel = mChannelManager.getChannel(lChannelId);
+				if (lChannel != null) {
+					lItem.put("id", lChannelId);
+					lItem.put("name", lChannel.getName());
+					lItem.put("isPrivate", lChannel.isPrivate());
+					lItem.put("isSystem", lChannel.isSystem());
+				}
 				lSubscriptions.add(lItem);
 			}
 		}
 		Token lResponseToken = createResponse(aToken);
-		lResponseToken.setList("subscriptions", lSubscriptions);
+		lResponseToken.setList("channels", lSubscriptions);
 
 		// send the response
 		sendToken(aConnector, aConnector, lResponseToken);

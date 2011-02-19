@@ -247,6 +247,13 @@ public interface WebSocketConnector {
 	void removeSubprot();
 
 	/**
+	 * returns if the connector is connected to a local TCP port or
+	 * if it is a connection on a remote (cluster) node.
+	 * @return
+	 */
+	boolean isLocal();
+
+	/**
 	 *
 	 * @return
 	 */

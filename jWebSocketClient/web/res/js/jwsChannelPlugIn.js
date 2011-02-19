@@ -80,7 +80,7 @@ jws.ChannelPlugIn = {
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.SUBSCRIBE,
 				channel: aChannel,
-				access_key: aAccessKey
+				accessKey: aAccessKey
 			});
 		}
 		return lRes;
@@ -120,8 +120,8 @@ jws.ChannelPlugIn = {
 				type: jws.ChannelPlugIn.AUTHORIZE,
 				channel: aChannel,
 				login: this.getUsername(),
-				access_key: aAccessKey,
-				secret_key: aSecretKey
+				accessKey: aAccessKey,
+				secretKey: aSecretKey
 			});
 		}
 		return lRes;
@@ -149,19 +149,54 @@ jws.ChannelPlugIn = {
 		return lRes;
 	},
 
-	channelCreate: function( aChannel, aName ) {
+	//:m:*:channelCreate
+	//:d:en:Creates a new channel on the server. If a channel with the given _
+	//:d:en:channel-id already exists the create channel request is rejected. _
+	//:d:en:A private channel requires an access key, if this is not provided _
+	//:d:en:for a private channel the request is rejected. For public channel _
+	//:d:en:the access key is optional.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:a:en::aName:String:The name (human readably) of the channel.
+	//:r:*:::void:none
+	channelCreate: function( aChannel, aName, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
+			var lIsPrivate = false;
+			var lIsSystem = false;
+			var lAccessKey = null;
+			var lSecretKey = null;
+			var lOwner = null;
+			if( aOptions ) {
+				if( aOptions.isPrivate != undefined ) {
+					lIsPrivate = aOptions.isPrivate;
+					lIsSystem = aOptions.isSystem;
+					lAccessKey = aOptions.accessKey;
+					lSecretKey = aOptions.secretKey;
+					lOwner = aOptions.owner;
+				}
+			}
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.CREATE_CHANNEL,
 				channel: aChannel,
-				name: aName
+				name: aName,
+				isPrivate: lIsPrivate,
+				isSystem: lIsSystem,
+				accessKey: lAccessKey,
+				secretKey: lSecretKey,
+				owner: lOwner
 			});
 		}
 		return lRes;
 	},
 
+	//:m:*:channelRemove
+	//:d:en:Removes a (non-system) channel on the server. Only the owner of _
+	//:d:en:channel can remove a channel. If a accessKey/secretKey pair is _
+	//:d:en:defined for a channel this needs to be passed as well, otherwise _
+	//:d:en:the remove request is rejected.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:r:*:::void:none
 	channelRemove: function( aChannel ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
@@ -174,18 +209,34 @@ jws.ChannelPlugIn = {
 		return lRes;
 	},
 
-	channelGetSubscribers: function( aChannel ) {
+	//:m:*:channelGetSubscribers
+	//:d:en:Returns all channels to which the current client currently has
+	//:d:en:subscribed to. This also includes private channels. The owners of
+	//:d:en:the channels are not returned due to security reasons.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:a:en::aAccessKey:String:Access Key for the channel (required for private channels, optional for public channels).
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get noticed on error or success.
+	channelGetSubscribers: function( aChannel, aAccessKey ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.GET_SUBSCRIBERS,
-				channel: aChannel
+				channel: aChannel,
+				accessKey: aAccessKey
 			});
 		}
 		return lRes;
 	},
 
+	//:m:*:channelGetSubscriptions
+	//:d:en:Returns all channels to which the current client currently has
+	//:d:en:subscribed to. This also includes private channels. The owners of
+	//:d:en:the channels are not returned due to security reasons.
+	//:a:en:::none
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get noticed on error or success.
 	channelGetSubscriptions: function() {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
