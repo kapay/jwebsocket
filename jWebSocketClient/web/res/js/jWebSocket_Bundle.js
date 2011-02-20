@@ -77,18 +77,18 @@ var jws = {
 	//:d:en:The connection has been closed or could not be opened.
 	CLOSED: 3,
 
-	//:const:*:WS_SUBPROT_JSON:String:jWebSocket-JSON
+	//:const:*:WS_SUBPROT_JSON:String:jwebsocket.org/json
 	//:d:en:jWebSocket sub protocol JSON
-	WS_SUBPROT_JSON: "jWebSocket-JSON",
-	//:const:*:WS_SUBPROT_XML:String:jWebSocket-XML
+	WS_SUBPROT_JSON: "jwebsocket.org/json",
+	//:const:*:WS_SUBPROT_XML:String:jwebsocket.org/xml
 	//:d:en:jWebSocket sub protocol XML
-	WS_SUBPROT_XML: "jWebSocket-XML",
-	//:const:*:WS_SUBPROT_CSV:String:jWebSocket-CSV
+	WS_SUBPROT_XML: "jwebsocket.org/xml",
+	//:const:*:WS_SUBPROT_CSV:String:jwebsocket.org/csv
 	//:d:en:jWebSocket sub protocol CSV
-	WS_SUBPROT_CSV: "jWebSocket-CSV",
-	//:const:*:WS_SUBPROT_CUSTOM:String:jWebSocket-Custom
+	WS_SUBPROT_CSV: "jwebsocket.org/csv",
+	//:const:*:WS_SUBPROT_CUSTOM:String:jwebsocket.org/custom
 	//:d:en:jWebSocket sub protocol Custom
-	WS_SUBPROT_CUSTOM: "jWebSocket-Custom",
+	WS_SUBPROT_CUSTOM: "jwebsocket.org/custom",
 
 	//:const:*:SCOPE_PRIVATE:String:private
 	//:d:en:private scope, only authenticated user can read and write his personal items
@@ -225,6 +225,20 @@ jws.events = {
 		:
 			function( aEvent ) {
 				return aEvent.target;
+			}
+	),
+	
+	preventDefault : (
+		jws.isIE ?
+			function( aEvent ) {
+				aEvent = window.event;
+				if( aEvent ) {
+					aEvent.returnValue = false;
+				}
+			}
+		:
+			function( aEvent ) {
+				return aEvent.preventDefault();
 			}
 	)
 
@@ -698,7 +712,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:d:en:to init the instance.
 	//:a:en::::none
 	//:r:*:::void:none
-	create: function() {
+	create: function( aOptions ) {
 		this.fRequestCallbacks = {};
 	},
 
@@ -723,7 +737,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		// console.log("checking result for utid: " + aToken.utid + "...");
 		var lClbkRec = this.fRequestCallbacks[ lField ];
 		if( lClbkRec ) {
-			lClbkRec.callback.call( this, aToken );
+			// TODO: Approve update by Rolando 2010-01-04
+			lClbkRec.callback.OnResponse( aToken );
+			// lClbkRec.callback.call( this, aToken );
 			delete this.fRequestCallbacks[ lField ];
 		}
 		// TODO: delete timed out requests and optionally fire timeout callbacks
@@ -906,6 +922,16 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::aToken:Object:Token to be processed by the plug-ins in the plug-in chain.
 	//:r:*:::void:none
 	processToken: function( aToken ) {
+
+		// TODO: Remove this temporary hack with final release 1.0
+		// TODO: this was required to ensure upward compatibility from 0.10 to 0.11
+		var lNS = aToken.ns;
+		if ( lNS != null && lNS.indexOf( "org.jWebSocket" ) == 1 ) {
+			aToken.ns = "org.jwebsocket" + lNS.substring( 15 );
+		} else if( lNS == null ) {
+			aToken.ns = "org.jwebsocket.plugins.system";
+		}
+
 		// is it a token from the system plug-in at all?
 		if( jws.NS_SYSTEM == aToken.ns ) {
 			// check welcome and goodBye tokens to manage the session
@@ -913,7 +939,15 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				this.fSessionId = aToken.usid;
 				this.fClientId = aToken.sourceId;
 				this.notifyPlugInsOpened();
+				// fire OnWelcome Event if assigned
+				if( this.fOnWelcome ) {
+					this.fOnWelcome( aToken );
+				}
 			} else if( aToken.type == "goodBye" ) {
+				// fire OnGoodBye Event if assigned
+				if( this.fOnGoodBye ) {
+					this.fOnGoodBye( aToken );
+				}
 				this.fSessionId = null;
 				this.fUsername = null;
 			} else if( aToken.type == "close" ) {
@@ -945,6 +979,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					this.processDisconnected( aToken );
 				}
 			}
+		} else {
+			// check the incoming token for an optional response callback
+			this.checkCallbacks( aToken );
 		}
 
 		// notify all plug-ins that a token has to be processed
@@ -1018,7 +1055,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			var lSpawnThread = false;
 			if( aOptions ) {
 				if( aOptions.OnResponse ) {
-					lOnResponse = aOptions.OnResponse;
+					// TODO: Approve update by Rolando 2010-01-04
+					lOnResponse = aOptions;
+					// lOnResponse = aOptions.OnResponse;
 				}
 				if( aOptions.spawnThread ) {
 					lSpawnThread  = aOptions.spawnThread;
@@ -1155,6 +1194,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	open: function( aURL, aOptions ) {
 		var lRes = this.createDefaultResult();
 		try {
+			if( aOptions && aOptions.OnWelcome && typeof aOptions.OnWelcome == "function" ) {
+				this.fOnWelcome = aOptions.OnWelcome;
+			}
+			if( aOptions && aOptions.OnGoodBye && typeof aOptions.OnGoodBye == "function" ) {
+				this.fOnGoodBye = aOptions.OnGoodBye;
+			}
 			// call inherited connect, catching potential exception
 			arguments.callee.inherited.call( this, aURL, aOptions );
 		} catch( ex ) {
@@ -1192,16 +1237,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			// if connected and timeout is passed give server a chance to
 			// register the disconnect properly and send a good bye response.
 			if( lRes.code == 0 ) {
-				// TODO: Work-around for Safari 5! Check in versions after 5.0.7533.16!
-				if( !(	/* lTimeout > 0 && */
-						navigator.userAgent.indexOf( "Safari" ) >= 0 &&
-						navigator.userAgent.indexOf( "Chrome" ) < 0 ) ) {
-					this.sendToken({
-						ns: jws.NS_SYSTEM,
-						type: "close",
-						timeout: lTimeout
-					});
-				}
+				this.sendToken({
+					ns: jws.NS_SYSTEM,
+					type: "close",
+					timeout: lTimeout
+				});
 				// call inherited disconnect, catching potential exception
 				arguments.callee.inherited.call( this, aOptions );
 			} else {
@@ -1878,6 +1918,572 @@ jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 	console.log( lStream );
 })();
 */
+/*
+MIT LICENSE
+Copyright (c) 2007 Monsur Hossain (http://www.monsur.com)
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+// ****************************************************************************
+// CachePriority ENUM
+// An easier way to refer to the priority of a cache item
+
+jws.cache = {};
+
+jws.cache.CachePriority = {
+    Low: 1,
+    Normal: 2,
+    High: 4
+};
+
+// ****************************************************************************
+// Cache constructor
+// Creates a new cache object
+// INPUT: maxSize (optional) - indicates how many items the cache can hold.
+//                             default is -1, which means no limit on the 
+//                             number of items.
+jws.cache.Cache = function Cache(maxSize) {
+    this.items = {};
+    this.count = 0;
+    if (maxSize == null)
+        maxSize = -1;
+    this.maxSize = maxSize;
+    this.fillFactor = .75;
+    this.purgeSize = Math.round(this.maxSize * this.fillFactor);
+    
+    this.stats = {};
+    this.stats.hits = 0;
+    this.stats.misses = 0;
+}
+
+// ****************************************************************************
+// Cache.getItem
+// retrieves an item from the cache, returns null if the item doesn't exist
+// or it is expired.
+// INPUT: key - the key to load from the cache
+jws.cache.Cache.prototype.getItem = function(key) {
+
+    // retrieve the item from the cache
+    var item = this.items[key];
+    
+    if (item != null) {
+        if (!this._isExpired(item)) {
+            // if the item is not expired
+            // update its last accessed date
+            item.lastAccessed = new Date().getTime();
+        } else {
+            // if the item is expired, remove it from the cache
+            this._removeItem(key);
+            item = null;
+        }
+    }
+    
+    // return the item value (if it exists), or null
+    var returnVal = null;
+    if (item != null) {
+        returnVal = item.value;
+        this.stats.hits++;
+    } else {
+        this.stats.misses++;
+    }
+    return returnVal;
+};
+
+// ****************************************************************************
+// Cache.setItem
+// sets an item in the cache
+// parameters: key - the key to refer to the object
+//             value - the object to cache
+//             options - an optional parameter described below
+// the last parameter accepts an object which controls various caching options:
+//      expirationAbsolute: the datetime when the item should expire
+//      expirationSliding: an integer representing the seconds since
+//                         the last cache access after which the item
+//                         should expire
+//      priority: How important it is to leave this item in the cache.
+//                You can use the values CachePriority.Low, .Normal, or 
+//                .High, or you can just use an integer.  Note that 
+//                placing a priority on an item does not guarantee 
+//                it will remain in cache.  It can still be purged if 
+//                an expiration is hit, or if the cache is full.
+//      callback: A function that gets called when the item is purged
+//                from cache.  The key and value of the removed item
+//                are passed as parameters to the callback function.
+jws.cache.Cache.prototype.setItem = function(key, value, options) {
+
+    function CacheItem(k, v, o) {
+        if ((k == null) || (k == ''))
+            throw new Error("key cannot be null or empty");
+        this.key = k;
+        this.value = v;
+        if (o == null)
+            o = {};
+        if (o.expirationAbsolute != null)
+            o.expirationAbsolute = o.expirationAbsolute.getTime();
+        if (o.priority == null)
+            o.priority = jws.cache.CachePriority.Normal;
+        this.options = o;
+        this.lastAccessed = new Date().getTime();
+    }
+
+    // add a new cache item to the cache
+    if (this.items[key] != null)
+        this._removeItem(key);
+    this._addItem(new CacheItem(key, value, options));
+    
+    // if the cache is full, purge it
+    if ((this.maxSize > 0) && (this.count > this.maxSize)) {
+        this._purge();
+    }
+};
+
+// ****************************************************************************
+// Cache.clear
+// Remove all items from the cache
+jws.cache.Cache.prototype.clear = function() {
+
+    // loop through each item in the cache and remove it
+    for (var key in this.items) {
+      this._removeItem(key);
+    }  
+};
+
+// ****************************************************************************
+// Cache._purge (PRIVATE FUNCTION)
+// remove old elements from the cache
+jws.cache.Cache.prototype._purge = function() {
+    
+    var tmparray = new Array();
+    
+    // loop through the cache, expire items that should be expired
+    // otherwise, add the item to an array
+    for (var key in this.items) {
+        var item = this.items[key];
+        if (this._isExpired(item)) {
+            this._removeItem(key);
+        } else {
+            tmparray.push(item);
+        }
+    }
+    
+    if (tmparray.length > this.purgeSize) {
+
+        // sort this array based on cache priority and the last accessed date
+        tmparray = tmparray.sort(function(a, b) { 
+            if (a.options.priority != b.options.priority) {
+                return b.options.priority - a.options.priority;
+            } else {
+                return b.lastAccessed - a.lastAccessed;
+            }
+        });
+        
+        // remove items from the end of the array
+        while (tmparray.length > this.purgeSize) {
+            var ritem = tmparray.pop();
+            this._removeItem(ritem.key);
+        }
+    }
+};
+
+// ****************************************************************************
+// Cache._addItem (PRIVATE FUNCTION)
+// add an item to the cache
+jws.cache.Cache.prototype._addItem = function(item) {
+    this.items[item.key] = item;
+    this.count++;
+};
+
+// ****************************************************************************
+// Cache._removeItem (PRIVATE FUNCTION)
+// Remove an item from the cache, call the callback function (if necessary)
+jws.cache.Cache.prototype._removeItem = function(key) {
+    var item = this.items[key];
+    delete this.items[key];
+    this.count--;
+    
+    // if there is a callback function, call it at the end of execution
+    if (item.options.callback != null) {
+        var callback = function() {
+            item.options.callback(item.key, item.value);
+        };
+        setTimeout(callback, 0);
+    }
+};
+
+// ****************************************************************************
+// Cache._isExpired (PRIVATE FUNCTION)
+// Returns true if the item should be expired based on its expiration options
+jws.cache.Cache.prototype._isExpired = function(item) {
+    var now = new Date().getTime();
+    var expired = false;
+    if ((item.options.expirationAbsolute) && (item.options.expirationAbsolute < now)) {
+        // if the absolute expiration has passed, expire the item
+        expired = true;
+    } 
+    if (!expired && (item.options.expirationSliding)) {
+        // if the sliding expiration has passed, expire the item
+        var lastAccess = item.lastAccessed + (item.options.expirationSliding * 1000);
+        if (lastAccess < now) {
+            expired = true;
+        }
+    }
+    return expired;
+};
+
+jws.cache.Cache.prototype.toHtmlString = function() {
+    var returnStr = this.count + " item(s) in cache<br /><ul>";
+    for (var key in this.items) {
+        var item = this.items[key];
+        returnStr = returnStr + "<li>" + item.key.toString() + " = " + item.value.toString() + "</li>";
+    }
+    returnStr = returnStr + "</ul>";
+    return returnStr;
+};
+//	---------------------------------------------------------------------------
+//	jWebSocket Channel PlugIn (uses jWebSocket Client and Server)
+//	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
+
+
+//	---------------------------------------------------------------------------
+//  jWebSocket Channel Plug-In
+//	---------------------------------------------------------------------------
+
+//:package:*:jws
+//:class:*:jws.ChannelPlugIn
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.ChannelPlugIn[/tt] class. This _
+//:d:en:plug-in provides the methods to subscribe and unsubscribe at certain _
+//:d:en:channel sn the server.
+jws.ChannelPlugIn = {
+
+	//:const:*:NS:String:org.jwebsocket.plugins.channels (jws.NS_BASE + ".plugins.channels")
+	//:d:en:Namespace for the [tt]ChannelPlugIn[/tt] class.
+	// if namespace changes update server plug-in accordingly!
+	NS: jws.NS_BASE + ".plugins.channels",
+
+	SUBSCRIBE: "subscribe",
+	UNSUBSCRIBE: "unsubscribe",
+	GET_CHANNELS: "getChannels",
+	CREATE_CHANNEL:  "createChannel",
+	REMOVE_CHANNEL:  "removeChannel",
+	GET_SUBSCRIBERS: "getSubscribers",
+	GET_SUBSCRIPTIONS: "getSubscriptions",
+
+	AUTHORIZE: "authorize",
+	PUBLISH: "publish",
+	STOP: "stop",
+
+	processToken: function( aToken ) {
+		// check if namespace matches
+		if( aToken.ns == jws.ChannelPlugIn.NS ) {
+			// here you can handle incomimng tokens from the server
+			// directy in the plug-in if desired.
+			if( "event" == aToken.type ) {
+				if( "channelCreated" == aToken.name ) {
+					if( this.OnChannelCreated ) {
+						this.OnChannelCreated( aToken );
+					}
+				} else if( "channelRemoved" == aToken.name ) {
+					if( this.OnChannelRemoved ) {
+						this.OnChannelRemoved( aToken );
+					}
+				} 
+			} else if( "getChannels" == aToken.reqType ) {
+				if( this.OnChannelsReceived ) {
+					this.OnChannelsReceived( aToken );
+				}
+			}
+		}
+	},
+
+	//:m:*:channelSubscribe
+	//:d:en:Registers the client at the given channel on the server. _
+	//:d:en:After this operation the client obtains all messages on this _
+	//:d:en:channel. Basically, a client can subscribe at multiple channels.
+	//:d:en:If no channel with the given ID exists on the server an error token _
+	//:d:en:is returned. Depending on the type of the channel it may take more _
+	//:d:en:or less time until you get the first token from the channel.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get notified on error or success.
+	channelSubscribe: function( aChannel, aAccessKey ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.SUBSCRIBE,
+				channel: aChannel,
+				accessKey: aAccessKey
+			});
+		}
+		return lRes;
+	},
+
+	//:m:*:channelUnsubscribe
+	//:d:en:Unsubscribes the client from the given channel on the server.
+	//:d:en:From this point in time the client does not receive any messages _
+	//:d:en:on this channel anymore.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get notified on error or success.
+	channelUnsubscribe: function( aChannel ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.UNSUBSCRIBE,
+				channel: aChannel
+			});
+		}
+		return lRes;
+	},
+
+	//:m:*:channelAuth
+	//:d:en:Authenticates the client at a certain channel to publish messages.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:a:en::aAccessKey:String:Access key configured for the channel.
+	//:a:en::aSecretKey:String:Secret key configured for the channel.
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get notified on error or success.
+	channelAuth: function( aChannel, aAccessKey, aSecretKey ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.AUTHORIZE,
+				channel: aChannel,
+				login: this.getUsername(),
+				accessKey: aAccessKey,
+				secretKey: aSecretKey
+			});
+		}
+		return lRes;
+	},
+
+	//:m:*:channelPublish
+	//:d:en:Sends a message to the given channel on the server.
+	//:d:en:The client needs to be authenticated against the server and the
+	//:d:en:channel to publish data. All clients that subscribed to the channel
+	//:d:en:will receive the message.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:a:en::aData:String:Data to be sent to the server side data channel.
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get noticed on error or success.
+	channelPublish: function( aChannel, aData ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.PUBLISH,
+				channel: aChannel,
+				data: aData
+			});
+		}
+		return lRes;
+	},
+
+	//:m:*:channelCreate
+	//:d:en:Creates a new channel on the server. If a channel with the given _
+	//:d:en:channel-id already exists the create channel request is rejected. _
+	//:d:en:A private channel requires an access key, if this is not provided _
+	//:d:en:for a private channel the request is rejected. For public channel _
+	//:d:en:the access key is optional.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:a:en::aName:String:The name (human readably) of the channel.
+	//:r:*:::void:none
+	channelCreate: function( aId, aName, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lIsPrivate = false;
+			var lIsSystem = false;
+			var lAccessKey = null;
+			var lSecretKey = null;
+			var lOwner = null;
+			var lPassword = null;
+			if( aOptions ) {
+				if( aOptions.isPrivate != undefined ) {
+					lIsPrivate = aOptions.isPrivate;
+				}
+				if( aOptions.isSystem != undefined ) {
+					lIsSystem = aOptions.isSystem;
+				}
+				if( aOptions.accessKey != undefined ) {
+					lAccessKey = aOptions.accessKey;
+				}
+				if( aOptions.secretKey != undefined ) {
+					lSecretKey = aOptions.secretKey;
+				}
+				if( aOptions.owner != undefined ) {
+					lOwner = aOptions.owner;
+				}
+				if( aOptions.password != undefined ) {
+					lPassword = aOptions.password;
+				}
+			}
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.CREATE_CHANNEL,
+				channel: aId,
+				name: aName,
+				isPrivate: lIsPrivate,
+				isSystem: lIsSystem,
+				accessKey: lAccessKey,
+				secretKey: lSecretKey,
+				owner: lOwner,
+				password: lPassword
+			});
+		}
+		return lRes;
+	},
+
+	//:m:*:channelRemove
+	//:d:en:Removes a (non-system) channel on the server. Only the owner of _
+	//:d:en:channel can remove a channel. If a accessKey/secretKey pair is _
+	//:d:en:defined for a channel this needs to be passed as well, otherwise _
+	//:d:en:the remove request is rejected.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:r:*:::void:none
+	channelRemove: function( aId, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lAccessKey = null;
+			var lSecretKey = null;
+			var lOwner = null;
+			var lPassword = null;
+			if( aOptions ) {
+				if( aOptions.accessKey != undefined ) {
+					lAccessKey = aOptions.accessKey;
+				}
+				if( aOptions.secretKey != undefined ) {
+					lSecretKey = aOptions.secretKey;
+				}
+				if( aOptions.owner != undefined ) {
+					lOwner = aOptions.owner;
+				}
+				if( aOptions.password != undefined ) {
+					lPassword = aOptions.password;
+				}
+			}
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.REMOVE_CHANNEL,
+				channel: aId,
+				accessKey: lAccessKey,
+				secretKey: lSecretKey,
+				owner: lOwner,
+				password: lPassword
+			});
+		}
+		return lRes;
+	},
+
+	//:m:*:channelGetSubscribers
+	//:d:en:Returns all channels to which the current client currently has
+	//:d:en:subscribed to. This also includes private channels. The owners of
+	//:d:en:the channels are not returned due to security reasons.
+	//:a:en::aChannel:String:The id of the server side data channel.
+	//:a:en::aAccessKey:String:Access Key for the channel (required for private channels, optional for public channels).
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get noticed on error or success.
+	channelGetSubscribers: function( aChannel, aAccessKey ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.GET_SUBSCRIBERS,
+				channel: aChannel,
+				accessKey: aAccessKey
+			});
+		}
+		return lRes;
+	},
+
+	//:m:*:channelGetSubscriptions
+	//:d:en:Returns all channels to which the current client currently has
+	//:d:en:subscribed to. This also includes private channels. The owners of
+	//:d:en:the channels are not returned due to security reasons.
+	//:a:en:::none
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get noticed on error or success.
+	channelGetSubscriptions: function() {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.GET_SUBSCRIPTIONS
+			});
+		}
+		return lRes;
+	},
+
+
+	//:m:*:channelPublish
+	//:d:en:Tries to obtain all id of the channels
+	//:a:en:::none
+	//:r:*:::void:none
+	// TODO: introduce OnResponse here too to get noticed on error or success.
+	channelGetIds: function() {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.ChannelPlugIn.NS,
+				type: jws.ChannelPlugIn.GET_CHANNELS
+			});
+		}
+		return lRes;
+	},
+
+	setChannelCallbacks: function( aListeners ) {
+		if( !aListeners ) {
+			aListeners = {};
+		}
+		if( aListeners.OnChannelCreated !== undefined ) {
+			this.OnChannelCreated = aListeners.OnChannelCreated;
+		}
+		if( aListeners.OnChannelsReceived !== undefined ) {
+			this.OnChannelsReceived = aListeners.OnChannelsReceived;
+		}
+		if( aListeners.OnChannelRemoved !== undefined ) {
+			this.OnChannelRemoved = aListeners.OnChannelRemoved;
+		}
+	}
+
+};
+
+// add the ChannelPlugIn PlugIn into the jWebSocketTokenClient class
+jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.ChannelPlugIn );
 //	---------------------------------------------------------------------------
 //	jWebSocket Sample Client PlugIn (uses jWebSocket Client and Server)
 //	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
@@ -1893,7 +2499,6 @@ jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-
 
 //	---------------------------------------------------------------------------
 //  jWebSocket Sample Client Plug-In
@@ -1918,6 +2523,9 @@ jws.CanvasPlugIn = {
 				this.doMoveTo( aToken.id, aToken.x, aToken.y );
 			} else if( "lineTo" == aToken.reqType ) {
 				this.doLineTo( aToken.id, aToken.x, aToken.y );
+			} else if( "line" == aToken.reqType ) {
+				this.doLine( aToken.id, aToken.x1, aToken.y1,
+					aToken.x2, aToken.y2, { color: aToken.color });
 			} else if( "closePath" == aToken.reqType ) {
 				this.doClosePath( aToken.id );
 			}
@@ -2029,6 +2637,50 @@ jws.CanvasPlugIn = {
 		}
 	},
 
+	doLine: function( aId, aX1, aY1, aX2, aY2, aOptions ) {
+		if( undefined == aOptions ) {
+			aOptions = {};
+		}
+		var lColor = "black";
+		if( aOptions.color ) {
+			lColor = aOptions.color;
+		}
+		var lCanvas = this.fCanvas[ aId ];
+		if( lCanvas != null ) {
+			lCanvas.ctx.beginPath();
+			lCanvas.ctx.moveTo( aX1, aY1 );
+			lCanvas.ctx.strokeStyle = lColor;
+			lCanvas.ctx.lineTo( aX2, aY2 );
+			lCanvas.ctx.stroke();
+			lCanvas.ctx.closePath();
+			return true;
+		}
+		return false;
+	},
+
+	canvasLine: function( aId, aX1, aY1, aX2, aY2, aOptions ) {
+		if( undefined == aOptions ) {
+			aOptions = {};
+		}
+		var lColor = "black";
+		if( aOptions.color ) {
+			lColor = aOptions.color;
+		}
+		if( this.doLine( aId, aX1, aY1, aX2, aY2, aOptions ) ) {
+			var lToken = {
+				reqNS: jws.CanvasPlugIn.NS,
+				reqType: "line",
+				id: aId,
+				x1: aX1,
+				y1: aY1,
+				x2: aX2,
+				y2: aY2,
+				color: lColor
+			};
+			this.broadcastToken(lToken);
+		}
+	},
+
 	doClosePath: function( aId ) {
 		var lCanvas = this.fCanvas[ aId ];
 		if( lCanvas != null ) {
@@ -2054,7 +2706,86 @@ jws.CanvasPlugIn = {
 
 // add the JWebSocket Shared Objects PlugIn into the TokenClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.CanvasPlugIn );
-//	---------------------------------------------------------------------------
+
+// optionally include canvas support for IE8
+if( jws.isIE ) {
+
+	//  <JasobNoObfs>
+	//
+	//	-------------------------------------------------------------------------------
+	//	ExplorerCanvas
+	//
+	//	Google Open Source:
+	//		<http://code.google.com>
+	//		<opensource@google.com>
+	//
+	//	Developers:
+	//		Emil A Eklund <emil@eae.net>
+	//		Erik Arvidsson <erik@eae.net>
+	//		Glen Murphy <glen@glenmurphy.com>
+	//
+	//	-------------------------------------------------------------------------------
+	//	DESCRIPTION
+	//
+	//	Firefox, Safari and Opera 9 support the canvas tag to allow 2D command-based
+	//	drawing operations. ExplorerCanvas brings the same functionality to Internet
+	//	Explorer; web developers only need to include a single script tag in their
+	//	existing canvas webpages to enable this support.
+	//
+	//	-------------------------------------------------------------------------------
+	//	INSTALLATION
+	//
+	//	Include the ExplorerCanvas tag in the same directory as your HTML files, and
+	//	add the following code to your page, preferably in the <head> tag.
+	//
+	//	<!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
+	//
+	//	If you run into trouble, please look at the included example code to see how
+	//	to best implement this
+	//	
+	//	Copyright 2006 Google Inc.
+	//
+	//	Licensed under the Apache License, Version 2.0 (the "License");
+	//	you may not use this file except in compliance with the License.
+	//	You may obtain a copy of the License at
+	//
+	//	http://www.apache.org/licenses/LICENSE-2.0
+	//
+	//	Unless required by applicable law or agreed to in writing, software
+	//	distributed under the License is distributed on an "AS IS" BASIS,
+	//	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	//	See the License for the specific language governing permissions and
+	//	limitations under the License.
+	//
+	//	Fullsource code at: http://excanvas.sourceforge.net/
+	//	and http://code.google.com/p/explorercanvas/
+	//
+	//	</JasobNoObfs>
+
+	document.createElement("canvas").getContext||(function(){var s=Math,j=s.round,F=s.sin,G=s.cos,V=s.abs,W=s.sqrt,k=10,v=k/2;function X(){return this.context_||(this.context_=new H(this))}var L=Array.prototype.slice;function Y(b,a){var c=L.call(arguments,2);return function(){return b.apply(a,c.concat(L.call(arguments)))}}var M={init:function(b){if(/MSIE/.test(navigator.userAgent)&&!window.opera){var a=b||document;a.createElement("canvas");a.attachEvent("onreadystatechange",Y(this.init_,this,a))}},init_:function(b){b.namespaces.g_vml_||
+	b.namespaces.add("g_vml_","urn:schemas-microsoft-com:vml","#default#VML");b.namespaces.g_o_||b.namespaces.add("g_o_","urn:schemas-microsoft-com:office:office","#default#VML");if(!b.styleSheets.ex_canvas_){var a=b.createStyleSheet();a.owningElement.id="ex_canvas_";a.cssText="canvas{display:inline-block;overflow:hidden;text-align:left;width:300px;height:150px}g_vml_\\:*{behavior:url(#default#VML)}g_o_\\:*{behavior:url(#default#VML)}"}var c=b.getElementsByTagName("canvas"),d=0;for(;d<c.length;d++)this.initElement(c[d])},
+	initElement:function(b){if(!b.getContext){b.getContext=X;b.innerHTML="";b.attachEvent("onpropertychange",Z);b.attachEvent("onresize",$);var a=b.attributes;if(a.width&&a.width.specified)b.style.width=a.width.nodeValue+"px";else b.width=b.clientWidth;if(a.height&&a.height.specified)b.style.height=a.height.nodeValue+"px";else b.height=b.clientHeight}return b}};function Z(b){var a=b.srcElement;switch(b.propertyName){case "width":a.style.width=a.attributes.width.nodeValue+"px";a.getContext().clearRect();
+	break;case "height":a.style.height=a.attributes.height.nodeValue+"px";a.getContext().clearRect();break}}function $(b){var a=b.srcElement;if(a.firstChild){a.firstChild.style.width=a.clientWidth+"px";a.firstChild.style.height=a.clientHeight+"px"}}M.init();var N=[],B=0;for(;B<16;B++){var C=0;for(;C<16;C++)N[B*16+C]=B.toString(16)+C.toString(16)}function I(){return[[1,0,0],[0,1,0],[0,0,1]]}function y(b,a){var c=I(),d=0;for(;d<3;d++){var f=0;for(;f<3;f++){var h=0,g=0;for(;g<3;g++)h+=b[d][g]*a[g][f];c[d][f]=
+	h}}return c}function O(b,a){a.fillStyle=b.fillStyle;a.lineCap=b.lineCap;a.lineJoin=b.lineJoin;a.lineWidth=b.lineWidth;a.miterLimit=b.miterLimit;a.shadowBlur=b.shadowBlur;a.shadowColor=b.shadowColor;a.shadowOffsetX=b.shadowOffsetX;a.shadowOffsetY=b.shadowOffsetY;a.strokeStyle=b.strokeStyle;a.globalAlpha=b.globalAlpha;a.arcScaleX_=b.arcScaleX_;a.arcScaleY_=b.arcScaleY_;a.lineScale_=b.lineScale_}function P(b){var a,c=1;b=String(b);if(b.substring(0,3)=="rgb"){var d=b.indexOf("(",3),f=b.indexOf(")",d+
+	1),h=b.substring(d+1,f).split(",");a="#";var g=0;for(;g<3;g++)a+=N[Number(h[g])];if(h.length==4&&b.substr(3,1)=="a")c=h[3]}else a=b;return{color:a,alpha:c}}function aa(b){switch(b){case "butt":return"flat";case "round":return"round";case "square":default:return"square"}}function H(b){this.m_=I();this.mStack_=[];this.aStack_=[];this.currentPath_=[];this.fillStyle=this.strokeStyle="#000";this.lineWidth=1;this.lineJoin="miter";this.lineCap="butt";this.miterLimit=k*1;this.globalAlpha=1;this.canvas=b;
+	var a=b.ownerDocument.createElement("div");a.style.width=b.clientWidth+"px";a.style.height=b.clientHeight+"px";a.style.overflow="hidden";a.style.position="absolute";b.appendChild(a);this.element_=a;this.lineScale_=this.arcScaleY_=this.arcScaleX_=1}var i=H.prototype;i.clearRect=function(){this.element_.innerHTML=""};i.beginPath=function(){this.currentPath_=[]};i.moveTo=function(b,a){var c=this.getCoords_(b,a);this.currentPath_.push({type:"moveTo",x:c.x,y:c.y});this.currentX_=c.x;this.currentY_=c.y};
+	i.lineTo=function(b,a){var c=this.getCoords_(b,a);this.currentPath_.push({type:"lineTo",x:c.x,y:c.y});this.currentX_=c.x;this.currentY_=c.y};i.bezierCurveTo=function(b,a,c,d,f,h){var g=this.getCoords_(f,h),l=this.getCoords_(b,a),e=this.getCoords_(c,d);Q(this,l,e,g)};function Q(b,a,c,d){b.currentPath_.push({type:"bezierCurveTo",cp1x:a.x,cp1y:a.y,cp2x:c.x,cp2y:c.y,x:d.x,y:d.y});b.currentX_=d.x;b.currentY_=d.y}i.quadraticCurveTo=function(b,a,c,d){var f=this.getCoords_(b,a),h=this.getCoords_(c,d),g={x:this.currentX_+
+	0.6666666666666666*(f.x-this.currentX_),y:this.currentY_+0.6666666666666666*(f.y-this.currentY_)};Q(this,g,{x:g.x+(h.x-this.currentX_)/3,y:g.y+(h.y-this.currentY_)/3},h)};i.arc=function(b,a,c,d,f,h){c*=k;var g=h?"at":"wa",l=b+G(d)*c-v,e=a+F(d)*c-v,m=b+G(f)*c-v,r=a+F(f)*c-v;if(l==m&&!h)l+=0.125;var n=this.getCoords_(b,a),o=this.getCoords_(l,e),q=this.getCoords_(m,r);this.currentPath_.push({type:g,x:n.x,y:n.y,radius:c,xStart:o.x,yStart:o.y,xEnd:q.x,yEnd:q.y})};i.rect=function(b,a,c,d){this.moveTo(b,
+	a);this.lineTo(b+c,a);this.lineTo(b+c,a+d);this.lineTo(b,a+d);this.closePath()};i.strokeRect=function(b,a,c,d){var f=this.currentPath_;this.beginPath();this.moveTo(b,a);this.lineTo(b+c,a);this.lineTo(b+c,a+d);this.lineTo(b,a+d);this.closePath();this.stroke();this.currentPath_=f};i.fillRect=function(b,a,c,d){var f=this.currentPath_;this.beginPath();this.moveTo(b,a);this.lineTo(b+c,a);this.lineTo(b+c,a+d);this.lineTo(b,a+d);this.closePath();this.fill();this.currentPath_=f};i.createLinearGradient=function(b,
+	a,c,d){var f=new D("gradient");f.x0_=b;f.y0_=a;f.x1_=c;f.y1_=d;return f};i.createRadialGradient=function(b,a,c,d,f,h){var g=new D("gradientradial");g.x0_=b;g.y0_=a;g.r0_=c;g.x1_=d;g.y1_=f;g.r1_=h;return g};i.drawImage=function(b){var a,c,d,f,h,g,l,e,m=b.runtimeStyle.width,r=b.runtimeStyle.height;b.runtimeStyle.width="auto";b.runtimeStyle.height="auto";var n=b.width,o=b.height;b.runtimeStyle.width=m;b.runtimeStyle.height=r;if(arguments.length==3){a=arguments[1];c=arguments[2];h=g=0;l=d=n;e=f=o}else if(arguments.length==
+	5){a=arguments[1];c=arguments[2];d=arguments[3];f=arguments[4];h=g=0;l=n;e=o}else if(arguments.length==9){h=arguments[1];g=arguments[2];l=arguments[3];e=arguments[4];a=arguments[5];c=arguments[6];d=arguments[7];f=arguments[8]}else throw Error("Invalid number of arguments");var q=this.getCoords_(a,c),t=[];t.push(" <g_vml_:group",' coordsize="',k*10,",",k*10,'"',' coordorigin="0,0"',' style="width:',10,"px;height:",10,"px;position:absolute;");if(this.m_[0][0]!=1||this.m_[0][1]){var E=[];E.push("M11=",
+	this.m_[0][0],",","M12=",this.m_[1][0],",","M21=",this.m_[0][1],",","M22=",this.m_[1][1],",","Dx=",j(q.x/k),",","Dy=",j(q.y/k),"");var p=q,z=this.getCoords_(a+d,c),w=this.getCoords_(a,c+f),x=this.getCoords_(a+d,c+f);p.x=s.max(p.x,z.x,w.x,x.x);p.y=s.max(p.y,z.y,w.y,x.y);t.push("padding:0 ",j(p.x/k),"px ",j(p.y/k),"px 0;filter:progid:DXImageTransform.Microsoft.Matrix(",E.join(""),", sizingmethod='clip');")}else t.push("top:",j(q.y/k),"px;left:",j(q.x/k),"px;");t.push(' ">','<g_vml_:image src="',b.src,
+	'"',' style="width:',k*d,"px;"," height:",k*f,'px;"',' cropleft="',h/n,'"',' croptop="',g/o,'"',' cropright="',(n-h-l)/n,'"',' cropbottom="',(o-g-e)/o,'"'," />","</g_vml_:group>");this.element_.insertAdjacentHTML("BeforeEnd",t.join(""))};i.stroke=function(b){var a=[],c=P(b?this.fillStyle:this.strokeStyle),d=c.color,f=c.alpha*this.globalAlpha;a.push("<g_vml_:shape",' filled="',!!b,'"',' style="position:absolute;width:',10,"px;height:",10,'px;"',' coordorigin="0 0" coordsize="',k*10," ",k*10,'"',' stroked="',
+	!b,'"',' path="');var h={x:null,y:null},g={x:null,y:null},l=0;for(;l<this.currentPath_.length;l++){var e=this.currentPath_[l];switch(e.type){case "moveTo":a.push(" m ",j(e.x),",",j(e.y));break;case "lineTo":a.push(" l ",j(e.x),",",j(e.y));break;case "close":a.push(" x ");e=null;break;case "bezierCurveTo":a.push(" c ",j(e.cp1x),",",j(e.cp1y),",",j(e.cp2x),",",j(e.cp2y),",",j(e.x),",",j(e.y));break;case "at":case "wa":a.push(" ",e.type," ",j(e.x-this.arcScaleX_*e.radius),",",j(e.y-this.arcScaleY_*e.radius),
+	" ",j(e.x+this.arcScaleX_*e.radius),",",j(e.y+this.arcScaleY_*e.radius)," ",j(e.xStart),",",j(e.yStart)," ",j(e.xEnd),",",j(e.yEnd));break}if(e){if(h.x==null||e.x<h.x)h.x=e.x;if(g.x==null||e.x>g.x)g.x=e.x;if(h.y==null||e.y<h.y)h.y=e.y;if(g.y==null||e.y>g.y)g.y=e.y}}a.push(' ">');if(b)if(typeof this.fillStyle=="object"){var m=this.fillStyle,r=0,n={x:0,y:0},o=0,q=1;if(m.type_=="gradient"){var t=m.x1_/this.arcScaleX_,E=m.y1_/this.arcScaleY_,p=this.getCoords_(m.x0_/this.arcScaleX_,m.y0_/this.arcScaleY_),
+	z=this.getCoords_(t,E);r=Math.atan2(z.x-p.x,z.y-p.y)*180/Math.PI;if(r<0)r+=360;if(r<1.0E-6)r=0}else{var p=this.getCoords_(m.x0_,m.y0_),w=g.x-h.x,x=g.y-h.y;n={x:(p.x-h.x)/w,y:(p.y-h.y)/x};w/=this.arcScaleX_*k;x/=this.arcScaleY_*k;var R=s.max(w,x);o=2*m.r0_/R;q=2*m.r1_/R-o}var u=m.colors_;u.sort(function(ba,ca){return ba.offset-ca.offset});var J=u.length,da=u[0].color,ea=u[J-1].color,fa=u[0].alpha*this.globalAlpha,ga=u[J-1].alpha*this.globalAlpha,S=[],l=0;for(;l<J;l++){var T=u[l];S.push(T.offset*q+
+	o+" "+T.color)}a.push('<g_vml_:fill type="',m.type_,'"',' method="none" focus="100%"',' color="',da,'"',' color2="',ea,'"',' colors="',S.join(","),'"',' opacity="',ga,'"',' g_o_:opacity2="',fa,'"',' angle="',r,'"',' focusposition="',n.x,",",n.y,'" />')}else a.push('<g_vml_:fill color="',d,'" opacity="',f,'" />');else{var K=this.lineScale_*this.lineWidth;if(K<1)f*=K;a.push("<g_vml_:stroke",' opacity="',f,'"',' joinstyle="',this.lineJoin,'"',' miterlimit="',this.miterLimit,'"',' endcap="',aa(this.lineCap),
+	'"',' weight="',K,'px"',' color="',d,'" />')}a.push("</g_vml_:shape>");this.element_.insertAdjacentHTML("beforeEnd",a.join(""))};i.fill=function(){this.stroke(true)};i.closePath=function(){this.currentPath_.push({type:"close"})};i.getCoords_=function(b,a){var c=this.m_;return{x:k*(b*c[0][0]+a*c[1][0]+c[2][0])-v,y:k*(b*c[0][1]+a*c[1][1]+c[2][1])-v}};i.save=function(){var b={};O(this,b);this.aStack_.push(b);this.mStack_.push(this.m_);this.m_=y(I(),this.m_)};i.restore=function(){O(this.aStack_.pop(),
+	this);this.m_=this.mStack_.pop()};function ha(b){var a=0;for(;a<3;a++){var c=0;for(;c<2;c++)if(!isFinite(b[a][c])||isNaN(b[a][c]))return false}return true}function A(b,a,c){if(!!ha(a)){b.m_=a;if(c)b.lineScale_=W(V(a[0][0]*a[1][1]-a[0][1]*a[1][0]))}}i.translate=function(b,a){A(this,y([[1,0,0],[0,1,0],[b,a,1]],this.m_),false)};i.rotate=function(b){var a=G(b),c=F(b);A(this,y([[a,c,0],[-c,a,0],[0,0,1]],this.m_),false)};i.scale=function(b,a){this.arcScaleX_*=b;this.arcScaleY_*=a;A(this,y([[b,0,0],[0,a,
+	0],[0,0,1]],this.m_),true)};i.transform=function(b,a,c,d,f,h){A(this,y([[b,a,0],[c,d,0],[f,h,1]],this.m_),true)};i.setTransform=function(b,a,c,d,f,h){A(this,[[b,a,0],[c,d,0],[f,h,1]],true)};i.clip=function(){};i.arcTo=function(){};i.createPattern=function(){return new U};function D(b){this.type_=b;this.r1_=this.y1_=this.x1_=this.r0_=this.y0_=this.x0_=0;this.colors_=[]}D.prototype.addColorStop=function(b,a){a=P(a);this.colors_.push({offset:b,color:a.color,alpha:a.alpha})};function U(){}G_vmlCanvasManager=
+	M;CanvasRenderingContext2D=H;CanvasGradient=D;CanvasPattern=U})();
+
+}//	---------------------------------------------------------------------------
 //	jWebSocket Chat PlugIn (uses jWebSocket Client and Server)
 //	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	---------------------------------------------------------------------------
@@ -2375,6 +3106,10 @@ jws.FileSystemPlugIn = {
 					if( this.OnFileSaved ) {
 						this.OnFileSaved( aToken );
 					}
+				} else if( "filesent" == aToken.name ) {
+					if( this.OnFileSent ) {
+						this.OnFileSent( aToken );
+					}
 				}
 			}
 		}
@@ -2445,6 +3180,27 @@ jws.FileSystemPlugIn = {
 		return lRes;
 	},
 
+	fileSend: function( aTargetId, aFilename, aData, aOptions ) {
+		var lEncoding = "base64";
+		if( aOptions ) {
+			if( aOptions.encoding != undefined ) {
+				lEncoding = aOptions.encoding;
+			}
+		}
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.FileSystemPlugIn.NS,
+				type: "send",
+				data: aData,
+				targetId: aTargetId,
+				encoding: lEncoding,
+				filename: aFilename
+			});
+		}
+		return lRes;
+	},
+
 	setFileSystemCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
@@ -2454,6 +3210,9 @@ jws.FileSystemPlugIn = {
 		}
 		if( aListeners.OnFileSaved !== undefined ) {
 			this.OnFileSaved = aListeners.OnFileSaved;
+		}
+		if( aListeners.OnFileSent !== undefined ) {
+			this.OnFileSent = aListeners.OnFileSent;
 		}
 		if( aListeners.OnFileError !== undefined ) {
 			this.OnFileError = aListeners.OnFileError;
@@ -3170,6 +3929,94 @@ jws.StreamingPlugIn = {
 // add the StreamingPlugIn PlugIn into the jWebSocketTokenClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StreamingPlugIn );
 //	---------------------------------------------------------------------------
+//	jWebSocket Test PlugIn (uses jWebSocket Client and Server)
+//	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
+
+
+//	---------------------------------------------------------------------------
+//  jWebSocket Test Client Plug-In
+//	---------------------------------------------------------------------------
+
+//:package:*:jws
+//:class:*:jws.TestPlugIn
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.TestPlugIn[/tt] class.
+jws.TestPlugIn = {
+
+	//:const:*:NS:String:org.jwebsocket.plugins.test (jws.NS_BASE + ".plugins.test")
+	//:d:en:Namespace for the [tt]TestPlugIn[/tt] class.
+	// if namespace is changed update server plug-in accordingly!
+	NS: jws.NS_BASE + ".plugins.test",
+
+	processToken: function( aToken ) {
+		// check if namespace matches
+		if( aToken.ns == jws.TestPlugIn.NS ) {
+			// here you can handle incoming tokens from the server
+			// directy in the plug-in if desired.
+			if( "event" == aToken.type ) {
+				// callback when a server started a certain test
+				if( "testStarted" == aToken.name && this.OnTestStarted ) {
+					this.OnTestStarted( aToken );
+				// callback when a server stopped a certain test
+				} else if( "testStopped" == aToken.name && this.OnTestStopped ) {
+					this.OnTestStopped( aToken );
+				// event used to run a test triggered by the server
+				} else if( "startTest" == aToken.name && this.OnStartTest ) {
+					this.OnStartTest( aToken );
+				}
+			}
+		}
+	},
+
+	testS2CPerformance: function( aCount, aMessage, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TestPlugIn.NS,
+				type: "testS2CPerformance",
+				count: aCount,
+				message: aMessage
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	setTestCallbacks: function( aListeners ) {
+		if( !aListeners ) {
+			aListeners = {};
+		}
+		// event used to run a test triggered by the server
+		if( aListeners.OnStartTest !== undefined ) {
+			this.OnStartTest = aListeners.OnStartTest;
+		}
+		// callback when a server started a certain test
+		if( aListeners.OnTestStarted !== undefined ) {
+			this.OnTestStarted = aListeners.OnTestStarted;
+		}
+		// callback when a server stopped a certain test
+		if( aListeners.OnTestStopped !== undefined ) {
+			this.OnTestStopped = aListeners.OnTestStopped;
+		}
+	}
+
+}
+
+// add the JWebSocket Test PlugIn into the TokenClient class
+jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.TestPlugIn );
+//	---------------------------------------------------------------------------
 //	jWebSocket Twitter PlugIn (uses jWebSocket Client and Server)
 //	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	---------------------------------------------------------------------------
@@ -3213,6 +4060,10 @@ jws.TwitterPlugIn = {
 			} else if( "requestAccessToken" == aToken.reqType ) {
 				if( this.OnTwitterAccessToken ) {
 					this.OnTwitterAccessToken( aToken );
+				}
+			} else if( "event" == aToken.type ) {
+				if( "status" == aToken.name && this.OnTwitterStatus ) {
+					this.OnTwitterStatus( aToken );
 				}
 			}
 		}
@@ -3336,6 +4187,18 @@ jws.TwitterPlugIn = {
 		return lRes;
 	},
 
+	twitterStatistics: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TwitterPlugIn.NS,
+				type: "getStatistics"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	twitterPublicTimeline: function( aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
@@ -3381,6 +4244,9 @@ jws.TwitterPlugIn = {
 		}
 		if( aListeners.OnGotTwitterTimeline !== undefined ) {
 			this.OnGotTwitterTimeline = aListeners.OnGotTwitterTimeline;
+		}
+		if( aListeners.OnTwitterStatus !== undefined ) {
+			this.OnTwitterStatus = aListeners.OnTwitterStatus;
 		}
 		if( aListeners.OnTwitterAccessToken !== undefined ) {
 			this.OnTwitterAccessToken = aListeners.OnTwitterAccessToken;
