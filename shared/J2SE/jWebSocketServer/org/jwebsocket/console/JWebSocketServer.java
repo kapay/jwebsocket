@@ -54,7 +54,7 @@ public class JWebSocketServer {
 			JWebSocketFactory.start(lOverrideConfigPath);
 
 			// get the token server
-			TokenServer lTS0 = (TokenServer) JWebSocketFactory.getServer("ts0");
+			TokenServer lTS0 = JWebSocketFactory.getTokenServer();
 			if (lTS0 != null) {
 				// and add the sample listener to the server's listener chain
 				lTS0.addListener(new JWebSocketTokenListenerSample());

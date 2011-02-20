@@ -15,142 +15,70 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
-import java.util.Date;
-
+import java.util.List;
+import javolution.util.FastList;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.factory.JWebSocketFactory;
 
 /**
- * Represents the single publisher connected the the particular channel
+ * Represents the single publisher connected to a particular channel
  * 
- * @author puran
+ * @author puran, aschulze
  * @version $Id: Publisher.java 1120 2010-10-24 06:03:08Z mailtopuran@gmail.com$
  */
 public final class Publisher {
 
-	private String id;
-	private String login;
-	private String channel;
-	private WebSocketConnector connector;
-	private Date authorizedDate;
-	private Date lastPublishedDate;
-	private boolean authorized;
+	private String mConnectionId;
+	private List<String> mChannels = new FastList<String>();
 
-	public Publisher(WebSocketConnector connector, String login, String channel, Date authorizedDate,
-			Date lastPublishedDate, boolean authorized) {
-		this.id = connector.getSession().getSessionId();
-		this.login = login;
-		this.channel = channel;
-		this.connector = connector;
-		this.authorizedDate = authorizedDate;
-		this.lastPublishedDate = lastPublishedDate;
-		this.authorized = authorized;
-	}
-
-	public Publisher(String id, String login, String channel, Date authorizedDate, Date lastPublishedDate,
-			boolean authorized) {
-		this.id = id;
-		this.login = login;
-		this.channel = channel;
-		this.connector = null;
-		this.authorizedDate = authorizedDate;
-		this.lastPublishedDate = lastPublishedDate;
-		this.authorized = authorized;
+	public Publisher(String aConnId) {
+		this.mConnectionId = aConnId;
 	}
 
 	/**
 	 * @return the id
 	 */
 	public String getId() {
-		return id;
-	}
-
-	/**
-	 * @return the login name
-	 */
-	public String getLogin() {
-		return login;
-	}
-
-	/**
-	 * @return the channel
-	 */
-	public String getChannel() {
-		return channel;
+		return mConnectionId;
 	}
 
 	/**
 	 * @return the connector
 	 */
 	public WebSocketConnector getConnector() {
-		return connector;
+		WebSocketConnector lConnector =
+				JWebSocketFactory.getTokenServer().getConnector(mConnectionId);
+		return lConnector;
 	}
 
 	/**
-	 * @return the authorizedDate
+	 * @return the channels
 	 */
-	public Date getAuthorizedDate() {
-		return authorizedDate;
+	public List<String> getChannels() {
+		return mChannels;
 	}
 
 	/**
-	 * @return the authorized
-	 */
-	public boolean isAuthorized() {
-		return authorized;
-	}
-
-	/**
-	 * @return the lastPublishedDate
-	 */
-	public Date getLastPublishedDate() {
-		return lastPublishedDate;
-	}
-
-	/*
-	 * (non-Javadoc)
+	 * Add the channel id to the list of channels this subscriber is
+	 * subscribed
 	 *
-	 * @see java.lang.Object#hashCode()
+	 * @param aChannel
 	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((channel == null) ? 0 : channel.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
+	public void addChannel(String aChannel) {
+		if (this.mChannels != null) {
+			this.mChannels.add(aChannel);
+		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * Removes the channel from the subscriber list of channels
+	 * @param aChannel the channel id to remove.
 	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
+	public void removeChannel(String aChannel) {
+		if (this.mChannels != null) {
+			this.mChannels.remove(aChannel);
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		Publisher other = (Publisher) obj;
-		if (channel == null) {
-			if (other.channel != null) {
-				return false;
-			}
-		} else if (!channel.equals(other.channel)) {
-			return false;
-		}
-		if (id == null) {
-			if (other.id != null) {
-				return false;
-			}
-		} else if (!id.equals(other.id)) {
-			return false;
-		}
-		return true;
 	}
+
+
 }

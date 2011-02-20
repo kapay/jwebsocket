@@ -37,7 +37,9 @@
 				eChannelId = null,
 				eChannelName = null,
 				eAccessKey = null,
-				eAccessSecret = null,
+				eSecretKey = null,
+				eIsPrivate = null,
+				eIsSystem = null,
 				eKeepAlive = null,
 				eChannelSel = null;
 
@@ -69,6 +71,10 @@
 						OnOpen: function( aEvent ) {
 							log( "<font style='color:#888'>jWebSocket connection established.</font>" );
 							jws.$("simgStatus").src = "../../images/connected.png";
+						},
+
+						OnWelcome: function() {
+							getChannels();
 						},
 
 						// OnMessage callback
@@ -113,14 +119,16 @@
 			function createChannel() {
 				var lChannelId = eChannelId.value;
 				var lChannelName = eChannelName.value;
+				var lIsPrivate = eIsPrivate.checked;
+				var lIsSystem = eIsSystem.checked;
 				var lAccessKey = eAccessKey.value;
-				var lSecretKey = eAccessSecret.value;
+				var lSecretKey = eSecretKey.value;
 				log( "Creating channel '" + lChannelId + "'..." );
 				var lRes = lWSC.channelCreate(
 					lChannelId, 
 					lChannelName,
-					{	isPrivate: false,
-						isSystem: false,
+					{	isPrivate: lIsPrivate,
+						isSystem: lIsSystem,
 						accessKey: lAccessKey,
 						secretKey: lSecretKey
 					}
@@ -132,8 +140,15 @@
 			// on success the OnChannelRemoved event is fired
 			function removeChannel() {
 				var lChannelId = eChannelId.value;
+				var lAccessKey = eAccessKey.value;
+				var lSecretKey = eSecretKey.value;
 				log( "Removing channel '" + lChannelId + "'..." );
-				var lRes = lWSC.channelRemove( lChannelId );
+				var lRes = lWSC.channelRemove( 
+					lChannelId,
+					{	accessKey: lAccessKey,
+						secretKey: lSecretKey
+					}
+				);
 				log( lWSC.resultToString( lRes ) );
 			}
 
@@ -158,7 +173,7 @@
 			function auth() {
 				var lChannel = eChannelSel.value;
 				var lAccessKey = eAccessKey.value;
-				var lSecretKey = eAccessSecret.value;
+				var lSecretKey = eSecretKey.value;
 				log( "Authenticating against channel '" + lChannel + "'..." );
 				// use access key and secret key for this channel to authenticate
 				// required to publish data only
@@ -226,13 +241,32 @@
 				}
 			}
 
+			// this method is called when a channel has been removed from the server
+			// remove the channel from the drop down box on the client as well
+			function onChannelsReceivedObs( aEvent ) {
+				// remove all existing channels in drop down box
+				while( eChannelSel.options.length > 0 ) {
+					var lOption = eChannelSel.options[ 0 ];
+					eChannelSel.removeChild(lOption);
+				}
+				// add all channels from event
+				for( var lIdx = 0, lCnt = aEvent.channels.length; lIdx < lCnt; lIdx++ ) {
+					var lOption = document.createElement("option");
+					lOption.value = aEvent.channels[ lIdx ].id;
+					lOption.text = aEvent.channels[ lIdx ].name;
+					eChannelSel.appendChild(lOption);
+				}
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivChat" );
 				eMessage = jws.$( "stxfMsg" );
 				eChannelId = jws.$( "stxfChannelId" );
 				eChannelName = jws.$( "stxfChannelId" );
 				eAccessKey = jws.$( "stxfAccessKey" );
-				eAccessSecret = jws.$( "stxfAccessSecret" );
+				eSecretKey = jws.$( "stxfSecretKey" );
+				eIsPrivate = jws.$( "schkPrivate" );
+				eIsSystem = jws.$( "schkSystem" );
 				eKeepAlive =  jws.$( "schkKeepAlive" );
 				eChannelSel = jws.$( "sselChannel" );
 
@@ -240,7 +274,8 @@
 					lWSC = new jws.jWebSocketJSONClient();
 					lWSC.setChannelCallbacks({
 						OnChannelCreated: onChannelCreatedObs,
-						OnChannelRemoved: onChannelRemovedObs
+						OnChannelRemoved: onChannelRemovedObs,
+						OnChannelsReceived: onChannelsReceivedObs
 					});
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
@@ -287,21 +322,60 @@
 		<div id="sdivChat" class="sdivContainer"
 			 style="position:relative; height:300px; overflow:auto;">
 		</div>
+<!--
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
+					<td class="stdDlg" width="5">Username</td>
+					<td class="stdDlg" width="5">
+						<input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:100px"
+							   title="jWebSocket username or 'Guest' for demo.">
+					</td>
+					<td class="stdDlg" width="5">Password</td>
+					<td class="stdDlg" width="5">
+						<input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:100px"
+							   title="jWebSocket password or 'guest' for demo.">
+					</td>
+					<td class="stdDlg" width="5">
+						URL
+					</td>
+					<td class="stdDlg" width="5">
+						<input id="stxfURL" type="text" value="ws://localhost:8787/jWebSocket/jWebSocket" style="width:300px">
+					</td>
+					<td class="stdDlg" width="5">
+						&nbsp;|&nbsp;&nbsp;KeepAlive
+					</td>
+					<td class="stdDlg" width="5">
+						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleKeepAlive();">
+					</td>
+					<td class="stdDlg" width="5">
+						&nbsp;|&nbsp;&nbsp;Share&nbsp;http/ws&nbsp;ports
+					</td>
+					<td class="stdDlg" width="5">
+						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleSharePorts();">
+					</td>
+					<td class="stdDlg" width="5">
+						&nbsp;|&nbsp;&nbsp;SSL
+					</td>
+					<td class="stdDlg" width="5">
+						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleSSL();">
+					</td>
+					<td class="stdDlg" width="5">
+						&nbsp;|&nbsp;&nbsp;Debug
+					</td>
 					<td class="stdDlg" width="">
-						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleKeepAlive();">&nbsp;Keep-Alive&nbsp;
+						<input id="schkKeepAlive" type="checkbox" value="off" onclick="toggleDebug();">
 					</td>
 				</tr>
 			</table>
 		</div>
+-->
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnConnect" type="button" value="Login" onclick="login();"
-							   title="Authenticates you against the jWebSocket Server.">
+							   title="Authenticates you against the jWebSocket Server (using 'guest' account).">
 					</td>
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnSubscribe" type="button" value="Subscribe" onclick="subscribeChannel();"
@@ -313,12 +387,16 @@
 					</td>
 					<td width="5">
 						<select id="sselChannel" title="Channel to subscribe to or unsubscribe from.">
+							<!--
+							not required to set fix channels here,
+							the drop down box is filled by OnChannelsReceived event
 							<option selected="selected" value="publicA">Public A</option>
 							<option value="publicB">Public B</option>
 							<option value="privateA">Private A</option>
 							<option value="privateB">Private B</option>
 							<option value="systemA">System A</option>
 							<option value="systemB">System B</option>
+						   -->
 						</select>
 					</td>
 					<td width="70">
@@ -329,12 +407,19 @@
 						<input class="stxfDlg" id="stxfChannelId" type="text" value="id" style="width:99%"
 							   title="Channel identifier to create or remove channels.">
 					</td>
-					<td width="">
-						&nbsp;
+					<td class="stdDlg" width="5">
+						&nbsp;Private
 					</td>
-					<td width="5">
+					<td class="stdDlg" width="5">
+						<input id="schkPrivate" type="checkbox" value="off"
+							   title="Specifies if the new channel is a private (or public) channel. ">
+					</td>
+					<td width="">
 						<input class="sbtnDlg" id="sbtnCreate" type="button" value="Create" onclick="createChannel();"
 							   title="Creates a new channel with the given name.">
+					</td>
+					<td width="5">
+						&nbsp;
 					</td>
 				</tr>
 				<tr class="strDlg">
@@ -355,19 +440,26 @@
 							   title="Authenticates the user against the selected channel to publish messages on it.">
 					</td>
 					<td width="70">
-						<input class="stxfDlg" id="stxfAccessSecret" type="text" value="secret" style="width:99%"
+						<input class="stxfDlg" id="stxfSecretKey" type="text" value="secret" style="width:99%"
 							   title="Access Secret to authorize publish operations.">
 					</td>
 					<td width="70">
 						<input class="stxfDlg" id="stxfChannelName" type="text" value="name" style="width:99%"
 							   title="Channel name to create new channels.">
 					</td>
-					<td width="">
-						&nbsp;
+					<td class="stdDlg" width="5">
+						&nbsp;System
 					</td>
-					<td width="5">
+					<td class="stdDlg" width="5">
+						<input id="schkSystem" type="checkbox" value="off"
+							   title="Specifies if the new channel is a system or user/application channel.">
+					</td>
+					<td width="">
 						<input class="sbtnDlg" id="sbtnRemove" type="button" value="Remove" onclick="removeChannel();"
 							   title="Removes the channel with the given name.">
+					</td>
+					<td width="5">
+						&nbsp;
 					</td>
 				</tr>
 				<tr class="strDlg">
@@ -379,7 +471,7 @@
 						<input class="sbtnDlg" id="sbtnGetChannels" type="button" value="Get Channels" onclick="getChannels();"
 							   title="Returns a list of available channels on the server.">
 					</td>
-					<td width="" colspan="5">
+					<td width="" colspan="7">
 						<input class="stxfDlg" id="stxfMsg" type="text" value="Your Message" style="width:99%"
 							   title="Message to be broadcasted on the selected channel.">
 					</td>

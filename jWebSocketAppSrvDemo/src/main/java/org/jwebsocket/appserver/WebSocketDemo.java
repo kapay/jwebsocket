@@ -63,7 +63,7 @@ public class WebSocketDemo extends HttpServlet implements WebSocketServerTokenLi
 	public void init() {
 		mLog = Logging.getLogger(WebSocketDemo.class);
 		mLog.info("Adding servlet '" + getClass().getSimpleName() + "' to WebSocket listeners...");
-		TokenServer lServer = (TokenServer) JWebSocketFactory.getServer("ts0");
+		TokenServer lServer = JWebSocketFactory.getTokenServer();
 		if (lServer != null) {
 			lServer.addListener(this);
 		}

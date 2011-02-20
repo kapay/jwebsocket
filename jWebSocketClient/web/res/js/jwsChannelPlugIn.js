@@ -58,6 +58,10 @@ jws.ChannelPlugIn = {
 					if( this.OnChannelRemoved ) {
 						this.OnChannelRemoved( aToken );
 					}
+				} 
+			} else if( "getChannels" == aToken.reqType ) {
+				if( this.OnChannelsReceived ) {
+					this.OnChannelsReceived( aToken );
 				}
 			}
 		}
@@ -158,7 +162,7 @@ jws.ChannelPlugIn = {
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:a:en::aName:String:The name (human readably) of the channel.
 	//:r:*:::void:none
-	channelCreate: function( aChannel, aName, aOptions ) {
+	channelCreate: function( aId, aName, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			var lIsPrivate = false;
@@ -166,25 +170,38 @@ jws.ChannelPlugIn = {
 			var lAccessKey = null;
 			var lSecretKey = null;
 			var lOwner = null;
+			var lPassword = null;
 			if( aOptions ) {
 				if( aOptions.isPrivate != undefined ) {
 					lIsPrivate = aOptions.isPrivate;
+				}
+				if( aOptions.isSystem != undefined ) {
 					lIsSystem = aOptions.isSystem;
+				}
+				if( aOptions.accessKey != undefined ) {
 					lAccessKey = aOptions.accessKey;
+				}
+				if( aOptions.secretKey != undefined ) {
 					lSecretKey = aOptions.secretKey;
+				}
+				if( aOptions.owner != undefined ) {
 					lOwner = aOptions.owner;
+				}
+				if( aOptions.password != undefined ) {
+					lPassword = aOptions.password;
 				}
 			}
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.CREATE_CHANNEL,
-				channel: aChannel,
+				channel: aId,
 				name: aName,
 				isPrivate: lIsPrivate,
 				isSystem: lIsSystem,
 				accessKey: lAccessKey,
 				secretKey: lSecretKey,
-				owner: lOwner
+				owner: lOwner,
+				password: lPassword
 			});
 		}
 		return lRes;
@@ -197,13 +214,35 @@ jws.ChannelPlugIn = {
 	//:d:en:the remove request is rejected.
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:r:*:::void:none
-	channelRemove: function( aChannel ) {
+	channelRemove: function( aId, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
+			var lAccessKey = null;
+			var lSecretKey = null;
+			var lOwner = null;
+			var lPassword = null;
+			if( aOptions ) {
+				if( aOptions.accessKey != undefined ) {
+					lAccessKey = aOptions.accessKey;
+				}
+				if( aOptions.secretKey != undefined ) {
+					lSecretKey = aOptions.secretKey;
+				}
+				if( aOptions.owner != undefined ) {
+					lOwner = aOptions.owner;
+				}
+				if( aOptions.password != undefined ) {
+					lPassword = aOptions.password;
+				}
+			}
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.REMOVE_CHANNEL,
-				channel: aChannel
+				channel: aId,
+				accessKey: lAccessKey,
+				secretKey: lSecretKey,
+				owner: lOwner,
+				password: lPassword
 			});
 		}
 		return lRes;
@@ -271,6 +310,9 @@ jws.ChannelPlugIn = {
 		}
 		if( aListeners.OnChannelCreated !== undefined ) {
 			this.OnChannelCreated = aListeners.OnChannelCreated;
+		}
+		if( aListeners.OnChannelsReceived !== undefined ) {
+			this.OnChannelsReceived = aListeners.OnChannelsReceived;
 		}
 		if( aListeners.OnChannelRemoved !== undefined ) {
 			this.OnChannelRemoved = aListeners.OnChannelRemoved;

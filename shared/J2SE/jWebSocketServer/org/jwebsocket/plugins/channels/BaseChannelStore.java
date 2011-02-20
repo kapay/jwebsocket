@@ -15,126 +15,131 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javolution.util.FastList;
+import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jwebsocket.storage.jdbc.JDBCStorage;
 import org.jwebsocket.logging.Logging;
+import org.jwebsocket.storage.ehcache.EhCacheStorage;
 
 /**
  * Base JDBC based implementation of the <tt>ChannelStore</tt>
  * 
- * @author puran
+ * @author puran, aschulze
  * @version $Id: BaseChannelStore.java 1101 2010-10-19 12:36:12Z fivefeetfurther$
  */
-public class BaseChannelStore extends JDBCStorage implements ChannelStore {
+public class BaseChannelStore
+		extends EhCacheStorage
+		implements ChannelStore {
 
 	/** logger object */
 	private static Logger logger = Logging.getLogger(BaseChannelStore.class);
-	/** default table name for the channel store */
-	private static final String TABLE_NAME = "channel_store_table";
-	/** default mysql driver name for channel store */
-	private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
-	/** default application column name for channels data store */
-	private static final String APP_COLUMN_NAME = "channels";
-	/** default key column name for channel data store */
-	private static final String KEY_COLUMN_NAME = "channel_key";
-	/** default value column name for channel data store */
-	private static final String VALUE_COLUMN_NAME = "channel_value";
-	/** properties */
 	private static final String ID = "id";
 	private static final String NAME = "name";
-	private static final String SUBSCRIBER_COUNT = "subscriber_count";
 	private static final String PRIVATE = "private";
 	private static final String SYSTEM = "system";
 	private static final String SECRET_KEY = "secret_key";
 	private static final String ACCESS_KEY = "access_key";
 	private static final String OWNER = "owner";
-	private static final String CREATED_DATE = "created_date";
 	private static final String STATE = "state";
+	private static final String SUBSCRIBERS = "subscribers";
+	private static final String PUBLISHERS = "publishers";
 
 	/**
 	 * default constructor
 	 */
 	public BaseChannelStore() {
-		init();
-	}
-
-	/**
-	 * initialize the JDBC store properties.
-	 */
-	private void init() {
-		super.tableName = TABLE_NAME;
-		super.driverName = DRIVER_NAME;
-		super.appColumnName = APP_COLUMN_NAME;
-		super.keyColumnName = KEY_COLUMN_NAME;
-		super.valueColumnName = VALUE_COLUMN_NAME;
+		super("channelStore");
 	}
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param aId
 	 */
 	@Override
-	public Channel getChannel(String id) {
-		Channel channel = null;
-		List<Subscriber> subscribers = new ArrayList<Subscriber>();
-		List<Publisher> publishers = new ArrayList<Publisher>();
-		String channelData = (String) super.get(id);
+	public Channel getChannel(String aId) {
+		return json2Channel((String) super.get(aId));
+	}
+
+	private Channel json2Channel(String lJSONStr) {
+		Channel lChannel = null;
 		try {
-			JSONObject channelObject = new JSONObject(channelData);
-			String channelId = channelObject.getString(ID);
-			String channelName = channelObject.getString(NAME);
-			int subscriberCount = channelObject.getInt(SUBSCRIBER_COUNT);
-			boolean privateChannel = channelObject.getBoolean(PRIVATE);
-			boolean systemChannel = channelObject.getBoolean(SYSTEM);
-			String secretKey = channelObject.getString(SECRET_KEY);
-			String accessKey = channelObject.getString(ACCESS_KEY);
-			String owner = channelObject.getString(OWNER);
-			Date createdDate = null; // channelObject.getLong(CREATED_DATE);
-			int stateValue = channelObject.getInt(STATE);
-			Channel.ChannelState state = null;
-			for (Channel.ChannelState ch : Channel.ChannelState.values()) {
-				if (ch.getValue() == stateValue) {
-					state = ch;
+			JSONObject lJSONObj = new JSONObject(lJSONStr);
+			String lChannelId = lJSONObj.getString(ID);
+			String lChannelName = lJSONObj.getString(NAME);
+			boolean lPrivate = lJSONObj.getBoolean(PRIVATE);
+			boolean lSystem = lJSONObj.getBoolean(SYSTEM);
+			String lSecretKey = lJSONObj.getString(SECRET_KEY);
+			String lAccessKey = lJSONObj.getString(ACCESS_KEY);
+			String lOwner = lJSONObj.getString(OWNER);
+			int lStateValue = lJSONObj.getInt(STATE);
+			JSONArray lJSSubscribers = lJSONObj.getJSONArray(SUBSCRIBERS);
+			JSONArray lJSPublishers = lJSONObj.getJSONArray(PUBLISHERS);
+			Channel.ChannelState lState = null;
+			for (Channel.ChannelState lChannelState : Channel.ChannelState.values()) {
+				if (lChannelState.getValue() == lStateValue) {
+					lState = lChannelState;
 					break;
 				}
 			}
 			// construct the channel object
-			channel = new Channel(channelId, channelName, privateChannel, systemChannel, secretKey,
-					accessKey, owner, createdDate, state);
-		} catch (JSONException e) {
-			logger.error("Error parsing json response from the channel store:", e);
+			lChannel = new Channel(lChannelId, lChannelName,
+					lPrivate, lSystem,
+					lAccessKey, lSecretKey,
+					lOwner, lState);
+			List lSubscribers = new FastList<String>();
+			List lPublishers = new FastList<String>();
+			for (int i = 0; i < lJSSubscribers.length(); i++) {
+				lSubscribers.add(lJSSubscribers.getString(i));
+			}
+			for (int i = 0; i < lJSPublishers.length(); i++) {
+				lPublishers.add(lJSPublishers.getString(i));
+			}
+
+			lChannel.setSubscribers(lSubscribers);
+			lChannel.setPublishers(lPublishers);
+		} catch (JSONException lEx) {
+			logger.error("Error parsing JSON response from the channel store:", lEx);
 		}
-		return channel;
+		return lChannel;
 	}
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param aChannel
 	 */
 	@Override
-	public boolean storeChannel(Channel channel) {
-		JSONObject jsonObject = new JSONObject();
+	public boolean storeChannel(Channel aChannel) {
+		JSONObject lJSON = new JSONObject();
 		try {
-			jsonObject.put(ID, channel.getId());
-			jsonObject.put(NAME, channel.getName());
-			jsonObject.put(SUBSCRIBER_COUNT, channel.getSubscriberCount());
-			jsonObject.put(PRIVATE, channel.isPrivate());
-			jsonObject.put(SYSTEM, channel.isSystem());
-			jsonObject.put(SECRET_KEY, channel.getSecretKey());
-			jsonObject.put(ACCESS_KEY, channel.getAccessKey());
-			jsonObject.put(CREATED_DATE, channel.getCreatedDate());
-			jsonObject.put(OWNER, channel.getOwner());
+			lJSON.put(ID, aChannel.getId());
+			lJSON.put(NAME, aChannel.getName());
+			lJSON.put(PRIVATE, aChannel.isPrivate());
+			lJSON.put(SYSTEM, aChannel.isSystem());
+			lJSON.put(SECRET_KEY, aChannel.getSecretKey());
+			lJSON.put(ACCESS_KEY, aChannel.getAccessKey());
+			lJSON.put(OWNER, aChannel.getOwner());
+			lJSON.put(STATE, Channel.ChannelState.STARTED.getValue());
+			JSONArray lSubscribers = new JSONArray(aChannel.getSubscribers());
+			lJSON.put(SUBSCRIBERS, lSubscribers);
+			JSONArray lPublishers = new JSONArray(aChannel.getPublishers());
+			lJSON.put(PUBLISHERS, lPublishers);
 
 			// now save
 			// TODO: Need to think about how to return potential error (Exception?)
-			super.put(channel.getId(), jsonObject);
+			super.put(aChannel.getId(), lJSON.toString());
 			return true;
 		} catch (JSONException e) {
-			logger.error("Error constructing JSON data for the given channel:" + channel.getName(), e);
+			logger.error("Error constructing JSON data for the given channel '"
+					+ aChannel.getName() + "'", e);
 		}
 		return false;
 	}
@@ -161,5 +166,20 @@ public class BaseChannelStore extends JDBCStorage implements ChannelStore {
 	@Override
 	public int getChannelStoreSize() {
 		return size();
+	}
+
+	@Override
+	public Map<String, Channel> getChannels() {
+		// TODO: EhCacheStorage does not yet implement values and entryset! Implement to be more efficient!
+		Set lKeys = keySet();
+		Map lRes = new FastMap<String, Channel>();
+		if (lKeys != null) {
+			for (Object lKey : lKeys) {
+				Object lValue = get((String) lKey);
+				Channel lChannel = json2Channel((String) lValue);
+				lRes.put(lChannel.getId(), lChannel);
+			}
+		}
+		return lRes;
 	}
 }

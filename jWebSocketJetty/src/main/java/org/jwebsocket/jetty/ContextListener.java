@@ -38,7 +38,7 @@ public class ContextListener implements ServletContextListener {
 
 		// get the token server
 		// and and a listener to it (for demo purposes)
-		TokenServer lTS0 = (TokenServer) JWebSocketFactory.getServer("ts0");
+		TokenServer lTS0 = JWebSocketFactory.getTokenServer();
 		if (lTS0 != null) {
 			// and add the sample listener to the server's listener chain
 			lTS0.addListener(new JWebSocketTokenListenerSample());

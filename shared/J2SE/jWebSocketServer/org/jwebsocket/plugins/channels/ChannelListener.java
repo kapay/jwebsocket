@@ -19,7 +19,7 @@ import org.jwebsocket.token.Token;
 
 /**
  * Listener interface for the <tt>Channel</tt>. 
- * @author puran
+ * @author puran, aschulze
  * @version $Id$
  */
 public interface ChannelListener {

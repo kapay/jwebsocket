@@ -15,6 +15,8 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
+import java.util.Map;
+
 /**
  * Channel store interface that defines the operation for store/retrieval of
  * channel data.
@@ -32,6 +34,12 @@ public interface ChannelStore {
 	Channel getChannel(String id);
 
 	/**
+	 * Returns all channels from the data store
+	 * @return the channel object
+	 */
+	Map<String, Channel> getChannels();
+
+	/**
 	 * Store the given channel in the channel store
 	 * @param channel the channel object
 	 * @return {@code true} if insert successful
@@ -40,7 +48,8 @@ public interface ChannelStore {
 
 	/**
 	 * Removes the channel from the channel store based on given id
-	 * @param key the key of the data to remove from the store
+	 *
+	 * @param id
 	 */
 	void removeChannel(String id);
 

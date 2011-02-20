@@ -17,6 +17,7 @@ import org.jwebsocket.instance.JWebSocketInstance;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
+import org.jwebsocket.server.TokenServer;
 
 /**
  * Factory to initialize and start the jWebSocket components
@@ -30,6 +31,7 @@ public class JWebSocketFactory {
 	private static Logger mLog = null;
 	private static WebSocketEngine mEngine = null;
 	private static List<WebSocketServer> mServers = null;
+	private static TokenServer mTokenServer = null;
 
 	public static void start() {
 		start(null);
@@ -240,4 +242,12 @@ public class JWebSocketFactory {
 		}
 		return null;
 	}
+
+	public static TokenServer getTokenServer() {
+		if( mTokenServer == null ) {
+			mTokenServer = (TokenServer)getServer("ts0");
+		}
+		return mTokenServer;
+	}
+
 }

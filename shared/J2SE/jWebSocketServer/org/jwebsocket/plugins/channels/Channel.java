@@ -16,17 +16,19 @@
 package org.jwebsocket.plugins.channels;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javolution.util.FastList;
+import org.jwebsocket.api.WebSocketConnector;
 
 import org.jwebsocket.async.IOFuture;
+import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.security.Right;
 import org.jwebsocket.security.Rights;
 import org.jwebsocket.security.SecurityFactory;
+import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 
 /**
@@ -53,13 +55,13 @@ import org.jwebsocket.token.Token;
  * this channel without the use of <tt>access_key</tt> or irrespective of the
  * roles and rights.
  * 
- * Also <tt>CopyOnWriteArrayList</tt> has been used for the list of subscribers,
+ * Also <tt>FastList</tt> has been used for the list of subscribers,
  * publishers and channel listeners for the concurrent access. Although it is
  * expensive but considering the fact that number of traversal for broadcasting
  * data or callback on listeners on events would be more than insertion and
  * removal.
  * 
- * @author puran
+ * @author puran, aschulze
  * @version $Id$
  */
 public final class Channel implements ChannelLifeCycle {
@@ -70,11 +72,10 @@ public final class Channel implements ChannelLifeCycle {
 	private boolean mIsSystem;
 	private String mSecretKey;
 	private String mAccessKey;
-	private Date mCreatedDate;
 	private String mOwner;
 	private volatile boolean mAuthenticated = false;
-	private List<Subscriber> mSubscribers;
-	private List<Publisher> mPublishers;
+	private List<String> mSubscribers;
+	private List<String> mPublishers;
 	private ChannelState mState = ChannelState.STOPPED;
 	private List<ChannelListener> mChannelListeners;
 
@@ -129,16 +130,15 @@ public final class Channel implements ChannelLifeCycle {
 	 */
 	public Channel(String aId, String aName,
 			boolean aIsPrivate, boolean aIsSystem,
-			String aSecretKey, String aAccessKey, String aOwner,
-			Date aCreatedDate, ChannelState aState) {
+			String aAccessKey, String aSecretKey, String aOwner,
+			ChannelState aState) {
 		this.mId = aId;
 		this.mName = aName;
 		this.mIsPrivate = aIsPrivate;
 		this.mIsSystem = aIsSystem;
-		this.mSecretKey = aSecretKey;
 		this.mAccessKey = aAccessKey;
+		this.mSecretKey = aSecretKey;
 		this.mOwner = aOwner;
-		this.mCreatedDate = aCreatedDate;
 		this.mState = aState;
 	}
 
@@ -201,13 +201,6 @@ public final class Channel implements ChannelLifeCycle {
 	}
 
 	/**
-	 * @return the createdDate
-	 */
-	public Date getCreatedDate() {
-		return mCreatedDate;
-	}
-
-	/**
 	 * @return the owner
 	 */
 	public String getOwner() {
@@ -219,7 +212,7 @@ public final class Channel implements ChannelLifeCycle {
 	 *
 	 * @return the list of subscribers
 	 */
-	public List<Subscriber> getSubscribers() {
+	public List<String> getSubscribers() {
 		return (mSubscribers != null
 				? Collections.unmodifiableList(mSubscribers)
 				: null);
@@ -232,25 +225,24 @@ public final class Channel implements ChannelLifeCycle {
 	 * @param aSubscribers
 	 *            the list of subscribers
 	 */
-	public void setSubscribers(List<Subscriber> aSubscribers) {
+	public void setSubscribers(List<String> aSubscribers) {
 		this.mSubscribers = aSubscribers;
 	}
 
 	/**
 	 * @return the publishers who is currently publishing to this channel
 	 */
-	public List<Publisher> getPublishers() {
-		return Collections.unmodifiableList(mPublishers);
+	public List<String> getPublishers() {
+		return (mPublishers != null
+				? Collections.unmodifiableList(mPublishers)
+				: null);
 	}
 
 	/**
 	 * @param aPublishers
 	 *            the publishers to set
 	 */
-	public void setPublishers(List<Publisher> aPublishers) {
-		if (this.mPublishers == null) {
-			this.mPublishers = new CopyOnWriteArrayList<Publisher>();
-		}
+	public void setPublishers(List<String> aPublishers) {
 		this.mPublishers = aPublishers;
 	}
 
@@ -260,11 +252,23 @@ public final class Channel implements ChannelLifeCycle {
 	 * @param aPublisher
 	 *            the publisher to add
 	 */
-	public void addPublisher(Publisher aPublisher) {
+	public void addPublisher(String aPublisher) {
 		if (this.mPublishers == null) {
-			this.mPublishers = new CopyOnWriteArrayList<Publisher>();
+			this.mPublishers = new FastList<String>();
 		}
 		this.mPublishers.add(aPublisher);
+	}
+
+	/**
+	 * Removes a publisher from the list of publishers.
+	 *
+	 * @param aPublisher
+	 *            the publisher to add
+	 */
+	public void removePublisher(String aPublisher) {
+		if (this.mPublishers == null) {
+			this.mPublishers.remove(aPublisher);
+		}
 	}
 
 	/**
@@ -274,28 +278,27 @@ public final class Channel implements ChannelLifeCycle {
 	 *            the subscriber which wants to subscribe
 	 * @param aChannelManager
 	 */
-	public void subscribe(Subscriber aSubscriber, ChannelManager aChannelManager) {
+	public void subscribe(String aSubscriber) {
 		// create new subscribers if needed
 		if (this.mSubscribers == null) {
-			this.mSubscribers = new CopyOnWriteArrayList<Subscriber>();
+			this.mSubscribers = new FastList<String>();
 		}
 		if (!mSubscribers.contains(aSubscriber)) {
 			mSubscribers.add(aSubscriber);
-			aSubscriber.addChannel(this.getId());
-
 			// persist the subscriber
-			aChannelManager.storeSubscriber(aSubscriber);
+			/*
 			if (mChannelListeners != null) {
-				for (ChannelListener lListener : mChannelListeners) {
-					try {
-						lListener.subscribed(this, aSubscriber);
-					} catch (Exception es) {
-						// trap for any exception so that if any of the
-						// listener implementation fails or throws exception
-						// we continue with others.
-					}
-				}
+			for (ChannelListener lListener : mChannelListeners) {
+			try {
+			lListener.subscribed(this, aSubscriber);
+			} catch (Exception es) {
+			// trap for any exception so that if any of the
+			// listener implementation fails or throws exception
+			// we continue with others.
 			}
+			}
+			}
+			 */
 		}
 	}
 
@@ -307,25 +310,19 @@ public final class Channel implements ChannelLifeCycle {
 	 * @param aChannelManager
 	 *            the channel manager
 	 */
-	public void unsubscribe(Subscriber aSubscriber, ChannelManager aChannelManager) {
+	public void unsubscribe(String aSubscriber) {
 		if (this.mSubscribers == null) {
 			return;
 		}
 		if (mSubscribers.contains(aSubscriber)) {
 			mSubscribers.remove(aSubscriber);
-			// remove channel from this subscriber (client)
-			aSubscriber.removeChannel(this.getId());
-			if (aSubscriber.getChannels().size() <= 0) {
-				aChannelManager.removeSubscriber(aSubscriber);
-			} else {
-				// TODO: upate persistent storage!
-				aChannelManager.storeSubscriber(aSubscriber);
-			}
+			/*
 			if (mChannelListeners != null) {
-				for (ChannelListener listener : mChannelListeners) {
-					listener.unsubscribed(this, aSubscriber);
-				}
+			for (ChannelListener listener : mChannelListeners) {
+			listener.unsubscribed(this, aSubscriber);
 			}
+			}
+			 */
 		}
 	}
 
@@ -363,23 +360,37 @@ public final class Channel implements ChannelLifeCycle {
 	 * @param aToken
 	 *            the token data for the subscribers
 	 */
-	public void broadcastToken(final Token aToken) {
-		// Added by Alex: If no subscribers exist do nothing!
+	public void broadcastTokenAsync(final Token aToken) {
+		// If no subscribers exist do nothing!
 		if (mSubscribers != null && mSubscribers.size() > 0) {
-			ExecutorService executor = Executors.newCachedThreadPool();
-			for (final Subscriber subscriber : mSubscribers) {
-				executor.submit(new Runnable() {
+			ExecutorService lExecutor = Executors.newCachedThreadPool();
+			for (final String lSubscriber : mSubscribers) {
+				lExecutor.submit(new Runnable() {
 
 					@Override
 					public void run() {
-						subscriber.sendTokenAsync(aToken);
+						TokenServer lTS = JWebSocketFactory.getTokenServer();
+						WebSocketConnector lConnector = lTS.getConnector(lSubscriber);
+						lTS.sendTokenAsync(lConnector, aToken);
 					}
 				});
 			}
 			try {
-				executor.awaitTermination(1, TimeUnit.SECONDS);
+				lExecutor.awaitTermination(1, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
+			}
+		}
+	}
+
+	public void broadcastToken(final Token aToken) {
+		// If no subscribers exist do nothing!
+		// TODO: synchronize mSubScribers!
+		if (mSubscribers != null && mSubscribers.size() > 0) {
+			TokenServer lTS = JWebSocketFactory.getTokenServer();
+			for (final String lSubscriber : mSubscribers) {
+				WebSocketConnector lConnector = lTS.getConnector(lSubscriber);
+				lTS.sendToken(lConnector, aToken);
 			}
 		}
 	}
@@ -401,7 +412,7 @@ public final class Channel implements ChannelLifeCycle {
 	 */
 	public void registerListener(ChannelListener aChannelListener) {
 		if (mChannelListeners == null) {
-			mChannelListeners = new CopyOnWriteArrayList<ChannelListener>();
+			mChannelListeners = new FastList<ChannelListener>();
 		}
 		mChannelListeners.add(aChannelListener);
 	}
@@ -442,7 +453,7 @@ public final class Channel implements ChannelLifeCycle {
 					+ "' for invalid user login '" + aUser + "'");
 		} else {
 			Rights lRights = SecurityFactory.getUserRights(aUser);
-			Right lRight = lRights.get("org.jwebsocket.plugins.channel.start");
+			Right lRight = lRights.get("org.jwebsocket.plugins.channels.start");
 			if (lRight == null) {
 				throw new ChannelLifeCycleException(
 						"User '" + aUser
@@ -482,14 +493,17 @@ public final class Channel implements ChannelLifeCycle {
 	@Override
 	public void suspend(final String aUser) throws ChannelLifeCycleException {
 		if (this.mState == ChannelState.SUSPENDED) {
-			throw new ChannelLifeCycleException("Channel:[" + this.getName() + "] is already suspended");
+			throw new ChannelLifeCycleException("Channel '"
+					+ this.getName()
+					+ "' is already suspended");
 		}
 		if (!SecurityFactory.isValidUser(aUser) && !mAuthenticated) {
-			throw new ChannelLifeCycleException("Cannot suspend the channel:[" + this.getName()
-					+ "] for invalid user login [" + aUser + "]");
+			throw new ChannelLifeCycleException("Cannot suspend the channel '"
+					+ this.getName()
+					+ "'] for invalid user login '" + aUser + "'");
 		} else {
 			Rights rights = SecurityFactory.getUserRights(aUser);
-			Right right = rights.get("org.jwebsocket.plugins.channel.suspend");
+			Right right = rights.get("org.jwebsocket.plugins.channels.suspend");
 			if (right == null) {
 				throw new ChannelLifeCycleException(
 						"User '" + aUser
@@ -537,7 +551,7 @@ public final class Channel implements ChannelLifeCycle {
 					+ "' for invalid user login '" + aUser + "'");
 		} else {
 			Rights rights = SecurityFactory.getUserRights(aUser);
-			Right right = rights.get("org.jwebsocket.plugins.channel.stop");
+			Right right = rights.get("org.jwebsocket.plugins.channels.stop");
 			if (right == null) {
 				throw new ChannelLifeCycleException(
 						"User '" + aUser

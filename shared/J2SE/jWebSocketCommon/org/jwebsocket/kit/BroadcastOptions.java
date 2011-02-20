@@ -29,9 +29,14 @@ package org.jwebsocket.kit;
  */
 public class BroadcastOptions {
 
-    private boolean senderIncluded = false;
-    private boolean responseRequested = false;
-    private boolean async = false;
+	public static final boolean SENDER_INCLUDED = true;
+	public static final boolean SENDER_EXCLUDED = false;
+	public static final boolean RESPONSE_REQUESTED = true;
+	public static final boolean RESPONSE_IGNORED = false;
+
+    private boolean mSenderIncluded = false;
+    private boolean mRresponseRequested = false;
+    private boolean mAsync = false;
 
     /**
      * Creates a new <tt>BroadcastOptions</tt> instance. The caller can decide
@@ -53,12 +58,12 @@ public class BroadcastOptions {
      * 
      * @param aSenderIncluded {@code true} if to include sender, {@code false} otherwise
      * @param aResponseRequested {@code true} if to response is requested, {@code false} otherwise
-     * @param async {@code true} if to broadcast asynchronously
+     * @param aAsync {@code true} if to broadcast asynchronously
      */
-    public BroadcastOptions(boolean aSenderIncluded, boolean aResponseRequested, boolean async) {
-        senderIncluded = aSenderIncluded;
-        responseRequested = aResponseRequested;
-        this.async = async;
+    public BroadcastOptions(boolean aSenderIncluded, boolean aResponseRequested, boolean aAsync) {
+        mSenderIncluded = aSenderIncluded;
+        mRresponseRequested = aResponseRequested;
+        mAsync = aAsync;
     }
 
     /**
@@ -67,7 +72,7 @@ public class BroadcastOptions {
      * @return senderIncluded Is the sender included in the pending broadcast?
      */
     public boolean isSenderIncluded() {
-        return senderIncluded;
+        return mSenderIncluded;
     }
 
     /**
@@ -76,7 +81,7 @@ public class BroadcastOptions {
      * @param aSenderIncluded Sender supposed to be included in the pending broadcast?
      */
     public void setSenderIncluded(boolean aSenderIncluded) {
-        this.senderIncluded = aSenderIncluded;
+        mSenderIncluded = aSenderIncluded;
     }
 
     /**
@@ -85,7 +90,7 @@ public class BroadcastOptions {
      * @return responseRequested Server supposed to send a response?
      */
     public boolean isResponseRequested() {
-        return responseRequested;
+        return mRresponseRequested;
     }
 
     /**
@@ -94,21 +99,21 @@ public class BroadcastOptions {
      * @param responseRequested Server supposed to send a response?
      */
     public void setResponseRequested(boolean responseRequested) {
-        this.responseRequested = responseRequested;
+        mRresponseRequested = responseRequested;
     }
 
     /**
      * @return the async
      */
     public boolean isAsync() {
-        return async;
+        return mAsync;
     }
 
     /**
-     * @param async the async to set
+     * @param aAsync the async to set
      */
-    public void setAsync(boolean async) {
-        this.async = async;
+    public void setAsync(boolean aAsync) {
+        mAsync = aAsync;
     }
 
 }
