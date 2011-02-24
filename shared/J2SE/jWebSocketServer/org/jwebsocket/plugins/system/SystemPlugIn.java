@@ -448,6 +448,10 @@ public class SystemPlugIn extends TokenPlugIn {
 						+ "') from '" + aConnector
 						+ "' to " + lTargetId + "...");
 			}
+			// don't distribute session id of the client here!
+			// this would open a security hole!
+			aToken.remove("usid");
+
 			aToken.setString("sourceId", aConnector.getId());
 			sendToken(aConnector, lTargetConnector, aToken);
 		} else {
@@ -478,11 +482,16 @@ public class SystemPlugIn extends TokenPlugIn {
 		 * if (getUsername(aConnector) != null) {
 		 */
 		aToken.setString("sourceId", aConnector.getId());
-		// don't distribute session id here!
-		aToken.remove("usid");
 		// keep senderIncluded beging false as default, apps rely on this!
 		Boolean lIsSenderIncluded = aToken.getBoolean("senderIncluded", false);
 		Boolean lIsResponseRequested = aToken.getBoolean("responseRequested", true);
+
+		// don't distribute session id here!
+		aToken.remove("usid");
+		// remove further non target related fields
+		aToken.remove("senderIncluded");
+		aToken.remove("responseRequested");
+
 		// broadcast the token
 		broadcastToken(aConnector, aToken,
 				new BroadcastOptions(lIsSenderIncluded, lIsResponseRequested));

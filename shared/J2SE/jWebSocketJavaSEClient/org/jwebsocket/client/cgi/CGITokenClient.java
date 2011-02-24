@@ -30,8 +30,6 @@ public class CGITokenClient extends BaseTokenClient {
 
     private final static char START_FRAME = 0x02; // ASCII STX
     private final static char END_FRAME = 0x03; // ASCII ETX
-    // used from JWebSocketCommonConstants from v0.10
-    // private final static int MAX_FRAMESIZE = 16384;
     private boolean mIsRunning = false;
     private Thread mInboundThread;
     private InboundProcess mInboundProcess;

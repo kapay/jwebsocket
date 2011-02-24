@@ -30,8 +30,6 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class CGIClient extends BaseWebSocket {
 
-    // used from JWebSocketCommonConstants from v0.10
-    // private final static int MAX_FRAMESIZE = 16384;
     private boolean isRunning = false;
     private Thread inboundThread;
     private InboundProcess inboundProcess;

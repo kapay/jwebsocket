@@ -210,7 +210,7 @@ jws.FileSystemPlugIn = {
 	},
 
 	//:author:*:Unni Vemanchery Mana:2011-02-17:Incorporated image processing capabilities.
-	//:m:*:processFileSelect
+	//:m:*:fileLoadLocal
 	//:d:en:This is a call back method which gets the number of files selected from the user.
 	//:d:en:Construts a FileReader object that is specified in HTML 5 specification
 	//:d:en:Finally calls its readAsDataURL with the filename obeject and reads the
@@ -280,7 +280,7 @@ jws.FileSystemPlugIn = {
 						lThis.OnLocalFileRead( lToken );
 					}
 				}
-			})( lFile, lFile.fileSize );
+			})( lFile );
 
 			// if any error appears fire OnLocalFileError event
 			lReader.onerror = (function( aFile ) {
