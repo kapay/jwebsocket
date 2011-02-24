@@ -65,6 +65,11 @@
 						jws.$("simgStatus").src = "../../images/connected.png";
 					},
 
+					// OnWelcome callback
+					OnWelcome: function( aEvent ) {
+						eTarget.value = aEvent.sourceId;
+					},
+
 					// OnMessage callback
 					OnMessage: function( aEvent ) {
 						log( "<font style='color:#888'>jWebSocket message received: '" + aEvent.data + "'</font>" );
@@ -158,32 +163,54 @@
 				log( lHTML );
 			}
 
+			function onLocalFileLoadedObs( aToken ) {
+				log( "Successfully read file <b>" + aToken.fileName + "</b> (" + aToken.fileSize + " bytes) from local file." );
+				// parse action option after a file has been successfully loaded
+				if( aToken.action ) {
+					// check upload action
+					if( aToken.action == "upload" ) {
+						var lRes = lWSC.fileSave(
+							aToken.fileName,
+							aToken.data,
+							{	encoding: "base64",
+								suppressEncoder: true,
+								scope: "public"
+							}
+						);
+						log( lWSC.resultToString( lRes ) );
+					}
+				}
+			}
+
+			function onLocalFileErrorObs( aToken ) {
+				log( "Error " + aToken.code + " reading local file: " + aToken.msg );
+			}
+
+			function loadFile() {
+				log( "loading local file via HTML 5 file..." );
+				// OnLocalFileLoaded refers to onLocalFileLoadedObs
+				var lRes =
+					lWSC.fileLoadLocal( jws.$( "sinpUpload" ), {
+						// no action planned for this file other than to show it
+						// action: null
+						// no additional arguments required
+						// args: null
+					});
+				log( lWSC.resultToString( lRes ) );
+			}
+
 			function uploadFile() {
-				log( "Uploading file..." );
-				if( undefined == window.FileReader ) {
-					log( "This browser does unfortunately not (yet) support the HTML5 FileReader Object." );
-					return;
-				}
-				var lReader = new FileReader();
-				var lFile = jws.$( "sinpUpload" ).files[ 0 ];
-				if( !lWSC.isConnected() ) {
-					log( "Not connected" );
-				} else if( lFile != null ) {
-					lReader.onloadend = function() {
-						lWSC.fileSave(
-						lFile.fileName,
-						lReader.result,
-						{	encoding: "base64",
-							// lReader.result is already base64 encoded!
-							suppressEncoder: true,
-							scope: "public"
-						}
-					);
-					};
-					lReader.readAsDataURL(lFile);
-				} else {
-					log( "No file selected" );
-				}
+				log( "uploading local file to the jWebSocket server..." );
+				// OnLocalFileLoaded refers to onLocalFileLoadedObs
+				var lRes =
+					lWSC.fileLoadLocal( jws.$( "sinpUpload" ), {
+						// add optional action option to notify
+						// listener to upload the file to the server
+						action: "upload"
+						// no additional arguments required
+						// args: null
+					});
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function sendFile() {
@@ -220,7 +247,9 @@
 					lWSC = new jws.jWebSocketJSONClient();
 					lWSC.setFileSystemCallbacks({
 						OnFileSaved: onFileSavedObs,
-						OnFileSent: onFileSentObs
+						OnFileSent: onFileSentObs,
+						OnLocalFileRead: onLocalFileLoadedObs,
+						OnLocalFileError: onLocalFileErrorObs
 					});
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
@@ -287,12 +316,16 @@
 		<div class="sdivContainer">
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
-					<td class="stdDlg" colspan ="6"><input class="sbtnDlg" id="sinpUpload" type="file" style="width:100%"></td>
+					<td class="stdDlg" colspan ="6"><input class="sbtnDlg" id="sinpUpload" type="file" multiple="multiple" style="width:100%"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnConnect" type="button" value="Connect" onclick="connect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnDisconnect" type="button" value="Disconnect" onclick="disconnect();"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLoad" type="button" value="Load" onclick="loadFile();"
+							   title="Loads one or more files via the HTML5 File API and displays it/them in the log.">
+					</td>
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnUpload" type="button" value="Upload" onclick="uploadFile();"
 							   title="Uploads a file to the server and optionally notifies clients about URL, but does not pass the file itself.">

@@ -25,6 +25,19 @@ jws.FileSystemPlugIn = {
 	// if namespace is changed update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.filesystem",
 
+	NOT_FOUND_ERR: 1,
+	SECURITY_ERR: 2,
+	ABORT_ERR: 3,
+	NOT_READABLE_ERR: 4,
+	ENCODING_ERR: 5,
+	NO_MODIFICATION_ALLOWED_ERR: 6,
+	INVALID_STATE_ERR: 7,
+	SYNTAX_ERR: 8,
+	INVALID_MODIFICATION_ERR: 9,
+	QUOTA_EXCEEDED_ERR: 10,
+	TYPE_MISMATCH_ERR: 11,
+	PATH_EXISTS_ERR: 12,
+
 	processToken: function( aToken ) {
 		// check if namespace matches
 		if( aToken.ns == jws.FileSystemPlugIn.NS ) {
@@ -141,6 +154,170 @@ jws.FileSystemPlugIn = {
 		return lRes;
 	},
 
+	fileGetErrorMsg: function( aCode ) {
+		var lMsg = "unkown";
+		switch( aCode ) {
+			case jws.FileSystemPlugIn.NOT_FOUND_ERR: {
+				lMsg = "NOT_FOUND_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.SECURITY_ERR: {
+				lMsg = "SECURITY_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.ABORT_ERR: {
+				lMsg = "ABORT_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.NOT_READABLE_ERR: {
+				lMsg = "NOT_READABLE_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.ENCODING_ERR: {
+				lMsg = "ENCODING_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.NO_MODIFICATION_ALLOWED_ERR: {
+				lMsg = "NO_MODIFICATION_ALLOWED_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.INVALID_STATE_ERR: {
+				lMsg = "INVALID_STATE_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.SYNTAX_ERR: {
+				lMsg = "SYNTAX_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.INVALID_MODIFICATION_ERR: {
+				lMsg = "INVALID_MODIFICATION_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.QUOTA_EXCEEDED_ERR: {
+				lMsg = "QUOTA_EXCEEDED_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.TYPE_MISMATCH_ERR: {
+				lMsg = "TYPE_MISMATCH_ERR";
+				break;
+			}
+			case jws.FileSystemPlugIn.PATH_EXISTS_ERR: {
+				lMsg = "PATH_EXISTS_ERR";
+				break;
+			}
+		}
+		return lMsg;
+	},
+
+	//:author:*:Unni Vemanchery Mana:2011-02-17:Incorporated image processing capabilities.
+	//:m:*:processFileSelect
+	//:d:en:This is a call back method which gets the number of files selected from the user.
+	//:d:en:Construts a FileReader object that is specified in HTML 5 specification
+	//:d:en:Finally calls its readAsDataURL with the filename obeject and reads the
+	//:d:en:file content in Base64 encoded string.
+	//:a:en::evt:Object:File Selection event object.
+	//:r:*:::void:none
+	fileLoadLocal: function( aDOMElem, aOptions ) {
+		// to locally load a file no check for websocket connection is required
+		var lRes = {
+			code: 0,
+			msg: "ok"
+		};
+		// check if the file upload element exists at all
+		if( !aDOMElem || !aDOMElem.files ) {
+			// TODO: Think about error message here!
+			return {
+				code: -1,
+				msg: "No input file element passed."
+			};
+		}
+		// create options if not passed (eg. encoding)
+		if( !aOptions ) {
+			aOptions = {};
+		}
+		// if no encoding was passed and a default one
+		if( !aOptions.encoding ) {
+			aOptions.encoding = "base64";
+		}
+		// iterate through list of files
+		var lFileList = aDOMElem.files;
+		if( !lFileList || !lFileList.length ) {
+			return {
+				code: -1,
+				msg: "No files selected."
+			};
+		}
+		for( var lIdx = 0, lCnt = lFileList.length; lIdx < lCnt; lIdx++ ) {
+			var lFile = lFileList[ lIdx ]
+			var lReader = new FileReader();
+			var lThis = this;
+
+			// if file is completely loaded, fire OnLocalFileRead event
+			lReader.onload = (function( aFile ) {
+				return function( aEvent ) {
+					if( lThis.OnLocalFileRead ) {
+						var lToken = {
+							encoding: aOptions.encoding,
+							fileName : aFile.fileName,
+							fileSize: aFile.fileSize,
+							type: aFile.type,
+							lastModified: aFile.lastModifiedDate,
+							data: aEvent.target.result
+						};
+						if( aOptions.args ) {
+							lToken.args = aOptions.args;
+						}
+						if( aOptions.action ) {
+							lToken.action = aOptions.action;
+						}
+						lThis.OnLocalFileRead( lToken );
+					}
+				}
+			})( lFile, lFile.fileSize );
+
+			// if any error appears fire OnLocalFileError event
+			lReader.onerror = (function( aFile ) {
+				return function( aEvent ) {
+					if( lThis.OnLocalFileError ) {
+						// TODO: force error case and fill token
+						var lCode = aEvent.target.error.code;
+						var lToken = {
+							code: lCode,
+							msg: lThis.fileGetErrorMsg( lCode )
+						};
+						if( aOptions.args ) {
+							lToken.args = aOptions.args;
+						}
+						if( aOptions.action ) {
+							lToken.action = aOptions.action;
+						}
+						lThis.OnLocalFileError( lToken );
+					}
+				}
+			})( lFile );
+
+			// and finally read the file(s)
+			try{
+				lReader.readAsDataURL( lFile );
+			} catch( lEx ) {
+				if( lThis.OnLocalFileError ) {
+					var lToken = {
+						code: -1,
+						msg: lEx.message
+					};
+					if( aOptions.args ) {
+						lToken.args = aOptions.args;
+					}
+					if( aOptions.action ) {
+						lToken.action = aOptions.action;
+					}
+					lThis.OnLocalFileError( lToken );
+				}
+			}
+		}
+		return lRes;
+	},
+
 	setFileSystemCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
@@ -156,6 +333,13 @@ jws.FileSystemPlugIn = {
 		}
 		if( aListeners.OnFileError !== undefined ) {
 			this.OnFileError = aListeners.OnFileError;
+		}
+
+		if( aListeners.OnLocalFileRead !== undefined ) {
+			this.OnLocalFileRead = aListeners.OnLocalFileRead;
+		}
+		if( aListeners.OnLocalFileError !== undefined ) {
+			this.OnLocalFileError = aListeners.OnLocalFileError;
 		}
 	}
 
