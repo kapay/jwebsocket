@@ -140,9 +140,30 @@
 				}
 				log( lHTML );
 			}
-			
+
+			function onLocalFileLoadedObs( aToken ) {
+				log( "Uploading file " + aToken.filename + "..." );
+				/*
+				lWSC.fileSave(
+					aToken.filename,
+					aToken.data,
+					{	encoding: "base64",
+						suppressEncoder: true,
+						scope: "public"
+					}
+				);
+				 */
+			}
+
 			function uploadFile() {
 				log( "Uploading file..." );
+				// OnLocalFileLoaded refers to onLocalFileLoadedObs
+				lWSC.loadLocalFiles( jws.$( "sinpUpload" ), {
+					userInfo: "My info to be passed to event handler"
+				});
+				/*
+				log( "Uploading file..." );
+
 				if( undefined == window.FileReader ) {
 					log( "This browser does unfortunately not (yet) support the HTML5 FileReader Object." );
 					return;
@@ -167,6 +188,7 @@
 				} else {
 					log( "No file selected" );
 				}
+				 */
 			}
 
 			function initPage() {
@@ -175,7 +197,8 @@
 				if( jws.browserSupportsWebSockets() ) {
 					lWSC = new jws.jWebSocketJSONClient();
 					lWSC.setFileSystemCallbacks({
-						OnFileSaved: onFileSavedObs
+						OnFileSaved: onFileSavedObs,
+						OnLocalFileLoaded: onLocalFileLoadedObs
 					});
 				} else {
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
@@ -237,7 +260,7 @@
 				</tr>
 			</table>
 		</div>
-<!--
+		<!--
 		<p>To start chatting, select a video camera:
 			<device style="border:1px solid green;"  type="media" onchange="update(this.data);">
 			</device>
@@ -247,7 +270,6 @@
 			function update(stream) {
 				document.getElementsByTagName('video')[0].src = stream.url;
 		}
--->
-</script>
-</body>
+		-->
+	</body>
 </html>

@@ -116,9 +116,56 @@ jws.FileSystemPlugIn = {
 		return lRes;
 	},
 
+	//:author:*:Unni Vemanchery Mana:2011-02-17:Incorporated image processing capabilities.
+	//:m:*:processFileSelect
+	//:d:en:This is a call back method which gets the number of files selected from the user.
+	//:d:en:Construts a FileReader object that is specified in HTML 5 specification
+	//:d:en:Finally calls its readAsDataURL with the filename obeject and reads the
+	//:d:en:file content in Base64 encoded string.
+	//:a:en::evt:Object:File Selection event object.
+	//:r:*:::void:none
+	loadLocalFiles: function( aDOMElem, aOptions ) {
+		// create options if not passed (eg. encoding)
+		if( !aOptions ) {
+			aOptions = {};
+		}
+		if( !aOptions.encoding ) {
+			aOptions.encoding = "base64";
+		}
+		if( !aDOMElem || !aDOMElem.files ) {
+			// TODO: Think about error message here!
+			return;
+		}
+		var lFileList = aDOMElem.files;
+		for( var lIdx = 0, lFile; lFile = lFileList[ lIdx ]; lIdx++ ) {
+			var lReader = new FileReader();
+			lReader.onload = function( aEvent ) {
+				if( this.OnLocalFileLoaded ) {
+					var lToken = {
+						encoding: aOptions.encoding,
+						filename : lFile.filename,
+						data: aEvent.target.result
+					};
+					if( aOptions.userInfo ) {
+						lToken.userInfo = aOptions.userInfo;
+					}
+					this.OnLocalFileLoaded( lToken );
+				}
+			};
+			// and finally read the file(s)
+			lReader.readAsDataURL( lFile );
+		}
+	},
+
 	setFileSystemCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
+		}
+		if( aListeners.OnLocalFileRead !== undefined ) {
+			this.OnLocalFileRead = aListeners.OnLocalFileRead;
+		}
+		if( aListeners.OnLocalFileError !== undefined ) {
+			this.OnLocalFileError = aListeners.OnLocalFileError;
 		}
 		if( aListeners.OnFileLoaded !== undefined ) {
 			this.OnFileLoaded = aListeners.OnFileLoaded;
