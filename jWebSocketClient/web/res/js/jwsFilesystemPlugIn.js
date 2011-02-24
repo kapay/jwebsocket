@@ -231,6 +231,13 @@ jws.FileSystemPlugIn = {
 				msg: "No input file element passed."
 			};
 		}
+		// check if the browser already supports the HTML5 File API
+		if( undefined == window.FileReader ) {
+			return {
+				code: -1,
+				msg: "Your browser does not yet support the HTML5 File API."
+			};
+		}
 		// create options if not passed (eg. encoding)
 		if( !aOptions ) {
 			aOptions = {};

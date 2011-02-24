@@ -166,15 +166,27 @@
 			function onLocalFileLoadedObs( aToken ) {
 				log( "Successfully read file <b>" + aToken.fileName + "</b> (" + aToken.fileSize + " bytes) from local file." );
 				// parse action option after a file has been successfully loaded
+
 				if( aToken.action ) {
+					var lRes;
 					// check upload action
 					if( aToken.action == "upload" ) {
-						var lRes = lWSC.fileSave(
+						lRes = lWSC.fileSave(
 							aToken.fileName,
 							aToken.data,
 							{	encoding: "base64",
 								suppressEncoder: true,
 								scope: "public"
+							});
+						log( lWSC.resultToString( lRes ) );
+					} else if( aToken.action == "send" ) {
+						lRes = lWSC.fileSend(
+							// target was passed as optional argument
+							// and thus can be used here
+							aToken.args.target,
+							aToken.fileName,
+							aToken.data,
+							{	encoding: "base64"
 							}
 						);
 						log( lWSC.resultToString( lRes ) );
@@ -214,29 +226,19 @@
 			}
 
 			function sendFile() {
-				log( "Sending file..." );
-				if( undefined == window.FileReader ) {
-					log( "This browser does unfortunately not (yet) support the HTML5 FileReader Object." );
-					return;
-				}
-				var lReader = new FileReader();
-				var lFile = jws.$( "sinpUpload" ).files[ 0 ];
-				if( !lWSC.isConnected() ) {
-					log( "Not connected" );
-				} else if( lFile != null ) {
-					lReader.onloadend = function() {
-						lWSC.fileSend(
-						eTarget.value,
-						lFile.fileName,
-						lReader.result,
-						{	encoding: "base64"
+				log( "Sending file to given target '" + eTarget.value + "'..." );
+				// OnLocalFileLoaded refers to onLocalFileLoadedObs
+				var lRes =
+					lWSC.fileLoadLocal( jws.$( "sinpUpload" ), {
+						// add optional action option to notify
+						// listener to upload the file to the server
+						action: "send",
+						// pass target as argument
+						args: {
+							target: eTarget.value
 						}
-					);
-					};
-					lReader.readAsDataURL(lFile);
-				} else {
-					log( "No file selected" );
-				}
+					});
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function initPage() {
@@ -277,7 +279,7 @@
 					video.src = videoStream.url;
 					video.play();
 				};
-				*/
+				 */
 			}
 
 			function exitPage() {
@@ -360,5 +362,5 @@
 		}
 		</script>
 	-->
-</body>
+	</body>
 </html>
