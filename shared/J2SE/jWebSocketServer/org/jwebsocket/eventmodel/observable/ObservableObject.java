@@ -34,7 +34,7 @@ import org.jwebsocket.eventmodel.util.CommonUtil;
  */
 public abstract class ObservableObject implements IObservable {
 
-	private Integer maxExecutionTime = 60;
+	private Integer maxExecutionTime = 1; //SECONDS
 	private Set<Class<? extends Event>> events = new FastSet<Class<? extends Event>>();
 	private Map<Class<? extends Event>, Set<IListener>> listeners = new FastMap<Class<? extends Event>, Set<IListener>>();
 
@@ -110,7 +110,7 @@ public abstract class ObservableObject implements IObservable {
 			aResponseEvent.setId(aEvent.getId());
 		}
 
-		long initTime = System.currentTimeMillis();
+		long initTime = System.nanoTime();
 
 		if (getListeners().containsKey(aEvent.getClass()) && null != getListeners().get(aEvent.getClass())) {
 			if (getListeners().get(aEvent.getClass()).size() > 0) {
@@ -132,11 +132,11 @@ public abstract class ObservableObject implements IObservable {
 			}
 		}
 
-		aResponseEvent.setElapsedTime(System.currentTimeMillis() - initTime);
+		aResponseEvent.setElapsedTime((System.nanoTime() - initTime));
 		return aResponseEvent;
 	}
 
-	public static void callProcessEvent(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) throws Exception {
+	public static void callProcessEvent(IListener aListener, Event aEvent, ResponseEvent aResponseEvent) throws Exception{
 		Class<? extends Event> aEventClass = aEvent.getClass();
 		Class<? extends IListener> aListenerClass = aListener.getClass();
 		Class<? extends ResponseEvent> aResponseClass = aResponseEvent.getClass();
@@ -147,8 +147,8 @@ public abstract class ObservableObject implements IObservable {
 		} catch (NoSuchMethodException ex) {
 			//Calling the base method
 			aListener.processEvent(aEvent, aResponseEvent);
-		} catch (InvocationTargetException ex) {
-			throw (Exception) ex.getTargetException();
+		} catch (InvocationTargetException ex){
+			throw (Exception)ex.getTargetException();
 		}
 	}
 
@@ -162,7 +162,7 @@ public abstract class ObservableObject implements IObservable {
 			aResponseEvent.setId(aEvent.getId());
 		}
 
-		long initTime = System.currentTimeMillis();
+		long initTime = System.nanoTime();
 
 		if (getListeners().containsKey(aEvent.getClass()) && null != getListeners().get(aEvent.getClass())) {
 			if (getListeners().get(aEvent.getClass()).size() > 0) {
@@ -178,7 +178,7 @@ public abstract class ObservableObject implements IObservable {
 			}
 		}
 
-		aResponseEvent.setElapsedTime(System.currentTimeMillis() - initTime);
+		aResponseEvent.setElapsedTime(System.nanoTime() - initTime);
 		return aResponseEvent;
 	}
 

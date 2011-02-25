@@ -13,31 +13,36 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.event.test;
+package org.jwebsocket.eventmodel.s2c;
 
-import org.jwebsocket.eventmodel.annotation.ImportFromToken;
-import org.jwebsocket.eventmodel.event.WebSocketEvent;
+import java.util.Collection;
+import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.eventmodel.event.S2CEvent;
+import org.jwebsocket.eventmodel.s2c.OnResponse;
+import org.jwebsocket.eventmodel.s2c.S2CEventNotificationHandler;
+import org.jwebsocket.plugins.events.EventsPlugIn;
 
 /**
  *
  * @author kyberneees
  */
-public class GetHashCode extends WebSocketEvent {
+public class S2CEventNotification {
 
-	@ImportFromToken
-	private String text;
+	private S2CEvent event;
 
-	/**
-	 * @return the text
-	 */
-	public String getText() {
-		return text;
+	public S2CEventNotification(String plugInId, S2CEvent aEvent) {
+		aEvent.setPlugInId(plugInId);
+		event = aEvent;
 	}
 
-	/**
-	 * @param text the text to set
-	 */
-	public void setText(String text) {
-		this.text = text;
+	public void to(WebSocketConnector aConnector, OnResponse aOnResponse) {
+		((S2CEventNotificationHandler)EventsPlugIn.getBeanFactory().
+				getBean("S2CEventNotificationHandler")).send(event, aConnector, aOnResponse);
+	}
+
+	public void to(Collection<WebSocketConnector> aConnectorCollection, OnResponse aOnResponse) {
+		for (WebSocketConnector c : aConnectorCollection) {
+			to(c, aOnResponse);
+		}
 	}
 }

@@ -45,21 +45,22 @@ public class AuthPlugIn extends EventModelPlugIn {
 	 * @param aResponseEvent
 	 */
 	public void processEvent(Logon aEvent, WebSocketResponseEvent aResponseEvent) {
-		String username = aEvent.getArgs().getString("username");
-		String password = aEvent.getArgs().getString("password");
-
-		Authentication request = new UsernamePasswordAuthenticationToken(username, password);
+		//Login process
+		Authentication request = new UsernamePasswordAuthenticationToken(aEvent.getUsername(), aEvent.getPassword());
 		Authentication result = getAm().authenticate(request);
 		SecurityContextHolder.getContext().setAuthentication(result);
 
+		//Setting the username
+		aEvent.getConnector().setUsername(aEvent.getUsername());
+
 		//Adding roles in the response
 		FastList<String> roles = new FastList<String>();
-		for (GrantedAuthority ga: SecurityContextHolder.getContext().getAuthentication().getAuthorities()){
+		for (GrantedAuthority ga : SecurityContextHolder.getContext().getAuthentication().getAuthorities()) {
 			roles.add(ga.getAuthority());
 		}
-		aResponseEvent.getArgs().setString("username", username);
+		aResponseEvent.getArgs().setString("username", aEvent.getUsername());
 		aResponseEvent.getArgs().setList("roles", roles);
-		aResponseEvent.setMessage(">> Login process has finished successfully. Username: '" + username + "'");
+		aResponseEvent.setMessage(">> Login process has finished successfully!");
 	}
 
 	/**
@@ -70,6 +71,9 @@ public class AuthPlugIn extends EventModelPlugIn {
 	 */
 	public void processEvent(Logoff aEvent, WebSocketResponseEvent aResponseEvent) {
 		SecurityContextHolder.clearContext();
+
+		//Removing username value
+		aEvent.getConnector().setUsername(null);
 
 		aResponseEvent.setMessage("<< Logout process has finished successfully!");
 	}

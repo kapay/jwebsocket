@@ -21,19 +21,19 @@ package org.jwebsocket.eventmodel.observable;
  */
 public class ResponseEvent extends Event {
 
-	private long elapsedTime;
+	private double elapsedTime;
 
 	/**
-	 * @return the elapsedTime
+	 * @return the elapsedTime in nanoseconds
 	 */
-	public long getElapsedTime() {
+	public double getElapsedTime() {
 		return elapsedTime;
 	}
 
 	/**
-	 * @param elapsedTime the elapsedTime to set
+	 * @param elapsedTime the elapsedTime in nanoseconds to set
 	 */
-	public void setElapsedTime(long elapsedTime) {
+	public void setElapsedTime(double elapsedTime) {
 		this.elapsedTime = elapsedTime;
 	}
 }

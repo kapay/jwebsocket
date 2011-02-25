@@ -13,36 +13,31 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.plugin;
+package org.jwebsocket.eventmodel.event.system;
 
-import java.util.Collection;
-import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.eventmodel.observable.Event;
+import org.jwebsocket.eventmodel.annotation.ImportFromToken;
+import org.jwebsocket.eventmodel.event.WebSocketEvent;
 
 /**
  *
  * @author kyberneees
  */
-public class EventNotification {
+public class S2CEventNotSupportedOnClient extends WebSocketEvent {
 
-	private Event event;
-	private EventModelPlugIn plugIn;
+	@ImportFromToken(key = "req_id")
+	private String reqId;
 
-	public EventNotification(EventModelPlugIn plugIn, Event aEvent) {
-		this.plugIn = plugIn;
-		this.event = aEvent;
-		this.event.getArgs().setType("s2c.event_notification");
-		this.event.getArgs().setString("event_name", aEvent.getId());
-		this.event.getArgs().setString("plugin_id", plugIn.getId());
+	/**
+	 * @return the reqId
+	 */
+	public String getReqId() {
+		return reqId;
 	}
 
-	public void to(WebSocketConnector aConnector) {
-		plugIn.getEm().getParent().getServer().sendTokenAsync(aConnector, plugIn.getEm().getEventFactory().eventToToken(event));
-	}
-
-	public void to(Collection<WebSocketConnector> aConnectorCollection) {
-		for (WebSocketConnector c : aConnectorCollection) {
-			to(c);
-		}
+	/**
+	 * @param reqId the reqId to set
+	 */
+	public void setReqId(String reqId) {
+		this.reqId = reqId;
 	}
 }

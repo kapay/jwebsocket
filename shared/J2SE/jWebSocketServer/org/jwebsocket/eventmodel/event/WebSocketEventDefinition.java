@@ -19,29 +19,101 @@ import org.jwebsocket.eventmodel.filter.validator.Argument;
 import javolution.util.FastSet;
 import java.util.Set;
 import org.jwebsocket.api.IInitializable;
+import org.jwebsocket.eventmodel.api.IWebSocketSecureObject;
+import org.jwebsocket.eventmodel.observable.Event;
 
 /**
  *
  * @author kyberneees
  */
-public class WebSocketEventDefinition implements IInitializable {
+public class WebSocketEventDefinition implements IInitializable, IWebSocketSecureObject {
 
 	private String id;
+	private String ns;
 	private Set<Argument> incomingArgsValidation = new FastSet<Argument>();
 	private Set<Argument> outgoingArgsValidation = new FastSet<Argument>();
 	private boolean responseRequired = false;
 	private boolean responseToOwnerConnector = false;
 	private boolean cacheEnabled = false;
-	private boolean notificationConcurrent = true;
+	private boolean notificationConcurrent = false;
 	private int cacheTime = 0;
 	private boolean securityEnabled = false;
 	private Set<String> roles = new FastSet<String>();
-	private String ns;
+	private Set<String> users = new FastSet<String>();
+	private Set<String> ipAddresses = new FastSet<String>();
 
 	public void initialize() {
 	}
 
 	public void shutdown() {
+	}
+
+	@Override
+	public int hashCode() {
+		return ((null != id) ? id.hashCode() : 0)
+				+ incomingArgsValidation.hashCode()
+				+ outgoingArgsValidation.hashCode()
+				+ ((responseRequired) ? 1 : 0)
+				+ ((responseToOwnerConnector) ? 1 : 0)
+				+ ((cacheEnabled) ? 1 : 0)
+				+ ((notificationConcurrent) ? 1 : 0)
+				+ cacheTime
+				+ ((securityEnabled) ? 1 : 0)
+				+ roles.hashCode()
+				+ users.hashCode()
+				+ ((null != ns) ? ns.hashCode() : 0)
+				+ ((null != ipAddresses) ? ipAddresses.hashCode() : 0);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final WebSocketEventDefinition other = (WebSocketEventDefinition) obj;
+		if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId())) {
+			return false;
+		}
+		if (this.incomingArgsValidation != other.getIncomingArgsValidation() && (this.incomingArgsValidation == null || !this.incomingArgsValidation.equals(other.getIncomingArgsValidation()))) {
+			return false;
+		}
+		if (this.outgoingArgsValidation != other.getOutgoingArgsValidation() && (this.outgoingArgsValidation == null || !this.outgoingArgsValidation.equals(other.getOutgoingArgsValidation()))) {
+			return false;
+		}
+		if (this.responseRequired != other.isResponseRequired()) {
+			return false;
+		}
+		if (this.responseToOwnerConnector != other.isResponseToOwnerConnector()) {
+			return false;
+		}
+		if (this.cacheEnabled != other.isCacheEnabled()) {
+			return false;
+		}
+		if (this.notificationConcurrent != other.isNotificationConcurrent()) {
+			return false;
+		}
+		if (this.cacheTime != other.getCacheTime()) {
+			return false;
+		}
+		if (this.securityEnabled != other.isSecurityEnabled()) {
+			return false;
+		}
+		if (this.roles != other.getRoles() && (this.roles == null || !this.roles.equals(other.getRoles()))) {
+			return false;
+		}
+		if (this.users != other.getRoles() && (this.users == null || !this.users.equals(other.getUsers()))) {
+			return false;
+		}
+		if ((this.ns == null) ? (other.getNs() != null) : !this.ns.equals(other.getNs())) {
+			return false;
+		}
+		if ((this.ipAddresses == null) ? (other.getIpAddresses() != null) : !this.ipAddresses.equals(other.getIpAddresses())) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -69,7 +141,7 @@ public class WebSocketEventDefinition implements IInitializable {
 	 * @param incomingArgsValidation the incomingArgsValidation to set
 	 */
 	public void setIncomingArgsValidation(Set<Argument> incomingArgsValidation) {
-		this.incomingArgsValidation = incomingArgsValidation;
+		this.incomingArgsValidation.addAll(incomingArgsValidation);
 	}
 
 	/**
@@ -83,7 +155,7 @@ public class WebSocketEventDefinition implements IInitializable {
 	 * @param outgoingArgsValidation the outgoingArgsValidation to set
 	 */
 	public void setOutgoingArgsValidation(Set<Argument> outgoingArgsValidation) {
-		this.outgoingArgsValidation = outgoingArgsValidation;
+		this.outgoingArgsValidation.addAll(outgoingArgsValidation);
 	}
 
 	/**
@@ -159,8 +231,9 @@ public class WebSocketEventDefinition implements IInitializable {
 	/**
 	 * @return the eventClass
 	 */
-	public Class getEventClass() throws Exception {
-		return Class.forName(getNs());
+	@SuppressWarnings("unchecked")
+	public Class<? extends Event> getEventClass() throws Exception {
+		return (Class<? extends Event>) Class.forName(getNs());
 	}
 
 	/**
@@ -203,5 +276,33 @@ public class WebSocketEventDefinition implements IInitializable {
 	 */
 	public void setNotificationConcurrent(boolean notificationConcurrent) {
 		this.notificationConcurrent = notificationConcurrent;
+	}
+
+	/**
+	 * @return the ipAddresses
+	 */
+	public Set<String> getIpAddresses() {
+		return ipAddresses;
+	}
+
+	/**
+	 * @param ipAddresses the ipAddresses to set
+	 */
+	public void setIpAddresses(Set<String> ipAddresses) {
+		this.ipAddresses.addAll(ipAddresses);
+	}
+
+	/**
+	 * @return the users
+	 */
+	public Set<String> getUsers() {
+		return users;
+	}
+
+	/**
+	 * @param users the users to set
+	 */
+	public void setUsers(Set<String> users) {
+		this.users.addAll(users);
 	}
 }

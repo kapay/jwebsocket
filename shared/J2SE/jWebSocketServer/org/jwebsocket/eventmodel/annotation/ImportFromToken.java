@@ -13,31 +13,34 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.event.test;
+package org.jwebsocket.eventmodel.annotation;
 
-import org.jwebsocket.eventmodel.annotation.ImportFromToken;
-import org.jwebsocket.eventmodel.event.WebSocketEvent;
+import java.lang.annotation.*;
 
 /**
+ * This annotation allows automatic population in custom events fields. Copy 
+ * or move value from the incoming tokens to the targeted fields in events.
  *
  * @author kyberneees
  */
-public class GetHashCode extends WebSocketEvent {
-
-	@ImportFromToken
-	private String text;
-
-	/**
-	 * @return the text
-	 */
-	public String getText() {
-		return text;
-	}
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface ImportFromToken {
 
 	/**
-	 * @param text the text to set
+	 * Allowed strategies: "copy" | "move"
+	 *
+	 * copy: Keeps the original parameter in the incoming token
+	 * move: Remove the original parameter from the incoming token
+	 *
+	 * @return The importing strategy
 	 */
-	public void setText(String text) {
-		this.text = text;
-	}
+	String strategy() default "move";
+
+	/**
+	 *
+	 * @return The key of the incoming parameter to import. By default
+	 * use the same field name as the parameter name.
+	 */
+	String key() default "";
 }

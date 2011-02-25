@@ -15,6 +15,7 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.plugin;
 
+import org.jwebsocket.eventmodel.s2c.S2CEventNotification;
 import java.util.Collection;
 import org.jwebsocket.eventmodel.observable.ObservableObject;
 import org.jwebsocket.eventmodel.api.IEventModelPlugIn;
@@ -23,6 +24,7 @@ import org.jwebsocket.eventmodel.observable.Event;
 import org.jwebsocket.eventmodel.observable.ResponseEvent;
 import java.util.Map;
 import java.util.Set;
+import org.jwebsocket.eventmodel.event.S2CEvent;
 import org.jwebsocket.eventmodel.event.WebSocketEventDefinition;
 
 /**
@@ -60,8 +62,8 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	 * @param aEvent The event to be sent
 	 * @return
 	 */
-	public EventNotification notifyEvent(Event aEvent) {
-		return new EventNotification(this, aEvent);
+	public S2CEventNotification notifyEventToClient(S2CEvent aEvent) {
+		return new S2CEventNotification(this.getId(), aEvent);
 	}
 
 	/**

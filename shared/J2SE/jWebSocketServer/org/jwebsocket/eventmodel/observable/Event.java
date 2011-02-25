@@ -29,6 +29,13 @@ public class Event {
 	private Object subject;
 	private boolean processed = false;
 
+	public Event() {
+	}
+
+	public Event(String aId) {
+		id = aId;
+	}
+
 	@Override
 	public String toString() {
 		return getId();
@@ -36,7 +43,10 @@ public class Event {
 
 	@Override
 	public int hashCode() {
-		return id.hashCode() + args.hashCode() + subject.hashCode();
+		return (null == id) ? 0 : id.hashCode()
+				+ ((processed) ? 1 : 0)
+				+ args.hashCode()
+				+ ((null == subject) ? 0 : subject.hashCode());
 	}
 
 	@Override
@@ -55,6 +65,9 @@ public class Event {
 			return false;
 		}
 		if (this.subject != other.getSubject() && (this.subject == null || !this.subject.equals(other.getSubject()))) {
+			return false;
+		}
+		if (this.processed != other.isProcessed()) {
 			return false;
 		}
 		return true;

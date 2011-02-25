@@ -63,7 +63,7 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 				for (var i = 0; i < this.filterChain.length; i++){
 					try
 					{
-						this.filterChain[i].firstCall(lToken, aOnResponseObject);
+						this.filterChain[i].beforeCall(lToken, aOnResponseObject);
 					}
 					catch(err)
 					{
@@ -71,10 +71,10 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 						{
 							case "stop_filter_chain":
 								return;
-								break;
+							break;
 							default:
 								throw err;
-								break;
+							break;
 						}
 					}
 					
@@ -85,7 +85,7 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 		}
 		else
 			throw "client:not_connected";
-	}
+    }
 	,
 	//:m:*:processToken
 	//:d:en:Processes an incoming token. Used to support S2C events notifications. _
@@ -99,9 +99,25 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 			var plugin_id = aToken.plugin_id;
 
 			if (undefined != this.plugIns[plugin_id] && undefined != this.plugIns[plugin_id][event_name]){
-				this.plugIns[plugin_id][event_name](aToken);
+				result = this.plugIns[plugin_id][event_name](aToken);
+				
+				//Sending response back to the server
+				if (undefined != aToken.response_type){
+					this.notify("s2c.onresponse", {
+						args: {
+							req_id: aToken.uid,
+							response: result
+						}
+					});
+				}
 			}
 			else {
+				//Sending the "not supported" event notification
+				this.notify("s2c.event_not_supported", {
+					args: {
+						req_id: aToken.uid,
+					}
+				});
 				throw "s2c_event_support_not_found:" + event_name;
 			}
 		}
@@ -124,7 +140,7 @@ jws.oop.declareClass( "jws", "OnResponseObject", null, {
 			while (index > -1){
 				try
 				{
-					this.filterChain[index].secondCall(this.request, aResponseToken);
+					this.filterChain[index].afterCall(this.request, aResponseToken);
 				}
 				catch(err)
 				{
@@ -132,10 +148,10 @@ jws.oop.declareClass( "jws", "OnResponseObject", null, {
 					{
 						case "stop_filter_chain":
 							return;
-							break;
+						break;
 						default:
 							throw err;
-							break;
+						break;
 					}
 				}
 				index--;
@@ -156,7 +172,7 @@ jws.oop.declareClass( "jws", "OnResponseObject", null, {
 			if (undefined != this.request.OnFailure)
 				this.request.OnFailure(aResponseToken);
 		}
-	}
+    }
 });
 
 //:package:*:jws
@@ -224,8 +240,8 @@ jws.oop.declareClass( "jws", "EventsPlugIn", null, {
 	,
 	plugInAPI: {}
 	
-//Methods are generated in runtime!
-//Custom methods can be added using the OnReady callback
+	//Methods are generated in runtime!
+	//Custom methods can be added using the OnReady callback
 });
 
 //:package:*:jws
@@ -235,19 +251,19 @@ jws.oop.declareClass( "jws", "EventsPlugIn", null, {
 //:d:en:This class represents an abstract client filter.
 jws.oop.declareClass( "jws", "EventsBaseFilter", null, {
 
-	//:m:*:firstCall
+	//:m:*:beforeCall
 	//:d:en:This method is called before every C2S event notification.
 	//:a:en::aToken:Object:The token to be filtered.
 	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
 	//:r:*:::void:none
-	firstCall: function(aToken, aOnResponseObject){}
+	beforeCall: function(aToken, aOnResponseObject){}
 	,
-	//:m:*:secondCall
+	//:m:*:afterCall
 	//:d:en:This method is called after every C2S event notification.
 	//:a:en::aRequest:Object:The request to be filtered.
 	//:a:en::aResponseToken:Object:The response token from the server.
 	//:r:*:::void:none
-	secondCall: function(aRequest, aResponseToken){}
+	afterCall: function(aRequest, aResponseToken){}
 });
 
 //:package:*:jws
@@ -259,35 +275,103 @@ jws.oop.declareClass( "jws", "EventsBaseFilter", null, {
 jws.oop.declareClass( "jws", "SecurityFilter", jws.EventsBaseFilter, {
 	user:[]
 	,
-	//:m:*:firstCall
+	//:m:*:beforeCall
 	//:d:en:This method is called before every C2S event notification. _
 	//:d:en:Checks that the logged in user has the correct roles to notify _
 	//:d:en:a custom event in the server.
 	//:a:en::aToken:Object:The token to be filtered.
 	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
 	//:r:*:::void:none
-	firstCall: function(aToken, aOnResponseObject){
+	beforeCall: function(aToken, aOnResponseObject){
 		if (aOnResponseObject.request.eventDefinition.isSecurityEnabled){
-			var roles = null;
-			//Getting allowed roles to notify the event
+			var r, u;
+			var roles, users = null;
+			var exclusion = false;
+			var role_authorized = false;
+			var user_authorized = false;
+			var stop = false;
+			
+			//@TODO: Support IP addresses restrictions checks on the JS client
+
+			//Getting users restrictions
+			users = aOnResponseObject.request.eventDefinition.users;
+
+			//Getting roles restrictions
 			roles = aOnResponseObject.request.eventDefinition.roles;
+
+			//Checking if the user have the allowed roles
+			if (users.length > 0){
+				var user_match = false;
+				for (var i = 0; i < users.length; i++){
+					u = users[i];
+					
+					if ("all" != u){
+						exclusion = (u.substring(0,1) == "!") ? true : false;
+						u = (exclusion) ? u.substring(1) : u;
+
+						if (u == this.user.username){
+							user_match = true;
+							if (!exclusion){
+								user_authorized = true;
+							}
+							break;
+						}
+					} else {
+						user_match = true;
+						user_authorized = true;
+						break;
+					}
+				}
+
+				//Not Authorized USER
+				if (!user_authorized && user_match || 0 == roles.length){
+					aOnResponseObject.OnResponse({
+						code: -1,
+						msg: "Not autorized to notify this event. USER restrictions: " + users.toString()
+					});
+					this.OnNotAuthorized(aToken);
+					throw "stop_filter_chain";
+				}
+			}
 
 			//Checking if the user have the allowed roles
 			if (roles.length > 0){
 				for (var i = 0; i < roles.length; i++){
-					for (var j = 0; j < this.user.roles.length; j++)
-						if (roles[i] == this.user.roles[j])
-							return;
+					for (var j = 0; j < this.user.roles.length; j++){
+						r = roles[i];
+					
+						if ("all" != r){
+							exclusion = (r.substring(0,1) == "!") ? true : false;
+							r = (exclusion) ? r.substring(1) : r;
+
+							if (r == this.user.roles[j]){
+								if (!exclusion){
+									role_authorized = true;
+								}
+								stop = true;
+								break;
+							}
+						} else {
+							role_authorized = true;
+							stop = true;
+							break;
+						}	
+					}
+					if (stop){
+						break;
+					}
+				}
+
+				//Not Authorized ROLE
+				if (!role_authorized){
+					aOnResponseObject.OnResponse({
+						code: -1,
+						msg: "Not autorized to notify this event. ROLE restrictions: " + roles.toString()
+					});
+					this.OnNotAuthorized(aToken);
+					throw "stop_filter_chain";
 				}
 			}
-
-			//Not Authorized
-			aOnResponseObject.OnResponse({
-				code: -1,
-				msg: "Not autorized to notify this event. Allowed roles: " + roles.toString() 
-			});
-			this.OnNotAuthorized(aToken);
-			throw "stop_filter_chain";
 		}
 	}
 	,
@@ -311,14 +395,14 @@ jws.oop.declareClass( "jws", "SecurityFilter", jws.EventsBaseFilter, {
 jws.oop.declareClass( "jws", "CacheFilter", jws.EventsBaseFilter, {
 	cache:{}
 	,
-	//:m:*:firstCall
+	//:m:*:beforeCall
 	//:d:en:This method is called before every C2S event notification. _
 	//:d:en:Checks if exist a non-expired cached response for the outgoing event. _
 	//:d:en:If TRUE, the cached response is used and the server is not notified.
 	//:a:en::aToken:Object:The token to be filtered.
 	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
 	//:r:*:::void:none
-	firstCall: function(aToken, aOnResponseObject){
+	beforeCall: function(aToken, aOnResponseObject){
 		if (aOnResponseObject.request.eventDefinition.isCacheEnabled){
 			var cachedResponseToken = this.cache.getItem(aOnResponseObject.request._tokenUID);
 			if (null != cachedResponseToken){
@@ -328,14 +412,14 @@ jws.oop.declareClass( "jws", "CacheFilter", jws.EventsBaseFilter, {
 		}
 	}
 	,
-	//:m:*:secondCall
+	//:m:*:afterCall
 	//:d:en:This method is called after every C2S event notification. _
 	//:d:en:Checks if a response needs to be cached. The server configuration _
 	//:d:en:for cache used.
 	//:a:en::aRequest:Object:The request to be filtered.
 	//:a:en::aResponseToken:Object:The response token from the server.
 	//:r:*:::void:none
-	secondCall: function(aRequest, aResponseToken){
+	afterCall: function(aRequest, aResponseToken){
 		if (aRequest.eventDefinition.isCacheEnabled){
 			this.cache.setItem(aRequest._tokenUID, aResponseToken, {
 				expirationAbsolute: null,
@@ -353,13 +437,13 @@ jws.oop.declareClass( "jws", "CacheFilter", jws.EventsBaseFilter, {
 //:d:en:This class handle the validation for every argument in the request.
 jws.oop.declareClass( "jws", "ValidatorFilter", jws.EventsBaseFilter, {
 
-	//:m:*:firstCall
+	//:m:*:beforeCall
 	//:d:en:This method is called before every C2S event notification. _
 	//:d:en:Checks if the request arguments match with the validation server rules.
 	//:a:en::aToken:Object:The token to be filtered.
 	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
 	//:r:*:::void:none
-	firstCall: function(aToken, aOnResponseObject){
+	beforeCall: function(aToken, aOnResponseObject){
 		var arguments = aOnResponseObject.request.eventDefinition.incomingArgsValidation;
 		
 		for (var index = 0; index < arguments.length; index++){
@@ -372,6 +456,11 @@ jws.oop.declareClass( "jws", "ValidatorFilter", jws.EventsBaseFilter, {
 			}else if (aToken.hasOwnProperty(arguments[index].name)){
 				var requiredType = arguments[index].type;
 				if (requiredType != typeof(aToken[arguments[index].name])){
+					//Supporting 'array' as types too
+					if ("array" == requiredType && aToken[arguments[index].name] instanceof Array){
+						return;
+					}
+
 					aOnResponseObject.OnResponse({
 						code: -1,
 						msg: "Argument '"+arguments[index].name+"' has invalid type. Required: '"+requiredType+"'"

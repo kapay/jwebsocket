@@ -13,31 +13,56 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.event.test;
+package org.jwebsocket.eventmodel.s2c;
 
-import org.jwebsocket.eventmodel.annotation.ImportFromToken;
-import org.jwebsocket.eventmodel.event.WebSocketEvent;
+import org.jwebsocket.eventmodel.api.IS2COnResponse;
 
 /**
  *
  * @author kyberneees
  */
-public class GetHashCode extends WebSocketEvent {
+public class OnResponse implements IS2COnResponse {
 
-	@ImportFromToken
-	private String text;
+	private Object context;
+	private String requiredType;
 
-	/**
-	 * @return the text
-	 */
-	public String getText() {
-		return text;
+	public OnResponse(Object aContext) {
+		context = aContext;
+	}
+
+	public void success(Object aResponse) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	public void failure(FailureReason reason) {
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	/**
-	 * @param text the text to set
+	 * @return the context
 	 */
-	public void setText(String text) {
-		this.text = text;
+	public Object getContext() {
+		return context;
+	}
+
+	/**
+	 * @param context the context to set
+	 */
+	public void setContext(Object context) {
+		this.context = context;
+	}
+
+	/**
+	 * @return the requiredType
+	 */
+	public String getRequiredType() {
+		return requiredType;
+	}
+
+	/**
+	 * @param requiredType the requiredType to set
+	 */
+	public void setRequiredType(String requiredType) {
+		this.requiredType = requiredType;
 	}
 }

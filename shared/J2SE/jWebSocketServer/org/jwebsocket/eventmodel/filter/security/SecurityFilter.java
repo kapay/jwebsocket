@@ -15,14 +15,13 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.filter.security;
 
-import java.util.Collection;
 import org.jwebsocket.eventmodel.filter.EventModelFilter;
 import org.jwebsocket.eventmodel.event.WebSocketEvent;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.eventmodel.event.WebSocketEventDefinition;
-import org.jwebsocket.eventmodel.exception.NotAuthorizedException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.jwebsocket.eventmodel.api.IWebSocketSecureObject;
+import org.jwebsocket.eventmodel.util.CommonUtil;
+import org.apache.log4j.Logger;
+import org.jwebsocket.logging.Logging;
 
 /**
  *
@@ -30,25 +29,22 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class SecurityFilter extends EventModelFilter {
 
+	private static Logger mLog = Logging.getLogger(SecurityFilter.class);
+
 	@Override
-	public void firstCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
-		WebSocketEventDefinition def = getEm().getEventFactory().getEventDefinitions().getDefinition(aEvent.getId());
-		if (def.isSecurityEnabled() && def.getRoles().size() > 0) {
-			if (null != SecurityContextHolder.getContext().getAuthentication()) {
-				Collection<GrantedAuthority> connectorRoles = SecurityContextHolder.getContext().
-						getAuthentication().getAuthorities();
-
-				for (GrantedAuthority role : connectorRoles) {
-					if (def.getRoles().contains(role.getAuthority())) {
-						return; //Authorized!
-					}
-				}
-			}
-
-			//Not authorized!
-			throw new NotAuthorizedException("Unauthorized notification of '"
-					+ aEvent.getId() + "' event. Allowed roles for notify this event: '"
-					+ def.getRoles().toString() + "'");
+	public void beforeCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
+		//Processing plug-in restrictions
+		if (mLog.isDebugEnabled()) {
+			mLog.debug(">> Processing security restrictions in the 'EventsPlugIn' level...");
 		}
+		CommonUtil.checkSecurityRestrictions((IWebSocketSecureObject) getEm().getParent(), aConnector);
+
+		//Processing the WebSocketEvent restrictions
+		if (mLog.isDebugEnabled()) {
+			mLog.debug(">> Processing security restrictions in the 'WebSocketEventDefinition' level...");
+		}
+		CommonUtil.checkSecurityRestrictions((IWebSocketSecureObject) getEm().getEventFactory().
+				getEventDefinitions().getDefinition(aEvent.getId()),
+				aConnector);
 	}
 }

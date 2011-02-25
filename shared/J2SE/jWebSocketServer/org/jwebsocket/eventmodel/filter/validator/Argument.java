@@ -29,17 +29,8 @@ public class Argument {
 	private Object value;
 	private Validator validator;
 
-	public Argument(String name, String type, boolean optional, Validator validator) {
-		this.name = name;
-		this.type = type;
-		this.optional = optional;
-		this.validator = validator;
-	}
-
-	public Argument(String name, String type, boolean optional) {
-		this.name = name;
-		this.type = type;
-		this.optional = optional;
+	public Argument(){
+		
 	}
 
 	/**

@@ -28,6 +28,7 @@ public class BeforeRouteResponseToken extends Event {
 	private int requestId;
 
 	public BeforeRouteResponseToken(int requestId) {
+		super();
 		this.requestId = requestId;
 	}
 

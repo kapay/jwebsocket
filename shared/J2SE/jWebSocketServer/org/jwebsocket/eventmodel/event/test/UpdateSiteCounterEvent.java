@@ -15,29 +15,38 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.event.test;
 
-import org.jwebsocket.eventmodel.annotation.ImportFromToken;
-import org.jwebsocket.eventmodel.event.WebSocketEvent;
+import org.jwebsocket.eventmodel.event.S2CEvent;
+import org.jwebsocket.token.Token;
 
 /**
  *
  * @author kyberneees
  */
-public class GetHashCode extends WebSocketEvent {
+public class UpdateSiteCounterEvent extends S2CEvent {
 
-	@ImportFromToken
-	private String text;
+	private Integer counter;
 
-	/**
-	 * @return the text
-	 */
-	public String getText() {
-		return text;
+	public UpdateSiteCounterEvent() {
+		setId("setVisitorCounter");
 	}
 
 	/**
-	 * @param text the text to set
+	 * @return the counter
 	 */
-	public void setText(String text) {
-		this.text = text;
+	public Integer getCounter() {
+		return counter;
+	}
+
+	/**
+	 * @param counter the counter to set
+	 */
+	public void setCounter(Integer counter) {
+		this.counter = counter;
+	}
+
+	@Override
+	public void writeToToken(Token token) {
+		writeParentToToken(token);
+		token.setString("counter", getCounter().toString());
 	}
 }

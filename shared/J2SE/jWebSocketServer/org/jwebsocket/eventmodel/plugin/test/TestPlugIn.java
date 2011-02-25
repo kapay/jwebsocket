@@ -20,8 +20,11 @@ import org.jwebsocket.eventmodel.event.WebSocketResponseEvent;
 import org.jwebsocket.eventmodel.event.test.GetEventsInfo;
 import org.jwebsocket.eventmodel.event.test.GetHashCode;
 import org.jwebsocket.eventmodel.event.test.S2CNotification;
+import org.jwebsocket.eventmodel.event.test.S2CPlusXYEvent;
 import org.jwebsocket.eventmodel.event.test.SecureEvent;
-import org.jwebsocket.eventmodel.observable.Event;
+import org.jwebsocket.eventmodel.event.test.UpdateSiteCounterEvent;
+import org.jwebsocket.eventmodel.s2c.FailureReason;
+import org.jwebsocket.eventmodel.s2c.OnResponse;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 
@@ -32,9 +35,7 @@ import org.jwebsocket.token.TokenFactory;
 public class TestPlugIn extends EventModelPlugIn {
 
 	public void processEvent(GetHashCode aEvent, WebSocketResponseEvent aResponseEvent) {
-		String text = aEvent.getArgs().getString("text");
-
-		aResponseEvent.getArgs().setInteger("hash_code", text.hashCode());
+		aResponseEvent.getArgs().setInteger("hash_code", aEvent.getText().hashCode());
 	}
 
 	public void processEvent(GetEventsInfo aEvent, WebSocketResponseEvent aResponseEvent) {
@@ -46,11 +47,26 @@ public class TestPlugIn extends EventModelPlugIn {
 	}
 
 	public void processEvent(S2CNotification aEvent, WebSocketResponseEvent aResponseEvent) {
-		Event e = new Event();
-		e.setId("setVisitorNumber");
-		e.getArgs().setString("counter", "99999999999");   // ;)
+		//Notification with callbacks
+		this.notifyEventToClient(new S2CPlusXYEvent(5, 5)).to(aEvent.getConnector(),
+				new OnResponse(null) {
 
-		this.notifyEvent(e).to(getEm().getParent().getServer().getAllConnectors().values());
+					@Override
+					public void success(Object aResponse) {
+						System.out.println(">> S2CPlusXYEvent success callback. Response: " + (Integer) aResponse);
+					}
+
+					@Override
+					public void failure(FailureReason reason) {
+						System.out.println(">> S2CPlusXYEvent failure callback. Reason: " + reason.name());
+					}
+				});
+
+		//Notification w/o callbacks
+		UpdateSiteCounterEvent e = new UpdateSiteCounterEvent();
+		e.setCounter(Integer.MAX_VALUE);
+		//Sending to all connectors
+		this.notifyEventToClient(e).to(getEm().getParent().getServer().getAllConnectors().values(), null);
 	}
 
 	public void processEvent(SecureEvent aEvent, WebSocketResponseEvent aResponseEvent) {

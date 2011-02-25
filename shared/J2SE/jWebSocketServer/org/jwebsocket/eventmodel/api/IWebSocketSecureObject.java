@@ -13,31 +13,53 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.event.test;
+package org.jwebsocket.eventmodel.api;
 
-import org.jwebsocket.eventmodel.annotation.ImportFromToken;
-import org.jwebsocket.eventmodel.event.WebSocketEvent;
+import java.util.Set;
 
 /**
  *
  * @author kyberneees
  */
-public class GetHashCode extends WebSocketEvent {
-
-	@ImportFromToken
-	private String text;
+public interface IWebSocketSecureObject {
 
 	/**
-	 * @return the text
+	 * @return the securityEnabled
 	 */
-	public String getText() {
-		return text;
-	}
+	public boolean isSecurityEnabled();
 
 	/**
-	 * @param text the text to set
+	 * @param securityEnabled the securityEnabled to set
 	 */
-	public void setText(String text) {
-		this.text = text;
-	}
+	public void setSecurityEnabled(boolean securityEnabled);
+
+	/**
+	 * @return the roles
+	 */
+	public Set<String> getRoles();
+
+	/**
+	 * @param roles the roles to set
+	 */
+	public void setRoles(Set<String> roles);
+
+	/**
+	 * @return the users
+	 */
+	public Set<String> getUsers();
+
+	/**
+	 * @param users the users to set
+	 */
+	public void setUsers(Set<String> users);
+
+	/**
+	 * @return the ipAddresses
+	 */
+	public Set<String> getIpAddresses();
+
+	/**
+	 * @param ipAddresses the ipAddresses to set
+	 */
+	public void setIpAddresses(Set<String> ipAddresses);
 }

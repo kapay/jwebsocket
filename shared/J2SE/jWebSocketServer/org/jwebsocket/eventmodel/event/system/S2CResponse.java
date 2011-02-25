@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.event.test;
+package org.jwebsocket.eventmodel.event.system;
 
 import org.jwebsocket.eventmodel.annotation.ImportFromToken;
 import org.jwebsocket.eventmodel.event.WebSocketEvent;
@@ -22,22 +22,37 @@ import org.jwebsocket.eventmodel.event.WebSocketEvent;
  *
  * @author kyberneees
  */
-public class GetHashCode extends WebSocketEvent {
+public class S2CResponse extends WebSocketEvent {
 
-	@ImportFromToken
-	private String text;
+	@ImportFromToken(key = "req_id")
+	private String reqId;
+	private Object response;
 
 	/**
-	 * @return the text
+	 * @return the response
 	 */
-	public String getText() {
-		return text;
+	public Object getResponse() {
+		return response;
 	}
 
 	/**
-	 * @param text the text to set
+	 * @param response the response to set
 	 */
-	public void setText(String text) {
-		this.text = text;
+	public void setResponse(Object response) {
+		this.response = response;
+	}
+
+	/**
+	 * @return the reqId
+	 */
+	public String getReqId() {
+		return reqId;
+	}
+
+	/**
+	 * @param reqId the reqId to set
+	 */
+	public void setReqId(String reqId) {
+		this.reqId = reqId;
 	}
 }

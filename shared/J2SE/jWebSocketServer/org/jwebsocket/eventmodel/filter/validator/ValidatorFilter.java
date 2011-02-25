@@ -38,7 +38,7 @@ public class ValidatorFilter extends EventModelFilter {
 	private TypesMap types;
 
 	@Override
-	public void firstCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
+	public void beforeCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
 		Set<Argument> args = getEm().getEventFactory().getEventDefinitions().
 				getDefinition(aEvent.getId()).getIncomingArgsValidation();
 
@@ -55,18 +55,24 @@ public class ValidatorFilter extends EventModelFilter {
 			if (errors.hasErrors()) {
 				throw new Exception(errors.getAllErrors().toString());
 			}
-
 		}
 	}
 
 	@Override
-	public void secondCall(WebSocketConnector aConnector, WebSocketResponseEvent aResponseEvent) throws Exception {
+	public void afterCall(WebSocketConnector aConnector, WebSocketResponseEvent aResponseEvent) throws Exception {
 		WebSocketEventDefinition def = getEm().getEventFactory().getEventDefinitions().
 				getDefinition(aResponseEvent.getId());
 
 		if (def.isResponseRequired()) {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(">> Validating outgoing arguments for '" + aResponseEvent.getId() + "' event ...");
+			}
+
+			if (aResponseEvent.getCode() != 0) {
+				if (mLog.isDebugEnabled()) {
+					mLog.debug(">> Validation aborted. The response state is NOT OK!");
+				}
+				return;
 			}
 
 			//Response event args validation
@@ -79,7 +85,7 @@ public class ValidatorFilter extends EventModelFilter {
 			}
 
 			//Adding owner connector in the response if checked
-			if (def.isResponseToOwnerConnector()){
+			if (def.isResponseToOwnerConnector()) {
 				aResponseEvent.getTo().add(aConnector);
 			}
 
@@ -90,7 +96,7 @@ public class ValidatorFilter extends EventModelFilter {
 		}
 	}
 
-	private void validateArg(Argument aArg, Event aEvent, Errors errors) throws Exception {
+	public void validateArg(Argument aArg, Event aEvent, Errors errors) throws Exception {
 		//Argument validation
 		if (!aEvent.getArgs().getMap().containsKey(aArg.getName())) {
 			if (!aArg.isOptional()) {

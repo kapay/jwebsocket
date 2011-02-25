@@ -25,18 +25,26 @@ import org.jwebsocket.eventmodel.factory.EventFactory;
 import org.jwebsocket.eventmodel.event.WebSocketResponseEvent;
 import org.jwebsocket.eventmodel.observable.Event;
 import org.jwebsocket.eventmodel.event.WebSocketEvent;
-import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.eventmodel.event.em.BeforeProcessEvent;
 import org.jwebsocket.eventmodel.event.em.AfterProcessEvent;
 import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
 import java.util.Set;
+import javolution.util.FastSet;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.eventmodel.api.IExceptionHandler;
 import org.jwebsocket.eventmodel.event.WebSocketEventDefinition;
+import org.jwebsocket.eventmodel.event.em.ConnectorStarted;
+import org.jwebsocket.eventmodel.event.em.ConnectorStopped;
+import org.jwebsocket.eventmodel.event.em.EngineStarted;
+import org.jwebsocket.eventmodel.event.em.EngineStopped;
+import org.jwebsocket.eventmodel.event.filter.BeforeRouteResponseToken;
+import org.jwebsocket.eventmodel.event.system.S2CEventNotSupportedOnClient;
+import org.jwebsocket.eventmodel.event.system.S2CResponse;
 import org.jwebsocket.eventmodel.exception.CachedResponseException;
 import org.jwebsocket.eventmodel.exception.ExceptionHandler;
+import org.jwebsocket.plugins.events.EventsPlugIn;
 
 /**
  *
@@ -44,12 +52,27 @@ import org.jwebsocket.eventmodel.exception.ExceptionHandler;
  */
 public class EventModel extends ObservableObject implements IInitializable, IListener {
 
-	private Set<IEventModelFilter> filterChain;
-	private Set<IEventModelPlugIn> plugIns;
-	private TokenPlugIn parent;
+	private Set<IEventModelFilter> filterChain = new FastSet<IEventModelFilter>();
+	private Set<IEventModelPlugIn> plugIns = new FastSet<IEventModelPlugIn>();
+	private EventsPlugIn parent;
 	private EventFactory eventFactory;
 	private static Logger mLog = Logging.getLogger(EventModel.class);
 	private IExceptionHandler exceptionHandler;
+
+	public EventModel() {
+		super();
+
+		//Core Events Registration
+		addEvents(ConnectorStarted.class);
+		addEvents(ConnectorStopped.class);
+		addEvents(BeforeProcessEvent.class);
+		addEvents(AfterProcessEvent.class);
+		addEvents(EngineStarted.class);
+		addEvents(EngineStopped.class);
+		addEvents(BeforeRouteResponseToken.class);
+		addEvents(S2CResponse.class);
+		addEvents(S2CEventNotSupportedOnClient.class);
+	}
 
 	public void initialize() throws Exception {
 	}
@@ -68,7 +91,7 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 				mLog.info(">> Starting the 'event' workflow...");
 			}
 
-			executeFilters1erCall(aEvent.getConnector(), aEvent);
+			executeFiltersBeforeCall(aEvent.getConnector(), aEvent);
 
 			//"before.process.event" notification
 			if (mLog.isDebugEnabled()) {
@@ -83,9 +106,9 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 				mLog.debug(">> Executing EM listeners notifications...");
 			}
 			WebSocketEventDefinition def = getEventFactory().getEventDefinitions().getDefinition(aEvent.getId());
-			if (def.isNotificationConcurrent()){
+			if (def.isNotificationConcurrent()) {
 				notify(aEvent, aResponseEvent, true);
-			}else {
+			} else {
 				notify(aEvent, aResponseEvent, false);
 			}
 
@@ -97,7 +120,7 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 			e2.setEvent(aEvent);
 			notify(e2, aResponseEvent, true);
 
-			executeFilters2ndCall(aEvent.getConnector(), aResponseEvent);
+			executeFiltersAfterCall(aEvent.getConnector(), aResponseEvent);
 
 			if (mLog.isInfoEnabled()) {
 				mLog.info(">> The 'event' workflow has finished successfully!");
@@ -140,9 +163,9 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 	 * @param aEvent
 	 * @throws Exception
 	 */
-	public void executeFilters1erCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
+	public void executeFiltersBeforeCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
 		for (IEventModelFilter f : getFilterChain()) {
-			f.firstCall(aConnector, aEvent);
+			f.beforeCall(aConnector, aEvent);
 		}
 	}
 
@@ -153,11 +176,11 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 	 * @param aResponseEvent
 	 * @throws Exception
 	 */
-	public void executeFilters2ndCall(WebSocketConnector aConnector, WebSocketResponseEvent aResponseEvent) throws Exception {
+	public void executeFiltersAfterCall(WebSocketConnector aConnector, WebSocketResponseEvent aResponseEvent) throws Exception {
 		int index = getFilterChain().size() - 1;
 		while (index >= 0) {
 			((IEventModelFilter) getFilterChain().
-					toArray()[index]).secondCall(aConnector, aResponseEvent);
+					toArray()[index]).afterCall(aConnector, aResponseEvent);
 			index--;
 		}
 	}
@@ -203,7 +226,7 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 	 * @param filterChain the filterChain to set
 	 */
 	public void setFilterChain(Set<IEventModelFilter> filterChain) {
-		this.filterChain = filterChain;
+		this.filterChain.addAll(filterChain);
 	}
 
 	/**
@@ -217,20 +240,20 @@ public class EventModel extends ObservableObject implements IInitializable, ILis
 	 * @param plugIns the plugIns to set
 	 */
 	public void setPlugIns(Set<IEventModelPlugIn> plugIns) {
-		this.plugIns = plugIns;
+		this.plugIns.addAll(plugIns);
 	}
 
 	/**
 	 * @return the parent
 	 */
-	public TokenPlugIn getParent() {
+	public EventsPlugIn getParent() {
 		return parent;
 	}
 
 	/**
 	 * @param parent the parent to set
 	 */
-	public void setParent(TokenPlugIn parent) {
+	public void setParent(EventsPlugIn parent) {
 		this.parent = parent;
 	}
 

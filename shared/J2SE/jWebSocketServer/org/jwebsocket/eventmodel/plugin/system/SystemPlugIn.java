@@ -56,9 +56,8 @@ public class SystemPlugIn extends EventModelPlugIn {
 
 	public void processEvent(HasPlugIn aEvent, WebSocketResponseEvent aResponseEvent) throws Exception {
 		boolean has = false;
-		String id = aEvent.getArgs().getString("plugin_id");
 		for (IEventModelPlugIn p : getEm().getPlugIns()) {
-			if (p.getId().equals(id)) {
+			if (p.getId().equals(aEvent.getPluginId())) {
 				has = true;
 				break;
 			}
@@ -68,7 +67,7 @@ public class SystemPlugIn extends EventModelPlugIn {
 	}
 
 	public void processEvent(GetPlugInAPI aEvent, WebSocketResponseEvent aResponseEvent) throws Exception {
-		String aPlugInId = aEvent.getArgs().getString("plugin_id");
+		String aPlugInId = aEvent.getPluginId();
 		if (mLog.isDebugEnabled()) {
 			mLog.debug(">> Exporting API for '" + aPlugInId + "' plugIn...");
 		}
@@ -77,7 +76,7 @@ public class SystemPlugIn extends EventModelPlugIn {
 		Token api = TokenFactory.createToken();
 		Token method, arg;
 		WebSocketEventDefinition def = null;
-		FastList<String> roles;
+		FastList<String> roles, users, ipAddresses;
 		FastList<Token> incomingArgs, outgoingArgs;
 
 		try {
@@ -100,6 +99,16 @@ public class SystemPlugIn extends EventModelPlugIn {
 					roles.add(r);
 				}
 				method.setList("roles", roles);
+				users = new FastList<String>();
+				for (String u : def.getUsers()) {
+					users.add(u);
+				}
+				method.setList("users", users);
+				ipAddresses = new FastList<String>();
+				for (String ip : def.getIpAddresses()) {
+					ipAddresses.add(ip);
+				}
+				method.setList("ip_addresses", ipAddresses);
 
 				incomingArgs = new FastList<Token>();
 				for (Argument a : def.getIncomingArgsValidation()) {

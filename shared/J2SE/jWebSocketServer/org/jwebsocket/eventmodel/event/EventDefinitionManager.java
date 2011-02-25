@@ -17,6 +17,7 @@ package org.jwebsocket.eventmodel.event;
 
 import org.jwebsocket.api.IInitializable;
 import java.util.Set;
+import javolution.util.FastSet;
 import org.jwebsocket.eventmodel.observable.Event;
 
 /**
@@ -25,7 +26,7 @@ import org.jwebsocket.eventmodel.observable.Event;
  */
 public class EventDefinitionManager implements IInitializable {
 
-	private Set<WebSocketEventDefinition> set;
+	private Set<WebSocketEventDefinition> set = new FastSet<WebSocketEventDefinition>();
 
 	@Override
 	public void initialize() {
@@ -46,7 +47,7 @@ public class EventDefinitionManager implements IInitializable {
 	 * @param set the set to set
 	 */
 	public void setSet(Set<WebSocketEventDefinition> set) {
-		this.set = set;
+		this.set.addAll(set);
 	}
 
 	public boolean hasDefinition(String aEventId) {

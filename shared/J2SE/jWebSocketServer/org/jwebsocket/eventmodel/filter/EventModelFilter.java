@@ -37,11 +37,11 @@ public abstract class EventModelFilter extends ObservableObject implements IEven
 	private EventModel em;
 
 	@Override
-	public void firstCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
+	public void beforeCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
 	}
 
 	@Override
-	public void secondCall(WebSocketConnector aConnector, WebSocketResponseEvent aEvent) throws Exception {
+	public void afterCall(WebSocketConnector aConnector, WebSocketResponseEvent aEvent) throws Exception {
 	}
 
 	public void initialize() throws Exception {

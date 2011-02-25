@@ -34,8 +34,8 @@ public interface IEventModelFilter {
 
 	public void setEm(EventModel em);
 
-	public void firstCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception;
+	public void beforeCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception;
 
-	public void secondCall(WebSocketConnector aConnector, WebSocketResponseEvent aEvent) throws Exception;
+	public void afterCall(WebSocketConnector aConnector, WebSocketResponseEvent aEvent) throws Exception;
 	
 }

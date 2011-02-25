@@ -50,6 +50,7 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void clear() {
 		for (Object key : keySet()) {
 			remove((K) key);
@@ -58,6 +59,7 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, "");
 	}
 
+	@SuppressWarnings("unchecked")
 	public Set<K> keySet() {
 		String index = (String) get(name + KEYS_LOCATION);
 		if (index.length() == 0) {
@@ -75,10 +77,12 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		return getAll(keySet()).values();
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean containsKey(Object key) {
 		return keySet().contains((K) key);
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean containsValue(Object value) {
 		return values().contains((V) value);
 	}
@@ -92,6 +96,7 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		return m;
 	}
 
+	@SuppressWarnings("unchecked")
 	public V get(Object key) {
 		V myObj = null;
 		myObj = (V) memcachedClient.get(key.toString());
@@ -100,7 +105,7 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 	}
 
 	public V remove(Object key) {
-		V myObj = (V) get(key);
+		V myObj = get(key);
 		memcachedClient.delete(key.toString());
 
 		//Key index update

@@ -35,6 +35,8 @@ public class EventFactory {
 	private static Logger mLog = Logging.getLogger(EventFactory.class);
 
 	public Token eventToToken(Event aEvent) {
+		aEvent.getArgs().setType(aEvent.getId());
+		
 		return aEvent.getArgs();
 	}
 
@@ -50,7 +52,7 @@ public class EventFactory {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug(">> Creating instance for event: '" + aEventId + "'...");
 		}
-
+		//Use the BeansFactory to load the instances
 		WebSocketEvent e = (WebSocketEvent) getEventDefinitions().getDefinition(aEventId).getEventClass().newInstance();
 		e.setId(aEventId);
 

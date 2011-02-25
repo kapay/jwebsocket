@@ -36,7 +36,7 @@ public class RouterFilter extends EventModelFilter {
 	private static Logger mLog = Logging.getLogger(RouterFilter.class);
 
 	@Override
-	public void firstCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
+	public void beforeCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
 		if (mLog.isInfoEnabled()) {
 			mLog.info(">> Checking if the event: '" + aEvent.getId() + "' has listener(s) in the server side...");
 		}
@@ -47,9 +47,9 @@ public class RouterFilter extends EventModelFilter {
 	}
 
 	@Override
-	public void secondCall(WebSocketConnector aConnector, WebSocketResponseEvent aEvent) throws Exception {
-		WebSocketEvent e = getEm().getEventFactory().stringToEvent(aEvent.getId());
-		WebSocketEventDefinition def = getEm().getEventFactory().getEventDefinitions().getDefinition(e.getId());
+	public void afterCall(WebSocketConnector aConnector, WebSocketResponseEvent aEvent) throws Exception {
+		//WebSocketEvent e = getEm().getEventFactory().stringToEvent(aEvent.getId());
+		WebSocketEventDefinition def = getEm().getEventFactory().getEventDefinitions().getDefinition(aEvent.getId());
 		if (!def.isResponseRequired()) {
 			return;
 		}
@@ -57,7 +57,7 @@ public class RouterFilter extends EventModelFilter {
 		//Send the token to the client(s)
 		Token aToken = aEvent.getArgs();
 		aToken.setInteger("code", aEvent.getCode());
-		aToken.setDouble("elapsedTime", (double) aEvent.getElapsedTime());
+		aToken.setDouble("elapsedTime", aEvent.getElapsedTime());
 		aToken.setString("msg", aEvent.getMessage());
 
 		//BeforeSendResponseToken event notification

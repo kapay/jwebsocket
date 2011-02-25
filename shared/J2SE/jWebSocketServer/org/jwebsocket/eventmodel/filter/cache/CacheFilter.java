@@ -28,7 +28,6 @@ import org.jwebsocket.eventmodel.event.filter.ResponseFromCache;
 import org.jwebsocket.eventmodel.exception.CachedResponseException;
 import org.jwebsocket.eventmodel.observable.ResponseEvent;
 import org.jwebsocket.token.Token;
-import org.jwebsocket.token.TokenFactory;
 
 /**
  *
@@ -40,15 +39,18 @@ public class CacheFilter extends EventModelFilter implements IListener {
 	private String cacheNamespace;
 
 	@Override
-	public void firstCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
+	public void beforeCall(WebSocketConnector aConnector, WebSocketEvent aEvent) throws Exception {
 		WebSocketEventDefinition def = getEm().getEventFactory().getEventDefinitions().getDefinition(aEvent.getId());
+		if (!def.isCacheEnabled()) {
+			return;
+		}
 
-		if (def.isCacheEnabled() && def.getCacheTime() > 0) {
+		if (def.getCacheTime() > 0) {
 			//Getting the cached response Token
 			Element e = getCache(aEvent.getId()).get(aEvent.getRequestId());
 
 			if (e != null && !e.isExpired()) {
-				
+
 				//Setting the correct "utid" value in the cached response token
 				Token cachedToken = (Token) e.getObjectValue();
 				Token newtoken = getEm().getParent().createResponse(aEvent.getArgs());

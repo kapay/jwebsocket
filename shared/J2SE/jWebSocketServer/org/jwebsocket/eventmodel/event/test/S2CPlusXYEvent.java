@@ -12,32 +12,63 @@
 //  more details.
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
-//  ---------------------------------------------------------------------------
+//  ---------------------------------------------------------------------------F
 package org.jwebsocket.eventmodel.event.test;
 
-import org.jwebsocket.eventmodel.annotation.ImportFromToken;
-import org.jwebsocket.eventmodel.event.WebSocketEvent;
+import org.jwebsocket.eventmodel.event.S2CEvent;
+import org.jwebsocket.token.Token;
 
 /**
  *
  * @author kyberneees
  */
-public class GetHashCode extends WebSocketEvent {
+public class S2CPlusXYEvent extends S2CEvent {
 
-	@ImportFromToken
-	private String text;
+	private int x;
+	private int y;
 
-	/**
-	 * @return the text
-	 */
-	public String getText() {
-		return text;
+	public S2CPlusXYEvent(int x, int y) {
+		super();
+		setId("plusXY");
+		setResponseType("integer");
+
+		setX(x);
+		setY(y);
 	}
 
 	/**
-	 * @param text the text to set
+	 * @return the x
 	 */
-	public void setText(String text) {
-		this.text = text;
+	public int getX() {
+		return x;
+	}
+
+	/**
+	 * @param x the x to set
+	 */
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	/**
+	 * @return the y
+	 */
+	public int getY() {
+		return y;
+	}
+
+	/**
+	 * @param y the y to set
+	 */
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	@Override
+	public void writeToToken(Token token){
+		token.setInteger("x", getX());
+		token.setInteger("y", getY());
+
+		writeParentToToken(token);
 	}
 }

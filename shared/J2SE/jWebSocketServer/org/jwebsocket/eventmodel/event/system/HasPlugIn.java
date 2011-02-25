@@ -15,6 +15,7 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.event.system;
 
+import org.jwebsocket.eventmodel.annotation.ImportFromToken;
 import org.jwebsocket.eventmodel.event.WebSocketEvent;
 
 /**
@@ -22,4 +23,21 @@ import org.jwebsocket.eventmodel.event.WebSocketEvent;
  * @author kyberneees
  */
 public class HasPlugIn extends WebSocketEvent {
+
+	@ImportFromToken(key = "plugin_id")
+	private String pluginId;
+
+	/**
+	 * @return the pluginId
+	 */
+	public String getPluginId() {
+		return pluginId;
+	}
+
+	/**
+	 * @param pluginId the pluginId to set
+	 */
+	public void setPluginId(String pluginId) {
+		this.pluginId = pluginId;
+	}
 }

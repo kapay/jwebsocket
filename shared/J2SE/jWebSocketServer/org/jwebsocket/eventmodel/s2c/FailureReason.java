@@ -13,31 +13,11 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.eventmodel.event.test;
+package org.jwebsocket.eventmodel.s2c;
 
-import org.jwebsocket.eventmodel.annotation.ImportFromToken;
-import org.jwebsocket.eventmodel.event.WebSocketEvent;
+public enum FailureReason {
 
-/**
- *
- * @author kyberneees
- */
-public class GetHashCode extends WebSocketEvent {
-
-	@ImportFromToken
-	private String text;
-
-	/**
-	 * @return the text
-	 */
-	public String getText() {
-		return text;
-	}
-
-	/**
-	 * @param text the text to set
-	 */
-	public void setText(String text) {
-		this.text = text;
-	}
+	CONNECTOR_STOPPED,
+	EVENT_NOT_SUPPORTED_BY_CLIENT,
+	INVALID_RESPONSE_TYPE
 }

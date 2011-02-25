@@ -486,7 +486,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		Boolean lIsSenderIncluded = aToken.getBoolean("senderIncluded", false);
 		Boolean lIsResponseRequested = aToken.getBoolean("responseRequested", true);
 
-		// don't distribute session id here!
+		// don't distribute session id of sender connection here!
 		aToken.remove("usid");
 		// remove further non target related fields
 		aToken.remove("senderIncluded");

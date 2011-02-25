@@ -18,8 +18,9 @@ package org.jwebsocket.eventmodel.api;
 import org.jwebsocket.api.IInitializable;
 import org.jwebsocket.eventmodel.core.EventModel;
 import java.util.Map;
+import org.jwebsocket.eventmodel.event.S2CEvent;
 import org.jwebsocket.eventmodel.observable.Event;
-import org.jwebsocket.eventmodel.plugin.EventNotification;
+import org.jwebsocket.eventmodel.s2c.S2CEventNotification;
 
 /**
  *
@@ -39,5 +40,5 @@ public interface IEventModelPlugIn extends IListener, IInitializable {
 
 	public void setClientAPI(Map<String, Class<? extends Event>> clientAPI);
 
-	public EventNotification notifyEvent(Event aEvent);
+	public S2CEventNotification notifyEventToClient(S2CEvent aEvent);
 }
