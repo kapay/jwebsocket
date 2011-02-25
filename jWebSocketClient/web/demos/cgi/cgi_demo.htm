@@ -73,12 +73,12 @@
 
 						// OnWelcome event
 						OnWelcome: function( aEvent )  {
-							log( "<font style='color:red'>jWebSocket Welcome received.</font>" );
+							log( "jWebSocket Welcome received." );
 						},
 
 						// OnGoodBye event
 						OnGoodBye: function( aEvent )  {
-							log( "<font style='color:red'>jWebSocket GoodBye received.</font>" );
+							log( "jWebSocket GoodBye received." );
 						},
 
 						// OnMessage callback
@@ -160,6 +160,26 @@
 				}
 			}
 
+			function wait() {
+				var lRes = lWSC.wait( 1000, {
+
+					OnResponse: function( aToken ) {
+						var lOut = "";
+						for( var lField in lWSC.fRequestCallbacks ) {
+							lOut += lField + " ";
+						}
+						log( "Wait response received! " + lOut );
+					},
+					OnTimeout: function( aToken ) {
+						log( "Response timed out!" );
+					},
+					spawnThread: true,
+					responseRequested: true,
+					timeout: 2000
+				});
+				log( lWSC.resultToString( lRes ) );
+			}
+
 			function sendCommand() {
 				var lMsg = eCmd.value;
 				log( "Sending command '" + lMsg + "', waiting for response..." );
@@ -184,6 +204,20 @@
 				} catch( ex ) {
 					log( "Exception: " + ex.message );
 				}
+			}
+
+			function runSkill( aSkillCmd, aTimeout ) {
+				var lToken = {
+					ns: "org.jwebsocket.plugins.system",
+					type: "send",
+					targetId: eTarget.value,
+					subType: eCmd.value,	// e.g. exec
+					cmd: lArgs				// e.g. dir
+				};
+				var lRes = lWSC.sendToken( lToken, {
+
+				});
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function initPage() {
@@ -269,7 +303,10 @@
 						<input class="sbtnDlg" id="sbtnLogout" type="button" value="Logout" onclick="logout();"
 							   title="Logs you out and disconnects from the jWebSocket server.">
 					</td>
-					<td class="stdDlg" width="" >&nbsp;</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnWait" type="button" value="Wait" onclick="wait();"
+							   title="Waits for a certain amount of time.">
+					</td>
 					<td class="stdDlg" width="5">Arguments</td>
 					<td class="stdDlg" width="">
 						<input class="stxfDlg" id="stxfArgs" type="text" value="Please type your arguments here!" style="width:100%">

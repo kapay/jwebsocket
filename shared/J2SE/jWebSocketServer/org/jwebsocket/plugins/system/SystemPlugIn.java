@@ -60,6 +60,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String TT_GETCLIENTS = "getClients";
 	private static final String TT_PING = "ping";
 	private static final String TT_ECHO = "echo";
+	private static final String TT_WAIT = "wait";
 	private static final String TT_ALLOC_CHANNEL = "alloc";
 	private static final String TT_DEALLOC_CHANNEL = "dealloc";
 	// specify shared connector variables
@@ -129,6 +130,8 @@ public class SystemPlugIn extends TokenPlugIn {
 				ping(aConnector, aToken);
 			} else if (lType.equals(TT_ECHO)) {
 				echo(aConnector, aToken);
+			} else if (lType.equals(TT_WAIT)) {
+				wait(aConnector, aToken);
 			} else if (lType.equals(TT_ALLOC_CHANNEL)) {
 				allocChannel(aConnector, aToken);
 			} else if (lType.equals(TT_DEALLOC_CHANNEL)) {
@@ -569,6 +572,39 @@ public class SystemPlugIn extends TokenPlugIn {
 			// TODO: here could we optionally send a time stamp
 			// TODO: implement response time on client!
 			// lResponseToken.put("","");
+			sendToken(aConnector, aConnector, lResponse);
+		}
+	}
+
+	/**
+	 * simply waits for a certain amount of time and does not perform any _
+	 * operation. This feature is used for debugging and simulation purposes _
+	 * only and is not related to any business logic.
+	 * @param aToken
+	 */
+	private void wait(WebSocketConnector aConnector, Token aToken) {
+		Token lResponse = createResponse(aToken);
+
+		Integer lDuration = aToken.getInteger("duration", 0);
+		Boolean lIsResponseRequested = aToken.getBoolean("responseRequested", true);
+		if (lDuration != null && lDuration >= 0) {
+			if (log.isDebugEnabled()) {
+				log.debug("duration " + lDuration);
+			}
+			try {
+				Thread.sleep(lDuration);
+			} catch (Exception lEx) {
+				// ignore potential exception here!
+			}
+			lResponse.setInteger("duration", lDuration);
+		} else {
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "missing or invalid 'duration' argument for 'wait' command");
+		}
+
+		// for test purposes we need to optionally suppress a response
+		// to simulate this error condition
+		if( lIsResponseRequested ) {
 			sendToken(aConnector, aConnector, lResponse);
 		}
 	}

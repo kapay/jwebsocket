@@ -97,6 +97,11 @@ var jws = {
 	//:d:en:public scope, everybody can read and write items from this scope
 	SCOPE_PUBLIC: "public",
 
+	//:const:*:DEF_RESP_TIMEOUT:integer:3000
+	//:d:en:Default timeout in milliseconds for waiting on asynchronous responses.
+	//:d:en:An individual timeout can be passed per request.
+	DEF_RESP_TIMEOUT: 3000,
+
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
 	//:d:en:Returns the first HTML element with the given id or [tt]null[/tt] _
@@ -734,20 +739,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:r:*:::void:none
 	checkCallbacks: function( aToken ) {
 		var lField = "utid" + aToken.utid;
-		// console.log("checking result for utid: " + aToken.utid + "...");
+		// console.log( "checking result for utid: " + aToken.utid + "..." );
 		var lClbkRec = this.fRequestCallbacks[ lField ];
 		if( lClbkRec ) {
-			// TODO: Approve update by Rolando 2010-01-04
 			lClbkRec.callback.OnResponse( aToken );
-			// lClbkRec.callback.call( this, aToken );
 			delete this.fRequestCallbacks[ lField ];
 		}
-		// TODO: delete timed out requests and optionally fire timeout callbacks
-/*
-		for( lField in this.fRequestCallbacks ) {
-			// ..
-		}
-*/
 	},
 
 	//:m:*:createDefaultResult
@@ -1051,23 +1048,49 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	sendToken: function( aToken, aOptions ) {
 		var lRes = this.checkConnected();
 		if( lRes.code == 0 ) {
-			var lOnResponse = null;
 			var lSpawnThread = false;
+			var lTimeout = jws.DEF_WAITRESP_TIMEOUT;
+			var lCallbacks = {
+				OnResponse: null,
+				OnSuccess: null,
+				OnError: null,
+				OnTimeout: null
+			};
+			var lControlResponse = false;
 			if( aOptions ) {
 				if( aOptions.OnResponse ) {
-					// TODO: Approve update by Rolando 2010-01-04
-					lOnResponse = aOptions;
-					// lOnResponse = aOptions.OnResponse;
+					lCallbacks.OnResponse = aOptions.OnResponse;
+					lControlResponse = true;
+				}
+				if( aOptions.OnError ) {
+					lCallbacks.OnError = aOptions.OnError;
+					lControlResponse = true;
+				}
+				if( aOptions.OnSuccess ) {
+					lCallbacks.OnSuccess = aOptions.OnSuccess;
+					lControlResponse = true;
+				}
+				if( aOptions.OnTimeout ) {
+					lCallbacks.OnTimeout = aOptions.OnTimeout;
+					lControlResponse = true;
+				}
+				if( aOptions.timeout ) {
+					lTimeout = aOptions;
 				}
 				if( aOptions.spawnThread ) {
-					lSpawnThread  = aOptions.spawnThread;
+					lSpawnThread = aOptions.spawnThread;
 				}
 			}
 			jws.CUR_TOKEN_ID++;
-			if( lOnResponse ) {
-				this.fRequestCallbacks[ "utid" + jws.CUR_TOKEN_ID ] = {
+			if( lControlResponse ) {
+				var lCallbackId = "utid" + jws.CUR_TOKEN_ID;
+				this.fRequestCallbacks[ lCallbackId ] = {
 					request: new Date().getTime(),
-					callback: lOnResponse
+					callback: lCallbacks,
+					timeout: lTimeout/*,
+					cleanup: (function( aInstance, aCallbackId ) {
+						delete aInstance.fRequestCallbacks[ aCallbackId ];
+					})( this, lCallbackId ) */
 				}
 			}
 			if( lSpawnThread ) {
@@ -1539,6 +1562,36 @@ jws.SystemClientPlugIn = {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
 			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	//:m:*:wait
+	//:d:en:Simply send a wait request to the jWebSocket server. _
+	//:d:en:The server waits for the given amount of time and returns a _
+	//:d:en:result token. This feature is for test and debugging purposes only _
+	//:d:en:and is not related to any particular business logic.
+	//:a:en::aDuration:Integer:Duration in ms the server waits for a response
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	//:a:en:aOptions:OnResponse:Function:Callback to be invoked once the response is received.
+	//:r:*:::void:none
+	wait: function( aDuration, aOptions ) {
+		var lRes = this.checkConnected();
+		if( lRes.code == 0 ) {
+			var lResponseRequested = true;
+			if( aOptions ) {
+				if( aOptions.responseRequested != undefined ) {
+					lResponseRequested = aOptions.responseRequested;
+				}
+			}
+			this.sendToken({
+				ns: jws.SystemClientPlugIn.NS,
+				type: "wait",
+				duration: aDuration,
+				responseRequested: lResponseRequested
+				},
+				aOptions
+			);
 		}
 		return lRes;
 	},
