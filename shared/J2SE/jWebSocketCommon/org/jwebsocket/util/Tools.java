@@ -17,7 +17,6 @@ package org.jwebsocket.util;
 
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 
@@ -114,8 +113,16 @@ public class Tools {
 	 * @return
 	 */
 	public static Date ISO8601ToDate(String aISO8601Date) {
+		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		try {
+			return lSDF.parse(aISO8601Date);
+		} catch (Exception lEx) {
+			return null;
+		}
+		/* this one cannot be used under Android, thus replacing by above code!
 		Calendar lCal = javax.xml.bind.DatatypeConverter.parseDateTime(aISO8601Date);
 		return lCal.getTime();
+		 */
 	}
 
 	/**
