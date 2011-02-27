@@ -20,6 +20,7 @@ import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 /**
  * implements a stream with a queue of token instances. In addition to the
@@ -56,7 +57,9 @@ public class TokenStream extends BaseStream {
 		try {
 			getServer().sendToken(aConnector, (Token) aObject);
 		} catch (Exception lEx) {
-			mLog.error("(processConnector) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+			mLog.error("(processConnector) "
+					+ lEx.getClass().getSimpleName()
+					+ ": " + lEx.getMessage());
 		}
 	}
 
@@ -66,5 +69,15 @@ public class TokenStream extends BaseStream {
 	 */
 	public TokenServer getServer() {
 		return mServer;
+	}
+
+	/**
+	 *
+	 * @param aToken
+	 */
+	public Token control(Token aToken) {
+		// needs to be implemented in descending classes
+		return null;
+
 	}
 }

@@ -40,16 +40,23 @@ var jws = {
 	//:const:*:CUR_TOKEN_ID:Integer:0
 	//:d:en:Current token id, incremented per token exchange to assign results.
 	CUR_TOKEN_ID: 0,
-	//:const:*:JWS_SERVER_SCHEMA:String:[ws|wss]
-	//:d:en:Default schema, [tt]ws[/tt] for un-secured and [tt]wss[/tt] for secured WebSocket-Connections.
+	//:const:*:JWS_SERVER_SCHEMA:String:ws
+	//:d:en:Default schema, [tt]ws[/tt] for un-secured WebSocket-Connections.
 	JWS_SERVER_SCHEMA: "ws",
+	//:const:*:JWS_SERVER_SSL_SCHEMA:String:ws
+	//:d:en:Default schema, [tt]wss[/tt] for secured WebSocket-Connections.
+	JWS_SERVER_SSL_SCHEMA: "wss",
 	//:const:*:JWS_SERVER_HOST:String:[hostname|localhost]
 	//:d:en:Default hostname of current webbite or [tt]localhost[/tt] if no hostname can be detected.
 	JWS_SERVER_HOST: ( self.location.hostname ? self.location.hostname : "localhost" ),
 	//:const:*:JWS_SERVER_PORT:Integer:8787
-	//:d:en:Default port number, 8787 for stand-alone un-secured or 9797 for stand-alone SSL secured servers, _
-	//:d:en:80[80] for Jetty or Glassfish un-secured or [8]443 for embedded SSL secured servers.
+	//:d:en:Default port number, 8787 for stand-alone un-secured servers, _
+	//:d:en:80 for Jetty or Glassfish un-secured servers.
 	JWS_SERVER_PORT: 8787,
+	//:const:*:JWS_SERVER_SSL_PORT:Integer:9797
+	//:d:en:Default port number, 9797 for stand-alone SSL secured servers, _
+	//:d:en:443 for Jetty or Glassfish SSL secured servers.
+	JWS_SERVER_SSL_PORT: 9797,
 	//:const:*:JWS_SERVER_CONTEXT:String:jWebSocket
 	//:d:en:Default application context in web application servers or servlet containers like Jetty or GlassFish.
 	JWS_SERVER_CONTEXT: "/jWebSocket",
@@ -97,10 +104,10 @@ var jws = {
 	//:d:en:public scope, everybody can read and write items from this scope
 	SCOPE_PUBLIC: "public",
 
-	//:const:*:DEF_RESP_TIMEOUT:integer:3000
+	//:const:*:DEF_RESP_TIMEOUT:integer:30000
 	//:d:en:Default timeout in milliseconds for waiting on asynchronous responses.
 	//:d:en:An individual timeout can be passed per request.
-	DEF_RESP_TIMEOUT: 3000,
+	DEF_RESP_TIMEOUT: 30000,
 
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
@@ -113,7 +120,7 @@ var jws = {
 	},
 	
 	//:m:*:getDefaultServerURL
-	//:d:en:Returns the default URL to the jWebSocket Server. This is a convenience _
+	//:d:en:Returns the default URL to the un-secured jWebSocket Server. This is a convenience _
 	//:d:en:method used in all jWebSocket demo dialogs. In case of changes to the _
 	//:d:en:server URL you only need to change to above JWS_SERVER_xxx constants.
 	//:a:en::voide::
@@ -127,6 +134,28 @@ var jws = {
 		if( jws.JWS_SERVER_CONTEXT && jws.JWS_SERVER_CONTEXT.length > 0 ) {
 			lURL += jws.JWS_SERVER_CONTEXT;
 			
+			if( jws.JWS_SERVER_SERVLET && jws.JWS_SERVER_SERVLET.length > 0 ) {
+				lURL += jws.JWS_SERVER_SERVLET;
+			}
+		}
+		return lURL;
+	},
+
+	//:m:*:getDefaultSSLServerURL
+	//:d:en:Returns the default URL to the secured jWebSocket Server. This is a convenience _
+	//:d:en:method used in all jWebSocket demo dialogs. In case of changes to the _
+	//:d:en:server URL you only need to change to above JWS_SERVER_xxx constants.
+	//:a:en::voide::
+	//:r:*:::void:Default jWebSocket server URL consisting of schema://host:port/context/servlet
+	getDefaultSSLServerURL: function() {
+		var lURL =
+			jws.JWS_SERVER_SSL_SCHEMA + "://"
+			+ jws.JWS_SERVER_HOST + ":" +
+			+ jws.JWS_SERVER_SSL_PORT;
+
+		if( jws.JWS_SERVER_CONTEXT && jws.JWS_SERVER_CONTEXT.length > 0 ) {
+			lURL += jws.JWS_SERVER_CONTEXT;
+
 			if( jws.JWS_SERVER_SERVLET && jws.JWS_SERVER_SERVLET.length > 0 ) {
 				lURL += jws.JWS_SERVER_SERVLET;
 			}
@@ -743,6 +772,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		var lClbkRec = this.fRequestCallbacks[ lField ];
 		if( lClbkRec ) {
 			lClbkRec.callback.OnResponse( aToken );
+			// result came in within the given timeout
+			if( lClbkRec.hCleanUp ) {
+				// thus reset the timeout observer
+				clearTimeout( lClbkRec.hCleanUp );
+			}
 			delete this.fRequestCallbacks[ lField ];
 		}
 	},
@@ -1075,7 +1109,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					lControlResponse = true;
 				}
 				if( aOptions.timeout ) {
-					lTimeout = aOptions;
+					lTimeout = aOptions.timeout;
 				}
 				if( aOptions.spawnThread ) {
 					lSpawnThread = aOptions.spawnThread;
@@ -1083,15 +1117,27 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			}
 			jws.CUR_TOKEN_ID++;
 			if( lControlResponse ) {
-				var lCallbackId = "utid" + jws.CUR_TOKEN_ID;
-				this.fRequestCallbacks[ lCallbackId ] = {
+				var lUTID = jws.CUR_TOKEN_ID;
+				var lClbkId = "utid" + lUTID;
+				var lThis = this;
+				var lClbkRec = {
 					request: new Date().getTime(),
 					callback: lCallbacks,
-					timeout: lTimeout/*,
-					cleanup: (function( aInstance, aCallbackId ) {
-						delete aInstance.fRequestCallbacks[ aCallbackId ];
-					})( this, lCallbackId ) */
-				}
+					timeout: lTimeout
+				};
+				this.fRequestCallbacks[ lClbkId ] = lClbkRec;
+				// set timeout to observe response
+				lClbkRec.hCleanUp = setTimeout( function() {
+					var lCallbacks = lClbkRec.callback;
+					if( lCallbacks.OnTimeout ) {
+						lCallbacks.OnTimeout({
+							utid: lUTID,
+							timeout: lTimeout,
+							token: aToken
+						});
+					}
+					delete lThis.fRequestCallbacks[ lClbkId ];
+				}, lTimeout );
 			}
 			if( lSpawnThread ) {
 				aToken.spawnThread = true;

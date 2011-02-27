@@ -15,14 +15,21 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.tcp;
 
+import com.sun.net.ssl.internal.ssl.SSLSocketImpl;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyStore;
 import java.util.Date;
 import java.util.Map;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
@@ -30,6 +37,7 @@ import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.CloseReason;
@@ -46,42 +54,43 @@ import org.jwebsocket.kit.WebSocketHandshake;
 public class TCPEngine extends BaseEngine {
 
 	private static Logger mLog = Logging.getLogger(TCPEngine.class);
-	private ServerSocket mServerSocket = null;
-	private int mListenerPort = JWebSocketCommonConstants.DEFAULT_PORT;
+	private ServerSocket mTCPServerSocket = null;
+	private SSLServerSocket mSSLServerSocket = null;
+	private int mTCPListenerPort = JWebSocketCommonConstants.DEFAULT_PORT;
+	private int mSSLListenerPort = JWebSocketCommonConstants.DEFAULT_SSLPORT;
 	private int mSessionTimeout = JWebSocketCommonConstants.DEFAULT_TIMEOUT;
 	private boolean mIsRunning = false;
-	private Thread mEngineThread = null;
+	private boolean mEventsFired = false;
+	private Thread mTCPEngineThread = null;
+	private Thread mSSLEngineThread = null;
 
 	public TCPEngine(EngineConfiguration aConfiguration) {
 		super(aConfiguration);
-		mListenerPort = aConfiguration.getPort();
+		mTCPListenerPort = aConfiguration.getPort();
+		mSSLListenerPort = aConfiguration.getSSLPort();
 		mSessionTimeout = aConfiguration.getTimeout();
 	}
 
 	@Override
 	public void startEngine()
 			throws WebSocketException {
+		setSessionTimeout(mSessionTimeout);
+
+		// create unencrypted server socket for ws:// protocol
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Starting TCP engine '"
 					+ getId()
-					+ "' at port " + mListenerPort
+					+ "' at port " + mTCPListenerPort
 					+ " with default timeout "
 					+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
 					+ "...");
 		}
 		try {
-			mServerSocket = new ServerSocket(mListenerPort);
-			/*
-			serverSocket = new ServerSocket(listenerPort); // listenerPort
-			serverSocket.setReuseAddress(true);
-			InetSocketAddress lISA = new InetSocketAddress(listenerPort);
-			serverSocket.bind(lISA);
-			 */
-			setSessionTimeout(mSessionTimeout);
+			mTCPServerSocket = new ServerSocket(mTCPListenerPort);
 
-			EngineListener listener = new EngineListener(this);
-			mEngineThread = new Thread(listener);
-			mEngineThread.start();
+			EngineListener lListener = new EngineListener(this, mTCPServerSocket);
+			mTCPEngineThread = new Thread(lListener);
+			mTCPEngineThread.start();
 
 		} catch (IOException lEx) {
 			throw new WebSocketException(lEx.getMessage());
@@ -92,7 +101,48 @@ public class TCPEngine extends BaseEngine {
 		if (mLog.isInfoEnabled()) {
 			mLog.info("TCP engine '"
 					+ getId() + "' started' at port "
-					+ mListenerPort + " with default timeout "
+					+ mTCPListenerPort + " with default timeout "
+					+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
+					+ ".");
+		}
+
+		// create encrypted (SSL) server socket for wss:// protocol
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Starting SSL engine '"
+					+ getId()
+					+ "' at port " + mSSLListenerPort
+					+ " with default timeout "
+					+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
+					+ "...");
+		}
+		try {
+			SSLContext lSSLContext = SSLContext.getInstance("SSL");
+			KeyManagerFactory lKMF = KeyManagerFactory.getInstance("SunX509");
+			KeyStore lKeyStore = KeyStore.getInstance("JKS");
+
+			char[] lPassword = "jWebSocket".toCharArray();
+			String lKeyStorePath = JWebSocketConfig.getConfigFolder("jWebSocket.ks");
+			lKeyStore.load(new FileInputStream(lKeyStorePath), lPassword);
+			lKMF.init(lKeyStore, lPassword);
+
+			lSSLContext.init(lKMF.getKeyManagers(), null, null);
+			SSLServerSocketFactory lSSLFactory = lSSLContext.getServerSocketFactory();
+			mSSLServerSocket = (SSLServerSocket) lSSLFactory.createServerSocket(
+					mSSLListenerPort);
+			EngineListener lSSLListener = new EngineListener(this, mSSLServerSocket);
+			mSSLEngineThread = new Thread(lSSLListener);
+			mSSLEngineThread.start();
+
+		} catch (Exception lEx) {
+			throw new WebSocketException(lEx.getMessage());
+		}
+
+		// TODO: results in firing started event twice! make more clean!
+		// super.startEngine();
+		if (mLog.isInfoEnabled()) {
+			mLog.info("SSL engine '"
+					+ getId() + "' started' at port "
+					+ mSSLListenerPort + " with default timeout "
 					+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
 					+ ".");
 		}
@@ -102,44 +152,99 @@ public class TCPEngine extends BaseEngine {
 	public void stopEngine(CloseReason aCloseReason)
 			throws WebSocketException {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Stopping TCP engine '" + getId() + "' at port " + mListenerPort + "...");
+			mLog.debug("Stopping TCP engine '" + getId()
+					+ "' at port " + mTCPListenerPort + "...");
 		}
 
 		// resetting "isRunning" causes engine listener to terminate
 		mIsRunning = false;
 		long lStarted = new Date().getTime();
 
+		// close unencrypted TCP server socket
 		try {
 			// when done, close server socket
 			// closing the server socket should lead to an IOExeption
 			// at accept in the listener thread which terminates the listener
-			if (mServerSocket != null && !mServerSocket.isClosed()) {
-				mServerSocket.close();
+			if (mTCPServerSocket != null && !mTCPServerSocket.isClosed()) {
+				mTCPServerSocket.close();
 				if (mLog.isInfoEnabled()) {
-					mLog.info("TCP engine '" + getId() + "' stopped at port " + mListenerPort + " (closed=" + mServerSocket.isClosed() + ").");
+					mLog.info("TCP engine '" + getId()
+							+ "' stopped at port " + mTCPListenerPort
+							+ " (closed=" + mTCPServerSocket.isClosed() + ").");
 				}
-				mServerSocket = null;
+				mTCPServerSocket = null;
 			} else {
-				mLog.warn("Stopping TCP engine '" + getId() + "': no server socket or server socket closed.");
+				mLog.warn("Stopping TCP engine '" + getId()
+						+ "': no server socket or server socket closed.");
 			}
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName() + " on stopping TCP engine '" + getId() + "': " + lEx.getMessage());
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " on stopping TCP engine '" + getId()
+					+ "': " + lEx.getMessage());
 		}
 
-		if (mEngineThread != null) {
+		// close encrypted SSL server socket
+		try {
+			// when done, close server socket
+			// closing the server socket should lead to an IOExeption
+			// at accept in the listener thread which terminates the listener
+			if (mSSLServerSocket != null && !mSSLServerSocket.isClosed()) {
+				mSSLServerSocket.close();
+				if (mLog.isInfoEnabled()) {
+					mLog.info("SSL engine '" + getId()
+							+ "' stopped at port " + mSSLListenerPort
+							+ " (closed=" + mSSLServerSocket.isClosed() + ").");
+				}
+				mSSLServerSocket = null;
+			} else {
+				mLog.warn("Stopping SSL engine '" + getId()
+						+ "': no server socket or server socket closed.");
+			}
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " on stopping SSL engine '" + getId()
+					+ "': " + lEx.getMessage());
+		}
+
+		// stop TCP listener thread
+		if (mTCPEngineThread != null) {
 			try {
 				// TODO: Make this timeout configurable one day
-				mEngineThread.join(10000);
+				mTCPEngineThread.join(10000);
 			} catch (Exception lEx) {
 				mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 			}
 			if (mLog.isDebugEnabled()) {
 				long lDuration = new Date().getTime() - lStarted;
-				if (mEngineThread.isAlive()) {
-					mLog.warn("TCP engine '" + getId() + "' did not stop after " + lDuration + "ms.");
+				if (mTCPEngineThread.isAlive()) {
+					mLog.warn("TCP engine '" + getId()
+							+ "' did not stop after " + lDuration + "ms.");
 				} else {
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("TCP engine '" + getId() + "' stopped after " + lDuration + "ms.");
+						mLog.debug("TCP engine '" + getId()
+								+ "' stopped after " + lDuration + "ms.");
+					}
+				}
+			}
+		}
+
+		// stop SSL listener thread
+		if (mSSLEngineThread != null) {
+			try {
+				// TODO: Make this timeout configurable one day
+				mSSLEngineThread.join(10000);
+			} catch (Exception lEx) {
+				mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+			}
+			if (mLog.isDebugEnabled()) {
+				long lDuration = new Date().getTime() - lStarted;
+				if (mSSLEngineThread.isAlive()) {
+					mLog.warn("SSL engine '" + getId()
+							+ "' did not stop after " + lDuration + "ms.");
+				} else {
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("SSL engine '" + getId()
+								+ "' stopped after " + lDuration + "ms.");
 					}
 				}
 			}
@@ -215,7 +320,9 @@ public class TCPEngine extends BaseEngine {
 		mLog.debug("Parsing initial WebSocket handshake...");
 		}
 		 */
-		Map lRespMap = WebSocketHandshake.parseC2SRequest(lReq);
+		Map lRespMap = WebSocketHandshake.parseC2SRequest(
+				lReq,
+				aClientSocket instanceof SSLSocketImpl);
 		// maybe the request is a flash policy-file-request
 		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
 		if (lFlashBridgeReq != null) {
@@ -345,27 +452,32 @@ public class TCPEngine extends BaseEngine {
 	 * listener thread.
 	 */
 	public boolean isAlive() {
-		return (mEngineThread != null && mEngineThread.isAlive());
+		return (mTCPEngineThread != null && mTCPEngineThread.isAlive());
 	}
 
 	private class EngineListener implements Runnable {
 
 		private WebSocketEngine mEngine = null;
+		private ServerSocket mServer = null;
 
 		/**
 		 * Creates the server socket listener for new
 		 * incoming socket connections.
 		 * @param aEngine
 		 */
-		public EngineListener(WebSocketEngine aEngine) {
+		public EngineListener(WebSocketEngine aEngine, ServerSocket aServerSocket) {
 			mEngine = aEngine;
+			mServer = aServerSocket;
 		}
 
 		@Override
 		public void run() {
 
 			// notify server that engine has started
-			engineStarted();
+			if (!mEventsFired) {
+				mEventsFired = true;
+				engineStarted();
+			}
 
 			mIsRunning = true;
 			while (mIsRunning) {
@@ -375,7 +487,7 @@ public class TCPEngine extends BaseEngine {
 					// if (log.isDebugEnabled()) {
 					//	log.debug("Waiting for client...");
 					// }
-					Socket lClientSocket = mServerSocket.accept();
+					Socket lClientSocket = mServer.accept();
 					boolean lTCPNoDelay = lClientSocket.getTcpNoDelay();
 					lClientSocket.setTcpNoDelay(true);
 					try {
@@ -434,7 +546,10 @@ public class TCPEngine extends BaseEngine {
 
 			// notify server that engine has stopped
 			// this closes all connections
-			engineStopped();
+			if (mEventsFired) {
+				mEventsFired = false;
+				engineStopped();
+			}
 		}
 	}
 }

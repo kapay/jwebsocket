@@ -159,24 +159,39 @@
 					}
 				}
 			}
+			
+			function getPendingResponsesString() {
+				var lOut = "";
+				for( var lField in lWSC.fRequestCallbacks ) {
+					lOut += lField + " ";
+				}
+				return lOut ? lOut : "[none]";
+			}
+
+			function getPendingResponses() {
+				log( "Retreiving pending responses: "
+					+ getPendingResponsesString());
+			}
 
 			function wait() {
-				var lRes = lWSC.wait( 1000, {
+				var lRes = lWSC.wait( parseInt( eDuration.value ), {
 
 					OnResponse: function( aToken ) {
-						var lOut = "";
-						for( var lField in lWSC.fRequestCallbacks ) {
-							lOut += lField + " ";
-						}
-						log( "Wait response received! " + lOut );
+						log( "Response received within timeout: "
+							+ getPendingResponsesString() );
 					},
+
 					OnTimeout: function( aToken ) {
-						log( "Response timed out!" );
+						log( "Token " + aToken.utid 
+							+ " was not answered within "
+							+ aToken.timeout + " ms, response timed out!" );
 					},
+
 					spawnThread: true,
-					responseRequested: true,
-					timeout: 2000
+					responseRequested: eReqResp.checked,
+					timeout: parseInt( eTimeout.value )
 				});
+
 				log( lWSC.resultToString( lRes ) );
 			}
 
@@ -206,7 +221,7 @@
 				}
 			}
 
-			function runSkill( aSkillCmd, aTimeout ) {
+			function runCGI( aCGICmd, aTimeout ) {
 				var lToken = {
 					ns: "org.jwebsocket.plugins.system",
 					type: "send",
@@ -225,6 +240,9 @@
 				eCmd = jws.$( "stxfCmd" );
 				eArgs = jws.$( "stxfArgs" );
 				eTarget = jws.$( "stxfTarget" );
+				eReqResp = jws.$( "schkReqResp" );
+				eTimeout = jws.$( "stxfTimeout" );
+				eDuration = jws.$( "stxfDuration" );
 
 				if( window.WebSocket ) {
 					lWSC = new jws.jWebSocketJSONClient();
@@ -304,8 +322,8 @@
 							   title="Logs you out and disconnects from the jWebSocket server.">
 					</td>
 					<td class="stdDlg" width="5">
-						<input class="sbtnDlg" id="sbtnWait" type="button" value="Wait" onclick="wait();"
-							   title="Waits for a certain amount of time.">
+						<input class="sbtnDlg" id="sbtnPendResp" type="button" value="Pend.Resp." onclick="getPendingResponses();"
+							   title="Returns the list of currently pending responses from the jWebSocket server.">
 					</td>
 					<td class="stdDlg" width="5">Arguments</td>
 					<td class="stdDlg" width="">
@@ -313,7 +331,15 @@
 					</td>
 				</tr>
 				<tr class="strDlg">
-					<td class="stdDlg" width="" colspan="3">&nbsp;</td>
+					<td class="stdDlg" width="" colspan="2">
+						Dur <input class="stxfDlg" id="stxfDuration" type="text" value="1000" style="width:38px">
+						Tmo <input class="stxfDlg" id="stxfTimeout" type="text" value="2000" style="width:38px">
+						RqR <input class="stxfDlg" id="schkReqResp" type="checkbox" checked="checked">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnWait" type="button" value="Wait" onclick="wait();"
+							   title="Waits for a certain amount of time.">
+					</td>
 					<td class="stdDlg" width="5">Target</td>
 					<td class="stdDlg" width="">
 						<input class="stxfDlg" id="stxfTarget" type="text" value="Please type the target CGI client-id here!" style="width:100%">

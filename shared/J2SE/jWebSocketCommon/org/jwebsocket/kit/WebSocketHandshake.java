@@ -140,7 +140,7 @@ public final class WebSocketHandshake {
 	 * @param aReq
 	 * @return
 	 */
-	public static Map parseC2SRequest(byte[] aReq) {
+	public static Map parseC2SRequest(byte[] aReq, boolean aIsSSL) {
 		String lHost = null;
 		String lOrigin = null;
 		String lLocation = null;
@@ -199,7 +199,7 @@ public final class WebSocketHandshake {
 		lPos = lPath.indexOf("HTTP");
 		lPath = lPath.substring(0, lPos - 1);
 
-		lLocation = "ws://" + lHost + lPath;
+		lLocation = ( aIsSSL ? "wss" : "ws" ) +  "://" + lHost + lPath;
 
 		// get websocket sub protocol (irrespective of Sec- prefix for older browsers)
 		lPos = lRequest.indexOf("WebSocket-Protocol:");

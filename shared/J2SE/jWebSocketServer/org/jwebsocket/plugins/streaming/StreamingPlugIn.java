@@ -162,6 +162,8 @@ public class StreamingPlugIn extends TokenPlugIn {
 				registerConnector(aConnector, aToken);
 			} else if (lType.equals("unregister")) {
 				unregisterConnector(aConnector, aToken);
+			} else if (lType.equals("controlStream")) {
+				controlStream(aConnector, aToken);
 			}
 		}
 	}
@@ -174,7 +176,7 @@ public class StreamingPlugIn extends TokenPlugIn {
 	 */
 	public void registerConnector(WebSocketConnector aConnector, Token aToken) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing register...");
+			mLog.debug("Processing 'register'...");
 		}
 
 		BaseStream lStream = null;
@@ -198,14 +200,14 @@ public class StreamingPlugIn extends TokenPlugIn {
 	}
 
 	/**
-	 * registers a connector from a certain stream.
+	 * unregisters a connector from a certain stream.
 	 *
 	 * @param aConnector
 	 * @param aToken
 	 */
 	public void unregisterConnector(WebSocketConnector aConnector, Token aToken) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing unregister...");
+			mLog.debug("Processing 'unregister'...");
 		}
 
 		BaseStream lStream = null;
@@ -223,6 +225,30 @@ public class StreamingPlugIn extends TokenPlugIn {
 			}
 			// else...
 			// todo: error handling
+		}
+		// else...
+		// todo: error handling
+	}
+
+	/**
+	 * unregisters a connector from a certain stream.
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public void controlStream(WebSocketConnector aConnector, Token aToken) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'controlStream'...");
+		}
+
+		TokenStream lStream = null;
+		String lStreamID = aToken.getString("stream");
+		if (lStreamID != null) {
+			lStream = (TokenStream) mStreams.get(lStreamID);
+		}
+
+		if (lStream != null) {
+			lStream.control(aToken);
 		}
 		// else...
 		// todo: error handling

@@ -19,6 +19,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import javax.net.ssl.SSLSocket;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
@@ -44,6 +45,10 @@ public class TCPConnector extends BaseConnector {
 	private InputStream mIn = null;
 	private OutputStream mOut = null;
 	private Socket mClientSocket = null;
+	private boolean mIsSSL = false;
+	private static final String TCP_LOG = "TCP";
+	private static final String SSL_LOG = "SSL";
+	private String mLogInfo = TCP_LOG;
 	private boolean mIsRunning = false;
 	private CloseReason mCloseReason = CloseReason.TIMEOUT;
 
@@ -58,6 +63,8 @@ public class TCPConnector extends BaseConnector {
 	public TCPConnector(WebSocketEngine aEngine, Socket aClientSocket) {
 		super(aEngine);
 		mClientSocket = aClientSocket;
+		mIsSSL = mClientSocket instanceof SSLSocket;
+		mLogInfo = mIsSSL ? SSL_LOG : TCP_LOG;
 		try {
 			mIn = mClientSocket.getInputStream();
 			mOut = new PrintStream(mClientSocket.getOutputStream(), true, "UTF-8");
@@ -79,14 +86,16 @@ public class TCPConnector extends BaseConnector {
 		} catch (Exception lEx) {
 		}
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Starting TCP connector on port " + lPort + " with timeout "
+			mLog.debug("Starting " + mLogInfo + " connector on port "
+					+ lPort + " with timeout "
 					+ (lTimeout > 0 ? lTimeout + "ms" : "infinite") + "");
 		}
 		ClientProcessor lClientProc = new ClientProcessor(this);
 		Thread lClientThread = new Thread(lClientProc);
 		lClientThread.start();
 		if (mLog.isInfoEnabled()) {
-			mLog.info("Started TCP connector on port " + lPort + " with timeout "
+			mLog.info("Started " + mLogInfo + " connector on port "
+					+ lPort + " with timeout "
 					+ (lTimeout > 0 ? lTimeout + "ms" : "infinite") + "");
 		}
 	}
@@ -94,7 +103,8 @@ public class TCPConnector extends BaseConnector {
 	@Override
 	public void stopConnector(CloseReason aCloseReason) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Stopping TCP connector (" + aCloseReason.name() + ")...");
+			mLog.debug("Stopping " + mLogInfo
+					+ " connector (" + aCloseReason.name() + ")...");
 		}
 		int lPort = mClientSocket.getPort();
 		mCloseReason = aCloseReason;
@@ -110,13 +120,15 @@ public class TCPConnector extends BaseConnector {
 		try {
 			mIn.close();
 			if (mLog.isInfoEnabled()) {
-				mLog.info("Stopped TCP connector (" + aCloseReason.name()
+				mLog.info("Stopped " + mLogInfo
+						+ " connector (" + aCloseReason.name()
 						+ ") on port " + lPort + ".");
 			}
 		} catch (IOException lEx) {
 			if (mLog.isDebugEnabled()) {
 				mLog.info(lEx.getClass().getSimpleName()
-						+ " while stopping TCP connector (" + aCloseReason.name()
+						+ " while stopping " + mLogInfo
+						+ " connector (" + aCloseReason.name()
 						+ ") on port " + lPort + ": " + lEx.getMessage());
 			}
 		}

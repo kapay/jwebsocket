@@ -160,6 +160,10 @@ public class JWebSocketCommonConstants {
 	 */
 	public static int DEFAULT_PORT = 8787;
 	/**
+	 * Default socket port for jWebSocket clients.
+	 */
+	public static int DEFAULT_SSLPORT = 9797;
+	/**
 	 * Default Session Timeout for client connections (120000ms = 2min)
 	 */
 	public static int DEFAULT_TIMEOUT = 120000;
