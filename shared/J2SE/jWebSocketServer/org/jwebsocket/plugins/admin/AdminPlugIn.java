@@ -38,183 +38,177 @@ import org.jwebsocket.token.Token;
  */
 public class AdminPlugIn extends TokenPlugIn {
 
-  private static Logger log = Logging.getLogger(AdminPlugIn.class);
-  // if namespace changed update client plug-in accordingly!
-  private static final String NS_ADMIN = JWebSocketServerConstants.NS_BASE + ".plugins.admin";
+	private static Logger log = Logging.getLogger(AdminPlugIn.class);
+	// if namespace changed update client plug-in accordingly!
+	private static final String NS_ADMIN = JWebSocketServerConstants.NS_BASE + ".plugins.admin";
 
-  /**
-   * Default Constructor
-   */
-  public AdminPlugIn() {
-    this(null);
-  }
-  
-  /**
-   * Constructor that takes configuration object
-   */
-  public AdminPlugIn(PluginConfiguration configuration) {
-    super(configuration);
-    if (log.isDebugEnabled()) {
-      log.debug("Instantiating admin plug-in...");
-    }
-    // specify default name space for admin plugin
-    this.setNamespace(NS_ADMIN);
-  }
+	/**
+	 * Constructor that takes configuration object
+	 */
+	public AdminPlugIn(PluginConfiguration configuration) {
+		super(configuration);
+		if (log.isDebugEnabled()) {
+			log.debug("Instantiating admin plug-in...");
+		}
+		// specify default name space for admin plugin
+		this.setNamespace(NS_ADMIN);
+	}
 
-  @Override
-  public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-    String lType = aToken.getType();
-    String lNS = aToken.getNS();
+	@Override
+	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+		String lType = aToken.getType();
+		String lNS = aToken.getNS();
 
-    if (lType != null && getNamespace().equals(lNS)) {
-      // remote shut down server
-      if (lType.equals("shutdown")) {
-        shutdown(aConnector, aToken);
-      } else if (lType.equals("getConnections")) {
-        getConnections(aConnector, aToken);
-      } else if (lType.equals("getUserRights")) {
-        getUserRights(aConnector, aToken);
-      } else if (lType.equals("getUserRoles")) {
-        getUserRoles(aConnector, aToken);
-      }
-    }
-  }
+		if (lType != null && getNamespace().equals(lNS)) {
+			// remote shut down server
+			if (lType.equals("shutdown")) {
+				shutdown(aConnector, aToken);
+			} else if (lType.equals("getConnections")) {
+				getConnections(aConnector, aToken);
+			} else if (lType.equals("getUserRights")) {
+				getUserRights(aConnector, aToken);
+			} else if (lType.equals("getUserRoles")) {
+				getUserRoles(aConnector, aToken);
+			}
+		}
+	}
 
-  /**
-   * shutdown server
-   * 
-   * @param aConnector
-   * @param aToken
-   */
-  public void shutdown(WebSocketConnector aConnector, Token aToken) {
-    TokenServer lServer = getServer();
+	/**
+	 * shutdown server
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	private void shutdown(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
 
-    if (log.isDebugEnabled()) {
-      log.debug("Processing 'shutdown'...");
-    }
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'shutdown'...");
+		}
 
-    // TODO: check for allowShutdown setting, irrespective of user right!
+		// TODO: check for allowShutdown setting, irrespective of user right!
 
-    // check if user is allowed to run 'shutdown' command
-    if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".shutdown")) {
-      lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-      return;
-    }
+		// check if user is allowed to run 'shutdown' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".shutdown")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
 
-    // notify clients about shutdown
-    Token lResponseToken = lServer.createResponse(aToken);
-    lResponseToken.setString("msg", "Shutdown in progress...");
-    lServer.broadcastToken(lResponseToken);
+		// notify clients about shutdown
+		Token lResponseToken = lServer.createResponse(aToken);
+		lResponseToken.setString("msg", "Shutdown in progress...");
+		lServer.broadcastToken(lResponseToken);
 
-    JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
+		JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
 
-  }
+	}
 
-  /**
-   * return all sessions
-   * 
-   * @param aConnector
-   * @param aToken
-   */
-  public void getConnections(WebSocketConnector aConnector, Token aToken) {
-    TokenServer lServer = getServer();
+	/**
+	 * return all sessions
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	private void getConnections(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
 
-    if (log.isDebugEnabled()) {
-      log.debug("Processing 'getConnections'...");
-    }
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'getConnections'...");
+		}
 
-    // check if user is allowed to run 'getConnections' command
-    if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".getConnections")) {
-      lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-      return;
-    }
+		// check if user is allowed to run 'getConnections' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".getConnections")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
 
-    Token lResponse = lServer.createResponse(aToken);
-    try {
-      List<Map> lResultList = new FastList<Map>();
-      Map lConnectorMap = lServer.getAllConnectors();
-      Collection<WebSocketConnector> lConnectors = lConnectorMap.values();
-      for (WebSocketConnector lConnector : lConnectors) {
-        Map lResultItem = new FastMap<String, Object>();
-        lResultItem.put("port", lConnector.getRemotePort());
-        lResultItem.put("usid", lConnector.getSession().getSessionId());
-        lResultItem.put("username", lConnector.getUsername());
-        lResultItem.put("isToken", lConnector.getBoolean(TokenServer.VAR_IS_TOKENSERVER));
-        lResultList.add(lResultItem);
-      }
-      lResponse.setList("connections", lResultList);
-    } catch (Exception ex) {
-      log.error(ex.getClass().getSimpleName() + " on getConnections: " + ex.getMessage());
-    }
-    lServer.sendToken(aConnector, lResponse);
-  }
+		Token lResponse = lServer.createResponse(aToken);
+		try {
+			List<Map> lResultList = new FastList<Map>();
+			Map lConnectorMap = lServer.getAllConnectors();
+			Collection<WebSocketConnector> lConnectors = lConnectorMap.values();
+			for (WebSocketConnector lConnector : lConnectors) {
+				Map lResultItem = new FastMap<String, Object>();
+				lResultItem.put("port", lConnector.getRemotePort());
+				// Caution! This method may only be granted to administrators!
+				lResultItem.put("usid", lConnector.getSession().getSessionId());
+				lResultItem.put("username", lConnector.getUsername());
+				lResultItem.put("isToken", lConnector.getBoolean(TokenServer.VAR_IS_TOKENSERVER));
+				lResultList.add(lResultItem);
+			}
+			lResponse.setList("connections", lResultList);
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName() + " on getConnections: " + ex.getMessage());
+		}
+		lServer.sendToken(aConnector, lResponse);
+	}
 
-  public void getUserRights(WebSocketConnector aConnector, Token aToken) {
-    TokenServer lServer = getServer();
+	private void getUserRights(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
 
-    if (log.isDebugEnabled()) {
-      log.debug("Processing 'getUserRights'...");
-    }
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'getUserRights'...");
+		}
 
-    // check if user is allowed to run 'getUserRights' command
-    if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".getUserRights")) {
-      // TODO: create right in jWebSocket.xml!
-      // lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-      // return;
-    }
+		// check if user is allowed to run 'getUserRights' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".getUserRights")) {
+			// TODO: create right in jWebSocket.xml!
+			// lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
 
-    String lUsername = aToken.getString("username");
-    if (lUsername == null || lUsername.isEmpty()) {
-      lUsername = aConnector.getUsername();
-    }
-    Token lResponse = lServer.createResponse(aToken);
-    try {
-      User lUser = SecurityFactory.getUser(lUsername);
-      if (lUser != null) {
-        List<String> lRightIds = new FastList(lUser.getRightIdSet());
-        lResponse.setList("rights", lRightIds);
-      } else {
-        lResponse.setInteger("code", -1);
-        lResponse.setString("msg", "invalid user");
-      }
-    } catch (Exception ex) {
-      log.error(ex.getClass().getSimpleName() + " on getUserRights: " + ex.getMessage());
-    }
+		String lUsername = aToken.getString("username");
+		if (lUsername == null || lUsername.isEmpty()) {
+			lUsername = aConnector.getUsername();
+		}
+		Token lResponse = lServer.createResponse(aToken);
+		try {
+			User lUser = SecurityFactory.getUser(lUsername);
+			if (lUser != null) {
+				List<String> lRightIds = new FastList(lUser.getRightIdSet());
+				lResponse.setList("rights", lRightIds);
+			} else {
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "invalid user");
+			}
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName() + " on getUserRights: " + ex.getMessage());
+		}
 
-    lServer.sendToken(aConnector, lResponse);
-  }
+		lServer.sendToken(aConnector, lResponse);
+	}
 
-  public void getUserRoles(WebSocketConnector aConnector, Token aToken) {
-    TokenServer lServer = getServer();
+	private void getUserRoles(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
 
-    if (log.isDebugEnabled()) {
-      log.debug("Processing 'getUserRoles'...");
-    }
+		if (log.isDebugEnabled()) {
+			log.debug("Processing 'getUserRoles'...");
+		}
 
-    // check if user is allowed to run 'getUserRoles' command
-    if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".getUserRoles")) {
-      // TODO: create right in jWebSocket.xml!
-      // lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-      // return;
-    }
+		// check if user is allowed to run 'getUserRoles' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".getUserRoles")) {
+			// TODO: create right in jWebSocket.xml!
+			// lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
 
-    String lUsername = aToken.getString("username");
-    if (lUsername == null || lUsername.isEmpty()) {
-      lUsername = aConnector.getUsername();
-    }
-    Token lResponse = lServer.createResponse(aToken);
-    try {
-      List<String> lRoleIds = new FastList(SecurityFactory.getRoleIdSet(lUsername));
-      if (lRoleIds != null) {
-        lResponse.setList("roles", lRoleIds);
-      } else {
-        lResponse.setInteger("code", -1);
-        lResponse.setString("msg", "invalid user");
-      }
-    } catch (Exception ex) {
-      log.error(ex.getClass().getSimpleName() + " on getUserRoles: " + ex.getMessage());
-    }
+		String lUsername = aToken.getString("username");
+		if (lUsername == null || lUsername.isEmpty()) {
+			lUsername = aConnector.getUsername();
+		}
+		Token lResponse = lServer.createResponse(aToken);
+		try {
+			List<String> lRoleIds = new FastList(SecurityFactory.getRoleIdSet(lUsername));
+			if (lRoleIds != null) {
+				lResponse.setList("roles", lRoleIds);
+			} else {
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "invalid user");
+			}
+		} catch (Exception ex) {
+			log.error(ex.getClass().getSimpleName() + " on getUserRoles: " + ex.getMessage());
+		}
 
-    lServer.sendToken(aConnector, lResponse);
-  }
+		lServer.sendToken(aConnector, lResponse);
+	}
 }

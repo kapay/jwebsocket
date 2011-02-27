@@ -75,13 +75,6 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String BROADCAST_LOGOUT_KEY = "broadcastLogoutEvent";
 
 	/**
-	 * Default constructor
-	 */
-	public SystemPlugIn() {
-		this(null);
-	}
-
-	/**
 	 * Constructor with configuration object
 	 */
 	public SystemPlugIn(PluginConfiguration aConfiguration) {
