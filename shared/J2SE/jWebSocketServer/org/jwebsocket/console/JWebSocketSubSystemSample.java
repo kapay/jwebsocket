@@ -18,12 +18,14 @@ import java.util.List;
 import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
+import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketServerListener;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.config.LoggingConfig;
 import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
@@ -98,11 +100,19 @@ public class JWebSocketSubSystemSample {
 			TokenPlugInChain lPlugInChain = mServer.getPlugInChain();
 			// the system plug-in is essential to process authentication
 			// send and broadcast
-			lPlugInChain.addPlugIn(new SystemPlugIn());
+			PluginConfiguration lPlugInConfig = new PluginConfig(
+					"jws.system", // id
+					"SystemPlugIn", // name
+					"org.jwebsocket.plugins.system", // package
+					"jWebSocketServer-1.0.jar", // jar
+					"org.jwebsocket.plugins.system", // namespace
+					lDomains, // list of accepted domains
+					null // settings
+					);
+			lPlugInChain.addPlugIn(new SystemPlugIn(lPlugInConfig));
 			// the FlashBrigde plug-in is strongly recommended to also support
 			// non websocket compliant browsers
 			lPlugInChain.addPlugIn(new FlashBridgePlugIn());
-
 		}
 	}
 

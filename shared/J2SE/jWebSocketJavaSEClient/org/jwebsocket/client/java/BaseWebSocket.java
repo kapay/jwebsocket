@@ -166,14 +166,16 @@ public class BaseWebSocket implements WebSocketClient {
 			if (lHeaders.containsKey("Sec-WebSocket-Protocol")) {
 				String llHeader = lHeaders.get("Sec-WebSocket-Protocol");
 				if (llHeader.indexOf('/') == -1) {
-					mNegotiatedSubprotocol = new SubProtocol(llHeader, JWebSocketCommonConstants.WS_FORMAT_DEFAULT);
+					mNegotiatedSubprotocol = new SubProtocol(
+							llHeader, JWebSocketCommonConstants.WS_FORMAT_DEFAULT);
 				} else {
 					String[] lSplit = llHeader.split("/");
 					mNegotiatedSubprotocol = new SubProtocol(lSplit[0], lSplit[1]);
 				}
 			} else {
 				// just default to 'jwebsocket.org/json'
-				mNegotiatedSubprotocol = new SubProtocol(JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT,
+				mNegotiatedSubprotocol = new SubProtocol(
+						JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT,
 						JWebSocketCommonConstants.WS_FORMAT_DEFAULT);
 			}
 
@@ -186,7 +188,9 @@ public class BaseWebSocket implements WebSocketClient {
 			mConnected = true;
 			mStatus = WebSocketStatus.OPEN;
 		} catch (IOException lIOEx) {
-			throw new WebSocketException("error while connecting: " + lIOEx.getMessage(), lIOEx);
+			throw new WebSocketException(
+					"Error while connecting: "
+					+ lIOEx.getMessage(), lIOEx);
 		}
 	}
 
@@ -210,7 +214,9 @@ public class BaseWebSocket implements WebSocketClient {
 		try {
 			lData = aData.getBytes(aEncoding);
 		} catch (UnsupportedEncodingException lEx) {
-			throw new WebSocketException("Encoding exception while sending the data:" + lEx.getMessage(), lEx);
+			throw new WebSocketException(
+					"Encoding exception while sending the data:"
+					+ lEx.getMessage(), lEx);
 		}
 
 		send(lData);
@@ -226,7 +232,8 @@ public class BaseWebSocket implements WebSocketClient {
 		} else {
 			if (isBinaryFormat() && (aDataPacket.getFrameType() != RawPacket.FRAMETYPE_BINARY)) {
 				// we negotiated binary format with the server
-				throw new WebSocketException("Only binary packets are allowed for this connection");
+				throw new WebSocketException(
+						"Only binary packets are allowed for this connection");
 			}
 
 			sendInternal(WebSocketProtocolHandler.toProtocolPacket(aDataPacket));
@@ -257,7 +264,6 @@ public class BaseWebSocket implements WebSocketClient {
 			throw new WebSocketException("error while sending socket data: ", lEx);
 		}
 	}
-
 
 	public void handleReceiverError() {
 		try {
@@ -484,6 +490,7 @@ public class BaseWebSocket implements WebSocketClient {
 	}
 
 	class SubProtocol {
+
 		private String mName;
 		private String mFormat;
 

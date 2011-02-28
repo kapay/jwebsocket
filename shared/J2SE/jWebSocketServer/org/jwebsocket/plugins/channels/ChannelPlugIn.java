@@ -15,7 +15,6 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javolution.util.FastList;
