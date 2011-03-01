@@ -83,7 +83,7 @@ jws.CanvasPlugIn = {
 		}
 	},
 
-	canvasGetBase64: function( aId ) {
+	canvasGetBase64: function( aId, aMimeType ) {
 		var lRes = {
 			code: -1,
 			msg : "Ok"
@@ -93,7 +93,7 @@ jws.CanvasPlugIn = {
 			if( typeof lCanvas.fDOMElem.toDataURL == "function" ) {
 				lRes.code = 0;
 				lRes.encoding = "base64";
-				lRes.data = lCanvas.fDOMElem.toDataURL();
+				lRes.data = lCanvas.fDOMElem.toDataURL( aMimeType );
 			} else {
 				lRes.msg = "Retrieving image data from canvas not (yet) supported by browser.";
 			}

@@ -153,16 +153,22 @@
 
 			function snapshot() {
 				if( lIsConnected ) {
-					var lRes = lWSC.canvasGetBase64( CANVAS_ID );
+					// png should be supported by all HTML5 compliant browser
+					// jpeg may not be supported yet (as of 2011-03-01)
+					// by Safari and Opera. Thus, take png as default for now.
+					var lRes = lWSC.canvasGetBase64( CANVAS_ID, "image/png" );
 					if( lRes.code == 0 ) {
 						// the image could be loaded successfully
 						// from the canvase element
 						var lRes = lWSC.fileSave(
+							// use hardcoded file name for now in this
+							// demo to keep it as simple as possible
 							"canvas_demo.png",
+							// the data is already base64 encoded!
 							lRes.data,
 							{	scope: jws.SCOPE_PUBLIC,
 								encoding: "base64",
-								suppressEncoder: true // the data is already base64 encoded!
+								suppressEncoder: true // data already base64 encoded!
 							}
 						);
 					} else {
