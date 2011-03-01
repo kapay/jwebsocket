@@ -27,6 +27,8 @@
 		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
 		<script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
 		<script src="../../res/js/jwsCanvasPlugIn.js" type="text/javascript"></script>
+		<!-- load file system plug-in to be able to send snap shots of the canvas -->
+		<script src="../../res/js/jwsFileSystemPlugIn.js" type="text/javascript"></script>
 		<script type="text/javascript" language="JavaScript">
 			var lJWSID = "jWebSocket Chat",
 			lWSC = null,
@@ -149,6 +151,27 @@
 				}
 			}
 
+			function snapshot() {
+				if( lIsConnected ) {
+					var lRes = lWSC.canvasGetBase64( CANVAS_ID );
+					if( lRes.code == 0 ) {
+						// the image could be loaded successfully
+						// from the canvase element
+						var lRes = lWSC.fileSave(
+							"canvas_demo.png",
+							lRes.data,
+							{	scope: jws.SCOPE_PUBLIC,
+								encoding: "base64",
+								suppressEncoder: true // the data is already base64 encoded!
+							}
+						);
+					} else {
+						// an error occured
+						alert( lRes.msg );
+					}
+				}
+			}
+
 			function initPage() {
 				// get some required HTML elements
 
@@ -204,7 +227,10 @@
 		>
 		<div> <!-- style="border:1px solid red" -->
 			<p>
-				<input class="sbtnDlg" id="sbtnClear" type="button" value="Clear" onclick="doClear();">&nbsp;
+				<input class="sbtnDlg" id="sbtnClear" type="button" value="Clear" onclick="doClear();"
+					   title="Clears the current canvas locally and on all connected clients.">&nbsp;
+				<input class="sbtnDlg" id="sbtnSend" type="button" value="Snapshot" onclick="snapshot();"
+					   title="Creates a snapshot, save it on the server and broadcasts a 'filesave' event.">&nbsp;
 				<img id="simgStatus" alt="status"  src="../../images/disconnected.png"/>
 			</p>
 			<p id="spnAvg" style="display:none">0ms</p>

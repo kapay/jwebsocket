@@ -83,6 +83,26 @@ jws.CanvasPlugIn = {
 		}
 	},
 
+	canvasGetBase64: function( aId ) {
+		var lRes = {
+			code: -1,
+			msg : "Ok"
+		};
+		var lCanvas = this.fCanvas[ aId ];
+		if( lCanvas != null ) {
+			if( typeof lCanvas.fDOMElem.toDataURL == "function" ) {
+				lRes.code = 0;
+				lRes.encoding = "base64";
+				lRes.data = lCanvas.fDOMElem.toDataURL();
+			} else {
+				lRes.msg = "Retrieving image data from canvas not (yet) supported by browser.";
+			}
+		} else {
+			lRes.msg = "Canvas not found.";
+		}
+		return lRes;
+	},
+
 	doBeginPath: function( aId ) {
 		var lCanvas = this.fCanvas[ aId ];
 		if( lCanvas != null ) {
