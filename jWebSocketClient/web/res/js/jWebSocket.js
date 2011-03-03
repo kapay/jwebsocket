@@ -206,6 +206,117 @@ var jws = {
 		);
 	})(),
 
+	//:m:*:browserSupportsWebWorkers
+	//:d:en:checks if the browser natively supports HTML5 WebWorkers
+	//:a:en::::none
+	//:r:*:::boolean:true if the browser natively support WebWorkers, otherwise false.
+	browserSupportsWebWorkers: (function() {
+		return(
+			window.Worker !== null && window.Worker !== undefined
+		);
+	})(),
+
+	//:m:*:runAsThread
+	//:d:en:checks if the browser natively supports HTML5 WebWorkers
+	//:a:en::::none
+	//:r:*:::boolean:true if the browser natively support WebWorkers, otherwise false.
+	runAsThread: function( aOptions ) {
+		// if browser does not support WebWorkers nothing can be done here
+		if ( !this.browserSupportsWebWorkers ) {
+			return {
+				code: -1,
+				msg: "Browser does not (yet) support WebWorkers."
+			};
+		}
+		// check if options were passed
+		if( !aOptions ) {
+			aOptions = {};
+		}
+		// set default options
+		var lOnMessage = null;
+		var lOnError = null;
+		var lFile = jws.SCRIPT_PATH + "jwsWorker.js";
+		var lMethod = null;
+		var lArgs = [];
+		// checked options passed
+		if( aOptions.OnMessage && typeof aOptions.OnMessage == "function" ) {
+			lOnMessage = aOptions.OnMessage;
+		}
+		if( aOptions.OnError && typeof aOptions.OnError == "function" ) {
+			lOnError = aOptions.OnError;
+		}
+		if( aOptions.file && typeof aOptions.file == "String" ) {
+			lFile = aOptions.file;
+		}
+		if( aOptions.method && typeof aOptions.method == "function" ) {
+			lMethod = aOptions.method;
+		}
+		if( aOptions.args ) {
+			lArgs = aOptions.args;
+		}
+		// TODO:
+		// check lArgs for type, if needed convert to array
+
+		var lThis = this;
+		// create worker object if required
+		if( !jws.worker ) {
+			jws.worker = new Worker( lFile );
+
+			// This listener is called when a message from the thread
+			// to the application is posted.
+			var lThis = this;
+			jws.worker.onmessage = function( aEvent ) {
+				if( lOnMessage != null ) {
+					lOnMessage.call( lThis, {
+						data: aEvent.data
+					});
+				}
+				// console.log( "Worker message: " + JSON.stringify( aEvent.data ) );
+			};
+
+			// This listener is called when an error
+			// occurred within the thread.
+			jws.worker.onerror = function( aEvent ) {
+				if( lOnError != null ) {
+					lOnError.call( lThis, {
+						message: aEvent.message
+					});
+				}
+				// console.log( "Worker error: " + aEvent.message );
+			};
+		}
+
+		jws.worker.postMessage({
+			// instance: lThis,
+			method: lMethod.toString(),
+			args: lArgs
+		});
+
+		return {
+			code: 0,
+			msg: "ok",
+			worker: jws.worker
+		};
+	},
+
+	SCRIPT_PATH: (function() {
+		var lScripts = document.getElementsByTagName( "script" );
+		for( var lIdx = 0, lCnt = lScripts.length; lIdx < lCnt; lIdx++ ) {
+			var lScript = lScripts[ lIdx ];
+			var lPath = lScript.src;
+			if( !lPath ) {
+				lPath = lScript.getAttribute( "src" );
+			}
+			if( lPath ) {
+				var lPos = lPath.lastIndexOf( "jWebSocket" );
+				if( lPos > 0 ) {
+					return lPath.substr( 0, lPos );
+				}
+			}
+		}
+		return null;
+	})(),
+
 	//:m:*:isIE
 	//:d:en:checks if the browser is Internet Explorer. _
 	//:d:en:This is needed to switch to IE specific event model.
@@ -554,7 +665,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 		// if browser natively supports WebSockets...
 		// otherwise flash bridge may have embedded WebSocket class
-		if( self.WebSocket) {
+		if( self.WebSocket ) {
 
 			// TODO: !this.fConn is not enough here! Check for readystate!
 			// if connection not already established...

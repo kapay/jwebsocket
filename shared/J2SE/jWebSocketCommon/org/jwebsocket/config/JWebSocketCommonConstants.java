@@ -164,6 +164,14 @@ public class JWebSocketCommonConstants {
 	 */
 	public static int DEFAULT_SSLPORT = 9797;
 	/**
+	 * Default context on app servers and servlet containers
+	 */
+	public static final String JWEBSOCKET_DEF_CONTEXT = "/jWebSocket";
+	/**
+	 * Default servlet on app servers and servlet containers
+	 */
+	public static final String JWEBSOCKET_DEF_SERVLET = "/jWebSocket";
+	/**
 	 * Default Session Timeout for client connections (120000ms = 2min)
 	 */
 	public static int DEFAULT_TIMEOUT = 120000;

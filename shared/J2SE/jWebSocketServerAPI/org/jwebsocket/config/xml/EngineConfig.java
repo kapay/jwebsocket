@@ -35,6 +35,8 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	private final String mServlet;
 	private final Integer mPort;
 	private final Integer mSSLPort;
+	private final String mKeyStore;
+	private final String mKeyStorePassword;
 	private final int mTimeout;
 	private final int mMaxframesize;
 	private final List<String> mDomains;
@@ -51,7 +53,8 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	 *						receive without closing the connection
 	 * @param aDomains      list of domain names
 	 */
-	public EngineConfig(String aId, String aName, String aJar, Integer aPort, Integer aSSLPort,
+	public EngineConfig(String aId, String aName, String aJar, Integer aPort,
+			Integer aSSLPort, String aKeyStore, String aKeyStorePassword,
 			String aContext, String aServlet, int aTimeout,
 			int aMaxFrameSize, List<String> aDomains) {
 		this.mId = aId;
@@ -61,6 +64,8 @@ public final class EngineConfig implements Config, EngineConfiguration {
 		this.mServlet = aServlet;
 		this.mPort = aPort;
 		this.mSSLPort = aSSLPort;
+		this.mKeyStore = aKeyStore;
+		this.mKeyStorePassword = aKeyStorePassword;
 		this.mTimeout = aTimeout;
 		this.mMaxframesize = aMaxFrameSize;
 		this.mDomains = aDomains;
@@ -163,12 +168,29 @@ public final class EngineConfig implements Config, EngineConfiguration {
 				// leaving port empty needs to be allowed eg. for Jetty
 				// when using underlying WebSocket Servlets
 				&& (mPort == null || (mPort >= 0 && mPort < 65536))
-				&& (mSSLPort == null || (mSSLPort >= 0 && mSSLPort < 65536))
+				&& (mSSLPort == null
+				|| (mSSLPort >= 0 && mSSLPort < 65536
+				&& mKeyStore != null && mKeyStore.length() > 0
+				&& mKeyStorePassword != null && mKeyStorePassword.length() > 0))
 				&& mTimeout >= 0) {
 			return;
 		}
 		throw new WebSocketRuntimeException(
 				"Missing one of the engine configuration, "
 				+ "please check your configuration file");
+	}
+
+	/**
+	 * @return the KeyStore
+	 */
+	public String getKeyStore() {
+		return mKeyStore;
+	}
+
+	/**
+	 * @return the KeyStorePassword
+	 */
+	public String getKeyStorePassword() {
+		return mKeyStorePassword;
 	}
 }

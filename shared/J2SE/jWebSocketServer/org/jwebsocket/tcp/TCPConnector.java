@@ -45,9 +45,8 @@ public class TCPConnector extends BaseConnector {
 	private InputStream mIn = null;
 	private OutputStream mOut = null;
 	private Socket mClientSocket = null;
-	private boolean mIsSSL = false;
-	private static final String TCP_LOG = "TCP";
-	private static final String SSL_LOG = "SSL";
+	public static final String TCP_LOG = "TCP";
+	public static final String SSL_LOG = "SSL";
 	private String mLogInfo = TCP_LOG;
 	private boolean mIsRunning = false;
 	private CloseReason mCloseReason = CloseReason.TIMEOUT;
@@ -63,8 +62,8 @@ public class TCPConnector extends BaseConnector {
 	public TCPConnector(WebSocketEngine aEngine, Socket aClientSocket) {
 		super(aEngine);
 		mClientSocket = aClientSocket;
-		mIsSSL = mClientSocket instanceof SSLSocket;
-		mLogInfo = mIsSSL ? SSL_LOG : TCP_LOG;
+		setSSL(mClientSocket instanceof SSLSocket);
+		mLogInfo = isSSL() ? SSL_LOG : TCP_LOG;
 		try {
 			mIn = mClientSocket.getInputStream();
 			mOut = new PrintStream(mClientSocket.getOutputStream(), true, "UTF-8");

@@ -172,6 +172,24 @@
 				}
 			}
 
+			function thread() {
+				log( "Starting method as thread..." );
+				var lRes = jws.runAsThread({
+					method: function( aOut ) {
+						return( "This method was called in a WebWorker thread and returned: " + aOut );
+					},
+					args: [ "This was the passed argument" ],
+					OnMessage: function( aToken ) {
+						var lData = aToken.data;
+						log( "Result: " + lData );
+					},
+					OnError: function( aToken ) {
+						log( "Error: " + aToken.message );
+					}
+				});
+				log( lRes.msg );
+			}
+
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
 				eMessage = jws.$( "stxfMsg" );
@@ -257,6 +275,10 @@
 							   title="Logs you out and disconnects from the jWebSocket server.">
 					</td>
 					<td class="stdDlg" width="" colspan="3"></td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnLogout" type="button" value="Thread" onclick="thread();"
+							   title="Runs the echo operation as a thread." >
+					</td>
 				</tr>
 			</table>
 		</div>

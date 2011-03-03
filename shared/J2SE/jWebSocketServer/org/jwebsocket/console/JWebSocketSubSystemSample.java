@@ -72,10 +72,12 @@ public class JWebSocketSubSystemSample {
 				"tcp0", // id
 				"org.jwebsocket.tcp.engines.TCPEngine", // name
 				"-", // jar, needs to be in classpath, i.e. embedded in .jar'/manifest
-				8787, // unsecured nonssl-port
-				9797, // secured ssl-port
-				null, // context if such
-				null, // servlet if such
+				JWebSocketCommonConstants.DEFAULT_PORT, // unsecured nonssl-port
+				JWebSocketCommonConstants.DEFAULT_SSLPORT, // secured ssl-port
+				JWebSocketServerConstants.JWEBSOCKET_KEYSTORE, // default keystore file
+				JWebSocketServerConstants.JWEBSOCKET_KS_DEF_PWD, // default keystore file password
+				JWebSocketCommonConstants.JWEBSOCKET_DEF_CONTEXT, // context if such
+				JWebSocketCommonConstants.JWEBSOCKET_DEF_SERVLET, // servlet if such
 				120000, // default session timeout
 				JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE, // max framesize
 				lDomains // list of accepted domains

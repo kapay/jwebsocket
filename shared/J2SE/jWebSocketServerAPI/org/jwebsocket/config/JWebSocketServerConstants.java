@@ -48,9 +48,18 @@ public final class JWebSocketServerConstants {
 	 */
 	public static final String JWEBSOCKET_XML = "jWebSocket.xml";
 	/**
+	 * Constant for jWebSocket.ks key store file
+	 */
+	public static final String JWEBSOCKET_KEYSTORE = "jWebSocket.ks";
+	/**
+	 * Default password for demo keystore
+	 */
+	public static final String JWEBSOCKET_KS_DEF_PWD = "jWebSocket";
+	/**
 	 * Constant for jWebSocket.xml configuration file
 	 */
 	public static final String JWEBSOCKET_OVERRIDE_XML = "jWebSocket-override.xml";
+
 	/**
 	 * Default engine for jWebSocket server.
 	 */

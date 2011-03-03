@@ -21,6 +21,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.util.List;
 import javolution.util.FastList;
 import org.jwebsocket.config.ConfigHandler;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.util.Tools;
 
 /**
@@ -39,6 +40,8 @@ public class EngineConfigHandler implements ConfigHandler {
 	private static final String SERVLET = "servlet";
 	private static final String PORT = "port";
 	private static final String SSL_PORT = "sslport";
+	private static final String KEYSTORE = "keystore";
+	private static final String KEYSTORE_PASSWORD = "password";
 	private static final String TIMEOUT = "timeout";
 	private static final String MAXFRAMESIZE = "maxframesize";
 	private static final String DOMAINS = "domains";
@@ -50,7 +53,9 @@ public class EngineConfigHandler implements ConfigHandler {
 	@Override
 	public Config processConfig(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
-		String lId = "", lName = "", lJar = "", lContext = "", lServlet = "";
+		String lId = "", lName = "", lJar = "", lContext = "", lServlet = "", 
+				lKeyStore = JWebSocketServerConstants.JWEBSOCKET_KEYSTORE,
+				lKeyStorePassword = JWebSocketServerConstants.JWEBSOCKET_KS_DEF_PWD;
 		int lPort = 0, lSSLPort = 0, lTimeout = 0, lFramesize = 0;
 		List<String> lDomains = null;
 		while (aStreamReader.hasNext()) {
@@ -78,6 +83,12 @@ public class EngineConfigHandler implements ConfigHandler {
 				} else if (lElementName.equals(SSL_PORT)) {
 					aStreamReader.next();
 					lSSLPort = Tools.stringToInt(aStreamReader.getText(), -1);
+				} else if (lElementName.equals(KEYSTORE)) {
+					aStreamReader.next();
+					lKeyStore = aStreamReader.getText();
+				} else if (lElementName.equals(KEYSTORE_PASSWORD)) {
+					aStreamReader.next();
+					lKeyStorePassword = aStreamReader.getText();
 				} else if (lElementName.equals(TIMEOUT)) {
 					aStreamReader.next();
 					lTimeout = Integer.parseInt(aStreamReader.getText());
@@ -98,7 +109,7 @@ public class EngineConfigHandler implements ConfigHandler {
 			}
 		}
 		return new EngineConfig(lId, lName, lJar, 
-				lPort, lSSLPort,
+				lPort, lSSLPort, lKeyStore, lKeyStorePassword,
 				lContext, lServlet,
 				lTimeout, lFramesize, lDomains);
 	}

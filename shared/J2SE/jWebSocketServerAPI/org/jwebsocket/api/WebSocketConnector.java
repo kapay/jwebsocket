@@ -269,4 +269,14 @@ public interface WebSocketConnector {
 	 *
 	 */
 	void removeNodeId();
+
+	/**
+	 *
+	 */
+	boolean isSSL();
+
+	/**
+	 *
+	 */
+	void setSSL(boolean aIsSSL);
 }

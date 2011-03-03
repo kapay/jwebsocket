@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.Date;
 import java.util.Map;
 import javax.net.ssl.KeyManagerFactory;
@@ -38,6 +39,7 @@ import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.CloseReason;
@@ -59,6 +61,8 @@ public class TCPEngine extends BaseEngine {
 	private int mTCPListenerPort = JWebSocketCommonConstants.DEFAULT_PORT;
 	private int mSSLListenerPort = JWebSocketCommonConstants.DEFAULT_SSLPORT;
 	private int mSessionTimeout = JWebSocketCommonConstants.DEFAULT_TIMEOUT;
+	private String mKeyStore = JWebSocketServerConstants.JWEBSOCKET_KEYSTORE;
+	private String mKeyStorePassword = JWebSocketServerConstants.JWEBSOCKET_KS_DEF_PWD;
 	private boolean mIsRunning = false;
 	private boolean mEventsFired = false;
 	private Thread mTCPEngineThread = null;
@@ -69,6 +73,8 @@ public class TCPEngine extends BaseEngine {
 		mTCPListenerPort = aConfiguration.getPort();
 		mSSLListenerPort = aConfiguration.getSSLPort();
 		mSessionTimeout = aConfiguration.getTimeout();
+		mKeyStore = aConfiguration.getKeyStore();
+		mKeyStorePassword = aConfiguration.getKeyStorePassword();
 	}
 
 	@Override
@@ -107,44 +113,59 @@ public class TCPEngine extends BaseEngine {
 		}
 
 		// create encrypted (SSL) server socket for wss:// protocol
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Starting SSL engine '"
-					+ getId()
-					+ "' at port " + mSSLListenerPort
-					+ " with default timeout "
-					+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
-					+ "...");
-		}
-		try {
-			SSLContext lSSLContext = SSLContext.getInstance("SSL");
-			KeyManagerFactory lKMF = KeyManagerFactory.getInstance("SunX509");
-			KeyStore lKeyStore = KeyStore.getInstance("JKS");
+		if (mSSLListenerPort > 0) {
+			if (mKeyStore != null && !mKeyStore.isEmpty()
+					&& mKeyStorePassword != null && !mKeyStorePassword.isEmpty()) {
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Starting SSL engine '"
+							+ getId()
+							+ "' at port " + mSSLListenerPort
+							+ " with default timeout "
+							+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
+							+ "...");
+				}
+				try {
+					SSLContext lSSLContext = SSLContext.getInstance("SSL");
+					KeyManagerFactory lKMF = KeyManagerFactory.getInstance("SunX509");
+					KeyStore lKeyStore = KeyStore.getInstance("JKS");
 
-			char[] lPassword = "jWebSocket".toCharArray();
-			String lKeyStorePath = JWebSocketConfig.getConfigFolder("jWebSocket.ks");
-			lKeyStore.load(new FileInputStream(lKeyStorePath), lPassword);
-			lKMF.init(lKeyStore, lPassword);
+					String lKeyStorePath = JWebSocketConfig.getConfigFolder(mKeyStore);
+					if( lKeyStorePath != null ) {
+						char[] lPassword = mKeyStorePassword.toCharArray();
+						lKeyStore.load(new FileInputStream(lKeyStorePath), lPassword);
+						lKMF.init(lKeyStore, lPassword);
 
-			lSSLContext.init(lKMF.getKeyManagers(), null, null);
-			SSLServerSocketFactory lSSLFactory = lSSLContext.getServerSocketFactory();
-			mSSLServerSocket = (SSLServerSocket) lSSLFactory.createServerSocket(
-					mSSLListenerPort);
-			EngineListener lSSLListener = new EngineListener(this, mSSLServerSocket);
-			mSSLEngineThread = new Thread(lSSLListener);
-			mSSLEngineThread.start();
+						lSSLContext.init(lKMF.getKeyManagers(), null, null);
+						SSLServerSocketFactory lSSLFactory = lSSLContext.getServerSocketFactory();
+						mSSLServerSocket = (SSLServerSocket) lSSLFactory.createServerSocket(
+								mSSLListenerPort);
+						EngineListener lSSLListener = new EngineListener(this, mSSLServerSocket);
+						mSSLEngineThread = new Thread(lSSLListener);
+						mSSLEngineThread.start();
 
-		} catch (Exception lEx) {
-			throw new WebSocketException(lEx.getMessage());
-		}
-
-		// TODO: results in firing started event twice! make more clean!
-		// super.startEngine();
-		if (mLog.isInfoEnabled()) {
-			mLog.info("SSL engine '"
-					+ getId() + "' started' at port "
-					+ mSSLListenerPort + " with default timeout "
-					+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
-					+ ".");
+						if (mLog.isInfoEnabled()) {
+							mLog.info("SSL engine '"
+									+ getId() + "' started' at port "
+									+ mSSLListenerPort + " with default timeout "
+									+ (mSessionTimeout > 0
+										? mSessionTimeout + "ms" : "infinite")
+									+ ".");
+						}
+					} else {
+						mLog.error("SSL engine could not be instantiated: "
+								+ "KeyStore '" + mKeyStore + "' not found.");
+					}
+				} catch (Exception lEx) {
+					mLog.error("SSL engine could not be instantiated: "
+							+ lEx.getMessage());
+				}
+			} else {
+				mLog.error("SSL engine could not be instantiated due to missing configuration,"
+						+ " please set sslport, keystore and password options.");
+			}
+		} else {
+			mLog.info("No SSL engine configured,"
+					+ " set sslport, keystore and password options if desired.");
 		}
 	}
 
@@ -505,25 +526,28 @@ public class TCPEngine extends BaseEngine {
 							lSessionTimeout = JWebSocketServerConstants.MIN_TIMEOUT;
 							}
 							 */
-							if (mLog.isDebugEnabled()) {
-								mLog.debug("Client accepted on port "
-										+ lClientSocket.getPort()
-										+ " with timeout "
-										+ (lSessionTimeout > 0 ? lSessionTimeout + "ms" : "infinite")
-										+ " (TCPNoDelay was: " + lTCPNoDelay + ")...");
-							}
 							if (lSessionTimeout > 0) {
 								lClientSocket.setSoTimeout(lSessionTimeout);
 							}
 							// create connector and pass header
 							// log.debug("Instantiating connector...");
 							WebSocketConnector lConnector = new TCPConnector(mEngine, lClientSocket);
+
+							String lLogInfo = lConnector.isSSL() ? "SSL" : "TCP";
+							if (mLog.isDebugEnabled()) {
+								mLog.debug(lLogInfo + " client accepted on port "
+										+ lClientSocket.getPort()
+										+ " with timeout "
+										+ (lSessionTimeout > 0 ? lSessionTimeout + "ms" : "infinite")
+										+ " (TCPNoDelay was: " + lTCPNoDelay + ")...");
+							}
+
 							// log.debug("Setting header to engine...");
 							lConnector.setHeader(lHeader);
 							// log.debug("Adding connector to engine...");
 							getConnectors().put(lConnector.getId(), lConnector);
 							if (mLog.isDebugEnabled()) {
-								mLog.debug("Starting connector...");
+								mLog.debug("Starting " + lLogInfo + " connector...");
 							}
 							lConnector.startConnector();
 						} else {

@@ -50,6 +50,10 @@ public class BaseConnector implements WebSocketConnector {
 	 */
 	public final static String VAR_NODEID = "$nodeid";
 	/**
+	 * Is connector using SSL encryption?
+	 */
+	private boolean mIsSSL = false;
+	/**
 	 * Backward reference to the engine of this connector.
 	 */
 	private WebSocketEngine mEngine = null;
@@ -267,5 +271,15 @@ public class BaseConnector implements WebSocketConnector {
 	@Override
 	public void removeNodeId() {
 		removeVar(BaseConnector.VAR_NODEID);
+	}
+
+	@Override
+	public boolean isSSL() {
+		return mIsSSL;
+	}
+
+	@Override
+	public void setSSL(boolean aIsSSL) {
+		mIsSSL = aIsSSL;
 	}
 }

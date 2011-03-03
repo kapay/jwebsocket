@@ -45,6 +45,18 @@ public interface EngineConfiguration extends Configuration {
 	String getServlet();
 
 	/**
+	 * Returns the name of the key store file
+	 * @return the name of the key store file (null or empty for non-ssl engines)
+	 */
+	String getKeyStore();
+
+	/**
+	 * Returns the password of the key store file
+	 * @return the password of the key store file (null or empty for non-ssl engines)
+	 */
+	String getKeyStorePassword();
+
+	/**
 	 * Returns the port at which the engine is running
 	 * @return the port number by default it's 8787 for jWebSocket
 	 */
