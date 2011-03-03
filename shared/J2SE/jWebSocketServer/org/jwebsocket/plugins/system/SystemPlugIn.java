@@ -51,6 +51,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String NS_SYSTEM_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.system";
 	// specify token types processed by system plug-in
 	private static final String TT_SEND = "send";
+	private static final String TT_RESPOND = "respond";
 	private static final String TT_BROADCAST = "broadcast";
 	private static final String TT_WELCOME = "welcome";
 	private static final String TT_GOODBYE = "goodBye";
@@ -103,6 +104,9 @@ public class SystemPlugIn extends TokenPlugIn {
 		if (lType != null && getNamespace().equals(lNS)) {
 			if (lType.equals(TT_SEND)) {
 				send(aConnector, aToken);
+				aResponse.abortChain();
+			} else if (lType.equals(TT_RESPOND)) {
+				respond(aConnector, aToken);
 				aResponse.abortChain();
 			} else if (lType.equals(TT_BROADCAST)) {
 				broadcast(aConnector, aToken);
@@ -421,17 +425,19 @@ public class SystemPlugIn extends TokenPlugIn {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
-
 		Token lResponse = createResponse(aToken);
 
 		WebSocketConnector lTargetConnector;
 		String lTargetId = aToken.getString("unid");
+		String lTargetType;
 		if (lTargetId != null) {
 			lTargetConnector = getNode(lTargetId);
+			lTargetType = "node-id";
 		} else {
 			// get the target
 			lTargetId = aToken.getString("targetId");
 			lTargetConnector = getConnector(lTargetId);
+			lTargetType = "client-id";
 		}
 
 		/*
@@ -451,12 +457,51 @@ public class SystemPlugIn extends TokenPlugIn {
 			aToken.setString("sourceId", aConnector.getId());
 			sendToken(aConnector, lTargetConnector, aToken);
 		} else {
-			log.warn("Target connector '" + lTargetId + "' not found.");
+			String lMsg = "No target connector with "
+					+ lTargetType + " '"
+					+ lTargetId + "' found.";
+			log.warn(lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
+			sendToken(aConnector, aConnector, lResponse);
 		}
-		/*
-		 * } else { lResponse.put("code", -1); lResponse.put("msg",
-		 * "not logged in"); sendToken(aConnector, aConnector, lResponse); }
-		 */
+	}
+
+	private void respond(WebSocketConnector aConnector, Token aToken) {
+		Token lResponse = createResponse(aToken);
+
+		WebSocketConnector lTargetConnector;
+		String lTargetId = aToken.getString("unid");
+		String lTargetType;
+		if (lTargetId != null) {
+			lTargetConnector = getNode(lTargetId);
+			lTargetType = "node-id";
+		} else {
+			// get the target
+			lTargetId = aToken.getString("targetId");
+			lTargetConnector = getConnector(lTargetId);
+			lTargetType = "client-id";
+		}
+
+		if (lTargetConnector != null) {
+			if (log.isDebugEnabled()) {
+				log.debug("Processing 'respond' (username='"
+						+ getUsername(aConnector)
+						+ "') from '" + aConnector
+						+ "' to " + lTargetId + "...");
+			}
+			aToken.setType( "response" );
+			aToken.setString("sourceId", aConnector.getId());
+			sendToken(aConnector, lTargetConnector, aToken);
+		} else {
+			String lMsg = "No target connector with "
+					+ lTargetType + " '"
+					+ lTargetId + "' found.";
+			log.warn(lMsg);
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", lMsg);
+			sendToken(aConnector, aConnector, lResponse);
+		}
 	}
 
 	private void broadcast(WebSocketConnector aConnector, Token aToken) {
@@ -597,7 +642,7 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		// for test purposes we need to optionally suppress a response
 		// to simulate this error condition
-		if( lIsResponseRequested ) {
+		if (lIsResponseRequested) {
 			sendToken(aConnector, aConnector, lResponse);
 		}
 	}

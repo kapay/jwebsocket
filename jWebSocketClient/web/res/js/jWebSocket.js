@@ -882,12 +882,14 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		// console.log( "checking result for utid: " + aToken.utid + "..." );
 		var lClbkRec = this.fRequestCallbacks[ lField ];
 		if( lClbkRec ) {
-			lClbkRec.callback.OnResponse( aToken );
 			// result came in within the given timeout
+			// first cleanup timeout observer because
+			// OnResponse listener potentially could take a while as well
 			if( lClbkRec.hCleanUp ) {
 				// thus reset the timeout observer
 				clearTimeout( lClbkRec.hCleanUp );
 			}
+			lClbkRec.callback.OnResponse( aToken );
 			delete this.fRequestCallbacks[ lField ];
 		}
 	},
@@ -1240,6 +1242,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				// set timeout to observe response
 				lClbkRec.hCleanUp = setTimeout( function() {
 					var lCallbacks = lClbkRec.callback;
+					// delete callback first to not fire response event
+					// in case the OnTimeout processing takes longer or
+					// even invokes blocking methods like alert.
+					delete lThis.fRequestCallbacks[ lClbkId ];
+					// now the OnTimeout Callback can be called.
 					if( lCallbacks.OnTimeout ) {
 						lCallbacks.OnTimeout({
 							utid: lUTID,
@@ -1247,7 +1254,6 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 							token: aToken
 						});
 					}
-					delete lThis.fRequestCallbacks[ lClbkId ];
 				}, lTimeout );
 			}
 			if( lSpawnThread ) {
@@ -1847,10 +1853,6 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 	//:r:*:::String:The resulting JSON stream.
 	tokenToStream: function( aToken ) {
 		aToken.utid = jws.CUR_TOKEN_ID;
-		//:todo:en:Do we really want the session id per call? Alex: Don't think so! To be checked!
- 		if( this.fSessionId ) {
-			aToken.usid = this.fSessionId;
- 		}
 		var lJSON = JSON.stringify( aToken );
  		return( lJSON );
 	},
@@ -1891,9 +1893,6 @@ jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 	//:r:*:::String:The resulting CSV stream.
 	tokenToStream: function( aToken ) {
 		var lCSV = "utid=" + jws.CUR_TOKEN_ID;
-		if( this.fSessionId ) {
-			lCSV += ",usid=\"" + this.fSessionId + "\"";
-		}
 		for( var lKey in aToken ) {
 			var lVal = aToken[ lKey ];
 			if( lVal === null || lVal === undefined ) {

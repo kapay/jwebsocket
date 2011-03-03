@@ -34,6 +34,7 @@
 			var eCmd = null;
 			var eArgs = null;
 			var eTarget = null;
+			var eNode = null;
 
 			function log( aString ) {
 				eLog.innerHTML +=
@@ -197,7 +198,7 @@
 
 			function sendCommand() {
 				var lMsg = eCmd.value;
-				log( "Sending command '" + lMsg + "', waiting for response..." );
+				log( "Sending command '" + lMsg + "'..." );
 				var lArgs = eArgs.value;
 				lArgs = lArgs.replace( /\"/g, "&22");
 				lArgs = lArgs.replace( /\=/g, "&3D");
@@ -206,11 +207,23 @@
 					var lToken = {
 						ns: "org.jwebsocket.plugins.system",
 						type: "send",
-						targetId: eTarget.value,
 						subType: eCmd.value,	// e.g. exec
 						cmd: lArgs				// e.g. dir
 					};
-					var lRes = lWSC.sendToken( lToken );
+					if( eNode.value ) {
+						lToken.unid = eNode.value;
+					} else {
+						lToken.targetId = eTarget.value;
+					}
+					var lRes = lWSC.sendToken( lToken, {
+						timeout: 3000,
+						OnResponse: function( aToken ) {
+							log( "Resonse: " + JSON.stringify( aToken ));
+						},
+						OnTimeout: function( aToken ) {
+							log( "Timeout: " + JSON.stringify( aToken ));
+						}
+					});
 					if( lRes.code == 0 ) {
 						log( "Message sent." );
 					} else {
@@ -240,6 +253,7 @@
 				eCmd = jws.$( "stxfCmd" );
 				eArgs = jws.$( "stxfArgs" );
 				eTarget = jws.$( "stxfTarget" );
+				eNode = jws.$( "stxfNode" );
 				eReqResp = jws.$( "schkReqResp" );
 				eTimeout = jws.$( "stxfTimeout" );
 				eDuration = jws.$( "stxfDuration" );
@@ -305,7 +319,7 @@
 							   title="Clears the result and event log above.">
 					</td>
 					<td class="stdDlg" width="5">Command</td>
-					<td class="stdDlg" width="">
+					<td class="stdDlg" width="" colspan="3">
 						<input class="stxfDlg" id="stxfCmd" type="text" value="Please type your command here!" style="width:100%">
 					</td>
 					<td class="stdDlg" width="5">
@@ -326,7 +340,7 @@
 							   title="Returns the list of currently pending responses from the jWebSocket server.">
 					</td>
 					<td class="stdDlg" width="5">Arguments</td>
-					<td class="stdDlg" width="">
+					<td class="stdDlg" width="" colspan="3">
 						<input class="stxfDlg" id="stxfArgs" type="text" value="Please type your arguments here!" style="width:100%">
 					</td>
 				</tr>
@@ -341,8 +355,12 @@
 							   title="Waits for a certain amount of time.">
 					</td>
 					<td class="stdDlg" width="5">Target</td>
-					<td class="stdDlg" width="">
+					<td class="stdDlg" width="70">
 						<input class="stxfDlg" id="stxfTarget" type="text" value="Please type the target CGI client-id here!" style="width:100%">
+					</td>
+					<td class="stdDlg" width="5">Node</td>
+					<td class="stdDlg" width="">
+						<input class="stxfDlg" id="stxfNode" type="text" value="Please type the target CGI node-id here!" style="width:100%">
 					</td>
 					<td class="stdDlg" width="" >&nbsp;</td>
 				</tr>

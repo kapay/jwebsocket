@@ -132,6 +132,7 @@ public class AdminPlugIn extends TokenPlugIn {
 				lResultItem.put("port", lConnector.getRemotePort());
 				// Caution! This method may only be granted to administrators!
 				lResultItem.put("usid", lConnector.getSession().getSessionId());
+				lResultItem.put("unid", lConnector.getNodeId());
 				lResultItem.put("username", lConnector.getUsername());
 				lResultItem.put("isToken", lConnector.getBoolean(TokenServer.VAR_IS_TOKENSERVER));
 				lResultList.add(lResultItem);
