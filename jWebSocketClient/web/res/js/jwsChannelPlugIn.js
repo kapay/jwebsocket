@@ -47,7 +47,7 @@ jws.ChannelPlugIn = {
 	processToken: function( aToken ) {
 		// check if namespace matches
 		if( aToken.ns == jws.ChannelPlugIn.NS ) {
-			// here you can handle incomimng tokens from the server
+			// here you can handle incoming tokens from the server
 			// directy in the plug-in if desired.
 			if( "event" == aToken.type ) {
 				if( "channelCreated" == aToken.name ) {

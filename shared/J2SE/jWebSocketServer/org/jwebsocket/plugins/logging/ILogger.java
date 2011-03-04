@@ -57,11 +57,17 @@ public interface ILogger {
 	 *
 	 * @param aMsg
 	 */
+	void warn(String aMsg);
+
+	/**
+	 *
+	 * @param aMsg
+	 */
 	void error(String aMsg);
 
 	/**
 	 *
 	 * @param aMsg
 	 */
-	void warn(String aMsg);
+	void fatal(String aMsg);
 }

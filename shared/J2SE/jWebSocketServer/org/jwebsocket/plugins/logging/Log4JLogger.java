@@ -35,10 +35,6 @@ public class Log4JLogger extends BaseLogger implements ILogger {
 	public void log(LogLevel aLogLevel, String aInfo, String aMsg) {
 		Priority lPrio = Priority.DEBUG;
 		switch (aLogLevel) {
-			case DEBUG: {
-				lPrio = Priority.DEBUG;
-				break;
-			}
 			case INFO: {
 				lPrio = Priority.INFO;
 				break;
@@ -51,8 +47,12 @@ public class Log4JLogger extends BaseLogger implements ILogger {
 				lPrio = Priority.ERROR;
 				break;
 			}
+			case FATAL: {
+				lPrio = Priority.FATAL;
+				break;
+			}
 		}
-		mLog.log(lPrio, aMsg);
+		mLog.log(lPrio, (aInfo != null ? "[" + aInfo + "] " : "") + aMsg);
 	}
 
 	/**
@@ -78,6 +78,15 @@ public class Log4JLogger extends BaseLogger implements ILogger {
 	 * @param aMsg
 	 */
 	@Override
+	public void warn(String aMsg) {
+		mLog.warn(aMsg);
+	}
+
+	/**
+	 *
+	 * @param aMsg
+	 */
+	@Override
 	public void error(String aMsg) {
 		mLog.error(aMsg);
 	}
@@ -87,7 +96,7 @@ public class Log4JLogger extends BaseLogger implements ILogger {
 	 * @param aMsg
 	 */
 	@Override
-	public void warn(String aMsg) {
-		mLog.warn(aMsg);
+	public void fatal(String aMsg) {
+		mLog.fatal(aMsg);
 	}
 }

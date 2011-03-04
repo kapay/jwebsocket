@@ -1,7 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//	---------------------------------------------------------------------------
+//	jWebSocket - Factory Singleton
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
 import java.util.List;
@@ -13,6 +24,8 @@ import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
+import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.instance.JWebSocketInstance;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
@@ -33,18 +46,56 @@ public class JWebSocketFactory {
 	private static List<WebSocketServer> mServers = null;
 	private static TokenServer mTokenServer = null;
 
+	/**
+	 *
+	 */
+	public static void printCopyrightToConsole() {
+		// the following 3 lines may not be removed due to GNU LGPL 3.0 license!
+		System.out.println("jWebSocket Ver. "
+				+ JWebSocketServerConstants.VERSION_STR
+				+ " (" + System.getProperty("sun.arch.data.model") + "bit)");
+		System.out.println(JWebSocketCommonConstants.COPYRIGHT);
+		System.out.println(JWebSocketCommonConstants.LICENSE);
+	}
+
+	/**
+	 *
+	 */
 	public static void start() {
 		start(null);
 	}
 
-	public static void start(String aOverrideConfigPath) {
+	/**
+	 *
+	 * @param aArgs
+	 * @return
+	 */
+	public static String getConfigOverridePath(String[] aArgs) {
+		String lConfigOverridePath = null;
+		if (aArgs != null && aArgs.length > 0) {
+			if (aArgs.length < 2) {
+				System.out.println("use [-config <path_to_config_file>] as command line arguments to override default jWebSocket.xml");
+			} else if (aArgs.length == 2) {
+				if ("-config".equals(aArgs[0])) {
+					lConfigOverridePath = aArgs[1];
+				}
+			}
+		}
+		return lConfigOverridePath;
+	}
+
+	/**
+	 *
+	 * @param aConfigOverridePath
+	 */
+	public static void start(String aConfigOverridePath) {
 
 		JWebSocketInstance.setStatus(JWebSocketInstance.STARTING);
 
 		JWebSocketLoader loader = new JWebSocketLoader();
 		try {
 			WebSocketInitializer lInitializer =
-					loader.initialize(aOverrideConfigPath);
+					loader.initialize(aConfigOverridePath);
 			if (lInitializer == null) {
 				JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
 				return;
@@ -130,7 +181,7 @@ public class JWebSocketFactory {
 					try {
 						lServer.startServer();
 					} catch (Exception lEx) {
-						mLog.error("Starting server '" + lServer.getId() 
+						mLog.error("Starting server '" + lServer.getId()
 								+ "' failed (" + lEx.getClass().getSimpleName()
 								+ ": " + lEx.getMessage() + ").");
 					}
@@ -162,6 +213,9 @@ public class JWebSocketFactory {
 		}
 	}
 
+	/**
+	 *
+	 */
 	public static void stop() {
 
 		JWebSocketInstance.setStatus(JWebSocketInstance.STOPPING);
@@ -216,10 +270,18 @@ public class JWebSocketFactory {
 		JWebSocketInstance.setStatus(JWebSocketInstance.STOPPED);
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public static WebSocketEngine getEngine() {
 		return mEngine;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public static List<WebSocketServer> getServers() {
 		return mServers;
 	}
@@ -243,11 +305,14 @@ public class JWebSocketFactory {
 		return null;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	public static TokenServer getTokenServer() {
-		if( mTokenServer == null ) {
-			mTokenServer = (TokenServer)getServer("ts0");
+		if (mTokenServer == null) {
+			mTokenServer = (TokenServer) getServer("ts0");
 		}
 		return mTokenServer;
 	}
-
 }

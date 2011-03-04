@@ -1,5 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Copyright (c) 2010 jwebsocket.org
+//	jWebSocket - Server Main Class
+//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -14,8 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.console;
 
-import org.jwebsocket.config.JWebSocketCommonConstants;
-import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.instance.JWebSocketInstance;
 import org.jwebsocket.server.CustomServer;
@@ -33,23 +32,10 @@ public class JWebSocketServer {
 	 * @param aArgs the command line arguments
 	 */
 	public static void main(String[] aArgs) {
-		// the following 3 lines may not be removed due to GNU LGPL 3.0 license!
-		System.out.println("jWebSocket Ver. " + JWebSocketServerConstants.VERSION_STR + " (" + System.getProperty("sun.arch.data.model") + "bit)");
-		System.out.println(JWebSocketCommonConstants.COPYRIGHT);
-		System.out.println(JWebSocketCommonConstants.LICENSE);
-		System.out.println("Log files per default in jWebSocket.log if not overwritten in jWebSocket.xml.");
+		// the following line may not be removed due to GNU LGPL 3.0 license!
+		JWebSocketFactory.printCopyrightToConsole();
 
-		String lOverrideConfigPath = "";
-		if (aArgs != null && aArgs.length > 0) {
-			if (aArgs.length < 2) {
-				System.out.println("use [-config <path_to_config_file>] as command line arguments to override default jWebSocket.xml");
-			} else if (aArgs.length == 2) {
-				if ("-config".equals(aArgs[0])) {
-					lOverrideConfigPath = aArgs[1];
-				}
-			}
-		}
-
+		String lOverrideConfigPath = JWebSocketFactory.getConfigOverridePath(aArgs);
 		try {
 			JWebSocketFactory.start(lOverrideConfigPath);
 

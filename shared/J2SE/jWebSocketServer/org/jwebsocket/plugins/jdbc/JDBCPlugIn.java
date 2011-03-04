@@ -49,6 +49,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
 	private IBasicStorage mCache = null;
+	private int mConnValTimeout = 300;
 
 	/**
 	 *
@@ -62,6 +63,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 		// specify default name space for admin plugin
 		this.setNamespace(NS_JDBC);
 		mCache = new EhCacheStorage(NS_JDBC);
+
+		String lVal = getString("conn_val_timeout");
 	}
 
 	@Override

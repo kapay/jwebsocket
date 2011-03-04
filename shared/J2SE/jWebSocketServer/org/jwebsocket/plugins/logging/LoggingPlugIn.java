@@ -15,7 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.logging;
 
-import java.util.Map;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
@@ -54,7 +53,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 		mImplementation = getString("implementation", DEF_IMPL);
 		mLogger = new Log4JLogger();
 	}
-
+/*
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 	}
@@ -62,7 +61,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseRease) {
 	}
-
+*/
 	@Override
 	public void processToken(PlugInResponse aResponse,
 			WebSocketConnector aConnector, Token aToken) {
@@ -87,7 +86,8 @@ public class LoggingPlugIn extends TokenPlugIn {
 		String lLevel = aToken.getString("level");
 
 		try {
-			mLogger.log(LogLevel.stringToLevel(lLevel), lInfo, lMessage);
+			LogLevel lLogLevel = LogLevel.stringToLevel(lLevel);
+			mLogger.log(lLogLevel, lInfo, lMessage);
 		} catch (Exception lEx) {
 			String lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
 			mLog.error(lMsg);

@@ -741,7 +741,12 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	sendStream: function( aData ) {
 		// is client already connected
 		if( this.isConnected() ) {
-			this.fConn.send( aData );
+			try {
+				this.fConn.send( aData );
+			} catch( lEx ) {
+				// this is never fired !
+				// console.log( "Could not send!" );
+			}
 		// if not raise exception
 		} else {
 			throw new Error( "Not connected" );
@@ -1196,7 +1201,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		var lRes = this.checkConnected();
 		if( lRes.code == 0 ) {
 			var lSpawnThread = false;
-			var lTimeout = jws.DEF_WAITRESP_TIMEOUT;
+			var lTimeout = jws.DEF_RESP_TIMEOUT;
 			var lCallbacks = {
 				OnResponse: null,
 				OnSuccess: null,

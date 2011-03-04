@@ -55,6 +55,14 @@ public class BaseLogger implements ILogger {
 	public void info(String aMsg) {
 		log(LogLevel.INFO, null, aMsg);
 	}
+	/**
+	 *
+	 * @param aMsg
+	 */
+	@Override
+	public void warn(String aMsg) {
+		log(LogLevel.WARN, null, aMsg);
+	}
 
 	/**
 	 *
@@ -70,7 +78,7 @@ public class BaseLogger implements ILogger {
 	 * @param aMsg
 	 */
 	@Override
-	public void warn(String aMsg) {
-		log(LogLevel.WARN, null, aMsg);
+	public void fatal(String aMsg) {
+		log(LogLevel.FATAL, null, aMsg);
 	}
 }
