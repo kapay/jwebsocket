@@ -19,13 +19,17 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -344,12 +348,42 @@ public class BaseWebSocket implements WebSocketClient {
 				lPort = 443;
 			}
 			try {
-				SocketFactory lFactory = SSLSocketFactory.getDefault();
-				mSocket = lFactory.createSocket(lHost, lPort);
+				try {
+					// TODO: Make acceptance of unsigned certificates optional!
+					// This methodology is used to accept unsigned certficates
+					// on the SSL server. Be careful with this in production environments!
+					// Create a trust manager to accept unsigned certificates
+					TrustManager[] lTrustManager = new TrustManager[]{
+						new X509TrustManager() {
+
+							public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+								return null;
+							}
+
+							public void checkClientTrusted(
+									java.security.cert.X509Certificate[] aCerts, String aAuthType) {
+							}
+
+							public void checkServerTrusted(
+									java.security.cert.X509Certificate[] aCerts, String aAuthType) {
+							}
+						}
+					};
+					// Use this trustmanager to not reject unsigned certificates
+					SSLContext lSSLContext = SSLContext.getInstance("SSL");
+					lSSLContext.init(null, lTrustManager, new java.security.SecureRandom());
+					mSocket = (SSLSocket) lSSLContext.getSocketFactory().createSocket(lHost, lPort);
+				} catch (NoSuchAlgorithmException lNSAEx) {
+					throw new RuntimeException("Unable to initialise SSL context", lNSAEx);
+				} catch (KeyManagementException lKMEx) {
+					throw new RuntimeException("Unable to initialise SSL context", lKMEx);
+				}
 			} catch (UnknownHostException lUHEx) {
 				throw new WebSocketException("unknown host: " + lHost, lUHEx);
 			} catch (IOException lIOEx) {
 				throw new WebSocketException("error while creating secure socket to " + mURL, lIOEx);
+			} catch (Exception lEx) {
+				throw new WebSocketException(lEx.getClass().getSimpleName() + " while creating secure socket to " + mURL, lEx);
 			}
 		} else {
 			throw new WebSocketException("unsupported protocol: " + lScheme);
