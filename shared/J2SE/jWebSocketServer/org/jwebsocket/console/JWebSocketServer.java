@@ -32,7 +32,7 @@ public class JWebSocketServer {
 	 * @param aArgs the command line arguments
 	 */
 	public static void main(String[] aArgs) {
-		// the following line may not be removed due to GNU LGPL 3.0 license!
+		// the following line must not be removed due to GNU LGPL 3.0 license!
 		JWebSocketFactory.printCopyrightToConsole();
 
 		String lOverrideConfigPath = JWebSocketFactory.getConfigOverridePath(aArgs);
@@ -62,7 +62,11 @@ public class JWebSocketServer {
 				}
 			}
 		} catch (Exception lEx) {
-			System.out.println(lEx.getClass().getSimpleName() + " on starting jWebsocket server: " + lEx.getMessage());
+			System.out.println(
+					lEx.getClass().getSimpleName()
+					+ " on starting jWebsocket server: "
+					+ lEx.getMessage());
+			// TODO: remove that for final release
 			lEx.printStackTrace();
 		} finally {
 			JWebSocketFactory.stop();

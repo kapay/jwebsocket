@@ -28,6 +28,7 @@ import org.jwebsocket.config.LoggingConfig;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.ServerConfig;
+import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
@@ -50,10 +51,8 @@ public class JWebSocketSubSystemSample {
 	/**
 	 */
 	public JWebSocketSubSystemSample() {
-		// the following 3 lines may not be removed due to GNU LGPL 3.0 license!
-		System.out.println("jWebSocket Ver. " + JWebSocketServerConstants.VERSION_STR + " (" + System.getProperty("sun.arch.data.model") + "bit)");
-		System.out.println(JWebSocketCommonConstants.COPYRIGHT);
-		System.out.println(JWebSocketCommonConstants.LICENSE);
+		// the following line may not be removed due to GNU LGPL 3.0 license!
+		JWebSocketFactory.printCopyrightToConsole();
 
 		// initialize the logging system
 		LoggingConfig lLoggingConfig = new LoggingConfig(
@@ -79,7 +78,7 @@ public class JWebSocketSubSystemSample {
 				JWebSocketServerConstants.JWEBSOCKET_KS_DEF_PWD, // default keystore file password
 				JWebSocketCommonConstants.JWEBSOCKET_DEF_CONTEXT, // context if such
 				JWebSocketCommonConstants.JWEBSOCKET_DEF_SERVLET, // servlet if such
-				120000, // default session timeout
+				JWebSocketCommonConstants.DEFAULT_TIMEOUT, // default session timeout
 				JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE, // max framesize
 				lDomains // list of accepted domains
 				);
