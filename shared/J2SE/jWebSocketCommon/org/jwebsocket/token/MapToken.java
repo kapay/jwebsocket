@@ -29,7 +29,7 @@ import javolution.util.FastMap;
  */
 public class MapToken extends BaseToken implements Token {
 
-	private FastMap mData = null;
+	private Map mData = null;
 
 	/**
 	 * Creates a new empty instance of a token.
@@ -81,7 +81,8 @@ public class MapToken extends BaseToken implements Token {
 	 *
 	 * @param aMap
 	 */
-	public void setMap(FastMap aMap) {
+	@Override
+	public void setMap(Map aMap) {
 		mData = aMap;
 	}
 

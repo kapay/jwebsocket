@@ -37,7 +37,11 @@ public abstract class BaseToken implements Token {
 	@Override
 	public boolean setValidated(String aKey, Object aObj) {
 		boolean lRes = true;
-		if (aObj instanceof Boolean) {
+		if (aObj instanceof BaseTokenizable) {
+			Token lToken = TokenFactory.createToken();
+			((BaseTokenizable)aObj).writeToToken(lToken);
+			setToken(aKey, lToken);
+		} else if (aObj instanceof Boolean) {
 			setBoolean(aKey, (Boolean) aObj);
 		} else if (aObj instanceof Integer) {
 			setInteger(aKey, (Integer) aObj);

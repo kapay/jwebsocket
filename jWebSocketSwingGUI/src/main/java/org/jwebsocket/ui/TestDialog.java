@@ -621,15 +621,17 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		lArgs.add(lListArg);
 		*/
 
-		// getRPCObject
+		// demo for getRPCObject
 		lToken.setString("method", "getRPCObject");
-		SampleRPCObject lObj = new SampleRPCObject(
+		// instantiate a new tokenizable object to be used for a RPC
+		SampleRPCObject lRPCObj = new SampleRPCObject(
 			"Alexander",
 			"Schulze",
 			"An Vieslapp 29",
 			"52134",
 			"Herzogenrath");
-		lArgs.add(lObj);
+		// add this object to the list of arguments
+		lArgs.add(lRPCObj.toToken());
 
 		// pass the list of arguments to the method (automatic methods matching)
 		lToken.setList("args", lArgs);

@@ -46,6 +46,15 @@ public interface Token {
 	Map getMap();
 
 	/**
+	 * copies all fields from a Map into the Token. A check has to be made
+	 * by the corresponding implementations that only such data types are
+	 * passed that are supported by the Token abstraction.
+	 *
+	 * @return
+	 */
+	void setMap(Map aMap);
+
+	/**
 	 *
 	 * @param aKey
 	 * @return

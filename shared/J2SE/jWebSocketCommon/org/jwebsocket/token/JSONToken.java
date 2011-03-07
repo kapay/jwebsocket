@@ -91,6 +91,16 @@ public class JSONToken extends BaseToken implements Token {
 
 	/**
 	 *
+	 *
+	 * @return
+	 */
+	@Override
+	public void setMap(Map aMap) {
+		// TODO: implement setMap for JSON token
+	}
+
+	/**
+	 *
 	 * @param aJSON
 	 */
 	public void setJSONObject(JSONObject aJSON) {
@@ -422,11 +432,11 @@ public class JSONToken extends BaseToken implements Token {
 		Map lMap = new FastMap<String, Object>();
 		Iterator<String> lIterator = mData.keys();
 		while (lIterator.hasNext()) {
-			String lKey = (String)lIterator.next();
-			try{
+			String lKey = (String) lIterator.next();
+			try {
 				Object lVal = mData.get(lKey);
 				lMap.put(lKey, lVal);
-			} catch(Exception lEx) {
+			} catch (Exception lEx) {
 				// TODO: process exception
 			}
 		}

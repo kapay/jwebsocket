@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.rpc;
 
+import org.jwebsocket.token.BaseTokenizable;
 import org.jwebsocket.token.ITokenizable;
 import org.jwebsocket.token.Token;
 
@@ -22,7 +23,7 @@ import org.jwebsocket.token.Token;
  *
  * @author aschulze
  */
-public class SampleRPCObject implements ITokenizable {
+public class SampleRPCObject extends BaseTokenizable implements ITokenizable {
 
 	private String mFirstName = null;
 	private String mLastName = null;
@@ -30,8 +31,19 @@ public class SampleRPCObject implements ITokenizable {
 	private String mZipcode = null;
 	private String mCity = null;
 
+	// we necessarily need to have a default constructor with no arguments
+	// for tokenizable RPC objects
+	public SampleRPCObject() {
+		// don't miss this call to initialize classname
+		super();
+	}
+
 	public SampleRPCObject(String aFirstName, String aLastName,
 			String aAddress, String aZipcode, String aCity) {
+
+		// don't miss this call to initialize classname
+		super();
+
 		mFirstName = aFirstName;
 		mLastName = aLastName;
 		mAddress = aAddress;
@@ -49,6 +61,9 @@ public class SampleRPCObject implements ITokenizable {
 		aToken.setString("address", mAddress);
 		aToken.setString("zipcode", mZipcode);
 		aToken.setString("city", mCity);
+
+		// don't miss this call to write classname to Token
+		super.writeToToken(aToken);
 	}
 
 	@Override
@@ -61,5 +76,8 @@ public class SampleRPCObject implements ITokenizable {
 		mAddress = aToken.getString("address");
 		mZipcode = aToken.getString("zipcode");
 		mCity = aToken.getString("city");
+
+		// don't miss this call to read classname to Token
+		super.readFromToken(aToken);
 	}
 }

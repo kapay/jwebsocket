@@ -15,13 +15,17 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.rpc;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 import org.jwebsocket.plugins.rpc.util.ListConverter;
 import org.jwebsocket.plugins.rpc.util.MethodMatcherConversionException;
+import org.jwebsocket.token.BaseTokenizable;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 
 @SuppressWarnings("rawtypes")
 public class MethodMatcher {
@@ -72,36 +76,69 @@ public class MethodMatcher {
 					// String and Token
 					// TODO: with the new Tokens, we don't need anymore to check every argument.
 					// Just need to take care of Float/Double and specific types.
-					if (lParameterType == String.class) {
-						mMethodParameters[j] = (String) aArgs.get(k);
-					} else if (lParameterType == Token.class) {
-						mMethodParameters[j] = (Token) aArgs.get(k);
-					} // Special support for primitive type
-					else if (lParameterType == int.class) {
-						mMethodParameters[j] = (Integer) aArgs.get(k);
-					} else if (lParameterType == boolean.class) {
-						mMethodParameters[j] = (Boolean) aArgs.get(k);
-					} else if (lParameterType == double.class) {
-						mMethodParameters[j] = (Double) aArgs.get(k);
-					} // Wrappers of primitive types
-					else if (lParameterType == Integer.class) {
-						mMethodParameters[j] = (Integer) aArgs.get(k);
-					} else if (lParameterType == Boolean.class) {
-						mMethodParameters[j] = (Boolean) aArgs.get(k);
-					} else if (lParameterType == Double.class) {
-						mMethodParameters[j] = (Double) aArgs.get(k);
-					} else if (lParameterType == List.class) {
-						// try to guess which type of object should be on the List:
-						Type genericParameterType = mMethod.getGenericParameterTypes()[j];
-						mMethodParameters[j] = ListConverter.convert((List) aArgs.get(k), genericParameterType);
-					} else if (specificMatching(lParameterType, j)) {
-						k--;
-					} // any other object are *not* supported !
-					else {
-//			      if (mLog.isDebugEnabled()) {
-//			        mLog.debug("Can't extract an object with type '" + lParameterType.getName() + "' in a Token Object");
-//			      }
-						throw new MethodMatcherConversionException("Can't extract an object whith type '" + lParameterType.getName() + "' in a Token Object");
+					Object lArg = aArgs.get(k);
+					// check if argument is a specific class
+					if (lArg instanceof Map) {
+						Map lMap = (Map) lArg;
+						// look for class identifier
+						String lClassName = (String) lMap.get(BaseTokenizable.ARG_CLASS_ID);
+						if (lClassName != null) {
+							// ITokenizable lTokenizable =
+							try {
+								Class lClass = Class.forName(lClassName);
+								Class[] lCA = new Class[]{};
+								Constructor lConstr = lClass.getConstructor(lCA);
+								lConstr.setAccessible(true);
+								Object lCustObj = lConstr.newInstance();
+								if (lCustObj instanceof BaseTokenizable) {
+									Token lToken = TokenFactory.createToken();
+									lToken.setMap(lMap);
+									((BaseTokenizable) lCustObj).readFromToken(lToken);
+								}
+								mMethodParameters[j] = lCustObj;
+							} catch (Exception lEx) {
+								throw new MethodMatcherConversionException(
+										lEx.getClass().getSimpleName() + ": "
+										+ lEx.getMessage());
+							}
+						}
+					}
+
+					if (mMethodParameters[j] == null) {
+						if (lParameterType == String.class) {
+							mMethodParameters[j] = (String) lArg;
+						} else if (lParameterType == Token.class) {
+							mMethodParameters[j] = (Token) lArg;
+						} // Special support for primitive type
+						else if (lParameterType == int.class) {
+							mMethodParameters[j] = (Integer) lArg;
+						} else if (lParameterType == boolean.class) {
+							mMethodParameters[j] = (Boolean) lArg;
+						} else if (lParameterType == double.class) {
+							mMethodParameters[j] = (Double) lArg;
+						} // Wrappers of primitive types
+						else if (lParameterType == Integer.class) {
+							mMethodParameters[j] = (Integer) lArg;
+						} else if (lParameterType == Boolean.class) {
+							mMethodParameters[j] = (Boolean) lArg;
+						} else if (lParameterType == Double.class) {
+							mMethodParameters[j] = (Double) lArg;
+						} else if (lParameterType == List.class) {
+							// try to guess which type of object should be on the List:
+							Type genericParameterType = mMethod.getGenericParameterTypes()[j];
+							mMethodParameters[j] = ListConverter.convert((List) lArg, genericParameterType);
+						} else if (specificMatching(lParameterType, j)) {
+							k--;
+						} // any other object are *not* supported !
+						else {
+//							if (mLog.isDebugEnabled()) {
+//								mLog.debug("Can't extract an object with type '" + lParameterType.getName() + "' in a Token Object");
+//							}
+							throw new MethodMatcherConversionException(
+									"Can't extract an object with type '"
+									+ lParameterType.getName()
+									+ "' in a Token Object");
+						}
 					}
 				}
 				// If no exception has been thrown, so the method mat
