@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - RPC PlugIn
+//	jWebSocket - RPCCallableClassLoader
 //	Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -37,6 +37,7 @@ public class RPCCallableClassLoader {
 		this.mRpcCallableClass = aRpcCallableClass;
 		this.mRpcCallableInstance = aRpcCallableInstance;
 	}
+
 	/**
 	 * Add a tuple (method, right) to the list method of the RPCCallableClassLoader
 	 * @param aMethodName
@@ -65,24 +66,29 @@ public class RPCCallableClassLoader {
 	public List<MethodRightLink> getMethods(String aMethodName) {
 		return mMethods.get(aMethodName);
 	}
-	
+
 	/**
 	 * make a link between a Right and a Method
 	 * @author Kiou
 	 */
 	public class MethodRightLink {
-		private String mRightId ;
+
+		private String mRightId;
 		private Method mMethod;
-		public MethodRightLink (Method aMethod, String aRightId) {
+
+		public MethodRightLink(Method aMethod, String aRightId) {
 			mMethod = aMethod;
 			mRightId = aRightId;
 		}
+
 		public String getRightId() {
 			return mRightId;
 		}
+
 		public Method getMethod() {
 			return mMethod;
 		}
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -91,26 +97,34 @@ public class RPCCallableClassLoader {
 			result = prime * result + ((mRightId == null) ? 0 : mRightId.hashCode());
 			return result;
 		}
+
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			MethodRightLink other = (MethodRightLink) obj;
-			if (!getOuterType().equals(other.getOuterType()))
+			if (!getOuterType().equals(other.getOuterType())) {
 				return false;
+			}
 			if (mRightId == null) {
-				if (other.mRightId != null)
+				if (other.mRightId != null) {
 					return false;
-			} else if (!mRightId.equals(other.mRightId))
+				}
+			} else if (!mRightId.equals(other.mRightId)) {
 				return false;
+			}
 			return true;
 		}
+
 		private RPCCallableClassLoader getOuterType() {
 			return RPCCallableClassLoader.this;
-		}		
+		}
 	}
 }
