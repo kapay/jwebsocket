@@ -52,11 +52,11 @@ var jws = {
 	//:const:*:JWS_SERVER_PORT:Integer:8787
 	//:d:en:Default port number, 8787 for stand-alone un-secured servers, _
 	//:d:en:80 for Jetty or Glassfish un-secured servers.
-	JWS_SERVER_PORT: 8787,
+	JWS_SERVER_PORT: 80,
 	//:const:*:JWS_SERVER_SSL_PORT:Integer:9797
 	//:d:en:Default port number, 9797 for stand-alone SSL secured servers, _
 	//:d:en:443 for Jetty or Glassfish SSL secured servers.
-	JWS_SERVER_SSL_PORT: 9797,
+	JWS_SERVER_SSL_PORT: 443,
 	//:const:*:JWS_SERVER_CONTEXT:String:jWebSocket
 	//:d:en:Default application context in web application servers or servlet containers like Jetty or GlassFish.
 	JWS_SERVER_CONTEXT: "/jWebSocket",
@@ -264,7 +264,6 @@ var jws = {
 
 			// This listener is called when a message from the thread
 			// to the application is posted.
-			var lThis = this;
 			jws.worker.onmessage = function( aEvent ) {
 				if( lOnMessage != null ) {
 					lOnMessage.call( lThis, {
@@ -1191,6 +1190,39 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		}
 	},
 
+	// process the token queue
+	// tries to send out all tokens stored in the quere
+	processQueue: function() {
+		if( !this.mQueue ) {
+			var lRes = this.checkConnected();
+			if( lRes.code == 0 ) {
+				var lToken;
+				while( this.mQueue.length > 0 ) {
+					// get first element of the queue
+					lToken = this.mQueue[ 0 ];
+				}
+			}
+		}
+	},
+
+	//:m:*:queueToken
+	//:d:en:Adds a new token to the send queue
+	//:d:en:this method can also be executed, if no connection is established
+	//:a:en::aToken:Object:Token to be queued to the jWebSocket server.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
+	//:r:*:::void:none
+	queueToken: function( aToken, aOptions ) {
+		if( !this.mQueue ) {
+			this.mQueue = [];
+		}
+		this.mQueue.push({ 
+			token: aToken,
+			options: aOptions
+		});
+		this.processQueue();
+	},
+
 	//:m:*:sendToken
 	//:d:en:Sends a token to the jWebSocket server.
 	//:a:en::aToken:Object:Token to be send to the jWebSocket server.
@@ -1201,6 +1233,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		var lRes = this.checkConnected();
 		if( lRes.code == 0 ) {
 			var lSpawnThread = false;
+			var lL2FragmSize = 0;
 			var lTimeout = jws.DEF_RESP_TIMEOUT;
 			var lCallbacks = {
 				OnResponse: null,
@@ -1231,6 +1264,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				}
 				if( aOptions.spawnThread ) {
 					lSpawnThread = aOptions.spawnThread;
+				}
+				if( aOptions.fragmentSize ) {
+					lL2FragmSize = aOptions.fragmentSize;
 				}
 			}
 			jws.CUR_TOKEN_ID++;
@@ -1265,9 +1301,27 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				aToken.spawnThread = true;
 			}
 			var lStream = this.tokenToStream( aToken );
-
-			// console.log("sending" + lStream + "...");
-			this.sendStream( lStream );
+			if( lL2FragmSize > 0 && lStream.length > 0 ) {
+				var lToken, lFragment, lFragmId = 0, lStart = 0, lTotal = lStream.length;
+				while( lStream.length > 0 ) {
+					lToken = {
+						ns: jws.NS_SYSTEM,
+						type: "fragment",
+						utid: aToken.utid,
+						index: lFragmId++,
+						total: parseInt( lTotal / lL2FragmSize ) + 1,
+						data: lStream.substr( 0, lL2FragmSize )
+					};
+					lStart += lL2FragmSize;
+					lStream = lStream.substr( lL2FragmSize );
+					lFragment = this.tokenToStream( lToken );
+					this.sendStream( lFragment );
+					// console.log( "sending fragment " + lFragment + "..." );
+				}
+			} else {
+				// console.log( "sending stream " + lStream + "..." );
+				this.sendStream( lStream );
+			}
 		}
 		return lRes;
 	},

@@ -47,6 +47,9 @@
 				<Set name="confidentialPort">443</Set>
 				<Set name="lowResourcesConnections">20000</Set>
 				<Set name="lowResourcesMaxIdleTime">5000</Set>
+				
+		        <Set name="responseBufferSize">65536</Set>
+				<Set name="headerBufferSize">32768</Set>
 			</New>
 		</Arg>
 	</Call>

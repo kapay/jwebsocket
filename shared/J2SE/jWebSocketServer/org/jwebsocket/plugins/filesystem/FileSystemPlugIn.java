@@ -317,7 +317,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		Token lResponse = lServer.createResponse(aToken);
 
 		WebSocketConnector lTarget = lServer.getConnector(lTargetId);
-		if( lTarget != null ) {
+		if (lTarget != null) {
 			// send notification event to target client
 			// to allow to update their content (if desired)
 			// create token of type "event"

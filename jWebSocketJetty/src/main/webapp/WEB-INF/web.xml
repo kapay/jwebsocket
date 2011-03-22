@@ -17,7 +17,17 @@
 	<servlet>
 		<servlet-name>jWebSocket</servlet-name>
 		<servlet-class>org.jwebsocket.jetty.jWebSocket</servlet-class>
-	</servlet>
+		<!-- this init-param is essential!
+			If not set Jetty crashes cannot be excluded in latest 8.0.0.M2 -->
+		<init-param>
+			<param-name>bufferSize</param-name>
+			<param-value>1048576</param-value>
+		</init-param>
+		<init-param>
+			<param-name>timeout</param-name>
+			<param-value>1000</param-value>
+		</init-param>
+ 	</servlet>
 	<servlet-mapping>
 		<servlet-name>jWebSocket</servlet-name>
 		<url-pattern>/jWebSocket</url-pattern>

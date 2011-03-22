@@ -39,6 +39,7 @@ import org.jwebsocket.filter.TokenFilterChain;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.FilterResponse;
+import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.listener.WebSocketServerTokenEvent;
 import org.jwebsocket.listener.WebSocketServerTokenListener;
 import org.jwebsocket.plugins.TokenPlugInChain;
@@ -281,7 +282,16 @@ public class TokenServer extends BaseServer {
 					if (mLog.isDebugEnabled()) {
 						mLog.debug("Processing token '" + lToken.toString() + "' from '" + aConnector + "'...");
 					}
-					processToken(aConnector, lToken);
+					if ("org.jwebsocket.plugins.system".equals(lToken.getNS())
+							&& "fragment".equals(lToken.getType())) {
+
+						Token llToken = FragmentedTokenBuilder.putFragment(aConnector, lToken);
+						if( llToken != null ) {
+							processToken(aConnector, llToken);
+						}
+					} else {
+						processToken(aConnector, lToken);
+					}
 				}
 			} else {
 				mLog.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
@@ -587,7 +597,7 @@ public class TokenServer extends BaseServer {
 		Integer lTokenId = null;
 		String lType = null;
 		String lNS = null;
-		if( aInToken != null ) {
+		if (aInToken != null) {
 			lTokenId = aInToken.getInteger("utid", -1);
 			lType = aInToken.getString("type");
 			lNS = aInToken.getString("ns");

@@ -16,6 +16,7 @@
 package org.jwebsocket.api;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 
 /**
  * Specifies the API for low level data packets which are interchanged between
@@ -30,6 +31,60 @@ public interface WebSocketPacket {
 	 * @param aByteArray
 	 */
 	void setByteArray(byte[] aByteArray);
+
+	/**
+	 * 
+	 * @return
+	 */
+	boolean isFragmented();
+
+	/**
+	 * 
+	 * @return
+	 */
+	boolean isComplete();
+
+	/**
+	 *
+	 * @param aString
+	 * @param aStart
+	 */
+	void setFragment(String aString, int aIdx);
+
+	/**
+	 *
+	 */
+	void packFragments();
+
+	/**
+	 * 
+	 * @param aDate
+	 */
+	void setCreationDate(Date aDate);
+
+	/**
+	 * 
+	 * @return
+	 */
+	Date getCreationDate();
+
+	/**
+	 * 
+	 * @param aMilliseconds
+	 */
+	void setTimeout(long aMilliseconds);
+
+	/**
+	 *
+	 * @return
+	 */
+	boolean isTimedOut();
+
+	/**
+	 *
+	 * @param aTotal
+	 */
+	void initFragmented(int aTotal);
 
 	/**
 	 * Sets the value of the data packet to the given string by using

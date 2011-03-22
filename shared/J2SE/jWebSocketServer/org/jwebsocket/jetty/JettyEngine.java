@@ -104,13 +104,15 @@ public class JettyEngine extends BaseEngine {
 			lServletContext.setContextPath(lContext);
 			mJettyServer.setHandler(lServletContext);
 
-			lServletContext.addServlet(new ServletHolder(new JettyServlet()), lServlet);
+			ServletHolder lServletHolder = new ServletHolder(new JettyServlet());
+			lServletContext.addServlet(lServletHolder, lServlet);
 
 			mJettyServer.setStopAtShutdown(true);
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Starting embedded Jetty Server '"
 						+ Server.getVersion() + "'...");
 			}
+
 			mJettyServer.start();
 			// if (mLog.isDebugEnabled()) {
 			//	mLog.debug("Joining embedded Jetty server...");

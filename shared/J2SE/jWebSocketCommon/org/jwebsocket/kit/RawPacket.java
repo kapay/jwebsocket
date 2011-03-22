@@ -16,6 +16,9 @@
 package org.jwebsocket.kit;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jwebsocket.api.WebSocketPacket;
 
 /**
@@ -28,14 +31,26 @@ public class RawPacket implements WebSocketPacket {
 
 	public static final int FRAMETYPE_UTF8 = 0;
 	public static final int FRAMETYPE_BINARY = 1;
-    // control frames
+	// control frames
 	public static final int FRAMETYPE_PING = 2;
 	public static final int FRAMETYPE_PONG = 3;
 	public static final int FRAMETYPE_CLOSE = 4;
 	public static final int FRAMETYPE_FRAGMENT = 5;
-
 	private byte[] mData = null;
+	private String[] mFragments = null;
+	// private String mUTF8 = null;
+	// fragmentation support
+	private int mFragmentsLoaded = 0;
+	private int mFragmentsExpected = 0;
+	private boolean mIsFragmented = false;
+	private boolean mIsComplete = false;
+	private Date mCreationDate = null;
+	private long mTimeout = 0;
 	private int mFrameType = FRAMETYPE_UTF8;
+
+	public RawPacket(int aInitialSize) {
+		initFragmented(aInitialSize);
+	}
 
 	/**
 	 * Instantiates a new data packet and initializes its value to the passed
@@ -63,7 +78,7 @@ public class RawPacket implements WebSocketPacket {
 	 * @throws UnsupportedEncodingException
 	 */
 	public RawPacket(String aString, String aEncoding)
-		throws UnsupportedEncodingException {
+			throws UnsupportedEncodingException {
 		setString(aString, aEncoding);
 	}
 
@@ -79,7 +94,7 @@ public class RawPacket implements WebSocketPacket {
 
 	@Override
 	public void setString(String aString, String aEncoding)
-		throws UnsupportedEncodingException {
+			throws UnsupportedEncodingException {
 		mData = aString.getBytes(aEncoding);
 	}
 
@@ -113,7 +128,7 @@ public class RawPacket implements WebSocketPacket {
 
 	@Override
 	public String getString(String aEncoding)
-		throws UnsupportedEncodingException {
+			throws UnsupportedEncodingException {
 		return new String(mData, aEncoding);
 	}
 
@@ -149,5 +164,61 @@ public class RawPacket implements WebSocketPacket {
 	@Override
 	public void setFrameType(int aFrameType) {
 		this.mFrameType = aFrameType;
+	}
+
+	@Override
+	public boolean isFragmented() {
+		return mIsFragmented;
+	}
+
+	@Override
+	public boolean isComplete() {
+		return mIsComplete;
+	}
+
+	@Override
+	public void setFragment(String aString, int aIdx) {
+		mFragments[aIdx] = aString;
+		mFragmentsLoaded++;
+		mIsComplete = mFragmentsLoaded >= mFragmentsExpected;
+	}
+
+	@Override
+	public void packFragments() {
+		StringBuilder lSB = new StringBuilder();
+		for (int lIdx = 0; lIdx < mFragments.length; lIdx++) {
+			lSB.append(mFragments[lIdx]);
+			mFragments[lIdx] = null;
+		}
+		try {
+			mData = lSB.toString().getBytes("UTF-8");
+		} catch (UnsupportedEncodingException lEx) {
+		}
+	}
+
+	@Override
+	public void initFragmented(int aTotal) {
+		mFragmentsExpected = aTotal;
+		mFragments = new String[aTotal];
+	}
+
+	@Override
+	public void setCreationDate(Date aDate) {
+		mCreationDate = aDate;
+	}
+
+	@Override
+	public Date getCreationDate() {
+		return mCreationDate;
+	}
+
+	@Override
+	public void setTimeout(long aMilliseconds) {
+		mTimeout = aMilliseconds;
+	}
+
+	@Override
+	public boolean isTimedOut() {
+		return mCreationDate.getTime() + mTimeout < new Date().getTime();
 	}
 }

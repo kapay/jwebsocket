@@ -28,7 +28,7 @@
 		<script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
 		<script src="../../res/js/jwsCanvasPlugIn.js" type="text/javascript"></script>
 		<!-- load file system plug-in to be able to send snap shots of the canvas -->
-		<script src="../../res/js/jwsFileSystemPlugIn.js" type="text/javascript"></script>
+		<script src="../../res/js/jwsFilesystemPlugIn.js" type="text/javascript"></script>
 		<script type="text/javascript" language="JavaScript">
 			var lJWSID = "jWebSocket Chat",
 			lWSC = null,
@@ -46,7 +46,7 @@
 
 			function doOpen() {
 				// adjust this URL to your jWebSocket server
-				var lURL = jws.JWS_SERVER_URL + "/;prot=json,timeout=360000";
+				var lURL = jws.getDefaultServerURL();
 
 				// try to establish connection to jWebSocket server
 				lWSC.logon( lURL, "Guest", "guest", {
@@ -151,6 +151,28 @@
 				}
 			}
 
+			function paint() {
+				var lImages = new Array();
+				lImages[ 0 ] = "image 732.jpg";
+				lImages[ 1 ] = "image 738.png";
+				lImages[ 2 ] = "image 819.png";
+				lImages[ 3 ] = "image 886.png";
+				lImages[ 4 ] = "image 964.png";
+				lImages[ 5 ] = "image 1062.png";
+				lImages[ 6 ] = "image 920.png";
+				lImages[ 7 ] = "image 954.png";
+				lImages[ 8 ] = "image 748.png";
+
+				var lCanvas = document.getElementById( "cnvDemo" );
+				lCanvas.clear = true;
+				var lContext = lCanvas.getContext( "2d" );
+				var lImg = new Image();
+				for( var lIdx = 0; lIdx < lImages.length; lIdx++ ){
+					lImg.src = lImages[ lIdx ];
+					lContext.drawImage( lImg, 0, 0 );
+				}
+			}
+
 			function snapshot() {
 				if( lIsConnected ) {
 					// png should be supported by all HTML5 compliant browser
@@ -237,13 +259,15 @@
 					   title="Clears the current canvas locally and on all connected clients.">&nbsp;
 				<input class="sbtnDlg" id="sbtnSend" type="button" value="Snapshot" onclick="snapshot();"
 					   title="Creates a snapshot, save it on the server and broadcasts a 'filesave' event.">&nbsp;
+				<input class="sbtnDlg" id="sbtnPaint" type="button" value="Paint" onclick="paint();"
+					   title="Paints some images on the canvas.">&nbsp;
 				<img id="simgStatus" alt="status"  src="../../images/disconnected.png"/>
 			</p>
 			<p id="spnAvg" style="display:none">0ms</p>
-			<canvas id="cnvDemo" width="250" height="142"
-					style="width:250px; height:142px; overflow:hidden; border:1px solid gray; cursor:crosshair; float:left" >
+			<canvas id="cnvDemo" width="250" height="222"
+					style="width:250px; height:222px; overflow:hidden; border:1px solid gray; cursor:crosshair; float:left" >
 			</canvas>
-			<div id="spanSettings" style="border:1px solid gray; position:relative; top: 0px; left: 5px; width:20px; height:142px; overflow:hidden">
+			<div id="spanSettings" style="border:1px solid gray; position:relative; top: 0px; left: 5px; width:20px; height:142px; margin-bottom:80px; overflow:hidden">
 				<table border="0" cellspacing="2" cellpadding="1">
 					<colgroup><col width="20px"></colgroup>
 					<tr><td style="cursor: pointer; background-color: #000000" onclick="selectColor('#000000');"

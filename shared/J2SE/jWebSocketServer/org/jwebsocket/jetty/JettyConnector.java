@@ -114,12 +114,12 @@ public class JettyConnector extends BaseConnector {
 	@Override
 	public void startConnector() {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Starting Jetty connector...");
+			mLog.debug("Starting Jetty connector at port " + getRemotePort() + "...");
 		}
 		mIsRunning = true;
 
 		if (mLog.isInfoEnabled()) {
-			mLog.info("Started Jetty connector.");
+			mLog.info("Started Jetty connector at port " + getRemotePort());
 		}
 
 		// call connectorStarted method of engine
@@ -131,9 +131,11 @@ public class JettyConnector extends BaseConnector {
 
 	@Override
 	public void stopConnector(CloseReason aCloseReason) {
-		if( mIsRunning ) {
+		if (mIsRunning) {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Stopping Jetty connector (" + aCloseReason.name() + ")...");
+				mLog.debug("Stopping Jetty connector ("
+						+ aCloseReason.name() + ") at port "
+						+ getRemotePort() + "...");
 			}
 			// call client stopped method of engine
 			// (e.g. to release client from streams)
@@ -146,7 +148,9 @@ public class JettyConnector extends BaseConnector {
 			mCloseReason = aCloseReason;
 			mIsRunning = false;
 			if (mLog.isInfoEnabled()) {
-				mLog.info("Stopped Jetty connector.");
+				mLog.info("Stopped Jetty connector ("
+						+ aCloseReason.name() + ") at port "
+						+ getRemotePort() + ".");
 			}
 		}
 	}

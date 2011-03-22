@@ -38,7 +38,6 @@ public class jWebSocket extends WebSocketServlet {
 	@Override
 	protected void doGet(HttpServletRequest aRequest, HttpServletResponse aResponse)
 			throws ServletException, IOException {
-		// System.out.print("@doGet");
 		getServletContext().getNamedDispatcher("default").forward(aRequest, aResponse);
 	}
 
@@ -52,7 +51,7 @@ public class jWebSocket extends WebSocketServlet {
 	@Override
 	protected void doPost(HttpServletRequest aRequest, HttpServletResponse aResponse)
 			throws ServletException, IOException {
-		// System.out.println("@doPost");
+		// not required for now.
 	}
 
 	/**

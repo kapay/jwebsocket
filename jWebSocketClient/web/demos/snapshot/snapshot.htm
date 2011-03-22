@@ -136,7 +136,7 @@
 					|| lLC.indexOf( ".jpeg" ) > 0
 					|| lLC.indexOf( ".png" ) > 0
 					|| lLC.indexOf( ".gif" ) > 0
-			) {
+				) {
 					log( "Picture received: '" + lFilename + "':" );
 					// aToken.url = aToken.url.replace("foto.jpg", "flowers_1280x1024.jpg");
 					lHTML = "<img onload=\"checkImageSize()\" src=\"" + aToken.url + "\"/>";
@@ -154,7 +154,7 @@
 					|| lLC.indexOf( ".jpeg" ) > 0
 					|| lLC.indexOf( ".png" ) > 0
 					|| lLC.indexOf( ".gif" ) > 0
-			) {
+				) {
 					log( "Picture received: '" + lFilename + "':" );
 					lHTML = "<img onload=\"checkImageSize()\" src=\"" + aToken.data + "\"/>";
 				} else {
@@ -175,7 +175,9 @@
 							aToken.fileName,
 							aToken.data,
 							{	encoding: "base64",
+								// here we already have base64 encoded data
 								suppressEncoder: true,
+								fragmentSize: 16384,
 								scope: "public"
 							});
 						log( lWSC.resultToString( lRes ) );
