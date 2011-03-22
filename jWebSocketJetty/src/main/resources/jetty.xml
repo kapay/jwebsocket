@@ -48,8 +48,24 @@
 				<Set name="lowResourcesConnections">20000</Set>
 				<Set name="lowResourcesMaxIdleTime">5000</Set>
 				
-		        <Set name="responseBufferSize">65536</Set>
+				<Set name="responseBufferSize">65536</Set>
 				<Set name="headerBufferSize">32768</Set>
+			</New>
+		</Arg>
+	</Call>
+
+	<!-- https/SSL configuration for Jetty -->
+	<!-- refer to http://docs.codehaus.org/display/JETTY/How+to+configure+SSL -->
+	<Call name="addConnector">
+		<Arg>
+			<!-- Don't use this as suggested <New class="org.mortbay.jetty.security.SslSocketConnector"> -->
+			<New class="org.eclipse.jetty.server.ssl.SslSocketConnector">
+				<Set name="Port">443</Set>
+				<Set name="maxIdleTime">30000</Set>
+				<!-- put your path to the keystore here -->
+				<Set name="keystore">c:/svn/jWebsocket/rte/jWebSocket-1.0/conf/jWebSocket.ks</Set>
+				<Set name="password">jWebSocket</Set>
+				<Set name="keyPassword">jWebSocket</Set>
 			</New>
 		</Arg>
 	</Call>
