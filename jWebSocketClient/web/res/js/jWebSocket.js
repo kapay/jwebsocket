@@ -732,6 +732,44 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		return this.open(aURL, aOptions );
 	},
 
+	//:m:*:processQueue
+	//:d:en:Processes the token queue. _
+	//:d:en:Tries to send out all tokens stored in the quere
+	//:a:en::aToken:Object:Token to be queued to the jWebSocket server.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
+	//:r:*:::void:none
+	processQueue: function() {
+		if( !this.mQueue ) {
+			var lRes = this.checkConnected();
+			if( lRes.code == 0 ) {
+				var lToken;
+				while( this.mQueue.length > 0 ) {
+					// get first element of the queue
+					lToken = this.mQueue[ 0 ];
+				}
+			}
+		}
+	},
+
+	//:m:*:queuePacket
+	//:d:en:Adds a new token to the send queue
+	//:d:en:this method can also be executed, if no connection is established
+	//:a:en::aToken:Object:Token to be queued to the jWebSocket server.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
+	//:r:*:::void:none
+	queuePacket: function( aToken, aOptions ) {
+		if( !this.mQueue ) {
+			this.mQueue = [];
+		}
+		this.mQueue.push({
+			token: aToken,
+			options: aOptions
+		});
+		this.processQueue();
+	},
+
 	//:m:*:sendStream
 	//:d:en:Sends a given string to the jWebSocket Server. The methods checks _
 	//:d:en:if the connection is still up and throws an exception if not.
@@ -1188,39 +1226,6 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				}
 			}
 		}
-	},
-
-	// process the token queue
-	// tries to send out all tokens stored in the quere
-	processQueue: function() {
-		if( !this.mQueue ) {
-			var lRes = this.checkConnected();
-			if( lRes.code == 0 ) {
-				var lToken;
-				while( this.mQueue.length > 0 ) {
-					// get first element of the queue
-					lToken = this.mQueue[ 0 ];
-				}
-			}
-		}
-	},
-
-	//:m:*:queueToken
-	//:d:en:Adds a new token to the send queue
-	//:d:en:this method can also be executed, if no connection is established
-	//:a:en::aToken:Object:Token to be queued to the jWebSocket server.
-	//:a:en::aOptions:Object:Optional arguments as listed below...
-	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
-	//:r:*:::void:none
-	queueToken: function( aToken, aOptions ) {
-		if( !this.mQueue ) {
-			this.mQueue = [];
-		}
-		this.mQueue.push({ 
-			token: aToken,
-			options: aOptions
-		});
-		this.processQueue();
 	},
 
 	//:m:*:sendToken

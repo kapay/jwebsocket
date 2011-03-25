@@ -255,7 +255,8 @@ public class TokenServer extends BaseServer {
 	}
 
 	@Override
-	public void processPacket(WebSocketEngine aEngine, final WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
+	public void processPacket(WebSocketEngine aEngine,
+			final WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		// is the data packet supposed to be interpreted as token?
 		if (aConnector.getBool(VAR_IS_TOKENSERVER)) {
 			if (mLog.isDebugEnabled()) {
@@ -269,7 +270,9 @@ public class TokenServer extends BaseServer {
 				// on shutdown
 				if (lRunReqInOwnThread) {
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Processing threaded token '" + lToken.toString() + "' from '" + aConnector + "'...");
+						mLog.debug("Processing threaded token '"
+								+ lToken.toString()
+								+ "' from '" + aConnector + "'...");
 					}
 					mCachedThreadPool.execute(new Runnable() {
 
@@ -280,13 +283,15 @@ public class TokenServer extends BaseServer {
 					});
 				} else {
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Processing token '" + lToken.toString() + "' from '" + aConnector + "'...");
+						mLog.debug("Processing token '" + lToken.toString()
+								+ "' from '" + aConnector + "'...");
 					}
 					if ("org.jwebsocket.plugins.system".equals(lToken.getNS())
 							&& "fragment".equals(lToken.getType())) {
 
-						Token llToken = FragmentedTokenBuilder.putFragment(aConnector, lToken);
-						if( llToken != null ) {
+						Token llToken = FragmentedTokenBuilder.putFragment(
+								aConnector, lToken);
+						if (llToken != null) {
 							processToken(aConnector, llToken);
 						}
 					} else {
@@ -294,7 +299,8 @@ public class TokenServer extends BaseServer {
 					}
 				}
 			} else {
-				mLog.error("Packet '" + aDataPacket.toString() + "' could not be converted into token.");
+				mLog.error("Packet '" + aDataPacket.toString()
+						+ "' could not be converted into token.");
 			}
 		} else {
 			if (mLog.isDebugEnabled()) {
@@ -310,7 +316,8 @@ public class TokenServer extends BaseServer {
 	 * @param aTarget
 	 * @param aToken
 	 */
-	public void sendToken(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+	public void sendToken(WebSocketConnector aSource,
+			WebSocketConnector aTarget, Token aToken) {
 		sendTokenData(aSource, aTarget, aToken, false);
 	}
 
@@ -340,7 +347,8 @@ public class TokenServer extends BaseServer {
 	 * @param aToken
 	 * @return
 	 */
-	public IOFuture sendTokenAsync(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+	public IOFuture sendTokenAsync(WebSocketConnector aSource,
+			WebSocketConnector aTarget, Token aToken) {
 		return sendTokenData(aSource, aTarget, aToken, true);
 	}
 
@@ -369,16 +377,19 @@ public class TokenServer extends BaseServer {
 		}
 	}
 
-	private IOFuture sendTokenData(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken, boolean aIsAsync) {
+	private IOFuture sendTokenData(WebSocketConnector aSource,
+			WebSocketConnector aTarget, Token aToken, boolean aIsAsync) {
 		if (aTarget.getBool(VAR_IS_TOKENSERVER)) {
 			// before sending the token push it through filter chain
-			FilterResponse lFilterResponse = getFilterChain().processTokenOut(aSource, aTarget, aToken);
+			FilterResponse lFilterResponse = getFilterChain().processTokenOut(
+					aSource, aTarget, aToken);
 
 			// only forward the token to the plug-in chain
 			// if filter chain does not response "aborted"
 			if (!lFilterResponse.isRejected()) {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug("Sending token '" + aToken + "' to '" + aTarget + "'...");
+					mLog.debug("Sending token '" + aToken
+							+ "' to '" + aTarget + "'...");
 				}
 				WebSocketPacket lPacket = tokenToPacket(aTarget, aToken);
 				return sendPacketData(aTarget, lPacket, false);
@@ -393,7 +404,8 @@ public class TokenServer extends BaseServer {
 		return null;
 	}
 
-	private IOFuture sendPacketData(WebSocketConnector aTarget, WebSocketPacket aDataPacket, boolean aIsAsync) {
+	private IOFuture sendPacketData(WebSocketConnector aTarget,
+			WebSocketPacket aDataPacket, boolean aIsAsync) {
 		if (aIsAsync) {
 			return super.sendPacketAsync(aTarget, aDataPacket);
 		} else {
@@ -431,7 +443,8 @@ public class TokenServer extends BaseServer {
 	public void broadcastFiltered(Token aToken, String aFilterID, String aFilterName) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Broadcasting token '" + aToken + "' to all token based "
-					+ "connectors that belong to the filter '" + aFilterID + "' called '" + aFilterName + "'...");
+					+ "connectors that belong to the filter '" + aFilterID
+					+ "' called '" + aFilterName + "'...");
 		}
 		FastMap<String, Object> lFilter = new FastMap<String, Object>();
 		lFilter.put(aFilterID, aFilterName);
@@ -452,7 +465,8 @@ public class TokenServer extends BaseServer {
 		}
 
 		// before sending the token push it through filter chain
-		FilterResponse lFilterResponse = getFilterChain().processTokenOut(null, null, aToken);
+		FilterResponse lFilterResponse = getFilterChain().processTokenOut(
+				null, null, aToken);
 
 		aFilter.put(VAR_IS_TOKENSERVER, true);
 
@@ -486,7 +500,8 @@ public class TokenServer extends BaseServer {
 		}
 
 		// before sending the token push it through filter chain
-		FilterResponse lFilterResponse = getFilterChain().processTokenOut(null, null, aToken);
+		FilterResponse lFilterResponse = getFilterChain().processTokenOut(
+				null, null, aToken);
 
 		FastMap<String, Object> lFilter = new FastMap<String, Object>();
 		lFilter.put(VAR_IS_TOKENSERVER, true);
