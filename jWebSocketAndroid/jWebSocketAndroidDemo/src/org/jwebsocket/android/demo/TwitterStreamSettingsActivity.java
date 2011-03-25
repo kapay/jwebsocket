@@ -36,11 +36,13 @@ public class TwitterStreamSettingsActivity extends Dialog {
 		this.listener = listener;
 	}
 
+
+
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		setContentView(R.layout.twitter_stream_settings);
-		setTitle("Twitter strea settings");
+		setTitle("Twitter stream settings");
 		keywordsText = (EditText) findViewById(R.id.keywordsTxt);
 		setBtn = (Button) findViewById(R.id.setButton);
 		setBtn.setOnClickListener(new View.OnClickListener() {
