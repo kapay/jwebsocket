@@ -50,7 +50,7 @@ public class TwitterStreamActivity extends ListActivity implements
     private ArrayList<Tweet> mTweets = null;
     private TweetAdapter mTweetAdapter;
     TwitterStreamSettingsActivity lSettingsDialog;
-    private final int CAPACITY = 200;
+    private final int CAPACITY = 50;
 
     @Override
     public void onCreate(Bundle icicle) {

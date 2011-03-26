@@ -18,6 +18,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -41,8 +42,8 @@ public class TwitterStreamSettingsActivity extends Dialog {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		setContentView(R.layout.twitter_stream_settings);
-		setTitle("Twitter stream settings");
+                this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setContentView(R.layout.twitter_stream_settings);		
 		keywordsText = (EditText) findViewById(R.id.keywordsTxt);
 		setBtn = (Button) findViewById(R.id.setButton);
 		setBtn.setOnClickListener(new View.OnClickListener() {
