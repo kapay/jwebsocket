@@ -28,13 +28,13 @@ import android.widget.EditText;
  */
 public class TwitterStreamSettingsActivity extends Dialog {
 
-	private TwitterSettingsListener listener;
-	private EditText keywordsText;
-	private Button setBtn;
+	private TwitterSettingsListener mListener;
+	private EditText mKeywordsText;
+	private Button mSetBtn;
 
 	public TwitterStreamSettingsActivity(Context context, TwitterSettingsListener listener) {
 		super(context);
-		this.listener = listener;
+		this.mListener = listener;
 	}
 
 
@@ -44,12 +44,12 @@ public class TwitterStreamSettingsActivity extends Dialog {
 		super.onCreate(icicle);
                 this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.twitter_stream_settings);		
-		keywordsText = (EditText) findViewById(R.id.keywordsTxt);
-		setBtn = (Button) findViewById(R.id.setButton);
-		setBtn.setOnClickListener(new View.OnClickListener() {
+		mKeywordsText = (EditText) findViewById(R.id.keywordsTxt);
+		mSetBtn = (Button) findViewById(R.id.setButton);
+		mSetBtn.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View view) {
-				listener.setSettings(keywordsText.getText().toString());
+				mListener.setSettings(mKeywordsText.getText().toString());
 				TwitterStreamSettingsActivity.this.dismiss();
 			}
 		});

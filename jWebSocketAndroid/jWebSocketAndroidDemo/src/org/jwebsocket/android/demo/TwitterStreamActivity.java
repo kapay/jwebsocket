@@ -18,7 +18,6 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,209 +44,213 @@ import org.jwebsocket.token.TokenFactory;
  * @author Prashant
  */
 public class TwitterStreamActivity extends ListActivity implements
-        WebSocketClientTokenListener {
+		WebSocketClientTokenListener {
 
-    private ArrayList<Tweet> mTweets = null;
-    private TweetAdapter mTweetAdapter;
-    TwitterStreamSettingsActivity lSettingsDialog;
-    private final int CAPACITY = 50;
+	private ArrayList<Tweet> mTweets = null;
+	private TweetAdapter mTweetAdapter;
+	TwitterStreamSettingsActivity lSettingsDialog;
+	private final int CAPACITY = 10;
 
-    @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        setContentView(R.layout.twitter_stream_activity);
-        this.mTweets = new ArrayList<Tweet>(CAPACITY);
-        this.mTweetAdapter = new TweetAdapter(this, R.layout.tweet_row, mTweets);
-        setListAdapter(mTweetAdapter);
+	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
+		setContentView(R.layout.twitter_stream_activity);
+		this.mTweets = new ArrayList<Tweet>(CAPACITY);
+		this.mTweetAdapter = new TweetAdapter(this, R.layout.tweet_row, mTweets);
+		setListAdapter(mTweetAdapter);
 
-    }
+	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu aMenu) {
-        MenuInflater lMenInfl = getMenuInflater();
-        lMenInfl.inflate(R.menu.twitter_stream_menu, aMenu);
-        return true;
-    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu aMenu) {
+		MenuInflater lMenInfl = getMenuInflater();
+		lMenInfl.inflate(R.menu.twitter_stream_menu, aMenu);
+		return true;
+	}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.twitterStreamSettings:
-                if (lSettingsDialog == null) {
-                    lSettingsDialog =
-                            new TwitterStreamSettingsActivity(this, new TwitterStreamSettingsActivity.TwitterSettingsListener() {
+	@Override
+	public boolean onOptionsItemSelected(MenuItem aItem) {
+		// Handle item selection
+		switch (aItem.getItemId()) {
+			case R.id.twitterStreamSettings:
+				if (lSettingsDialog == null) {
+					lSettingsDialog =
+							new TwitterStreamSettingsActivity(this,
+							new TwitterStreamSettingsActivity.TwitterSettingsListener() {
 
-                        public void setSettings(String keywords) {
+						public void setSettings(String keywords) {
 
-                            //TODO:use the keywords specified to get the twitter stream
-                            Token token = TokenFactory.createToken("org.jwebsocket.plugins.twitter", "setStream");
-                            token.setString("keywords", keywords);
-                            try {
-                                JWC.sendToken(token);
-                            } catch (WebSocketException ex) {
-                                Logger.getLogger(TwitterStreamActivity.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    });
-                }
-                lSettingsDialog.show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
+							//TODO:use the keywords specified to get the twitter stream
+							Token token = TokenFactory.createToken(
+									"org.jwebsocket.plugins.twitter", "setStream");
+							token.setString("keywords", keywords);
+							try {
+								JWC.sendToken(token);
+							} catch (WebSocketException ex) {
+								Logger.getLogger(TwitterStreamActivity.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
+					});
+				}
+				lSettingsDialog.show();
+				return true;
+			default:
+				return super.onOptionsItemSelected(aItem);
+		}
+	}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        connect();
-    }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		connect();
+	}
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        disConnect();
-    }
+	@Override
+	protected void onPause() {
+		super.onPause();
+		disConnect();
+	}
 
-    private void connect() {
-        try {
-            JWC.addListener(this);
-            JWC.open();
-        } catch (WebSocketException ex) {
-        }
-    }
+	private void connect() {
+		try {
+			JWC.addListener(this);
+			JWC.open();
+		} catch (WebSocketException ex) {
+		}
+	}
 
-    private void disConnect() {
-        try {
-            JWC.removeListener(this);
-            JWC.close();
-        } catch (WebSocketException ex) {
-            // TODO: log exception
-        }
-    }
+	private void disConnect() {
+		try {
+			JWC.removeListener(this);
+			JWC.close();
+		} catch (WebSocketException ex) {
+			// TODO: log exception
+		}
+	}
 
-    public void processToken(WebSocketClientEvent aEvent, Token aToken) {
-        if (aToken.getNS().equals("org.jwebsocket.plugins.twitter")
-                && aToken.getType().equals("event")
-                && aToken.getString("name").equals("status")) {
-            mTweets.add(0, new Tweet(aToken.getString("status"), aToken.getString("userImgURL"), aToken.getString("userName")));
+	public void processToken(WebSocketClientEvent aEvent, Token aToken) {
+		if (aToken.getNS().equals("org.jwebsocket.plugins.twitter")
+				&& aToken.getType().equals("event")
+				&& aToken.getString("name").equals("status")) {
+			mTweets.add(0, new Tweet(aToken.getString("status"),
+					aToken.getString("userImgURL"), aToken.getString("userName")));
 
-            mTweetAdapter.notifyDataSetChanged();
-        }
-        //fillDemoTweets();
-        //throw new UnsupportedOperationException("Not supported yet.");
-    }
+			mTweetAdapter.notifyDataSetChanged();
+		}
+		//fillDemoTweets();
+		//throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    public void processOpened(WebSocketClientEvent aEvent) {
-        //throw new UnsupportedOperationException("Not supported yet.");
-    }
+	public void processOpened(WebSocketClientEvent aEvent) {
+		//throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
-        //throw new UnsupportedOperationException("Not supported yet.");
-    }
+	public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+		//throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    public void processClosed(WebSocketClientEvent aEvent) {
-        //throw new UnsupportedOperationException("Not supported yet.");
-    }
+	public void processClosed(WebSocketClientEvent aEvent) {
+		//throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    public class Tweet {
+	public class Tweet {
 
-        private String tweet;
-        private String userImgURL;
-        private String userName;
+		private String mTweet;
+		private String mUserImgURL;
+		private String mUserName;
 
-        public Tweet(String tweet, String userImageUrl, String userName) {
-            this.tweet = tweet;
-            this.userImgURL = userImageUrl;
-            this.userName = userName;
-        }
+		public Tweet(String aTweet, String aUserImageUrl, String aUserName) {
+			this.mTweet = aTweet;
+			this.mUserImgURL = aUserImageUrl;
+			this.mUserName = aUserName;
+		}
 
-        /**
-         * @return the tweet
-         */
-        public String getTweet() {
-            return tweet;
-        }
+		/**
+		 * @return the tweet
+		 */
+		public String getTweet() {
+			return mTweet;
+		}
 
-        /**
-         * @param tweet
-         */
-        public void setTweet(String tweet) {
-            this.tweet = tweet;
-        }
+		/**
+		 * @param tweet
+		 */
+		public void setTweet(String tweet) {
+			this.mTweet = tweet;
+		}
 
-        /**
-         * @return the userImgURL
-         */
-        public String getUserImgURL() {
-            return userImgURL;
-        }
+		/**
+		 * @return the userImgURL
+		 */
+		public String getUserImgURL() {
+			return mUserImgURL;
+		}
 
-        /**
-         * @param userImgURL the userImgURL to set
-         */
-        public void setUserImgURL(String userImgURL) {
-            this.userImgURL = userImgURL;
-        }
+		/**
+		 * @param aUserImgURL the userImgURL to set
+		 */
+		public void setUserImgURL(String aUserImgURL) {
+			this.mUserImgURL = aUserImgURL;
+		}
 
-        /**
-         * @return the userName
-         */
-        public String getUserName() {
-            return userName;
-        }
+		/**
+		 * @return the userName
+		 */
+		public String getUserName() {
+			return mUserName;
+		}
 
-        /**
-         * @param userName the userName to set
-         */
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
-    }
+		/**
+		 * @param aUserName the userName to set
+		 */
+		public void setUserName(String aUserName) {
+			this.mUserName = aUserName;
+		}
+	}
 
-    public class TweetAdapter extends ArrayAdapter<Tweet> {
+	public class TweetAdapter extends ArrayAdapter<Tweet> {
 
-        private ArrayList<Tweet> tweets;
-        private ImageThreadLoader imageLoader = new ImageThreadLoader();
+		private ArrayList<Tweet> mTweets;
+		private ImageThreadLoader mImageLoader = new ImageThreadLoader();
 
-        public TweetAdapter(Context context, int textViewResourceId, ArrayList<Tweet> tweets) {
-            super(context, textViewResourceId, tweets);
-            this.tweets = tweets;
-        }
+		public TweetAdapter(Context aContext, int aTextViewResourceId,
+				ArrayList<Tweet> aTweets) {
+			super(aContext, aTextViewResourceId, aTweets);
+			this.mTweets = aTweets;
+		}
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View v = convertView;
-            if (v == null) {
-                LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.tweet_row, null);
-            }
-            Tweet tweet = tweets.get(position);
-            if (tweet != null) {
-                TextView tweetText = (TextView) v.findViewById(R.id.tweetTxt);
-                if (tweetText != null) {
-                    tweetText.setText(tweet.getTweet());
-                }
-                final ImageView userImage = (ImageView) v.findViewById(R.id.userImg);
-                Bitmap cachedImage = null;
-                try {
-                    cachedImage = imageLoader.loadImage(tweet.userImgURL, new ImageLoadedListener() {
+		@Override
+		public View getView(int aPosition, View aConvertView, ViewGroup aParent) {
+			View lView = aConvertView;
+			if (lView == null) {
+				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				lView = vi.inflate(R.layout.tweet_row, null);
+			}
+			Tweet lTweet = mTweets.get(aPosition);
+			if (lTweet != null) {
+				TextView tweetText = (TextView) lView.findViewById(R.id.tweetTxt);
+				if (tweetText != null) {
+					tweetText.setText(lTweet.getTweet());
+				}
+				final ImageView lUserImage = (ImageView) lView.findViewById(R.id.userImg);
+				Bitmap lCachedImage = null;
+				try {
+					lCachedImage = mImageLoader.loadImage(lTweet.mUserImgURL, new ImageLoadedListener() {
 
-                        public void imageLoaded(Bitmap imageBitmap) {
-                            userImage.setImageBitmap(imageBitmap);
-                            notifyDataSetChanged();
-                        }
-                    });
-                } catch (MalformedURLException e) {
-                }
-                if (cachedImage != null) {
-                    userImage.setImageBitmap(cachedImage);
-                }
+						public void imageLoaded(Bitmap aImageBitmap) {
+							lUserImage.setImageBitmap(aImageBitmap);
+							notifyDataSetChanged();
+						}
+					});
+				} catch (MalformedURLException e) {
+				}
+				if (lCachedImage != null) {
+					lUserImage.setImageBitmap(lCachedImage);
+				}
 
 
-            }
-            return v;
-        }
-    }
+			}
+			return lView;
+		}
+	}
 }

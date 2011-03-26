@@ -13,17 +13,20 @@
     android:layout_height="50dp"
     android:orientation="horizontal"
     >
-    <ImageView
+	<ImageView
         android:id="@+id/userImg"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:gravity="center_vertical"/>
-    <TextView
+        android:gravity="center_vertical"
+		android:layout_marginTop="3px"
+		android:layout_marginRight="3px"
+		android:layout_marginBottom="2px"
+	/>
+	<TextView
         android:id="@+id/tweetTxt"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="9sp"
+        android:textSize="14sp"
         android:gravity="center_vertical"
-
     />
 </LinearLayout>

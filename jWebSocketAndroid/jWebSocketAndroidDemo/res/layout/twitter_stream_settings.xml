@@ -22,13 +22,13 @@
     android:hint="@string/required_hint"
     android:layout_width="180dp"
     android:layout_height="36sp"
-    android:textSize="9sp" />
+    android:textSize="12sp" />
     <Button
     android:id="@+id/setButton"
     android:layout_width="50dp"
     android:layout_height="40dp"
     android:layout_below="@id/parameterTxt"
     android:text="Set"
-    android:textSize="9sp"
+    android:textSize="12sp"
     />
 </LinearLayout>
