@@ -123,7 +123,8 @@ public class BaseWebSocket implements WebSocketClient {
 
 			boolean lHandshakeComplete = false;
 			boolean lHeader = true;
-			int len = 1000;
+			// TODO: handle this length! >Could lead to buffer overflow!
+			int len = 8192;
 			byte[] lBuffer = new byte[len];
 			int lPos = 0;
 			ArrayList<String> lHandshakeLines = new ArrayList<String>();

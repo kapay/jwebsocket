@@ -311,12 +311,18 @@ public class FileSystemPlugIn extends TokenPlugIn {
 
 		String lFilename = aToken.getString("filename");
 		String lData = aToken.getString("data");
+		String lNodeId = aToken.getString("unid");
 		String lTargetId = aToken.getString("targetId");
 
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
 
-		WebSocketConnector lTarget = lServer.getConnector(lTargetId);
+		WebSocketConnector lTarget = null;
+		if (lNodeId != null) {
+			lTarget = lServer.getNode(lNodeId);
+		} else if (lTargetId != null) {
+			lTarget = lServer.getConnector(lTargetId);
+		}
 		if (lTarget != null) {
 			// send notification event to target client
 			// to allow to update their content (if desired)

@@ -285,7 +285,20 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 		lToken.setString("scope", aScope);
 		lToken.setBoolean("notify", aNotify);
 
-		lToken.setString("data", String.valueOf(Base64.encodeBase64(aData)));
+		lToken.setString("data", new String(Base64.encodeBase64(aData)));
+		sendToken(lToken);
+	}
+
+	public void sendFile(String aHeader, byte[] aData, String aFilename, String aTarget) throws WebSocketException {
+		Token lToken = TokenFactory.createToken(NS_FILESYSTEM_PLUGIN, "send");
+		lToken.setString("sourceId", getClientId());
+		lToken.setString("sender", getUsername());
+		lToken.setString("filename", aFilename);
+		// TODO: set mimetype correctly according to file extension based on configuration in jWebSocket.xml
+		lToken.setString("mimetype", "image/jpeg");
+		lToken.setString("unid", aTarget);
+
+		lToken.setString("data", aHeader + new String(Base64.encodeBase64(aData)));
 		sendToken(lToken);
 	}
 

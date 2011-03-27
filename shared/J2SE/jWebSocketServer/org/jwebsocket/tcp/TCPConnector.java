@@ -84,8 +84,14 @@ public class TCPConnector extends BaseConnector {
 			lTimeout = mClientSocket.getSoTimeout();
 		} catch (Exception lEx) {
 		}
+		String lNodeStr = getNodeId();
+		if (lNodeStr != null) {
+			lNodeStr= " (unid: " + lNodeStr + ")";
+		} else {
+			lNodeStr = "";
+		}
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Starting " + mLogInfo + " connector on port "
+			mLog.debug("Starting " + mLogInfo + " connector" + lNodeStr + " on port "
 					+ lPort + " with timeout "
 					+ (lTimeout > 0 ? lTimeout + "ms" : "infinite") + "");
 		}
@@ -93,7 +99,7 @@ public class TCPConnector extends BaseConnector {
 		Thread lClientThread = new Thread(lClientProc);
 		lClientThread.start();
 		if (mLog.isInfoEnabled()) {
-			mLog.info("Started " + mLogInfo + " connector on port "
+			mLog.info("Started " + mLogInfo + " connector" + lNodeStr + " on port "
 					+ lPort + " with timeout "
 					+ (lTimeout > 0 ? lTimeout + "ms" : "infinite") + "");
 		}
@@ -349,7 +355,7 @@ public class TCPConnector extends BaseConnector {
 							try {
 								/* Please keep this comment for debug purposes
 								if (mLog.isDebugEnabled()) {
-									mLog.debug("Received packet: '" + lPacket.getUTF8() + "'");
+								mLog.debug("Received packet: '" + lPacket.getUTF8() + "'");
 								}
 								 */
 								aEngine.processPacket(mConnector, lPacket);
