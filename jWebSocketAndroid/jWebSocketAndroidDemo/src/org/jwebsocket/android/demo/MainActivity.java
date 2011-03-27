@@ -29,49 +29,50 @@ import android.widget.ListView;
  */
 public class MainActivity extends ListActivity {
 
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
 
-        JWC.init();
-        JWC.loadSettings(this);
+		JWC.init();
+		JWC.loadSettings(this);
 
-        String[] lItems = {"Fundamentals", "Canvas Demo", "Camera Demo", "RPC Demo", "Twitter Stream", "Setup"};
+		String[] lItems = {"Fundamentals", "Canvas Demo", "Camera Demo", "Video Demo", "RPC Demo", "Twitter Stream", "Setup"};
 
-        setListAdapter(new ArrayAdapter<String>(this, R.layout.list_item, lItems));
+		setListAdapter(new ArrayAdapter<String>(this, R.layout.list_item, lItems));
 
-        ListView lv = getListView();
-        lv.setTextFilterEnabled(true);
+		ListView lv = getListView();
+		lv.setTextFilterEnabled(true);
 
 
-        lv.setOnItemClickListener(new OnItemClickListener() {
+		lv.setOnItemClickListener(new OnItemClickListener() {
 
-            public void onItemClick(AdapterView<?> parent, View view,
-                    int position, long id) {
-                switch (position) {
-                    case 0:
-                        startActivity(new Intent(MainActivity.this, Fundamentals.class));
-                        break;
-                    case 1:
-                        startActivity(new Intent(MainActivity.this, CanvasActivity.class));
-                        break;
-                    case 2:
-                        startActivity(new Intent(MainActivity.this, CameraActivity.class));
-                        break;
-                   case 3:
-                        startActivity(new Intent(MainActivity.this, RPCDemoActivity.class));
-                        break;
-                    case 4:
-                        startActivity(new Intent(MainActivity.this, TwitterStreamActivity.class));
-                        break;
-                    case 5:
-                        startActivity(new Intent(MainActivity.this, ConfigActivity.class));
-                        break;
-                }
-                //Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
-                //       Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				switch (position) {
+					case 0:
+						startActivity(new Intent(MainActivity.this, Fundamentals.class));
+						break;
+					case 1:
+						startActivity(new Intent(MainActivity.this, CanvasActivity.class));
+						break;
+					case 2:
+						startActivity(new Intent(MainActivity.this, CameraActivity.class));
+						break;
+					case 3:
+						startActivity(new Intent(MainActivity.this, VideoActivity.class));
+						break;
+					case 4:
+						startActivity(new Intent(MainActivity.this, RPCDemoActivity.class));
+						break;
+					case 5:
+						startActivity(new Intent(MainActivity.this, TwitterStreamActivity.class));
+						break;
+					case 6:
+						startActivity(new Intent(MainActivity.this, ConfigActivity.class));
+						break;
+				}
+			}
+		});
+	}
 }

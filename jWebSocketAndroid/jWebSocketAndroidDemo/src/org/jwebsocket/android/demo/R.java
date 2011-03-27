@@ -92,6 +92,7 @@ public final class R {
         public static final int tweet_row=0x7f030006;
         public static final int twitter_stream_activity=0x7f030007;
         public static final int twitter_stream_settings=0x7f030008;
+        public static final int video_hvga_p=0x7f030009;
     }
     public static final class menu {
         public static final int canvas_menu=0x7f050000;

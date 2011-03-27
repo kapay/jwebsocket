@@ -107,8 +107,14 @@ public class JWC {
         mJWC.broadcastText(aData);
     }
 
-    public static void saveFile(byte[] aData, String aFilename, String aScope, Boolean aNotify) throws WebSocketException {
+    public static void saveFile(byte[] aData, String aFilename, String aScope,
+			Boolean aNotify) throws WebSocketException {
         mJWC.saveFile(aData, aFilename, aScope, aNotify);
+    }
+
+    public static void sendFile(String aHeader, byte[] aData, String aFilename, String aTarget)
+			throws WebSocketException {
+        mJWC.sendFile(aHeader, aData, aFilename, aTarget);
     }
 
     public static void addListener(WebSocketClientTokenListener aListener) {
