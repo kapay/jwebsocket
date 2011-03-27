@@ -135,21 +135,30 @@ jws.FileSystemPlugIn = {
 
 	fileSend: function( aTargetId, aFilename, aData, aOptions ) {
 		var lEncoding = "base64";
+		var lIsNode = false;
 		if( aOptions ) {
 			if( aOptions.encoding != undefined ) {
 				lEncoding = aOptions.encoding;
 			}
+			if( aOptions.isNode != undefined ) {
+				lIsNode = aOptions.isNode;
+			}
 		}
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
-			this.sendToken({
+			var lToken = {
 				ns: jws.FileSystemPlugIn.NS,
 				type: "send",
 				data: aData,
-				targetId: aTargetId,
 				encoding: lEncoding,
 				filename: aFilename
-			});
+			};
+			if( lIsNode ) {
+				lToken.unid = aTargetId;
+			} else {
+				lToken.targetId = aTargetId;				
+			}
+			this.sendToken( lToken );
 		}
 		return lRes;
 	},

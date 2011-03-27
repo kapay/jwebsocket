@@ -46,7 +46,8 @@
 
 			function doOpen() {
 				// adjust this URL to your jWebSocket server
-				var lURL = jws.getDefaultServerURL();
+				var lURL = jws.getDefaultServerURL()
+					+ ( frameElement.id ? ";unid=" + frameElement.id : "");
 
 				// try to establish connection to jWebSocket server
 				lWSC.logon( lURL, "Guest", "guest", {
@@ -151,27 +152,67 @@
 				}
 			}
 
-			function paint() {
-				var lImages = new Array();
-				/*
-				lImages[ 0 ] = "image 732.jpg";
-				lImages[ 1 ] = "image 738.png";
-				lImages[ 2 ] = "image 819.png";
-				lImages[ 3 ] = "image 886.png";
-				lImages[ 4 ] = "image 964.png";
-				lImages[ 5 ] = "image 1062.png";
-				lImages[ 6 ] = "image 920.png";
-				lImages[ 7 ] = "image 954.png";
-				lImages[ 8 ] = "image 748.png";
-				*/
-				lImages[ 0 ] = "../../res/img/image1.jpg";
+			var lImgIdx = 0;
+			var lImages = new Array();
+		
+			lImages[ 0 ] = new Image();
+			lImages[ 1 ] = new Image();
+			lImages[ 2 ] = new Image();
+			lImages[ 3 ] = new Image();
+			lImages[ 4 ] = new Image();
+			lImages[ 5 ] = new Image();
+			lImages[ 6 ] = new Image();
+			lImages[ 7 ] = new Image();
+			lImages[ 8 ] = new Image();
 
+			lImages[ 0 ].src = "../../res/img/image1.jpg";
+			lImages[ 1 ].src = "../../res/img/image2.jpg";
+			lImages[ 2 ].src = "../../res/img/image3.jpg";
+			lImages[ 3 ].src = "../../res/img/image4.jpg";
+			lImages[ 4 ].src = "../../res/img/image5.jpg";
+			lImages[ 5 ].src = "../../res/img/image6.jpg";
+			lImages[ 6 ].src = "../../res/img/image7.jpg";
+			lImages[ 7 ].src = "../../res/img/image8.jpg";
+			lImages[ 8 ].src = "../../res/img/image9.jpg";
+
+			function paint() {
 				var lCanvas = document.getElementById( "cnvDemo" );
 				lCanvas.clear = true;
 				var lContext = lCanvas.getContext( "2d" );
-				var lImg = new Image();
+				/*
 				for( var lIdx = 0; lIdx < lImages.length; lIdx++ ){
 					lImg.src = lImages[ lIdx ];
+					lContext.drawImage( lImg, 0, 0 );
+				}
+				*/
+				lContext.drawImage( lImages[ lImgIdx ], 0, 0 );
+				if ( lImgIdx >= 8 ) {
+					lImgIdx = 0;
+				} else {
+					lImgIdx++;
+				}
+
+				lRes = lWSC.fileSend(
+					// target was passed as optional argument
+					// and thus can be used here
+					"target2", // Token.args.target,
+					"painting", // Token.fileName,
+					lCanvas.toDataURL( "image/jpeg" ),
+					// lCanvas.toDataURL( "image/png" ),
+					{	encoding: "base64",
+						isNode: true
+					}
+				);
+			}
+
+			function onFileSentObs( aToken ) {
+				console.log( new Date() + ": " + aToken.data.length +  " " + aToken.data.substr(0, 40));
+				var lImg = new Image();
+				// document.body.appendChild(lImg);
+				lImg.src = aToken.data;
+				lImg.onload = function() {
+					var lCanvas = document.getElementById( "cnvDemo" );
+					var lContext = lCanvas.getContext( "2d" );
 					lContext.drawImage( lImg, 0, 0 );
 				}
 			}
@@ -224,7 +265,15 @@
 				// check if WebSockets are supported by the browser
 				if( jws.browserSupportsWebSockets() ) {
 					// instaniate new TokenClient, either JSON, CSV or XML
-					lWSC = new jws.jWebSocketJSONClient();
+					lWSC = new jws.jWebSocketJSONClient({
+					});
+					lWSC.setFileSystemCallbacks({
+						// OnFileSaved: onFileSavedObs,
+						OnFileSent: onFileSentObs
+						// OnLocalFileRead: onLocalFileLoadedObs,
+						// OnLocalFileError: onLocalFileErrorObs
+					});
+
 
 					lWSC.canvasOpen( CANVAS_ID, "cnvDemo" );
 					doOpen();
@@ -267,8 +316,13 @@
 				<img id="simgStatus" alt="status"  src="../../images/disconnected.png"/>
 			</p>
 			<p id="spnAvg" style="display:none">0ms</p>
+<!--
 			<canvas id="cnvDemo" width="250" height="222"
 					style="width:250px; height:222px; overflow:hidden; border:1px solid gray; cursor:crosshair; float:left" >
+			</canvas>
+-->
+			<canvas id="cnvDemo" width="650" height="490"
+					style="width:650px; height:490px; overflow:hidden; border:1px solid gray; cursor:crosshair; float:left" >
 			</canvas>
 			<div id="spanSettings" style="border:1px solid gray; position:relative; top: 0px; left: 5px; width:20px; height:142px; margin-bottom:80px; overflow:hidden">
 				<table border="0" cellspacing="2" cellpadding="1">

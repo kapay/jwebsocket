@@ -52,11 +52,11 @@ var jws = {
 	//:const:*:JWS_SERVER_PORT:Integer:8787
 	//:d:en:Default port number, 8787 for stand-alone un-secured servers, _
 	//:d:en:80 for Jetty or Glassfish un-secured servers.
-	JWS_SERVER_PORT: 80,
+	JWS_SERVER_PORT: 8787,
 	//:const:*:JWS_SERVER_SSL_PORT:Integer:9797
 	//:d:en:Default port number, 9797 for stand-alone SSL secured servers, _
 	//:d:en:443 for Jetty or Glassfish SSL secured servers.
-	JWS_SERVER_SSL_PORT: 443,
+	JWS_SERVER_SSL_PORT: 9797,
 	//:const:*:JWS_SERVER_CONTEXT:String:jWebSocket
 	//:d:en:Default application context in web application servers or servlet containers like Jetty or GlassFish.
 	JWS_SERVER_CONTEXT: "/jWebSocket",
@@ -1180,6 +1180,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				}
 			}
 		}
+
+		if( this.fOnToken ) {
+			this.fOnToken( aToken );
+		}
+
 	},
 
 	//:m:*:processClosed
@@ -1444,6 +1449,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	open: function( aURL, aOptions ) {
 		var lRes = this.createDefaultResult();
 		try {
+			if( aOptions && aOptions.OnToken && typeof aOptions.OnToken == "function" ) {
+				this.fOnToken = aOptions.OnToken;
+			}
 			if( aOptions && aOptions.OnWelcome && typeof aOptions.OnWelcome == "function" ) {
 				this.fOnWelcome = aOptions.OnWelcome;
 			}
