@@ -34,6 +34,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
@@ -54,10 +56,10 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 	private float lSX = 0, lSY = 0;
 	private ImageView lImgView = null;
 	private ImageView lImgStatus = null;
-	int lWidth;
-	int lHeight;
-	Timer timer;
-	private boolean isDirty = false;
+	private int lWidth;
+	private int lHeight;
+	private Timer mTimer;
+	private volatile boolean mIsDirty = false;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -144,12 +146,17 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 			}
 		});
 
-		timer = new Timer();
-		timer.scheduleAtFixedRate(new TimerTask() {
+		mTimer = new Timer();
+		mTimer.schedule(new TimerTask() { // AtFixedRate
 
 			public void run() {
-				if (isDirty) {
+				if (mIsDirty) {
+					mIsDirty = false;
 					lImgView.postInvalidate();
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException ex) {
+					}
 				}
 			}
 		}, 0, 200);
@@ -320,12 +327,10 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 				lCanvas.drawLine(lSX, lSY, lEX, lEY, lPaint);
 				// invalidate image view to re-draw the canvas
 
-				isDirty = true;
+				mIsDirty = true;
 
 				lSX = lEX;
 				lSY = lEY;
-				// }
-				// check "closePath" request
 			} else if ("line".equals(aToken.getString("reqType"))) {
 				// TODO: implement multiple canvas, this is what is used for
 				// int id = aToken.getInteger("identifier");
@@ -335,15 +340,24 @@ public class CanvasActivity extends Activity implements WebSocketClientTokenList
 				float lEX = new Float(aToken.getDouble("x2", 0.0));
 				float lEY = new Float(aToken.getDouble("y2", 0.0));
 				// draw the line
+				String lColStr = aToken.getString("color");
+				if (lColStr != null
+						&& lColStr.length() == 7
+						&& lColStr.startsWith("#")) {
+					int lColVal;
+					try {
+						lColVal = Integer.valueOf(lColStr.substring(1), 16);
+					} catch (Exception lEx) {
+						lColVal = 0;
+					}
+					lPaint.setColor(0xFF000000 | lColVal);
+				}
 				lCanvas.drawLine(lSX, lSY, lEX, lEY, lPaint);
 				// invalidate image view to re-draw the canvas
-
-				isDirty = true;
+				mIsDirty = true;
 
 				lSX = lEX;
 				lSY = lEY;
-				// }
-				// check "closePath" request
 			} else if ("closePath".equals(aToken.getString("reqType"))) {
 				// nothing to do here
 			} else if ("clear".equals(aToken.getString("reqType"))) {

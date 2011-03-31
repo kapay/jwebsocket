@@ -26,6 +26,10 @@
 //:d:en:including various utility methods.
 var jws = {
 
+	//:const:*:VERSION:String:1.0a7
+	//:d:en:Version of the jWebSocket JavaScript Client
+	VERSION: "1.0a7 (10328)",
+
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
 	NS_BASE: "org.jwebsocket",
@@ -33,7 +37,8 @@ var jws = {
 	
 	MSG_WS_NOT_SUPPORTED:
 		"Unfortunately your browser does neither natively support WebSockets\n" +
-		"nor you have the Adobe Flash-PlugIn 9+ installed.",
+		"nor you have the Adobe Flash-PlugIn 9+ installed.\n" +
+		"Download the Adobe Flash Player at http://get.adobe.com/flashplayer.",
 
 	// some namespace global constants
 	
@@ -43,7 +48,7 @@ var jws = {
 	//:const:*:JWS_SERVER_SCHEMA:String:ws
 	//:d:en:Default schema, [tt]ws[/tt] for un-secured WebSocket-Connections.
 	JWS_SERVER_SCHEMA: "ws",
-	//:const:*:JWS_SERVER_SSL_SCHEMA:String:ws
+	//:const:*:JWS_SERVER_SSL_SCHEMA:String:wss
 	//:d:en:Default schema, [tt]wss[/tt] for secured WebSocket-Connections.
 	JWS_SERVER_SSL_SCHEMA: "wss",
 	//:const:*:JWS_SERVER_HOST:String:[hostname|localhost]
@@ -118,7 +123,26 @@ var jws = {
 	$: function( aId ) {
 		return document.getElementById( aId );
 	},
-	
+
+	//:m:*:getServerURL
+	//:d:en:Returns the URL to the jWebSocket based on schema, host, port, _
+	//:d:en:context and servlet.
+	//:a:en::voide::
+	//:r:*:::void:jWebSocket server URL consisting of schema://host:port/context/servlet
+	getServerURL: function( aSchema, aHost, aPort, aContext, aServlet ) {
+		var lURL =
+			aSchema + "://"
+			+ aHost 
+			+ ( aPort ? ":" + aPort : "" );
+		if( aContext && aContext.length > 0 ) {
+			lURL += aContext;
+			if( aServlet && aServlet.length > 0 ) {
+				lURL += aServlet;
+			}
+		}
+		return lURL;
+	},
+
 	//:m:*:getDefaultServerURL
 	//:d:en:Returns the default URL to the un-secured jWebSocket Server. This is a convenience _
 	//:d:en:method used in all jWebSocket demo dialogs. In case of changes to the _
@@ -126,19 +150,13 @@ var jws = {
 	//:a:en::voide::
 	//:r:*:::void:Default jWebSocket server URL consisting of schema://host:port/context/servlet
 	getDefaultServerURL: function() {
-		var lURL =  
-			jws.JWS_SERVER_SCHEMA + "://"
-			+ jws.JWS_SERVER_HOST + ":" +
-			+ jws.JWS_SERVER_PORT;
-			
-		if( jws.JWS_SERVER_CONTEXT && jws.JWS_SERVER_CONTEXT.length > 0 ) {
-			lURL += jws.JWS_SERVER_CONTEXT;
-			
-			if( jws.JWS_SERVER_SERVLET && jws.JWS_SERVER_SERVLET.length > 0 ) {
-				lURL += jws.JWS_SERVER_SERVLET;
-			}
-		}
-		return lURL;
+		return( this.getServerURL(
+			jws.JWS_SERVER_SCHEMA,
+			jws.JWS_SERVER_HOST,
+			jws.JWS_SERVER_PORT,
+			jws.JWS_SERVER_CONTEXT,
+			jws.JWS_SERVER_SERVLET
+		));
 	},
 
 	//:m:*:getDefaultSSLServerURL
@@ -148,19 +166,13 @@ var jws = {
 	//:a:en::voide::
 	//:r:*:::void:Default jWebSocket server URL consisting of schema://host:port/context/servlet
 	getDefaultSSLServerURL: function() {
-		var lURL =
-			jws.JWS_SERVER_SSL_SCHEMA + "://"
-			+ jws.JWS_SERVER_HOST + ":" +
-			+ jws.JWS_SERVER_SSL_PORT;
-
-		if( jws.JWS_SERVER_CONTEXT && jws.JWS_SERVER_CONTEXT.length > 0 ) {
-			lURL += jws.JWS_SERVER_CONTEXT;
-
-			if( jws.JWS_SERVER_SERVLET && jws.JWS_SERVER_SERVLET.length > 0 ) {
-				lURL += jws.JWS_SERVER_SERVLET;
-			}
-		}
-		return lURL;
+		return( this.getServerURL(
+			jws.JWS_SERVER_SSL_SCHEMA,
+			jws.JWS_SERVER_HOST,
+			jws.JWS_SERVER_SSL_PORT,
+			jws.JWS_SERVER_CONTEXT,
+			jws.JWS_SERVER_SERVLET
+		));
 	},
 
 	//:m:*:browserSupportsWebSockets

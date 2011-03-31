@@ -31,8 +31,10 @@
 
 			var eLog = null;
 			var eCount = null;
-			var lCurSlide = 0;
+			var lOldSlide = 0;
+			var lCurSlide = 1;
 			var lMaxSlides = 19;
+			var lCientCount = 0;
 
 			function scrollLogToBottom() {
 				if( eLog.scrollHeight > eLog.clientHeight ) {
@@ -83,18 +85,34 @@
 
 					// OnMessage callback
 					OnToken: function( aToken ) {
-						if( "slide" == aToken.action ) {
-							if( lCurSlide != aToken.slide ) {
-								eSlide.src = "slides/slide" + jws.tools.zerofill( aToken.slide, 4 ) + ".gif";
-								lCurSlide = aToken.slide;
-							}
-							eCount.innerHTML = aToken.clientCount;
+						// check if slide has to be updated
+						if( aToken.action == "slide") {
+							eSlide.src = "slides/slide" + jws.tools.zerofill( aToken.slide, 4 ) + ".gif";
+						// check if new client connected and send the current for initialization
 						} else if( "event" == aToken.type
 							&& "connect" == aToken.name ) {
-							eCount.innerHTML = aToken.clientCount;
+							lCientCount = aToken.clientCount;
+							lWSC.sendToken({
+								ns: jws.NS_SYSTEM,
+								type: "send",
+								targetId: aToken.sourceId,
+								action: "slide",
+								slide: lCurSlide,
+								clientCount: lCientCount
+							});
+							eCount.innerHTML = lCientCount;
 						} else if( "event" == aToken.type
 							&& "disconnect" == aToken.name ) {
-							eCount.innerHTML = aToken.clientCount;
+							lCientCount = aToken.clientCount - 1;
+							eCount.innerHTML = lCientCount;
+							lWSC.sendToken({
+								ns: jws.NS_SYSTEM,
+								type: "send",
+								targetId: aToken.sourceId,
+								action: "slide",
+								slide: lCurSlide,
+								clientCount: lCientCount
+							});
 						}
 					},
 
@@ -108,6 +126,54 @@
 				});
 
 				log( lWSC.resultToString( lRes ) );
+			}
+
+			function updateSlide() {
+				if( lOldSlide != lCurSlide ) {
+					lWSC.broadcastToken({
+						action: "slide",
+						slide: lCurSlide,
+						senderIncluded: true,
+						responseRequested: false
+					});
+				}
+			}
+
+			function first() {
+				lCurSlide = 1;
+				updateSlide();
+			}
+
+			function prev() {
+				if( lCurSlide > 1 ) {
+					lCurSlide--;
+					updateSlide();
+				}
+			}
+
+			function next() {
+				if( lCurSlide < lMaxSlides ) {
+					lCurSlide++;
+					updateSlide();
+				}
+			}
+
+			function last() {
+				lCurSlide = lMaxSlides;
+				updateSlide();
+			}
+
+			function processKeyDown( aEvent ) {
+				// console.log( aEvent.keyCode );
+				if( aEvent.keyCode == 36 ) {
+					first();
+				} else if( aEvent.keyCode == 37 ) {
+					prev();
+				} else if( aEvent.keyCode == 39 ) {
+					next();
+				} else if( aEvent.keyCode == 35 ) {
+					last();
+				}
 			}
 
 			function disconnect() {
@@ -132,6 +198,7 @@
 				}
 
 				connect();
+				jws.events.addEventListener( document.body, "keydown", processKeyDown );
 			}
 
 			function exitPage() {
@@ -149,17 +216,25 @@
 		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
 			<tr>
 				<td class="tdHeader" width="">
-					jWebSocket Slideshow Viewer: &quot;Boosting Web Communication with WebSockets&quot;
-					&nbsp;<span id="slblCount">-</span> online
+					jWebSocket Slideshow 
+					<input class="sbtnDlg" id="sbtnFirst" type="button" value="|<" onclick="first();"
+						   title="Shows the first slide." style="width:35px">
+					<input class="sbtnDlg" id="sbtnPrev" type="button" value="<" onclick="prev();"
+						   title="Shows the previous slide." style="width:35px">
+					<input class="sbtnDlg" id="sbtnNext" type="button" value=">" onclick="next();"
+						   title="Shows the next slide." style="width:35px">
+					<input class="sbtnDlg" id="sbtnLast" type="button" value=">|" onclick="last();"
+						   title="Shows the last slide." style="width:35px">
+					<span id="slblCount">-</span> online
 				</td>
 				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
 				<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span></td>
 			</tr>
 		</table>
-		<!-- <p>Welcome to the jWebSocket Slideshow Viewer.</p>  -->
+		<!-- <p>Welcome to the jWebSocket Slideshow Presenter.</p> -->
 		<img id="simgSlide" src="slides/slide0001.gif"/>
-		<div id="sdivLog" class="sdivContainer"
-			 style="display:none; position:relative; height:100px; overflow:auto;">
+		<div id="sdivLog" class="sdivContainer" style="display:none"
+			 style="position:relative; height:100px; overflow:auto;">
 		</div>
 	</body>
 </html>
