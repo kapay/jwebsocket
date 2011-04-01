@@ -26,6 +26,10 @@
 //:d:en:including various utility methods.
 var jws = {
 
+	//:const:*:VERSION:String:1.0a7
+	//:d:en:Version of the jWebSocket JavaScript Client
+	VERSION: "1.0a7 (10328)",
+
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
 	NS_BASE: "org.jwebsocket",
@@ -33,7 +37,8 @@ var jws = {
 	
 	MSG_WS_NOT_SUPPORTED:
 		"Unfortunately your browser does neither natively support WebSockets\n" +
-		"nor you have the Adobe Flash-PlugIn 9+ installed.",
+		"nor you have the Adobe Flash-PlugIn 9+ installed.\n" +
+		"Download the Adobe Flash Player at http://get.adobe.com/flashplayer.",
 
 	// some namespace global constants
 	
@@ -43,7 +48,7 @@ var jws = {
 	//:const:*:JWS_SERVER_SCHEMA:String:ws
 	//:d:en:Default schema, [tt]ws[/tt] for un-secured WebSocket-Connections.
 	JWS_SERVER_SCHEMA: "ws",
-	//:const:*:JWS_SERVER_SSL_SCHEMA:String:ws
+	//:const:*:JWS_SERVER_SSL_SCHEMA:String:wss
 	//:d:en:Default schema, [tt]wss[/tt] for secured WebSocket-Connections.
 	JWS_SERVER_SSL_SCHEMA: "wss",
 	//:const:*:JWS_SERVER_HOST:String:[hostname|localhost]
@@ -118,7 +123,26 @@ var jws = {
 	$: function( aId ) {
 		return document.getElementById( aId );
 	},
-	
+
+	//:m:*:getServerURL
+	//:d:en:Returns the URL to the jWebSocket based on schema, host, port, _
+	//:d:en:context and servlet.
+	//:a:en::voide::
+	//:r:*:::void:jWebSocket server URL consisting of schema://host:port/context/servlet
+	getServerURL: function( aSchema, aHost, aPort, aContext, aServlet ) {
+		var lURL =
+			aSchema + "://"
+			+ aHost 
+			+ ( aPort ? ":" + aPort : "" );
+		if( aContext && aContext.length > 0 ) {
+			lURL += aContext;
+			if( aServlet && aServlet.length > 0 ) {
+				lURL += aServlet;
+			}
+		}
+		return lURL;
+	},
+
 	//:m:*:getDefaultServerURL
 	//:d:en:Returns the default URL to the un-secured jWebSocket Server. This is a convenience _
 	//:d:en:method used in all jWebSocket demo dialogs. In case of changes to the _
@@ -126,19 +150,13 @@ var jws = {
 	//:a:en::voide::
 	//:r:*:::void:Default jWebSocket server URL consisting of schema://host:port/context/servlet
 	getDefaultServerURL: function() {
-		var lURL =  
-			jws.JWS_SERVER_SCHEMA + "://"
-			+ jws.JWS_SERVER_HOST + ":" +
-			+ jws.JWS_SERVER_PORT;
-			
-		if( jws.JWS_SERVER_CONTEXT && jws.JWS_SERVER_CONTEXT.length > 0 ) {
-			lURL += jws.JWS_SERVER_CONTEXT;
-			
-			if( jws.JWS_SERVER_SERVLET && jws.JWS_SERVER_SERVLET.length > 0 ) {
-				lURL += jws.JWS_SERVER_SERVLET;
-			}
-		}
-		return lURL;
+		return( this.getServerURL(
+			jws.JWS_SERVER_SCHEMA,
+			jws.JWS_SERVER_HOST,
+			jws.JWS_SERVER_PORT,
+			jws.JWS_SERVER_CONTEXT,
+			jws.JWS_SERVER_SERVLET
+		));
 	},
 
 	//:m:*:getDefaultSSLServerURL
@@ -148,19 +166,13 @@ var jws = {
 	//:a:en::voide::
 	//:r:*:::void:Default jWebSocket server URL consisting of schema://host:port/context/servlet
 	getDefaultSSLServerURL: function() {
-		var lURL =
-			jws.JWS_SERVER_SSL_SCHEMA + "://"
-			+ jws.JWS_SERVER_HOST + ":" +
-			+ jws.JWS_SERVER_SSL_PORT;
-
-		if( jws.JWS_SERVER_CONTEXT && jws.JWS_SERVER_CONTEXT.length > 0 ) {
-			lURL += jws.JWS_SERVER_CONTEXT;
-
-			if( jws.JWS_SERVER_SERVLET && jws.JWS_SERVER_SERVLET.length > 0 ) {
-				lURL += jws.JWS_SERVER_SERVLET;
-			}
-		}
-		return lURL;
+		return( this.getServerURL(
+			jws.JWS_SERVER_SSL_SCHEMA,
+			jws.JWS_SERVER_HOST,
+			jws.JWS_SERVER_SSL_PORT,
+			jws.JWS_SERVER_CONTEXT,
+			jws.JWS_SERVER_SERVLET
+		));
 	},
 
 	//:m:*:browserSupportsWebSockets
@@ -204,6 +216,116 @@ var jws = {
 		return(
 			window.JSON !== null && window.JSON !== undefined
 		);
+	})(),
+
+	//:m:*:browserSupportsWebWorkers
+	//:d:en:checks if the browser natively supports HTML5 WebWorkers
+	//:a:en::::none
+	//:r:*:::boolean:true if the browser natively support WebWorkers, otherwise false.
+	browserSupportsWebWorkers: (function() {
+		return(
+			window.Worker !== null && window.Worker !== undefined
+		);
+	})(),
+
+	//:m:*:runAsThread
+	//:d:en:checks if the browser natively supports HTML5 WebWorkers
+	//:a:en::::none
+	//:r:*:::boolean:true if the browser natively support WebWorkers, otherwise false.
+	runAsThread: function( aOptions ) {
+		// if browser does not support WebWorkers nothing can be done here
+		if ( !this.browserSupportsWebWorkers ) {
+			return {
+				code: -1,
+				msg: "Browser does not (yet) support WebWorkers."
+			};
+		}
+		// check if options were passed
+		if( !aOptions ) {
+			aOptions = {};
+		}
+		// set default options
+		var lOnMessage = null;
+		var lOnError = null;
+		var lFile = jws.SCRIPT_PATH + "jwsWorker.js";
+		var lMethod = null;
+		var lArgs = [];
+		// checked options passed
+		if( aOptions.OnMessage && typeof aOptions.OnMessage == "function" ) {
+			lOnMessage = aOptions.OnMessage;
+		}
+		if( aOptions.OnError && typeof aOptions.OnError == "function" ) {
+			lOnError = aOptions.OnError;
+		}
+		if( aOptions.file && typeof aOptions.file == "String" ) {
+			lFile = aOptions.file;
+		}
+		if( aOptions.method && typeof aOptions.method == "function" ) {
+			lMethod = aOptions.method;
+		}
+		if( aOptions.args ) {
+			lArgs = aOptions.args;
+		}
+		// TODO:
+		// check lArgs for type, if needed convert to array
+
+		var lThis = this;
+		// create worker object if required
+		if( !jws.worker ) {
+			jws.worker = new Worker( lFile );
+
+			// This listener is called when a message from the thread
+			// to the application is posted.
+			jws.worker.onmessage = function( aEvent ) {
+				if( lOnMessage != null ) {
+					lOnMessage.call( lThis, {
+						data: aEvent.data
+					});
+				}
+				// console.log( "Worker message: " + JSON.stringify( aEvent.data ) );
+			};
+
+			// This listener is called when an error
+			// occurred within the thread.
+			jws.worker.onerror = function( aEvent ) {
+				if( lOnError != null ) {
+					lOnError.call( lThis, {
+						message: aEvent.message
+					});
+				}
+				// console.log( "Worker error: " + aEvent.message );
+			};
+		}
+
+		jws.worker.postMessage({
+			// instance: lThis,
+			method: lMethod.toString(),
+			args: lArgs
+		});
+
+		return {
+			code: 0,
+			msg: "ok",
+			worker: jws.worker
+		};
+	},
+
+	SCRIPT_PATH: (function() {
+		var lScripts = document.getElementsByTagName( "script" );
+		for( var lIdx = 0, lCnt = lScripts.length; lIdx < lCnt; lIdx++ ) {
+			var lScript = lScripts[ lIdx ];
+			var lPath = lScript.src;
+			if( !lPath ) {
+				lPath = lScript.getAttribute( "src" );
+			}
+			if( lPath ) {
+				var lPos = lPath.lastIndexOf( "jWebSocket" );
+				if( lPos > 0 ) {
+					return lPath.substr( 0, lPos );
+				}
+			}
+		}
+		return null;
 	})(),
 
 	//:m:*:isIE
@@ -554,7 +676,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 		// if browser natively supports WebSockets...
 		// otherwise flash bridge may have embedded WebSocket class
-		if( self.WebSocket) {
+		if( self.WebSocket ) {
 
 			// TODO: !this.fConn is not enough here! Check for readystate!
 			// if connection not already established...
@@ -622,6 +744,44 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		return this.open(aURL, aOptions );
 	},
 
+	//:m:*:processQueue
+	//:d:en:Processes the token queue. _
+	//:d:en:Tries to send out all tokens stored in the quere
+	//:a:en::aToken:Object:Token to be queued to the jWebSocket server.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
+	//:r:*:::void:none
+	processQueue: function() {
+		if( !this.mQueue ) {
+			var lRes = this.checkConnected();
+			if( lRes.code == 0 ) {
+				var lToken;
+				while( this.mQueue.length > 0 ) {
+					// get first element of the queue
+					lToken = this.mQueue[ 0 ];
+				}
+			}
+		}
+	},
+
+	//:m:*:queuePacket
+	//:d:en:Adds a new token to the send queue
+	//:d:en:this method can also be executed, if no connection is established
+	//:a:en::aToken:Object:Token to be queued to the jWebSocket server.
+	//:a:en::aOptions:Object:Optional arguments as listed below...
+	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
+	//:r:*:::void:none
+	queuePacket: function( aToken, aOptions ) {
+		if( !this.mQueue ) {
+			this.mQueue = [];
+		}
+		this.mQueue.push({
+			token: aToken,
+			options: aOptions
+		});
+		this.processQueue();
+	},
+
 	//:m:*:sendStream
 	//:d:en:Sends a given string to the jWebSocket Server. The methods checks _
 	//:d:en:if the connection is still up and throws an exception if not.
@@ -630,7 +790,12 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	sendStream: function( aData ) {
 		// is client already connected
 		if( this.isConnected() ) {
-			this.fConn.send( aData );
+			try {
+				this.fConn.send( aData );
+			} catch( lEx ) {
+				// this is never fired !
+				// console.log( "Could not send!" );
+			}
 		// if not raise exception
 		} else {
 			throw new Error( "Not connected" );
@@ -771,12 +936,14 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		// console.log( "checking result for utid: " + aToken.utid + "..." );
 		var lClbkRec = this.fRequestCallbacks[ lField ];
 		if( lClbkRec ) {
-			lClbkRec.callback.OnResponse( aToken );
 			// result came in within the given timeout
+			// first cleanup timeout observer because
+			// OnResponse listener potentially could take a while as well
 			if( lClbkRec.hCleanUp ) {
 				// thus reset the timeout observer
 				clearTimeout( lClbkRec.hCleanUp );
 			}
+			lClbkRec.callback.OnResponse( aToken );
 			delete this.fRequestCallbacks[ lField ];
 		}
 	},
@@ -1025,6 +1192,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				}
 			}
 		}
+
+		if( this.fOnToken ) {
+			this.fOnToken( aToken );
+		}
+
 	},
 
 	//:m:*:processClosed
@@ -1083,7 +1255,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		var lRes = this.checkConnected();
 		if( lRes.code == 0 ) {
 			var lSpawnThread = false;
-			var lTimeout = jws.DEF_WAITRESP_TIMEOUT;
+			var lL2FragmSize = 0;
+			var lTimeout = jws.DEF_RESP_TIMEOUT;
 			var lCallbacks = {
 				OnResponse: null,
 				OnSuccess: null,
@@ -1114,6 +1287,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				if( aOptions.spawnThread ) {
 					lSpawnThread = aOptions.spawnThread;
 				}
+				if( aOptions.fragmentSize ) {
+					lL2FragmSize = aOptions.fragmentSize;
+				}
 			}
 			jws.CUR_TOKEN_ID++;
 			if( lControlResponse ) {
@@ -1129,6 +1305,11 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				// set timeout to observe response
 				lClbkRec.hCleanUp = setTimeout( function() {
 					var lCallbacks = lClbkRec.callback;
+					// delete callback first to not fire response event
+					// in case the OnTimeout processing takes longer or
+					// even invokes blocking methods like alert.
+					delete lThis.fRequestCallbacks[ lClbkId ];
+					// now the OnTimeout Callback can be called.
 					if( lCallbacks.OnTimeout ) {
 						lCallbacks.OnTimeout({
 							utid: lUTID,
@@ -1136,16 +1317,33 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 							token: aToken
 						});
 					}
-					delete lThis.fRequestCallbacks[ lClbkId ];
 				}, lTimeout );
 			}
 			if( lSpawnThread ) {
 				aToken.spawnThread = true;
 			}
 			var lStream = this.tokenToStream( aToken );
-
-			// console.log("sending" + lStream + "...");
-			this.sendStream( lStream );
+			if( lL2FragmSize > 0 && lStream.length > 0 ) {
+				var lToken, lFragment, lFragmId = 0, lStart = 0, lTotal = lStream.length;
+				while( lStream.length > 0 ) {
+					lToken = {
+						ns: jws.NS_SYSTEM,
+						type: "fragment",
+						utid: aToken.utid,
+						index: lFragmId++,
+						total: parseInt( lTotal / lL2FragmSize ) + 1,
+						data: lStream.substr( 0, lL2FragmSize )
+					};
+					lStart += lL2FragmSize;
+					lStream = lStream.substr( lL2FragmSize );
+					lFragment = this.tokenToStream( lToken );
+					this.sendStream( lFragment );
+					// console.log( "sending fragment " + lFragment + "..." );
+				}
+			} else {
+				// console.log( "sending stream " + lStream + "..." );
+				this.sendStream( lStream );
+			}
 		}
 		return lRes;
 	},
@@ -1263,6 +1461,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	open: function( aURL, aOptions ) {
 		var lRes = this.createDefaultResult();
 		try {
+			if( aOptions && aOptions.OnToken && typeof aOptions.OnToken == "function" ) {
+				this.fOnToken = aOptions.OnToken;
+			}
 			if( aOptions && aOptions.OnWelcome && typeof aOptions.OnWelcome == "function" ) {
 				this.fOnWelcome = aOptions.OnWelcome;
 			}
@@ -1736,10 +1937,6 @@ jws.oop.declareClass( "jws", "jWebSocketJSONClient", jws.jWebSocketTokenClient, 
 	//:r:*:::String:The resulting JSON stream.
 	tokenToStream: function( aToken ) {
 		aToken.utid = jws.CUR_TOKEN_ID;
-		//:todo:en:Do we really want the session id per call? Alex: Don't think so! To be checked!
- 		if( this.fSessionId ) {
-			aToken.usid = this.fSessionId;
- 		}
 		var lJSON = JSON.stringify( aToken );
  		return( lJSON );
 	},
@@ -1780,9 +1977,6 @@ jws.oop.declareClass( "jws", "jWebSocketCSVClient", jws.jWebSocketTokenClient, {
 	//:r:*:::String:The resulting CSV stream.
 	tokenToStream: function( aToken ) {
 		var lCSV = "utid=" + jws.CUR_TOKEN_ID;
-		if( this.fSessionId ) {
-			lCSV += ",usid=\"" + this.fSessionId + "\"";
-		}
 		for( var lKey in aToken ) {
 			var lVal = aToken[ lKey ];
 			if( lVal === null || lVal === undefined ) {
@@ -2016,8 +2210,7 @@ jws.oop.declareClass( "jws", "jWebSocketXMLClient", jws.jWebSocketTokenClient, {
 	var lToken = lXMLClient.streamToToken( lStream );
 	console.log( lStream );
 })();
-*/
-/*
+*//*
 MIT LICENSE
 Copyright (c) 2007 Monsur Hossain (http://www.monsur.com)
 
@@ -2307,7 +2500,7 @@ jws.ChannelPlugIn = {
 	processToken: function( aToken ) {
 		// check if namespace matches
 		if( aToken.ns == jws.ChannelPlugIn.NS ) {
-			// here you can handle incomimng tokens from the server
+			// here you can handle incoming tokens from the server
 			// directy in the plug-in if desired.
 			if( "event" == aToken.type ) {
 				if( "channelCreated" == aToken.name ) {
@@ -2666,6 +2859,26 @@ jws.CanvasPlugIn = {
 			};
 			this.broadcastToken(lToken);
 		}
+	},
+
+	canvasGetBase64: function( aId, aMimeType ) {
+		var lRes = {
+			code: -1,
+			msg : "Ok"
+		};
+		var lCanvas = this.fCanvas[ aId ];
+		if( lCanvas != null ) {
+			if( typeof lCanvas.fDOMElem.toDataURL == "function" ) {
+				lRes.code = 0;
+				lRes.encoding = "base64";
+				lRes.data = lCanvas.fDOMElem.toDataURL( aMimeType );
+			} else {
+				lRes.msg = "Retrieving image data from canvas not (yet) supported by browser.";
+			}
+		} else {
+			lRes.msg = "Canvas not found.";
+		}
+		return lRes;
 	},
 
 	doBeginPath: function( aId ) {
@@ -3769,21 +3982,30 @@ jws.FileSystemPlugIn = {
 
 	fileSend: function( aTargetId, aFilename, aData, aOptions ) {
 		var lEncoding = "base64";
+		var lIsNode = false;
 		if( aOptions ) {
 			if( aOptions.encoding != undefined ) {
 				lEncoding = aOptions.encoding;
 			}
+			if( aOptions.isNode != undefined ) {
+				lIsNode = aOptions.isNode;
+			}
 		}
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
-			this.sendToken({
+			var lToken = {
 				ns: jws.FileSystemPlugIn.NS,
 				type: "send",
 				data: aData,
-				targetId: aTargetId,
 				encoding: lEncoding,
 				filename: aFilename
-			});
+			};
+			if( lIsNode ) {
+				lToken.unid = aTargetId;
+			} else {
+				lToken.targetId = aTargetId;				
+			}
+			this.sendToken( lToken );
 		}
 		return lRes;
 	},
@@ -5257,3 +5479,35 @@ jws.XMPPPlugIn = {
 
 // add the JWebSocket XMPP PlugIn into the TokenClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.XMPPPlugIn );
+//	---------------------------------------------------------------------------
+//	jWebSocket Worker (supports multithreading and background processes
+//	on the browser clients, if they support the HTML5 WebWorker standard)
+//	Copyright (c) 2011 Alexander Schulze, Innotrade GmbH, Herzogenrath
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
+
+//:i:en:This method is executed if postmessage is invoked by the caller.
+//:i:de:Über aEvent können von der Applikation Daten _
+//:i:de:an den Thread übergeben werden
+onmessage = function( aEvent ) {
+	// console.log( "started!" );
+	// here computationally intensive processes can be run as thread.
+	// aEvent.data contains the Object from the caller (application)
+	var lMethod;
+	eval( "lMethod=" + aEvent.data.method );
+
+	// run the method and return the result via postmessage to the application.
+	// in the application the onmessage listener of the worker is invoked
+	postMessage( lMethod( aEvent.data.args ) );
+
+};
