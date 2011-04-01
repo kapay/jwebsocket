@@ -123,12 +123,12 @@ public class TwitterStreamActivity extends ListActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+        disConnect();
 
     }
 
     private void savePreference(String keyWords)
-    {
-        disConnect();
+    { 
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("keywords", keyWords);
         editor.commit();
@@ -169,6 +169,7 @@ public class TwitterStreamActivity extends ListActivity implements
 
     public void processOpened(WebSocketClientEvent aEvent) {
         //throw new UnsupportedOperationException("Not supported yet.");
+        int test = 1;
     }
 
     public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
@@ -177,6 +178,7 @@ public class TwitterStreamActivity extends ListActivity implements
 
     public void processClosed(WebSocketClientEvent aEvent) {
         //throw new UnsupportedOperationException("Not supported yet.");
+        int test = 1;
     }
 
     public class Tweet {
