@@ -34,8 +34,7 @@ import org.jwebsocket.token.Token;
 public class MyPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(MyPlugIn.class);
-	// if namespace changed update client plug-in accordingly!
-	private final static String NS_SAMPLE = JWebSocketServerConstants.NS_BASE + ".plugins.samples";
+	private final static String NS_SAMPLE = "tld.domain.plugins.myplugin";
 	private final static String SAMPLE_VAR = NS_SAMPLE + ".started";
 
 	/**
@@ -45,7 +44,7 @@ public class MyPlugIn extends TokenPlugIn {
 	public MyPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating sample plug-in...");
+			mLog.debug("Instantiating my plug-in...");
 		}
 		// specify default name space for sample plugin
 		this.setNamespace(NS_SAMPLE);
@@ -90,7 +89,7 @@ public class MyPlugIn extends TokenPlugIn {
 		if (lType != null && lNS != null && lNS.equals(getNamespace())) {
 
 			// get the server time
-			if ("requestServerTime".equals(lType)) {
+			if ("mydemo_function".equals(lType)) {
 				// create the response token
 				// this includes the unique token-id
 				Token lResponse = createResponse(aToken);
@@ -98,6 +97,9 @@ public class MyPlugIn extends TokenPlugIn {
 				// add the "time" and "started" field
 				lResponse.setString("time", new Date().toString());
 				lResponse.setString("started", (String) aConnector.getVar(SAMPLE_VAR));
+
+				// lResponse.setString("vendor", "jwebsocket.org");
+				// lResponse.setString("version", "2.3.0815");
 
 				// send the response token back to the client
 				sendToken(aConnector, aConnector, lResponse);

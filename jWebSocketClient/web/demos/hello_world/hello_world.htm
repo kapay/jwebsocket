@@ -172,15 +172,17 @@
 				log( "Retreiving a token from the server via a jWebSocket listener..." );
 				if( lWSC.isConnected() ) {
 					var lToken = {
-						ns: "my.namespace",
-						type: "getInfo"
+						// ns: "my.namespace",
+						// type: "getInfo"
+						ns: "tld.domain.plugins.myplugin",
+						type: "mydemo_function"
 					};
 					lWSC.sendToken( lToken,	{
 						OnResponse: function( aToken ) {
 							log("Server responded: "
 								+ "vendor: " + aToken.vendor
 								+ ", version: " + aToken.version
-						);
+							);
 						}
 					});
 				} else {

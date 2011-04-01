@@ -94,13 +94,12 @@ public class AdminPlugIn extends TokenPlugIn {
 			return;
 		}
 
-		// notify clients about shutdown
+		// notify clients about pending shutdown
 		Token lResponseToken = lServer.createResponse(aToken);
 		lResponseToken.setString("msg", "Shutdown in progress...");
 		lServer.broadcastToken(lResponseToken);
 
 		JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
-
 	}
 
 	/**

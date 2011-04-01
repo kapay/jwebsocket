@@ -28,7 +28,7 @@
 		<script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
 		<script type="text/javascript" language="JavaScript">
 
-			var MAX_IFRAMES_FOR_STRESS_TEST = 6;
+			var MAX_IFRAMES_FOR_STRESS_TEST = 2;
 			var lJWSID = "jWebSocket Canvas";
 			var lWSC = null;
 			var eLog = null;
@@ -158,13 +158,12 @@
 					lIframe.src = "iframe.htm";
 					lIframe.id = "iframe" + i;
 					lIframe.setAttribute( "frameborder", "0" );
-					lIframe.style.width = "320px";
-					lIframe.style.height = "200px";
+					lIframe.style.width = "400px";
+					lIframe.style.height = "270px";
 					lIframe.style.border = "1px solid #ccc";
 					lIframe.style.margin = "2px";
 					document.body.appendChild( lIframe );
 				}
-
 			}
 
 			function initPage() {

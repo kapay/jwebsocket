@@ -191,22 +191,23 @@
 				} else {
 					lImgIdx++;
 				}
-
+				/*
 				lRes = lWSC.fileSend(
 					// target was passed as optional argument
 					// and thus can be used here
 					"target2", // Token.args.target,
 					"painting", // Token.fileName,
-					lCanvas.toDataURL( "image/jpeg" ),
-					// lCanvas.toDataURL( "image/png" ),
+					// lCanvas.toDataURL( "image/jpeg" ),
+					lCanvas.toDataURL( "image/png" ),
 					{	encoding: "base64",
 						isNode: true
 					}
 				);
+				*/
 			}
 
 			function onFileSentObs( aToken ) {
-				console.log( new Date() + ": " + aToken.data.length +  " " + aToken.data.substr(0, 40));
+				// console.log( new Date() + ": " + aToken.data.length +  " " + aToken.data.substr(0, 40));
 				var lImg = new Image();
 				// document.body.appendChild(lImg);
 				lImg.src = aToken.data;
@@ -216,6 +217,18 @@
 					lContext.drawImage( lImg, 0, 0 );
 				}
 			}
+
+			function onFileSavedObs( aToken ) {
+				var lImg = new Image();
+				lImg.src = aToken.url;
+				lImg.onload = function() {
+					var lCanvas = document.getElementById( "cnvDemo" );
+					var lContext = lCanvas.getContext( "2d" );
+					lContext.drawImage( lImg, 0, 0 );
+				}
+			}
+
+			var lRollingId = 1, lMaxRollingIDs = 9;
 
 			function snapshot() {
 				if( lIsConnected ) {
@@ -229,7 +242,7 @@
 						var lRes = lWSC.fileSave(
 							// use hardcoded file name for now in this
 							// demo to keep it as simple as possible
-							"canvas_demo.png",
+							"canvas_demo_" + lRollingId + ".png",
 							// the data is already base64 encoded!
 							lRes.data,
 							{	scope: jws.SCOPE_PUBLIC,
@@ -237,6 +250,10 @@
 								suppressEncoder: true // data already base64 encoded!
 							}
 						);
+						lRollingId++;
+						if( lRollingId > lMaxRollingIDs ) {
+							lRollingId = 1;
+						}
 					} else {
 						// an error occured
 						alert( lRes.msg );
@@ -268,7 +285,7 @@
 					lWSC = new jws.jWebSocketJSONClient({
 					});
 					lWSC.setFileSystemCallbacks({
-						// OnFileSaved: onFileSavedObs,
+						OnFileSaved: onFileSavedObs,
 						OnFileSent: onFileSentObs
 						// OnLocalFileRead: onLocalFileLoadedObs,
 						// OnLocalFileError: onLocalFileErrorObs
@@ -316,10 +333,11 @@
 				<img id="simgStatus" alt="status"  src="../../images/disconnected.png"/>
 			</p>
 			<p id="spnAvg" style="display:none">0ms</p>
-			<canvas id="cnvDemo" width="250" height="222"
-					style="width:250px; height:222px; overflow:hidden; border:1px solid gray; cursor:crosshair; float:left" >
+			<canvas id="cnvDemo" width="325" height="230"
+					style="width:325px; height:230px; overflow:hidden; border:1px solid gray; cursor:crosshair; float:left" >
 			</canvas>
-			<div id="spanSettings" style="border:1px solid gray; position:relative; top: 0px; left: 5px; width:20px; height:142px; margin-bottom:80px; overflow:hidden">
+			<div id="spanSettings" style="border:1px solid gray; position:relative;
+				 top: 0px; left: 5px; width:20px; height:142px; margin-bottom:80px; overflow:hidden">
 				<table border="0" cellspacing="2" cellpadding="1">
 					<colgroup><col width="20px"></colgroup>
 					<tr><td style="cursor: pointer; background-color: #000000" onclick="selectColor('#000000');"

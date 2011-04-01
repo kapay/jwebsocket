@@ -292,10 +292,11 @@ public class BaseWebSocket implements WebSocketClient {
 			mReceiver.stopit();
 		}
 		try {
-			// input.close();
-			// output.close();
-			mSocket.shutdownInput();
-			mSocket.shutdownOutput();
+			// shutdown methods are not implemented for SSL sockets
+			if (!(mSocket instanceof SSLSocket)) {
+				mSocket.shutdownInput();
+				mSocket.shutdownOutput();
+			}
 			mSocket.close();
 			mStatus = WebSocketStatus.CLOSED;
 		} catch (IOException lIOEx) {
