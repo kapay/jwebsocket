@@ -33,7 +33,7 @@
 			var eCount = null;
 			var lOldSlide = 0;
 			var lCurSlide = 1;
-			var lMaxSlides = 19;
+			var lMaxSlides = 22;
 			var lCientCount = 0;
 
 			function scrollLogToBottom() {
@@ -134,7 +134,8 @@
 						action: "slide",
 						slide: lCurSlide,
 						senderIncluded: true,
-						responseRequested: false
+						responseRequested: false,
+						clientCount: lCientCount
 					});
 				}
 			}
