@@ -55,7 +55,6 @@ public class MyPlugIn extends TokenPlugIn {
 	public void connectorStarted(WebSocketConnector aConnector) {
 		// this method is called every time when a client
 		// connected to the server
-		aConnector.setVar(SAMPLE_VAR, new Date().toString());
 	}
 
 	@Override
@@ -66,11 +65,6 @@ public class MyPlugIn extends TokenPlugIn {
 
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-		// RandomData data = new RandomData();
-
-		// TODO: can the following line be ultimately removed?
-		// System.out.println(data.getRandomText());
-
 		// this method is called when the engine has started
 		super.engineStarted(aEngine);
 	}
@@ -105,48 +99,8 @@ public class MyPlugIn extends TokenPlugIn {
 				lResponse.setString("time", new Date().toString());
 				lResponse.setString("started", (String) aConnector.getVar(SAMPLE_VAR));
 
-/* please keep this code snippet for test purposes for complex objects!
-				// put an array into the token
-				Object[] lObjs = new Object[]{1, 2, 3, 'a', 'b', 'c', "ABC", "XYZ", true, false};
-				lResponse.setList("array", Arrays.asList(lObjs));
-
-				// put a map into the token
-				Map lMap = new FastMap();
-				lMap.put("MapItem1", 1);
-				lMap.put("MapItem2", 2);
-				lResponse.setMap("map", lMap);
-
-				List lList = new FastList();
-				lList.add("ListItem1");
-				lList.add("ListItem2");
-				lResponse.setList("list", lList);
-
-				// put a token into a token
-				Token lToken = TokenFactory.createToken();
-				lToken.setInteger("number", 1);
-				lToken.setString("string", "test");
-				lToken.setDouble("float", 1.23456);
-				lToken.setBoolean("boolean", false);
-				lToken.setList("array", Arrays.asList(new Object[]{4, 5, 6, 'd', 'e', 'f', "DEF", "UVW", false, true}));
-
-				// insert subtoken, another level in object's hierarchy...
-				Token lSubToken = TokenFactory.createToken();
-				lSubToken.setInteger("number", 2);
-				lSubToken.setString("string", "demo");
-				lSubToken.setDouble("float", 2.34567);
-				lSubToken.setBoolean("boolean", true);
-				lSubToken.setList("array", Arrays.asList(new Object[]{7, 8, 9, 'g', 'h', 'i', "GHI", "RST", true, false}));
-				lToken.setMap("subtoken", lSubToken.asMap());
-
-				// put the token incl. its subtoken into the response
-				lResponse.setMap("token", lToken.asMap());
-*/
 				// send the response token back to the client
 				sendToken(aConnector, aConnector, lResponse);
-
-			} else if (lType.equals("processComplexObject")) {
-				// simply echo the complex object
-				sendToken(aConnector, aConnector, aToken);
 			}
 		}
 	}
