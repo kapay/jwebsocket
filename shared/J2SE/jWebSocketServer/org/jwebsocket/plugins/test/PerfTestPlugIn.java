@@ -36,9 +36,9 @@ import org.jwebsocket.util.Tools;
  *
  * @author aschulze
  */
-public class TestPlugIn extends TokenPlugIn {
+public class PerfTestPlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(TestPlugIn.class);
+	private static Logger mLog = Logging.getLogger(PerfTestPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_TEST = JWebSocketServerConstants.NS_BASE + ".plugins.test";
 
@@ -46,10 +46,10 @@ public class TestPlugIn extends TokenPlugIn {
 	 *
 	 * @param aConfiguration
 	 */
-	public TestPlugIn(PluginConfiguration aConfiguration) {
+	public PerfTestPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating test plug-in...");
+			mLog.debug("Instantiating performane test plug-in...");
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_TEST);

@@ -610,7 +610,6 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 	}
 	// if the class already has descendants recursively
 	// clone the plug-in methods to these as well.
-	// checkDescendants( aClass );
 	if( aClass.descendants ) {
 		for( var lIdx = 0, lCnt = aClass.descendants.length; lIdx < lCnt; lIdx ++ ) {
 			jws.oop.addPlugIn( aClass.descendants[ lIdx ], aPlugIn );
@@ -888,6 +887,36 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:r:*::::Please refer to the [tt]close[/tt] method.
 	disconnect: function( aOptions ) {
 		return this.close( aOptions );
+	},
+
+	//:m:*:addPlugIn
+	//:d:en:Adds a client side plug-in to the instance - not to the class!
+	//:a:en::aPlugIn:Object:Plug-in to be appended to the client side plug-in chain.
+	//:r:*:::void:none
+	addPlugIn: function( aPlugIn, aId ) {
+		// if the class has no plug-ins yet initialize array
+		if( !this.fPlugIns ) {
+			this.fPlugIns = [];
+		}
+		// add the plug-in to the class
+		this.fPlugIns.push( aPlugIn );
+
+		var lField;
+		if( !aId ) {
+			aId = aPlugIn.ID;
+		}
+		//:todo:en:check if plug-in with given id already exists!
+		if( aId ) {
+			// blend all methods of the plug-in to the connection instance
+			this[ aId ] = {
+				conn: this
+			};
+			for( lField in aPlugIn ) {
+				if( lField != "conn" ) {
+					this[ aId ][ lField ] = aPlugIn[ lField ];
+				}
+			}
+		}
 	}
 
 });
@@ -1182,17 +1211,34 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			this.checkCallbacks( aToken );
 		}
 
-		// notify all plug-ins that a token has to be processed
-		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
+		var lIdx, lLen, lPlugIns, lPlugIn;
+
+		// notify all plug-ins bound to the class
+		// that a token has to be processed
+		lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
 		if( lPlugIns ) {
-			for( var lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
-				var lPlugIn = lPlugIns[ lIdx ];
+			for( lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
+				lPlugIn = lPlugIns[ lIdx ];
 				if( lPlugIn.processToken ) {
 					lPlugIn.processToken.call( this, aToken );
 				}
 			}
 		}
 
+		// notify all plug-ins bound to the instance
+		// that a token has to be processed
+		lPlugIns = this.fPlugIns;
+		if( lPlugIns ) {
+			for( lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
+				lPlugIn = lPlugIns[ lIdx ];
+				if( lPlugIn.processToken ) {
+					lPlugIn.processToken( aToken );
+				}
+			}
+		}
+
+		// if the instance got an OnToken event assigned
+		// fire the event
 		if( this.fOnToken ) {
 			this.fOnToken( aToken );
 		}

@@ -97,13 +97,6 @@ public class TwitterPlugIn extends TokenPlugIn {
 
 	/**
 	 *
-	 */
-	public TwitterPlugIn() {
-		super(null);
-	}
-
-	/**
-	 *
 	 * @param aConfiguration
 	 */
 	public TwitterPlugIn(PluginConfiguration aConfiguration) {
