@@ -73,12 +73,12 @@ public class TwitterPlugIn extends TokenPlugIn {
 	private static final String CONSUMER_KEY_KEY = "consumer_key";
 	private static String CONSUMER_SECRET = null;
 	private static final String CONSUMER_SECRET_KEY = "consumer_secret";
-	private static Integer APP_ID = null;
-	private static final String APP_ID_KEY = "app_id";
+	private static Integer APP_KEY = null;
+	private static final String APP_KEY_KEY = "app_key";
 	private static String ACCESSTOKEN_KEY = null;
-	private static final String ACCESSTOKEN_KEY_KEY = "accesstoken_key";
-	private static String ACCESSTOKEN_SECRET = null;
-	private static final String ACCESSTOKEN_SECRET_KEY = "accesstoken_secret";
+	private static final String ACCESS_KEY_KEY = "access_key";
+	private static String ACCESS_SECRET = null;
+	private static final String ACCESS_SECRET_KEY = "access_secret";
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_TWITTER = JWebSocketServerConstants.NS_BASE + ".plugins.twitter";
 	private Twitter mTwitter = null;
@@ -113,12 +113,12 @@ public class TwitterPlugIn extends TokenPlugIn {
 		CONSUMER_KEY = getString(CONSUMER_KEY_KEY, null);
 		CONSUMER_SECRET = getString(CONSUMER_SECRET_KEY, null);
 		try {
-			APP_ID = Integer.parseInt(getString(APP_ID_KEY, "0"));
+			APP_KEY = Integer.parseInt(getString(APP_KEY_KEY, "0"));
 		} catch (Exception lEx) {
-			APP_ID = 0;
+			APP_KEY = 0;
 		}
-		ACCESSTOKEN_KEY = getString(ACCESSTOKEN_KEY_KEY, null);
-		ACCESSTOKEN_SECRET = getString(ACCESSTOKEN_SECRET_KEY, null);
+		ACCESSTOKEN_KEY = getString(ACCESS_KEY_KEY, null);
+		ACCESS_SECRET = getString(ACCESS_SECRET_KEY, null);
 	}
 
 	@Override
@@ -186,7 +186,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 				TwitterFactory lTwitterFactory = new TwitterFactory();
 				mTwitter = lTwitterFactory.getInstance();
 				mTwitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-				AccessToken lAccessToken = new AccessToken(ACCESSTOKEN_KEY, ACCESSTOKEN_SECRET);
+				AccessToken lAccessToken = new AccessToken(ACCESSTOKEN_KEY, ACCESS_SECRET);
 				mTwitter.setOAuthAccessToken(lAccessToken);
 				lMsg = "Successfully authenticated against Twitter.";
 			} else {
@@ -648,6 +648,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 	}
+
 	StatusListener mTwitterStreamListener = new StatusListener() {
 
 		@Override
@@ -733,6 +734,11 @@ public class TwitterPlugIn extends TokenPlugIn {
 				mServer.sendToken(lConnector, lToken);
 			}
 		}
+
+		@Override
+		public void onScrubGeo(int aInt, long aLong) {
+			// not required for now
+		}
 	};
 
 	private void mAddConnector(WebSocketConnector aConnector, Set<String> aKeywords) {
@@ -797,7 +803,7 @@ public class TwitterPlugIn extends TokenPlugIn {
 			if (mTwitterStream == null) {
 				mTwitterStream = new TwitterStreamFactory(mTwitterStreamListener).getInstance();
 				mTwitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-				AccessToken lAccessToken = new AccessToken(ACCESSTOKEN_KEY, ACCESSTOKEN_SECRET);
+				AccessToken lAccessToken = new AccessToken(ACCESSTOKEN_KEY, ACCESS_SECRET);
 				mTwitterStream.setOAuthAccessToken(lAccessToken);
 			}
 			// apply the filter to the stream object
