@@ -19,6 +19,9 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Provides some convenience methods to support the web socket
@@ -143,5 +146,23 @@ public class Tools {
 	public static String DateToISO8601WithMillis(Date aDate) {
 		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 		return lSDF.format(aDate);
+	}
+
+	public static String expandEnvVars(String aString) {
+		Map<String, String> lEnvVars = System.getenv();
+		String lPattern = "\\$\\{([A-Za-z0-9_]+)\\}";
+		Pattern lRegExpr = Pattern.compile(lPattern);
+		Matcher lMatcher = lRegExpr.matcher(aString);
+		while (lMatcher.find()) {
+			String lEnvVal = lEnvVars.get(lMatcher.group(1).toUpperCase());
+			if (lEnvVal == null) {
+				lEnvVal = "";
+			} else {
+				lEnvVal = lEnvVal.replace("\\", "\\\\");
+			}
+			Pattern lSubExpr = Pattern.compile(Pattern.quote(lMatcher.group(0)));
+			aString = lSubExpr.matcher(aString).replaceAll(lEnvVal);
+		}
+		return aString;
 	}
 }

@@ -114,7 +114,7 @@ public class JWebSocketSubSystemSample {
 			lPlugInChain.addPlugIn(new SystemPlugIn(lPlugInConfig));
 			// the FlashBrigde plug-in is strongly recommended to also support
 			// non websocket compliant browsers
-			lPlugInChain.addPlugIn(new FlashBridgePlugIn());
+			lPlugInChain.addPlugIn(new FlashBridgePlugIn(null));
 		}
 	}
 
