@@ -49,10 +49,15 @@ public class JettyEngine extends BaseEngine {
 		// If ports are 0 use the WebSocket Servlet capabilities
 		// of the Jetty Engine and do not instantiate a separate engine here!
 		// Caution! It is mandatory to load the jWebSocket Servlet in the
-		// web.xml or webdefault.xml of th eJetty server!
+		// web.xml or webdefault.xml of the Jetty server!
 		if (null == lPort || 0 == lPort) {
 			// fire the engine start event
 			engineStarted();
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Using Jetty " 
+						+ Server.getVersion()
+						+ "' configured by jetty.xml...");
+			}
 			return;
 		}
 

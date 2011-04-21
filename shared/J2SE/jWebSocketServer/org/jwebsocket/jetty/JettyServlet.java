@@ -16,7 +16,6 @@
 package org.jwebsocket.jetty;
 
 import java.io.IOException;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,15 +73,10 @@ public class JettyServlet extends WebSocketServlet {
 		return "jWebSocket Jetty WebSocket Servlet";
 	}
 
-
-
-
-
 }
 
 /*
 timing issues: http://jira.codehaus.org/browse/JETTY-933
-
 http://dev.eclipse.org/mhonarc/lists/jetty-users/msg01064.html
  *
  *
