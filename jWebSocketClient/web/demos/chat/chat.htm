@@ -81,7 +81,7 @@
 			function logon() {
 				// URL is ws[s]://[hostname|localhost]:8787[/context][/servlet/][;args...]
 				// you can also use getDefaultSSLServerURL for secured connections
-				var lURL = jws.getDefaultServerURL() + "/;timeout=360000";
+				var lURL = jws.getDefaultServerURL(); // + "/;timeout=360000";
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
 				// try to establish connection to jWebSocket server

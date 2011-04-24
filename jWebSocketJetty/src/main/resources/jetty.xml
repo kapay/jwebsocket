@@ -59,16 +59,53 @@
 	<Call name="addConnector">
 		<Arg>
 			<!-- Don't use this as suggested <New class="org.mortbay.jetty.security.SslSocketConnector"> -->
+			<!-- see how convert crt files to keystore: http://www.aditsu.net/HTTPS_in_Jetty_using_CAcert -->
 			<New class="org.eclipse.jetty.server.ssl.SslSocketConnector">
+				<!-- set the desired port number for wss transmissions here -->
 				<Set name="Port">443</Set>
 				<Set name="maxIdleTime">30000</Set>
 				<!-- put your path to the keystore here -->
-				<Set name="keystore">c:/svn/jWebsocket/rte/jWebSocket-1.0/conf/jWebSocket.ks</Set>
+				<!-- windows -->
+				<!-- <Set name="keystore">c:/svn/jWebsocket/rte/jWebSocket-1.0/conf/jWebSocket.ks</Set> -->
+				<!-- unix or mac osx -->
+				<Set name="keystore">/svn/jWebsocket/rte/jWebSocket-1.0/conf/jWebSocket.ks</Set>
+				<!-- CAUTION! -->
+				<!-- not all browsers automatically accept self-signed certificates -->
+				<!-- please follow instructions on the jWebSocket.org website, how
+				     to trust self-signed certificates for the various browsers or
+					 how to import self-signed private key/certificate bundles into the keystore -->
 				<Set name="password">jWebSocket</Set>
 				<Set name="keyPassword">jWebSocket</Set>
+
+				<Set name="responseBufferSize">65536</Set>
+				<Set name="headerBufferSize">32768</Set>
 			</New>
 		</Arg>
 	</Call>
+
+	<!-- From release 1.0a9 we should try to run SSL on NIO -->
+	<!--
+	<Call name="addConnector">
+		<Arg>
+			<New class="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+				<Arg>
+					<New class="org.eclipse.jetty.http.ssl.SslContextFactory">
+						<Set name="port">443</Set>
+						<Set name="keyStore">/svn/jWebsocket/rte/jWebSocket-1.0/conf/jWebSocketJetty.ks</Set>
+						<Set name="keyStorePassword">jWebSocket</Set>
+						<Set name="keyManagerPassword">jWebSocket</Set>
+						<Set name="trustStore">/svn/jWebsocket/rte/jWebSocket-1.0/conf/jWebSocketJetty.ks</Set>
+						<Set name="trustStorePassword">jWebSocket</Set>
+					</New>
+				</Arg>
+				<Set name="maxIdleTime">30000</Set>
+
+				<Set name="responseBufferSize">65536</Set>
+				<Set name="headerBufferSize">32768</Set>
+			</New>
+		</Arg>
+	</Call>
+	-->
 
     <!-- =========================================================== -->
     <!-- Set handler Collection Structure                            --> 

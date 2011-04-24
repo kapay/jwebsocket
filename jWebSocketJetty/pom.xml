@@ -163,6 +163,23 @@
 			<artifactId>jetty-servlet</artifactId>
 			<version>8.0.0.M2</version>
 		</dependency>
+		<!--
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-http</artifactId>
+			<version>8.0.0.M2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+			<version>8.0.0.M2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-security</artifactId>
+			<version>8.0.0.M2</version>
+		</dependency>
+		-->
 		<!-- requires jWebSocket Server Module -->
 		<dependency>
 			<groupId>org.jwebsocket</groupId>

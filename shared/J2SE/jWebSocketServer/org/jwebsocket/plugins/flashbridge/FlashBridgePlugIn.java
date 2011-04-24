@@ -127,22 +127,22 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 						mLog.debug("Waiting on flash policy-file-request on port "
 								+ mServerSocket.getLocalPort() + "...");
 					}
-					Socket clientSocket = mServerSocket.accept();
+					Socket lClientSocket = mServerSocket.accept();
 					if (mLog.isDebugEnabled()) {
 						mLog.debug("Client connected...");
 					}
 					try {
 						// clientSocket.setSoTimeout(TIMEOUT);
-						InputStream lIS = clientSocket.getInputStream();
-						OutputStream lOS = clientSocket.getOutputStream();
-						byte[] ba = new byte[1024];
+						InputStream lIS = lClientSocket.getInputStream();
+						OutputStream lOS = lClientSocket.getOutputStream();
+						byte[] lBA = new byte[4096];
 						String lLine = "";
 						boolean lFoundPolicyFileRequest = false;
 						int lLen = 0;
 						while (lLen >= 0 && !lFoundPolicyFileRequest) {
-							lLen = lIS.read(ba);
+							lLen = lIS.read(lBA);
 							if (lLen > 0) {
-								lLine += new String(ba, 0, lLen, "US-ASCII");
+								lLine += new String(lBA, 0, lLen, "US-ASCII");
 							}
 							if (mLog.isDebugEnabled()) {
 								mLog.debug("Received " + lLine + "...");
@@ -153,21 +153,18 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 						if (lFoundPolicyFileRequest) {
 							if (mLog.isDebugEnabled()) {
 								mLog.debug("Answering on flash policy-file-request (" + lLine + ")...");
+								mLog.debug("Answer: " + mCrossDomainXML);
 							}
 							lOS.write(mCrossDomainXML.getBytes("UTF-8"));
 							lOS.flush();
 						} else {
 							mLog.warn("Received invalid policy-file-request (" + lLine + ")...");
 						}
-					} catch (UnsupportedEncodingException ex) {
-						mLog.error("(encoding) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-					} catch (IOException ex) {
-						mLog.error("(io) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					} catch (Exception ex) {
-						mLog.error("(other) " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+						mLog.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					}
 
-					clientSocket.close();
+					lClientSocket.close();
 					if (mLog.isDebugEnabled()) {
 						mLog.debug("Client disconnected...");
 					}

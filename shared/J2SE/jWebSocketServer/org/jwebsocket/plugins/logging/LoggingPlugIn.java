@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketServerConstants;
-import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
@@ -34,7 +33,8 @@ public class LoggingPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(LoggingPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
-	private static final String NS_LOGGING = JWebSocketServerConstants.NS_BASE + ".plugins.logging";
+	private static final String NS_LOGGING =
+			JWebSocketServerConstants.NS_BASE + ".plugins.logging";
 	private ILogger mLogger = null;
 	private static final String DEF_IMPL = "log4j";
 	private String mImplementation = DEF_IMPL;

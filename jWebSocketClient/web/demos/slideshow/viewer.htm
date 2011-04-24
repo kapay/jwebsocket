@@ -85,7 +85,7 @@
 					OnToken: function( aToken ) {
 						if( "slide" == aToken.action ) {
 							if( lCurSlide != aToken.slide ) {
-								eSlide.src = "slides/slide" + jws.tools.zerofill( aToken.slide, 4 ) + ".gif";
+								eSlide.src = "slides/Slide" + jws.tools.zerofill( aToken.slide, 4 ) + ".gif";
 								lCurSlide = aToken.slide;
 							}
 							eCount.innerHTML = aToken.clientCount;
@@ -157,7 +157,7 @@
 			</tr>
 		</table>
 		<!-- <p>Welcome to the jWebSocket Slideshow Viewer.</p>  -->
-		<img id="simgSlide" src="slides/slide0001.gif"/>
+		<img id="simgSlide" src="slides/Slide0001.gif"/>
 		<div id="sdivLog" class="sdivContainer"
 			 style="display:none; position:relative; height:100px; overflow:auto;">
 		</div>
