@@ -26,9 +26,9 @@
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0a7
+	//:const:*:VERSION:String:1.0a8
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0a7 (10328)",
+	VERSION: "1.0a8 (10421)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -37,8 +37,8 @@ var jws = {
 	
 	MSG_WS_NOT_SUPPORTED:
 		"Unfortunately your browser does neither natively support WebSockets\n" +
-		"nor you have the Adobe Flash-PlugIn 9+ installed.\n" +
-		"Download the Adobe Flash Player at http://get.adobe.com/flashplayer.",
+		"nor you have the Adobe Flash-PlugIn 10+ installed.\n" +
+		"Please download the last recent Adobe Flash Player at http://get.adobe.com/flashplayer.",
 
 	// some namespace global constants
 	
@@ -469,30 +469,17 @@ if( !jws.browserSupportsNativeWebSockets ) {
 	//	</JasobNoObfs>
 
 	// check if appropriate flash version is installed
-	if( swfobject.hasFlashPlayerVersion( "9.0.0" ) ) {
+	if( swfobject.hasFlashPlayerVersion( "10.0.0" ) ) {
 	
 		//	<JasobNoObfs>
-		// --- FABridge.js ---
-		// http://opensource.adobe.com/wiki/display/flexsdk/Flex+SDK
-		// Copyright 2006 Adobe Systems Incorporated
-		// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
-		// to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-		// and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-		// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-		// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-		// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-		// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
-		// OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-		// Full Sources codes provided in FABridge.js
-		eval((function(x){var d="";var p=0;while(p<x.length){if(x.charAt(p)!="`")d+=x.charAt(p++);else{var l=x.charCodeAt(p+3)-28;if(l>4)d+=d.substr(d.length-x.charCodeAt(p+1)*96-x.charCodeAt(p+2)+3104-l,l);else d+="`";p+=4}}return d})("function FABridge(target,b` )!Name){this.` 2\"=` 9\";` .!remoteTypeCache={}` ,(Instanc` '1F`!0#` .*local` %2`!I\"ID=`!`$.next` %\"ID++` @\"name=`!p&` .#extL` r$ID=0;` [%i`!\\#s[` V%]=this` 8'dMap` 9\"`!<$` <#return ` '!}` G%TYPE_ASINSTANCE=1` a&` 4#FUNCTION=2` ,+J` 1&3` F,NONYMOUS=4`!r(itCallbacks={}` 0&userType` (*addToU` 2%`%3$(){for(var i=0;i<arguments.length;i++){` k.[` @%[i]]={typ`#r!:` ,(,enriched:false};}`!F(rgsToArray`!E&args){var result=[];`!P-`!N*` C\"[i]=args[i];}`$7#` 4\";};`'`%`%,$Factory(objID`']#fb_` 7$_id=` 6!`$z*`(?-__invokeJS`'1$`!v'f`&L\"`!P!0];var throughArgs` 3!.concat();` /'.shift()` M!`&Q\"`'o&extrac`'u#FromID(`!#\")`!d$` M\".`!T\"`'s%`!X!` D\",`!\"')`'3'addInitializa`)@\"`&:\"`$5&`(u&,c` 6#`\"G\"inst`!\\&`(q&` G&];if(inst!=undefined){` ^$.call` :!`\" $;}var ` 8$Li` r*`'r'` t,` F)=null`'5'` A5=` J)[];}` %(.push` q%)`&'(`%B&`*|#`#;$ed`#$'`# \"objects=doc`(?!.getEle`(J!ByTagName(\"` A\"\"`%<\"ol=` P#`'n$var activeO` i#[`\"T!ol>0`),ol`(?\"if(typeof`!<$[i].SetVariable!=\"`$-%\"){` r)[`! )`!?#]`!N$`),!}`$H!embed`!}=` A!`\"6#el=` O\"`\"*.E` g\"`\"5\"e`\".)j=0;j<el;j`\"-*` e\"[j`!x>` w\"`\"2#` '\"`\"/%` ]%`\"/$aol=`\"O0`!g\"e` 5$` Z)` 7!searchStr=\"`%@&=\"+`1Z'if(aol==1&&!ael||` &$ael==1`'/'attach`4A#`$2*0]`4F(;}else if(` ^\"&&!ao`'x(` W/`\"i#` U0`,f\"lash_found=`/F!`!r#>1`$,&k=0;k<aol;k++`'j\"params`#/*[k].childNodes`/T%l=0;l<` K\"`#<$l` [)=` 7\"[l`%M!` (!.nodeType`\"B!` -\"t`&B\".toLowerCase()==\"` 9!\"` >$n` /0`\"A!vars` >%value.indexOf(`$g%)>=0`#uBk`#D*`#<(true;break;}}if(` 1'){` 0$}if(!` /'`%T!`#j(m=0;m<ael;m`#&$` J!Var`#q$`$v#m].attributes.getNamedItem(`\"T\"Vars\")`#O!Valu`$!` 0%`\"1P`!0%`\"W)`\"2%`4?$`\"d!`1=&nex`29#ID=0;`0c.={}` +'dMap` %)refCount` P(`3$/`2+&id`#2\"`/9#D=id>>16`3H$` }*`0M#ID];`!)'`\"Q(` n'`!k#`\"S(`!%!new`\";#` ;#=new`! %` C1`!#%`1h)` X-`+s!`1`$s`2cKs`3'$`3z$`0^*` >%`)X$`0u!` -%[i]`4`\"`!D-);}delete`#A'`!75`#K'blockedMethods={toString:true,get` #\"se` \"#call` %!` Y'prototype={root:`$4%`\">$ this.deser`4Q\"(` ,!targe`1~!Root());},releaseAS`*7#` U4` U#` ?,(` Y'`)7!` 2$` ^&`+k!`2'(` ,!!=\"`3g\"\"` %`._\"`.w&ret=`!)/` z)` x\".fb_`&9$_id)`'_$ret;}},create`!H&class`'4\"`\"l@` Y\"` K');},makeID` j&token` h$` Y\"`(n$<<16)+` <!;},getPropertyFromAS` Z&objRef,prop`!X\"if(`*R->0){throw new Error(\"You are trying to`(K! recursively into the Flash Player which is not allowed. In most cases` P!JavaScript setTimeout `!r$, can be used as a workaround.\"`3n$`!{-++;retVal`${)`\"{#`\"x\"`\"d-` E)handle`\"_\"` 2\"`+K&` }%--`%E'Val;}},s`#|&In`#i7,`'4&`#(~`#(~`#[K`\"#In`#v.,` C!`(G&`#\"\"`#WccallASF`\"-#`$3&funcID,args`#1~`#1~`#_Pinvoke`\"s&`\"l$`$ +`\"~!`#Ai`1l\"`(<)ID,func`%J!`#2~`#2~`#oAargs`#K\"`#_+`$28`#7\"`\"1`#^b`!#\"Local`(8;`3T\"sult;var`\"m!`!6\"l` Q(Cache[` S\"];if` _!!=undefined){` ^\"`\"Z,func.apply(null`&q\"`3M(`&s\");}`!z%`!F!`2s!TypeFromNam`4C'objType`4>.remoteType`!h\"` >'];},`4Q\"Proxy`'&,t` g%var ` Q#`\"%\"`!8+(` B%;instanceFactory.prototype=` Z#`#K!` >$=new` $%` L#`!8\");`!s'I` ;#`!y%ID]=` O$`$$` '%`#!!`!~0`\"e0` g0;},addTypeDataTo` 7!` b&t` 2#`\"r\"new`\"s!new AS`!2!(this`#:!Data.n`\"t!var accessors=` 4%` *%;for(`\"w!=0;i<` /%.length;i++){`!t!add`4.$ToType(`!=#,` L%[i]);}var m`(o!`!&'` *#`! +` /#`! )`,;(blocked`)\\\"s[` H#[i]]=`'c(`!X$` B\"`!O+` K&);}}`&h1` D#.`&($]=` +#`$}$` '$`$=!`\"X*`$5(`3x%`$>\"c=` ($.charAt(0`$+\"setterNam`&q\"g` %&if(c>=\"a\"&&c<=\"z\"){` 4&=\"get\"+c.toUpperCase()+` |%substr(1);` w&=\"s` -C`.0\"` }-` B$` b.` 1%}ty[` 4&]=`\"i%val`$6#b`$j\"s`(=!`#9!InAS`'-!.fb_`(]$_id`#;%,val);};ty[`!K&` r'`(i*` z#`,b(` ,(`)U\"`!4!From` |;));}`%&\"`&&(`$})`&0\"`%&\"ty`&s#`!&X`4](`!H1` y&,`(7%argsToArray(argument`/<\"`,)\"`0J$`,(+`0U\"`&\"`!9\"`.;!;if`!4\"`(:\"`0z1==nul`$n$` ,8`\"['`\"5)` F$`2Q$`!l<;}`1F%` t<`\"F*ID`\"C*`+U!`2^!__`!L\"_id__`+<)` ,/`!0!makeID`\"w\"next`4c%ID++`0M#`4,3` a*`\"r\"`\")%` /.;},`%W%`!v&valu`+N#`4.\"={}`+6!t`.=!of ` =!`$\\!==\"number\"||t==\"string` &#boolean` (\"null` $!`\"W'` x#` i\"`*n! if`!:\"`2B%of `$B!` E%[]`/I+` K!`/I)` D\"[i]`#K\"`'z&` F!`.v#`!'$t==\"`\"T$\"` T$`.y!=`%f%TYPE_JSFUNCTION;` >#` j!` ~\"`%?)`#<#`!w8`3@\"` s8ASINSTANCE`!!*`\"I\"`)b*`.)#` R7NONYMOUS` Y/`%X%` 5\";},`+,'`%M&packedV`%M,`%L*` :'`%4H` L'`%b$` &)`%b.`#p!handleError`!R)`#o&` +'`%gG` K'`%|8`.2(` H'`&-/object\"){` n6newTypes`!$)`!\"!addTypeDataTo`*G!`!\"(` P%`!1\"` y$aRefID in`$'(.newRefs` r#create`&d!(` J\",` :/[` 5\"]);}`#C*`&B\"`&:+PRIMITIVE`#U%` F(`*;+` M<A`))%`%**`0},` \\)`),,` c>`) $` t-` :_`)0$`\"S8`)/-addRef`)1&obj`$L#target.incRef(obj`*Z+);},releas`)o'` N-` ;#` I6`(n'`0'-if(`/{(`*+&&&`,5\"indexOf(\"__FLASHERROR\")==0`+2\"my` t!Messag`,h$split(\"||\");if(`#=%refCount>0){` $---;}throw new `*b\"` p*[1]);`#X#`&R'{` %*}};`.j#`3-!`\"I!`3!\",typeName`#:#` 0\"=` 7\"`4%\"` :$`->!Name`!($this;` q%.proto`%_!{get`.-'rop` |\"` M'`!\"#`+V)` ,(`&w\"pertyFromAS` 8\"`$\\*,` r%);},s`!!0,`$n#` p(s` r&In` [;` Y#;},call` v&func` ;!arg`+g$` x#callASMethod` g1` N*`'|/` b*` 8\"` e!`'i1` @*` 8#` G$};"));
 		 
 		// --- web_socket.js (minified) ---
 		// Copyright: Hiroshi Ichikawa <http://gimite.net/en/>
-		// http://github.com/gimite/web-socket-js
-		// http://www.lightsphere.com/dev/articles/socketpolicy.pl.html
 		// License: New BSD License
+		// Reference: http://dev.w3.org/html5/websockets/
+		// Reference: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol
 		// Full Sources codes provided in web_socket.js
-		eval((function(x){var d="";var p=0;while(p<x.length){if(x.charAt(p)!="`")d+=x.charAt(p++);else{var l=x.charCodeAt(p+3)-28;if(l>4)d+=d.substr(d.length-x.charCodeAt(p+1)*96-x.charCodeAt(p+2)+3104-l,l);else d+="`";p+=4}}return d})("(function(){if(window.WebSocket){return;}var console=` ?#` (#;if(!` %#){` <${log:` r'},error` &)};}if(!swfobject.hasFlashPlayerVersion(\"9.0.0\")` t%.` f!(\"` G! ` G\" is not installed.\");`!u$if(location.protocol==\"file:\"` f-WARNING: web-s`\"c!-js doesn't work in ` Y!///... URL unless you set `!W\"Security Settings properly. Open the page via Web server i.e. http:` }!\");}`$-%=`#<%url,`\")$,proxyHost` $\"Port,headers){var self=this;self.readyState=` r%.CONNECTING` ?\"bufferedAmount=0;setTimeout`%p(` W&__addTask` 3(` f!__create`\"u!`!QF;});},1);};` |&` U!type` h*`\"3c__f` i!`\"*(` -!.`!&\"` g3||nul` )#Port||0` $` 5\")` r).addEventListener(\"open\",`!|%fe){try`#9\"`$D'` Y)getR` 2%();if(` 9#timer){clearInterval` .*`(6!`*(#opera`$B%` ;!=set` P%`$].handleMessages();},500` o\"` >!onopen` I#` '\"();}}catch(`+$&`)3#e.toString());}}`\"n=close`\".~`#!+`\"'#`!8!`\"3%` )!`!Pim`#R\"`\"4'`\"2'`#i0` Qd` R!`#C/`\"QT` k!`# %`!O\"`\"=hstateChan`# )`$wQ`,0fe.getB` ()`#BI`,B2send`,E&data`3}!this`!W$){` )!`!r'` 2(`!l-`3H!` 6(||` P,`/T1){throw\"INVALID_STATE_ERR:`1L!` J\" conne`!h! ha`3f\"been established\";}var result`!^*send(encodeURIComponent`\"R\"`)?!` P\"<0){`4P\" true;}else`\"a\"`$(+` J\";` F#false;}`#U2`)W!`#b&`/c,if(!`%J(`!:$;}`*sQ`#X3LOSED||` $;`$*!`!2)`11%`+Z#`4@7` ~!`,.^tTimeout` ,)`3|!`#I2`)B,`#`&type,l` 0#,useCapture`'e!!(\"__events\"in this)`'k#` 0$={}`'P\"` e! ` ?#` 6%` ?,[type]=[];if(\"`!>$\"==typeof` X![\"on\"+` D!` I1.defaultH`.:!r`%]!` I';` U+`'^$create`\"b!` S#`*%!,type);}}` v0push(`\"v$`*o4remov` s\"`\"^~`#N.`&c$for(var i`\"I$` <\".length;i>-1;--i`!4!`!I$==` ?*`\"Q\"[i`#b3splice(i,1);break;}`&:3dispatch`\"q!`\"d&` i!`\">9row\"UNSPECIFIED_EVENT_TYP`-*!\"`\"e#` T!.`&86` E=`##&0,l`\"U+` s&]`#4%<l;++i`\"f,` ?'[i]`\"7#;if`!Y#cancelBubble){`#)$if(`-F!!==` A\"`$[\"Value&&`'}3`!H2`'{*`!C7` ;+`!b$`$F3__h` C!Messages`.h,ar`)/\"`-0%read` `\"Data();`#T';i<arr`#@%++` ^\"data=de`0}-arr[i]);try`3c%onm`!D\"` U\"e;if(window.`!\\#`&B!&&!` /#opera){e=docum`$&!`*S&(\"` I(\");e.init` )((\"`!*#\",`$F!,`$L!,data,null,null,`!'\"` '!)`2_#e={data:data};`+M\"`!u%(`+b!catch(e){console.error(e.toString())`(^5`,R0`$4&object`,k\"`4;$` 4%`4b!`#:\"`)O!new ` z%` k!;`%k\"ini` *\"`,V\"true,true)` 9#target`'5#currentT` .\"`!;\"`%5%key in`%&!){` K![key]=data` %!;}` L\"`+!*`&x\",arg`$W!s);};};`\"!$`!f+(){}` $*`#$'`);\"able=true`#I&` 32`)d\"=`%(!` 26pr`![!D`(l\"`(0(`'($`!-&`)L#`*7'` w#`$t(` q,stopPropagation` v(` t'`!f#`\"3!` R7`$e%`.V+TypeArg,can` d\"` &#`!r#Arg`!'#type`%'\"` L#`3[!`#O(` I)` 8\"timeStamp`&B!Dat`!W).CONNECTING=0` ,'OPEN=1` <(LOSING=2` %+ED=3` ('__tasks=[]` ()initialize`$6+` 9(swfLoc`#d!){`+8#WEB_SOCKET_SWF_LOCATION=` A3`1N\"` >:`*?,\"[` d%] set ` A3 to l`!!# of`'s&Main.swf\");`&8\";}var container`-*-lem`,u!div\");` ?%.id=\"w` n$C` /$\"` 7'style.posi`&j!\"absolute\";`#=+isFlashLite()`\"M!` U)left=\"0px` k.top` 3#`.\"\"` E2-10` D6` 5$`\"b!hold`\"C=` ?\"`\"S*`!|!` v(appendChild(` K\");` n%body` 5)` O%);swf`,v#embedSWF(`$m3,`!/,,\"1\",\"1\",\"9.0.0\"`1)\"{bridgeName:` H&\"},{hasPriority:`/*!allowScriptAccess:\"always\"}` f\"`*b&`(,!!e.su` D!`&j:`\"\"- failed\");}});FAB`!^!.addI`)5$`'6!Callback(`!n'`!;&){try{`%~(flash=` g%` L%.root()`*:)` G!.setCallerUrl(`(J$.href` 73Debug(!`)e/DEBUG)`1}%i=0;i<`+]-.length;++i)`!o)` 9![i]();`1P&`,8(}catch(e`#O9\"+e.toString()`#Z\"`-w(__addTask`,r&task`,o-`\"K!){task()`(w#`!z.push` Z\"`1M)`*&*`-w+`#2$navigator||` \"-.mimeTypes){`,A\" `2Y#var ` 5$=` =6['appli`$i\"/x-shockwave-`\"4!'];if(!` G$||` \"%.enabledPlugin||` \"3.filename`!P,` '#` 7;.m`$f!/`!H!lite/i)?true:` `#;`\"4#`'9%Log`#>&messag`%>'log(decodeURIComponent` ?%)` ^/Error` X7`&6\"` V;`1k2DISABLE_AUTO_INITIALIZ`2)#if(` K#addEventListener`3?%` ),(\"load\",`4/2,`#.!`&|$` [$ttach` a!(\"on` D8);}}})();"));
+		(function(){if(window.WebSocket)return;var console=window.console;if(!console|| !console.log|| !console.error){console={log:function(){},error:function(){}};}if(!swfobject.hasFlashPlayerVersion("10.0.0")){console.error("Flash Player >= 10.0.0 is required.");return;}if(location.protocol=="file:"){console.error("WARNING: web-socket-js doesn't work in file:///... URL "+"unless you set Flash Security Settings properly. "+"Open the page via Web server i.e. http://...");}WebSocket=function(url,protocol,proxyHost,proxyPort,headers){var self=this;self.__id=WebSocket.__nextId++;WebSocket.__instances[self.__id]=self;self.readyState=WebSocket.CONNECTING;self.bufferedAmount=0;self.__events={};setTimeout(function(){WebSocket.__addTask(function(){WebSocket.__flash.create(self.__id,url,protocol,proxyHost||null,proxyPort||0,headers||null);});},0);};WebSocket.prototype.send=function(data){if(this.readyState==WebSocket.CONNECTING){throw "INVALID_STATE_ERR: Web Socket connection has not been established";}var result=WebSocket.__flash.send(this.__id,encodeURIComponent(data));if(result<0){return true;}else{this.bufferedAmount+=result;return false;}};WebSocket.prototype.close=function(){if(this.readyState==WebSocket.CLOSED||this.readyState==WebSocket.CLOSING){return;}this.readyState=WebSocket.CLOSING;WebSocket.__flash.close(this.__id);};WebSocket.prototype.addEventListener=function(type,listener,useCapture){if(!(type in this.__events)){this.__events[type]=[];}this.__events[type].push(listener);};WebSocket.prototype.removeEventListener=function(type,listener,useCapture){if(!(type in this.__events))return;var events=this.__events[type];for(var i=events.length-1;i>=0;--i){if(events[i]===listener){events.splice(i,1);break;}}};WebSocket.prototype.dispatchEvent=function(event){var events=this.__events[event.type]||[];for(var i=0;i<events.length;++i){events[i](event);}var handler=this["on"+event.type];if(handler)handler(event);};WebSocket.prototype.__handleEvent=function(flashEvent){if("readyState"in flashEvent){this.readyState=flashEvent.readyState;}var jsEvent;if(flashEvent.type=="open"||flashEvent.type=="error"){jsEvent=this.__createSimpleEvent(flashEvent.type);}else if(flashEvent.type=="close"){jsEvent=this.__createSimpleEvent("close");}else if(flashEvent.type=="message"){var data=decodeURIComponent(flashEvent.message);jsEvent=this.__createMessageEvent("message",data);}else{throw "unknown event type: "+flashEvent.type;}this.dispatchEvent(jsEvent);};WebSocket.prototype.__createSimpleEvent=function(type){if(document.createEvent&&window.Event){var event=document.createEvent("Event");event.initEvent(type,false,false);return event;}else{return{type:type,bubbles:false,cancelable:false};}};WebSocket.prototype.__createMessageEvent=function(type,data){if(document.createEvent&&window.MessageEvent&& !window.opera){var event=document.createEvent("MessageEvent");event.initMessageEvent("message",false,false,data,null,null,window,null);return event;}else{return{type:type,data:data,bubbles:false,cancelable:false};}};WebSocket.CONNECTING=0;WebSocket.OPEN=1;WebSocket.CLOSING=2;WebSocket.CLOSED=3;WebSocket.__flash=null;WebSocket.__instances={};WebSocket.__tasks=[];WebSocket.__nextId=0;WebSocket.loadFlashPolicyFile=function(url){WebSocket.__addTask(function(){WebSocket.__flash.loadManualPolicyFile(url);});};WebSocket.__initialize=function(){if(WebSocket.__flash)return;if(WebSocket.__swfLocation){window.WEB_SOCKET_SWF_LOCATION=WebSocket.__swfLocation;}if(!window.WEB_SOCKET_SWF_LOCATION){console.error("[WebSocket] set WEB_SOCKET_SWF_LOCATION to location of WebSocketMain.swf");return;}var container=document.createElement("div");container.id="webSocketContainer";container.style.position="absolute";if(WebSocket.__isFlashLite()){container.style.left="0px";container.style.top="0px";}else{container.style.left="-100px";container.style.top="-100px";}var holder=document.createElement("div");holder.id="webSocketFlash";container.appendChild(holder);document.body.appendChild(container);swfobject.embedSWF(WEB_SOCKET_SWF_LOCATION,"webSocketFlash","1","1","10.0.0",null,null,{hasPriority:true,swliveconnect:true,allowScriptAccess:"always"},null,function(e){if(!e.success){console.error("[WebSocket] swfobject.embedSWF failed");}});};WebSocket.__onFlashInitialized=function(){setTimeout(function(){WebSocket.__flash=document.getElementById("webSocketFlash");WebSocket.__flash.setCallerUrl(location.href);WebSocket.__flash.setDebug(! !window.WEB_SOCKET_DEBUG);for(var i=0;i<WebSocket.__tasks.length;++i){WebSocket.__tasks[i]();}WebSocket.__tasks=[];},0);};WebSocket.__onFlashEvent=function(){setTimeout(function(){try{var events=WebSocket.__flash.receiveEvents();for(var i=0;i<events.length;++i){WebSocket.__instances[events[i].webSocketId].__handleEvent(events[i]);}}catch(e){console.error(e);}},0);return true;};WebSocket.__log=function(message){console.log(decodeURIComponent(message));};WebSocket.__error=function(message){console.error(decodeURIComponent(message));};WebSocket.__addTask=function(task){if(WebSocket.__flash){task();}else{WebSocket.__tasks.push(task);}};WebSocket.__isFlashLite=function(){if(!window.navigator|| !window.navigator.mimeTypes){return false;}var mimeType=window.navigator.mimeTypes["application/x-shockwave-flash"];if(!mimeType|| !mimeType.enabledPlugin|| !mimeType.enabledPlugin.filename){return false;}return mimeType.enabledPlugin.filename.match(/flashlite/i)?true:false;};if(!window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION){if(window.addEventListener){window.addEventListener("load",function(){WebSocket.__initialize();},false);}else{window.attachEvent("onload",function(){WebSocket.__initialize();});}}})();
 		//	</JasobNoObfs>
 
 		// init flash bridge
@@ -610,7 +597,6 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 	}
 	// if the class already has descendants recursively
 	// clone the plug-in methods to these as well.
-	// checkDescendants( aClass );
 	if( aClass.descendants ) {
 		for( var lIdx = 0, lCnt = aClass.descendants.length; lIdx < lCnt; lIdx ++ ) {
 			jws.oop.addPlugIn( aClass.descendants[ lIdx ], aPlugIn );
@@ -888,6 +874,36 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:r:*::::Please refer to the [tt]close[/tt] method.
 	disconnect: function( aOptions ) {
 		return this.close( aOptions );
+	},
+
+	//:m:*:addPlugIn
+	//:d:en:Adds a client side plug-in to the instance - not to the class!
+	//:a:en::aPlugIn:Object:Plug-in to be appended to the client side plug-in chain.
+	//:r:*:::void:none
+	addPlugIn: function( aPlugIn, aId ) {
+		// if the class has no plug-ins yet initialize array
+		if( !this.fPlugIns ) {
+			this.fPlugIns = [];
+		}
+		// add the plug-in to the class
+		this.fPlugIns.push( aPlugIn );
+
+		var lField;
+		if( !aId ) {
+			aId = aPlugIn.ID;
+		}
+		//:todo:en:check if plug-in with given id already exists!
+		if( aId ) {
+			// blend all methods of the plug-in to the connection instance
+			this[ aId ] = {
+				conn: this
+			};
+			for( lField in aPlugIn ) {
+				if( lField != "conn" ) {
+					this[ aId ][ lField ] = aPlugIn[ lField ];
+				}
+			}
+		}
 	}
 
 });
@@ -1182,17 +1198,34 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			this.checkCallbacks( aToken );
 		}
 
-		// notify all plug-ins that a token has to be processed
-		var lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
+		var lIdx, lLen, lPlugIns, lPlugIn;
+
+		// notify all plug-ins bound to the class
+		// that a token has to be processed
+		lPlugIns = jws.jWebSocketTokenClient.fPlugIns;
 		if( lPlugIns ) {
-			for( var lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
-				var lPlugIn = lPlugIns[ lIdx ];
+			for( lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
+				lPlugIn = lPlugIns[ lIdx ];
 				if( lPlugIn.processToken ) {
 					lPlugIn.processToken.call( this, aToken );
 				}
 			}
 		}
 
+		// notify all plug-ins bound to the instance
+		// that a token has to be processed
+		lPlugIns = this.fPlugIns;
+		if( lPlugIns ) {
+			for( lIdx = 0, lLen = lPlugIns.length; lIdx < lLen; lIdx++ ) {
+				lPlugIn = lPlugIns[ lIdx ];
+				if( lPlugIn.processToken ) {
+					lPlugIn.processToken( aToken );
+				}
+			}
+		}
+
+		// if the instance got an OnToken event assigned
+		// fire the event
 		if( this.fOnToken ) {
 			this.fOnToken( aToken );
 		}
