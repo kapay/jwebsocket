@@ -17,14 +17,12 @@ package org.jwebsocket.plugins.api;
 
 import java.util.List;
 import javolution.util.FastList;
-import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
-import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
@@ -39,29 +37,24 @@ import org.springframework.core.io.FileSystemResource;
  */
 public class InterfacePlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(InterfacePlugIn.class);
-	// if namespace changed update client plug-in accordingly!
-	private static final String NS_INTERFACE =
-			JWebSocketServerConstants.NS_BASE + ".plugins.api";
 	private String EXPORT_SERVER_API = "server.export.api";
 	private String EXPORT_PLUGIN_API = "server.export.plugin.api";
 	private String EXPORT_PLUGIN_IDENTIFIERS = "server.export.plugin.ids";
 	private String SUPPORT_TOKEN = "server.support.token";
 	private String HAS_PLUGIN = "server.has.plugin";
-	private BeanFactory beanFactory;
+	private BeanFactory mBeanFactory;
+	private static final String NS_INTERFACE =
+			JWebSocketServerConstants.NS_BASE + ".plugins.api";
 
 	public InterfacePlugIn(PluginConfiguration configuration) throws Exception {
 		super(configuration);
 
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating automated test plug-in...");
-		}
-		// specify default name space for interface plugin
-		this.setNamespace(NS_INTERFACE);
+		//Creating the Spring Bean Factory
+		String lPath = JWebSocketConfig.getConfigFolder(getString("config_file"));
+		mBeanFactory = new XmlBeanFactory(new FileSystemResource(lPath));
 
-		// Creating the Spring Bean Factory
-		String lPath = JWebSocketConfig.getConfigFolder((String) getSettings().get("config_file"));
-		beanFactory = new XmlBeanFactory(new FileSystemResource(lPath));
+		//Specify default name space for interface plugin
+		this.setNamespace(NS_INTERFACE);
 	}
 
 	/**
@@ -69,17 +62,20 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-		if (EXPORT_SERVER_API.equals(aToken.getType())) {
-			exportServerAPI(aConnector, aToken);
-		} else if (EXPORT_PLUGIN_API.equals(aToken.getType())) {
-			exportPlugInAPI(aConnector, aToken);
-		} else if (EXPORT_PLUGIN_IDENTIFIERS.equals(aToken.getType())) {
-			exportPlugInIdentifiers(aConnector, aToken);
-		} else if (SUPPORT_TOKEN.equals(aToken.getType())) {
-			supportToken(aConnector, aToken);
-		} else if (HAS_PLUGIN.equals(aToken.getType())) {
-			hasPlugIn(aConnector, aToken);
+	public void processToken(PlugInResponse aResponse,
+			WebSocketConnector aConnector, Token aToken) {
+		if (getNamespace().equals(aToken.getNS())) {
+			if (EXPORT_SERVER_API.equals(aToken.getType())) {
+				exportServerAPI(aConnector, aToken);
+			} else if (EXPORT_PLUGIN_API.equals(aToken.getType())) {
+				exportPlugInAPI(aConnector, aToken);
+			} else if (EXPORT_PLUGIN_IDENTIFIERS.equals(aToken.getType())) {
+				exportPlugInIdentifiers(aConnector, aToken);
+			} else if (SUPPORT_TOKEN.equals(aToken.getType())) {
+				supportToken(aConnector, aToken);
+			} else if (HAS_PLUGIN.equals(aToken.getType())) {
+				hasPlugIn(aConnector, aToken);
+			}
 		}
 	}
 
@@ -90,22 +86,22 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * @param aToken 
 	 */
 	public void exportServerAPI(WebSocketConnector aConnector, Token aToken) {
-		Token response = createResponse(aToken);
+		Token lResponse = createResponse(aToken);
 
-		List<Token> plugIns = new FastList<Token>();
-		Token tempPlugIn;
+		List<Token> lPlugIns = new FastList<Token>();
+		Token lTempPlugIn;
 		for (WebSocketPlugIn p : getPlugInChain().getPlugIns()) {
-			if (beanFactory.containsBean(p.getId())) {
-				tempPlugIn = TokenFactory.createToken();
-				PlugInDefinition pd = (PlugInDefinition) beanFactory.getBean(p.getId());
-				pd.writeToToken(tempPlugIn);
-				plugIns.add(tempPlugIn);
+			if (mBeanFactory.containsBean(p.getId())) {
+				lTempPlugIn = TokenFactory.createToken();
+				PlugInDefinition pd = (PlugInDefinition) mBeanFactory.getBean(p.getId());
+				pd.writeToToken(lTempPlugIn);
+				lPlugIns.add(lTempPlugIn);
 			}
 		}
-		response.setList("api", plugIns);
+		lResponse.setList("api", lPlugIns);
 
 		//Sending the response
-		sendToken(aConnector, aConnector, response);
+		sendToken(aConnector, aConnector, lResponse);
 	}
 
 	/**
@@ -115,23 +111,23 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * @param aToken 
 	 */
 	public void exportPlugInAPI(WebSocketConnector aConnector, Token aToken) {
-		Token response = createResponse(aToken);
+		Token lResponse = createResponse(aToken);
 
-		String plugInId = aToken.getString("plugin_id", null);
-		if (null == plugInId) {
-			response.setInteger("code", -1);
-			response.setString("msg", "Missing 'plugInId' parameter value!");
+		String lPlugInId = aToken.getString("plugin_id", null);
+		if (null == lPlugInId) {
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "Missing 'plugInId' parameter value!");
 
-		} else if (!beanFactory.containsBean(plugInId)) {
-			response.setInteger("code", -1);
-			response.setString("msg", "Missing '" + plugInId + "' plug-in definition!");
+		} else if (!mBeanFactory.containsBean(lPlugInId)) {
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "Missing '" + lPlugInId + "' plug-in definition!");
 		} else {
-			PlugInDefinition p = (PlugInDefinition) beanFactory.getBean(plugInId);
-			p.writeToToken(response);
+			PlugInDefinition p = (PlugInDefinition) mBeanFactory.getBean(lPlugInId);
+			p.writeToToken(lResponse);
 		}
 
 		//Sending the response
-		sendToken(aConnector, aConnector, response);
+		sendToken(aConnector, aConnector, lResponse);
 	}
 
 	/**
@@ -141,18 +137,18 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * @param aToken 
 	 */
 	public void exportPlugInIdentifiers(WebSocketConnector aConnector, Token aToken) {
-		List<String> identifiers = new FastList<String>();
-		for (WebSocketPlugIn p : getPlugInChain().getPlugIns()) {
-			if (beanFactory.containsBean(p.getId())) {
-				identifiers.add(p.getId());
+		List<String> lIdentifiers = new FastList<String>();
+		for (WebSocketPlugIn lPlugIn : getPlugInChain().getPlugIns()) {
+			if (mBeanFactory.containsBean(lPlugIn.getId())) {
+				lIdentifiers.add(lPlugIn.getId());
 			}
 		}
 
-		Token response = createResponse(aToken);
-		response.setList("identifiers", identifiers);
+		Token lResponse = createResponse(aToken);
+		lResponse.setList("identifiers", lIdentifiers);
 
 		//Sending the response
-		sendToken(aConnector, aConnector, response);
+		sendToken(aConnector, aConnector, lResponse);
 	}
 
 	/**
@@ -163,20 +159,20 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * @param aToken 
 	 */
 	public void supportToken(WebSocketConnector aConnector, Token aToken) {
-		Token response = createResponse(aToken);
+		Token lResponse = createResponse(aToken);
 
 		//Getting the plug-in identifier
-		String token_type = aToken.getString("token_type", null);
-		if (null == token_type) {
-			response.setInteger("code", -1);
-			response.setString("msg", "Missing 'token_type' parameter value!");
+		String lType = aToken.getString("token_type", null);
+		if (null == lType) {
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "Missing 'token_type' parameter value!");
 		} else {
-			response.setBoolean("token_supported", Boolean.FALSE);
+			lResponse.setBoolean("token_supported", Boolean.FALSE);
 
-			for (WebSocketPlugIn p : getPlugInChain().getPlugIns()) {
-				if (beanFactory.containsBean(p.getId())) {
-					if (((PlugInDefinition) beanFactory.getBean(p.getId())).supportToken(token_type)) {
-						response.setBoolean("token_supported", Boolean.TRUE);
+			for (WebSocketPlugIn lPlugIn : getPlugInChain().getPlugIns()) {
+				if (mBeanFactory.containsBean(lPlugIn.getId())) {
+					if (((PlugInDefinition) mBeanFactory.getBean(lPlugIn.getId())).supportToken(lType)) {
+						lResponse.setBoolean("token_supported", Boolean.TRUE);
 						break;
 					}
 				}
@@ -184,7 +180,7 @@ public class InterfacePlugIn extends TokenPlugIn {
 		}
 
 		//Sending the response
-		sendToken(aConnector, aConnector, response);
+		sendToken(aConnector, aConnector, lResponse);
 	}
 
 	/**
@@ -195,36 +191,36 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * @param aToken 
 	 */
 	public void hasPlugIn(WebSocketConnector aConnector, Token aToken) {
-		Token response = createResponse(aToken);
-
+		Token lResponse = createResponse(aToken);
+		
 		//Getting the plug-in identifier
-		String id = aToken.getString("plugin_id", null);
-		if (null == id) {
-			response.setInteger("code", -1);
-			response.setString("msg", "Missing 'plugin_id' parameter value!");
+		String lId = aToken.getString("plugin_id");
+		if (null == lId) {
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "Missing 'plugin_id' parameter value!");
 		} else {
-			if (null != getPlugInChain().getPlugIn(id) && beanFactory.containsBean(id)) {
-				response.setBoolean("has", Boolean.TRUE);
+			if (null != getPlugInChain().getPlugIn(lId) && mBeanFactory.containsBean(lId)) {
+				lResponse.setBoolean("has", Boolean.TRUE);
 			} else {
-				response.setBoolean("has", Boolean.FALSE);
+				lResponse.setBoolean("has", Boolean.FALSE);
 			}
 		}
-
+		
 		//Sending the response
-		sendToken(aConnector, aConnector, response);
+		sendToken(aConnector, aConnector, lResponse);
 	}
 
 	/**
 	 * @return the beanFactory
 	 */
 	public BeanFactory getBeanFactory() {
-		return beanFactory;
+		return mBeanFactory;
 	}
 
 	/**
-	 * @param beanFactory the beanFactory to set
+	 * @param aBeanFactory the beanFactory to set
 	 */
-	public void setBeanFactory(BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
+	public void setBeanFactory(BeanFactory aBeanFactory) {
+		this.mBeanFactory = aBeanFactory;
 	}
 }

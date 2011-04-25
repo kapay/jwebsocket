@@ -3,21 +3,17 @@
 <html>
 	<head>
 		<title>Jasmine Test Runner</title>
-		<link rel="stylesheet" type="text/css" href="lib/jasmine-1.0.2/jasmine.css">
-		<script type="text/javascript" src="lib/jasmine-1.0.2/jasmine.js"></script>
-		<script type="text/javascript" src="lib/jasmine-1.0.2/jasmine-html.js"></script>
+		<link rel="stylesheet" type="text/css" href="../lib/jasmine-1.0.2/jasmine.css">
+		<script type="text/javascript" src="../lib/jasmine-1.0.2/jasmine.js"></script>
+		<script type="text/javascript" src="../lib/jasmine-1.0.2/jasmine-html.js"></script>
 		<script type="text/javascript" src="../res/js/jWebSocket.js"></script>
-		<script type="text/javascript" src="lib/InterfacePlugIn.js"></script>
-		<script type="text/javascript" src="lib/ValueGenerator.js"></script>
-		<script type="text/javascript" src="lib/TestHelpers.js"></script>
-		<script type="text/javascript" src="lib/Init.js"></script>
+		<script type="text/javascript" src="../res/js/jwsAPIPlugIn.js"></script>
 
 		<!-- include source files here... -->
 		<script type="text/javascript" src="src/TestPlugInHelper.js"></script>
 
 		<!-- include spec files here... -->
 		<script type="text/javascript" src="spec/Matchers.js"></script>
-		<script type="text/javascript" src="spec/SpecBase.js"></script>
 
 	</head>
 	<body>
@@ -26,27 +22,25 @@
 			
 			if(jws.browserSupportsWebSockets()){
 				
-				jws.t.auxConn = new jws.jWebSocketJSONClient();
-				jws.t.conn = new jws.jWebSocketJSONClient();
-				jws.t.server = new InterfacePlugIn(jws.t.conn);
-				jws.t.auxConn.open(jws.JWS_SERVER_URL, {
+				auxConn = new jws.jWebSocketJSONClient();
+				conn = new jws.jWebSocketJSONClient();
+				
+				auxConn.open(jws.JWS_SERVER_URL, {
 					OnOpen: function(){
-						jws.t.conn.open(jws.JWS_SERVER_URL, {
-							OnOpen: function (){
-	
-								jws.t.server.serverAPI(function (response){
+						conn.open(jws.JWS_SERVER_URL, {
+							OnOpen: function () {
+								server = new jws.APIPlugIn(conn);
+								server.serverAPI(function (response){
 									//Iterating over all the plug-ins
 									var end = response.api.length;
 									for (var i = 0; i < end; i++){
-										describePlugIn(response.api[i]);
+										testing.describePlugIn(response.api[i]);
 									}
 									setTimeout(function (){
 										jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
 										jasmine.getEnv().execute();
 									}, 500);
-							
 								});
-								
 							}
 						});
 					}

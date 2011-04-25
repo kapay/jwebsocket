@@ -208,7 +208,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	 */
 	public void broadcastDisconnectEvent(WebSocketConnector aConnector) {
 		// only broadcast if corresponding global plugin setting is "true"
-		if (BROADCAST_CLOSE) {
+		if (BROADCAST_CLOSE
+				&& !aConnector.getBoolean("noDisconnectBroadcast")) {
 			if (log.isDebugEnabled()) {
 				log.debug("Broadcasting disconnect...");
 			}
@@ -490,7 +491,7 @@ public class SystemPlugIn extends TokenPlugIn {
 						+ "') from '" + aConnector
 						+ "' to " + lTargetId + "...");
 			}
-			aToken.setType( "response" );
+			aToken.setType("response");
 			aToken.setString("sourceId", aConnector.getId());
 			sendToken(aConnector, lTargetConnector, aToken);
 		} else {
@@ -550,12 +551,19 @@ public class SystemPlugIn extends TokenPlugIn {
 	private void close(WebSocketConnector aConnector, Token aToken) {
 		int lTimeout = aToken.getInteger("timeout", 0);
 
-		// only send a good bye message if timeout is > 0
-		if (lTimeout > 0) {
+		boolean lNoGoodBye =
+				aToken.getBoolean("noGoodBye", false);
+		boolean lNoLogoutBroadcast =
+				aToken.getBoolean("noLogoutBroadcast", false);
+		boolean lNoDisconnectBroadcast =
+				aToken.getBoolean("noDisconnectBroadcast", false);
+
+		// only send a good bye message if timeout is > 0 and not to be noed
+		if (lTimeout > 0 && !lNoGoodBye) {
 			sendGoodBye(aConnector, CloseReason.CLIENT);
 		}
 		// if logged in...
-		if (getUsername(aConnector) != null) {
+		if (getUsername(aConnector) != null && !lNoLogoutBroadcast) {
 			// broadcast the logout event.
 			broadcastLogoutEvent(aConnector);
 		}
@@ -568,6 +576,8 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		// don't send a response here! We're about to close the connection!
 		// broadcasts disconnect event to other clients
+		// if not explicitely noed
+		aConnector.setBoolean("noDisconnectBroadcast", lNoDisconnectBroadcast);
 		aConnector.stopConnector(CloseReason.CLIENT);
 	}
 

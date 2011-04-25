@@ -276,6 +276,13 @@
 			<version>${org.springframework.version}</version>
 		</dependency>
 
+		<!-- Spring JDBC database abastraction -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${org.springframework.version}</version>
+		</dependency>
+
 		<!-- memcached dependency -->
 		<!--
 		<dependency>

@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - EventsPlugIn
+//  jWebSocket - PlugInDefinition
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -30,43 +30,44 @@ import org.jwebsocket.token.TokenFactory;
  */
 public class PlugInDefinition implements ITokenizable {
 
-	private String id;
-	private Set<TokenDefinition> supportedTokens;
-	private String comment;
+	private String mId;
+	private String mNamespace;
+	private Set<TokenDefinition> mSupportedTokens;
+	private String mComment;
 
 	/**
 	 * @return The plug-in identifier
 	 */
 	public String getId() {
-		return id;
+		return mId;
 	}
 
 	/**
 	 * @param id The plug-in identifier to set
 	 */
 	public void setId(String id) {
-		this.id = id;
+		this.mId = id;
 	}
 
 	/**
 	 * @return The supported tokens definition
 	 */
 	public Set<TokenDefinition> getSupportedTokens() {
-		return Collections.unmodifiableSet(supportedTokens);
+		return Collections.unmodifiableSet(mSupportedTokens);
 	}
 
 	/**
-	 * @param supportedTokens The supported tokens definitions to set
+	 * @param aSupportedTokens The supported tokens definitions to set
 	 */
-	public void setSupportedTokens(Set<TokenDefinition> supportedTokens) {
-		this.supportedTokens = supportedTokens;
+	public void setSupportedTokens(Set<TokenDefinition> aSupportedTokens) {
+		this.mSupportedTokens = aSupportedTokens;
 	}
 
 	/**
 	 * @return The plug-in comment
 	 */
 	public String getComment() {
-		return comment;
+		return mComment;
 	}
 
 	/**
@@ -88,28 +89,45 @@ public class PlugInDefinition implements ITokenizable {
 	 * @param comment The plug-in comment to set
 	 */
 	public void setComment(String comment) {
-		this.comment = comment;
+		this.mComment = comment;
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
-	public void writeToToken(Token token) {
-		token.setString("id", getId());
-		token.setString("comment", getComment());
+	@Override
+	public void writeToToken(Token aToken) {
+		aToken.setString("id", getId());
+		aToken.setString("namespace", getNamespace());
+		aToken.setString("comment", getComment());
 
-		List<Token> tokens = new FastList<Token>();
-		Token tempToken;
-		for (TokenDefinition t : getSupportedTokens()) {
-			tempToken = TokenFactory.createToken();
-			t.writeToToken(tempToken);
-			tokens.add(tempToken);
+		List<Token> lTokens = new FastList<Token>();
+		Token lTempToken;
+		for (TokenDefinition lTokenDef : getSupportedTokens()) {
+			lTempToken = TokenFactory.createToken();
+			lTokenDef.writeToToken(lTempToken);
+			lTokens.add(lTempToken);
 		}
 
-		token.setList("supportedTokens", tokens);
+		aToken.setList("supportedTokens", lTokens);
 	}
 
-	public void readFromToken(Token token) {
+	@Override
+	public void readFromToken(Token aToken) {
 		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	/**
+	 * @return The plug-in namespace
+	 */
+	public String getNamespace() {
+		return mNamespace;
+	}
+
+	/**
+	 * @param aNamespace The plug-in namespace
+	 */
+	public void setNamespace(String aNamespace) {
+		this.mNamespace = aNamespace;
 	}
 }

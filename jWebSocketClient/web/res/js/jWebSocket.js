@@ -454,6 +454,32 @@ jws.tools = {
 		lDate.setUTCSeconds( aISO.substr( 12, 2 ) );
 		lDate.setUTCMilliseconds( aISO.substr( 14, 3 ) );
 		return lDate;
+	},
+
+	generateSharedUTID: function(aToken){
+		var string = JSON.stringify(aToken);
+		var chars = string.split('');
+		chars.sort();
+
+		return hex_md5("{" + chars.toString() + "}");
+	},
+
+	getType: function(aObject){
+		var value = aObject;
+		var t = typeof value;
+
+		if ("number" == t){
+			if((parseFloat(value) == parseInt(value))){
+				t = "integer";
+			} else {
+				t = "double";
+			}
+		} else if (Object.prototype.toString.call(value) === "[object Array]") {
+			t = "array";
+		} else if (value === null) {
+			t = "null";
+		}
+		return t;
 	}
 
 };
@@ -841,6 +867,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	close: function( aOptions ) {
 		// check if timeout option is used
 		var lTimeout = 0;
+
 		if( aOptions ) {
 			if( aOptions.timeout ) {
 				lTimeout = aOptions.timeout;
@@ -894,6 +921,8 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 		//:todo:en:check if plug-in with given id already exists!
 		if( aId ) {
+			aPlugIn.conn = this;
+/*
 			// blend all methods of the plug-in to the connection instance
 			this[ aId ] = {
 				conn: this
@@ -903,6 +932,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 					this[ aId ][ lField ] = aPlugIn[ lField ];
 				}
 			}
+*/
 		}
 	}
 
@@ -1296,6 +1326,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				OnError: null,
 				OnTimeout: null
 			};
+			// we need to check for a response only
+			// if correspondig callbacks are set
 			var lControlResponse = false;
 			if( aOptions ) {
 				if( aOptions.OnResponse ) {
@@ -1530,9 +1562,23 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:r:*:::void:none
 	close: function( aOptions ) {
 		var lTimeout = 0;
+
+		var lNoGoodBye = false;
+		var lNoLogoutBroadcast = false;
+		var lNoDisconnectBroadcast = false;
+
 		if( aOptions ) {
 			if( aOptions.timeout ) {
 				lTimeout = aOptions.timeout;
+			}
+			if( aOptions.noGoodBye ) {
+				lNoGoodBye = true;
+			}
+			if( aOptions.noLogoutBroadcast ) {
+				lNoLogoutBroadcast = true;
+			}
+			if( aOptions.noDisconnectBroadcast ) {
+				lNoDisconnectBroadcast = true;
 			}
 		}
 		var lRes = this.checkConnected();
@@ -1540,11 +1586,23 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			// if connected and timeout is passed give server a chance to
 			// register the disconnect properly and send a good bye response.
 			if( lRes.code == 0 ) {
-				this.sendToken({
+				var lToken = {
 					ns: jws.NS_SYSTEM,
 					type: "close",
 					timeout: lTimeout
-				});
+				};
+				// only add the following optional fields to
+				// the close token on explicit request
+				if( lNoGoodBye ) {
+					lToken.noGoodBye = true;
+				}
+				if( lNoLogoutBroadcast ) {
+					lToken.noLogoutBroadcast = true;
+				}
+				if( lNoDisconnectBroadcast ) {
+					lToken.noDisconnectBroadcast = true;
+				}
+				this.sendToken( lToken );
 				// call inherited disconnect, catching potential exception
 				arguments.callee.inherited.call( this, aOptions );
 			} else {
