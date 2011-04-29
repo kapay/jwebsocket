@@ -173,7 +173,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        lblTitle.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        lblTitle.setFont(new java.awt.Font("Arial", 1, 16));
         lblTitle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Synapso32x32.png"))); // NOI18N
         lblTitle.setText("jWebSocket Java Client {ver}");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -490,7 +490,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 0);
         getContentPane().add(lblPassword, gridBagConstraints);
 
-        txfUser.setText("Guest");
+        txfUser.setText("guest");
         txfUser.setMinimumSize(new java.awt.Dimension(100, 20));
         txfUser.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();

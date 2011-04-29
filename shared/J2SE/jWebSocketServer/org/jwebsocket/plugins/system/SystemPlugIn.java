@@ -46,7 +46,7 @@ import org.jwebsocket.util.Tools;
  */
 public class SystemPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logging.getLogger(SystemPlugIn.class);
+	private static Logger mLog = Logging.getLogger(SystemPlugIn.class);
 	// specify name space for system plug-in
 	private static final String NS_SYSTEM_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.system";
 	// specify token types processed by system plug-in
@@ -80,8 +80,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	 */
 	public SystemPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating system plug-in...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating system plug-in...");
 		}
 		// specify default name space for system plugin
 		this.setNamespace(NS_SYSTEM_DEFAULT);
@@ -97,7 +97,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aResponse,
+			WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
@@ -181,8 +182,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	public void broadcastConnectEvent(WebSocketConnector aConnector) {
 		// only broadcast if corresponding global plugin setting is "true"
 		if (BROADCAST_OPEN) {
-			if (log.isDebugEnabled()) {
-				log.debug("Broadcasting connect...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Broadcasting connect...");
 			}
 			// broadcast connect event to other clients of the jWebSocket network
 			Token lConnect = TokenFactory.createToken(BaseToken.TT_EVENT);
@@ -210,8 +211,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		// only broadcast if corresponding global plugin setting is "true"
 		if (BROADCAST_CLOSE
 				&& !aConnector.getBoolean("noDisconnectBroadcast")) {
-			if (log.isDebugEnabled()) {
-				log.debug("Broadcasting disconnect...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Broadcasting disconnect...");
 			}
 			// broadcast connect event to other clients of the jWebSocket network
 			Token lDisconnect = TokenFactory.createToken(BaseToken.TT_EVENT);
@@ -231,8 +232,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	private void sendWelcome(WebSocketConnector aConnector) {
-		if (log.isDebugEnabled()) {
-			log.debug("Sending welcome...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Sending welcome...");
 		}
 		// send "welcome" token to client
 		Token lWelcome = TokenFactory.createToken(TT_WELCOME);
@@ -258,8 +259,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	private void broadcastLoginEvent(WebSocketConnector aConnector) {
 		// only broadcast if corresponding global plugin setting is "true"
 		if (BROADCAST_LOGIN) {
-			if (log.isDebugEnabled()) {
-				log.debug("Broadcasting login event...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Broadcasting login event...");
 			}
 			// broadcast login event to other clients of the jWebSocket network
 			Token lLogin = TokenFactory.createToken(BaseToken.TT_EVENT);
@@ -285,8 +286,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	private void broadcastLogoutEvent(WebSocketConnector aConnector) {
 		// only broadcast if corresponding global plugin setting is "true"
 		if (BROADCAST_LOGOUT) {
-			if (log.isDebugEnabled()) {
-				log.debug("Broadcasting logout event...");
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Broadcasting logout event...");
 			}
 			// broadcast login event to other clients of the jWebSocket network
 			Token lLogout = TokenFactory.createToken(BaseToken.TT_EVENT);
@@ -313,8 +314,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * @param aCloseReason
 	 */
 	private void sendGoodBye(WebSocketConnector aConnector, CloseReason aCloseReason) {
-		if (log.isDebugEnabled()) {
-			log.debug("Sending good bye...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Sending good bye...");
 		}
 		// send "goodBye" token to client
 		Token lGoodBye = TokenFactory.createToken(TT_GOODBYE);
@@ -331,9 +332,6 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	private void login(WebSocketConnector aConnector, Token aToken) {
-
-		// sendWelcome(aConnector);
-
 		Token lResponse = createResponse(aToken);
 
 		String lUsername = aToken.getString("username");
@@ -345,40 +343,51 @@ public class SystemPlugIn extends TokenPlugIn {
 		Boolean lReturnRoles = aToken.getBoolean("getRoles", Boolean.FALSE);
 		Boolean lReturnRights = aToken.getBoolean("getRights", Boolean.FALSE);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'login' (username='" + lUsername
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'login' (username='" + lUsername
 					+ "', group='" + lGroup
 					+ "') from '" + aConnector + "'...");
 		}
 
 		if (lUsername != null) {
 
+			// get user from security factory
 			User lUser = SecurityFactory.getUser(lUsername);
 
-			// TODO: Here we need to check if the user is in the user data base at
-			// all.
-			lResponse.setString("username", lUsername);
-			// if previous session id was passed to continue an aborted session
-			// return the session-id to notify client about acceptance
-			if (lSessionId != null) {
-				lResponse.setString("usid", lSessionId);
-			}
-			lResponse.setString("sourceId", aConnector.getId());
-			// set shared variables
-			setUsername(aConnector, lUsername);
-			setGroup(aConnector, lGroup);
+			// check if user exists and if password matches
+			if (lUser != null && lUser.checkPassword(lPassword)) {
+				lResponse.setString("username", lUsername);
+				// if previous session id was passed to continue an aborted session
+				// return the session-id to notify client about acceptance
+				if (lSessionId != null) {
+					lResponse.setString("usid", lSessionId);
+				}
+				lResponse.setString("sourceId", aConnector.getId());
+				// set shared variables
+				setUsername(aConnector, lUsername);
+				setGroup(aConnector, lGroup);
 
-			if (lUser != null) {
-				if (lReturnRoles) {
-					lResponse.setList("roles", new FastList(lUser.getRoleIdSet()));
+				if (lUser != null) {
+					if (lReturnRoles) {
+						lResponse.setList("roles", new FastList(lUser.getRoleIdSet()));
+					}
+					if (lReturnRights) {
+						lResponse.setList("rights", new FastList(lUser.getRightIdSet()));
+					}
 				}
-				if (lReturnRights) {
-					lResponse.setList("rights", new FastList(lUser.getRightIdSet()));
+				if (mLog.isInfoEnabled()) {
+					mLog.info("User '" + lUsername + "' successfully logged in.");
 				}
+			} else {
+				mLog.warn("Attempt to login with invalid credentials, username: '" + lUsername +"'.");
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "Invalid credentials");
+				// reset username to not send login event, see below
+				lUsername = null;
 			}
 		} else {
 			lResponse.setInteger("code", -1);
-			lResponse.setString("msg", "missing arguments for 'login' command");
+			lResponse.setString("msg", "Missing arguments for 'login' command");
 		}
 
 		// send response to client
@@ -394,8 +403,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	private void logout(WebSocketConnector aConnector, Token aToken) {
 		Token lResponse = createResponse(aToken);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'logout' (username='"
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'logout' (username='"
 					+ getUsername(aConnector)
 					+ "') from '" + aConnector + "'...");
 		}
@@ -445,8 +454,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		 * if (getUsername(aConnector) != null) {
 		 */
 		if (lTargetConnector != null) {
-			if (log.isDebugEnabled()) {
-				log.debug("Processing 'send' (username='"
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Processing 'send' (username='"
 						+ getUsername(aConnector)
 						+ "') from '" + aConnector
 						+ "' to " + lTargetId + "...");
@@ -461,7 +470,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			String lMsg = "No target connector with "
 					+ lTargetType + " '"
 					+ lTargetId + "' found.";
-			log.warn(lMsg);
+			mLog.warn(lMsg);
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", lMsg);
 			sendToken(aConnector, aConnector, lResponse);
@@ -485,8 +494,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		}
 
 		if (lTargetConnector != null) {
-			if (log.isDebugEnabled()) {
-				log.debug("Processing 'respond' (username='"
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Processing 'respond' (username='"
 						+ getUsername(aConnector)
 						+ "') from '" + aConnector
 						+ "' to " + lTargetId + "...");
@@ -498,7 +507,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			String lMsg = "No target connector with "
 					+ lTargetType + " '"
 					+ lTargetId + "' found.";
-			log.warn(lMsg);
+			mLog.warn(lMsg);
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", lMsg);
 			sendToken(aConnector, aConnector, lResponse);
@@ -515,8 +524,8 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		Token lResponse = createResponse(aToken);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'broadcast' (username='"
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'broadcast' (username='"
 					+ getUsername(aConnector)
 					+ "') from '" + aConnector + "'...");
 		}
@@ -570,8 +579,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		// reset the username, we're no longer logged in
 		removeUsername(aConnector);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Closing client " + (lTimeout > 0 ? "with timeout " + lTimeout + "ms" : "immediately") + "...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Closing client " + (lTimeout > 0 ? "with timeout " + lTimeout + "ms" : "immediately") + "...");
 		}
 
 		// don't send a response here! We're about to close the connection!
@@ -590,8 +599,8 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		String lData = aToken.getString("data");
 		if (lData != null) {
-			if (log.isDebugEnabled()) {
-				log.debug("echo " + lData);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("echo " + lData);
 			}
 			lResponse.setString("data", lData);
 		} else {
@@ -610,8 +619,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	public void ping(WebSocketConnector aConnector, Token aToken) {
 		Boolean lEcho = aToken.getBoolean("echo", Boolean.TRUE);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'Ping' (echo='" + lEcho
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'Ping' (echo='" + lEcho
 					+ "') from '" + aConnector + "'...");
 		}
 
@@ -636,8 +645,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		Integer lDuration = aToken.getInteger("duration", 0);
 		Boolean lIsResponseRequested = aToken.getBoolean("responseRequested", true);
 		if (lDuration != null && lDuration >= 0) {
-			if (log.isDebugEnabled()) {
-				log.debug("duration " + lDuration);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("duration " + lDuration);
 			}
 			try {
 				Thread.sleep(lDuration);
@@ -665,8 +674,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	public void getClients(WebSocketConnector aConnector, Token aToken) {
 		Token lResponse = createResponse(aToken);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'getClients' from '"
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'getClients' from '"
 					+ aConnector + "'...");
 		}
 
@@ -698,8 +707,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	public void allocChannel(WebSocketConnector aConnector, Token aToken) {
 		Token lResponse = createResponse(aToken);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'allocChannel' from '"
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'allocChannel' from '"
 					+ aConnector + "'...");
 		}
 	}
@@ -714,8 +723,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	public void deallocChannel(WebSocketConnector aConnector, Token aToken) {
 		Token lResponse = createResponse(aToken);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'deallocChannel' from '"
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'deallocChannel' from '"
 					+ aConnector + "'...");
 		}
 	}

@@ -36,8 +36,10 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class BaseEngine implements WebSocketEngine {
 
-	private final Map<String, WebSocketServer> mServers = new FastMap<String, WebSocketServer>();
-	private final Map<String, WebSocketConnector> mConnectors = new FastMap<String, WebSocketConnector>();
+	private final Map<String, WebSocketServer> mServers =
+			new FastMap<String, WebSocketServer>().shared();
+	private final Map<String, WebSocketConnector> mConnectors =
+			new FastMap<String, WebSocketConnector>().shared();
 	private int mSessionTimeout = JWebSocketCommonConstants.DEFAULT_TIMEOUT;
 	private EngineConfiguration mConfiguration;
 

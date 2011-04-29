@@ -25,8 +25,6 @@ import javolution.util.FastMap;
 
 import org.jwebsocket.config.ConfigHandler;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.config.LoggingConfig;
-import org.jwebsocket.config.LoggingConfigHandler;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
@@ -48,6 +46,8 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_INITIALIZER_CLASS = "initializerClass";
 	private static final String ELEMENT_JWEBSOCKET_HOME = "jWebSocketHome";
 	private static final String ELEMENT_LIBRARY_FOLDER = "libraryFolder";
+	private static final String ELEMENT_LIBRARIES = "libraries";
+	private static final String ELEMENT_LIBRARY = "library";
 	private static final String ELEMENT_ENGINES = "engines";
 	private static final String ELEMENT_ENGINE = "engine";
 	private static final String ELEMENT_SERVERS = "servers";
@@ -64,14 +64,13 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_ROLE = "role";
 	private static final String ELEMENT_USERS = "users";
 	private static final String ELEMENT_USER = "user";
-	private static final String ELEMENT_CHANNELS = "channels";
-	private static final String ELEMENT_CHANNEL = "channel";
 	private static final String JWEBSOCKET = "jWebSocket";
 	private static final String ELEMENT_THREAD_POOL = "threadPool";
 	private static Map<String, ConfigHandler> handlerContext = new FastMap<String, ConfigHandler>();
 
 	// initialize the different config handler implementations
 	static {
+		handlerContext.put("library", new LibraryConfigHandler());
 		handlerContext.put("engine", new EngineConfigHandler());
 		handlerContext.put("plugin", new PluginConfigHandler());
 		handlerContext.put("server", new ServerConfigHandler());
@@ -80,7 +79,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		handlerContext.put("right", new RightConfigHandler());
 		handlerContext.put("filter", new FilterConfigHandler());
 		handlerContext.put("log4j", new LoggingConfigHandler());
-		// handlerContext.put("channel", new ChannelConfigHandler());
 		handlerContext.put("threadPool", new ThreadPoolConfigHandler());
 	}
 
@@ -114,6 +112,9 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					} else if (lElementName.equals(ELEMENT_LIBRARY_FOLDER)) {
 						aStreamReader.next();
 						lConfigBuilder.setLibraryFolder(aStreamReader.getText());
+					} else if (lElementName.equals(ELEMENT_LIBRARIES)) {
+						List<LibraryConfig> lLibraries = handleLibraries(aStreamReader);
+						lConfigBuilder = lConfigBuilder.setLibraries(lLibraries);
 					} else if (lElementName.equals(ELEMENT_ENGINES)) {
 						List<EngineConfig> lEngines = handleEngines(aStreamReader);
 						lConfigBuilder = lConfigBuilder.setEngines(lEngines);
@@ -138,11 +139,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					} else if (lElementName.equals(ELEMENT_USERS)) {
 						List<UserConfig> lUsers = handleUsers(aStreamReader);
 						lConfigBuilder = lConfigBuilder.setUsers(lUsers);
-					/*
-					} else if (lElementName.equals(ELEMENT_CHANNELS)) {
-						List<ChannelConfig> lChannels = handleChannels(aStreamReader);
-						lConfigBuilder = lConfigBuilder.setChannels(lChannels);
-					 */
 					} else {
 						// ignore
 					}
@@ -397,6 +393,37 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	 * @throws XMLStreamException
 	 *           if exception occurs while reading
 	 */
+	private List<LibraryConfig> handleLibraries(XMLStreamReader aStreamReader) throws XMLStreamException {
+		List<LibraryConfig> lLibraries = new FastList<LibraryConfig>();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(ELEMENT_LIBRARY)) {
+					LibraryConfig lLibrary =
+							(LibraryConfig) handlerContext.get(lElementName).processConfig(aStreamReader);
+					lLibraries.add(lLibrary);
+				}
+			}
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(ELEMENT_LIBRARIES)) {
+					break;
+				}
+			}
+		}
+		return lLibraries;
+	}
+
+	/**
+	 * private method that reads the list of engines config from the xml file
+	 *
+	 * @param aStreamReader
+	 *          the stream reader object
+	 * @return the list of engine configs
+	 * @throws XMLStreamException
+	 *           if exception occurs while reading
+	 */
 	private List<EngineConfig> handleEngines(XMLStreamReader aStreamReader) throws XMLStreamException {
 		List<EngineConfig> lEngines = new FastList<EngineConfig>();
 		while (aStreamReader.hasNext()) {
@@ -419,35 +446,4 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		return lEngines;
 	}
 
-	/**
-	 * private method that reads the list of channels configuration
-	 * @param aStreamReader
-	 *          the stream reader object
-	 * @return the list of engine configs
-	 * @throws XMLStreamException
-	 *           if exception occurs while reading
-	 */
-	/*
-	private List<ChannelConfig> handleChannels(XMLStreamReader aStreamReader) throws XMLStreamException {
-		List<ChannelConfig> lChannels = new FastList<ChannelConfig>();
-		while (aStreamReader.hasNext()) {
-			aStreamReader.next();
-			if (aStreamReader.isStartElement()) {
-				String lElementName = aStreamReader.getLocalName();
-				if (lElementName.equals(ELEMENT_CHANNEL)) {
-					ChannelConfig lChannel =
-							(ChannelConfig) handlerContext.get(lElementName).processConfig(aStreamReader);
-					lChannels.add(lChannel);
-				}
-			}
-			if (aStreamReader.isEndElement()) {
-				String lElementName = aStreamReader.getLocalName();
-				if (lElementName.equals(ELEMENT_CHANNELS)) {
-					break;
-				}
-			}
-		}
-		return lChannels;
-	}
-	 */
 }

@@ -71,24 +71,21 @@ public class BenchmarkPlugIn extends TokenPlugIn {
 		TokenServer lServer = getServer();
 
 		String lMessage = aToken.getString("message");
-		Integer lCount = aToken.getInteger("count");
+		Integer lCount = aToken.getInteger("count", 0);
 
 		Token lTestToken = TokenFactory.createToken(getNamespace(), S2C_PERFORMANCE);
 		lTestToken.setString("data", lMessage);
 
-
 		for (int lLoop = 0; lLoop < lCount; lLoop++) {
-			// lServer.sendToken(aConnector, lTestToken);
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Broadcasting test token (loop " + lLoop + "/" + lCount + ")...");
+				mLog.debug("Broadcasting test token (loop " + (lLoop + 1) + "/" + lCount + ")...");
 			}
 			lServer.broadcastToken(lTestToken);
 		}
 
-		//Instantiate response token
+		// Instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
-
-		//Send response to requester
+		// Send response to requester
 		lServer.sendToken(aConnector, lResponse);
 	}
 }

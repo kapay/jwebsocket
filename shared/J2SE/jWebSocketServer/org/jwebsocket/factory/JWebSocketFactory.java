@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.instance.JWebSocketInstance;
 import org.jwebsocket.kit.CloseReason;
@@ -106,6 +108,13 @@ public class JWebSocketFactory {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Starting jWebSocket Server Sub System...");
 			}
+
+			// load and init all external libraries
+			URLClassLoader lClassLoader = lInitializer.initializeLibraries();
+			if (lClassLoader != null) {
+				JWebSocketConfig.setClassLoader(lClassLoader);
+			}
+
 			mEngine = lInitializer.initializeEngine();
 			if (mEngine == null) {
 				// the loader already logs an error!

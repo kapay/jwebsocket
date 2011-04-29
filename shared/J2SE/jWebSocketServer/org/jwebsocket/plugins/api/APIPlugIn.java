@@ -34,19 +34,20 @@ import org.springframework.core.io.FileSystemResource;
  * Plug-in to export the server API
  *
  * @author kyberneees
+ * @author aschulze
  */
-public class InterfacePlugIn extends TokenPlugIn {
+public class APIPlugIn extends TokenPlugIn {
 
-	private String EXPORT_SERVER_API = "server.export.api";
-	private String EXPORT_PLUGIN_API = "server.export.plugin.api";
-	private String EXPORT_PLUGIN_IDENTIFIERS = "server.export.plugin.ids";
-	private String SUPPORT_TOKEN = "server.support.token";
-	private String HAS_PLUGIN = "server.has.plugin";
+	private String GET_SERVER_API = "getServerAPI";
+	private String GET_PLUGIN_API = "getPlugInAPI";
+	private String GET_PLUGIN_IDS = "getPlugInIds";
+	private String SUPPORTS_TOKEN = "supportsToken";
+	private String HAS_PLUGIN = "hasPlugin";
 	private BeanFactory mBeanFactory;
 	private static final String NS_INTERFACE =
 			JWebSocketServerConstants.NS_BASE + ".plugins.api";
 
-	public InterfacePlugIn(PluginConfiguration configuration) throws Exception {
+	public APIPlugIn(PluginConfiguration configuration) throws Exception {
 		super(configuration);
 
 		//Creating the Spring Bean Factory
@@ -65,14 +66,14 @@ public class InterfacePlugIn extends TokenPlugIn {
 	public void processToken(PlugInResponse aResponse,
 			WebSocketConnector aConnector, Token aToken) {
 		if (getNamespace().equals(aToken.getNS())) {
-			if (EXPORT_SERVER_API.equals(aToken.getType())) {
-				exportServerAPI(aConnector, aToken);
-			} else if (EXPORT_PLUGIN_API.equals(aToken.getType())) {
-				exportPlugInAPI(aConnector, aToken);
-			} else if (EXPORT_PLUGIN_IDENTIFIERS.equals(aToken.getType())) {
-				exportPlugInIdentifiers(aConnector, aToken);
-			} else if (SUPPORT_TOKEN.equals(aToken.getType())) {
-				supportToken(aConnector, aToken);
+			if (GET_SERVER_API.equals(aToken.getType())) {
+				getServerAPI(aConnector, aToken);
+			} else if (GET_PLUGIN_API.equals(aToken.getType())) {
+				getPlugInAPI(aConnector, aToken);
+			} else if (GET_PLUGIN_IDS.equals(aToken.getType())) {
+				getPlugInIds(aConnector, aToken);
+			} else if (SUPPORTS_TOKEN.equals(aToken.getType())) {
+				supportsToken(aConnector, aToken);
 			} else if (HAS_PLUGIN.equals(aToken.getType())) {
 				hasPlugIn(aConnector, aToken);
 			}
@@ -85,7 +86,7 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken 
 	 */
-	public void exportServerAPI(WebSocketConnector aConnector, Token aToken) {
+	public void getServerAPI(WebSocketConnector aConnector, Token aToken) {
 		Token lResponse = createResponse(aToken);
 
 		List<Token> lPlugIns = new FastList<Token>();
@@ -110,7 +111,7 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken 
 	 */
-	public void exportPlugInAPI(WebSocketConnector aConnector, Token aToken) {
+	public void getPlugInAPI(WebSocketConnector aConnector, Token aToken) {
 		Token lResponse = createResponse(aToken);
 
 		String lPlugInId = aToken.getString("plugin_id", null);
@@ -122,8 +123,8 @@ public class InterfacePlugIn extends TokenPlugIn {
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", "Missing '" + lPlugInId + "' plug-in definition!");
 		} else {
-			PlugInDefinition p = (PlugInDefinition) mBeanFactory.getBean(lPlugInId);
-			p.writeToToken(lResponse);
+			PlugInDefinition lPlugInDef = (PlugInDefinition) mBeanFactory.getBean(lPlugInId);
+			lPlugInDef.writeToToken(lResponse);
 		}
 
 		//Sending the response
@@ -136,7 +137,7 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken 
 	 */
-	public void exportPlugInIdentifiers(WebSocketConnector aConnector, Token aToken) {
+	public void getPlugInIds(WebSocketConnector aConnector, Token aToken) {
 		List<String> lIdentifiers = new FastList<String>();
 		for (WebSocketPlugIn lPlugIn : getPlugInChain().getPlugIns()) {
 			if (mBeanFactory.containsBean(lPlugIn.getId())) {
@@ -158,7 +159,7 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken 
 	 */
-	public void supportToken(WebSocketConnector aConnector, Token aToken) {
+	public void supportsToken(WebSocketConnector aConnector, Token aToken) {
 		Token lResponse = createResponse(aToken);
 
 		//Getting the plug-in identifier
@@ -171,7 +172,7 @@ public class InterfacePlugIn extends TokenPlugIn {
 
 			for (WebSocketPlugIn lPlugIn : getPlugInChain().getPlugIns()) {
 				if (mBeanFactory.containsBean(lPlugIn.getId())) {
-					if (((PlugInDefinition) mBeanFactory.getBean(lPlugIn.getId())).supportToken(lType)) {
+					if (((PlugInDefinition) mBeanFactory.getBean(lPlugIn.getId())).supportsToken(lType)) {
 						lResponse.setBoolean("token_supported", Boolean.TRUE);
 						break;
 					}
@@ -192,7 +193,7 @@ public class InterfacePlugIn extends TokenPlugIn {
 	 */
 	public void hasPlugIn(WebSocketConnector aConnector, Token aToken) {
 		Token lResponse = createResponse(aToken);
-		
+
 		//Getting the plug-in identifier
 		String lId = aToken.getString("plugin_id");
 		if (null == lId) {
@@ -205,7 +206,7 @@ public class InterfacePlugIn extends TokenPlugIn {
 				lResponse.setBoolean("has", Boolean.FALSE);
 			}
 		}
-		
+
 		//Sending the response
 		sendToken(aConnector, aConnector, lResponse);
 	}

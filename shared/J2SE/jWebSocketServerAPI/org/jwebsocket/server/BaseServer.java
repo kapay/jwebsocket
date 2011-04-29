@@ -63,7 +63,7 @@ public class BaseServer implements WebSocketServer {
     public BaseServer(ServerConfiguration aServerConfig) {
         this.mConfiguration = aServerConfig;
         mId = aServerConfig.getId();
-        mEngines = new FastMap<String, WebSocketEngine>();
+        mEngines = new FastMap<String, WebSocketEngine>().shared();
     }
 
     @Override
@@ -233,15 +233,16 @@ public class BaseServer implements WebSocketServer {
     }
 
     /**
-     * returns all connectors of all engines connected to the server. Each
-     * connector has its own unique id which is used as key in the connectors
-     * FastMap.
+     * returns a thread safe ma of connectors of all engines connected to the
+	 * server. Each connector has its own unique id which is used as key in
+	 * the connectors FastMap.
      * 
      * @return the engines
      */
     @Override
     public Map<String, WebSocketConnector> getAllConnectors() {
-        Map<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
+        Map<String, WebSocketConnector> lClients =
+				new FastMap<String, WebSocketConnector>().shared();
         for (WebSocketEngine lEngine : mEngines.values()) {
             lClients.putAll(lEngine.getConnectors());
         }
@@ -249,12 +250,13 @@ public class BaseServer implements WebSocketServer {
     }
 
     /**
-     * returns only those connectors that match the passed shared variables. The
-     * search criteria is passed as a FastMap with key/value pairs. The key
-     * represents the name of the shared custom variable for the connector and
-     * the value the value for that variable. If multiple key/value pairs are
-     * passed they are combined by a logical 'and'. Each connector has its own
-     * unique id which is used as key in the connectors FastMap.
+     * returns a thread-safe map of only those connectors that match the passed
+	 * shared variables. The search criteria is passed as a FastMap with
+	 * key/value pairs. The key represents the name of the shared custom
+	 * variable for the connector and the value the value for that variable.
+	 * If multiple key/value pairs are passed they are combined by a logical
+	 * 'and'. Each connector has its own unique id which is used as key in the
+	 * connectors FastMap.
      * 
      * @param aFilter
      *            FastMap of key/values pairs as search criteria.
@@ -263,7 +265,8 @@ public class BaseServer implements WebSocketServer {
      */
     @Override
     public Map<String, WebSocketConnector> selectConnectors(Map<String, Object> aFilter) {
-        Map<String, WebSocketConnector> lClients = new FastMap<String, WebSocketConnector>();
+        Map<String, WebSocketConnector> lClients =
+				new FastMap<String, WebSocketConnector>().shared();
         for (WebSocketEngine lEngine : mEngines.values()) {
             for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
                 boolean lMatch = true;

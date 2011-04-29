@@ -24,7 +24,7 @@ import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketServerListener;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketServerConstants;
-import org.jwebsocket.config.LoggingConfig;
+import org.jwebsocket.config.xml.LoggingConfig;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.ServerConfig;

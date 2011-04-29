@@ -33,7 +33,6 @@ public class SecurityFactory {
 	private static Users mUsers = null;
 	private static Rights mRights = null;
 	private static Roles mRoles = null;
-
 	/**
 	 *
 	 */
@@ -163,33 +162,27 @@ public class SecurityFactory {
 	 */
 	public static User getUser(String aLoginname) {
 		// if user is not logged in use configured "anonymous" account
-		if (aLoginname == null) {
-			aLoginname = SecurityFactory.USER_ANONYMOUS;
-		}
-		User lUser = mUsers.getUserByLoginName(aLoginname);
-		// if the user is not found use the "anonymous" account
-		// TODO: this process needs to be changed in the final release!
-		if (lUser == null && !SecurityFactory.USER_ANONYMOUS.equals(aLoginname)) {
-			aLoginname = SecurityFactory.USER_ANONYMOUS;
+		User lUser = null;
+		if (aLoginname != null) {
 			lUser = mUsers.getUserByLoginName(aLoginname);
 		}
 		return lUser;
 	}
-	
+
 	public static boolean isValidUser(String aLoginname) {
-	    User lUser = mUsers.getUserByLoginName(aLoginname);
-	    if (lUser != null) {
-	        return true;
-	    } else {
-	        return false;
-	    }
+		User lUser = mUsers.getUserByLoginName(aLoginname);
+		if (lUser != null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
-	
+
 	/**
 	 * Returns the root user for the jWebSocket system.
 	 */
 	public static User getRootUser() {
-		return  mUsers.getUserByLoginName("root");
+		return mUsers.getUserByLoginName("root");
 	}
 
 	/**
@@ -229,7 +222,7 @@ public class SecurityFactory {
 	 */
 	public static Set<String> getRoleIdSet(String aUsername) {
 		User lUser = getUser(aUsername);
-		if( lUser != null ) {
+		if (lUser != null) {
 			return lUser.getRoleIdSet();
 		}
 		return null;
@@ -241,7 +234,7 @@ public class SecurityFactory {
 	 */
 	public static Set<String> getRightIdSet(String aUsername) {
 		User lUser = getUser(aUsername);
-		if( lUser != null ) {
+		if (lUser != null) {
 			return lUser.getRightIdSet();
 		}
 		return null;
@@ -253,7 +246,7 @@ public class SecurityFactory {
 	 */
 	public static Roles getUserRoles(String aUsername) {
 		User lUser = getUser(aUsername);
-		if( lUser != null ) {
+		if (lUser != null) {
 			return lUser.getRoles();
 		}
 		return null;
@@ -273,7 +266,7 @@ public class SecurityFactory {
 	 */
 	public static Rights getUserRights(String aUsername) {
 		User lUser = getUser(aUsername);
-		if( lUser != null ) {
+		if (lUser != null) {
 			return lUser.getRights();
 		}
 		return null;
@@ -304,6 +297,4 @@ public class SecurityFactory {
 		}
 		return lRights;
 	}
-
-
 }

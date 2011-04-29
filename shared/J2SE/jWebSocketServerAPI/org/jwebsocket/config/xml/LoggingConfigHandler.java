@@ -12,12 +12,14 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config;
+package org.jwebsocket.config.xml;
 
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.util.List;
+import org.jwebsocket.config.Config;
+import org.jwebsocket.config.ConfigHandler;
 
 /**
  * Handler for the logging configuration

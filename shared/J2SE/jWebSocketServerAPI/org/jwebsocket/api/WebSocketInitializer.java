@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.api;
 
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,11 @@ public interface WebSocketInitializer {
 	 * Initializes the loggins sub system
 	 */
 	void initializeLogging();
+
+	/**
+	 * Initialize the libraries
+	 */
+	URLClassLoader initializeLibraries();
 	/**
 	 * Initialize the engine 
 	 * @return the initialized engine, which is ready to start

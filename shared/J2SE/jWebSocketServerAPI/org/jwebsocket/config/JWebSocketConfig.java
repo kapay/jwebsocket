@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config;
 
+import org.jwebsocket.config.xml.LoggingConfig;
 import static org.jwebsocket.config.JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
 import static org.jwebsocket.config.JWebSocketServerConstants.CATALINA_HOME;
 import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATION;
@@ -24,6 +25,7 @@ import static org.jwebsocket.config.JWebSocketServerConstants.JWEBSOCKET_XML;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,6 +33,7 @@ import org.apache.log4j.Logger;
 // import org.jwebsocket.config.xml.ChannelConfig;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.FilterConfig;
+import org.jwebsocket.config.xml.LibraryConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.RightConfig;
 import org.jwebsocket.config.xml.RoleConfig;
@@ -56,6 +59,7 @@ public final class JWebSocketConfig implements Config {
 	private final String jWebSocketHome;
 	private final String mLibraryFolder;
 	private final String mInitializer;
+	private final List<LibraryConfig> mLibraries;
 	private final List<EngineConfig> mEngines;
 	private final List<ServerConfig> mServers;
 	private final List<UserConfig> mUsers;
@@ -66,6 +70,21 @@ public final class JWebSocketConfig implements Config {
 	private final List<RoleConfig> mGlobalRoles;
 	// private final List<ChannelConfig> mChannels;
 	private static JWebSocketConfig mConfig = null;
+	private static URLClassLoader mClassLoader = null;
+
+	/**
+	 * @return the mClassLoader
+	 */
+	public static URLClassLoader getClassLoader() {
+		return mClassLoader;
+	}
+
+	/**
+	 * @param amClassLoader the mClassLoader to set
+	 */
+	public static void setClassLoader(URLClassLoader aClassLoader) {
+		mClassLoader = aClassLoader;
+	}
 
 	/**
 	 * @return the installation
@@ -145,6 +164,7 @@ public final class JWebSocketConfig implements Config {
 		jWebSocketHome = aBuilder.jWebSocketHome;
 		mLibraryFolder = aBuilder.mLibraryFolder;
 		mInitializer = aBuilder.mInitializer;
+		mLibraries = aBuilder.mLibraries;
 		mEngines = aBuilder.mEngines;
 		mServers = aBuilder.mServers;
 		mUsers = aBuilder.mUsers;
@@ -173,6 +193,7 @@ public final class JWebSocketConfig implements Config {
 		private String jWebSocketHome;
 		private String mLibraryFolder;
 		private String mInitializer;
+		private List<LibraryConfig> mLibraries;
 		private List<EngineConfig> mEngines;
 		private List<ServerConfig> mServers;
 		private List<UserConfig> mUsers;
@@ -240,6 +261,16 @@ public final class JWebSocketConfig implements Config {
 		 */
 		public Builder setLibraryFolder(String aLibraryFolder) {
 			mLibraryFolder = aLibraryFolder;
+			return this;
+		}
+
+		/**
+		 *
+		 * @param aLibraries
+		 * @return
+		 */
+		public Builder setLibraries(List<LibraryConfig> aLibraries) {
+			mLibraries = aLibraries;
 			return this;
 		}
 
@@ -325,18 +356,6 @@ public final class JWebSocketConfig implements Config {
 
 		/**
 		 *
-		 * @param aChannels
-		 * @return
-		 */
-		/*
-		public Builder setChannels(List<ChannelConfig> aChannels) {
-			mChannels = aChannels;
-			return this;
-		}
-		 */
-
-		/**
-		 *
 		 * @return
 		 */
 		public synchronized JWebSocketConfig buildConfig() {
@@ -357,36 +376,61 @@ public final class JWebSocketConfig implements Config {
 	/**
 	 * @return the engines
 	 */
+	public List<LibraryConfig> getLibraries() {
+		if (mLibraries != null) {
+			return Collections.unmodifiableList(mLibraries);
+		}
+		return null;
+	}
+
+	/**
+	 * @return the engines
+	 */
 	public List<EngineConfig> getEngines() {
-		return Collections.unmodifiableList(mEngines);
+		if (mEngines != null) {
+			return Collections.unmodifiableList(mEngines);
+		}
+		return null;
 	}
 
 	/**
 	 * @return the servers
 	 */
 	public List<ServerConfig> getServers() {
-		return Collections.unmodifiableList(mServers);
+		if (mServers != null) {
+			return Collections.unmodifiableList(mServers);
+		}
+		return null;
 	}
 
 	/**
 	 * @return the users
 	 */
 	public List<UserConfig> getUsers() {
-		return Collections.unmodifiableList(mUsers);
+		if (mUsers != null) {
+			return Collections.unmodifiableList(mUsers);
+		}
+		return null;
 	}
 
 	/**
 	 * @return the plugins
 	 */
 	public List<PluginConfig> getPlugins() {
-		return Collections.unmodifiableList(mPlugins);
+		if (mPlugins != null) {
+			return Collections.unmodifiableList(mPlugins);
+		}
+		return null;
 	}
 
 	/**
 	 * @return the filters
 	 */
 	public List<FilterConfig> getFilters() {
-		return Collections.unmodifiableList(mFilters);
+		if (mFilters != null) {
+			return Collections.unmodifiableList(mFilters);
+		}
+		return null;
 	}
 
 	/**
@@ -400,24 +444,21 @@ public final class JWebSocketConfig implements Config {
 	 * @return the globalRights
 	 */
 	public List<RightConfig> getGlobalRights() {
-		return Collections.unmodifiableList(mGlobalRights);
+		if (mGlobalRights != null) {
+			return Collections.unmodifiableList(mGlobalRights);
+		}
+		return null;
 	}
 
 	/**
 	 * @return the globalRoles
 	 */
 	public List<RoleConfig> getGlobalRoles() {
-		return Collections.unmodifiableList(mGlobalRoles);
+		if (mGlobalRoles != null) {
+			return Collections.unmodifiableList(mGlobalRoles);
+		}
+		return null;
 	}
-
-	/**
-	 * @return the channels
-	 */
-	/*
-	public List<ChannelConfig> getChannels() {
-		return Collections.unmodifiableList(mChannels);
-	}
-	 */
 
 	/**
 	 * {@inheritDoc}
@@ -431,6 +472,10 @@ public final class JWebSocketConfig implements Config {
 				|| (mUsers == null || mUsers.isEmpty())
 				// we at least need the system plug-in
 				|| (mPlugins == null || mPlugins.isEmpty())
+				// the libraries section does not necessarily need to exist!
+				// if not simply no external libraries are loaded.
+				// || (mLibraries == null || mLibraries.isEmpty())
+
 				// we do not want to force the users to use filters.
 				// please leave this comment to prevent introducing the
 				// following line again!

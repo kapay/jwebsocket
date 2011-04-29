@@ -170,12 +170,14 @@
 			<artifactId>jetty-servlet</artifactId>
 			<version>8.0.0.M2</version>
 		</dependency>
+
 		<!-- required for the jWebSocket JDBC Plugin -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.13</version>
+			<version>5.1.15</version>
 		</dependency>
+
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>

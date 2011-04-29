@@ -15,6 +15,7 @@
 package org.jwebsocket.factory;
 
 import java.lang.reflect.Constructor;
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.xml.EngineConfig;
 import org.jwebsocket.config.xml.FilterConfig;
+import org.jwebsocket.config.xml.LibraryConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.ServerConfig;
 
@@ -60,6 +62,31 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 	 */
 	public static JWebSocketXmlConfigInitializer getInitializer(JWebSocketConfig aConfig) {
 		return new JWebSocketXmlConfigInitializer(aConfig);
+	}
+
+	@Override
+	public URLClassLoader initializeLibraries() {
+		List<LibraryConfig> lLibs = jWebSocketConfig.getLibraries();
+		JWebSocketJarClassLoader lJarLoader = null;
+		if (lLibs != null) {
+			lJarLoader = new JWebSocketJarClassLoader();
+			try {
+				for (LibraryConfig lLibConf : lLibs) {
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("Adding external library '" + lLibConf.getId()
+								+ "' from '" + lLibConf.getURL() + "'...");
+					}
+					lJarLoader.addFile(lLibConf.getURL());
+				}
+			} catch (Exception ex) {
+				System.out.println(ex.toString());
+			}
+		} else {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("No external libraries referenced in config file.");
+			}
+		}
+		return lJarLoader;
 	}
 
 	/**

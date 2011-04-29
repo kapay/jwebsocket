@@ -18,6 +18,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.config.ConfigHandler;
+
 /**
  * Handler class that reads the server configuration
  * @author puran
@@ -36,38 +37,38 @@ public class ServerConfigHandler implements ConfigHandler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Config processConfig(XMLStreamReader streamReader) throws XMLStreamException {
-		String id = "", name = "", jar = "";
+	public Config processConfig(XMLStreamReader aStreamReader) throws XMLStreamException {
+		String lId = "", lName = "", lJar = "";
 		ThreadPoolConfig lThreadPoolConfig = null ;
-		while (streamReader.hasNext()) {
-			streamReader.next();
-			if (streamReader.isStartElement()) {
-				String elementName = streamReader.getLocalName();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(ID)) {
-					streamReader.next();
-					id = streamReader.getText();
+					aStreamReader.next();
+					lId = aStreamReader.getText();
 				} else if (elementName.equals(NAME)) {
-					streamReader.next();
-					name = streamReader.getText();
+					aStreamReader.next();
+					lName = aStreamReader.getText();
 				} else if (elementName.equals(JAR)) {
-					streamReader.next();
-					jar = streamReader.getText();
+					aStreamReader.next();
+					lJar = aStreamReader.getText();
 				} else if (elementName.equals(ELEMENT_THREAD_POOL)) {
-					streamReader.next();
-					lThreadPoolConfig = (ThreadPoolConfig) new ThreadPoolConfigHandler().processConfig(streamReader);
+					aStreamReader.next();
+					lThreadPoolConfig = (ThreadPoolConfig) new ThreadPoolConfigHandler().processConfig(aStreamReader);
 				}
 				else {
 					//ignore
 				}
 			}
-			if (streamReader.isEndElement()) {
-				String elementName = streamReader.getLocalName();
+			if (aStreamReader.isEndElement()) {
+				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(ELEMENT_SERVER)) {
 					break;
 				}
 			}
 		}
-		return new ServerConfig(id, name, jar, lThreadPoolConfig);
+		return new ServerConfig(lId, lName, lJar, lThreadPoolConfig);
 	}
 
 }

@@ -43,10 +43,10 @@ public class PlugInDefinition implements ITokenizable {
 	}
 
 	/**
-	 * @param id The plug-in identifier to set
+	 * @param aId The plug-in identifier to set
 	 */
-	public void setId(String id) {
-		this.mId = id;
+	public void setId(String aId) {
+		this.mId = aId;
 	}
 
 	/**
@@ -72,12 +72,12 @@ public class PlugInDefinition implements ITokenizable {
 
 	/**
 	 * 
-	 * @param tokenType The token type
+	 * @param aTokenType The token type
 	 * @return <tt>TRUE</tt> if the token is supported, <tt>FALSE</tt> otherwise
 	 */
-	public boolean supportToken(String tokenType) {
-		for (TokenDefinition t : getSupportedTokens()) {
-			if (t.getType().equals(tokenType)) {
+	public boolean supportsToken(String aTokenType) {
+		for (TokenDefinition lTokenDef : getSupportedTokens()) {
+			if (lTokenDef.getType().equals(aTokenType)) {
 				return true;
 			}
 		}
@@ -86,10 +86,10 @@ public class PlugInDefinition implements ITokenizable {
 	}
 
 	/**
-	 * @param comment The plug-in comment to set
+	 * @param aComment The plug-in comment to set
 	 */
-	public void setComment(String comment) {
-		this.mComment = comment;
+	public void setComment(String aComment) {
+		this.mComment = aComment;
 	}
 
 	/**

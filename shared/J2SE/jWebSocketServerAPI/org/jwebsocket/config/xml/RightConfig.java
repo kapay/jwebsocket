@@ -23,20 +23,20 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  */
 public final class RightConfig implements Config {
 
-	private final String id;
-	private final String namespace;
-	private final String description;
+	private final String mId;
+	private final String mNamespace;
+	private final String mDescription;
 	
 	/**
 	 * default constructor
-	 * @param id the right id
-	 * @param namespace the right namespace
-	 * @param description the description
+	 * @param aId the right id
+	 * @param aNamespace the right namespace
+	 * @param aDescription the description
 	 */
-	public RightConfig(String id, String namespace, String description) {
-		this.id = id;
-		this.namespace = namespace;
-		this.description = description;
+	public RightConfig(String aId, String aNamespace, String aDescription) {
+		this.mId = aId;
+		this.mNamespace = aNamespace;
+		this.mDescription = aDescription;
 		//validate right config
 		validate();
 	}
@@ -45,21 +45,21 @@ public final class RightConfig implements Config {
 	 * @return the id
 	 */
 	public String getId() {
-		return id;
+		return mId;
 	}
 
 	/**
 	 * @return the namespace
 	 */
 	public String getNamespace() {
-		return namespace;
+		return mNamespace;
 	}
 
 	/**
 	 * @return the description
 	 */
 	public String getDescription() {
-		return description;
+		return mDescription;
 	}
 
 	/**
@@ -67,9 +67,9 @@ public final class RightConfig implements Config {
 	 */
 	@Override
 	public void validate() {
-		if ((id != null && id.length() > 0)
-				&& (namespace != null && namespace.length() > 0)
-				&& (description != null && description.length() > 0)) {
+		if ((mId != null && mId.length() > 0)
+				&& (mNamespace != null && mNamespace.length() > 0)
+				&& (mDescription != null && mDescription.length() > 0)) {
 			return;
 		}
 		throw new WebSocketRuntimeException(

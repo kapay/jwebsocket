@@ -748,7 +748,6 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	},
 
 	//:m:*:connect
-	//:d:en:Deprecated, kept for upward compatibility only. Do not use anymore!
 	//:a:en::aURL:String:Please refer to [tt]open[/tt] method.
 	//:a:en::aOptions:Object:Please refer to [tt]open[/tt] method.
 	//:r:*:::void:none
@@ -814,12 +813,23 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 	},
 
+	//:m:*:isOpened
+	//:d:en:Returns [tt]true[/tt] if the WebSocket connection opened up, otherwise [tt]false[/tt].
+	//:a:en::::none
+	//:r:*:::boolean:[tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
+	isOpened: function() {
+		return( this.fConn != undefined
+			&& this.fConn != null
+			&& this.fConn.readyState == jws.OPEN );
+	},
+
 	//:m:*:isConnected
+	//:@deprecated:en:Use [tt]isOpened()[/tt] instead.
 	//:d:en:Returns [tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
 	//:a:en::::none
 	//:r:*:::boolean:[tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
 	isConnected: function() {
-		return( this.fConn && this.fConn.readyState == jws.OPEN );
+		return( this.isOpened() );
 	},
 
 	//:m:*:forceClose
@@ -901,6 +911,24 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:r:*::::Please refer to the [tt]close[/tt] method.
 	disconnect: function( aOptions ) {
 		return this.close( aOptions );
+	},
+
+	addListener: function( aCallback ) {
+		// if the class has no plug-ins yet initialize array
+		if( !this.fListeners ) {
+			this.fListeners = [];
+		}
+		this.fListeners.push( aCallback );
+	},
+
+	removeListener: function( aCallback ) {
+		if( this.fListeners ) {
+			for( var lIdx = 0, lCnt = this.fListeners; lIdx < lCnt; lIdx++ ) {
+				if( aCallback == this.fListeners[ lIdx ] ) {
+					this.fListeners.splice( lIdx, 1 );
+				}
+			}
+		}
 	},
 
 	//:m:*:addPlugIn
@@ -1258,6 +1286,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		// fire the event
 		if( this.fOnToken ) {
 			this.fOnToken( aToken );
+		}
+
+		if( this.fListeners ) {
+			for( lIdx = 0, lLen = this.fListeners.length; lIdx < lLen; lIdx++ ) {
+				this.fListeners[ lIdx ]( aToken );
+			}
 		}
 
 	},

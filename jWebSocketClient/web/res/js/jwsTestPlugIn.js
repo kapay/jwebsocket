@@ -14,7 +14,6 @@
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 
-
 //	---------------------------------------------------------------------------
 //  jWebSocket Test Client Plug-In
 //	---------------------------------------------------------------------------
@@ -64,6 +63,15 @@ jws.TestPlugIn = {
 		return lRes;
 	},
 
+	execTests: function() {
+		setTimeout( function () {
+			var lReporter = new jasmine.TrivialReporter();
+			jasmine.getEnv().addReporter( lReporter );
+			jasmine.getEnv().execute();
+		}, 500 );
+	},
+
+
 	setTestCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
@@ -86,3 +94,69 @@ jws.TestPlugIn = {
 
 // add the JWebSocket Test PlugIn into the TokenClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.TestPlugIn );
+
+
+jws.StopWatchPlugIn = {
+
+	//:const:*:NS:String:org.jwebsocket.plugins.stopwatch (jws.NS_BASE + ".plugins.stopwatch")
+	//:d:en:Namespace for the [tt]StopWatchPlugIn[/tt] class.
+	// if namespace is changed update server plug-in accordingly!
+	NS: jws.NS_BASE + ".plugins.stopwatch",
+
+	mLog: {},
+
+	startWatch: function( aId, aSpec ) {
+		// create new log item
+		var lItem = {
+			spec: aSpec,
+			started: new Date().getTime()
+		};
+		// if an item which the given already exists
+		// then simply overwrite it
+		this.mLog[ aId ] = lItem;
+		// and return the item
+		return lItem;
+	},
+
+	stopWatch: function( aId ) {
+		var lItem = this.mLog[ aId ];
+		if( lItem ) {
+			lItem.stopped = new Date().getTime();
+			lItem.millis = lItem.stopped - lItem.started;
+			return lItem;
+		} else {
+			return null;
+		}
+	},
+
+	logWatch: function( aId, aSpec, aMillis ) {
+		var lItem = {
+			spec: aSpec,
+			millis: aMillis
+		};
+		this.mLog[ aId ] = lItem ;
+		return lItem;
+	},
+
+	resetWatches: function() {
+		this.mLog = {};
+	},
+
+	printWatches: function() {
+		for( var lField in this.mLog ) {
+
+			var lItem = this.mLog[ lField ];
+			var lOut = lItem.spec + " (" + lField + "): " + lItem.millis + "ms";
+
+			if( window.console ) {
+				console.log( lOut );
+			} else {
+				document.write( lOut + "<br>" );
+			}
+		}
+	}
+	
+}
+
+// add the JWebSocket Stop-Watch Plug-in into the TokenClient class
+jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StopWatchPlugIn );

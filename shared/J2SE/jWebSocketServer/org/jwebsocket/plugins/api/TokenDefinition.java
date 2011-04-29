@@ -28,121 +28,131 @@ import org.jwebsocket.token.TokenFactory;
  * The token definition class
  *
  * @author kyberneees
+ * @author aschulze
  */
 public class TokenDefinition implements ITokenizable {
 
-	private String type;
-	
+	private String mType;
 	/**
-	 * wr (with response), nr (no-response), none (no testeable from the client)
+	 * wr (with response), nr (no-response), none (not testable from the client)
 	 */
-	private String requestType = "wr";  
-	private Integer responseCode = 0;
-	private Set<TokenArgument> inArguments = new FastSet<TokenArgument>();
-	private Set<TokenArgument> outArguments = new FastSet<TokenArgument>();
-	private String comment;
+	private String mRequestType = "wr";
+	private Integer mResponseCode = 0;
+	private Set<TokenArgument> mInArgs = new FastSet<TokenArgument>();
+	private Set<TokenArgument> mOutArgs = new FastSet<TokenArgument>();
+	private String mComment;
 
 	/**
 	 * @return The token type
 	 */
 	public String getType() {
-		return type;
+		return mType;
 	}
 
 	/**
-	 * @param type The token type to set
+	 * @param aType The token type to set
 	 */
-	public void setType(String type) {
-		this.type = type;
+	public void setType(String aType) {
+		this.mType = aType;
 	}
 
 	/**
 	 * @return The response code
 	 */
 	public Integer getResponseCode() {
-		return responseCode;
+		return mResponseCode;
 	}
 
 	/**
-	 * @param responseCode The response code to set
+	 * @param aResponseCode The response code to set
 	 */
-	public void setResponseCode(Integer responseCode) {
-		this.responseCode = responseCode;
+	public void setResponseCode(Integer aResponseCode) {
+		this.mResponseCode = aResponseCode;
 	}
 
 	/**
 	 * @return The input arguments 
 	 */
 	public Set<TokenArgument> getInArguments() {
-		return Collections.unmodifiableSet(inArguments);
+		if (mInArgs != null) {
+			return Collections.unmodifiableSet(mInArgs);
+		} else {
+			return null;
+		}
 	}
 
 	/**
-	 * @param inArguments The input arguments to set
+	 * @param aInArgs The input arguments to set
 	 */
-	public void setInArguments(Set<TokenArgument> inArguments) {
-		this.inArguments = inArguments;
+	public void setInArguments(Set<TokenArgument> aInArgs) {
+		this.mInArgs = aInArgs;
 	}
 
 	/**
 	 * @return The output arguments
 	 */
 	public Set<TokenArgument> getOutArguments() {
-		return Collections.unmodifiableSet(outArguments);
+		if (mOutArgs != null) {
+			return Collections.unmodifiableSet(mOutArgs);
+		} else {
+			return null;
+		}
 	}
 
 	/**
-	 * @param outArguments The output arguments to set
+	 * @param aOutArgs The output arguments to set
 	 */
-	public void setOutArguments(Set<TokenArgument> outArguments) {
-		this.outArguments = outArguments;
+	public void setOutArguments(Set<TokenArgument> aOutArgs) {
+		this.mOutArgs = aOutArgs;
 	}
 
 	/**
 	 * @return The comment 
 	 */
 	public String getComment() {
-		return comment;
+		return mComment;
 	}
 
 	/**
 	 * @param comment The comment to set
 	 */
 	public void setComment(String comment) {
-		this.comment = comment;
+		this.mComment = comment;
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
-	public void writeToToken(Token token) {
-		token.setString("type", getType());
-		token.setString("comment", getComment());
-		token.setInteger("responseCode", getResponseCode());
-		token.setString("requestType", getRequestType());
+	@Override
+	public void writeToToken(Token aToken) {
+		aToken.setString("type", getType());
+		aToken.setString("comment", getComment());
+		aToken.setInteger("responseCode", getResponseCode());
+		aToken.setString("requestType", getRequestType());
 
-		List<Token> arguments = new FastList<Token>();
-		Token tempArg;
-		for (TokenArgument t : getInArguments()) {
-			tempArg = TokenFactory.createToken();
-			t.writeToToken(tempArg);
-			arguments.add(tempArg);
+		List<Token> lArgs = new FastList<Token>();
+		Token lTempArg;
+		for (TokenArgument lInArg : getInArguments()) {
+			lTempArg = TokenFactory.createToken();
+			lInArg.writeToToken(lTempArg);
+			lArgs.add(lTempArg);
 		}
-		token.setList("inArguments", arguments);
+		aToken.setList("inArguments", lArgs);
 
-		arguments = new FastList<Token>();
-		for (TokenArgument t : getOutArguments()) {
-			tempArg = TokenFactory.createToken();
-			t.writeToToken(tempArg);
-			arguments.add(tempArg);
+		lArgs = new FastList<Token>();
+		for (TokenArgument lOutArg : getOutArguments()) {
+			lTempArg = TokenFactory.createToken();
+			lOutArg.writeToToken(lTempArg);
+			lArgs.add(lTempArg);
 		}
-		token.setList("outArguments", arguments);
+		aToken.setList("outArguments", lArgs);
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
-	public void readFromToken(Token token) {
+	@Override
+	public void readFromToken(Token aToken) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
@@ -150,13 +160,13 @@ public class TokenDefinition implements ITokenizable {
 	 * @return The request type
 	 */
 	public String getRequestType() {
-		return requestType;
+		return mRequestType;
 	}
 
 	/**
-	 * @param requestType The request type to set
+	 * @param aRequestType The request type to set
 	 */
-	public void setRequestType(String requestType) {
-		this.requestType = requestType;
+	public void setRequestType(String aRequestType) {
+		this.mRequestType = aRequestType;
 	}
 }

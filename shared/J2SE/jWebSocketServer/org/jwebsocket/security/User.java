@@ -62,24 +62,24 @@ public class User {
 	 * He can be activated again to get access to the system.
 	 */
 	public static int ST_DELETED = 4;
-	private Integer userId = null;
-	private String loginname = null;
-	private String title = null;
-	private String company = null;
-	private String firstname = null;
-	private String lastname = null;
-	private String password = null;
-	private Integer pwdFailCount = 0;
-	private int status = ST_UNKNOWN;
-	private String defaultLocale = null;
-	private String city = null;
-	private String address = null;
-	private String zipcode = null;
-	private String country_code = null;
-	private String email = null;
-	private String phone = null;
-	private String fax = null;
-	private int sessionTimeout = 0;
+	private Integer mIserId = null;
+	private String mLoginname = null;
+	private String mTitle = null;
+	private String mCompany = null;
+	private String mFirstname = null;
+	private String mLastname = null;
+	private String mPassword = null;
+	private Integer mPwdFailCount = 0;
+	private int mStatus = ST_UNKNOWN;
+	private String mDefaultLocale = null;
+	private String mCity = null;
+	private String mAddress = null;
+	private String mZipCode = null;
+	private String mCountryCode = null;
+	private String mEmail = null;
+	private String mPhone = null;
+	private String mFax = null;
+	private int mSessionTimeout = 0;
 	private Roles mRoles = new Roles();
 
 	/**
@@ -92,10 +92,10 @@ public class User {
 	 * @param aRoles
 	 */
 	public User(String aLoginName, String aFirstname, String aLastname, String aPassword, Roles aRoles) {
-		loginname = aLoginName;
-		firstname = aFirstname;
-		lastname = aLastname;
-		password = aPassword;
+		mLoginname = aLoginName;
+		mFirstname = aFirstname;
+		mLastname = aLastname;
+		mPassword = aPassword;
 		mRoles = aRoles;
 	}
 
@@ -105,7 +105,7 @@ public class User {
 	 * @return id of the user.
 	 */
 	public Integer getUserId() {
-		return userId;
+		return mIserId;
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class User {
 	 * @param userId
 	 */
 	public void setUserId(Integer userId) {
-		this.userId = userId;
+		this.mIserId = userId;
 	}
 
 	/**
@@ -123,7 +123,7 @@ public class User {
 	 * @return
 	 */
 	public String getLoginname() {
-		return loginname;
+		return mLoginname;
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class User {
 	 * @param aLoginName
 	 */
 	public void setLoginname(String aLoginName) {
-		this.loginname = aLoginName;
+		this.mLoginname = aLoginName;
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class User {
 	 * @return the title
 	 */
 	public String getTitle() {
-		return title;
+		return mTitle;
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class User {
 	 * @param aTitle
 	 */
 	public void setTitle(String aTitle) {
-		this.title = aTitle;
+		this.mTitle = aTitle;
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class User {
 	 * @return the company
 	 */
 	public String getCompany() {
-		return company;
+		return mCompany;
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class User {
 	 * @param company the company to set
 	 */
 	public void setCompany(String company) {
-		this.company = company;
+		this.mCompany = company;
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class User {
 	 * @return
 	 */
 	public String getFirstname() {
-		return firstname;
+		return mFirstname;
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class User {
 	 * @param firstName
 	 */
 	public void setFirstname(String firstName) {
-		this.firstname = firstName;
+		this.mFirstname = firstName;
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class User {
 	 * @return
 	 */
 	public String getLastname() {
-		return lastname;
+		return mLastname;
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class User {
 	 * @param lastName
 	 */
 	public void setLastname(String lastName) {
-		this.lastname = lastName;
+		this.mLastname = lastName;
 	}
 
 	/**
@@ -204,12 +204,12 @@ public class User {
 	 * possible to obtain the password for the user. If the password is not
 	 * correct the fail counter is incremented. If the fail counter exceeds
 	 * the configured maximum the account gets locked. If the password is
-	 * correct the password fail counter is resetted.
+	 * correct the password fail counter is reseted.
 	 * @param aPassword
 	 * @return
 	 */
 	public boolean checkPassword(String aPassword) {
-		boolean lOk = (aPassword != null && aPassword.equals(password));
+		boolean lOk = (aPassword != null && aPassword.equals(mPassword));
 		if (lOk) {
 			resetPwdFailCount();
 		} else {
@@ -231,8 +231,8 @@ public class User {
 	public boolean changePassword(String aOldPW, String aNewPW) {
 		if (aOldPW != null
 				&& aNewPW != null
-				&& password.equals(aOldPW)) {
-			password = aNewPW;
+				&& mPassword.equals(aOldPW)) {
+			mPassword = aNewPW;
 			return true;
 		}
 		return false;
@@ -240,7 +240,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return loginname + ": " + firstname + " " + lastname;
+		return mLoginname + ": " + mFirstname + " " + mLastname;
 	}
 
 	// TODO: potential security hole: don't allow to change roles w/o a special permission!
@@ -257,7 +257,7 @@ public class User {
 	 * @return
 	 */
 	public int getStatus() {
-		return status;
+		return mStatus;
 	}
 
 	// TODO: potential security hole: don't allow to e.g. unlock a user w/o a special permission!
@@ -266,7 +266,7 @@ public class User {
 	 * @param status
 	 */
 	public void setStatus(int status) {
-		this.status = status;
+		this.mStatus = status;
 	}
 
 	/**
@@ -276,7 +276,7 @@ public class User {
 	 * @return
 	 */
 	public Integer getPwdFailCount() {
-		return pwdFailCount;
+		return mPwdFailCount;
 	}
 
 	// TODO: potential security hole: don't allow to reset password fail counter w/o a special permission!
@@ -285,7 +285,7 @@ public class User {
 	 * @param aPwdFailCount
 	 */
 	public void setPwdFailCount(Integer aPwdFailCount) {
-		pwdFailCount = aPwdFailCount;
+		mPwdFailCount = aPwdFailCount;
 	}
 
 	// TODO: potential security hole: don't allow to roll over password fail counter!
@@ -297,11 +297,11 @@ public class User {
 	 * @return 
 	 */
 	private Integer incPwdFailCount() {
-		setPwdFailCount(pwdFailCount + 1);
-		if (pwdFailCount >= MAX_PWD_FAIL_COUNT) {
+		setPwdFailCount(mPwdFailCount + 1);
+		if (mPwdFailCount >= MAX_PWD_FAIL_COUNT) {
 			lock();
 		}
-		return pwdFailCount;
+		return mPwdFailCount;
 	}
 
 	// TODO: potential security hole: don't allow to reset password fail counter w/o a special permission!
@@ -319,7 +319,7 @@ public class User {
 	 * @return
 	 */
 	public String getDefaultLocale() {
-		return defaultLocale;
+		return mDefaultLocale;
 	}
 
 	/**
@@ -328,7 +328,7 @@ public class User {
 	 * @param default_locale
 	 */
 	public void setDefaultLocale(String default_locale) {
-		this.defaultLocale = default_locale;
+		this.mDefaultLocale = default_locale;
 	}
 
 	/**
@@ -336,7 +336,7 @@ public class User {
 	 * @return
 	 */
 	public String getCity() {
-		return city;
+		return mCity;
 	}
 
 	/**
@@ -344,7 +344,7 @@ public class User {
 	 * @param city
 	 */
 	public void setCity(String city) {
-		this.city = city;
+		this.mCity = city;
 	}
 
 	/**
@@ -352,7 +352,7 @@ public class User {
 	 * @return
 	 */
 	public String getAddress() {
-		return address;
+		return mAddress;
 	}
 
 	/**
@@ -360,7 +360,7 @@ public class User {
 	 * @param address
 	 */
 	public void setAddress(String address) {
-		this.address = address;
+		this.mAddress = address;
 	}
 
 	/**
@@ -368,7 +368,7 @@ public class User {
 	 * @return
 	 */
 	public String getZipcode() {
-		return zipcode;
+		return mZipCode;
 	}
 
 	/**
@@ -376,7 +376,7 @@ public class User {
 	 * @param zipcode
 	 */
 	public void setZipcode(String zipcode) {
-		this.zipcode = zipcode;
+		this.mZipCode = zipcode;
 	}
 
 	/**
@@ -385,7 +385,7 @@ public class User {
 	 * @return
 	 */
 	public String getCountryCode() {
-		return country_code;
+		return mCountryCode;
 	}
 
 	/**
@@ -394,7 +394,7 @@ public class User {
 	 * @param country_code
 	 */
 	public void setCountryCode(String country_code) {
-		this.country_code = country_code;
+		this.mCountryCode = country_code;
 	}
 
 	/**
@@ -402,7 +402,7 @@ public class User {
 	 * @return
 	 */
 	public String getPhone() {
-		return phone;
+		return mPhone;
 	}
 
 	/**
@@ -410,7 +410,7 @@ public class User {
 	 * @param aPhone
 	 */
 	public void setPhone(String aPhone) {
-		this.phone = aPhone;
+		this.mPhone = aPhone;
 	}
 
 	/**
@@ -418,7 +418,7 @@ public class User {
 	 * @return
 	 */
 	public String getEmail() {
-		return email;
+		return mEmail;
 	}
 
 	/**
@@ -426,7 +426,7 @@ public class User {
 	 * @param aEmail
 	 */
 	public void setEmail(String aEmail) {
-		this.email = aEmail;
+		this.mEmail = aEmail;
 	}
 
 	/**
@@ -434,7 +434,7 @@ public class User {
 	 * @return
 	 */
 	public String getFax() {
-		return fax;
+		return mFax;
 	}
 
 	/**
@@ -442,7 +442,7 @@ public class User {
 	 * @param aFax
 	 */
 	public void setFax(String aFax) {
-		this.fax = aFax;
+		this.mFax = aFax;
 	}
 
 	/**
@@ -451,7 +451,7 @@ public class User {
 	 * @return
 	 */
 	public int getSessionTimeout() {
-		return sessionTimeout;
+		return mSessionTimeout;
 	}
 
 	/**
@@ -460,7 +460,7 @@ public class User {
 	 * @param session_timeout
 	 */
 	public void setSessionTimeout(int session_timeout) {
-		this.sessionTimeout = session_timeout;
+		this.mSessionTimeout = session_timeout;
 	}
 
 	/**

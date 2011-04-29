@@ -25,100 +25,114 @@ import org.jwebsocket.token.Token;
  */
 public class TokenArgument implements ITokenizable {
 
-	private String name;
-	private String type;
-	private boolean optional = false;
-	private String testValue;
-	private String comment;
+	private String mName;
+	private String mType;
+	private boolean mOptional = false;
+	private String mTestValue;
+	private String mComment;
 
 	/**
 	 * @return The argument name
 	 */
 	public String getName() {
-		return name;
+		return mName;
 	}
 
 	/**
 	 * @param The argument name to set
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String aName) {
+		this.mName = aName;
 	}
 
 	/**
 	 * @return The argument type
 	 */
 	public String getType() {
-		return type;
+		return mType;
 	}
 
 	/**
-	 * @param type The argument type to set
+	 * @param aType The argument type to set
 	 */
-	public void setType(String type) {
-		this.type = type;
+	public void setType(String aType) {
+		this.mType = aType;
 	}
 
 	/**
 	 * @return <tt>TRUE</tt> if the argument is optional <tt>FALSE</tt> otherwise
 	 */
 	public boolean isOptional() {
-		return optional;
+		return mOptional;
 	}
 
 	/**
-	 * @param optional Indicates if the argument is optional
+	 * @param aOptional Indicates if the argument is optional
 	 */
-	public void setOptional(boolean optional) {
-		this.optional = optional;
+	public void setOptional(boolean aOptional) {
+		this.mOptional = aOptional;
 	}
 
 	/**
 	 * @return The argument comment
 	 */
 	public String getComment() {
-		return comment;
+		return mComment;
 	}
 
 	/**
-	 * @param comment The argument comment to set
+	 * @param aComment The argument comment to set
 	 */
-	public void setComment(String comment) {
-		this.comment = comment;
+	public void setComment(String aComment) {
+		this.mComment = aComment;
 	}
 
 	/**
 	 * @return The test value for functional tests (JSON format)
 	 */
 	public String getTestValue() {
-		return testValue;
+		return mTestValue;
 	}
 
 	/**
-	 * @param testValue The test value for functional tests (JSON format)
+	 * @param aTestValue The test value for functional tests (JSON format)
 	 */
-	public void setTestValue(String testValue) {
-		this.testValue = testValue;
+	public void setTestValue(String aTestValue) {
+		this.mTestValue = aTestValue;
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
-	public void writeToToken(Token token) {
-		token.setString("name", getName());
-		token.setString("comment", getComment());
-		token.setString("type", getType());
-		token.setBoolean("optionl", isOptional());
-		
+	@Override
+	public void writeToToken(Token aToken) {
+		aToken.setString("name", getName());
+		aToken.setString("comment", getComment());
+		aToken.setString("type", getType());
+		aToken.setBoolean("optional", isOptional());
+
 		if (getTestValue() != null) {
-			token.setString("testValue", getTestValue());
+			String lType = getType();
+			String lVal = getTestValue();
+			if ("integer".equals(lType)) {
+				aToken.setInteger("testValue", Integer.parseInt(lVal, 10));
+			} else if ("double".equals(lType)) {
+				aToken.setDouble("testValue", Double.parseDouble(lVal));
+			} else if ("boolean".equals(lType)) {
+				aToken.setBoolean("testValue", Boolean.parseBoolean(lVal));
+			} else if ("number".equals(lType)) {
+				aToken.setDouble("testValue", Double.parseDouble(lVal));
+			} else {
+				aToken.setString("testValue", lVal);
+			}
 		}
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
-	public void readFromToken(Token token) {
+	@Override
+	public void readFromToken(Token aToken) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 }

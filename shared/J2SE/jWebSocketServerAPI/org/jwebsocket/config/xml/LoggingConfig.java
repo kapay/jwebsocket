@@ -12,8 +12,9 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config;
+package org.jwebsocket.config.xml;
 
+import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
@@ -24,11 +25,11 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
  */
 public class LoggingConfig implements Config {
 
-	private final String appender;
-	private final String pattern;
-	private final String level;
-	private final String filename;
-	private final Integer bufferSize;
+	private final String mAppender;
+	private final String mPattern;
+	private final String mLevel;
+	private final String mFilename;
+	private final Integer mBufferSize;
 
 	/**
 	 * Costrutor
@@ -40,31 +41,31 @@ public class LoggingConfig implements Config {
 	 */
 	public LoggingConfig(String appender, String pattern, String level,
 			String filename, Integer aBufferSize) {
-		this.appender = appender;
-		this.pattern = pattern;
-		this.level = level;
-		this.filename = filename;
-		this.bufferSize = aBufferSize;
+		this.mAppender = appender;
+		this.mPattern = pattern;
+		this.mLevel = level;
+		this.mFilename = filename;
+		this.mBufferSize = aBufferSize;
 	}
 
 	public String getAppender() {
-		return appender;
+		return mAppender;
 	}
 
 	public String getPattern() {
-		return pattern;
+		return mPattern;
 	}
 
 	public String getLevel() {
-		return level;
+		return mLevel;
 	}
 
 	public String getFilename() {
-		return filename;
+		return mFilename;
 	}
 
 	public Integer getBufferSize() {
-		return bufferSize;
+		return mBufferSize;
 	}
 
 	/**
@@ -72,11 +73,11 @@ public class LoggingConfig implements Config {
 	 */
 	@Override
 	public void validate() {
-		if ((appender != null && appender.length() > 0)
-				&& (pattern != null && pattern.length() > 0)
-				&& (level != null && level.length() > 0)
-				&& (filename != null && filename.length() > 0)
-				&& (bufferSize != null && bufferSize >= 0)) {
+		if ((mAppender != null && mAppender.length() > 0)
+				&& (mPattern != null && mPattern.length() > 0)
+				&& (mLevel != null && mLevel.length() > 0)
+				&& (mFilename != null && mFilename.length() > 0)
+				&& (mBufferSize != null && mBufferSize >= 0)) {
 			return;
 		}
 		throw new WebSocketRuntimeException(

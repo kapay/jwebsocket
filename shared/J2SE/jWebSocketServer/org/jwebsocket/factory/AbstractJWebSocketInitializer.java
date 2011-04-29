@@ -21,7 +21,7 @@ import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.config.LoggingConfig;
+import org.jwebsocket.config.xml.LoggingConfig;
 import org.jwebsocket.logging.Logging;
 
 /**
