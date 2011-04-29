@@ -9,6 +9,7 @@
 		<link rel="stylesheet" type="text/css" href="../res/css/jWebSocket.css">
 		<script type="text/javascript" src="../res/js/jWebSocket.js"></script>
 		<script type="text/javascript" src="../res/js/jwsAPIPlugIn.js"></script>
+		<script type="text/javascript" src="../res/js/jwsTestPlugIn.js"></script>
 
 		<!-- include source files here... -->
 		<script type="text/javascript" src="src/TestPlugInHelper.js"></script>
@@ -24,24 +25,41 @@
 			</tr>
 		</table>
 
+		<p>
+		<input class="sbtnDlg" id="sbtnManualTest" type="button" value="Programmatic" onclick="run('runManualTestSuite()');"
+				   title="Runs the manual (programmatic) test suite.">
+		<input class="sbtnDlg" id="sbtnBenchmarkTest" type="button" value="Benchmark" onclick="run('runBenchmarkSuite()');"
+				   title="Runs the benchmark suite.">
+		</p>
+
 		<script type="text/javascript">
 
+			function getURL() {
+				var lHref = location.href;
+				var lIdx = lHref.indexOf( "?" );
+				if( lIdx > 0 ) {
+					lHref = lHref.substring( 0, lIdx );
+				}
+				return lHref;
+			}
+
+			function run( aCall ) {
+				location.href = getURL() + "?" + aCall;
+			}
+
+			var lSuite = location.search;
+			if( lSuite ) {
+				lSuite = lSuite.substr( 1 );
+				console.log("running " + lSuite + "...");
+				eval( lSuite );
+				jws.TestPlugIn.execTests();
+			}
+
 			if( jws.browserSupportsWebSockets() ) {
-
-				runAPISuite();
-				
-				// runOpenCloseSuite();
-
-				setTimeout( function () {
-					var lReporter = new jasmine.TrivialReporter();
-					jasmine.getEnv().addReporter( lReporter );
-					jasmine.getEnv().execute();
-				}, 500 );
 
 			} else {
 				var lMsg = jws.MSG_WS_NOT_SUPPORTED;
 				alert( lMsg );
-				log( lMsg );
 			}
 
 		</script>

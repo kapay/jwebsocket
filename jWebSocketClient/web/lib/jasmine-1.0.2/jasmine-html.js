@@ -128,15 +128,14 @@ jasmine.TrivialReporter.prototype.reportSpecResults = function(spec) {
   if (results.skipped) {
     status = 'skipped';
   }
-  var timestamp = (testing.report[testing.reportIndexJ])? " (" + testing.report[testing.reportIndexJ++] + " ms)": "";
   var specDiv = this.createDom('div', { className: 'spec '  + status },
       this.createDom('a', { className: 'run_spec', href: '?spec=' + encodeURIComponent(spec.getFullName()) }, "run"),
       this.createDom('a', {
         className: 'description',
         href: '?spec=' + encodeURIComponent(spec.getFullName()),
         title: spec.getFullName()
-      }, spec.description + timestamp));
-	  
+      }, spec.description));
+
 
   var resultItems = results.getItems();
   var messagesDiv = this.createDom('div', { className: 'messages' });

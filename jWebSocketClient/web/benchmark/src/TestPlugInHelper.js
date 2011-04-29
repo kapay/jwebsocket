@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket Benchmarks
+//	jWebSocket Testsuites
 //	(C) 2011 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -16,27 +16,37 @@
 
 var NS_BENCHMARK = jws.NS_BASE  + ".plugins.benchmark";
 
-var MAX_CONNECTIONS = 10;
-var MAX_BROADCASTS = 10;
-var OPEN_CONNECTIONS_TIMEOUT = 5000;
-var BROADCAST_TIMEOUT = 10000;
-var CLOSE_CONNECTIONS_TIMEOUT = 5000;
+var MAX_CONNECTIONS = 50;
+var MAX_BROADCASTS = 100;
+var OPEN_CONNECTIONS_TIMEOUT = 30000;
+var BROADCAST_TIMEOUT = 30000;
+var CLOSE_CONNECTIONS_TIMEOUT = 30000;
+var BROADCAST_MESSAGE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghihjklmnopqrstuvwxyz 0123456789";
+
+var ROOT_USER = "root";
 
 var lConnectionsOpened = 0;
 var lConnections = [];
+var lPacketsReceived = 0;
 
+// this global connection is shared between multiple tests
+var lSharedRootConn = null;
 
 // this spec opens all connections
-function runOpenSpec() {
-	it( "Open " + MAX_CONNECTIONS + " connections", function () {
+function testOpenConnections() {
+	var lSpec = "Opening " + MAX_CONNECTIONS + " connections";
+	it( lSpec, function () {
 
-		testing.initTimeMarks[ testing.initTimeMarksIndex++ ] =
-			new Date().getTime();
+		// reset all watches
+		jws.StopWatchPlugIn.resetWatches();
+
+		// start stop watch for this spec
+		jws.StopWatchPlugIn.startWatch( "openConn", lSpec );
 
 		for( var lIdx = 0; lIdx < MAX_CONNECTIONS; lIdx++ ) {
 
 			lConnections[ lIdx ] = new jws.jWebSocketJSONClient();
-			lConnections[ lIdx ].open( jws.JWS_SERVER_URL, {
+			lConnections[ lIdx ].open( jws.getDefaultServerURL(), {
 
 				OnOpen: function () {
 					lConnectionsOpened++;
@@ -44,13 +54,17 @@ function runOpenSpec() {
 
 				OnClose: function () {
 					lConnectionsOpened--;
+				},
+
+				OnToken: function( aToken ) {
+					if ( "s2c_performance" == aToken.type
+							&& NS_BENCHMARK == aToken.ns ) {
+						lPacketsReceived++;
+					}
 				}
 
 			});
-
 		}
-
-		testing.report[ testing.reportIndexI++ ] = 0;
 
 		// wait for expected connections being opened
 		waitsFor(
@@ -64,21 +78,194 @@ function runOpenSpec() {
 		runs(
 			function () {
 				expect( lConnectionsOpened ).toEqual( MAX_CONNECTIONS );
-				testing.report[ testing.reportIndexI - 1 ] =
-					( new Date().getTime() - testing.initTimeMarks[ testing.initTimeMarksIndex - 1 ] );
+				// stop watch for this spec
+				jws.StopWatchPlugIn.stopWatch( "openConn" );
 			}
 		);
 
 	});
 }
 
+// this spec tests the login function of the system plug-in
+function testLoginValidCredentials() {
+	var lSpec = "Logging in with valid credentials";
+	it( lSpec, function () {
+
+		// we need to "control" the server to broadcast to all connections here
+		var lConn = new jws.jWebSocketJSONClient();
+		var lResponse = {};
+
+		// open a separate control connection
+		lConn.logon( jws.getDefaultServerURL(), "guest", "guest", {
+			OnToken: function ( aToken ) {
+				if( "org.jwebsocket.plugins.system" == aToken.ns
+					&& "login" == aToken.reqType) {
+					lResponse = aToken;
+				}
+			}
+		});
+
+		waitsFor(
+			function() {
+				return( lResponse.code != undefined );
+			},
+			lSpec,
+			3000
+		);
+
+		runs( function() {
+			expect( lResponse.code ).toEqual( 0 );
+			lConn.close();
+		});
+	});
+}
+
+
+// this spec tests the login function of the system plug-in
+function testLoginInvalidCredentials() {
+	var lSpec = "Logging in with invalid credentials";
+	it( lSpec, function () {
+
+		// we need to "control" the server to broadcast to all connections here
+		var lConn = new jws.jWebSocketJSONClient();
+		var lResponse = {};
+
+		// open a separate control connection
+		lConn.logon( jws.getDefaultServerURL(), "InVaLiD", "iNvAlId", {
+			OnToken: function ( aToken ) {
+				if( "org.jwebsocket.plugins.system" == aToken.ns
+					&& "login" == aToken.reqType) {
+					lResponse = aToken;
+				}
+			}
+		});
+
+		waitsFor(
+			function() {
+				return( lResponse.code != undefined );
+			},
+			lSpec,
+			3000
+		);
+
+		runs( function() {
+			expect( lResponse.code ).toEqual( -1 );
+			lConn.close();
+		});
+	});
+}
+
+// this spec tries to open a connection to be shared across multiple tests
+function testOpenSharedAdminConn() {
+	var lSpec = "Opening shared connection with administrator role";
+	it( lSpec, function () {
+
+		// we need to "control" the server to broadcast to all connections here
+		lSharedRootConn = new jws.jWebSocketJSONClient();
+		var lResponse = {};
+
+		// open a separate control connection
+		lSharedRootConn.logon( jws.getDefaultServerURL(), ROOT_USER, "root", {
+			OnToken: function ( aToken ) {
+				if( "org.jwebsocket.plugins.system" == aToken.ns
+					&& "login" == aToken.reqType) {
+					lResponse = aToken;
+				}
+			}
+		});
+
+		waitsFor(
+			function() {
+				return( lResponse.code != undefined );
+			},
+			lSpec,
+			3000
+		);
+
+		runs( function() {
+			expect( lResponse.username ).toEqual( ROOT_USER );
+		});
+	});
+}
+
+// this spec tries to open a connection to be shared across multiple tests
+function testCloseSharedAdminConn() {
+	var lSpec = "Closing shared connection with administrator role";
+	it( lSpec, function () {
+
+		// open a separate control connection
+		lSharedRootConn.close({
+			timeout: 3000
+		});
+
+		waitsFor(
+			function() {
+				return( !lSharedRootConn.isOpened() );
+			},
+			lSpec,
+			3000
+		);
+
+		runs( function() {
+			expect( lSharedRootConn.isOpened() ).toEqual( false );
+		});
+	});
+}
+
+
+// this spec tests the send method of the system plug-in by sending
+// this spec requires an established connection
+function testSendLoopBack() {
+	var lSpec = "Send and Loopback";
+	it( lSpec, function () {
+
+		// we need to "control" the server to broadcast to all connections here
+		var lResponse = {};
+		var lMsg = "This is my message";
+
+		// open a separate control connection
+		var lToken = {
+			ns: jws.NS_SYSTEM,
+			type: "send",
+			targetId: lSharedRootConn.getId(),
+			sourceId: lSharedRootConn.getId(),
+			sender: lSharedRootConn.getUsername(),
+			data: lMsg
+		};
+
+		var lListener = function( aToken ) {
+			if( "org.jwebsocket.plugins.system" == aToken.ns
+				&& "send" == aToken.type) {
+				lResponse = aToken;
+			}
+		};
+
+		lSharedRootConn.addListener( lListener );
+		lSharedRootConn.sendToken( lToken );
+
+		waitsFor(
+			function() {
+				return( lResponse.data == lMsg );
+			},
+			lSpec,
+			3000
+		);
+
+		runs( function() {
+			expect( lResponse.data ).toEqual( lMsg );
+			lSharedRootConn.removeListener( lListener );
+		});
+
+	});
+}
 
 // this spec closes all connections
-function runCloseSpec() {
-	it( "Close " + MAX_CONNECTIONS + " connections", function () {
+function testCloseConnections() {
+	var lSpec = "Closing " + MAX_CONNECTIONS + " connections";
+	it( lSpec, function () {
 
-		testing.initTimeMarks[ testing.initTimeMarksIndex++ ] =
-			new Date().getTime();
+		// start stop watch for this spec
+		jws.StopWatchPlugIn.startWatch( "closeConn", lSpec );
 
 		for( var lIdx = 0; lIdx < MAX_CONNECTIONS; lIdx++ ) {
 			lConnections[ lIdx ].close({
@@ -102,114 +289,186 @@ function runCloseSpec() {
 		runs(
 			function () {
 				expect( lConnectionsOpened ).toEqual( 0 );
-				testing.report[ testing.reportIndexI - 1 ] =
-					( new Date().getTime() - testing.initTimeMarks[ testing.initTimeMarksIndex - 1 ] );
+
+				// stop watch for this spec
+				jws.StopWatchPlugIn.stopWatch( "closeConn" );
+
+				// print all watches to the console
+				jws.StopWatchPlugIn.printWatches();
+
+				// reset all watches
+				jws.StopWatchPlugIn.resetWatches();
 			}
 		);
 	});
 }
 
-// this is a suite
-function runOpenCloseSuite () {
-	describe( "Open/Close Test Suite", function () {
-		runOpenSpec();
-		runCloseSpec();
-	});
+function testBenchmark() {
+	var lSpec = "Broadcasting " + MAX_BROADCASTS + " packets to " + MAX_CONNECTIONS + " connections";
+	it( lSpec, function () {
 
-}
+		// start stop watch for this spec
+		jws.StopWatchPlugIn.startWatch( "broadcast", lSpec );
 
-function runBenchmarkSpec() {
-	it( "run benchmarks", function () {
-
+		// we need to "control" the server to broadcast to all connections here
 		var lConn = new jws.jWebSocketJSONClient();
 
+		// open a separate control connection
 		lConn.open(jws.getDefaultServerURL(), {
 
 			OnOpen: function () {
-				// create and add the API plug-in to the connection
-				var lAPIPlugIn = new jws.APIPlugIn();
-				lConn.addPlugIn( lAPIPlugIn );
-				// request the API of the benchmark plug-in
-				lAPIPlugIn.plugInAPI(
-					"jws.benchmark",
-					function( aPlugIn ) {
-						testing.describePlugIn( lConn, aPlugIn );
-					}
-				);
+				lPacketsReceived = 0;
+				var lToken = {
+					ns: NS_BENCHMARK,
+					type: "s2c_performance",
+					count: MAX_BROADCASTS,
+					message: BROADCAST_MESSAGE
+				};
+				lConn.sendToken( lToken );
 			}
 		});
 
 		waitsFor(
 			function() {
-				return lConnectionsOpened == 0;
+				return lPacketsReceived == MAX_CONNECTIONS * MAX_BROADCASTS;
 			},
-			"closing connections...",
-			CLOSE_CONNECTIONS_TIMEOUT
+			"broadcasting test packages...",
+			BROADCAST_TIMEOUT
 		);
 			
 		runs( function() {
-			expect( true ).toEqual( true );
+			expect( lPacketsReceived ).toEqual( MAX_CONNECTIONS * MAX_BROADCASTS );
+
+			// stop watch for this spec
+			jws.StopWatchPlugIn.stopWatch( "broadcast" );
 		});
 	});
 }
 
-function runAPISuite () {
-	describe( "Benchmark Test Suite", function () {
-		runOpenSpec();
-		runBenchmarkSpec();
-		runCloseSpec();
+var lSpecs = [];
+
+function testGetAPIDefaults() {
+	var lSpec = "Running default API spec";
+
+	it( lSpec, function () {
+
+		var lDone = 0;
+
+		// start stop watch for this spec
+		jws.StopWatchPlugIn.startWatch( "defAPIspec", lSpec );
+
+		// we need to "control" the server to broadcast to all connections here
+		var lConn = new jws.jWebSocketJSONClient();
+		lDone = 0;
+		
+		// open a separate control connection
+		lConn.open(jws.getDefaultServerURL(), {
+
+			OnOpen: function () {
+				var lAPIPlugIn = new jws.APIPlugIn();
+				lConn.addPlugIn( lAPIPlugIn );
+				// request the API of the benchmark plug-in
+				lAPIPlugIn.getPlugInAPI(
+					"jws.benchmark", {
+					// if API received successfully run the tests...
+					OnResponse: function( aServerPlugIn ) {
+						lSpecs = lAPIPlugIn.createSpecFromAPI( lConn, aServerPlugIn );
+						lDone = 1;
+					},
+					OnTimeout: function() {
+						lConn.close();
+						lDone = 1;
+					}
+				});
+			}
+		});
+
+		waitsFor(
+			function() {
+				return lDone == 1;
+			},
+			"Running against API...",
+			BROADCAST_TIMEOUT
+		);
+
+		runs( function() {
+			expect( lDone ).toEqual( 1 );
+
+			// stop watch for this spec
+			jws.StopWatchPlugIn.stopWatch( "defAPIspec" );
+		});
 	});
 }
 
-
-function Connection (helper) {
-
-	this.helper = helper;
-	
-	this.processToken = function ( aToken ) {
-
-		if ("s2c_performance" == aToken.type
-			&& NS_BENCHMARK == aToken.ns ) {
-
-			if( aToken .data == this.helper.message ) {
-				this.helper.received++;
-				console.log(this.helper.received);
-			}
-			
-			if( this.helper.received == MAX_CONNECTIONS * MAX_BROADCASTS ) {
-				this.helper.ready = true;
-			}
-		}
-	}
+function testRunAPIDefaults() {
+	it( "Running default tests", function() {
+		eval( 
+			"  for( var i = 0; i < lSpecs.length; i++ ) { "
+			+ "  lSpecs[ i ]();"
+			+ "}"
+		);
+	});
 }
 
-testing.helpers.set( NS_BENCHMARK, "s2c_performance", {
+// ---------------------------------------------------------------------------
+// the various jWebSocket test suites
+// ---------------------------------------------------------------------------
 
-	ready		: false,
-	received	: 0,
-	message		: "",
-	startTime	: 0,
-	endTime		: 0,
+// this is a suite
+function runOpenCloseSuite () {
 
-	initialize: function( aToken ) {
+	describe( "Open/Close Test Suite", function () {
+		testOpenConnections();
+		testCloseConnections();
+	});
+}
 
-		//Initializing test values
-		this.message =  aToken.message;
-		
-		for( var lIdx = 0; lIdx < MAX_CONNECTIONS; lIdx++ ) {
-			lConnections[ lIdx ].addPlugIn( new Connection( this ), "benchmark" );
-		}
-		
-		this.startTime = new Date().getTime(); // Time stats goes in the client ;)
-	},
+function runBenchmarkSuite() {
 
-	isReady: function() {
-		return this.ready;
-	},
+	describe( "Benchmark Test Suite", function () {
 
-	validate: function() {
-		//Ensure that all the messages has been received
-		expect( this.received ).toEqual( MAX_CONNECTIONS * MAX_BROADCASTS );
-	}
+		// open all connections
+		testOpenConnections();
 
-});
+		// run the benchmark
+		testBenchmark();
+
+		// close all connections
+		testCloseConnections();
+	});
+
+}
+
+function runDefaultAPISuite() {
+
+	describe( "Default API test Suite", function () {
+
+		// open all connections
+		testOpenConnections();
+
+		// get the default specs from the API
+		testGetAPIDefaults();
+
+		// run all the obtained default specs
+		testRunAPIDefaults();
+
+		// close all connections
+		testCloseConnections();
+	});
+
+}
+
+function runManualTestSuite() {
+
+	describe( "jWebSocket Test Suite", function () {
+
+		testLoginValidCredentials();
+		testLoginInvalidCredentials();
+
+		testOpenSharedAdminConn();
+		testSendLoopBack();
+		testCloseSharedAdminConn();
+	});
+
+}
+

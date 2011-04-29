@@ -1,6 +1,5 @@
 body {
-  font-family: 'Times New Roman',Times,serif;
-  font-size: 13px;
+  font-family: "Helvetica Neue Light", "Lucida Grande", "Calibri", "Arial", sans-serif;
 }
 
 
@@ -57,8 +56,6 @@ body {
   border: 1px outset gray;
   margin: 5px 0;
   padding-left: 1em;
-  padding-top: 1em;
-  padding-bottom: 1em;
 }
 
 .suite .suite {
@@ -81,6 +78,7 @@ body {
 
 .spec.failed, .spec.passed, .spec.skipped {
   padding-bottom: 5px;
+  border: 1px solid gray;
 }
 
 .spec.failed {
