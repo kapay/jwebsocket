@@ -13,8 +13,10 @@
 	<description>jWebSocket Server Project</description>
 	<packaging>jar</packaging>
 
-	<!-- Shared version number properties -->
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<!-- shared version number properties -->
 		<org.springframework.version>3.0.5.RELEASE</org.springframework.version>
 	</properties>
 
@@ -24,6 +26,7 @@
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<groupId>org.apache.maven.plugins</groupId>
+				<version>2.3.1</version>
 				<executions>
 					<!-- create embedded version unpackaged -->
 					<execution>
@@ -48,7 +51,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.1</version>
+				<version>1.2</version>
 				<executions>
 					<execution>
 						<goals>
@@ -67,6 +70,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.7</version>
 				<configuration>
 					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/${project.name}</reportOutputDirectory>
 					<stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css
@@ -78,7 +82,7 @@
 			<!-- description: http://binkley.blogspot.com/2006/12/making-one-jar-with-maven.html -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-
+				<version>2.2.1</version>
 				<executions>
 					<execution>
 						<id>Bundle</id>
@@ -107,7 +111,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
+				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -178,6 +182,19 @@
 			<version>5.1.15</version>
 		</dependency>
 
+		<!-- required for the jWebSocket Proxy Plugin -->
+		<!--
+		<dependency>
+			<groupId>jlibs</groupId>
+			<artifactId>jlibs-core</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>jlibs</groupId>
+			<artifactId>jlibs-xml</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		-->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -372,6 +389,13 @@
 			</snapshots>
 			-->
 		</repository>
-
+		<!--
+		<repository>
+			<id>jlibs-repository</id>
+			<name>JLibs Repository</name>
+			<url>http://dl.dropbox.com/u/326301/repository</url>
+			<layout>default</layout>
+		</repository>
+		-->
 	</repositories>
 </project>

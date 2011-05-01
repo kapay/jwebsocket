@@ -12,7 +12,12 @@
 	<description>jWebSocket Web Application Project</description>
 	<version>1.0</version>
 	<packaging>war</packaging>
-
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+	</properties>
+	
 	<scm>
 		<connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk</connection>
 		<developerConnection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk</developerConnection>
@@ -24,6 +29,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
+				<version>2.1.1</version>
 				<configuration>
 					<warName>jWebSocketAppServer-${project.version}</warName>
 					<outputDirectory>${project.build.directory}/../../../../rte/jWebSocket-${project.version}/libs</outputDirectory>
@@ -37,6 +43,7 @@
 
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -46,6 +53,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.7</version>
 				<configuration>
 					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/${project.name}</reportOutputDirectory>
 					<stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css</stylesheetfile>
@@ -78,7 +86,4 @@
 	<repositories>
 	</repositories>
 
-    <properties>
-        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
-    </properties>
 </project>

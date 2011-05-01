@@ -11,6 +11,10 @@
 	<name>jWebSocketSwingGUI</name>
 	<description>jWebSocket SwingGUI PlugIn</description>
 	<packaging>jar</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
 	
 	<scm>
 		<connection>scm:svn:https://jwebsocket.googlecode.com/svn/trunk/jWebSocketSwingGUI</connection>
@@ -22,6 +26,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
 				<configuration>
 					<outputDirectory>../../../rte/jWebSocket-${project.version}/libs</outputDirectory>
 					<archive>
@@ -39,6 +44,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.7</version>
 				<configuration>
 					<reportOutputDirectory>${project.build.directory}/../../jWebSocketClient/web/javadocs/${project.name}</reportOutputDirectory>
 					<stylesheetfile>${project.build.directory}/../../jWebSocketClient/web/javadocs/stylesheet.css</stylesheetfile>
@@ -47,8 +53,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
+				<version>2.3.2</version>
 				<configuration>
+					<encoding>UTF-8</encoding>
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
