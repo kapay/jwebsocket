@@ -85,12 +85,11 @@
 				<version>2.2.1</version>
 				<executions>
 					<execution>
-						<!-- <id>Bundle</id> -->
+						<id>Bundle</id>
 						<configuration>
 							<!-- <classifier>Bundle</classifier> -->
 							<finalName>jWebSocketServer-Bundle</finalName>
-							<outputDirectory>../../../rte/jWebSocket-${project.version}/libs
-							</outputDirectory>
+							<outputDirectory>../../../rte/jWebSocket-${project.version}/libs</outputDirectory>
 							<archive>
 								<manifest>
 									<mainClass>org.jwebsocket.console.JWebSocketServer</mainClass>
@@ -106,7 +105,6 @@
 						</goals>
 					</execution>
 				</executions>
-
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -187,14 +185,27 @@
 		<dependency>
 			<groupId>jlibs</groupId>
 			<artifactId>jlibs-core</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>jlibs</groupId>
+			<artifactId>jlibs-parent</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>jlibs</groupId>
-			<artifactId>jlibs-xml</artifactId>
+			<artifactId>jlibs-nio</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>jlibs-framework</groupId>
+			<artifactId>jlibs-framework</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/../libs/ext/jlibs.jar</systemPath>
+		</dependency>
 		-->
+		
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -232,6 +243,11 @@
 		<dependency>
 			<groupId>org.jwebsocket</groupId>
 			<artifactId>jWebSocketServerAPI</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jwebsocket</groupId>
+			<artifactId>jWebSocketProxy</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -335,7 +351,13 @@
 			<url>file://${basedir}/lib</url>
 		</repository>
 		-->
-
+		<repository>
+			<id>jlibs-repository</id>
+			<name>JLibs Repository</name>
+			<url>http://dl.dropbox.com/u/326301/repository</url>
+			<layout>default</layout>
+		</repository>
+		
 		<repository>
 			<id>repository.jboss.org</id>
 			<url>http://repository.jboss.org/nexus/content/groups/public/</url>
@@ -351,6 +373,7 @@
 			<!-- <url>https://s3browse.springsource.com/browse/maven.springframework.org/milestone</url> -->
 			<url>https://s3browse.springsource.com/browse/maven.springframework.org/milestone/org/springframework/</url>
 		</repository>
+
 		<repository>
 			<id>com.springsource.repository.bundles.release</id>
 			<name>EBR Spring Release Repository</name>
@@ -389,13 +412,6 @@
 			</snapshots>
 			-->
 		</repository>
-		<!--
-		<repository>
-			<id>jlibs-repository</id>
-			<name>JLibs Repository</name>
-			<url>http://dl.dropbox.com/u/326301/repository</url>
-			<layout>default</layout>
-		</repository>
-		-->
+		
 	</repositories>
 </project>
