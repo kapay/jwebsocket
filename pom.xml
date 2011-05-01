@@ -14,6 +14,7 @@
 		<module>jWebSocketCommon</module>
 		<module>jWebSocketServerAPI</module>
 		<module>jWebSocketClientAPI</module>
+		<module>jWebSocketProxy</module>
 		<module>jWebSocketServer</module>
 		<module>jWebSocketJavaSEClient</module>
 		<module>jWebSocketSamples</module>
@@ -23,12 +24,17 @@
 		<module>jWebSocketJetty</module>
 		<!-- <module>jWebSocketGlassFish</module> -->
 	</modules>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -37,12 +43,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.7</version>
+				<version>2.8</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.6</version>
+				<version>2.8.1</version>
 			</plugin>
 		</plugins>
 		<extensions>
