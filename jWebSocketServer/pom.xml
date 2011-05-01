@@ -85,9 +85,9 @@
 				<version>2.2.1</version>
 				<executions>
 					<execution>
-						<id>Bundle</id>
+						<!-- <id>Bundle</id> -->
 						<configuration>
-							<classifier>Bundle</classifier>
+							<!-- <classifier>Bundle</classifier> -->
 							<finalName>jWebSocketServer-Bundle</finalName>
 							<outputDirectory>../../../rte/jWebSocket-${project.version}/libs
 							</outputDirectory>
