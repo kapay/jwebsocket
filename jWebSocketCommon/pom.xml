@@ -76,8 +76,9 @@
 
 	</dependencies>
 
-	<!--  define repositories -->
+	<!-- define repositories once required -->
+	<!--
 	<repositories>
 	</repositories>
-
+	-->
 </project>

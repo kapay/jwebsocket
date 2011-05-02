@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-4.0.0.xsd">
 		
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
@@ -9,12 +9,12 @@
 	<packaging>pom</packaging>
 	<name>jWebSocket-Parent</name>
 	<version>1.0</version>
-	<description>Parent project for jWebSocket</description>
+	<description>Parent Project for jWebSocket</description>
+	<url>http://jwebsocket.org</url>
 	<modules>
 		<module>jWebSocketCommon</module>
 		<module>jWebSocketServerAPI</module>
 		<module>jWebSocketClientAPI</module>
-		<module>jWebSocketProxy</module>
 		<module>jWebSocketServer</module>
 		<module>jWebSocketJavaSEClient</module>
 		<module>jWebSocketSamples</module>
@@ -22,6 +22,7 @@
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>
 		<module>jWebSocketJetty</module>
+		<module>jWebSocketProxy</module>
 		<!-- <module>jWebSocketGlassFish</module> -->
 	</modules>
 	<properties>
@@ -55,7 +56,7 @@
 			<extension>
 				<groupId>org.jvnet.wagon-svn</groupId>
 				<artifactId>wagon-svn</artifactId>
-				<version>1.9</version>
+				<version>1.12</version>
 			</extension>
 		</extensions>
 	</build>
@@ -65,13 +66,6 @@
 			<id>netbeans</id>
 			<name>NetBeans Repository</name>
 			<url>http://bits.netbeans.org/maven2</url>
-		</repository>
-		<repository>
-			<id>repository.jboss.org</id>
-			<url>http://repository.jboss.org/nexus/content/groups/public/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
 		</repository>
 		<repository>
 			<id>maven-central-repo</id>
@@ -85,6 +79,7 @@
 		</repository>
 	</repositories>
 	
+	<!-- these settings will be used for maven deployment to google code -->
 	<distributionManagement>
 		<repository>
 			<uniqueVersion>false</uniqueVersion>
