@@ -608,7 +608,7 @@ public class TokenServer extends BaseServer {
 	 * @param aInToken
 	 * @return
 	 */
-	public Token createResponse(Token aInToken) {
+	public void setResponseFields(Token aInToken, Token aOutToken) {
 		Integer lTokenId = null;
 		String lType = null;
 		String lNS = null;
@@ -617,18 +617,23 @@ public class TokenServer extends BaseServer {
 			lType = aInToken.getString("type");
 			lNS = aInToken.getString("ns");
 		}
-		Token lResToken = TokenFactory.createToken("response");
-		lResToken.setInteger("code", 0);
-		lResToken.setString("msg", "ok");
+		aOutToken.setType("response");
+		aOutToken.setInteger("code", 0);
+		aOutToken.setString("msg", "ok");
 		if (lTokenId != null) {
-			lResToken.setInteger("utid", lTokenId);
+			aOutToken.setInteger("utid", lTokenId);
 		}
 		if (lNS != null) {
-			lResToken.setString("ns", lNS);
+			aOutToken.setString("ns", lNS);
 		}
 		if (lType != null) {
-			lResToken.setString("reqType", lType);
+			aOutToken.setString("reqType", lType);
 		}
+	}
+
+	public Token createResponse(Token aInToken) {
+		Token lResToken = TokenFactory.createToken();
+		setResponseFields(aInToken, lResToken);
 		return lResToken;
 	}
 

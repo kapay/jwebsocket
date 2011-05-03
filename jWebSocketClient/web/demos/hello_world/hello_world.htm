@@ -259,6 +259,7 @@
 			}
 
 			// example how to request a result from a server side plugin
+			/*
 			function sampleSelect() {
 				log( "Requesting JDBC data via WebSockets..." );
 				// call the getTime method of the client side plug-in
@@ -270,6 +271,18 @@
 					group	: "",
 					having	: ""
 				});
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( lWSC.resultToString( lRes ) );
+				}
+			}
+			*/
+
+			// example how to request a result from a server side plugin
+			function sampleSelect() {
+				log( "Requesting JDBC data via WebSockets..." );
+				// call the getTime method of the client side plug-in
+				var lRes = lWSC.jdbcQuery("select * from event_tags");
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
 					log( lWSC.resultToString( lRes ) );

@@ -16,6 +16,14 @@
 package org.jwebsocket.plugins.jdbc;
 
 import java.sql.ResultSetMetaData;
+import java.util.List;
+import java.util.Map;
+import javolution.util.FastList;
+import javolution.util.FastMap;
+import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 /**
  *
@@ -48,5 +56,85 @@ public class JDBCTools {
 			}
 		}
 		return lResStr;
+	}
+
+	public static String getJSONType(String aJavaType, SqlRowSetMetaData aMetaData) {
+		String lResStr = aJavaType.toLowerCase();
+		if (lResStr != null) {
+			if (lResStr.equals("bigdecimal")
+					|| lResStr.equals("long")
+					|| lResStr.equals("int")
+					|| lResStr.equals("byte")
+					|| lResStr.equals("short")
+					|| lResStr.equals("float")
+					|| lResStr.equals("double")) {
+				lResStr = "number";
+			}
+		}
+		return lResStr;
+	}
+
+	public static List<Object> getResultColumns(SqlRowSet aRowSet, int aColCount) {
+		// TODO: should work with usual arrays!
+		List<Object> lDataRow = new FastList<Object>();
+		Object lObj = null;
+
+		try {
+			for (int lColIdx = 1; lColIdx <= aColCount; lColIdx++) {
+				lObj = aRowSet.getObject(lColIdx);
+				lDataRow.add(lObj);
+			}
+		} catch (Exception lEx) {
+			// System.out.println("EXCEPTION in getResultColumns");
+		}
+
+		return lDataRow;
+	}
+
+	public static Token resultSetToToken(SqlRowSet aRowSet) {
+		// instantiate response token
+		Token lResponse = TokenFactory.createToken();
+		// TODO: should work with usual arrays as well!
+		// Object[] lColumns = null;
+		int lRowCount = 0;
+		int lColCount = 0;
+		List<Map> lColumns = new FastList<Map>();
+		List lData = new FastList();
+		try {
+			// TODO: metadata should be optional to save bandwidth!
+			// generate the meta data for the response
+			SqlRowSetMetaData lMeta = aRowSet.getMetaData();
+			lColCount = lMeta.getColumnCount();
+			lResponse.setInteger("colcount", lColCount);
+
+			for (int lColIdx = 1; lColIdx <= lColCount; lColIdx++) {
+				// get name of colmuns
+				String lSimpleClass = JDBCTools.extractSimpleClass(lMeta.getColumnClassName(lColIdx));
+				// convert to json type
+				String lJSONType = JDBCTools.getJSONType(lSimpleClass, lMeta);
+
+				Map<String, Object> lColHeader = new FastMap<String, Object>();
+				lColHeader.put("name", lMeta.getColumnName(lColIdx));
+				lColHeader.put("jsontype", lJSONType);
+				lColHeader.put("jdbctype", lMeta.getColumnTypeName(lColIdx));
+
+				lColumns.add(lColHeader);
+			}
+
+			// generate the result data
+			while (aRowSet.next()) {
+				lData.add(getResultColumns(aRowSet, lColCount));
+				lRowCount++;
+			}
+		} catch (Exception lEx) {
+			// mLog.error(lEx.getClass().getSimpleName() + " on query: " + lEx.getMessage());
+		}
+
+		// complete the response token
+		lResponse.setInteger("rowcount", lRowCount);
+		lResponse.setList("columns", lColumns);
+		lResponse.setList("data", lData);
+
+		return lResponse;
 	}
 }

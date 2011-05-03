@@ -454,6 +454,32 @@ jws.tools = {
 		lDate.setUTCSeconds( aISO.substr( 12, 2 ) );
 		lDate.setUTCMilliseconds( aISO.substr( 14, 3 ) );
 		return lDate;
+	},
+
+	generateSharedUTID: function(aToken){
+		var string = JSON.stringify(aToken);
+		var chars = string.split('');
+		chars.sort();
+
+		return hex_md5("{" + chars.toString() + "}");
+	},
+
+	getType: function(aObject){
+		var value = aObject;
+		var t = typeof value;
+
+		if ("number" == t){
+			if((parseFloat(value) == parseInt(value))){
+				t = "integer";
+			} else {
+				t = "double";
+			}
+		} else if (Object.prototype.toString.call(value) === "[object Array]") {
+			t = "array";
+		} else if (value === null) {
+			t = "null";
+		}
+		return t;
 	}
 
 };
@@ -514,6 +540,243 @@ if( !jws.browserSupportsNativeWebSockets ) {
 	}
 
 }
+
+
+jws.XHR = {
+	//:i:en:AJAX constants
+
+	//:const:*:XHR_ASYNC
+	//:d:de:Asynchrone Kommunikation mit dem Server verwenden. Laufender Prozess wird fortgesetzt.
+	//:d:en:Use asynchronous communication with the server. The current process is continued.
+	ASYNC: true,
+	//:const:*:SYNC
+	//:d:de:Synchrone Kommunikation mit dem Server verwenden. Laufender Prozess wird geblockt.
+	//:d:en:Use synchronous communication with the server. The current process is blocked.
+	SYNC: false,
+	
+	METHOD_GET: "get",
+	METHOD_POST: "post",
+	METHOD_HEAD: "head",
+	
+	getXHRInstance: function() {
+		var lXHR = null;
+
+		//:i:de:Firefox, Opera, Safari etc. verf&uuml;gen &uuml;ber ein XMLHttpRequest Objekt
+		if ( window.XMLHttpRequest ) {
+			lXHR = new XMLHttpRequest();
+		//:i:de:f&uuml;r den Internet Explorer muss ein ActiveX Objekt instantiiert werden.
+		} else if( window.ActiveXObject ) {
+			/*
+ var XMLHTTP_IDS = new Array('MSXML2.XMLHTTP.5.0',
+                                     'MSXML2.XMLHTTP.4.0',
+                                     'MSXML2.XMLHTTP.3.0',
+                                     'MSXML2.XMLHTTP',
+                                     'Microsoft.XMLHTTP' );
+          var success = false;
+          for (var i=0;i < XMLHTTP_IDS.length && !success; i++) {
+              try {
+                   xmlhttp = new ActiveXObject(XMLHTTP_IDS[i]);
+                      success = true;
+                } catch (e) {}
+          }
+          if (!success) {
+              throw new Error('Unable to create XMLHttpRequest.');
+          }
+*/
+			try {
+				lXHR = new ActiveXObject( "Msxml2.XMLHTTP" );
+			} catch( e1 ) {
+				try{
+					lXHR = new ActiveXObject( "Microsoft.XMLHTTP" );
+				} catch( e2 ) {
+					//:todo:de:Exception handling implementieren falls kein AJAX Object geladen werden kann!
+					throw "f3.cfw.std.ex.xhr.NotAvail";
+				}
+			}
+		} else {
+			throw "f3.cfw.std.ex.xhr.NotAvail";
+		}
+		return lXHR;
+	},
+
+	isProtocolOk: function( aContext ) {
+		if( !aContext ) {
+			aContext = self;
+		}	
+		//:i:en:file protocol does not allow XHR requests.
+		return(
+			!(	aContext.location.protocol &&
+				aContext.location.protocol.toLowerCase() == "file:"
+				)
+			);
+	},
+	
+	//:i:de:Default AJAX handler, falls keine solchen von der Applikation bereit gestellt werden.
+	//:i:en:default AJAX handler if no handler are provided by application
+	mXHRSucClbk: function( aXHR, aArgs ) {
+		throw "f3.cfw.std.ex.xhr.NoSuccObs";
+	},
+
+	mXHRErrClbk: function( aXHR, aArgs ) {
+		throw "f3.cfw.std.ex.xhr.NoErrObs";
+	},
+
+	mXHRRespLsnr: function() {
+		//:i:de:M&ouml;glicherweise kommt eine Antwort nachdem ein Fenster beendet wurde!
+		var aOptions = arguments.callee.options;
+
+		if( f3.ajax.Request !== undefined /* && f3.ajax.Request.mXHRStChgObs */ ) {
+
+			if( aOptions.OnReadyStateChange ) {
+				aOptions.OnReadyStateChange( aOptions.XHR, aOptions );
+			}
+			switch( aOptions.XHR.readyState ) {
+				//:i:en:uninitialized
+				case 0:
+				//:i:en:loading
+				case 1:
+				//:i:en:loaded
+				case 2:
+				//:i:en:interactive
+				case 3:
+					break;
+				//:i:en:complete
+				case 4:
+					clearTimeout( aOptions.hTimeout );
+					if( aOptions.XHR.status == 200 ) {
+						// aOptions.OnSuccess( aOptions.XHR, aOptions );
+						f3.dom.Event.callObserver( aOptions.OnSuccess, aOptions.XHR, aOptions );
+					} else	{
+						// aOptions.OnError( aOptions.XHR, aOptions );
+						f3.dom.Event.callObserver( aOptions.OnError, aOptions.XHR, aOptions );
+					}	
+					aOptions.XHR = null;
+					aOptions = null;
+					arguments.callee.self = null;
+					arguments.callee.options = null;
+					// arguments.callee = null;
+					break;
+				default:
+					aOptions.OnError( aOptions.XHR, aOptions );
+					aOptions.XHR = null;
+					aOptions = null;
+					arguments.callee.self = null;
+					arguments.callee.options = null;
+					// arguments.callee = null;
+					break;
+			}
+		}
+	},
+
+//	this.mXHRRespLsnr.options = aOptions;
+//	this.mXHRRespLsnr.self = this;
+
+
+	//:m:*:request
+	//:d:de:Diese Methode f&uuml;hrt den eigentlichen XHR-Request aus.
+	//:a:de::aURL:String:Server URL zu einer Datei (Ressource) oder einem Servlet oder einem anderen Dienst.
+	//:a:de:aOptions:method:String:Entweder "post" (Daten&uuml;bermittlung im Post-Body) oder "get" (&uuml;bermittlung in der URL).
+	//:a:de:aOptions:asynchronous:Boolean:Bestimmt ob die Anfrage asynchron (non-blocking) oder synchron (blocking) durchgef&uuml;hrt werden soll.
+	//:a:de:aOptions:OnSuccess:Function:Callback der bei erfolgreicher Anfrage ausgef&uuml;hrt werden soll.
+	//:a:de:aOptions:OnError:Function:Callback der bei fehlerhafter Anfrage ausgef&uuml;hrt werden soll.
+	//:d:en:This method performs a AJAX call. The call either can be asynchronous or synchronous.
+	//:a:en::aURL:String:Server URL to access a resource or servlet.
+	//:a:en:aOptions:method:String:Can be "post" or "get".
+	//:a:en:aOptions:asynchronous:Boolean:Perform the request asynchronously (non-blocking) oder synchronously (blocking).
+	//:a:en:aOptions:OnSuccess:Function:Callback for a successful request.
+	//:a:en:aOptions:OnError:Function:Callback for a erroneous request.
+	//:r:*:::void
+	request: function( aURL, aOptions ) {
+
+		//i:de:Einige Vorgabewerte pr&uuml;fen...
+		//i:en:Check some default values
+		aOptions = f3.core.OOP.getDefaultOptions( aOptions, {
+			method			: "POST",
+			asynchronous	: f3.ajax.Common.ASYNC,
+			postBody		: null,
+			timeout			: -1,
+			// username		: null,
+			// password		: null,
+			OnSuccess		: f3.ajax.Request.mXHRSucClbk,
+			OnError			: f3.ajax.Request.mXHRErrClbk,
+			contentType		: "text/plain; charset=UTF-8", // "application/x-www-form-urlencoded"
+			cacheControl	: "must-revalidate"
+		});
+
+		//:i:de:Beim file Protokoll ist kein XHR m&ouml;glich.
+		if( !f3.ajax.Common.isProtocolOk() ) {
+			throw new Error( 0, f3.localeManager.getCurLocStr( "f3.cfw.std.ex.xhr.file" ) );
+		}
+
+		aOptions.XHR = f3.ajax.Common.getXHRInstance();
+		if( aOptions.XHR ) {
+
+			//:i:de:&Ouml;ffnen des XHR Objektes und...
+			aOptions.XHR.open( aOptions.method, aURL, aOptions.asynchronous );
+
+			//:i:de:Sobald ein Request offen ist, k&ouml;nnen wir den ContentType auf plain/text setzen.
+			if ( aOptions.method.toLowerCase() == "post" ) {
+				aOptions.XHR.setRequestHeader(
+					"Content-type",
+					aOptions.contentType
+					);
+			}
+
+			if( aOptions.cacheControl )
+				aOptions.XHR.setRequestHeader( "Cache-Control", aOptions.cacheControl );
+
+			//:i:de:Eventhandler setzen (callback Funktion zuweisen)
+			//:i:de:Dies funktioniert nicht f&uuml;r den Firefox im synchronen Modus, die Callback Funktion wird _
+			//:i:de:nicht aufgerufen. Daher muss in diesem Fall der Handler nach dem "send" explizit _
+			//:i:de:aufgerufen werden.
+		
+			var lResponseHandler = new $f3.$XHRResponse( aOptions );
+
+			if( !f3.browser.Browser.isFirefox() || aOptions.asynchronous ) {
+				aOptions.XHR.onreadystatechange = lResponseHandler.mXHRRespLsnr;
+			// function() {
+			//:i:de:M&ouml;glicherweise kommt eine Antwort nachdem ein Fenster beendet wurde!
+			//	if( f3.ajax.Request !== undefined && f3.ajax.Request.mXHRStChgObs )
+			//		f3.ajax.Request.mXHRStChgObs( aOptions );
+			//};
+			} else {
+				aOptions.XHR.onreadystatechange = null;
+			}
+			
+			if( aOptions.timeout > 0 ) {
+				aOptions.hTimeout = 
+				setTimeout(
+					function() {
+						aOptions.XHR.abort();
+						if( f3.browser.Browser.isFirefox() && !aOptions.asynchronous ) {
+							lResponseHandler.handler( aOptions );
+						}
+					},
+					aOptions.timeout
+					);
+			}	
+			
+			//:i:de:...absetzen des Requests, bei GET-Requests ist postBody "null"
+			try {
+				aOptions.XHR.send( aOptions.postBody );
+			} catch( e ) {
+				aOptions.OnError( aOptions.XHR, aOptions );
+			}	
+			//:i:de:Siehe oben bzgl. Firefox Work-Around
+			if( f3.browser.Browser.isFirefox() && !aOptions.asynchronous ) {
+				lResponseHandler.mXHRRespLsnr( aOptions );
+			}
+		// f3.ajax.Request.mXHRStChgObs( aOptions );
+		}
+
+		//:todo:de:Was passiert, wenn kein AJAX Object geladen werden konnte? Z.B. wegen Sicherheitseinstellungen... ?
+		//:todo:de:Es k&ouml;nnte ein hilfreiches Ergebnis erzeugt werden, z.B. ob und wie der Request ausgef&uuml;hrt werden konnte.
+
+		return aOptions.XHR;
+	}
+
+}
+
 
 if( !jws.browserSupportsNativeJSON ) {
 	// <JasobNoObfs>
@@ -722,7 +985,6 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	},
 
 	//:m:*:connect
-	//:d:en:Deprecated, kept for upward compatibility only. Do not use anymore!
 	//:a:en::aURL:String:Please refer to [tt]open[/tt] method.
 	//:a:en::aOptions:Object:Please refer to [tt]open[/tt] method.
 	//:r:*:::void:none
@@ -788,12 +1050,23 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 	},
 
+	//:m:*:isOpened
+	//:d:en:Returns [tt]true[/tt] if the WebSocket connection opened up, otherwise [tt]false[/tt].
+	//:a:en::::none
+	//:r:*:::boolean:[tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
+	isOpened: function() {
+		return( this.fConn != undefined
+			&& this.fConn != null
+			&& this.fConn.readyState == jws.OPEN );
+	},
+
 	//:m:*:isConnected
+	//:@deprecated:en:Use [tt]isOpened()[/tt] instead.
 	//:d:en:Returns [tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
 	//:a:en::::none
 	//:r:*:::boolean:[tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
 	isConnected: function() {
-		return( this.fConn && this.fConn.readyState == jws.OPEN );
+		return( this.isOpened() );
 	},
 
 	//:m:*:forceClose
@@ -841,6 +1114,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	close: function( aOptions ) {
 		// check if timeout option is used
 		var lTimeout = 0;
+
 		if( aOptions ) {
 			if( aOptions.timeout ) {
 				lTimeout = aOptions.timeout;
@@ -876,6 +1150,24 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		return this.close( aOptions );
 	},
 
+	addListener: function( aCallback ) {
+		// if the class has no plug-ins yet initialize array
+		if( !this.fListeners ) {
+			this.fListeners = [];
+		}
+		this.fListeners.push( aCallback );
+	},
+
+	removeListener: function( aCallback ) {
+		if( this.fListeners ) {
+			for( var lIdx = 0, lCnt = this.fListeners; lIdx < lCnt; lIdx++ ) {
+				if( aCallback == this.fListeners[ lIdx ] ) {
+					this.fListeners.splice( lIdx, 1 );
+				}
+			}
+		}
+	},
+
 	//:m:*:addPlugIn
 	//:d:en:Adds a client side plug-in to the instance - not to the class!
 	//:a:en::aPlugIn:Object:Plug-in to be appended to the client side plug-in chain.
@@ -894,6 +1186,8 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 		//:todo:en:check if plug-in with given id already exists!
 		if( aId ) {
+			aPlugIn.conn = this;
+/*
 			// blend all methods of the plug-in to the connection instance
 			this[ aId ] = {
 				conn: this
@@ -903,6 +1197,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 					this[ aId ][ lField ] = aPlugIn[ lField ];
 				}
 			}
+*/
 		}
 	}
 
@@ -1230,6 +1525,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			this.fOnToken( aToken );
 		}
 
+		if( this.fListeners ) {
+			for( lIdx = 0, lLen = this.fListeners.length; lIdx < lLen; lIdx++ ) {
+				this.fListeners[ lIdx ]( aToken );
+			}
+		}
+
 	},
 
 	//:m:*:processClosed
@@ -1296,6 +1597,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				OnError: null,
 				OnTimeout: null
 			};
+			// we need to check for a response only
+			// if correspondig callbacks are set
 			var lControlResponse = false;
 			if( aOptions ) {
 				if( aOptions.OnResponse ) {
@@ -1530,9 +1833,23 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:r:*:::void:none
 	close: function( aOptions ) {
 		var lTimeout = 0;
+
+		var lNoGoodBye = false;
+		var lNoLogoutBroadcast = false;
+		var lNoDisconnectBroadcast = false;
+
 		if( aOptions ) {
 			if( aOptions.timeout ) {
 				lTimeout = aOptions.timeout;
+			}
+			if( aOptions.noGoodBye ) {
+				lNoGoodBye = true;
+			}
+			if( aOptions.noLogoutBroadcast ) {
+				lNoLogoutBroadcast = true;
+			}
+			if( aOptions.noDisconnectBroadcast ) {
+				lNoDisconnectBroadcast = true;
 			}
 		}
 		var lRes = this.checkConnected();
@@ -1540,11 +1857,23 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			// if connected and timeout is passed give server a chance to
 			// register the disconnect properly and send a good bye response.
 			if( lRes.code == 0 ) {
-				this.sendToken({
+				var lToken = {
 					ns: jws.NS_SYSTEM,
 					type: "close",
 					timeout: lTimeout
-				});
+				};
+				// only add the following optional fields to
+				// the close token on explicit request
+				if( lNoGoodBye ) {
+					lToken.noGoodBye = true;
+				}
+				if( lNoLogoutBroadcast ) {
+					lToken.noLogoutBroadcast = true;
+				}
+				if( lNoDisconnectBroadcast ) {
+					lToken.noDisconnectBroadcast = true;
+				}
+				this.sendToken( lToken );
 				// call inherited disconnect, catching potential exception
 				arguments.callee.inherited.call( this, aOptions );
 			} else {
@@ -2484,6 +2813,182 @@ jws.cache.Cache.prototype.toHtmlString = function() {
     returnStr = returnStr + "</ul>";
     return returnStr;
 };
+//	---------------------------------------------------------------------------
+//	jWebSocket API PlugIn (uses jWebSocket Client and Server)
+//	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
+
+//:author:*:kyberneees
+//:author:*:aschulze
+
+//:package:*:jws
+//:class:*:jws.APIPlugInClass
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.APIPlugIn[/tt] instance plug-in. This _
+//:d:en:plug-in provides the methods to register and unregister at certain _
+//:d:en:stream sn the server.
+jws.APIPlugInClass = {
+
+	//:const:*:NS:String:org.jwebsocket.plugins.API (jws.NS_BASE + ".plugins.api")
+	//:d:en:Namespace for the [tt]APIPlugIn[/tt] class.
+	// if namespace changed update server plug-in accordingly!
+	NS: jws.NS_BASE + ".plugins.api",
+	//:const:*:ID:String:APIPlugIn
+	//:d:en:Id for the [tt]APIPlugIn[/tt] class.
+	ID: "api",
+
+	hasPlugIn: function( aId, aOptions ) {
+		var lToken = {
+			ns: jws.APIPlugInClass.NS,
+			type: "hasPlugIn",
+			plugin_id: aId
+		};
+		var lOptions = {};
+		if( aOptions ) {
+			if( aOptions.OnResponse ) {
+				lOptions.OnResponse = aOptions.OnResponse;
+			}
+		}
+		this.conn.sendToken( lToken, lOptions );
+	},
+
+	getPlugInAPI: function( aId, aOptions ) {
+		var lToken = {
+			ns: jws.APIPlugInClass.NS,
+			type: "getPlugInAPI",
+			plugin_id: aId
+		};
+		var lOptions = {};
+		if( aOptions ) {
+			if( aOptions.OnResponse ) {
+				lOptions.OnResponse = aOptions.OnResponse;
+			}
+		}
+		this.conn.sendToken( lToken, lOptions );
+	},
+
+	supportsToken: function( aId, aOptions ) {
+		var lToken = {
+			ns: jws.APIPlugInClass.NS,
+			type: "supportsToken",
+			token_type: aId
+		};
+		var lOptions = {};
+		if( aOptions ) {
+			if( aOptions.OnResponse ) {
+				lOptions.OnResponse = aOptions.OnResponse;
+			}
+		}
+		this.conn.sendToken( lToken, lOptions );
+	},
+
+	getServerAPI: function( aOptions ) {
+		var lToken = {
+			ns: jws.APIPlugInClass.NS,
+			type: "getServerAPI"
+		};
+		var lOptions = {};
+		if( aOptions ) {
+			if( aOptions.OnResponse ) {
+				lOptions.OnResponse = aOptions.OnResponse;
+			}
+		}
+		this.conn.sendToken( lToken, lOptions );
+	},
+
+	getPlugInsIds: function( aOptions ) {
+		var lToken = {
+			ns: jws.APIPlugInClass.NS,
+			type: "getPlugInIds"
+		}
+		var lOptions = {};
+		if( aOptions ) {
+			if( aOptions.OnResponse ) {
+				lOptions.OnResponse = aOptions.OnResponse;
+			}
+		}
+		this.conn.sendToken( lToken, lOptions );
+	},
+
+	createSpecFromAPI: function( aConn, aServerPlugIn ) {
+
+		// a plug-in might have more than one feature
+		var lCnt =  aServerPlugIn.supportedTokens.length;
+		var lSpecs = [];
+
+		for( var lIdx = 0; lIdx < lCnt; lIdx++ ) {
+
+			var lToken = aServerPlugIn.supportedTokens[ lIdx ];
+			lToken.ns = aServerPlugIn.namespace;
+
+			console.log( JSON.stringify( lToken ) );
+
+			// this is the function which has to be executed as a parameter
+			// of the it call within a describe statement (actually the suite).
+			var lItFunc = function () {
+				var lResponseReceived = false;
+				// create the automated test token
+				var lTestToken = {
+					ns: lToken.ns,
+					type: lToken.type
+				};
+				// add all arguments
+				var lInArgs = lToken.inArguments;
+				for( var lInArgIdx = 0, lInArgCnt = lInArgs.length; lInArgIdx < lInArgCnt; lInArgIdx++ ) {
+					var lInArg = lInArgs[ lInArgIdx ];
+					lTestToken[ lInArg.name ]  = lInArg.testValue;
+				}
+				console.log( "Automatically sending " + JSON.stringify( lTestToken ) );
+				aConn.sendToken( lTestToken, {
+					OnResponse: function( aToken ) {
+						console.log( "Received auto response: " + JSON.stringify( aToken ) );
+						lResponseReceived = true;
+					}
+				});
+
+				waitsFor(
+					function() {
+						return lResponseReceived == true;
+					},
+					"test",
+					20000
+				);
+
+				runs( function() {
+					expect( lResponseReceived ).toEqual( true );
+					// stop watch for this spec
+					// jws.StopWatchPlugIn.stopWatch( "defAPIspec" );
+				});
+			};
+
+			lSpecs.push( lItFunc );
+		}
+		// here the spec function are created and returned only
+		// but not yet executed!
+		return lSpecs;
+	}
+
+};
+
+jws.APIPlugIn = function() {
+	// do NOT use this.conn = aConn; here!
+	// Add the plug-in via conn.addPlugin instead!
+
+	// here you can add optonal instance fields
+	}
+
+jws.APIPlugIn.prototype = jws.APIPlugInClass;
 //	---------------------------------------------------------------------------
 //	jWebSocket Channel PlugIn (uses jWebSocket Client and Server)
 //	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
@@ -4964,7 +5469,6 @@ jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StreamingPlugIn );
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 
-
 //	---------------------------------------------------------------------------
 //  jWebSocket Test Client Plug-In
 //	---------------------------------------------------------------------------
@@ -5014,6 +5518,15 @@ jws.TestPlugIn = {
 		return lRes;
 	},
 
+	execTests: function() {
+		setTimeout( function () {
+			var lReporter = new jasmine.TrivialReporter();
+			jasmine.getEnv().addReporter( lReporter );
+			jasmine.getEnv().execute();
+		}, 500 );
+	},
+
+
 	setTestCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
@@ -5036,6 +5549,72 @@ jws.TestPlugIn = {
 
 // add the JWebSocket Test PlugIn into the TokenClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.TestPlugIn );
+
+
+jws.StopWatchPlugIn = {
+
+	//:const:*:NS:String:org.jwebsocket.plugins.stopwatch (jws.NS_BASE + ".plugins.stopwatch")
+	//:d:en:Namespace for the [tt]StopWatchPlugIn[/tt] class.
+	// if namespace is changed update server plug-in accordingly!
+	NS: jws.NS_BASE + ".plugins.stopwatch",
+
+	mLog: {},
+
+	startWatch: function( aId, aSpec ) {
+		// create new log item
+		var lItem = {
+			spec: aSpec,
+			started: new Date().getTime()
+		};
+		// if an item which the given already exists
+		// then simply overwrite it
+		this.mLog[ aId ] = lItem;
+		// and return the item
+		return lItem;
+	},
+
+	stopWatch: function( aId ) {
+		var lItem = this.mLog[ aId ];
+		if( lItem ) {
+			lItem.stopped = new Date().getTime();
+			lItem.millis = lItem.stopped - lItem.started;
+			return lItem;
+		} else {
+			return null;
+		}
+	},
+
+	logWatch: function( aId, aSpec, aMillis ) {
+		var lItem = {
+			spec: aSpec,
+			millis: aMillis
+		};
+		this.mLog[ aId ] = lItem ;
+		return lItem;
+	},
+
+	resetWatches: function() {
+		this.mLog = {};
+	},
+
+	printWatches: function() {
+		for( var lField in this.mLog ) {
+
+			var lItem = this.mLog[ lField ];
+			var lOut = lItem.spec + " (" + lField + "): " + lItem.millis + "ms";
+
+			if( window.console ) {
+				console.log( lOut );
+			} else {
+				document.write( lOut + "<br>" );
+			}
+		}
+	}
+	
+}
+
+// add the JWebSocket Stop-Watch Plug-in into the TokenClient class
+jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.StopWatchPlugIn );
 //	---------------------------------------------------------------------------
 //	jWebSocket Twitter PlugIn (uses jWebSocket Client and Server)
 //	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath

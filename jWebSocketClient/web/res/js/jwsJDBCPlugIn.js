@@ -44,8 +44,8 @@ jws.JDBCPlugIn = {
 	},
 
 	jdbcSelect: function( aQuery, aOptions ) {
-		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
 			var lToken = {
 				ns: jws.JDBCPlugIn.NS,
 				type: "select",
@@ -57,10 +57,19 @@ jws.JDBCPlugIn = {
 				having: aQuery.having
 			};
 			this.sendToken( lToken,	aOptions );
-		} else {
-			lRes.code = -1;
-			lRes.localeKey = "jws.jsc.res.notConnected";
-			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	jdbcQuery: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "query",
+				sql: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
 		}
 		return lRes;
 	},

@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
@@ -38,6 +39,9 @@ import org.jwebsocket.storage.ehcache.EhCacheStorage;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 import org.jwebsocket.util.Tools;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.FileSystemResource;
 
 /**
  * 
@@ -50,6 +54,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
 	private IBasicStorage mCache = null;
 	private int mConnValTimeout = 300;
+	private static BeanFactory mBeanFactory;
+	private static NativeAccess mNativeAccess;
 
 	/**
 	 *
@@ -65,6 +71,21 @@ public class JDBCPlugIn extends TokenPlugIn {
 		mCache = new EhCacheStorage(NS_JDBC);
 
 		String lVal = getString("conn_val_timeout");
+
+		try {
+			String lSpringConfig = getString("spring_config");
+			FileSystemResource lFSRes =
+					new FileSystemResource(JWebSocketConfig.getConfigFolder(lSpringConfig));
+			mBeanFactory = new XmlBeanFactory(lFSRes);
+
+			mNativeAccess = (NativeAccess) mBeanFactory.getBean("nativeAccess");
+			/*
+			mLog.info(mInstance.query("select * from event_tags").toString());
+			mLog.info(mInstance.query("select * from event_log").toString());
+			 */
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + " instantiation: " + lEx.getMessage());
+		}
 	}
 
 	@Override
@@ -96,12 +117,12 @@ public class JDBCPlugIn extends TokenPlugIn {
 				rollback(aConnector, aToken);
 				// run single native exec sql command (update, delete, insert)
 				// w/o returning a result set
-			} else if (lType.equals("execSQL")) {
+			} else if (lType.equals("exec")) {
 				execSQL(aConnector, aToken);
 				// run single native query sql command (select)
 				// with returning a result set
-			} else if (lType.equals("querySQL")) {
-				querySQL(aConnector, aToken);
+			} else if (lType.equals("query")) {
+				query(aConnector, aToken);
 				// run multiple abstract query sql commands (select)
 			} else if (lType.equals("getSecure")) {
 				getSecure(aConnector, aToken);
@@ -226,7 +247,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void querySQL(WebSocketConnector aConnector, Token aToken) {
+	public void query(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		if (mLog.isDebugEnabled()) {
@@ -245,7 +266,9 @@ public class JDBCPlugIn extends TokenPlugIn {
 		Integer lExpiration = aToken.getInteger("expiration", 0);
 
 		// run the query, optionally considering cache
-		Token lResponse = mQuerySQL(lSQL, lExpiration);
+		Token lResponse = mNativeAccess.query(lSQL);
+		// and add the token standard response fields for the request
+		lServer.setResponseFields(aToken, lResponse);
 
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
@@ -351,7 +374,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */
@@ -378,7 +401,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */
@@ -405,7 +428,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */
@@ -432,7 +455,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */
@@ -459,7 +482,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */
@@ -486,7 +509,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */
@@ -513,7 +536,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */
@@ -540,7 +563,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */
@@ -567,7 +590,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */
@@ -594,7 +617,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		/*
 		String lSQL = aToken.getString("sql");
 		Token lResponse = mExecSQL(lSQL);
-
+		
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 		 */

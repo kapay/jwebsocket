@@ -2,7 +2,7 @@
 	"http://www.w3.org/TR/html4/loose.dtd">
 <html>
 	<head>
-		<title>jWebSocket - Jasmine Test Runner</title>
+		<title>jWebSocket - Test and Benchmark</title>
 		<link rel="stylesheet" type="text/css" href="../lib/jasmine-1.0.2/jasmine.css">
 		<script type="text/javascript" src="../lib/jasmine-1.0.2/jasmine.js"></script>
 		<script type="text/javascript" src="../lib/jasmine-1.0.2/jasmine-html.js"></script>
@@ -10,7 +10,18 @@
 		<script type="text/javascript" src="../res/js/jWebSocket.js"></script>
 		<script type="text/javascript" src="../res/js/jwsAPIPlugIn.js"></script>
 		<script type="text/javascript" src="../res/js/jwsTestPlugIn.js"></script>
+		
+		<script type="text/javascript" src="../testing/src/jwsSharedTests.js"></script>
+		<script type="text/javascript" src="../testing/src/jwsSystemTests.js"></script>
+		
+		<script type="text/javascript" src="../res/js/jwsFilesystemPlugIn.js"></script>
+		<script type="text/javascript" src="../testing/src/jwsFilesystemTests.js"></script>
+		
+		<script type="text/javascript" src="../res/js/jwsLoggingPlugIn.js"></script>
+		<script type="text/javascript" src="../testing/src/jwsLoggingTests.js"></script>
 
+		<script type="text/javascript" src="../testing/src/jwsAutomatedAPITests.js"></script>
+		
 		<!-- include source files here... -->
 		<script type="text/javascript" src="src/TestPlugInHelper.js"></script>
 
@@ -21,7 +32,7 @@
 	<body>
 		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
 			<tr>
-				<td class="tdHeader" width="">jWebSocket Benchmarks</td>
+				<td class="tdHeader" width="">jWebSocket Automated Test and Benchmark Suite</td>
 			</tr>
 		</table>
 
