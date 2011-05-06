@@ -64,6 +64,42 @@ jws.LoggingPlugIn = {
 		return lRes;
 	},
 
+	loggingEvent: function( aTable, aData, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lSequence = null;
+			var lPrimaryKey = null;
+			debugger;
+			if( aOptions ) {
+				if( aOptions.primaryKey ) {
+					lPrimaryKey = aOptions.primaryKey;
+				}
+				if( aOptions.sequence ) {
+					lSequence = aOptions.sequence;
+				}	
+			}
+			var lFields = [];
+			var lValues = [];
+			for( var lField in aData ) {
+				lFields.push( lField );
+				lValues.push( aData[ lField ]);
+			}
+			var lToken = {
+				ns: jws.LoggingPlugIn.NS,
+				type: "logEvent",
+				table: aTable,
+				fields: lFields,
+				values: lValues
+			};
+			if( lPrimaryKey && lSequence ) {
+				lToken.primaryKey = lPrimaryKey;
+				lToken.sequence = lSequence;
+			}
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	setLoggingCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};

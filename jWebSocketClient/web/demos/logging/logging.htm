@@ -190,6 +190,39 @@
 					log( "Exception: " + ex.message );
 				}
 			}
+			
+			function logEvent() {
+				var lMsg = eMessage.value;
+				log( "Logging '" + lMsg + "'..." );
+				try {
+					var lNow = new Date();
+					var lData = {
+						"MESSAGE": lMsg,
+						"BROWSER": "Mein Browser",
+						"IP": "${ip}",
+						"TIMESTAMP": "TO_DATE( '" +
+							lNow.getUTCFullYear().toString() + "/" +
+							jws.tools.zerofill( lNow.getUTCMonth() + 1, 2 ) + "/" +
+							jws.tools.zerofill( lNow.getUTCDate(), 2 ) + " " +
+							jws.tools.zerofill( lNow.getUTCHours(), 2 ) + "/" +
+							jws.tools.zerofill( lNow.getUTCMinutes(), 2 ) + "/" +
+							jws.tools.zerofill( lNow.getUTCSeconds(), 2 ) +
+							"','YYYY/MM/DD HH24/MI/SS')"
+					};
+					var lRes = lWSC.loggingEvent( "ACTION_LOG", lData, {
+						primaryKey: "ID",
+						sequence: "SQ_ACTION_LOG_ID",
+						OnResponse: function( aToken ) {
+							log( "Logged: " + aToken.msg );
+						}
+					});
+					if( lRes.code != 0 ) {
+						log( "Error: " + lRes.msg );
+					}
+				} catch( ex ) {
+					log( "Exception: " + ex.message );
+				}
+			}
 
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
@@ -279,7 +312,7 @@
 					<td class="stdDlg" width="5">
 						Level
 					</td>
-					<td class="stdDlg" width="" colspan="3">
+					<td class="stdDlg" width="" >
 						Debug<input class="sbtnDlg" id="srbtDebug" type="radio" value="debug" name="g1" checked="checked" onclick="switchLevel();"
 							   title="Sets the log level to 'debug'." >
 						| Info<input class="sbtnDlg" id="srbtInfo" type="radio" value="info" name="g1" onclick="switchLevel();"
@@ -292,6 +325,8 @@
 							   title="Sets the log level to 'fatal'." >
 					</td>
 					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnEvent" type="button" value="Event" onclick="logEvent();"
+							   title="Logs an event." >
 					</td>
 				</tr>
 			</table>
