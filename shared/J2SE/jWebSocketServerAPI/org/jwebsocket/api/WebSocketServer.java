@@ -35,6 +35,7 @@ import org.jwebsocket.kit.WebSocketException;
  * @version $Id: WebSocketServer.java 625 2010-07-06 17:33:33Z fivefeetfurther $
  */
 public interface WebSocketServer {
+
 	/**
 	 * Starts the server and all underlying engines.
 	 * @throws WebSocketException
@@ -104,7 +105,7 @@ public interface WebSocketServer {
 	 * @param aDataPacket
 	 */
 	void sendPacket(WebSocketConnector aConnector, WebSocketPacket aDataPacket);
-	
+
 	/**
 	 * Sends the data packet asynchronously to the output channel through the given target
 	 * connector. This is a asynchronous output process which returns the future object 
@@ -137,31 +138,43 @@ public interface WebSocketServer {
 	 * Returns the plugin chain for the server .
 	 * @return the plugInChain
 	 */
-  WebSocketPlugInChain getPlugInChain();
+	WebSocketPlugInChain getPlugInChain();
+
+	/**
+	 * Returns plugin identified by id for the server.
+	 * @return the plugInChain
+	 */
+	WebSocketPlugIn getPlugInById(String aId);
 
 	/**
 	 * Returns the filter chain for the server.
 	 * @return the filterChain
 	 */
-	 WebSocketFilterChain getFilterChain();
+	WebSocketFilterChain getFilterChain();
+
+	/**
+	 * Returns filter identified by Id for the server.
+	 * @return the filterChain
+	 */
+	WebSocketFilter getFilterById(String aId);
 
 	/**
 	 * 
 	 * @param aListener
 	 */
-	 void addListener(WebSocketServerListener aListener);
+	void addListener(WebSocketServerListener aListener);
 
 	/**
 	 *
 	 * @param aListener
 	 */
-	 void removeListener(WebSocketServerListener aListener);
+	void removeListener(WebSocketServerListener aListener);
 
 	/**
 	 * Returns the list of listeners for the server.
 	 * @return the filterChain
 	 */
-	 List<WebSocketServerListener> getListeners();
+	List<WebSocketServerListener> getListeners();
 
 	/**
 	 *
@@ -214,8 +227,8 @@ public interface WebSocketServer {
 	Map<String, WebSocketConnector> selectConnectors(Map<String, Object> aFilter);
 
 	Map<String, WebSocketConnector> getAllConnectors();
-	
+
 	void setServerConfiguration(ServerConfiguration configuration);
-	
+
 	ServerConfiguration getServerConfiguration();
 }

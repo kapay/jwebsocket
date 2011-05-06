@@ -22,11 +22,12 @@ package org.jwebsocket.config;
  * @version $Id: JWebSocketServerConstants.java 624 2010-07-06 12:28:44Z fivefeetfurther $
  */
 public final class JWebSocketClientConstants {
+	
 
 	/**
 	 * Current version string of the jWebSocket package.
 	 */
-	public static final String VERSION_STR = "1.0a8 (build 10421)";
+	public static final String VERSION_STR = "1.0a9 (build 10505)";
 	/**
 	 * Name space base for tokens and plug-ins.
 	 */

@@ -15,9 +15,16 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.jdbc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
@@ -27,17 +34,46 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 public class NativeAccess {
 
 	private JdbcTemplate mJDBCTemplate;
+	private String mSelectSequenceSQL = null;
 
 	public void setDataSource(DataSource aDataSource) {
 		mJDBCTemplate = new JdbcTemplate(aDataSource);
 	}
 
-	public Token query(String aSQL) {
-		SqlRowSet lRowSet = mJDBCTemplate.queryForRowSet(aSQL);
-		return JDBCTools.resultSetToToken(lRowSet);
+	public void setSelectSequenceSQL(String aSQL) {
+		mSelectSequenceSQL = aSQL;
 	}
 
-	public int update(String aSQL) {
-		return mJDBCTemplate.update(aSQL);
+	public String getSelectSequenceSQL() {
+		return mSelectSequenceSQL;
+	}
+
+	public Token query(String aSQL) {
+		Token lResToken;
+		try {
+			SqlRowSet lRowSet = mJDBCTemplate.queryForRowSet(aSQL);
+			lResToken = JDBCTools.resultSetToToken(lRowSet);
+		} catch (Exception lEx) {
+			lResToken = TokenFactory.createToken();
+			lResToken.setInteger("code", -1);
+			lResToken.setString("msg",
+					lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+		}
+		return lResToken;
+	}
+
+	public Token exec(String aSQL) {
+		Token lResToken = TokenFactory.createToken();
+		int lAffectedRows = 0;
+		try {
+			lAffectedRows = mJDBCTemplate.update(aSQL);
+			lResToken.setInteger("code", 0);
+		} catch (Exception lEx) {
+			lResToken.setInteger("code", -1);
+			lResToken.setString("msg",
+					lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+		}
+		lResToken.setInteger("rowsAffected", lAffectedRows);
+		return lResToken;
 	}
 }

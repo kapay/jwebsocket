@@ -30,6 +30,9 @@ import java.util.regex.Pattern;
  */
 public class Tools {
 
+	public final static boolean EXPAND_CASE_SENSITIVE = false;
+	public final static boolean EXPAND_CASE_INSENSITIVE = true;
+	
 	/**
 	 * Returns the MD5 sum of the given string. The output always has 32 digits.
 	 * @param aMsg String the string to calculate the MD5 sum for.
@@ -111,6 +114,23 @@ public class Tools {
 	}
 
 	/**
+	 * Converts a string into a long value and automatically sets it to
+	 * a given default value if the string could not be parsed.
+	 * @param aString string to be converted into a long.
+	 * @param aDefault default value assigned to the result in case of an exception.
+	 * @return long value of string or given default value in case of exception.
+	 */
+	public static long stringToLong(String aString, long aDefault) {
+		long lRes;
+		try {
+			lRes = Long.parseLong(aString);
+		} catch (Exception lEx) {
+			lRes = aDefault;
+		}
+		return lRes;
+	}
+
+	/**
 	 * 
 	 * @param aISO8601Date
 	 * @return
@@ -148,13 +168,17 @@ public class Tools {
 		return lSDF.format(aDate);
 	}
 
-	public static String expandEnvVars(String aString) {
-		Map<String, String> lEnvVars = System.getenv();
+	public static String expandVars(String aString, Map<String, String> aVars,
+			boolean aIgnoreCase) {
 		String lPattern = "\\$\\{([A-Za-z0-9_]+)\\}";
 		Pattern lRegExpr = Pattern.compile(lPattern);
 		Matcher lMatcher = lRegExpr.matcher(aString);
 		while (lMatcher.find()) {
-			String lEnvVal = lEnvVars.get(lMatcher.group(1).toUpperCase());
+			String lFoundVal = lMatcher.group(1);
+			if (aIgnoreCase) {
+				lFoundVal = lFoundVal.toUpperCase();
+			}
+			String lEnvVal = aVars.get(lFoundVal);
 			if (lEnvVal == null) {
 				lEnvVal = "";
 			} else {
@@ -164,5 +188,10 @@ public class Tools {
 			aString = lSubExpr.matcher(aString).replaceAll(lEnvVal);
 		}
 		return aString;
+	}
+
+	public static String expandEnvVars(String aString) {
+		Map<String, String> lEnvVars = System.getenv();
+		return expandVars(aString, lEnvVars, EXPAND_CASE_INSENSITIVE);
 	}
 }

@@ -210,7 +210,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	public void broadcastDisconnectEvent(WebSocketConnector aConnector) {
 		// only broadcast if corresponding global plugin setting is "true"
 		if (BROADCAST_CLOSE
-				&& !aConnector.getBoolean("noDisconnectBroadcast")) {
+				&& !aConnector.getBool("noDisconnectBroadcast")) {
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Broadcasting disconnect...");
 			}
@@ -560,11 +560,11 @@ public class SystemPlugIn extends TokenPlugIn {
 	private void close(WebSocketConnector aConnector, Token aToken) {
 		int lTimeout = aToken.getInteger("timeout", 0);
 
-		boolean lNoGoodBye =
+		Boolean lNoGoodBye =
 				aToken.getBoolean("noGoodBye", false);
-		boolean lNoLogoutBroadcast =
+		Boolean lNoLogoutBroadcast =
 				aToken.getBoolean("noLogoutBroadcast", false);
-		boolean lNoDisconnectBroadcast =
+		Boolean lNoDisconnectBroadcast =
 				aToken.getBoolean("noDisconnectBroadcast", false);
 
 		// only send a good bye message if timeout is > 0 and not to be noed

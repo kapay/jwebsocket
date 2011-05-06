@@ -50,4 +50,14 @@ public interface WebSocketFilter {
 	 * @return the filterChain
 	 */
 	public WebSocketFilterChain getFilterChain();
+
+	/**
+	 * @return the Id of the filter
+	 */
+	public String getId();
+
+	/**
+	 * @return the name space of the filter
+	 */
+	public String getNS();
 }

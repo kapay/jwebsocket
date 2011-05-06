@@ -27,50 +27,58 @@ import org.jwebsocket.api.WebSocketPacket;
  * @author aschulze
  */
 public class BaseFilter implements WebSocketFilter {
-  // every filter has a backward reference to its filter chain
-  private WebSocketFilterChain filterChain = null;
-  private FilterConfiguration configuration = null;
-  private String id= null;
-  
-  public BaseFilter(String theId) {
-    this.id = theId;
-  }
-  
-  public BaseFilter(FilterConfiguration theConfiguration) {
-    this.configuration = theConfiguration;
-  }
+	// every filter has a backward reference to its filter chain
 
-  @Override
-  public String toString() {
-    if (id != null) {
-      return id;
-    }
-    return configuration.getId();
-  }
+	private WebSocketFilterChain mFilterChain = null;
+	private FilterConfiguration mConfiguration = null;
 
-  @Override
-  public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aPacket) {
-  }
+	public BaseFilter(FilterConfiguration aConfiguration) {
+		this.mConfiguration = aConfiguration;
+	}
 
-  @Override
-  public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket) {
-  }
+	@Override
+	public String toString() {
+		return mConfiguration.getId();
+	}
 
-  /**
-   * 
-   * @param aFilterChain
-   */
-  @Override
-  public void setFilterChain(WebSocketFilterChain aFilterChain) {
-    filterChain = aFilterChain;
-  }
+	@Override
+	public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aPacket) {
+	}
 
-  /**
-   * @return the filterChain
-   */
-  @Override
-  public WebSocketFilterChain getFilterChain() {
-    return filterChain;
-  }
+	@Override
+	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket) {
+	}
 
+	/**
+	 * 
+	 * @param aFilterChain
+	 */
+	@Override
+	public void setFilterChain(WebSocketFilterChain aFilterChain) {
+		mFilterChain = aFilterChain;
+	}
+
+	/**
+	 * @return the filterChain
+	 */
+	@Override
+	public WebSocketFilterChain getFilterChain() {
+		return mFilterChain;
+	}
+
+	/**
+	 * @return the id of the filter
+	 */
+	@Override
+	public String getId() {
+		return mConfiguration.getNamespace();
+	}
+
+	/**
+	 * @return the name space of the filter
+	 */
+	@Override
+	public String getNS() {
+		return mConfiguration.getId();
+	}
 }

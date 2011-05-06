@@ -22,12 +22,14 @@ import javolution.util.FastMap;
 import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketFilter;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServer;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.api.WebSocketPlugInChain;
 import org.jwebsocket.api.WebSocketFilterChain;
+import org.jwebsocket.api.WebSocketPlugIn;
 import org.jwebsocket.api.WebSocketServerListener;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.connectors.BaseConnector;
@@ -433,8 +435,18 @@ public class BaseServer implements WebSocketServer {
     }
 
     @Override
+    public WebSocketPlugIn getPlugInById(String aId) {
+        return mPlugInChain.getPlugIn(aId);
+    }
+	
+    @Override
     public WebSocketFilterChain getFilterChain() {
         return mFilterChain;
+    }
+
+    @Override
+    public WebSocketFilter getFilterById(String aId) {
+        return mFilterChain.getFilterById(aId);
     }
 
     @Override

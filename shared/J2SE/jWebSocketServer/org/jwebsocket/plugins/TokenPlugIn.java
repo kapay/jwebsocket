@@ -71,6 +71,15 @@ public class TokenPlugIn extends BasePlugIn {
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 	}
 
+	/**
+	 * 
+	 * @param aToken
+	 * @return
+	 */
+	public Token invoke(WebSocketConnector aConnector, Token aToken) {
+		return null;
+	}
+
 	@Override
 	public void processPacket(PlugInResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aDataPacket) {
 		//

@@ -24,8 +24,10 @@ package org.jwebsocket.kit;
  */
 public class PlugInResponse {
 
-	private boolean chainAborted = false;
-	private boolean tokenProcessed = false;
+	private boolean mChainAborted = false;
+	private boolean mTokenProcessed = false;
+	private int mReturnCode = -1;
+	private String mMessage = null;
 
 	/**
 	 * Returns if the plug-in chain has to be aborted after a plug-in has
@@ -33,7 +35,7 @@ public class PlugInResponse {
 	 * @return the chainAborted
 	 */
 	public Boolean isChainAborted() {
-		return chainAborted;
+		return mChainAborted;
 	}
 
 	/**
@@ -41,8 +43,8 @@ public class PlugInResponse {
 	 * been processed.
 	 */
 	public void abortChain() {
-		this.chainAborted = true;
-		this.tokenProcessed = false;
+		this.mChainAborted = true;
+		this.mTokenProcessed = false;
 	}
 
 	/**
@@ -50,15 +52,43 @@ public class PlugInResponse {
 	 * processed.
 	 */
 	public void breakChain() {
-		this.chainAborted = true;
-		this.tokenProcessed = true;
+		this.mChainAborted = true;
+		this.mTokenProcessed = true;
 	}
 
 	/**
 	 * Signals that the plug-in chain has to be be continued.
 	 */
 	public void continueChain() {
-		this.chainAborted = false;
+		this.mChainAborted = false;
+	}
+
+	/**
+	 * @return the mReturnCode
+	 */
+	public int getReturnCode() {
+		return mReturnCode;
+	}
+
+	/**
+	 * @param mReturnCode the mReturnCode to set
+	 */
+	public void setReturnCode(int aReturnCode) {
+		this.mReturnCode = aReturnCode;
+	}
+
+	/**
+	 * @return the mMessage
+	 */
+	public String getMessage() {
+		return mMessage;
+	}
+
+	/**
+	 * @param mMessage the mMessage to set
+	 */
+	public void setMessage(String aMessage) {
+		this.mMessage = aMessage;
 	}
 
 }

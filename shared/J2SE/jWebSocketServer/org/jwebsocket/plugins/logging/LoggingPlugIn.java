@@ -15,6 +15,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.logging;
 
+import java.util.List;
+import java.util.Map;
+import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
@@ -22,8 +25,11 @@ import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.plugins.jdbc.JDBCTools;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.token.TokenFactory;
+import org.jwebsocket.util.Tools;
 
 /**
  *
@@ -53,15 +59,16 @@ public class LoggingPlugIn extends TokenPlugIn {
 		mImplementation = getString("implementation", DEF_IMPL);
 		mLogger = new Log4JLogger();
 	}
-/*
+	/*
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 	}
-
+	
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseRease) {
 	}
-*/
+	 */
+
 	@Override
 	public void processToken(PlugInResponse aResponse,
 			WebSocketConnector aConnector, Token aToken) {
@@ -72,7 +79,14 @@ public class LoggingPlugIn extends TokenPlugIn {
 			// log
 			if (lType.equals("log")) {
 				log(aConnector, aToken);
+			} else if (lType.equals("logEvent")) {
+				logEvent(aConnector, aToken);
+			} else if (lType.equals("subscribe")) {
+				logEvent(aConnector, aToken);
+			} else if (lType.equals("unsubscribe")) {
+				logEvent(aConnector, aToken);
 			}
+
 		}
 	}
 
@@ -96,6 +110,80 @@ public class LoggingPlugIn extends TokenPlugIn {
 		}
 
 		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	private void registerListener(WebSocketConnector aConnector) {
+	}
+
+	private void unregisterListener(WebSocketConnector aConnector) {
+	}
+
+	private void subscribe(WebSocketConnector aConnector, Token aToken) {
+	}
+
+	private void unsubscribe(WebSocketConnector aConnector, Token aToken) {
+	}
+
+	private void logEvent(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		Token lResponse = lServer.createResponse(aToken);
+
+		TokenPlugIn lJDBCPlugIn = (TokenPlugIn) lServer.getPlugInById("jws.jdbc");
+		if (lJDBCPlugIn == null) {
+			// send response to requester
+			lResponse = lServer.createErrorToken(aToken, -1, "JDBC plug-in not loaded.");
+			lServer.sendToken(aConnector, lResponse);
+			return;
+		}
+
+		String lTable = aToken.getString("table");
+		List lFields = aToken.getList("fields");
+		List lValues = aToken.getList("values");
+		String lPrimaryKey = aToken.getString("primaryKey");
+		String lSequence = aToken.getString("sequence");
+
+		Token lExecToken = TokenFactory.createToken(
+				lJDBCPlugIn.getNamespace(), "exec");
+
+		Integer lValue = null;
+		if (lPrimaryKey != null && lSequence != null) {
+			Token lGetNextSeqToken = TokenFactory.createToken(
+				lJDBCPlugIn.getNamespace(), "getNextSeqVal");
+			lGetNextSeqToken.setString("sequence", lSequence);
+			Token lNextSeqVal = lJDBCPlugIn.invoke(aConnector, lGetNextSeqToken);
+			
+			lValue = lNextSeqVal.getInteger("value");
+			if( lValue == null ) {
+				// take over error message
+				lResponse.setInteger("code", lNextSeqVal.getInteger("code"));
+				lResponse.setString("msg", lNextSeqVal.getString("msg"));
+				lServer.sendToken(aConnector, lResponse);
+				return;
+			}
+			lFields.add(lPrimaryKey);
+			lValues.add(lValue);
+		}
+		
+		String lFieldsStr = JDBCTools.fieldListToString(lFields);
+		String lValuesStr = JDBCTools.valueListToString(lValues);
+
+		Map<String, String> lVars = new FastMap<String, String>();
+		lVars.put("ip", aConnector.getRemoteHost().getHostAddress());
+		lValuesStr = Tools.expandVars(lValuesStr, lVars, Tools.EXPAND_CASE_SENSITIVE);
+		
+		lExecToken.setString("sql",
+				"insert into "
+				+ lTable
+				+ " (" + lFieldsStr + ")"
+				+ " values "
+				+ " (" + lValuesStr + ")");
+		
+		Token lExecResp = lJDBCPlugIn.invoke(aConnector, lExecToken);
+		lResponse.setInteger("code", lExecResp.getInteger("code"));
+		lResponse.setInteger("msg", lExecResp.getInteger("msg"));
+		lResponse.setInteger("rowsAffected", lExecResp.getInteger("rowsAffected"));
+		lResponse.setInteger("key", lValue);
 		lServer.sendToken(aConnector, lResponse);
 	}
 }

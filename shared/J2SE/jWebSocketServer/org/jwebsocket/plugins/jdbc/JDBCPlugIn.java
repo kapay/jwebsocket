@@ -50,12 +50,13 @@ import org.springframework.core.io.FileSystemResource;
 public class JDBCPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(JDBCPlugIn.class);
-	// if namespace changed update client plug-in accordingly!
+	// if namespace changed exec client plug-in accordingly!
 	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
 	private IBasicStorage mCache = null;
 	private int mConnValTimeout = 300;
 	private static BeanFactory mBeanFactory;
 	private static NativeAccess mNativeAccess;
+	private static String mSelectSequenceSQL = null;
 
 	/**
 	 *
@@ -78,11 +79,9 @@ public class JDBCPlugIn extends TokenPlugIn {
 					new FileSystemResource(JWebSocketConfig.getConfigFolder(lSpringConfig));
 			mBeanFactory = new XmlBeanFactory(lFSRes);
 
+			// DataSource lDatasource = (DataSource)mBeanFactory.getBean("mysqlDataSource");
 			mNativeAccess = (NativeAccess) mBeanFactory.getBean("nativeAccess");
-			/*
-			mLog.info(mInstance.query("select * from event_tags").toString());
-			mLog.info(mInstance.query("select * from event_log").toString());
-			 */
+			mSelectSequenceSQL = mNativeAccess.getSelectSequenceSQL();
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName() + " instantiation: " + lEx.getMessage());
 		}
@@ -97,7 +96,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 			// abstract select from database
 			if (lType.equals("select")) {
 				select(aConnector, aToken);
-				// abstract update from database
+				// abstract exec from database
 			} else if (lType.equals("update")) {
 				update(aConnector, aToken);
 				// abstract delete from database
@@ -115,28 +114,46 @@ public class JDBCPlugIn extends TokenPlugIn {
 				// abstract rollback transaction
 			} else if (lType.equals("rollback")) {
 				rollback(aConnector, aToken);
-				// run single native exec sql command (update, delete, insert)
+				// run single native exec sql command (exec, delete, insert)
 				// w/o returning a result set
 			} else if (lType.equals("exec")) {
-				execSQL(aConnector, aToken);
+				exec(aConnector, aToken);
 				// run single native query sql command (select)
 				// with returning a result set
 			} else if (lType.equals("query")) {
 				query(aConnector, aToken);
 				// run multiple abstract query sql commands (select)
+			} else if (lType.equals("getNextSeqVal")) {
+				getNextSeqVal(aConnector, aToken);
+				// run multiple abstract query sql commands (select)
 			} else if (lType.equals("getSecure")) {
 				getSecure(aConnector, aToken);
-				// run multiple abstract exec sql commands (update, delete, insert)
+				// run multiple abstract exec sql commands (exec, delete, insert)
 			} else if (lType.equals("postSecure")) {
 				postSecure(aConnector, aToken);
 				// run multiple native query sql commands (select)
 			} else if (lType.equals("getSQL")) {
 				getSQL(aConnector, aToken);
-				// run multiple native exec sql commands (update, delete, insert)
+				// run multiple native exec sql commands (exec, delete, insert)
 			} else if (lType.equals("postSQL")) {
 				postSQL(aConnector, aToken);
 			}
 		}
+	}
+
+	@Override
+	public Token invoke(WebSocketConnector aConnector, Token aToken) {
+		String lType = aToken.getType();
+		String lNS = aToken.getNS();
+
+		if (lType != null && getNamespace().equals(lNS)) {
+			if (lType.equals("getNextSeqVal")) {
+				return getNextSeqVal(aToken);
+			} else if (lType.equals("exec")) {
+				return exec(aToken);
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -232,16 +249,6 @@ public class JDBCPlugIn extends TokenPlugIn {
 		return lResponse;
 	}
 
-	private Token mExecSQL(String aSQL) {
-		// instantiate response token
-		Token lResponse = TokenFactory.createToken();
-
-		// complete the response token
-		lResponse.setInteger("rowsAffected", -1);
-
-		return lResponse;
-	}
-
 	/**
 	 *
 	 * @param aConnector
@@ -274,17 +281,76 @@ public class JDBCPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
+	private Token getNextSeqVal(Token aToken) {
+		String lSequence = aToken.getString("sequence");
+		Token lResToken = TokenFactory.createToken();
+		if (lSequence != null) {
+			Map<String, String> lVars = new FastMap<String, String>();
+			lVars.put("sequence", lSequence);
+			String lQuery = Tools.expandVars(mSelectSequenceSQL, lVars, Tools.EXPAND_CASE_SENSITIVE);
+			Token lPKToken = mNativeAccess.query(lQuery);
+			Number lNextSeqVal = null;
+			List lRows = lPKToken.getList("data");
+			if (lRows != null) {
+				List lFields = (List) lRows.get(0);
+				if (lFields != null) {
+					lNextSeqVal = (Number) lFields.get(0);
+				}
+			}
+			if (lNextSeqVal != null) {
+				lResToken.setInteger("code", 0);
+				lResToken.setInteger("value", lNextSeqVal.intValue());
+			} else {
+				lResToken.setInteger("code", -1);
+				lResToken.setString("msg", "value could not be obtained");
+			}
+		} else {
+			lResToken.setInteger("code", -1);
+			lResToken.setString("msg", "no sequence given");
+		}
+		return lResToken;
+	}
+
+	private void getNextSeqVal(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		// send response to requester
+		lServer.sendToken(aConnector, getNextSeqVal(aToken));
+	}
+
 	/**
 	 *
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void execSQL(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
+	public Token exec(Token aToken) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'execSQL'...");
 		}
+
+		// load SQL string
+		String lSQL = aToken.getString("sql");
+		/*
+		String lPrimaryKey = aToken.getString("primaryKey");
+		String lSequence = aToken.getString("sequence");
+		
+		if (lPrimaryKey != null && lSequence != null) {
+		Token lNextSeqVal = getNextSeqVal(aToken);
+		Integer lValue = lNextSeqVal.getInteger("value");
+		if (lValue == null) {
+		// take over error message
+		lResponse.setInteger("code", lNextSeqVal.getInteger("code"));
+		lResponse.setString("msg", lNextSeqVal.getString("msg"));
+		return lResponse;
+		}
+		}
+		 */
+
+		Token lExecToken = mNativeAccess.exec(lSQL);
+		return lExecToken;
+	}
+
+	public void exec(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
 
 		// check if user is allowed to run 'select' command
 		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".execSQL")) {
@@ -292,13 +358,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 			// return;
 		}
 
-		// load SQL string
-		String lSQL = aToken.getString("sql");
-
-		Token lResponse = mExecSQL(lSQL);
-
 		// send response to requester
-		lServer.sendToken(aConnector, lResponse);
+		lServer.sendToken(aConnector, exec(aToken));
 	}
 
 	/**

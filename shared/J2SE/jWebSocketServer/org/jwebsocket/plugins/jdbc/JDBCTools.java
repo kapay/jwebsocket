@@ -137,4 +137,39 @@ public class JDBCTools {
 
 		return lResponse;
 	}
+
+	public static String fieldListToString(List aFieldList) {
+		StringBuilder lRes = new StringBuilder();
+		int lIdx = 0;
+		int lCnt = aFieldList.size();
+		for (Object lField : aFieldList) {
+			lRes.append(lField);
+			lIdx++;
+			if (lIdx < lCnt) {
+				lRes.append(",");
+			}
+		}
+		return lRes.toString();
+	}
+
+	public static String valueListToString(List aFieldList) {
+		StringBuilder lRes = new StringBuilder();
+		int lIdx = 0;
+		int lCnt = aFieldList.size();
+		for (Object lField : aFieldList) {
+			if (lField instanceof String
+					&& !((String) lField).startsWith("TO_DATE")) {
+				lRes.append("'");
+				lRes.append(lField);
+				lRes.append("'");
+			} else {
+				lRes.append(lField);
+			}
+			lIdx++;
+			if (lIdx < lCnt) {
+				lRes.append(", ");
+			}
+		}
+		return lRes.toString();
+	}
 }

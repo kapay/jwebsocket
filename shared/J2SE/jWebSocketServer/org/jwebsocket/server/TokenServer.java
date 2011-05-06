@@ -39,7 +39,6 @@ import org.jwebsocket.filter.TokenFilterChain;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.FilterResponse;
-import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.listener.WebSocketServerTokenEvent;
 import org.jwebsocket.listener.WebSocketServerTokenListener;
 import org.jwebsocket.plugins.TokenPlugInChain;
@@ -638,15 +637,32 @@ public class TokenServer extends BaseServer {
 	}
 
 	/**
+	 * creates an error token yet with a code and a message
+	 *
+	 * @param aInToken
+	 * @return
+	 */
+	public Token createErrorToken(Token aInToken, int aCode, String aMessage) {
+		Token lResToken = createResponse(aInToken);
+		lResToken.setInteger("code", aCode);
+		lResToken.setString("msg", aMessage);
+		return lResToken;
+	}
+	
+	/**
 	 * creates a response token with the standard "not authenticated" message.
 	 *
 	 * @param aInToken
 	 * @return
 	 */
 	public Token createNotAuthToken(Token aInToken) {
+		
+		Token lResToken = createErrorToken(aInToken, -1, "not authenticated");
+		/*
 		Token lResToken = createResponse(aInToken);
 		lResToken.setInteger("code", -1);
 		lResToken.setString("msg", "not authenticated");
+		 */
 		return lResToken;
 	}
 
@@ -657,9 +673,12 @@ public class TokenServer extends BaseServer {
 	 * @return
 	 */
 	public Token createAccessDenied(Token aInToken) {
+		Token lResToken = createErrorToken(aInToken, -1, "access denied");
+		/*
 		Token lResToken = createResponse(aInToken);
 		lResToken.setInteger("code", -1);
 		lResToken.setString("msg", "access denied");
+		 */
 		return lResToken;
 	}
 
@@ -693,4 +712,5 @@ public class TokenServer extends BaseServer {
 	public TokenFilterChain getFilterChain() {
 		return (TokenFilterChain) mFilterChain;
 	}
+	
 }
