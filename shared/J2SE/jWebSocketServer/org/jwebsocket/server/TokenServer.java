@@ -617,8 +617,11 @@ public class TokenServer extends BaseServer {
 			lNS = aInToken.getString("ns");
 		}
 		aOutToken.setType("response");
-		aOutToken.setInteger("code", 0);
-		aOutToken.setString("msg", "ok");
+		
+		// if code and msg are already part of outgoing token do not overwrite!
+		aOutToken.setInteger("code", aOutToken.getInteger("code", 0));
+		aOutToken.setString("msg", aOutToken.getString("msg", "ok"));
+		
 		if (lTokenId != null) {
 			aOutToken.setInteger("utid", lTokenId);
 		}

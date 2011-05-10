@@ -445,7 +445,7 @@ public class RPCPlugIn extends TokenPlugIn {
 		// JSONArray lJsonArrayArgs = null;
 		Method lMethodToInvoke = null;
 		List<MethodRightLink> lListMethod = aRpcClassLoader.getMethods(aMethodName);
-		//aConnector.
+		// aConnector.
 		// We look if one of the method we have loaded match
 		for (MethodRightLink lMethodRight : lListMethod) {
 			Method lMethod = lMethodRight.getMethod();

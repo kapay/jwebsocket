@@ -324,6 +324,16 @@
 			<version>${org.springframework.version}</version>
 		</dependency>
 
+		<!-- Spring LDAP directory service abastraction -->
+		<!-- http://static.springsource.org/spring-security/site/docs/3.0.x/reference/ldap.html -->
+		<!--
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-ldap</artifactId>
+			<version>${org.springframework.version}</version>
+		</dependency>
+		-->
+		
 		<!-- memcached dependency -->
 		<dependency>
 			<groupId>spy</groupId>

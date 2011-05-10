@@ -15,16 +15,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
@@ -62,7 +56,7 @@ public class NativeAccess {
 		return lResToken;
 	}
 
-	public Token exec(String aSQL) {
+	public Token update(String aSQL) {
 		Token lResToken = TokenFactory.createToken();
 		int lAffectedRows = 0;
 		try {
@@ -76,4 +70,18 @@ public class NativeAccess {
 		lResToken.setInteger("rowsAffected", lAffectedRows);
 		return lResToken;
 	}
+	
+	public Token exec(String aSQL) {
+		Token lResToken = TokenFactory.createToken();
+		try {
+			mJDBCTemplate.execute(aSQL);
+			lResToken.setInteger("code", 0);
+		} catch (Exception lEx) {
+			lResToken.setInteger("code", -1);
+			lResToken.setString("msg",
+					lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+		}
+		return lResToken;
+	}
+	
 }

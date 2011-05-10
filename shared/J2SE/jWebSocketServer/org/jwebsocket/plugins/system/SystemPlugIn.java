@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.BroadcastOptions;
@@ -148,7 +149,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		// network and reject connect if so!
 
 		aConnector.getSession().setSessionId(
-				Tools.getMD5(aConnector.generateUID() + "." + lRand.nextInt()));
+				Tools.getMD5(aConnector.generateUID()
+				+ "." + lRand.nextInt()));
 
 		// and send the welcome message incl. the session id
 		sendWelcome(aConnector);
@@ -379,7 +381,7 @@ public class SystemPlugIn extends TokenPlugIn {
 					mLog.info("User '" + lUsername + "' successfully logged in.");
 				}
 			} else {
-				mLog.warn("Attempt to login with invalid credentials, username: '" + lUsername +"'.");
+				mLog.warn("Attempt to login with invalid credentials, username: '" + lUsername + "'.");
 				lResponse.setInteger("code", -1);
 				lResponse.setString("msg", "Invalid credentials");
 				// reset username to not send login event, see below

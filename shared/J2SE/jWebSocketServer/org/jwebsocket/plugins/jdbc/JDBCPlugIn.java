@@ -50,7 +50,7 @@ import org.springframework.core.io.FileSystemResource;
 public class JDBCPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(JDBCPlugIn.class);
-	// if namespace changed exec client plug-in accordingly!
+	// if namespace changed updateSQL client plug-in accordingly!
 	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
 	private IBasicStorage mCache = null;
 	private int mConnValTimeout = 300;
@@ -79,7 +79,6 @@ public class JDBCPlugIn extends TokenPlugIn {
 					new FileSystemResource(JWebSocketConfig.getConfigFolder(lSpringConfig));
 			mBeanFactory = new XmlBeanFactory(lFSRes);
 
-			// DataSource lDatasource = (DataSource)mBeanFactory.getBean("mysqlDataSource");
 			mNativeAccess = (NativeAccess) mBeanFactory.getBean("nativeAccess");
 			mSelectSequenceSQL = mNativeAccess.getSelectSequenceSQL();
 		} catch (Exception lEx) {
@@ -93,10 +92,25 @@ public class JDBCPlugIn extends TokenPlugIn {
 		String lNS = aToken.getNS();
 
 		if (lType != null && getNamespace().equals(lNS)) {
-			// abstract select from database
-			if (lType.equals("select")) {
+			if (lType.equals("querySQL")) {
+				// run single native query sql command (select)
+				// with returning a result set
+				querySQL(aConnector, aToken);
+			} else if (lType.equals("updateSQL")) {
+				// run single native updateSQL sql command (updateSQL, delete, insert)
+				// w/o returning a result set, but number of affected rows
+				updateSQL(aConnector, aToken);
+			} else if (lType.equals("execSQL")) {
+				// run single native updateSQL sql command (updateSQL, delete, insert)
+				// w/o returning a result set, but number of affected rows
+				execSQL(aConnector, aToken);
+			} else if (lType.equals("getNextSeqVal")) {
+				// get the next value of a sequence
+				getNextSeqVal(aConnector, aToken);
+			} else if (lType.equals("select")) {
+				// abstract select from database
 				select(aConnector, aToken);
-				// abstract exec from database
+				// abstract updateSQL from database
 			} else if (lType.equals("update")) {
 				update(aConnector, aToken);
 				// abstract delete from database
@@ -114,27 +128,15 @@ public class JDBCPlugIn extends TokenPlugIn {
 				// abstract rollback transaction
 			} else if (lType.equals("rollback")) {
 				rollback(aConnector, aToken);
-				// run single native exec sql command (exec, delete, insert)
-				// w/o returning a result set
-			} else if (lType.equals("exec")) {
-				exec(aConnector, aToken);
-				// run single native query sql command (select)
-				// with returning a result set
-			} else if (lType.equals("query")) {
-				query(aConnector, aToken);
-				// run multiple abstract query sql commands (select)
-			} else if (lType.equals("getNextSeqVal")) {
-				getNextSeqVal(aConnector, aToken);
-				// run multiple abstract query sql commands (select)
 			} else if (lType.equals("getSecure")) {
 				getSecure(aConnector, aToken);
-				// run multiple abstract exec sql commands (exec, delete, insert)
+				// run multiple abstract updateSQL sql commands (updateSQL, delete, insert)
 			} else if (lType.equals("postSecure")) {
 				postSecure(aConnector, aToken);
 				// run multiple native query sql commands (select)
 			} else if (lType.equals("getSQL")) {
 				getSQL(aConnector, aToken);
-				// run multiple native exec sql commands (exec, delete, insert)
+				// run multiple native updateSQL sql commands (updateSQL, delete, insert)
 			} else if (lType.equals("postSQL")) {
 				postSQL(aConnector, aToken);
 			}
@@ -149,13 +151,204 @@ public class JDBCPlugIn extends TokenPlugIn {
 		if (lType != null && getNamespace().equals(lNS)) {
 			if (lType.equals("getNextSeqVal")) {
 				return getNextSeqVal(aToken);
-			} else if (lType.equals("exec")) {
-				return exec(aToken);
+			} else if (lType.equals("updateSQL")) {
+				return updateSQL(aToken);
+			} else if (lType.equals("execSQL")) {
+				return execSQL(aToken);
+			} else if (lType.equals("querySQL")) {
+				return query(aToken);
 			}
 		}
 		return null;
 	}
 
+	private void querySQL(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'querySQL'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".querySQL")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, query(aToken));
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	private Token query(Token aToken) {
+		TokenServer lServer = getServer();
+		
+		// load SQL query string
+		String lSQL = aToken.getString("sql");
+		// load expiration, default is no cache (expiration = 0)
+		Integer lExpiration = aToken.getInteger("expiration", 0);
+
+		// run the query, optionally considering cache
+		Token lResponse = mNativeAccess.query(lSQL);
+		// and add the token standard response fields for the request
+		lServer.setResponseFields(aToken, lResponse);
+
+		// send response to requester
+		return lResponse;
+	}
+	
+	private Token getNextSeqVal(Token aToken) {
+		String lSequence = aToken.getString("sequence");
+		Token lResToken = TokenFactory.createToken();
+		if (lSequence != null) {
+			Map<String, String> lVars = new FastMap<String, String>();
+			lVars.put("sequence", lSequence);
+			String lQuery = Tools.expandVars(mSelectSequenceSQL, lVars, Tools.EXPAND_CASE_SENSITIVE);
+			Token lPKToken = mNativeAccess.query(lQuery);
+			Number lNextSeqVal = null;
+			List lRows = lPKToken.getList("data");
+			if (lRows != null) {
+				List lFields = (List) lRows.get(0);
+				if (lFields != null) {
+					lNextSeqVal = (Number) lFields.get(0);
+				}
+			}
+			if (lNextSeqVal != null) {
+				lResToken.setInteger("code", 0);
+				lResToken.setInteger("value", lNextSeqVal.intValue());
+			} else {
+				lResToken.setInteger("code", -1);
+				lResToken.setString("msg", "value could not be obtained");
+			}
+		} else {
+			lResToken.setInteger("code", -1);
+			lResToken.setString("msg", "no sequence given");
+		}
+		return lResToken;
+	}
+
+	private void getNextSeqVal(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		// send response to requester
+		lServer.sendToken(aConnector, getNextSeqVal(aToken));
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	public Token updateSQL(Token aToken) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'updateSQL'...");
+		}
+		TokenServer lServer = getServer();
+		// load SQL string
+		String lSQL = aToken.getString("sql");
+		Token lExecToken = mNativeAccess.update(lSQL);
+		// and add the token standard response fields for the request
+		lServer.setResponseFields(aToken, lExecToken);
+		return lExecToken;
+	}
+
+	public void updateSQL(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// check if user is allowed to run 'updateSQL' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".updateSQL")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, updateSQL(aToken));
+	}
+
+	public Token execSQL(Token aToken) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'execSQL'...");
+		}
+		TokenServer lServer = getServer();
+		// load SQL string
+		String lSQL = aToken.getString("sql");
+		Token lExecToken = mNativeAccess.exec(lSQL);
+		lServer.setResponseFields(aToken, lExecToken);
+		return lExecToken;
+	}
+
+	public void execSQL(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".execSQL")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
+		// send response to requester
+		lServer.sendToken(aConnector, execSQL(aToken));
+	}
+	
+	/**
+	 *
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	private void select(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'select'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			// return;
+		}
+
+		// obtain required parameters for query
+		String lTable = aToken.getString("table");
+		String lFields = aToken.getString("fields");
+		String lOrder = aToken.getString("order");
+		String lWhere = aToken.getString("where");
+		String lGroup = aToken.getString("group");
+		String lHaving = aToken.getString("having");
+
+		// load expiration, default is no cache (expiration = 0)
+		Integer lExpiration = aToken.getInteger("expiration", 0);
+
+		// build SQL string
+		String lSQL =
+				"select "
+				+ lFields
+				+ " from "
+				+ lTable;
+
+		// add where condition
+		if (lWhere != null && lWhere.length() > 0) {
+			lSQL += " where " + lWhere;
+		}
+		// add order options
+		if (lOrder != null && lOrder.length() > 0) {
+			lSQL += " order by " + lOrder;
+		}
+
+		Token lQueryToken = TokenFactory.createToken();
+		lQueryToken.setString("sql", lSQL);
+		Token lResponse = query(lQueryToken);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	
+	
 	/**
 	 *
 	 * @param aResultSet
@@ -248,172 +441,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 
 		return lResponse;
 	}
-
-	/**
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 */
-	public void query(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'querySQL'...");
-		}
-
-		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".querySQL")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
-		}
-
-		// load SQL query string
-		String lSQL = aToken.getString("sql");
-		// load expiration, default is no cache (expiration = 0)
-		Integer lExpiration = aToken.getInteger("expiration", 0);
-
-		// run the query, optionally considering cache
-		Token lResponse = mNativeAccess.query(lSQL);
-		// and add the token standard response fields for the request
-		lServer.setResponseFields(aToken, lResponse);
-
-		// send response to requester
-		lServer.sendToken(aConnector, lResponse);
-	}
-
-	private Token getNextSeqVal(Token aToken) {
-		String lSequence = aToken.getString("sequence");
-		Token lResToken = TokenFactory.createToken();
-		if (lSequence != null) {
-			Map<String, String> lVars = new FastMap<String, String>();
-			lVars.put("sequence", lSequence);
-			String lQuery = Tools.expandVars(mSelectSequenceSQL, lVars, Tools.EXPAND_CASE_SENSITIVE);
-			Token lPKToken = mNativeAccess.query(lQuery);
-			Number lNextSeqVal = null;
-			List lRows = lPKToken.getList("data");
-			if (lRows != null) {
-				List lFields = (List) lRows.get(0);
-				if (lFields != null) {
-					lNextSeqVal = (Number) lFields.get(0);
-				}
-			}
-			if (lNextSeqVal != null) {
-				lResToken.setInteger("code", 0);
-				lResToken.setInteger("value", lNextSeqVal.intValue());
-			} else {
-				lResToken.setInteger("code", -1);
-				lResToken.setString("msg", "value could not be obtained");
-			}
-		} else {
-			lResToken.setInteger("code", -1);
-			lResToken.setString("msg", "no sequence given");
-		}
-		return lResToken;
-	}
-
-	private void getNextSeqVal(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-		// send response to requester
-		lServer.sendToken(aConnector, getNextSeqVal(aToken));
-	}
-
-	/**
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 */
-	public Token exec(Token aToken) {
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'execSQL'...");
-		}
-
-		// load SQL string
-		String lSQL = aToken.getString("sql");
-		/*
-		String lPrimaryKey = aToken.getString("primaryKey");
-		String lSequence = aToken.getString("sequence");
-		
-		if (lPrimaryKey != null && lSequence != null) {
-		Token lNextSeqVal = getNextSeqVal(aToken);
-		Integer lValue = lNextSeqVal.getInteger("value");
-		if (lValue == null) {
-		// take over error message
-		lResponse.setInteger("code", lNextSeqVal.getInteger("code"));
-		lResponse.setString("msg", lNextSeqVal.getString("msg"));
-		return lResponse;
-		}
-		}
-		 */
-
-		Token lExecToken = mNativeAccess.exec(lSQL);
-		return lExecToken;
-	}
-
-	public void exec(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
-		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".execSQL")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
-		}
-
-		// send response to requester
-		lServer.sendToken(aConnector, exec(aToken));
-	}
-
-	/**
-	 *
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 */
-	public void select(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'select'...");
-		}
-
-		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
-		}
-
-		// obtain required parameters for query
-		String lTable = aToken.getString("table");
-		String lFields = aToken.getString("fields");
-		String lOrder = aToken.getString("order");
-		String lWhere = aToken.getString("where");
-		String lGroup = aToken.getString("group");
-		String lHaving = aToken.getString("having");
-
-		// load expiration, default is no cache (expiration = 0)
-		Integer lExpiration = aToken.getInteger("expiration", 0);
-
-		// build SQL string
-		String lSQL =
-				"select "
-				+ lFields
-				+ " from "
-				+ lTable;
-
-		// add where condition
-		if (lWhere != null && lWhere.length() > 0) {
-			lSQL += " where " + lWhere;
-		}
-		// add order options
-		if (lOrder != null && lOrder.length() > 0) {
-			lSQL += " order by " + lOrder;
-		}
-
-		Token lResponse = mQuerySQL(lSQL, lExpiration);
-
-		// send response to requester
-		lServer.sendToken(aConnector, lResponse);
-	}
-
+	
 	/**
 	 *
 	 * @param aConnector

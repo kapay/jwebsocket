@@ -44,6 +44,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 	private ILogger mLogger = null;
 	private static final String DEF_IMPL = "log4j";
 	private String mImplementation = DEF_IMPL;
+	private Map<String, String> mListeners = new FastMap<String, String>();
 
 	public LoggingPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
@@ -81,6 +82,8 @@ public class LoggingPlugIn extends TokenPlugIn {
 				log(aConnector, aToken);
 			} else if (lType.equals("logEvent")) {
 				logEvent(aConnector, aToken);
+			} else if (lType.equals("getEvents")) {
+				getEvents(aConnector, aToken);
 			} else if (lType.equals("subscribe")) {
 				logEvent(aConnector, aToken);
 			} else if (lType.equals("unsubscribe")) {
@@ -149,12 +152,12 @@ public class LoggingPlugIn extends TokenPlugIn {
 		Integer lValue = null;
 		if (lPrimaryKey != null && lSequence != null) {
 			Token lGetNextSeqToken = TokenFactory.createToken(
-				lJDBCPlugIn.getNamespace(), "getNextSeqVal");
+					lJDBCPlugIn.getNamespace(), "getNextSeqVal");
 			lGetNextSeqToken.setString("sequence", lSequence);
 			Token lNextSeqVal = lJDBCPlugIn.invoke(aConnector, lGetNextSeqToken);
-			
+
 			lValue = lNextSeqVal.getInteger("value");
-			if( lValue == null ) {
+			if (lValue == null) {
 				// take over error message
 				lResponse.setInteger("code", lNextSeqVal.getInteger("code"));
 				lResponse.setString("msg", lNextSeqVal.getString("msg"));
@@ -164,26 +167,66 @@ public class LoggingPlugIn extends TokenPlugIn {
 			lFields.add(lPrimaryKey);
 			lValues.add(lValue);
 		}
-		
+
 		String lFieldsStr = JDBCTools.fieldListToString(lFields);
 		String lValuesStr = JDBCTools.valueListToString(lValues);
 
 		Map<String, String> lVars = new FastMap<String, String>();
 		lVars.put("ip", aConnector.getRemoteHost().getHostAddress());
 		lValuesStr = Tools.expandVars(lValuesStr, lVars, Tools.EXPAND_CASE_SENSITIVE);
-		
+
 		lExecToken.setString("sql",
 				"insert into "
 				+ lTable
 				+ " (" + lFieldsStr + ")"
 				+ " values "
 				+ " (" + lValuesStr + ")");
-		
+
 		Token lExecResp = lJDBCPlugIn.invoke(aConnector, lExecToken);
 		lResponse.setInteger("code", lExecResp.getInteger("code"));
-		lResponse.setInteger("msg", lExecResp.getInteger("msg"));
+		lResponse.setString("msg", lExecResp.getString("msg"));
 		lResponse.setInteger("rowsAffected", lExecResp.getInteger("rowsAffected"));
 		lResponse.setInteger("key", lValue);
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	private void getEvents(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		Token lResponse = lServer.createResponse(aToken);
+
+		TokenPlugIn lJDBCPlugIn = (TokenPlugIn) lServer.getPlugInById("jws.jdbc");
+		if (lJDBCPlugIn == null) {
+			// send response to requester
+			lResponse = lServer.createErrorToken(aToken, -1, "JDBC plug-in not loaded.");
+			lServer.sendToken(aConnector, lResponse);
+			return;
+		}
+
+		String lTable = aToken.getString("table");
+		Integer lFromKey = aToken.getInteger("fromKey");
+		Integer lToKey = aToken.getInteger("toKey");
+		String lPrimaryKey = aToken.getString("primaryKey");
+		String lSQLString = "select * from " + lTable;
+		if (lPrimaryKey != null && (lFromKey != null || lToKey != null)) {
+			lSQLString += " where";
+			if (lFromKey != null) {
+				lSQLString += " " + lPrimaryKey + " >= " + lFromKey;
+			}
+			if (lFromKey != null && lToKey != null ) {
+				lSQLString += " and";
+			}
+			if (lToKey != null) {
+				lSQLString += " " + lPrimaryKey + " <= " + lToKey;
+			}
+		}
+
+		Token lQueryToken = TokenFactory.createToken(
+				lJDBCPlugIn.getNamespace(), "query");
+
+		lQueryToken.setString("sql", lSQLString);
+
+		Token lQueryResp = lJDBCPlugIn.invoke(aConnector, lQueryToken);
+		lResponse.setList("data", lQueryResp.getList("data"));
 		lServer.sendToken(aConnector, lResponse);
 	}
 }
