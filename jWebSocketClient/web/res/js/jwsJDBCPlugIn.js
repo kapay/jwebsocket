@@ -43,6 +43,45 @@ jws.JDBCPlugIn = {
 		}
 	},
 
+	jdbcQuerySQL: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "querySQL",
+				sql: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcUpdateSQL: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "updateSQL",
+				sql: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcExecSQL: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "execSQL",
+				sql: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	jdbcSelect: function( aQuery, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
@@ -55,32 +94,6 @@ jws.JDBCPlugIn = {
 				where: aQuery.where,
 				group: aQuery.group,
 				having: aQuery.having
-			};
-			this.sendToken( lToken,	aOptions );
-		}
-		return lRes;
-	},
-
-	jdbcQuery: function( aQuery, aOptions ) {
-		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
-			var lToken = {
-				ns: jws.JDBCPlugIn.NS,
-				type: "query",
-				sql: aQuery
-			};
-			this.sendToken( lToken,	aOptions );
-		}
-		return lRes;
-	},
-
-	jdbcExec: function( aQuery, aOptions ) {
-		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
-			var lToken = {
-				ns: jws.JDBCPlugIn.NS,
-				type: "exec",
-				sql: aQuery
 			};
 			this.sendToken( lToken,	aOptions );
 		}

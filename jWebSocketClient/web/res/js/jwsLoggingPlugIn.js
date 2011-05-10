@@ -69,7 +69,6 @@ jws.LoggingPlugIn = {
 		if( 0 == lRes.code ) {
 			var lSequence = null;
 			var lPrimaryKey = null;
-			debugger;
 			if( aOptions ) {
 				if( aOptions.primaryKey ) {
 					lPrimaryKey = aOptions.primaryKey;
@@ -82,7 +81,7 @@ jws.LoggingPlugIn = {
 			var lValues = [];
 			for( var lField in aData ) {
 				lFields.push( lField );
-				lValues.push( aData[ lField ]);
+				lValues.push( jws.tools.escapeSQL( aData[ lField ] ));
 			}
 			var lToken = {
 				ns: jws.LoggingPlugIn.NS,
@@ -98,6 +97,44 @@ jws.LoggingPlugIn = {
 			this.sendToken( lToken,	aOptions );
 		}
 		return lRes;
+	},
+
+	loggingGetEvents: function( aTable, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lPrimaryKey = null;
+			var lFromKey = null;
+			var lToKey = null;
+			if( aOptions ) {
+				if( aOptions.primaryKey ) {
+					lPrimaryKey = aOptions.primaryKey;
+				}
+				if( aOptions.fromKey ) {
+					lFromKey = aOptions.fromKey;
+				}
+				if( aOptions.toKey ) {
+					lToKey = aOptions.toKey;
+				}
+			}
+			var lToken = {
+				ns: jws.LoggingPlugIn.NS,
+				type: "getEvents",
+				table: aTable,
+				primaryKey: lPrimaryKey,
+				fromKey: lFromKey,
+				toKey: lToKey
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	loggingSubscribe: function( aTable, aOptions ) {
+		
+	},
+
+	loggingUnsubscribe: function( aTable, aOptions ) {
+		
 	},
 
 	setLoggingCallbacks: function( aListeners ) {

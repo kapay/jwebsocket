@@ -15,48 +15,69 @@
 //	---------------------------------------------------------------------------
 
 
-jws.tests.Logging = {
+jws.tests.RPC = {
 
-	NS: "jws.tests.logging", 
+	NS: "jws.tests.rpc", 
+	
+	TEST_STRING: "This is a string to be MD5'ed", 
 
 	// this spec tests the file save method of the fileSystem plug-in
-	testLog: function() {
-		var lSpec = this.NS + ": Log";
-		var lData = this.TEST_FILE_DATA;
-		var lFilename = this.TEST_FILE_NAME;
+	testMD5Demo: function() {
+		
+		var lSpec = this.NS + ": MD5 demo (admin)";
 		
 		it( lSpec, function () {
-
+			
+			// init response
 			var lResponse = {};
 
-			jws.Tests.getAdminConn().fileLoad( lFilename, {
-				encoding: "base64",
-				scope: "public",
-				OnResponse: function( aToken ) {
-					lResponse = aToken;
-				}
-			});
+			var lClassName = "org.jwebsocket.rpc.sample.SampleRPCLibrary";
+			var lMethodName = "getMD5";
+			var lArguments = jws.tests.RPC.TEST_STRING;
+			var lMD5 = jws.tools.calcMD5( jws.tests.RPC.TEST_STRING );
 
+			// perform the Remote Procedure Call...
+			jws.Tests.getAdminConn().rpc(
+				// pass class, method and argument for server java method:
+				lClassName,
+				lMethodName,
+				lArguments,
+				{	// run it within the main thread
+					spawnThread: false,
+					// new easy-to-use response callback
+					OnResponse: function( aToken ) {
+						lResponse = aToken;
+					}
+				}
+			);
+			
+			// wait for result, consider reasonably timeout
 			waitsFor(
 				function() {
-					return( lResponse.data == lData );
+					// check response
+					return( lResponse.code !== undefined );
 				},
 				lSpec,
 				3000
 			);
 
+			// check result if ok
 			runs( function() {
-				expect( lResponse.data ).toEqual( lData );
+				expect( lResponse.code ).toEqual( 0 );
+				expect( lResponse.result ).toEqual( lMD5 );
 			});
 
 		});
 	},
 
 	runSpecs: function() {
-		this.testLog();
+		// run alls tests within an outer test suite
+		this.testMD5Demo();
 	},
 
 	runSuite: function() {
+		
+		// run alls tests as a separate test suite
 		var lThis = this;
 		describe( "Performing test suite: " + this.NS + "...", function () {
 			lThis.runSpecs();

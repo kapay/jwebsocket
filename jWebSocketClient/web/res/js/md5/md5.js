@@ -1,3 +1,4 @@
+//  <JasobNoObfs>
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -5,7 +6,9 @@
  * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
  * Distributed under the BSD License
  * See http://pajhome.org.uk/crypt/md5 for more info.
+ * For full source please refer to: md5.js
  */
+//  </JasobNoObfs>
 
 /*
  * Configurable variables. You may need to tweak these to be compatible with

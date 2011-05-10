@@ -223,7 +223,23 @@
 					log( "Exception: " + ex.message );
 				}
 			}
-
+			
+			function getLogEvents() {
+				log( "Retreiving events..." );
+				try {
+					var lRes = lWSC.loggingGetEvents( "ACTION_LOG", {
+						OnResponse: function( aToken ) {
+							log( "Events: " + aToken.data );
+						}
+					});
+					if( lRes.code != 0 ) {
+						log( "Error: " + lRes.msg );
+					}
+				} catch( ex ) {
+					log( "Exception: " + ex.message );
+				}
+			}
+			
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
 				eMessage = jws.$( "stxfMsg" );
@@ -296,6 +312,10 @@
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnSend" type="button" value="Log" onclick="sendLog();">
 					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnEvent" type="button" value="Event" onclick="logEvent();"
+							   title="Logs an event." >
+					</td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">
@@ -325,8 +345,11 @@
 							   title="Sets the log level to 'fatal'." >
 					</td>
 					<td class="stdDlg" width="5">
-						<input class="sbtnDlg" id="sbtnEvent" type="button" value="Event" onclick="logEvent();"
-							   title="Logs an event." >
+						&nbsp;
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnEvent" type="button" value="Get Events" onclick="getLogEvents();"
+							   title="Gets all logs." >
 					</td>
 				</tr>
 			</table>

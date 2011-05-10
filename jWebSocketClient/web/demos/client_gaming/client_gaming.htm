@@ -255,6 +255,8 @@
 					// instaniate new TokenClient, either JSON, CSV or XML
 					lWSC = new jws.jWebSocketJSONClient();
 					
+					jws.ClientGamingPlugIn.setActive( true );
+					
 					jws.events.addEventListener( eUsername, "keydown", usrKeyDnLsnr, false );
 					eUsername.focus();
 					eUsername.select();

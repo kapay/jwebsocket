@@ -63,20 +63,26 @@ function runDefaultAPISuite() {
 
 }
 
-function runManualTestSuite() {
+function runFullTestSuite() {
 
 	describe( "jWebSocket Test Suite", function () {
 
 		// open connections for admin and guest
 		jws.Tests.testOpenSharedAdminConn();
 		jws.Tests.testOpenSharedGuestConn();
-		
+/*		
 		// run test suites for the various plug-ins
 		jws.tests.System.runSuite();
 		jws.tests.FileSystem.runSuite();
 		jws.tests.Logging.runSuite();
 		jws.tests.AutomatedAPI.runSuite();
 		
+		// run RPC tests
+		jws.tests.RPC.runSuite();
+*/
+		// run JDBC tests
+		jws.tests.JDBC.runSuite();
+
 		// close connections for admin and guest
 		jws.Tests.testCloseSharedAdminConn();
 		jws.Tests.testCloseSharedGuestConn();

@@ -24,7 +24,21 @@ jws.ClientGamingPlugIn = {
 	// namespace for client gaming plugin
 	// not yet used because here we use the system broadcast only
 	NS: jws.NS_BASE + ".plugins.clientGaming",
+	
+	fIsActive: false,
 
+	setActive: function( aActive ) {
+		if( aActive ) {
+			
+		} else {
+			
+		}
+		jws.ClientGamingPlugIn.fIsActive = aActive;
+	},
+	
+	isActive: function() {
+		return jws.ClientGamingPlugIn.fIsActive;
+	},
 
 	// this places a div on the current document when a new client connects
 	addPlayer: function( aId, aUsername, aColor ) {
@@ -48,19 +62,19 @@ jws.ClientGamingPlugIn = {
 		lDiv.innerHTML = "<font style=\"font-size:8pt\">Player " + aUsername + "</font>";
 		document.body.appendChild( lDiv );
 
-		if( !this.players ) {
-			this.players = {};
+		if( !this.fPlayers ) {
+			this.fPlayers = {};
 		}
-		this.players[ aId ] = lDiv;
+		this.fPlayers[ aId ] = lDiv;
 	},
 
 	removeAllPlayers: function() {
-		if( this.players ) {
-			for( var lId in this.players) {
-				document.body.removeChild( this.players[ lId ] );
+		if( this.fPlayers ) {
+			for( var lId in this.fPlayers) {
+				document.body.removeChild( this.fPlayers[ lId ] );
 			}
 		}
-		delete this.players;
+		delete this.fPlayers;
 	},
 
 	// this removes a div from the document when a client logs out
@@ -69,8 +83,8 @@ jws.ClientGamingPlugIn = {
 		var lDiv = document.getElementById( aId );
 		if( lDiv ) {
 			document.body.removeChild( lDiv );
-			if( this.players ) {
-				delete this.players[ aId ];
+			if( this.fPlayers ) {
+				delete this.fPlayers[ aId ];
 			}
 		}
 	},
@@ -88,15 +102,16 @@ jws.ClientGamingPlugIn = {
 	// this method is called when the server connection was established
 	processOpened: function( aToken ) {
 		// console.log( "jws.ClientGamingPlugIn: Opened " + aToken.sourceId );
+		if( this.isActive() ) {
+			// add own player to playground
+			this.addPlayer( aToken.sourceId, aToken.sourceId, "green" );
 
-		// add own player to playground
-		this.addPlayer( aToken.sourceId, aToken.sourceId, "green" );
-
-		// broadcast an identify request to all clients to initialize game.
-		aToken.ns = jws.SystemClientPlugIn.NS;
-		aToken.type = "broadcast";
-		aToken.request = "identify";
-		this.sendToken( aToken );
+			// broadcast an identify request to all clients to initialize game.
+			aToken.ns = jws.SystemClientPlugIn.NS;
+			aToken.type = "broadcast";
+			aToken.request = "identify";
+			this.sendToken( aToken );
+		}	
 	},
 
 	// this method is called when the server connection was closed
@@ -104,19 +119,25 @@ jws.ClientGamingPlugIn = {
 		// console.log( "jws.ClientGamingPlugIn: Closed " + aToken.sourceId );
 
 		// if disconnected remove ALL players from playground
-		this.removeAllPlayers();
+		if( this.isActive() ) {
+			this.removeAllPlayers();
+		}	
 	},
 
 	// this method is called when another client connected to the network
 	processConnected: function( aToken ) {
 		// console.log( "jws.ClientGamingPlugIn: Connected " + aToken.sourceId );
-		this.addPlayer( aToken.sourceId, aToken.sourceId, "red" );
+		if( this.isActive() ) {
+			this.addPlayer( aToken.sourceId, aToken.sourceId, "red" );
+		}	
 	},
 
 	// this method is called when another client disconnected from the network
 	processDisconnected: function( aToken ) {
 		// console.log( "jws.ClientGamingPlugIn: Disconnected " + aToken.sourceId );
-		this.removePlayer( aToken.sourceId );
+		if( this.isActive() ) {
+			this.removePlayer( aToken.sourceId );
+		}	
 	},
 
 	// this method processes an incomng token from another client or the server

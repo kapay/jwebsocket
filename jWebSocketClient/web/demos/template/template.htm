@@ -24,13 +24,13 @@
 		<meta http-equiv="Content-Language" content="en">
 		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>jWebSocket Demo Template</title>
-		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">e
+		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
 <!--		
 		<script src="../../res/js/flash-bridge/swfobject.js" type="text/javascript"></script>
 		<script src="../../res/js/flash-bridge/FABridge.js" type="text/javascript"></script>
 		<script src="../../res/js/flash-bridge/web_socket.js" type="text/javascript"></script>
 -->	
-		<script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
+		<script src="../../res/js/jWebSocket_Bundle_min.js" type="text/javascript"></script>
 		
 		<script type="text/javascript" language="JavaScript" id="jsTemplate">
 
@@ -174,10 +174,38 @@
 				// debugger;
 				// log( lScript.innerText );
 			}
+			
+			var lHost = "localhost";
+			var lUseSSL = false;
+			var lSharePorts = false;
+			
+			function buildURL() {
+				var lURL = 
+					( lUseSSL ? "wss" : "ws" )
+					+ "://" + lHost + ":" 
+					+ ( lSharePorts 
+						? ( lUseSSL ? "443" : "80" )
+						: ( lUseSSL ? "9797" : "8787" )
+					) + "/jWebSocket/jWebSocket";
+				eURL.value = lURL;		
+			}
+			
+			function tooglePorts() {
+				lSharePorts = eSharedPort.checked;
+				buildURL();
+			}
+
+			function toogleSSL() {
+				lUseSSL = eUseSSL.checked;
+				buildURL();
+			}
 
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
 				eURL = jws.$( "stxfURL" );
+				eUseSSL = jws.$( "schkSSL" );
+				eSharedPort = jws.$( "srbtStdPorts" );
+				buildURL();
 
 				if( window.WebSocket ) {
 					lWSC = new jws.jWebSocketJSONClient();
@@ -268,7 +296,7 @@
 							<tr class="strDlg">
 								<td class="stdDlg" width="5">URL</td>
 								<td class="stdDlg" width="" colspan="4">
-									<input class="stxfDlg" id="stxfURL" type="text" value="ws://jWebSocket.org:8787/jWebSocket/jWebSocket" style="width:100%">
+									<input class="stxfDlg" id="stxfURL" type="text" value="" style="width:100%">
 								</td>
 							</tr>
 						</table>
@@ -283,11 +311,14 @@
 							</tr>
 							<tr class="strDlg">
 								<td class="stdDlg">
-									<input id="srbtStdPorts" name="ports" type="radio" value="on" checked="checked"
+									<input id="srbtStdPorts" name="ports" type="radio" value="off"
+										   onclick="tooglePorts();"
 										   title="Shares port 80 for http/ws and port 443 for https/wss">&nbsp;80/443&nbsp;
 								</td>
 								<td class="stdDlg">
-									<input id="schkSSL" type="checkbox" value="on" checked="checked">&nbsp;SSL&nbsp;
+									<input id="schkSSL" type="checkbox" value="off"
+										   onclick="toogleSSL();"
+										   >&nbsp;SSL&nbsp;
 								</td>
 								<td class="stdDlg">
 									<input id="schkDebug" type="checkbox" value="on" checked="checked">&nbsp;Debug&nbsp;
@@ -295,7 +326,8 @@
 							</tr>
 							<tr class="strDlg">
 								<td class="stdDlg">
-									<input id="srbtSepPorts" name="ports" type="radio" value="off"
+									<input id="srbtSepPorts" name="ports" type="radio" value="on" checked="checked"
+										   onclick="tooglePorts();"
 										   title="Uses separate ports 80/443 for http/https and 8787/9797 for ws/wss.">&nbsp;8787/9797&nbsp;
 								</td>
 								<td class="stdDlg">
