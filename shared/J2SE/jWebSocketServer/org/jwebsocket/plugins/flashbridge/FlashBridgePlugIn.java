@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
@@ -153,7 +152,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 						if (lFoundPolicyFileRequest) {
 							if (mLog.isDebugEnabled()) {
 								mLog.debug("Answering on flash policy-file-request (" + lLine + ")...");
-								mLog.debug("Answer: " + mCrossDomainXML);
+								// mLog.debug("Answer: " + mCrossDomainXML);
 							}
 							lOS.write(mCrossDomainXML.getBytes("UTF-8"));
 							lOS.flush();

@@ -152,22 +152,36 @@ public class JDBCTools {
 		return lRes.toString();
 	}
 
+	public static String valueToString(Object lField) {
+		String lRes;
+		if (lField instanceof String
+				&& !((String) lField).startsWith("TO_DATE")) {
+			lRes = "'" + (String) lField + "'";
+		} else {
+			lRes = (String) lField;
+		}
+		return lRes;
+	}
+
 	public static String valueListToString(List aFieldList) {
 		StringBuilder lRes = new StringBuilder();
 		int lIdx = 0;
 		int lCnt = aFieldList.size();
 		for (Object lField : aFieldList) {
+			lRes.append(valueToString(lField));
+			/*
 			if (lField instanceof String
-					&& !((String) lField).startsWith("TO_DATE")) {
-				lRes.append("'");
-				lRes.append(lField);
-				lRes.append("'");
+			&& !((String) lField).startsWith("TO_DATE")) {
+			lRes.append("'");
+			lRes.append(lField);
+			lRes.append("'");
 			} else {
-				lRes.append(lField);
+			lRes.append(lField);
 			}
+			 */
 			lIdx++;
 			if (lIdx < lCnt) {
-				lRes.append(", ");
+				lRes.append(",");
 			}
 		}
 		return lRes.toString();

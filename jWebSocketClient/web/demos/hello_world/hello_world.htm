@@ -259,14 +259,15 @@
 			}
 
 			// example how to request a result from a server side plugin
-			/*
+			
 			function sampleSelect() {
+				/*
 				log( "Requesting JDBC data via WebSockets..." );
 				// call the getTime method of the client side plug-in
 				var lRes = lWSC.jdbcSelect({
-					table	: "locales",
-					fields	: "*",
-					order	: "code",
+					tables	: [ "demo_master" ],
+					fields	: [ "*" ],
+					orders	: [ "master_id" ],
 					where	: "",
 					group	: "",
 					having	: ""
@@ -275,19 +276,54 @@
 				if( lRes.code != 0 ) {
 					log( lWSC.resultToString( lRes ) );
 				}
+				*/
+				/*
+				log( "Updating JDBC data via WebSockets..." );
+				// call the getTime method of the client side plug-in
+				var lRes = lWSC.jdbcUpdate({
+					table	: "demo_master",
+					fields	: [ "master_string" ],
+					values	: [ "Master Row #1 (updated)" ],
+					where	: "master_id=1"
+				});
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( lWSC.resultToString( lRes ) );
+				}
+				*/
+			   /*
+				log( "Inserting JDBC data via WebSockets..." );
+				// call the getTime method of the client side plug-in
+				var lRes = lWSC.jdbcInsert({
+					table	: "demo_master",
+					fields	: [ "master_string" ],
+					values	: [ "Master Row #1 (updated)" ]
+				});
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( lWSC.resultToString( lRes ) );
+				}
+				*/
+				log( "Deleting JDBC data via WebSockets..." );
+				// call the getTime method of the client side plug-in
+				var lRes = lWSC.jdbcDelete({
+					table	: "demo_master",
+					where	: "master_id=6"
+				});
 			}
-			*/
-
+			
+/*
 			// example how to request a result from a server side plugin
 			function sampleSelect() {
 				log( "Requesting JDBC data via WebSockets..." );
 				// call the getTime method of the client side plug-in
-				var lRes = lWSC.jdbcQuery("select * from uss_user");
+				var lRes = lWSC.jdbcQuerySQL("select * from demo_master");
 				// log error only, on success don't confuse the user
 				if( lRes.code != 0 ) {
 					log( lWSC.resultToString( lRes ) );
 				}
 			}
+*/
 
 			function loadFile() {
 				log( "Loading a file from the server via WebSockets..." );

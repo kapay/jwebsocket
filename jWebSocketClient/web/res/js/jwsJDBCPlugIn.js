@@ -85,12 +85,29 @@ jws.JDBCPlugIn = {
 	jdbcSelect: function( aQuery, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
+			var lTables = aQuery.tables;
+			if( lTables && !lTables.length ) {
+				lTables = [ lTables ];
+			}
+			var lFields = aQuery.fields;
+			if( lFields && !lFields.length ) {
+				lFields = [ lFields ];
+			}
+			var lJoins = aQuery.joins;
+			if( lJoins && !lJoins.length ) {
+				lJoins = [ lJoins ];
+			}
+			var lOrders = aQuery.orders;
+			if( lOrders && !lOrders.length ) {
+				lOrders = [ lOrders ];
+			}
 			var lToken = {
 				ns: jws.JDBCPlugIn.NS,
 				type: "select",
-				table: aQuery.table,
-				fields: aQuery.fields,
-				order: aQuery.order,
+				tables: lTables,
+				joins: lJoins,
+				fields: lFields,
+				orders: lOrders,
 				where: aQuery.where,
 				group: aQuery.group,
 				having: aQuery.having
@@ -100,6 +117,51 @@ jws.JDBCPlugIn = {
 		return lRes;
 	},
 
+	jdbcUpdate: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "update",
+				table: aQuery.table,
+				fields: aQuery.fields,
+				values: aQuery.values,
+				where: aQuery.where
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcInsert: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "insert",
+				table: aQuery.table,
+				fields: aQuery.fields,
+				values: aQuery.values
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcDelete: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "delete",
+				table: aQuery.table,
+				where: aQuery.where
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+	
 	setJDBCCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};

@@ -1027,21 +1027,20 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:m:*:processQueue
 	//:d:en:Processes the token queue. _
 	//:d:en:Tries to send out all tokens stored in the quere
-	//:a:en::aToken:Object:Token to be queued to the jWebSocket server.
-	//:a:en::aOptions:Object:Optional arguments as listed below...
-	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
+	//:a:en::::-
 	//:r:*:::void:none
 	processQueue: function() {
-		if( !this.mQueue ) {
+		if( this.mQueue ) {
 			var lRes = this.checkConnected();
 			if( lRes.code == 0 ) {
-				var lToken;
+				var lPacket;
 				while( this.mQueue.length > 0 ) {
 					// get first element of the queue
-					lToken = this.mQueue[ 0 ];
+					lPacket = this.mQueue[ 0 ];
 				}
 			}
 		}
+		// if no queue exists nothing needs to be done here.
 	},
 
 	//:m:*:queuePacket
@@ -1051,12 +1050,12 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:a:en::aOptions:Object:Optional arguments as listed below...
 	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
 	//:r:*:::void:none
-	queuePacket: function( aToken, aOptions ) {
+	queuePacket: function( aPacket, aOptions ) {
 		if( !this.mQueue ) {
 			this.mQueue = [];
 		}
 		this.mQueue.push({
-			token: aToken,
+			packet: aPacket,
 			options: aOptions
 		});
 		this.processQueue();

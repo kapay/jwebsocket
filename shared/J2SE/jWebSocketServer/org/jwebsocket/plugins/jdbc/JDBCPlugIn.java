@@ -164,7 +164,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 
 	private void querySQL(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
-		
+
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'querySQL'...");
 		}
@@ -186,7 +186,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 */
 	private Token query(Token aToken) {
 		TokenServer lServer = getServer();
-		
+
 		// load SQL query string
 		String lSQL = aToken.getString("sql");
 		// load expiration, default is no cache (expiration = 0)
@@ -200,7 +200,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		// send response to requester
 		return lResponse;
 	}
-	
+
 	private Token getNextSeqVal(Token aToken) {
 		String lSequence = aToken.getString("sequence");
 		Token lResToken = TokenFactory.createToken();
@@ -242,7 +242,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public Token updateSQL(Token aToken) {
+	private Token updateSQL(Token aToken) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'updateSQL'...");
 		}
@@ -255,7 +255,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		return lExecToken;
 	}
 
-	public void updateSQL(WebSocketConnector aConnector, Token aToken) {
+	private void updateSQL(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		// check if user is allowed to run 'updateSQL' command
@@ -268,7 +268,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, updateSQL(aToken));
 	}
 
-	public Token execSQL(Token aToken) {
+	private Token execSQL(Token aToken) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'execSQL'...");
 		}
@@ -280,7 +280,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		return lExecToken;
 	}
 
-	public void execSQL(WebSocketConnector aConnector, Token aToken) {
+	private void execSQL(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		// check if user is allowed to run 'select' command
@@ -292,7 +292,63 @@ public class JDBCPlugIn extends TokenPlugIn {
 		// send response to requester
 		lServer.sendToken(aConnector, execSQL(aToken));
 	}
-	
+
+	private String validateFieldsString(List<String> aFields) {
+		StringBuilder lRes = new StringBuilder();
+		int lCnt = aFields.size();
+		int lIdx = 0;
+		for (String lField : aFields) {
+			lRes.append(lField);
+			lIdx++;
+			if (lIdx < lCnt) {
+				lRes.append(",");
+			}
+		}
+		return lRes.toString();
+	}
+
+	private String validateValuesString(List<String> aValues) {
+		StringBuilder lRes = new StringBuilder();
+		int lCnt = aValues.size();
+		int lIdx = 0;
+		for (String lValue : aValues) {
+			lRes.append(JDBCTools.valueToString(lValue));
+			lIdx++;
+			if (lIdx < lCnt) {
+				lRes.append(",");
+			}
+		}
+		return lRes.toString();
+	}
+
+	private String validateTablesString(List<String> aTables) {
+		StringBuilder lRes = new StringBuilder();
+		int lCnt = aTables.size();
+		int lIdx = 0;
+		for (String lTable : aTables) {
+			lRes.append(lTable);
+			lIdx++;
+			if (lIdx < lCnt) {
+				lRes.append(",");
+			}
+		}
+		return lRes.toString();
+	}
+
+	private String validateOrdersString(List<String> aOrders) {
+		StringBuilder lRes = new StringBuilder();
+		int lCnt = aOrders.size();
+		int lIdx = 0;
+		for (String lOrder : aOrders) {
+			lRes.append(lOrder);
+			lIdx++;
+			if (lIdx < lCnt) {
+				lRes.append(",");
+			}
+		}
+		return lRes.toString();
+	}
+
 	/**
 	 *
 	 *
@@ -309,13 +365,31 @@ public class JDBCPlugIn extends TokenPlugIn {
 		// check if user is allowed to run 'select' command
 		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".select")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
+			return;
 		}
 
 		// obtain required parameters for query
-		String lTable = aToken.getString("table");
-		String lFields = aToken.getString("fields");
-		String lOrder = aToken.getString("order");
+		List lTables = aToken.getList("tables");
+		List lFields = aToken.getList("fields");
+		List lOrders = aToken.getList("orders");
+
+		if (lTables == null || lTables.size() <= 0) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"No tables passed for JDBC select."));
+			return;
+		}
+		if (lFields == null || lFields.size() <= 0) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"No fields passed for JDBC select."));
+			return;
+		}
+
+		String lTablesStr = validateFieldsString(lTables);
+		String lFieldsStr = validateTablesString(lFields);
+		String lOrdersStr = validateOrdersString(lOrders);
+
 		String lWhere = aToken.getString("where");
 		String lGroup = aToken.getString("group");
 		String lHaving = aToken.getString("having");
@@ -326,36 +400,224 @@ public class JDBCPlugIn extends TokenPlugIn {
 		// build SQL string
 		String lSQL =
 				"select "
-				+ lFields
+				+ lFieldsStr
 				+ " from "
-				+ lTable;
+				+ lTablesStr;
 
 		// add where condition
 		if (lWhere != null && lWhere.length() > 0) {
 			lSQL += " where " + lWhere;
 		}
 		// add order options
-		if (lOrder != null && lOrder.length() > 0) {
-			lSQL += " order by " + lOrder;
+		if (lOrdersStr != null && lOrdersStr.length() > 0) {
+			lSQL += " order by " + lOrdersStr;
 		}
 
 		Token lQueryToken = TokenFactory.createToken();
 		lQueryToken.setString("sql", lSQL);
 		Token lResponse = query(lQueryToken);
+		lServer.setResponseFields(aToken, lResponse);
 
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 	}
 
-	
-	
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	private void update(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'update'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".update")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
+		String lTable = aToken.getString("table");
+		List lFields = aToken.getList("fields");
+		List lValues = aToken.getList("values");
+		String lWhere = aToken.getString("where");
+
+		if (lTable == null || lTable.length() <= 0) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"No table passed for JDBC update."));
+			return;
+		}
+		if (lFields == null || lFields.size() <= 0) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"No fields passed for JDBC update."));
+			return;
+		}
+		if (lValues == null || lValues.size() <= 0) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"No values passed for JDBC update."));
+			return;
+		}
+		if (lFields.size() != lValues.size()) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"Number of values doe not match number of fields in JDBC update."));
+			return;
+		}
+
+		StringBuilder lSetStr = new StringBuilder();
+
+		int lIdx = 0;
+		int lCnt = lFields.size();
+		for (Object lField : lFields) {
+			lSetStr.append((String) lField);
+			lSetStr.append("=");
+			lSetStr.append(JDBCTools.valueToString(lValues.get(lIdx)));
+			lIdx++;
+			if (lIdx < lCnt) {
+				lSetStr.append(",");
+			}
+		}
+
+		String lSQL = "update"
+				+ " " + lTable
+				+ " set"
+				+ " " + lSetStr.toString();
+		if (lWhere != null) {
+			lSQL += " where"
+					+ " " + lWhere;
+		}
+
+		Token lUpdateToken = TokenFactory.createToken();
+		lUpdateToken.setString("sql", lSQL);
+		Token lResponse = updateSQL(lUpdateToken);
+		lServer.setResponseFields(aToken, lResponse);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	private void insert(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'insert'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".insert")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
+		String lTable = aToken.getString("table");
+		List lFields = aToken.getList("fields");
+		List lValues = aToken.getList("values");
+
+		String lFieldsStr = validateTablesString(lFields);
+		String lValuesStr = validateValuesString(lFields);
+
+		if (lTable == null || lTable.length() <= 0) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"No table passed for JDBC insert."));
+			return;
+		}
+		if (lFields == null || lFields.size() <= 0) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"No fields passed for JDBC insert."));
+			return;
+		}
+		if (lValues == null || lValues.size() <= 0) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"No values passed for JDBC insert."));
+			return;
+		}
+		if (lFields.size() != lValues.size()) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"Number of values doe not match number of fields in JDBC insert."));
+			return;
+		}
+
+		String lSQL = "insert into"
+				+ " " + lTable
+				+ " (" + lFieldsStr + ")"
+				+ " values" 
+				+ " (" + lValuesStr + ")";
+
+		Token lInsertToken = TokenFactory.createToken();
+		lInsertToken.setString("sql", lSQL);
+		Token lResponse = updateSQL(lInsertToken);
+		lServer.setResponseFields(aToken, lResponse);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	/**
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	private void delete(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'delete'...");
+		}
+
+		// check if user is allowed to run 'select' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".delete")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
+		String lTable = aToken.getString("table");
+		String lWhere = aToken.getString("where");
+
+		if (lTable == null || lTable.length() <= 0) {
+			lServer.sendToken(aConnector,
+					lServer.createErrorToken(aToken, -1,
+					"No table passed for JDBC delete."));
+			return;
+		}
+
+		String lSQL = "delete from"
+				+ " " + lTable;
+		if (lWhere != null) {
+			lSQL += " where"
+					+ " " + lWhere;
+		}
+
+		Token lInsertToken = TokenFactory.createToken();
+		lInsertToken.setString("sql", lSQL);
+		Token lResponse = updateSQL(lInsertToken);
+		lServer.setResponseFields(aToken, lResponse);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
 	/**
 	 *
 	 * @param aResultSet
 	 * @param aColCount
 	 * @return
 	 */
-	public List<Object> getResultColumns(ResultSet aResultSet, int aColCount) {
+	private List<Object> getResultColumns(ResultSet aResultSet, int aColCount) {
 		// TODO: should work with usual arrays!
 		List<Object> lDataRow = new FastList<Object>();
 		Object lObj = null;
@@ -441,94 +703,13 @@ public class JDBCPlugIn extends TokenPlugIn {
 
 		return lResponse;
 	}
-	
-	/**
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 */
-	public void update(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'update'...");
-		}
-
-		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".update")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
-		}
-
-		/*
-		String lSQL = aToken.getString("sql");
-		Token lResponse = mExecSQL(lSQL);
-		
-		// send response to requester
-		lServer.sendToken(aConnector, lResponse);
-		 */
-	}
 
 	/**
 	 *
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void insert(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'insert'...");
-		}
-
-		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".insert")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
-		}
-
-		/*
-		String lSQL = aToken.getString("sql");
-		Token lResponse = mExecSQL(lSQL);
-		
-		// send response to requester
-		lServer.sendToken(aConnector, lResponse);
-		 */
-	}
-
-	/**
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 */
-	public void delete(WebSocketConnector aConnector, Token aToken) {
-		TokenServer lServer = getServer();
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'delete'...");
-		}
-
-		// check if user is allowed to run 'select' command
-		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_JDBC + ".delete")) {
-			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
-			// return;
-		}
-
-		/*
-		String lSQL = aToken.getString("sql");
-		Token lResponse = mExecSQL(lSQL);
-		
-		// send response to requester
-		lServer.sendToken(aConnector, lResponse);
-		 */
-	}
-
-	/**
-	 *
-	 * @param aConnector
-	 * @param aToken
-	 */
-	public void startTA(WebSocketConnector aConnector, Token aToken) {
+	private void startTA(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		if (mLog.isDebugEnabled()) {
@@ -555,7 +736,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void rollback(WebSocketConnector aConnector, Token aToken) {
+	private void rollback(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		if (mLog.isDebugEnabled()) {
@@ -582,7 +763,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void commit(WebSocketConnector aConnector, Token aToken) {
+	private void commit(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		if (mLog.isDebugEnabled()) {
@@ -609,7 +790,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void getSecure(WebSocketConnector aConnector, Token aToken) {
+	private void getSecure(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		if (mLog.isDebugEnabled()) {
@@ -636,7 +817,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void postSecure(WebSocketConnector aConnector, Token aToken) {
+	private void postSecure(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		if (mLog.isDebugEnabled()) {
@@ -663,7 +844,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void getSQL(WebSocketConnector aConnector, Token aToken) {
+	private void getSQL(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		if (mLog.isDebugEnabled()) {
@@ -690,7 +871,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	 * @param aConnector
 	 * @param aToken
 	 */
-	public void postSQL(WebSocketConnector aConnector, Token aToken) {
+	private void postSQL(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		if (mLog.isDebugEnabled()) {
