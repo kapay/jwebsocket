@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket TestSpecs for the Logging Plug-in
+//	jWebSocket TestSpecs for the JDBC Plug-in
 //	(C) 2011 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -27,13 +27,12 @@ jws.tests.JDBC = {
 	testCreateTable: function() {
 		
 		var lSpec = this.NS + ": create table (admin)";
-		
 		it( lSpec, function () {
 			
 			// init response
 			var lResponse = {};
 
-			// perform the Remote Procedure Call...
+			// perform the native create table...
 			jws.Tests.getAdminConn().jdbcExecSQL(
 				"create table " + jws.tests.JDBC.TEST_TABLE + " (id int, text varchar(80))",
 				{	OnResponse: function( aToken ) {
@@ -42,7 +41,7 @@ jws.tests.JDBC = {
 				}
 			);
 			
-			// wait for result, consider reasonably timeout
+			// wait for result, consider reasonable timeout
 			waitsFor(
 				function() {
 					// check response
@@ -60,17 +59,16 @@ jws.tests.JDBC = {
 		});
 	},
 	
-	// this spec tests the jdbc plug-in, creating a temporary table for test purposes
+	// this spec tests the jdbc plug-in, dropping a temporary table for test purposes
 	testDropTable: function() {
 		
 		var lSpec = this.NS + ": drop table (admin)";
-		
 		it( lSpec, function () {
 			
 			// init response
 			var lResponse = {};
 
-			// perform the Remote Procedure Call...
+			// perform the native drop table...
 			jws.Tests.getAdminConn().jdbcExecSQL(
 				"drop table " + jws.tests.JDBC.TEST_TABLE,
 				{	OnResponse: function( aToken ) {
@@ -79,7 +77,7 @@ jws.tests.JDBC = {
 				}
 			);
 			
-			// wait for result, consider reasonably timeout
+			// wait for result, consider reasonable timeout
 			waitsFor(
 				function() {
 					// check response
@@ -97,17 +95,16 @@ jws.tests.JDBC = {
 		});
 	},
 	
-	// this spec tests the file save method of the fileSystem plug-in
-	testQuerySQL: function() {
+	// this spec tests the native SQL select function of the JDBC plug-in
+	testSelectSQL: function() {
 		
-		var lSpec = this.NS + ": querySQL (admin)";
-		
+		var lSpec = this.NS + ": selectSQL (admin)";
 		it( lSpec, function () {
 			
 			// init response
 			var lResponse = {};
 
-			// perform the Remote Procedure Call...
+			// perform the native select...
 			jws.Tests.getAdminConn().jdbcQuerySQL(
 				"select * from " + jws.tests.JDBC.TEST_TABLE,
 				{	OnResponse: function( aToken ) {
@@ -116,7 +113,7 @@ jws.tests.JDBC = {
 				}
 			);
 			
-			// wait for result, consider reasonably timeout
+			// wait for result, consider reasonable timeout
 			waitsFor(
 				function() {
 					// check response
@@ -134,17 +131,16 @@ jws.tests.JDBC = {
 		});
 	},
 
-	// this spec tests the file save method of the fileSystem plug-in
+	// this spec tests the native SQL insert function of the JDBC plug-in
 	testInsertSQL: function() {
 		
 		var lSpec = this.NS + ": insertSQL (admin)";
-		
 		it( lSpec, function () {
 			
 			// init response
 			var lResponse = {};
 
-			// perform the Remote Procedure Call...
+			// perform the native insert...
 			jws.Tests.getAdminConn().jdbcUpdateSQL(
 				"insert into " 
 					+ jws.tests.JDBC.TEST_TABLE 
@@ -156,7 +152,7 @@ jws.tests.JDBC = {
 				}
 			);
 			
-			// wait for result, consider reasonably timeout
+			// wait for result, consider reasonable timeout
 			waitsFor(
 				function() {
 					return( lResponse.code !== undefined );
@@ -174,17 +170,16 @@ jws.tests.JDBC = {
 		});
 	},
 
-	// this spec tests the file save method of the fileSystem plug-in
+	// this spec tests the native SQL update function of the JDBC plug-in
 	testUpdateSQL: function() {
 		
 		var lSpec = this.NS + ": updateSQL (admin)";
-		
 		it( lSpec, function () {
 			
 			// init response
 			var lResponse = {};
 
-			// perform the Remote Procedure Call...
+			// perform the native update...
 			jws.Tests.getAdminConn().jdbcUpdateSQL(
 				"update " 
 				+ jws.tests.JDBC.TEST_TABLE 
@@ -196,7 +191,7 @@ jws.tests.JDBC = {
 				}
 			);
 			
-			// wait for result, consider reasonably timeout
+			// wait for result, consider reasonable timeout
 			waitsFor(
 				function() {
 					return( lResponse.code !== undefined );
@@ -214,17 +209,16 @@ jws.tests.JDBC = {
 		});
 	},
 
-	// this spec tests the file save method of the fileSystem plug-in
+	// this spec tests the native SQL delete function of the JDBC plug-in
 	testDeleteSQL: function() {
 		
 		var lSpec = this.NS + ": deleteSQL (admin)";
-		
 		it( lSpec, function () {
 			
 			// init response
 			var lResponse = {};
 
-			// perform the Remote Procedure Call...
+			// perform the native delete...
 			jws.Tests.getAdminConn().jdbcUpdateSQL(
 				"delete from " 
 				+ jws.tests.JDBC.TEST_TABLE 
@@ -235,7 +229,165 @@ jws.tests.JDBC = {
 				}
 			);
 			
-			// wait for result, consider reasonably timeout
+			// wait for result, consider reasonable timeout
+			waitsFor(
+				function() {
+					return( lResponse.code !== undefined );
+				},
+				lSpec,
+				3000
+			);
+
+			// check result if ok
+			runs( function() {
+				expect( lResponse.msg ).toEqual( "ok" );
+				expect( lResponse.rowsAffected ).toEqual( 1 );
+			});
+
+		});
+	},
+
+
+	// this spec tests the abstract select function of the JDBC plug-in
+	testSelect: function() {
+		
+		var lSpec = this.NS + ": select (admin)";
+		it( lSpec, function () {
+			
+			// init response
+			var lResponse = {};
+
+			// perform the abstract select command...
+			jws.Tests.getAdminConn().jdbcSelect(
+				{	tables: [ jws.tests.JDBC.TEST_TABLE ],
+					fields: [ "id", "text" ],
+					where: "id=1"
+				},
+				{	OnResponse: function( aToken ) {
+						lResponse = aToken;
+					}
+				}
+			);
+			
+			// wait for result, consider reasonable timeout
+			waitsFor(
+				function() {
+					return( lResponse.code !== undefined );
+				},
+				lSpec,
+				3000
+			);
+
+			// check result if ok
+			runs( function() {
+				expect( lResponse.msg ).toEqual( "ok" );
+				expect( lResponse.data.length ).toEqual( 1 );
+				expect( lResponse.data[0][1] ).toEqual( jws.tests.JDBC.TEST_STRING_2 );
+			});
+
+		});
+	},
+
+	// this spec tests the abstract insert function of the JDBC plug-in
+	testInsert: function() {
+		
+		var lSpec = this.NS + ": insert (admin)";
+		it( lSpec, function () {
+			
+			// init response
+			var lResponse = {};
+
+			// perform the abstract insert command
+			jws.Tests.getAdminConn().jdbcInsert(
+				{	table: jws.tests.JDBC.TEST_TABLE ,
+					fields: [ "id", "text" ],
+					values: [ 1, jws.tests.JDBC.TEST_STRING_1 ]
+				},
+				{	OnResponse: function( aToken ) {
+						lResponse = aToken;
+					}
+				}
+			);
+			
+			// wait for result, consider reasonable timeout
+			waitsFor(
+				function() {
+					return( lResponse.code !== undefined );
+				},
+				lSpec,
+				3000
+			);
+
+			// check result if ok
+			runs( function() {
+				expect( lResponse.msg ).toEqual( "ok" );
+				expect( lResponse.rowsAffected ).toEqual( 1 );
+			});
+
+		});
+	},
+
+	// this spec tests the abstract update function of the JDBC plug-in
+	testUpdate: function() {
+		
+		var lSpec = this.NS + ": update (admin)";
+		it( lSpec, function () {
+			
+			// init response
+			var lResponse = {};
+
+			// perform the abstract update command
+			jws.Tests.getAdminConn().jdbcUpdate(
+				{	table: jws.tests.JDBC.TEST_TABLE ,
+					fields: [ "text" ],
+					values: [ jws.tests.JDBC.TEST_STRING_2 ],
+					where: "id=1"
+				},
+				{	OnResponse: function( aToken ) {
+						lResponse = aToken;
+					}
+				}
+			);
+			
+			// wait for result, consider reasonable timeout
+			waitsFor(
+				function() {
+					return( lResponse.code !== undefined );
+				},
+				lSpec,
+				3000
+			);
+
+			// check result if ok
+			runs( function() {
+				expect( lResponse.msg ).toEqual( "ok" );
+				expect( lResponse.rowsAffected ).toEqual( 1 );
+			});
+
+		});
+	},
+
+	// this spec tests the abstract delete function of the JDBC plug-in
+	testDelete: function() {
+		
+		var lSpec = this.NS + ": delete (admin)";
+		it( lSpec, function () {
+			
+			// init response
+			var lResponse = {};
+
+			// perform the abstract delete command
+			jws.Tests.getAdminConn().jdbcDelete(
+				{	table: jws.tests.JDBC.TEST_TABLE,
+					where: "id=1"
+				},
+				{	OnResponse: function( aToken ) {
+						lResponse = aToken;
+					}
+				}
+			);
+			
+			// wait for result, consider reasonable timeout
 			waitsFor(
 				function() {
 					return( lResponse.code !== undefined );
@@ -255,11 +407,21 @@ jws.tests.JDBC = {
 
 	runSpecs: function() {
 		// run alls tests within an outer test suite
+		
 		this.testCreateTable();
+		
+		// run native tests
 		this.testInsertSQL();
 		this.testUpdateSQL();
-		this.testQuerySQL();
+		this.testSelectSQL();
 		this.testDeleteSQL();
+				
+		// run abstract tests
+		this.testInsert();
+		this.testUpdate();
+		this.testSelect();
+		this.testDelete();
+		
 		this.testDropTable();
 	},
 
