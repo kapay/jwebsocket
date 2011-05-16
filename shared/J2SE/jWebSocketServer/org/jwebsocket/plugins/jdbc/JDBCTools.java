@@ -158,7 +158,7 @@ public class JDBCTools {
 				&& !((String) lField).startsWith("TO_DATE")) {
 			lRes = "'" + (String) lField + "'";
 		} else {
-			lRes = (String) lField;
+			lRes = lField.toString();
 		}
 		return lRes;
 	}

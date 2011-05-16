@@ -293,7 +293,11 @@ public class JDBCPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, execSQL(aToken));
 	}
 
+	// field names may be of type string only!
 	private String validateFieldsString(List<String> aFields) {
+		if (aFields == null) {
+			return null;
+		}
 		StringBuilder lRes = new StringBuilder();
 		int lCnt = aFields.size();
 		int lIdx = 0;
@@ -307,11 +311,15 @@ public class JDBCPlugIn extends TokenPlugIn {
 		return lRes.toString();
 	}
 
-	private String validateValuesString(List<String> aValues) {
+	// values may be of variable types!
+	private String validateValuesString(List aValues) {
+		if (aValues == null) {
+			return null;
+		}
 		StringBuilder lRes = new StringBuilder();
 		int lCnt = aValues.size();
 		int lIdx = 0;
-		for (String lValue : aValues) {
+		for (Object lValue : aValues) {
 			lRes.append(JDBCTools.valueToString(lValue));
 			lIdx++;
 			if (lIdx < lCnt) {
@@ -321,7 +329,11 @@ public class JDBCPlugIn extends TokenPlugIn {
 		return lRes.toString();
 	}
 
+	// table names may be of type string only!
 	private String validateTablesString(List<String> aTables) {
+		if (aTables == null) {
+			return null;
+		}
 		StringBuilder lRes = new StringBuilder();
 		int lCnt = aTables.size();
 		int lIdx = 0;
@@ -336,6 +348,9 @@ public class JDBCPlugIn extends TokenPlugIn {
 	}
 
 	private String validateOrdersString(List<String> aOrders) {
+		if (aOrders == null) {
+			return null;
+		}
 		StringBuilder lRes = new StringBuilder();
 		int lCnt = aOrders.size();
 		int lIdx = 0;
@@ -386,8 +401,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 			return;
 		}
 
-		String lTablesStr = validateFieldsString(lTables);
-		String lFieldsStr = validateTablesString(lFields);
+		String lTablesStr = validateTablesString(lTables);
+		String lFieldsStr = validateFieldsString(lFields);
 		String lOrdersStr = validateOrdersString(lOrders);
 
 		String lWhere = aToken.getString("where");
@@ -524,8 +539,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 		List lFields = aToken.getList("fields");
 		List lValues = aToken.getList("values");
 
-		String lFieldsStr = validateTablesString(lFields);
-		String lValuesStr = validateValuesString(lFields);
+		String lFieldsStr = validateFieldsString(lFields);
+		String lValuesStr = validateValuesString(lValues);
 
 		if (lTable == null || lTable.length() <= 0) {
 			lServer.sendToken(aConnector,
@@ -555,7 +570,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 		String lSQL = "insert into"
 				+ " " + lTable
 				+ " (" + lFieldsStr + ")"
-				+ " values" 
+				+ " values"
 				+ " (" + lValuesStr + ")";
 
 		Token lInsertToken = TokenFactory.createToken();
@@ -611,33 +626,11 @@ public class JDBCPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
-	/**
-	 *
-	 * @param aResultSet
-	 * @param aColCount
-	 * @return
-	 */
-	private List<Object> getResultColumns(ResultSet aResultSet, int aColCount) {
-		// TODO: should work with usual arrays!
-		List<Object> lDataRow = new FastList<Object>();
-		Object lObj = null;
-
-		try {
-			for (int lColIdx = 1; lColIdx <= aColCount; lColIdx++) {
-				lObj = aResultSet.getObject(lColIdx);
-				lDataRow.add(lObj);
-			}
-		} catch (Exception lEx) {
-			System.out.println("EXCEPTION in getResultColumns");
-		}
-
-		return lDataRow;
-	}
-
 	private Token mQuerySQL(String aSQL, int aExpiration) {
 
-		Token lResponse;
-		String lHash = null;
+
+		String lHash = "hash";
+		Token lResponse = null;
 
 		// check cache before running the query.
 		if (aExpiration > 0) {
@@ -649,49 +642,6 @@ public class JDBCPlugIn extends TokenPlugIn {
 			}
 		}
 
-		// instantiate response token
-		lResponse = TokenFactory.createToken();
-		// TODO: should work with usual arrays as well!
-		// Object[] lColumns = null;
-		int lRowCount = 0;
-		int lColCount = 0;
-		List<Map> lColumns = new FastList<Map>();
-		List lData = new FastList();
-		try {
-			DBQueryResult lRes = DBConnectSingleton.querySQL(DBConnectSingleton.USR_SYSTEM, aSQL);
-
-			// TODO: metadata should be optional to save bandwidth!
-			// generate the meta data for the response
-			lColCount = lRes.metaData.getColumnCount();
-			lResponse.setInteger("colcount", lColCount);
-
-			for (int lColIdx = 1; lColIdx <= lColCount; lColIdx++) {
-				// get name of colmuns
-				String lSimpleClass = JDBCTools.extractSimpleClass(lRes.metaData.getColumnClassName(lColIdx));
-				// convert to json type
-				String lJSONType = JDBCTools.getJSONType(lSimpleClass, lRes.metaData);
-
-				Map<String, Object> lColHeader = new FastMap<String, Object>();
-				lColHeader.put("name", lRes.metaData.getColumnName(lColIdx));
-				lColHeader.put("jsontype", lJSONType);
-				lColHeader.put("jdbctype", lRes.metaData.getColumnTypeName(lColIdx));
-
-				lColumns.add(lColHeader);
-			}
-
-			// generate the result data
-			while (lRes.resultSet.next()) {
-				lData.add(getResultColumns(lRes.resultSet, lColCount));
-				lRowCount++;
-			}
-		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName() + " on query: " + lEx.getMessage());
-		}
-
-		// complete the response token
-		lResponse.setInteger("rowcount", lRowCount);
-		lResponse.setList("columns", lColumns);
-		lResponse.setList("data", lData);
 
 		// if to be cached, put it to cache
 		// don't save isCached flag
