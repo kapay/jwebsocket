@@ -56,7 +56,7 @@
 				var lURL = jws.getDefaultServerURL();
 
 				log( "Connecting to " + lURL + " ..." );
-				var lRes = lWSC.open( lURL, {
+				var lRes = lWSC.logon( lURL, "guest", "guest", {
 
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
