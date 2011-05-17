@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.util;
 
+import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,7 +33,7 @@ public class Tools {
 
 	public final static boolean EXPAND_CASE_SENSITIVE = false;
 	public final static boolean EXPAND_CASE_INSENSITIVE = true;
-	
+
 	/**
 	 * Returns the MD5 sum of the given string. The output always has 32 digits.
 	 * @param aMsg String the string to calculate the MD5 sum for.
@@ -193,5 +194,52 @@ public class Tools {
 	public static String expandEnvVars(String aString) {
 		Map<String, String> lEnvVars = System.getenv();
 		return expandVars(aString, lEnvVars, EXPAND_CASE_INSENSITIVE);
+	}
+
+	public static Object invoke(String aClassName, String aMethodName,
+			Object[] aArgs) throws Exception {
+		Class lClass = Class.forName(aClassName);
+		if (lClass == null) {
+			throw new Exception("Class '" + aClassName + "' not found.");
+		}
+		Object lRes = null;
+
+		Class[] lArgClasses = null;
+		if (aArgs != null) {
+			lArgClasses = new Class[aArgs.length];
+		}
+		Method lMthd = lClass.getDeclaredMethod(aMethodName, lArgClasses);
+		if (lMthd == null) {
+			throw new Exception("Method '" + aMethodName + "' not found.");
+		}
+		lRes = lMthd.invoke(aArgs);
+
+		return lRes;
+	}
+
+	public static Object invoke(Object aInstance, String aMethodName,
+			Object[] aArgs) throws Exception {
+		if (aInstance == null) {
+			throw new Exception("No instance passed for call.");
+		}
+		Class lClass = aInstance.getClass();
+		Object lRes = null;
+
+		Class[] lArgClasses;
+		if (aArgs != null) {
+			lArgClasses = new Class[aArgs.length];
+		} else {
+			lArgClasses = new Class[0];
+		}
+		Method lMthd = lClass.getDeclaredMethod(aMethodName, lArgClasses);
+		if (lMthd == null) {
+			throw new Exception("Method '" + aMethodName + "' not found.");
+		}
+		if (aArgs == null) {
+			aArgs = new Object[0];
+		}
+		lRes = lMthd.invoke(aInstance, aArgs);
+
+		return lRes;
 	}
 }

@@ -33,6 +33,8 @@
 		<script type="text/javascript" src="../../res/js/jwsJDBCPlugIn.js"></script>
 		<!-- this one imports the client side file system plug-in -->
 		<script type="text/javascript" src="../../res/js/jwsFilesystemPlugIn.js"></script>
+		<!-- this one imports the client side reporting plug-in -->
+		<script type="text/javascript" src="../../res/js/jwsReportingPlugIn.js"></script>
 		<!-- this one imports the client side rpc plug-in -->
 		<script type="text/javascript" src="../../res/js/jwsRPCPlugIn.js"></script>
 		<script type="text/javascript" language="JavaScript">
@@ -304,11 +306,17 @@
 					log( lWSC.resultToString( lRes ) );
 				}
 				*/
+			   /*
 				log( "Deleting JDBC data via WebSockets..." );
 				// call the getTime method of the client side plug-in
 				var lRes = lWSC.jdbcDelete({
 					table	: "demo_master",
 					where	: "master_id=6"
+				});
+				*/
+				var lRes = lWSC.sendToken({
+					ns	: "org.jwebsocket.plugins.reporting",
+					type: "test"
 				});
 			}
 			
@@ -324,6 +332,42 @@
 				}
 			}
 */
+			function getFilelist() {
+				/*
+				log( "Retrieving file list from the server via WebSockets..." );
+				// call the getFilelist method of the client side plug-in
+				var lRes = lWSC.fileGetFilelist(
+					"publicDir", [ "*.*" ],
+					{	recursive: true
+					}
+				);
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( lWSC.resultToString( lRes ) );
+				}
+				*/
+				log( "Creating a report via WebSockets..." );
+				// call the getReports method of the client side plug-in
+				var lRes = lWSC.reportingCreateReport(
+					"Browser Usage",	// report id
+					null				// report params
+				);
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( lWSC.resultToString( lRes ) );
+				}
+				/*
+				log( "Retrieving reports via WebSockets..." );
+				// call the getReports method of the client side plug-in
+				var lRes = lWSC.reportingGetReports				(
+					[ "*.*" ],
+				);
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( lWSC.resultToString( lRes ) );
+				}
+				*/
+			}
 
 			function loadFile() {
 				log( "Loading a file from the server via WebSockets..." );
@@ -460,8 +504,8 @@
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Username</td>
 					<td class="stdDlg" width="5">
-						<input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px"
-							   title="jWebSocket username or 'Guest' for demo.">
+						<input class="stxfDlg" id="stxfUsername" type="text" value="root" style="width:150px"
+							   title="jWebSocket username or 'root' for demo.">
 					</td>
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"
@@ -483,19 +527,20 @@
 						<input class="sbtnDlg" id="sbtnTokenizable" type="button" value="Tokenizable" onclick="sampleTokenizable();"
 							   title="Retreives a tokenizable object from a server via a listener.">
 					</td>
-					<td class="stdDlg" width="">
+					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnSaveFile" type="button" value="Save File" onclick="saveFile();"
 							   title="Saves the message below into a shared file on the jWebSocket server.">
 					</td>
 					<td class="stdDlg" width="">
-						<!--<input class="sbtnDlg" id="sbtnCGITest" type="button" value="CGI Test" onclick="cgiTest();">-->
+						<input class="sbtnDlg" id="sbtnGetFilelist" type="button" value="Filelist" onclick="getFilelist();"
+							   title="Retreives the filelist from the server.">
 					</td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Password</td>
 					<td class="stdDlg" width="5">
-						<input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:150px"
-							   title="jWebSocket password or 'guest' for demo.">
+						<input class="spwfDlg" id="spwfPassword" type="password" value="root" style="width:150px"
+							   title="jWebSocket password or 'root' for demo.">
 					</td>
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logout" onclick="logoff();"

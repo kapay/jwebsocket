@@ -127,7 +127,8 @@ public class LoggingPlugIn extends TokenPlugIn {
 
 	private void unsubscribe(WebSocketConnector aConnector, Token aToken) {
 	}
-
+	
+	
 	private void logEvent(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		Token lResponse = lServer.createResponse(aToken);

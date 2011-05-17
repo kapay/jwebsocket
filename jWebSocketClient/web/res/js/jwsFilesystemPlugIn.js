@@ -68,6 +68,33 @@ jws.FileSystemPlugIn = {
 		}
 	},
 
+	fileGetFilelist: function( aAlias, aFilemasks, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lScope = jws.SCOPE_PRIVATE;
+			var lRecursive = false;
+
+			if( aOptions ) {
+				if( aOptions.scope != undefined ) {
+					lScope = aOptions.scope;
+				}
+				if( aOptions.recursive != undefined ) {
+					lRecursive = aOptions.recursive;
+				}
+			}
+			var lToken = {
+				ns: jws.FileSystemPlugIn.NS,
+				type: "getFilelist",
+				alias: aAlias,
+				recursive: lRecursive,
+				scope: lScope,
+				filemasks: aFilemasks
+			};
+			this.sendToken( lToken,	aOptions );
+		}	
+		return lRes;
+	},
+
 	fileLoad: function( aFilename, aOptions ) {
 		var lRes = this.createDefaultResult();
 		var lScope = jws.SCOPE_PRIVATE;

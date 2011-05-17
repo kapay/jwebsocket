@@ -424,10 +424,10 @@ jws.tools = {
 	//:a:en::aInt:Number:Number to be formatted.
 	//:a:en::aDigits:Number:Nu,ber of digits for the result.
 	//:r:*:::String:String with the exact number of digits filled with 0.
-	zerofill: function(aInt, aDigits) {
-		var lRes = aInt.toFixed(0);
+	zerofill: function( aInt, aDigits ) {
+		var lRes = aInt.toFixed( 0 );
 		if( lRes.length > aDigits ) {
-			lRes = lRes.substring( )
+			lRes = lRes.substring( lRes.length - aDigits );
 		} else {
 			while( lRes.length < aDigits ) {
 				lRes = "0" + lRes;

@@ -33,13 +33,17 @@ public class NativeAccess {
 	public void setDataSource(DataSource aDataSource) {
 		mJDBCTemplate = new JdbcTemplate(aDataSource);
 	}
-
+	
 	public void setSelectSequenceSQL(String aSQL) {
 		mSelectSequenceSQL = aSQL;
 	}
 
 	public String getSelectSequenceSQL() {
 		return mSelectSequenceSQL;
+	}
+	
+	public DataSource getDataSource() {
+		return mJDBCTemplate.getDataSource();
 	}
 
 	public Token query(String aSQL) {

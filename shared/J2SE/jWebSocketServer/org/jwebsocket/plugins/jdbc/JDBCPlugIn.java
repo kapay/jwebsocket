@@ -19,10 +19,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.jdbc;
 
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
-import javolution.util.FastList;
+import javax.sql.DataSource;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.IBasicStorage;
@@ -143,6 +142,10 @@ public class JDBCPlugIn extends TokenPlugIn {
 		}
 	}
 
+	public DataSource getNativeDataSource() {
+		return mNativeAccess.getDataSource();
+	}
+	
 	@Override
 	public Token invoke(WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
