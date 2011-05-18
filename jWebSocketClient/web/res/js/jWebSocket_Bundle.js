@@ -26,9 +26,9 @@
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0a8
+	//:const:*:VERSION:String:1.0a10
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0a8 (10421)",
+	VERSION: "1.0a10 (10519)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -424,10 +424,10 @@ jws.tools = {
 	//:a:en::aInt:Number:Number to be formatted.
 	//:a:en::aDigits:Number:Nu,ber of digits for the result.
 	//:r:*:::String:String with the exact number of digits filled with 0.
-	zerofill: function(aInt, aDigits) {
-		var lRes = aInt.toFixed(0);
+	zerofill: function( aInt, aDigits ) {
+		var lRes = aInt.toFixed( 0 );
 		if( lRes.length > aDigits ) {
-			lRes = lRes.substring( )
+			lRes = lRes.substring( lRes.length - aDigits );
 		} else {
 			while( lRes.length < aDigits ) {
 				lRes = "0" + lRes;
@@ -1027,21 +1027,20 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:m:*:processQueue
 	//:d:en:Processes the token queue. _
 	//:d:en:Tries to send out all tokens stored in the quere
-	//:a:en::aToken:Object:Token to be queued to the jWebSocket server.
-	//:a:en::aOptions:Object:Optional arguments as listed below...
-	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
+	//:a:en::::-
 	//:r:*:::void:none
 	processQueue: function() {
-		if( !this.mQueue ) {
+		if( this.mQueue ) {
 			var lRes = this.checkConnected();
 			if( lRes.code == 0 ) {
-				var lToken;
+				var lPacket;
 				while( this.mQueue.length > 0 ) {
 					// get first element of the queue
-					lToken = this.mQueue[ 0 ];
+					lPacket = this.mQueue[ 0 ];
 				}
 			}
 		}
+		// if no queue exists nothing needs to be done here.
 	},
 
 	//:m:*:queuePacket
@@ -1051,12 +1050,12 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:a:en::aOptions:Object:Optional arguments as listed below...
 	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
 	//:r:*:::void:none
-	queuePacket: function( aToken, aOptions ) {
+	queuePacket: function( aPacket, aOptions ) {
 		if( !this.mQueue ) {
 			this.mQueue = [];
 		}
 		this.mQueue.push({
-			token: aToken,
+			packet: aPacket,
 			options: aOptions
 		});
 		this.processQueue();
@@ -4506,6 +4505,33 @@ jws.FileSystemPlugIn = {
 		}
 	},
 
+	fileGetFilelist: function( aAlias, aFilemasks, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lScope = jws.SCOPE_PRIVATE;
+			var lRecursive = false;
+
+			if( aOptions ) {
+				if( aOptions.scope != undefined ) {
+					lScope = aOptions.scope;
+				}
+				if( aOptions.recursive != undefined ) {
+					lRecursive = aOptions.recursive;
+				}
+			}
+			var lToken = {
+				ns: jws.FileSystemPlugIn.NS,
+				type: "getFilelist",
+				alias: aAlias,
+				recursive: lRecursive,
+				scope: lScope,
+				filemasks: aFilemasks
+			};
+			this.sendToken( lToken,	aOptions );
+		}	
+		return lRes;
+	},
+
 	fileLoad: function( aFilename, aOptions ) {
 		var lRes = this.createDefaultResult();
 		var lScope = jws.SCOPE_PRIVATE;
@@ -4846,15 +4872,71 @@ jws.JDBCPlugIn = {
 		}
 	},
 
-	jdbcSelect: function( aQuery, aOptions ) {
+	jdbcQuerySQL: function( aQuery, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			var lToken = {
 				ns: jws.JDBCPlugIn.NS,
+				type: "querySQL",
+				sql: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcUpdateSQL: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "updateSQL",
+				sql: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcExecSQL: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "execSQL",
+				sql: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcSelect: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lTables = aQuery.tables;
+			if( lTables && !lTables.length ) {
+				lTables = [ lTables ];
+			}
+			var lFields = aQuery.fields;
+			if( lFields && !lFields.length ) {
+				lFields = [ lFields ];
+			}
+			var lJoins = aQuery.joins;
+			if( lJoins && !lJoins.length ) {
+				lJoins = [ lJoins ];
+			}
+			var lOrders = aQuery.orders;
+			if( lOrders && !lOrders.length ) {
+				lOrders = [ lOrders ];
+			}
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
 				type: "select",
-				table: aQuery.table,
-				fields: aQuery.fields,
-				order: aQuery.order,
+				tables: lTables,
+				joins: lJoins,
+				fields: lFields,
+				orders: lOrders,
 				where: aQuery.where,
 				group: aQuery.group,
 				having: aQuery.having
@@ -4864,32 +4946,51 @@ jws.JDBCPlugIn = {
 		return lRes;
 	},
 
-	jdbcQuery: function( aQuery, aOptions ) {
+	jdbcUpdate: function( aQuery, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			var lToken = {
 				ns: jws.JDBCPlugIn.NS,
-				type: "query",
-				sql: aQuery
+				type: "update",
+				table: aQuery.table,
+				fields: aQuery.fields,
+				values: aQuery.values,
+				where: aQuery.where
 			};
 			this.sendToken( lToken,	aOptions );
 		}
 		return lRes;
 	},
 
-	jdbcExec: function( aQuery, aOptions ) {
+	jdbcInsert: function( aQuery, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			var lToken = {
 				ns: jws.JDBCPlugIn.NS,
-				type: "exec",
-				sql: aQuery
+				type: "insert",
+				table: aQuery.table,
+				fields: aQuery.fields,
+				values: aQuery.values
 			};
 			this.sendToken( lToken,	aOptions );
 		}
 		return lRes;
 	},
 
+	jdbcDelete: function( aQuery, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "delete",
+				table: aQuery.table,
+				where: aQuery.where
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+	
 	setJDBCCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
@@ -5136,6 +5237,97 @@ jws.MailPlugIn = {
 
 // add the JWebSocket Mail PlugIn into the TokenClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.MailPlugIn );
+//	---------------------------------------------------------------------------
+//	jWebSocket Reporting Client PlugIn (uses jWebSocket Client and Server)
+//	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
+
+
+//	---------------------------------------------------------------------------
+//  jWebSocket Reporting Client Plug-In
+//	---------------------------------------------------------------------------
+
+//:package:*:jws
+//:class:*:jws.ReportingPlugIn
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.ReportingPlugIn[/tt] class.
+jws.ReportingPlugIn = {
+
+	//:const:*:NS:String:org.jwebsocket.plugins.reporting (jws.NS_BASE + ".plugins.reporting")
+	//:d:en:Namespace for the [tt]ReportingPlugIn[/tt] class.
+	// if namespace is changed update server plug-in accordingly!
+	NS: jws.NS_BASE + ".plugins.reporting",
+
+	processToken: function( aToken ) {
+		// check if namespace matches
+		if( aToken.ns == jws.ReportingPlugIn.NS ) {
+			// here you can handle incomimng tokens from the server
+			// directy in the plug-in if desired.
+			if( "createReport" == aToken.reqType ) {
+				if( this.OnReportAvail ) {
+					this.OnReportAvail( aToken );
+				}
+			}
+		}
+	},
+
+	reportingCreateReport: function( aReportId, aParams, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lOutputType = "pdf";
+			if( aOptions ) {
+				if( aOptions.outputType ) {
+					lOutputType = aOptions.outputType;
+				} 
+			}
+			var lToken = {
+				ns: jws.ReportingPlugIn.NS,
+				type: "createReport",
+				reportId: aReportId,
+				outputType: lOutputType,
+				params: aParams
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+	
+	reportingGetReports: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.ReportingPlugIn.NS,
+				type: "getReports"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+	
+	setReportingCallbacks: function( aListeners ) {
+		if( !aListeners ) {
+			aListeners = {};
+		}
+		if( aListeners.OnReportAvail !== undefined ) {
+			this.OnReportAvail = aListeners.OnReportAvail;
+		}
+	}
+
+}
+
+// add the JWebSocket Shared Objects PlugIn into the TokenClient class
+jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.ReportingPlugIn );
 //	---------------------------------------------------------------------------
 //	jWebSocket Mail RPC/RRPC  (uses jWebSocket Client and Server)
 //	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath

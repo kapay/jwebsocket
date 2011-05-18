@@ -28,7 +28,7 @@ var jws = {
 
 	//:const:*:VERSION:String:1.0a10
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0a10 (10516)",
+	VERSION: "1.0a10 (10519)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
