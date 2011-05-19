@@ -37,7 +37,7 @@ jws.tests.AutomatedAPI = {
 			// open a separate control connection
 			lConn.open(jws.getDefaultServerURL(), {
 
-				OnOpen: function () {
+				OnWelcome: function () {
 					var lAPIPlugIn = new jws.APIPlugIn();
 					lConn.addPlugIn( lAPIPlugIn );
 					// request the API of the benchmark plug-in

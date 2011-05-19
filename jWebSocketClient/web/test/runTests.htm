@@ -27,7 +27,7 @@
 		<script type="text/javascript" src="../res/js/jwsChatPlugIn.js"></script>
 		<script type="text/javascript" src="../res/js/jwsClientGamingPlugIn.js"></script>
 		<script type="text/javascript" src="../res/js/jwsEventsPlugIn.js"></script>
-		<script type="text/javascript" src="../res/js/jwsFileSystemPlugIn.js"></script>
+		<script type="text/javascript" src="../res/js/jwsFilesystemPlugIn.js"></script>
 		<script type="text/javascript" src="../res/js/jwsJDBCPlugIn.js"></script>
 		<script type="text/javascript" src="../res/js/jwsLoggingPlugIn.js"></script>
 		<script type="text/javascript" src="../res/js/jwsMailPlugIn.js"></script>
@@ -98,7 +98,7 @@
 			var lSuite = location.search;
 			if( lSuite ) {
 				lSuite = lSuite.substr( 1 );
-				console.log("running " + lSuite + "...");
+				// console.log("running " + lSuite + "...");
 				eval( lSuite );
 				jws.TestPlugIn.execTests();
 			}

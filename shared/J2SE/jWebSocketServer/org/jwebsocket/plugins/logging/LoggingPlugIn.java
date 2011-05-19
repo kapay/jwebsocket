@@ -147,9 +147,6 @@ public class LoggingPlugIn extends TokenPlugIn {
 		String lPrimaryKey = aToken.getString("primaryKey");
 		String lSequence = aToken.getString("sequence");
 
-		Token lExecToken = TokenFactory.createToken(
-				lJDBCPlugIn.getNamespace(), "exec");
-
 		Integer lValue = null;
 		if (lPrimaryKey != null && lSequence != null) {
 			Token lGetNextSeqToken = TokenFactory.createToken(
@@ -176,6 +173,8 @@ public class LoggingPlugIn extends TokenPlugIn {
 		lVars.put("ip", aConnector.getRemoteHost().getHostAddress());
 		lValuesStr = Tools.expandVars(lValuesStr, lVars, Tools.EXPAND_CASE_SENSITIVE);
 
+		Token lExecToken = TokenFactory.createToken(
+				lJDBCPlugIn.getNamespace(), "updateSQL");
 		lExecToken.setString("sql",
 				"insert into "
 				+ lTable
@@ -222,8 +221,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 		}
 
 		Token lQueryToken = TokenFactory.createToken(
-				lJDBCPlugIn.getNamespace(), "query");
-
+				lJDBCPlugIn.getNamespace(), "querySQL");
 		lQueryToken.setString("sql", lSQLString);
 
 		Token lQueryResp = lJDBCPlugIn.invoke(aConnector, lQueryToken);

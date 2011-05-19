@@ -20,7 +20,7 @@ jws.tests.Logging = {
 	NS: "jws.tests.logging", 
 	TABLE: "ACTION_LOG",
 	PRIMARY_KEY: "ID",
-	SEQUENCE: "SQ_ACTION_LOG_ID",
+	SEQUENCE: "SQ_PK_ACTION_LOG",
 	MESSAGE: "This is an message from the automated test suite.",
 	
 	mLogId: null,
@@ -37,7 +37,10 @@ jws.tests.Logging = {
 				"MESSAGE": jws.tests.Logging.MESSAGE,
 				"BROWSER": "Mein Browser",
 				"IP": "${ip}",
-				"TIMESTAMP": "TO_DATE('" +
+				"TIME_STAMP": 
+					// jws.tools.dateToISO( lNow )
+					/* oracle 
+					"TO_DATE('" +
 					lNow.getUTCFullYear().toString() + "/" +
 					jws.tools.zerofill( lNow.getUTCMonth() + 1, 2 ) + "/" +
 					jws.tools.zerofill( lNow.getUTCDate(), 2 ) + " " +
@@ -45,6 +48,15 @@ jws.tests.Logging = {
 					jws.tools.zerofill( lNow.getUTCMinutes(), 2 ) + "/" +
 					jws.tools.zerofill( lNow.getUTCSeconds(), 2 ) +
 					"','YYYY/MM/DD HH24/MI/SS')"
+					*/
+					/* mysql */
+					lNow.getUTCFullYear().toString() + "-" +
+					+ jws.tools.zerofill( lNow.getUTCMonth() + 1, 2 ) + "-"
+					+ jws.tools.zerofill( lNow.getUTCDate(), 2 ) + " "
+					+ jws.tools.zerofill( lNow.getUTCHours(), 2 ) + ":"
+					+ jws.tools.zerofill( lNow.getUTCMinutes(), 2 ) + ":"
+					+ jws.tools.zerofill( lNow.getUTCSeconds(), 2 ) + "."
+					+ jws.tools.zerofill( lNow.getUTCMilliseconds(), 3 )
 			};
 			jws.Tests.getAdminConn().loggingEvent( jws.tests.Logging.TABLE, lData, {
 				primaryKey: jws.tests.Logging.PRIMARY_KEY,

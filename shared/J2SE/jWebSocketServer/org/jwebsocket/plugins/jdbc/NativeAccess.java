@@ -33,7 +33,7 @@ public class NativeAccess {
 	public void setDataSource(DataSource aDataSource) {
 		mJDBCTemplate = new JdbcTemplate(aDataSource);
 	}
-	
+
 	public void setSelectSequenceSQL(String aSQL) {
 		mSelectSequenceSQL = aSQL;
 	}
@@ -41,15 +41,20 @@ public class NativeAccess {
 	public String getSelectSequenceSQL() {
 		return mSelectSequenceSQL;
 	}
-	
+
 	public DataSource getDataSource() {
 		return mJDBCTemplate.getDataSource();
 	}
 
-	public Token query(String aSQL) {
+	public Token query(String aSQL, Object[] aArgs) {
 		Token lResToken;
 		try {
-			SqlRowSet lRowSet = mJDBCTemplate.queryForRowSet(aSQL);
+			SqlRowSet lRowSet;
+			if (aArgs != null) {
+				lRowSet = mJDBCTemplate.queryForRowSet(aSQL, aArgs);
+			} else {
+				lRowSet = mJDBCTemplate.queryForRowSet(aSQL);
+			}
 			lResToken = JDBCTools.resultSetToToken(lRowSet);
 		} catch (Exception lEx) {
 			lResToken = TokenFactory.createToken();
@@ -60,11 +65,19 @@ public class NativeAccess {
 		return lResToken;
 	}
 
-	public Token update(String aSQL) {
+	public Token query(String aSQL) {
+		return query(aSQL, null);
+	}
+
+	public Token update(String aSQL, Object[] aArgs) {
 		Token lResToken = TokenFactory.createToken();
 		int lAffectedRows = 0;
 		try {
-			lAffectedRows = mJDBCTemplate.update(aSQL);
+			if (aArgs != null) {
+				lAffectedRows = mJDBCTemplate.update(aSQL, aArgs);
+			} else {
+				lAffectedRows = mJDBCTemplate.update(aSQL);
+			}
 			lResToken.setInteger("code", 0);
 		} catch (Exception lEx) {
 			lResToken.setInteger("code", -1);
@@ -74,7 +87,11 @@ public class NativeAccess {
 		lResToken.setInteger("rowsAffected", lAffectedRows);
 		return lResToken;
 	}
-	
+
+	public Token update(String aSQL) {
+		return update(aSQL, null);
+	}
+
 	public Token exec(String aSQL) {
 		Token lResToken = TokenFactory.createToken();
 		try {
@@ -87,5 +104,4 @@ public class NativeAccess {
 		}
 		return lResToken;
 	}
-	
 }

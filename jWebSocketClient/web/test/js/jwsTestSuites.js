@@ -70,7 +70,7 @@ function runFullTestSuite() {
 		// open connections for admin and guest
 		jws.Tests.testOpenSharedAdminConn();
 		jws.Tests.testOpenSharedGuestConn();
-/*		
+		
 		// run test suites for the various plug-ins
 		jws.tests.System.runSuite();
 		jws.tests.FileSystem.runSuite();
@@ -79,7 +79,7 @@ function runFullTestSuite() {
 		
 		// run RPC tests
 		jws.tests.RPC.runSuite();
-*/
+
 		// run JDBC tests
 		jws.tests.JDBC.runSuite();
 

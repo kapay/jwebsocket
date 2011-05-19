@@ -95,8 +95,7 @@ public class JSONProcessor {
 		while (iterator.hasNext()) {
 			try {
 				Object aKey = iterator.next();
-				Object aValue = convertJsonToJavaObject(aJsonObject.get(String
-						.valueOf(aKey)));
+				Object aValue = convertJsonToJavaObject(aJsonObject.get(String.valueOf(aKey)));
 				lFastMap.put(aKey, aValue);
 			} catch (JSONException e) {
 				// Sould never happen:
@@ -106,10 +105,12 @@ public class JSONProcessor {
 		}
 		return lFastMap;
 	}
-	
+
 	/**
-	 * Convert a json string to a token. If the json string isn't a valide one, return an empty token
-	 * Note that if you need a more generic conversion (other subprotocol than json), you may also use the following:
+	 * Convert a json string to a token. If the json string isn't a valid one, 
+	 * return an empty token.
+	 * Note that if you need a more generic conversion (other sub protocol than 
+	 * json), you may also use the following:
 	 * Token lToken = TokenServer.packetToToken(aConnector, new RawPacket(aJsonString))
 	 * Depending of the SubProtocol of aConnector, the token will be automatically created 
 	 * (if the SubProtocol is WS_SUBPROT_JSON, the conversion will be done internally using this method)

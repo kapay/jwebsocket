@@ -68,7 +68,7 @@ jws.TestPlugIn = {
 			var lReporter = new jasmine.TrivialReporter();
 			jasmine.getEnv().addReporter( lReporter );
 			jasmine.getEnv().execute();
-		}, 500 );
+		}, 1000 );
 	},
 
 
