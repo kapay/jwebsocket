@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 import javolution.util.FastMap;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.api.PluginConfiguration;
@@ -74,8 +75,13 @@ public class JDBCPlugIn extends TokenPlugIn {
 
 		try {
 			String lSpringConfig = getString("spring_config");
-			FileSystemResource lFSRes =
-					new FileSystemResource(JWebSocketConfig.getConfigFolder(lSpringConfig));
+			String lPath = FilenameUtils.getPath(lSpringConfig);
+			if (lPath == null || lPath.length() <= 0) {
+				lPath = JWebSocketConfig.getConfigFolder(lSpringConfig);
+			} else {
+				lPath = lSpringConfig;
+			}
+			FileSystemResource lFSRes = new FileSystemResource(lPath);
 			mBeanFactory = new XmlBeanFactory(lFSRes);
 
 			mNativeAccess = (NativeAccess) mBeanFactory.getBean("nativeAccess");
@@ -145,7 +151,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 	public DataSource getNativeDataSource() {
 		return mNativeAccess.getDataSource();
 	}
-	
+
 	@Override
 	public Token invoke(WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
@@ -225,7 +231,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 				lResToken.setInteger("value", lNextSeqVal.intValue());
 			} else {
 				lResToken.setInteger("code", -1);
-				lResToken.setString("msg", "value could not be obtained");
+				lResToken.setString("msg", "value could not be obtained: " + lPKToken.getString("msg"));
 			}
 		} else {
 			lResToken.setInteger("code", -1);

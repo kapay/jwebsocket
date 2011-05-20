@@ -51,9 +51,9 @@ var jws = {
 	//:const:*:JWS_SERVER_SSL_SCHEMA:String:wss
 	//:d:en:Default schema, [tt]wss[/tt] for secured WebSocket-Connections.
 	JWS_SERVER_SSL_SCHEMA: "wss",
-	//:const:*:JWS_SERVER_HOST:String:[hostname|localhost]
-	//:d:en:Default hostname of current webbite or [tt]localhost[/tt] if no hostname can be detected.
-	JWS_SERVER_HOST: ( self.location.hostname ? self.location.hostname : "localhost" ),
+	//:const:*:JWS_SERVER_HOST:String:[hostname|localhost|IP-Number]
+	//:d:en:Default hostname of current webbite or [tt]localhost|127.0.0.1[/tt] if no hostname can be detected.
+	JWS_SERVER_HOST: ( self.location.hostname ? self.location.hostname : "127.0.0.1" ),
 	//:const:*:JWS_SERVER_PORT:Integer:8787
 	//:d:en:Default port number, 8787 for stand-alone un-secured servers, _
 	//:d:en:80 for Jetty or Glassfish un-secured servers.
@@ -72,7 +72,7 @@ var jws = {
 	//:d:en:Current token id, incremented per token exchange to assign results.
 	//:@deprecated:en:Use [tt]getDefaultServerURL()[/tt] instead.
 	JWS_SERVER_URL:
-		"ws://" + ( self.location.hostname ? self.location.hostname : "localhost" ) + ":8787/jWebSocket/jWebSocket",
+		"ws://" + ( self.location.hostname ? self.location.hostname : "127.0.0.1" ) + ":8787/jWebSocket/jWebSocket",
 
 	//:const:*:CONNECTING:Integer:0
 	//:d:en:The connection has not yet been established.
@@ -460,6 +460,8 @@ jws.tools = {
 			aDate.getUTCFullYear()
 			+ this.zerofill( aDate.getUTCMonth() + 1, 2 )
 			+ this.zerofill( aDate.getUTCDate(), 2 )
+			// use time separator
+			+ "T" + 
 			+ this.zerofill( aDate.getUTCHours(), 2 )
 			+ this.zerofill( aDate.getUTCMinutes(), 2 )
 			+ this.zerofill( aDate.getUTCSeconds(), 2 )
@@ -474,13 +476,16 @@ jws.tools = {
 
 	ISO2Date: function( aISO, aTimezone ) {
 		var lDate = new Date();
+		// date part
 		lDate.setUTCFullYear( aISO.substr( 0, 4 ) );
 		lDate.setUTCMonth( aISO.substr( 4, 2 ) - 1 );
 		lDate.setUTCDate( aISO.substr( 6, 2 ) );
-		lDate.setUTCHours( aISO.substr( 8, 2 ) );
-		lDate.setUTCMinutes( aISO.substr( 10, 2 ) );
-		lDate.setUTCSeconds( aISO.substr( 12, 2 ) );
-		lDate.setUTCMilliseconds( aISO.substr( 14, 3 ) );
+		// time
+		lDate.setUTCHours( aISO.substr( 9, 2 ) );
+		lDate.setUTCMinutes( aISO.substr( 11, 2 ) );
+		lDate.setUTCSeconds( aISO.substr( 13, 2 ) );
+		lDate.setUTCMilliseconds( aISO.substr( 15, 3 ) );
+		//:TODO:en:Analyze timezone
 		return lDate;
 	},
 
@@ -488,7 +493,6 @@ jws.tools = {
 		var string = JSON.stringify(aToken);
 		var chars = string.split('');
 		chars.sort();
-
 		return hex_md5("{" + chars.toString() + "}");
 	},
 
@@ -2023,14 +2027,15 @@ jws.SystemClientPlugIn = {
 		if( !aOptions ) {
 			aOptions = {};
 		}
+		// if already connected, just send the login token 
 		if( this.isConnected() ) {
 			this.login( aUsername, aPassword );
 		} else {
-			var lAppOnOpenClBk = aOptions.OnOpen;
+			var lAppOnWelcomeClBk = aOptions.OnWelcome;
 			var lThis = this;
-			aOptions.OnOpen = function( aEvent ) {
-				if( lAppOnOpenClBk ) {
-					lAppOnOpenClBk.call( lThis, aEvent );
+			aOptions.OnWelcome = function( aEvent ) {
+				if( lAppOnWelcomeClBk ) {
+					lAppOnWelcomeClBk.call( lThis, aEvent );
 				}
 				lThis.login( aUsername, aPassword );
 			};
@@ -4077,7 +4082,7 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 				//Sending the "not supported" event notification
 				this.notify("s2c.event_not_supported", {
 					args: {
-						req_id: aToken.uid,
+						req_id: aToken.uid
 					}
 				});
 				throw "s2c_event_support_not_found:" + event_name;
@@ -5942,7 +5947,7 @@ jws.TestPlugIn = {
 			var lReporter = new jasmine.TrivialReporter();
 			jasmine.getEnv().addReporter( lReporter );
 			jasmine.getEnv().execute();
-		}, 500 );
+		}, 1000 );
 	},
 
 

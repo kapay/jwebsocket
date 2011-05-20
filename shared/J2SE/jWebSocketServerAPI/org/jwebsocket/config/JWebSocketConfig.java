@@ -71,6 +71,7 @@ public final class JWebSocketConfig implements Config {
 	// private final List<ChannelConfig> mChannels;
 	private static JWebSocketConfig mConfig = null;
 	private static URLClassLoader mClassLoader = null;
+	private static String mConfigOverrideRoot = null;
 
 	/**
 	 * @return the mClassLoader

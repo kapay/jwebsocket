@@ -49,9 +49,12 @@ public final class JWebSocketLoader {
 	 */
 	public final WebSocketInitializer initialize(String aOverrideConfigPath)
 			throws WebSocketException {
-		String lConfigPath = JWebSocketConfig.getConfigurationPath();
+		String lConfigPath;
 		if (aOverrideConfigPath != null && !"".equals(aOverrideConfigPath)) {
 			lConfigPath = aOverrideConfigPath;
+			System.out.println("Using config file " + aOverrideConfigPath + "...");
+		} else {
+			lConfigPath = JWebSocketConfig.getConfigurationPath();
 		}
 		if (lConfigPath == null) {
 			throw new WebSocketException("Either JWEBSOCKET_HOME variable is not set"

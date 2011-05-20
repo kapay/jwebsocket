@@ -115,7 +115,7 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 				//Sending the "not supported" event notification
 				this.notify("s2c.event_not_supported", {
 					args: {
-						req_id: aToken.uid,
+						req_id: aToken.uid
 					}
 				});
 				throw "s2c_event_support_not_found:" + event_name;
