@@ -36,6 +36,10 @@
                 <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>
                 
                 <jpda.listen>maven</jpda.listen>
+                
+                
+                
+                
             </properties>
         </action>
         <action>

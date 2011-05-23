@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -109,6 +110,10 @@ public class ReportingPlugIn extends TokenPlugIn {
 		}
 	}
 
+	private String getReportPath(String aReportId) {
+		return mReportFolder + aReportId + ".jrxml";
+	}
+
 	private void createReport(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		Token lResponse;
@@ -157,7 +162,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 					lJDBCPlugIn, "getNativeDataSource", null);
 
 			lReport = JasperCompileManager.compileReport(
-					mReportFolder + lReportId + ".jrxml");
+					getReportPath(lReportId));
 			lPrint = JasperFillManager.fillReport(lReport,
 					lParms, lDataSource.getConnection());
 			if ("pdf".equals(lOutputType)) {
@@ -213,6 +218,33 @@ public class ReportingPlugIn extends TokenPlugIn {
 
 		// instantiate response token
 		Token lResponse = lServer.createResponse(aToken);
+
+		String lReportId = aToken.getString("reportId");
+		if (lReportId == null) {
+			lResponse = lServer.createErrorToken(aToken, -1, "No report id passed.");
+			lServer.sendToken(aConnector, lResponse);
+			return;
+		}
+
+		try {
+			JasperReport lReport = JasperCompileManager.compileReport(
+					getReportPath(lReportId));
+
+			JRParameter[] lParams = lReport.getParameters();
+			Map lParamMap = new FastMap<String, String>();
+			for (int lIdx = 0; lIdx < lParams.length; lIdx++) {
+				JRParameter lParam = lParams[lIdx];
+				Map lParamData = new FastMap<String, String>();
+				lParamData.put("className", lParam.getValueClassName());
+				lParamData.put("description", lParam.getDescription());
+				lParamData.put("isForPrompting", lParam.isForPrompting());
+				lParamMap.put(lParam.getName(), lParamData);
+			}
+			lResponse.setMap("params", lParamMap);
+		} catch (Exception ex) {
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		}
 
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);

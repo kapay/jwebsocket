@@ -531,7 +531,7 @@ var jws = {
 					} else {
 						jws.fIsIExplorer = navigator.appName == "Microsoft Internet Explorer";
 						if( jws.fIsIExplorer ) {
-							jws.fBrowserType = fjws.BT_IEXPLORER;
+							jws.fBrowserType = jws.BT_IEXPLORER;
 						} else {
 							jws.fIsPocketIE = navigator.appName == "Microsoft Pocket Internet Explorer";
 							if( jws.fIsPocketIE ) {

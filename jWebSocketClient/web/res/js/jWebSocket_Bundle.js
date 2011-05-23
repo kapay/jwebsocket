@@ -112,6 +112,43 @@ var jws = {
 	//:d:en:An individual timeout can be passed per request.
 	DEF_RESP_TIMEOUT: 30000,
 
+
+	//:i:en:Browsertype Constants
+	//:const:*:BT_UNKNOWN
+	//:d:en:Browsertype is unknown.
+	BT_UNKNOWN		:  0,
+	//:const:*:BT_FIREFOX
+	//:d:en:Browser is "Firefox".
+	BT_FIREFOX		:  1,
+	//:const:*:BT_NETSCAPE
+	//:d:en:Browser is "Netscape".
+	BT_NETSCAPE		:  2,
+	//:const:*:BT_OPERA
+	//:d:en:Browser is "Opera".
+	BT_OPERA		:  3,
+	//:const:*:BT_IEXPLORER
+	//:d:en:Browser is "Internet Explorer".
+	BT_IEXPLORER	:  4,
+	//:const:*:BT_SAFARI
+	//:d:en:Browser is "Safari".
+	BT_SAFARI		:  5,
+	//:const:*:BT_CHROME
+	//:d:en:Browser is "Chrome".
+	BT_CHROME		: 6,
+
+	//:const:*:BROWSER_NAMES
+	//:d:en:Array of browser names. Each BT_xxx constant can be used as an index to this array.
+	BROWSER_NAMES : [
+		"Unknown",
+		"Firefox",
+		"Netscape",
+		"Opera",
+		"Internet Explorer",
+		"Safari",
+		"Chrome"
+	],
+
+
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
 	//:d:en:Returns the first HTML element with the given id or [tt]null[/tt] _
@@ -335,9 +372,313 @@ var jws = {
 		var lUserAgent = navigator.userAgent;
 		var lIsIE = lUserAgent.indexOf( "MSIE" );
 		return( lIsIE >= 0 );
-	})()
+	})(),
+
+	//:i:de:Bei Erweiterung der Browsertypen auch BROWSER_NAMES entsprechend anpassen!
+
+	//:m:*:getBrowserName
+	//:d:de:Liefert den Namen des aktuell verwendeten Browser zur&uuml;ck.
+	//:d:en:Returns the name of the browser.
+	//:a:*::-
+	//:r:de::browserName:String:Name des verwendeten Broswers.
+	//:r:en::browserName:String:Name of the used browser.
+	getBrowserName: function() {
+		return this.fBrowserName;
+	},
+
+	//:m:*:getBrowserVersion
+	//:d:de:Liefert die Browserversion als Flie&szlig;kommazahl zur&uuml;ck.
+	//:d:en:Returns the browser version als float value.
+	//:a:*::-
+	//:r:de::browserVersion:Float:Die Versions Nummer des Browsers.
+	//:r:en::browserVersion:Float:Version number of the browser.
+	getBrowserVersion: function() {
+		return this.fBrowserVerNo;
+	},
+
+	//:m:*:getBrowserVersionString
+	//:d:de:Liefert die Browserversion als String zur&uuml;ck.
+	//:d:en:Returns the browser version as string value.
+	//:a:*::-
+	//:r:de:::String:Die Versions Nummer des Browsers als String.
+	//:r:en:::String:Version string of the browser.
+	getBrowserVersionString: function() {
+		return this.fBrowserVerStr;
+	},
+
+	//:m:*:isFirefox
+	//:d:de:Ermittelt, ob der verwendete Browser von Typ "Firefox" ist.
+	//:d:en:Determines, if the used browser is a "Firefox".
+	//:a:*::-
+	//:r:de::isFirefox:Boolean:true, wenn der Browser Firefox ist, andernfalls false.
+	//:r:en::isFirefox:Boolean:true, if Browser is Firefox, otherwise false.
+	isFirefox: function() {
+		return this.fIsFirefox;
+	},
+
+	//:m:*:isOpera
+	//:d:de:Ermittelt, ob der verwendete Browser von Typ "Opera" ist.
+	//:d:en:Determines, if the used browser is a "Opera".
+	//:a:*::-
+	//:r:de::isOpera:Boolean:true, wenn der Browser Opera ist, andernfalls false.
+	//:r:en::isOpera:Boolean:true, if Browser is Opera, otherwise false.
+	isOpera: function() {
+		return this.fIsOpera;
+	},
+
+	//:m:*:isChrome
+	//:d:de:Ermittelt, ob der verwendete Browser von Typ "Chrome" ist.
+	//:d:en:Determines, if the used browser is a "Chrome".
+	//:a:*::-
+	//:r:de::isOpera:Boolean:true, wenn der Browser Chrome ist, andernfalls false.
+	//:r:en::isOpera:Boolean:true, if Browser is Chrome, otherwise false.
+	isChrome: function() {
+		return this.fIsChrome;
+	},
+
+	//:m:*:isIExplorer
+	//:d:de:Ermittelt, ob der verwendete Browser von Typ "Internet Explorer" ist.
+	//:d:en:Determines, if the used browser is a "Internet Explorer".
+	//:a:*::-
+	//:r:de::isIExplorer:Boolean:true, wenn der Browser Internet Explorer ist, andernfalls false.
+	//:r:en::isIExplorer:Boolean:true, if Browser is Internet Explorer, otherwise false.
+	isIExplorer: function() {
+		return this.fIsIExplorer;
+	},
+
+	isIE_LE6: function() {
+		return( this.isIExplorer() && this.getBrowserVersion() < 7 );
+	},
+
+	isIE_LE7: function() {
+		return( this.isIExplorer() && this.getBrowserVersion() < 8 );
+	},
+
+	isIE_GE8: function() {
+		return( this.isIExplorer() && this.getBrowserVersion() >= 8 );
+	},
+
+	//:m:*:isSafari
+	//:d:de:Ermittelt, ob der verwendete Browser von Typ "Safari" ist.
+	//:d:en:Determines, if the used browser is a "Safari".
+	//:a:*::-
+	//:r:de::isSafari:Boolean:true, wenn der Browser Safari ist, andernfalls false.
+	//:r:en::isSafari:Boolean:true, if Browser is Safari, otherwise false.
+	isSafari: function() {
+		return this.fIsSafari;
+	},
+
+	//:m:*:isNetscape
+	//:d:de:Ermittelt, ob der verwendete Browser von Typ "Netscape" ist.
+	//:d:en:Determines, if the used browser is a "Netscape".
+	//:a:*::-
+	//:r:de:::Boolean:true, wenn der Browser Netscape ist, andernfalls false.
+	//:r:en:::Boolean:true, if Browser is Netscape, otherwise false.
+	isNetscape: function() {
+		return this.fIsNetscape;
+	},
+
+	//:m:de:isPocketIE
+	//:d:de:...
+	//:d:en:...
+	//:a:*::-
+	//:r:de::isPocketIE:Boolean:true, wenn der Browser Pocket Internet Explorer ist, andernfalls false.
+	//:r:en::isPocketIE:Boolean:true, if Browser is Pocket Internet Explorer, otherwise false.
+	isPocketIE: function() {
+		return this.fIsPocketIE;
+	}
 
 };
+
+
+//i:en:Browser detection (embedded into a function to not polute global namespace...
+(function() {
+
+	jws.fBrowserName	= "unknown";
+	jws.fBrowserType	= jws.BT_UNKNOWN;
+	jws.fBrowserVerNo	= undefined;
+
+	jws.fIsIExplorer	= false;
+	jws.fIsFirefox		= false;
+	jws.fIsNetscape		= false;
+	jws.fIsOpera		= false;
+	jws.fIsSafari		= false;
+	jws.fIsChrome		= false;
+	
+	var lUA = navigator.userAgent;
+
+	//:i:en:First evaluate name of the browser
+	jws.fIsChrome = lUA.indexOf( "Chrome" ) >= 0;
+	if( jws.fIsChrome ) {
+		jws.fBrowserType = jws.BT_CHROME;
+	} else {
+		jws.fIsSafari = lUA.indexOf( "Safari" ) >= 0;
+		if( jws.fIsSafari ) {
+			jws.fBrowserType = jws.BT_SAFARI;
+		}
+		else {
+			jws.fIsNetscape = lUA.indexOf( "Netscape" ) >= 0;
+			if( jws.fIsNetscape ) {
+				jws.fBrowserType = jws.BT_NETSCAPE;
+			} else {
+				jws.fIsFirefox = navigator.appName == "Netscape";
+				if( jws.fIsFirefox ) {
+					jws.fBrowserType = jws.BT_FIREFOX;
+				} else {
+					jws.fIsOpera = navigator.appName == "Opera";
+					if( jws.fIsOpera ) {
+						jws.fBrowserType = jws.BT_OPERA;
+					} else {
+						jws.fIsIExplorer = navigator.appName == "Microsoft Internet Explorer";
+						if( jws.fIsIExplorer ) {
+							jws.fBrowserType = fjws.BT_IEXPLORER;
+						} else {
+							jws.fIsPocketIE = navigator.appName == "Microsoft Pocket Internet Explorer";
+							if( jws.fIsPocketIE ) {
+								jws.fBrowserType = jws.BT_IEXPLORER;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	var p, i;
+	var lStr;
+	var lFound;
+	var lVersion;
+
+	if( jws.fIsIExplorer ) {
+		//:i:de:Beispiel f&uuml;r userAgent bei IE6:
+		//:i:de:"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)"
+		jws.fBrowserName = jws.BROWSER_NAMES[ jws.BT_IEXPLORER ];
+		lVersion = lUA.match( /MSIE.*/i );
+		if ( lVersion ) {
+			lStr = lVersion[ 0 ].substr( 5 );
+			p = lStr.indexOf( ";" );
+			jws.fBrowserVerStr = p > 0 ? lStr.substr( 0, p ) : lStr;
+			jws.fBrowserVerNo = parseFloat( jws.fBrowserVerStr );
+		}
+	} else if( jws.fIsFirefox ) {
+		jws.fBrowserName = jws.BROWSER_NAMES[ jws.BT_FIREFOX ];
+		//:i:de:Beispiel f&uuml;r userAgent bei FF 2.0.0.11:
+		//:i:de:"Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11"
+		lVersion = lUA.match( /Firefox\/.*/i );
+		if ( lVersion ) {
+			lStr = lVersion[ 0 ].substr( 8 );
+			p = lStr.indexOf( " " );
+			if( p > 0 ) {
+				jws.fBrowserVerStr = lStr.substring( 0, p );
+			} else	{
+				jws.fBrowserVerStr = lStr;
+			}	
+			lFound = 0;
+			i = 0;
+			while( i < lStr.length ) {
+				if( lStr.charAt( i ) == '.' ) {
+					lFound++;
+				}	
+				if( lFound >= 2 ) {
+					break;
+				}	
+				i++;
+			}
+			lStr = lStr.substring( 0, i );
+			jws.fBrowserVerNo = parseFloat( lStr );
+		}
+	}
+	else if( jws.fIsNetscape ) {
+		jws.fBrowserName = jws.BROWSER_NAMES[ jws.BT_NETSCAPE ];
+		//:i:de:Beispiel f&uuml;r userAgent bei FF 2.0.0.11:
+		//:i:de:"Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11"
+		lVersion = lUA.match( /Netscape\/.*/i );
+		if ( lVersion ) {
+			lStr = lVersion[ 0 ].substr( 9 );
+			p = lStr.indexOf( " " );
+			if( p > 0 ) {
+				jws.fBrowserVerStr = lStr.substring( 0, p );
+			} else {
+				jws.fBrowserVerStr = lStr;
+			}
+			lFound = 0;
+			i = 0;
+			while( i < lStr.length ) {
+				if( lStr.charAt( i ) == '.' ) {
+					lFound++;
+				}
+				if( lFound >= 2 ) {
+					break;
+				}	
+				i++;
+			}
+			lStr = lStr.substring( 0, i );
+			jws.fBrowserVerNo = parseFloat( lStr );
+		}
+	} else if( jws.fIsOpera ) {
+		//:i:de:Beispiel f&uuml;r userAgent bei Opera 9.24
+		//:i:de:Opera/9.24 (Windows NT 5.1; U; en)
+		jws.fBrowserName = jws.BROWSER_NAMES[ jws.BT_OPERA ];
+		lVersion = lUA.match( /Opera\/.*/i );
+		if ( lVersion ) {
+			lStr = lVersion[ 0 ].substr( 6 );
+			p = lStr.indexOf( " " );
+			jws.fBrowserVerStr = p > 0 ? lStr.substr( 0, p ) : lStr;
+			jws.fBrowserVerNo = parseFloat( lStr );
+			// since 10.0 opera provides a separate "version" field
+			lVersion = lUA.match( /Version\/.*/i );
+			lStr = lVersion[ 0 ].substr( 8 );
+			if ( lVersion ) {
+				p = lStr.indexOf( " " );
+				jws.fBrowserVerStr = ( p > 0 ? lStr.substr( 0, p ) : lStr ) + "/" + jws.fBrowserVerStr;
+				jws.fBrowserVerNo = parseFloat( lStr );
+			}
+		}
+	} else if( jws.fIsChrome ) {
+		//:i:de:Beispiel f&uuml;r userAgent bei Chrome 4.0.211.7
+		//:i:de:Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.0 (KHTML, like Gecko) Chrome/4.0.211.7 Safari/532.0
+		jws.fBrowserName = jws.BROWSER_NAMES[ jws.BT_CHROME ];
+		lVersion = lUA.match( /Chrome\/.*/i );
+		if ( lVersion ) {
+			lStr = lVersion[ 0 ].substr( 7 );
+			p = lStr.indexOf( " " );
+			jws.fBrowserVerStr = p > 0 ? lStr.substr( 0, p ) : lStr;
+			jws.fBrowserVerNo = parseFloat( lStr );
+		}
+	} else if( jws.fIsSafari ) {
+		jws.fBrowserName = jws.BROWSER_NAMES[ jws.BT_SAFARI ];
+		//:i:de:Beispiel f&uuml;r userAgent bei Safari 3.0.4 (523.15):
+		//:i:de:"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/523.15 (KHTML, like Gecko) Version/3.0 Safari/523.15"
+		lVersion = lUA.match( /Version\/.*/i );
+		if ( lVersion ) {
+			lStr = lVersion[ 0 ].substr( 8 );
+			p = lStr.indexOf( " " );
+			jws.fBrowserVerStr = p > 0 ? lStr.substr( 0, p ) : lStr;
+
+			lFound = 0;
+			i = 0;
+			while( i < lStr.length ) {
+				if( lStr.charAt( i ) == '.' ) {
+					lFound++;
+				}	
+				if( lFound >= 2 ) {
+					break;
+				}	
+				i++;
+			}
+			lStr = lStr.substring( 0, i );
+			jws.fBrowserVerNo = parseFloat( lStr );
+
+			lVersion = lUA.match( /Safari\/.*/i );
+			if ( lVersion ) {
+				lStr = "." + lVersion[ 0 ].substr( 7 );
+				p = lStr.indexOf( " " );
+				jws.fBrowserVerStr += p > 0 ? lStr.substr( 0, p ) : lStr; 
+			}
+		}	
+	}
+}());
+	
 
 
 //:package:*:jws.events
@@ -979,7 +1320,8 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 
 				// create a new web socket instance
 				this.fConn = new WebSocket( aURL, lSubProt );
-
+				this.fURL = aURL; 
+				
 				// assign the listeners to local functions (closure) to allow
 				// to handle event before and after the application
 				this.fConn.onopen = function( aEvent ) {
@@ -1093,6 +1435,23 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		return( this.fConn != undefined
 			&& this.fConn != null
 			&& this.fConn.readyState == jws.OPEN );
+	},
+
+	//:m:*:getURL
+	//:d:en:Returns the URL if the WebSocket connection opened up, otherwise [tt]null[/tt].
+	//:a:en::::none
+	//:r:*:::String:the URL if the WebSocket connection opened up, otherwise [tt]null[/tt].
+	getURL: function() {
+		return this.fURL;
+		/*
+		return(
+			this.fConn != undefined
+			&& this.fConn != null
+			&& this.fConn.readyState == jws.OPEN 
+			? this.fURL
+			: null
+		);
+		*/
 	},
 
 	//:m:*:isConnected
@@ -1487,6 +1846,27 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				if( this.fOnWelcome ) {
 					this.fOnWelcome( aToken );
 				}
+				var lFlashBridgeVer = "n/a";
+				if( swfobject) {
+					var lInfo = swfobject.getFlashPlayerVersion();
+					lFlashBridgeVer = lInfo.major + "." + lInfo.minor + "." + lInfo.release;
+				}
+				this.sendToken({
+					ns: jws.SystemClientPlugIn.NS,
+					type: "header",
+					clientType: "browser",
+					clientName: jws.getBrowserName(),
+					clientVersion: jws.getBrowserVersionString(),
+					clientInfo: navigator.userAgent,
+					jwsType: "javascript",
+					jwsVersion: jws.VERSION,
+					jwsInfo: 
+						jws.browserSupportsNativeWebSockets 
+							? "native"
+							: "flash " + lFlashBridgeVer
+					}, {
+					}
+				);
 			} else if( aToken.type == "goodBye" ) {
 				// fire OnGoodBye Event if assigned
 				if( this.fOnGoodBye ) {
@@ -2309,7 +2689,7 @@ jws.SystemClientPlugIn = {
 			clearInterval( this.hKeepAlive );
 			this.hKeepAlive = null;
 		}
-	}
+	}	
 };
 
 // add the JWebSocket SystemClient PlugIn into the BaseClient class
