@@ -1,7 +1,7 @@
 -- MySQL Administrator dump 1.4
 --
 -- ------------------------------------------------------
--- Server version	5.1.45-community
+-- Server version	5.1.44
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -22,11 +22,11 @@ CREATE DATABASE IF NOT EXISTS jwebsocket;
 USE jwebsocket;
 
 --
--- Definition of table `demo_child`
+-- Definition of table `jwebsocket`.`demo_child`
 --
 
-DROP TABLE IF EXISTS `demo_child`;
-CREATE TABLE `demo_child` (
+DROP TABLE IF EXISTS `jwebsocket`.`demo_child`;
+CREATE TABLE  `jwebsocket`.`demo_child` (
   `child_id` int(10) unsigned NOT NULL DEFAULT '0',
   `master_id` int(10) unsigned NOT NULL,
   `child_string` varchar(80) DEFAULT NULL,
@@ -36,29 +36,30 @@ CREATE TABLE `demo_child` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `demo_child`
+-- Dumping data for table `jwebsocket`.`demo_child`
 --
 
 /*!40000 ALTER TABLE `demo_child` DISABLE KEYS */;
-INSERT INTO `demo_child` (`child_id`,`master_id`,`child_string`) VALUES 
- (1,1,'Child #1 for Master #1'),
+LOCK TABLES `demo_child` WRITE;
+INSERT INTO `jwebsocket`.`demo_child` VALUES  (1,1,'Child #1 for Master #1'),
  (2,1,'Child #2 for Master #1'),
  (3,1,'Child #3 for Master #1'),
  (4,2,'Child #1 for Master #2'),
  (5,2,'Child #2 for Master #2'),
  (6,2,'Child #3 for Master #2');
+UNLOCK TABLES;
 /*!40000 ALTER TABLE `demo_child` ENABLE KEYS */;
 
 
 --
--- Definition of trigger `tr_demo_child_bi`
+-- Definition of trigger `jwebsocket`.`tr_demo_child_bi`
 --
 
-DROP TRIGGER /*!50030 IF EXISTS */ `tr_demo_child_bi`;
+DROP TRIGGER /*!50030 IF EXISTS */ `jwebsocket`.`tr_demo_child_bi`;
 
 DELIMITER $$
 
-CREATE DEFINER = `root`@`localhost` TRIGGER `tr_demo_child_bi` BEFORE INSERT ON `demo_child` FOR EACH ROW BEGIN
+CREATE DEFINER = `root`@`localhost` TRIGGER  `jwebsocket`.`tr_demo_child_bi` BEFORE INSERT ON `demo_child` FOR EACH ROW BEGIN
   if( ( new.child_id = 0 ) || ( new.child_id is null ) ) then
     set new.child_id = getSequence( 'sq_pk_demo_child' );
   end if;
@@ -67,36 +68,37 @@ END $$
 DELIMITER ;
 
 --
--- Definition of table `demo_lookup`
+-- Definition of table `jwebsocket`.`demo_lookup`
 --
 
-DROP TABLE IF EXISTS `demo_lookup`;
-CREATE TABLE `demo_lookup` (
+DROP TABLE IF EXISTS `jwebsocket`.`demo_lookup`;
+CREATE TABLE  `jwebsocket`.`demo_lookup` (
   `lookup_id` int(10) unsigned NOT NULL DEFAULT '0',
   `lookup_string` varchar(80) DEFAULT NULL,
   PRIMARY KEY (`lookup_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `demo_lookup`
+-- Dumping data for table `jwebsocket`.`demo_lookup`
 --
 
 /*!40000 ALTER TABLE `demo_lookup` DISABLE KEYS */;
-INSERT INTO `demo_lookup` (`lookup_id`,`lookup_string`) VALUES 
- (1,'Lookup Value #1'),
+LOCK TABLES `demo_lookup` WRITE;
+INSERT INTO `jwebsocket`.`demo_lookup` VALUES  (1,'Lookup Value #1'),
  (2,'Lookup Value #2');
+UNLOCK TABLES;
 /*!40000 ALTER TABLE `demo_lookup` ENABLE KEYS */;
 
 
 --
--- Definition of trigger `tr_demo_lookup_bi`
+-- Definition of trigger `jwebsocket`.`tr_demo_lookup_bi`
 --
 
-DROP TRIGGER /*!50030 IF EXISTS */ `tr_demo_lookup_bi`;
+DROP TRIGGER /*!50030 IF EXISTS */ `jwebsocket`.`tr_demo_lookup_bi`;
 
 DELIMITER $$
 
-CREATE DEFINER = `root`@`localhost` TRIGGER `tr_demo_lookup_bi` BEFORE INSERT ON `demo_lookup` FOR EACH ROW BEGIN
+CREATE DEFINER = `root`@`localhost` TRIGGER  `jwebsocket`.`tr_demo_lookup_bi` BEFORE INSERT ON `demo_lookup` FOR EACH ROW BEGIN
   if( ( new.lookup_id = 0 ) || ( new.lookup_id is null ) ) then
     set new.lookup_id = getSequence( 'sq_pk_demo_lookup' );
   end if;
@@ -105,11 +107,11 @@ END $$
 DELIMITER ;
 
 --
--- Definition of table `demo_master`
+-- Definition of table `jwebsocket`.`demo_master`
 --
 
-DROP TABLE IF EXISTS `demo_master`;
-CREATE TABLE `demo_master` (
+DROP TABLE IF EXISTS `jwebsocket`.`demo_master`;
+CREATE TABLE  `jwebsocket`.`demo_master` (
   `master_id` int(10) unsigned NOT NULL DEFAULT '0',
   `lookup_id` int(10) unsigned DEFAULT NULL,
   `master_int` int(10) unsigned DEFAULT NULL,
@@ -122,28 +124,29 @@ CREATE TABLE `demo_master` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `demo_master`
+-- Dumping data for table `jwebsocket`.`demo_master`
 --
 
 /*!40000 ALTER TABLE `demo_master` DISABLE KEYS */;
-INSERT INTO `demo_master` (`master_id`,`lookup_id`,`master_int`,`master_float`,`master_string`,`master_clob`) VALUES 
- (1,1,1,1,'Master Row #1','Arbitrary Text Row #1'),
+LOCK TABLES `demo_master` WRITE;
+INSERT INTO `jwebsocket`.`demo_master` VALUES  (1,1,1,1,'Master Row #1','Arbitrary Text Row #1'),
  (2,2,2,2,'Master Row #2','Arbitrary Text Row #2'),
  (3,1,3,3,'Master Row #3','Arbitrary Text Row #3'),
  (4,2,4,4,'Master Row #4','Arbitrary Text Row #4'),
  (5,1,5,5,'Master Row #5','Arbitrary Text Row #5');
+UNLOCK TABLES;
 /*!40000 ALTER TABLE `demo_master` ENABLE KEYS */;
 
 
 --
--- Definition of trigger `tr_demo_master_bi`
+-- Definition of trigger `jwebsocket`.`tr_demo_master_bi`
 --
 
-DROP TRIGGER /*!50030 IF EXISTS */ `tr_demo_master_bi`;
+DROP TRIGGER /*!50030 IF EXISTS */ `jwebsocket`.`tr_demo_master_bi`;
 
 DELIMITER $$
 
-CREATE DEFINER = `root`@`localhost` TRIGGER `tr_demo_master_bi` BEFORE INSERT ON `demo_master` FOR EACH ROW BEGIN
+CREATE DEFINER = `root`@`localhost` TRIGGER  `jwebsocket`.`tr_demo_master_bi` BEFORE INSERT ON `demo_master` FOR EACH ROW BEGIN
   if( ( new.master_id = 0 ) || ( new.master_id is null ) ) then
     set new.master_id = getSequence( 'sq_pk_demo_master' );
   end if;
@@ -152,101 +155,104 @@ END $$
 DELIMITER ;
 
 --
--- Definition of table `sequences`
+-- Definition of table `jwebsocket`.`sequences`
 --
 
-DROP TABLE IF EXISTS `sequences`;
-CREATE TABLE `sequences` (
+DROP TABLE IF EXISTS `jwebsocket`.`sequences`;
+CREATE TABLE  `jwebsocket`.`sequences` (
   `seq_id` varchar(40) NOT NULL,
   `next_val` int(10) unsigned DEFAULT '1',
   PRIMARY KEY (`seq_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `sequences`
+-- Dumping data for table `jwebsocket`.`sequences`
 --
 
 /*!40000 ALTER TABLE `sequences` DISABLE KEYS */;
-INSERT INTO `sequences` (`seq_id`,`next_val`) VALUES 
- ('sq_pk_demo_child',7),
+LOCK TABLES `sequences` WRITE;
+INSERT INTO `jwebsocket`.`sequences` VALUES  ('sq_pk_demo_child',7),
  ('sq_pk_demo_lookup',3),
- ('sq_pk_demo_master',6);
+ ('sq_pk_demo_master',6),
+ ('sq_pk_system_log',29);
+UNLOCK TABLES;
 /*!40000 ALTER TABLE `sequences` ENABLE KEYS */;
 
 
 --
--- Definition of function `getSequence`
+-- Definition of table `jwebsocket`.`system_log`
 --
 
-DROP FUNCTION IF EXISTS `getSequence`;
+DROP TABLE IF EXISTS `jwebsocket`.`system_log`;
+CREATE TABLE  `jwebsocket`.`system_log` (
+  `id` int(11) NOT NULL DEFAULT '0',
+  `time_stamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `event_type` varchar(20) DEFAULT NULL,
+  `customer` varchar(25) DEFAULT NULL,
+  `app_name` varchar(25) DEFAULT NULL,
+  `app_version` varchar(20) DEFAULT NULL,
+  `app_module` varchar(25) DEFAULT NULL,
+  `app_dialog` varchar(25) DEFAULT NULL,
+  `ip` varchar(45) DEFAULT NULL,
+  `user_name` varchar(40) DEFAULT NULL,
+  `browser` varchar(20) DEFAULT NULL,
+  `browser_version` varchar(15) DEFAULT NULL,
+  `data_size` int(11) DEFAULT NULL,
+  `process_time` int(11) DEFAULT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `message` varchar(132) DEFAULT NULL,
+  `json` text,
+  `ws_version` varchar(25) DEFAULT NULL,
+  `session_id` varchar(32) DEFAULT NULL,
+  `name_space` varchar(50) DEFAULT NULL,
+  `token_type` varchar(30) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `jwebsocket`.`system_log`
+--
+
+/*!40000 ALTER TABLE `system_log` DISABLE KEYS */;
+LOCK TABLES `system_log` WRITE;
+INSERT INTO `jwebsocket`.`system_log` VALUES  (1,'2011-05-21 13:18:26',NULL,NULL,NULL,NULL,NULL,NULL,'0:0:0:0:0:0:0:1%0',NULL,'Mein Browser',NULL,NULL,NULL,NULL,'This is an message from the automated test suite.',NULL,NULL,NULL,NULL,NULL),
+ (5,'2011-05-21 13:37:28','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','n/a','n/a',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,NULL,NULL,NULL,NULL),
+ (6,'2011-05-21 14:04:49','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Chrome','11.0.696.68',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,NULL,NULL,NULL,NULL),
+ (7,'2011-05-21 14:12:33','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Chrome','11.0.696.68',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,NULL,NULL,NULL,NULL),
+ (8,'2011-05-21 14:13:32','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','127.0.0.1','root','Opera','9.80',49,NULL,NULL,'This is an message from the automated test suite.',NULL,NULL,NULL,NULL,NULL),
+ (9,'2011-05-21 14:14:34','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Firefox','4.0.1',49,NULL,NULL,'This is an message from the automated test suite.',NULL,NULL,NULL,NULL,NULL),
+ (10,'2011-05-21 14:15:01','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Firefox','4.0.1',49,NULL,NULL,'This is an message from the automated test suite.',NULL,NULL,NULL,NULL,NULL),
+ (11,'2011-05-21 14:16:04','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Safari','5.0.5.533.21.1',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,NULL,NULL,NULL,NULL),
+ (12,'2011-05-21 14:16:20','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Safari','5.0.5.533.21.1',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,NULL,NULL,NULL,NULL),
+ (15,'2011-05-21 14:30:18','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Safari','5.0.5.533.21.1',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,'native',NULL,NULL,NULL),
+ (17,'2011-05-21 14:34:46','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Safari','5.0.5.533.21.1',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,'native',NULL,NULL,NULL),
+ (18,'2011-05-21 14:35:14','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Firefox','4.0.1',49,NULL,NULL,'This is an message from the automated test suite.',NULL,'flash 10.1.102',NULL,NULL,NULL),
+ (19,'2011-05-21 14:41:06','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Chrome','11.0.696.68',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,'native',NULL,NULL,NULL),
+ (20,'2011-05-21 14:41:33','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Firefox','4.0.1',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,'flash 10.1.102',NULL,NULL,NULL),
+ (21,'2011-05-21 14:46:56','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Safari','5.0.5.533.21.1',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,'native',NULL,NULL,NULL),
+ (22,'2011-05-21 14:47:19','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','127.0.0.1','root','Opera','9.80',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.',NULL,'native',NULL,NULL,NULL),
+ (23,'2011-05-21 14:49:51','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','0:0:0:0:0:0:0:1%0','root','Safari','5.0.5.533.21.1',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.','{\"userAgent\":\"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_7; en-us) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1\"}','native',NULL,NULL,NULL),
+ (24,'2011-05-21 14:50:25','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','127.0.0.1','root','Opera','9.80',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.','{\"userAgent\":\"Opera/9.80 (Macintosh; Intel Mac OS X 10.6.7; U; en) Presto/2.8.131 Version/11.10\"}','native',NULL,NULL,NULL),
+ (25,'2011-05-21 14:58:35','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','127.0.0.1','root','Opera','n/11.10/9.80',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.','{\"userAgent\":\"Opera/9.80 (Macintosh; Intel Mac OS X 10.6.7; U; en) Presto/2.8.131 Version/11.10\"}','native',NULL,NULL,NULL),
+ (26,'2011-05-21 14:59:35','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','127.0.0.1','root','Opera','11.10/9.80',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.','{\"userAgent\":\"Opera/9.80 (Macintosh; Intel Mac OS X 10.6.7; U; en) Presto/2.8.131 Version/11.10\"}','native',NULL,NULL,NULL),
+ (27,'2011-05-21 15:01:05','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','127.0.0.1','root','Opera','11.10/9.80',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.','{\"userAgent\":\"Opera/9.80 (Macintosh; Intel Mac OS X 10.6.7; U; en) Presto/2.8.131 Version/11.10\"}','native',NULL,NULL,NULL),
+ (28,'2011-05-21 15:01:08','loggingTest','jWebSocket.org','jWebSocket','1.0a10 (10519)','test automation','full tests','127.0.0.1','root','Opera','11.10/9.80',49,NULL,'ws://localhost:8787/jWebSocket/jWebSocket','This is an message from the automated test suite.','{\"userAgent\":\"Opera/9.80 (Macintosh; Intel Mac OS X 10.6.7; U; en) Presto/2.8.131 Version/11.10\"}','native',NULL,NULL,NULL);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `system_log` ENABLE KEYS */;
+
+
+--
+-- Definition of trigger `jwebsocket`.`tr_system_log_bi`
+--
+
+DROP TRIGGER /*!50030 IF EXISTS */ `jwebsocket`.`tr_system_log_bi`;
 
 DELIMITER $$
 
-/*!50003 SET @TEMP_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */ $$
-CREATE DEFINER=`root`@`localhost` FUNCTION `getSequence`( aId VARCHAR(40) ) RETURNS int(11)
-BEGIN
-  DECLARE lNextVal INT;
-  select next_val into lNextVal from sequences where seq_id = aId;
-  update sequences set next_val = next_val + 1 where seq_id = aId;
-  return lNextVal;
-END $$
-/*!50003 SET SESSION SQL_MODE=@TEMP_SQL_MODE */  $$
-
-DELIMITER ;
-
---
--- Definition of procedure `initSequences`
---
-
-DROP PROCEDURE IF EXISTS `initSequences`;
-
-DELIMITER $$
-
-/*!50003 SET @TEMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `initSequences`()
-BEGIN
-  DECLARE lMaxId INT;
-
-  select max( master_id ) into lMaxId from demo_master;
-  call setSequence( 'sq_pk_demo_master', lMaxId + 1 );
-
-  select max( child_id ) into lMaxId from demo_child;
-  call setSequence( 'sq_pk_demo_child', lMaxId + 1 );
-
-  select max( lookup_id ) into lMaxId from demo_lookup;
-  call setSequence( 'sq_pk_demo_lookup', lMaxId + 1 );
-
-END $$
-/*!50003 SET SESSION SQL_MODE=@TEMP_SQL_MODE */  $$
-
-DELIMITER ;
-
---
--- Definition of procedure `setSequence`
---
-
-DROP PROCEDURE IF EXISTS `setSequence`;
-
-DELIMITER $$
-
-/*!50003 SET @TEMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER' */ $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `setSequence`( aId VARCHAR(40), aNextVal INT )
-BEGIN
-
-  DECLARE lCnt INT;
-  select count( * ) into lCnt from sequences where seq_id = aId;
-
-  if( aNextVaL is null ) then
-    set aNextVal = 1;
+CREATE DEFINER = `root`@`localhost` TRIGGER  `jwebsocket`.`tr_system_log_bi` BEFORE INSERT ON `system_log` FOR EACH ROW BEGIN
+  if( ( new.id = 0 ) || ( new.id is null ) ) then
+    set new.id = getSequence( 'sq_pk_system_log' );
   end if;
-
-  if( lCnt = 0 ) then
-    insert into sequences ( seq_id, next_val ) values ( aId, aNextVal );
-  else
-    update sequences set next_val = aNextVal where seq_id = aId;
-  end if;
 END $$
-/*!50003 SET SESSION SQL_MODE=@TEMP_SQL_MODE */  $$
 
 DELIMITER ;
 
