@@ -18,9 +18,9 @@
 jws.tests.Logging = {
 
 	NS: "jws.tests.logging", 
-	TABLE: "ACTION_LOG",
+	TABLE: "SYSTEM_LOG",
 	PRIMARY_KEY: "ID",
-	SEQUENCE: "SQ_PK_ACTION_LOG",
+	SEQUENCE: "SQ_PK_SYSTEM_LOG",
 	MESSAGE: "This is an message from the automated test suite.",
 	
 	mLogId: null,
@@ -33,11 +33,34 @@ jws.tests.Logging = {
 
 			var lResponse = {};
 			var lNow = new Date();
+			var lFlashBridgeVer = "n/a";
+			if( swfobject) {
+				var lInfo = swfobject.getFlashPlayerVersion();
+				lFlashBridgeVer = lInfo.major + "." + lInfo.minor + "." + lInfo.release;
+			}
 			var lData = {
-				"MESSAGE": jws.tests.Logging.MESSAGE,
-				"BROWSER": "Mein Browser",
-				"IP": "${ip}",
-				"TIME_STAMP": 
+				"event_type": "loggingTest",
+				"customer": "jWebSocket.org",
+				"app_name": "jWebSocket",
+				"app_version": jws.VERSION,
+				"app_module": "test automation",
+				"app_dialog": "full tests",
+				"user_name": jws.Tests.getAdminConn().getUsername(),
+				"data_size": jws.tests.Logging.MESSAGE.length,
+				"url": jws.Tests.getAdminConn().getURL(),
+				"message": jws.tests.Logging.MESSAGE,
+				"browser": jws.getBrowserName(),
+				"browser_version": jws.getBrowserVersionString(),
+				"ws_version": (
+					jws.browserSupportsNativeWebSockets 
+					? "native" 
+					: "flash " + lFlashBridgeVer
+				),
+				"json": JSON.stringify({
+					userAgent: navigator.userAgent
+				}),
+				"ip": "${ip}",
+				"time_stamp": 
 					// jws.tools.dateToISO( lNow )
 					/* oracle 
 					"TO_DATE('" +
