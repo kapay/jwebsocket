@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD html 4.01//EN" "http://www.w3.org/TR/html4/transitional.dtd">
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
+		<!-- If Google's chrome frame installed, use it! -->
+		<!-- Comment needs to be BELOW this meta tag! -->
+		<!--
+		//	****************************************************************************
+		//	jWebSocket Base Demo (uses jWebSocket Client and Server)
+		//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH, Herzogenrath
+		//	****************************************************************************
+		//	This program is free software; you can redistribute it and/or modify it
+		//	under the terms of the GNU Lesser General Public License as published by the
+		//	Free Software Foundation; either version 3 of the License, or (at your
+		//	option) any later version.
+		//	This program is distributed in the hope that it will be useful, but WITHOUT
+		//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+		//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+		//	more details.
+		//	You should have received a copy of the GNU Lesser General Public License along
+		//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+		//	****************************************************************************
+		-->
+		<meta http-equiv="Content-Language" content="en">
+		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+		<title>jWebSocket Reporting Demo</title>
+		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
+
+		<script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
+		<script src="../../res/js/jwsDemoPlugIn.js" type="text/javascript"></script>
+		<script src="../../res/js/jwsReportingPlugIn.js" type="text/javascript"></script>
+
+		<script type="text/javascript" language="JavaScript">
+			
+			function getReports() {
+				log( "Retreiving list of reports via jWebSocket..." );
+				if( lWSC.isConnected() ) {
+					lWSC.reportingGetReports({
+						OnResponse: function( aToken ) {
+							log("Reports " + JSON.stringify( aToken ) );
+						}
+					});
+				} else {
+					log( "Not connected." );
+				}
+			}
+
+			function getReportParams() {
+				var lReportId = "Browser Usage";
+				log( "Retreiving parameters for report '" + lReportId + "' via jWebSocket..." );
+				if( lWSC.isConnected() ) {
+					lWSC.reportingGetReportParams( lReportId, {
+						OnResponse: function( aToken ) {
+							log("Reports " + JSON.stringify( aToken ) );
+						}
+					});
+				} else {
+					log( "Not connected." );
+				}
+			}
+
+			function initPage() {
+			}
+
+			function exitPage() {
+				// processExitPage();
+			}
+
+		</script>
+	</head>
+
+	<body
+		onload="initPage();"
+		onunload="exitPage();"
+		>
+		<script type="text/javascript">
+			jws.DemoPlugIn.buildDemoPage({
+				title: "Reporting",
+				header: "jWebSocket Reporting Demo"
+			});
+			processInitPage();
+		</script>
+
+		<div class="sdivContainer">
+			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" >
+				<tr class="strDlg">
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnGetReports" type="button" value="Get Reports" onclick="getReports();"
+							   title="Gets the list of avaliable reports.">
+						<input class="sbtnDlg" id="sbtnGetReportParams" type="button" value="Get Params" onclick="getReportParams();"
+							   title="Gets the list of avaliable reports.">
+					</td>
+				</tr>
+			</table>
+		</div>
+
+	</body>
+</html>

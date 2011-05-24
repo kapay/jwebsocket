@@ -410,7 +410,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 					}
 					lFileData.put("path", lPath);
 					lFileData.put("size", lFile.length());
-					lFileData.put("modified", Tools.DateToISO8601(new Date(lFile.lastModified())));
+					lFileData.put("modified1", Tools.DateToISO8601(new Date(lFile.lastModified())));
 					lFileData.put("hidden", lFile.isHidden());
 					lFileData.put("canRead", lFile.canRead());
 					lFileData.put("canWrite", lFile.canWrite());

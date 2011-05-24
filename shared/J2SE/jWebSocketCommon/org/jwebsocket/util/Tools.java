@@ -31,7 +31,13 @@ import java.util.regex.Pattern;
  */
 public class Tools {
 
+	/**
+	 * 
+	 */
 	public final static boolean EXPAND_CASE_SENSITIVE = false;
+	/**
+	 * 
+	 */
 	public final static boolean EXPAND_CASE_INSENSITIVE = true;
 
 	/**
@@ -155,7 +161,9 @@ public class Tools {
 	 * @return
 	 */
 	public static String DateToISO8601(Date aDate) {
-		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		// we are using UTC times only here, ignoring the timezone of the server location
+		// so don't add a Z to the format string here! 'Z' means character Z = UTC
+		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 		return lSDF.format(aDate);
 	}
 
@@ -165,10 +173,19 @@ public class Tools {
 	 * @return
 	 */
 	public static String DateToISO8601WithMillis(Date aDate) {
-		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		// we are using UTC times only here, ignoring the timezone of the server location
+		// so don't add a Z to the format string here! 'Z' means character Z = UTC
+		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		return lSDF.format(aDate);
 	}
 
+	/**
+	 * 
+	 * @param aString
+	 * @param aVars
+	 * @param aIgnoreCase
+	 * @return
+	 */
 	public static String expandVars(String aString, Map<String, String> aVars,
 			boolean aIgnoreCase) {
 		String lPattern = "\\$\\{([A-Za-z0-9_]+)\\}";
@@ -191,11 +208,24 @@ public class Tools {
 		return aString;
 	}
 
+	/**
+	 * 
+	 * @param aString
+	 * @return
+	 */
 	public static String expandEnvVars(String aString) {
 		Map<String, String> lEnvVars = System.getenv();
 		return expandVars(aString, lEnvVars, EXPAND_CASE_INSENSITIVE);
 	}
 
+	/**
+	 * 
+	 * @param aClassName
+	 * @param aMethodName
+	 * @param aArgs
+	 * @return
+	 * @throws Exception
+	 */
 	public static Object invoke(String aClassName, String aMethodName,
 			Object[] aArgs) throws Exception {
 		Class lClass = Class.forName(aClassName);
@@ -217,6 +247,14 @@ public class Tools {
 		return lRes;
 	}
 
+	/**
+	 * 
+	 * @param aInstance
+	 * @param aMethodName
+	 * @param aArgs
+	 * @return
+	 * @throws Exception
+	 */
 	public static Object invoke(Object aInstance, String aMethodName,
 			Object[] aArgs) throws Exception {
 		if (aInstance == null) {

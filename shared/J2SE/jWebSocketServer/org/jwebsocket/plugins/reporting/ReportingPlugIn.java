@@ -100,8 +100,8 @@ public class ReportingPlugIn extends TokenPlugIn {
 				createReport(aConnector, aToken);
 			} else if ("getReports".equals(lType)) {
 				getReports(aConnector, aToken);
-			} else if ("getReportArgs".equals(lType)) {
-				getReportArgs(aConnector, aToken);
+			} else if ("getReportParams".equals(lType)) {
+				getReportParams(aConnector, aToken);
 			} else if ("uploadReport".equals(lType)) {
 				uploadReport(aConnector, aToken);
 			} else if ("downloadReport".equals(lType)) {
@@ -213,7 +213,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 	}
 
-	private void getReportArgs(WebSocketConnector aConnector, Token aToken) {
+	private void getReportParams(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
 		// instantiate response token

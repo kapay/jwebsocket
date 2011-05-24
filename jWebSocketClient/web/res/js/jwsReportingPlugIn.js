@@ -76,6 +76,19 @@ jws.ReportingPlugIn = {
 		return lRes;
 	},
 	
+	reportingGetReportParams: function( aReportId, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.ReportingPlugIn.NS,
+				type: "getReportParams",
+				reportId: aReportId
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+	
 	setReportingCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};

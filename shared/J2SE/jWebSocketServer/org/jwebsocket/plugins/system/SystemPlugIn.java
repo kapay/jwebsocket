@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketCommonConstants;
-import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.BroadcastOptions;
@@ -339,6 +338,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		String lUsername = aToken.getString("username");
 		// TODO: Add authentication and password check
 		String lPassword = aToken.getString("password");
+		String lEncoding = aToken.getString("encoding");
+
 		// optionally continue previous session
 		String lSessionId = aToken.getString("usid");
 		String lGroup = aToken.getString("group");
@@ -357,7 +358,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			User lUser = SecurityFactory.getUser(lUsername);
 
 			// check if user exists and if password matches
-			if (lUser != null && lUser.checkPassword(lPassword)) {
+			if (lUser != null && lUser.checkPassword(lPassword, lEncoding)) {
 				lResponse.setString("username", lUsername);
 				// if previous session id was passed to continue an aborted session
 				// return the session-id to notify client about acceptance

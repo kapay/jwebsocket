@@ -17,6 +17,7 @@ package org.jwebsocket.security;
 
 import java.util.Set;
 import org.apache.log4j.Logger;
+import org.jwebsocket.util.Tools;
 
 /**
  * implements a user with all its data fields and roles.
@@ -208,8 +209,12 @@ public class User {
 	 * @param aPassword
 	 * @return
 	 */
-	public boolean checkPassword(String aPassword) {
-		boolean lOk = (aPassword != null && aPassword.equals(mPassword));
+	public boolean checkPassword(String aPassword, String aEncoding) {
+		String lPassword = mPassword;
+		if( "md5".equalsIgnoreCase(aEncoding)) {
+			lPassword = Tools.getMD5(lPassword);
+		}
+		boolean lOk = (aPassword != null && aPassword.equals(lPassword));
 		if (lOk) {
 			resetPwdFailCount();
 		} else {

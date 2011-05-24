@@ -2341,6 +2341,17 @@ jws.SystemClientPlugIn = {
 	//:const:*:NON_AUTHENTICATED:Number:2
 	//:d:en:For [tt]getClients[/tt] method: Returns all non-authenticated clients only.
 	NON_AUTHENTICATED: 2,
+	
+	//:const:*:PW_PLAIN:Number:null
+	//:d:en:Use no password encoding, password is passed as plain text.
+	PW_PLAIN		: null,
+	//:const:*:PW_ENCODE_MD5:Number:1
+	//:d:en:Use MD5 password encoding, password is given as plain but converted and passed as a MD5 hash.
+	PW_ENCODE_MD5	: 1,
+	//:const:*:PW_MD5_ENCODED:Number:2
+	//:d:en:Use MD5 password encoding, password is given and passed as a MD5 hash. _
+	//:d:en:The method relies on the correct encoding and does not check the hash.
+	PW_MD5_ENCODED	: 2,
 
 	//:m:*:login
 	//:d:en:Tries to authenticate the client against the jWebSocket Server by _
@@ -2353,13 +2364,26 @@ jws.SystemClientPlugIn = {
 	//:r:*:::void:none
 	login: function( aUsername, aPassword, aOptions ) {
 		var lPool = null;
-		var lAutoConnect = false;
+		var lEncoding = null;
 		if( aOptions ) {
 			if( aOptions.pool !== undefined ) {
 				lPool = aOptions.pool;
 			}
-			if( aOptions.autoConnect !== undefined ) {
-				lAutoConnect = aOptions.autoConnect;
+			if( aOptions.encoding !== undefined ) {
+				lEncoding = aOptions.encoding;
+				// check if password has to be converted into a MD5 sum
+				if( jws.SystemClientPlugIn.PW_ENCODE_MD5 == lEncoding ) {
+					if( aPassword ) {
+						aPassword = jws.tools.calcMD5( aPassword );
+					}
+					lEncoding = "md5";
+				// check if password is already md5 encoded
+				} else if( jws.SystemClientPlugIn.PW_MD5_ENCODED == lEncoding ) {
+					lEncoding = "md5";
+				} else {
+					// TODO: raise error here due to invalid encoding option
+					lEncoding = null;
+				}
 			}
 		}
 		var lRes = this.createDefaultResult();
@@ -2369,19 +2393,13 @@ jws.SystemClientPlugIn = {
 				type: "login",
 				username: aUsername,
 				password: aPassword,
+				encoding: lEncoding,
 				pool: lPool
 			});
 		} else {
-			if( lAutoConnect ) {
-				// TODO: Implement auto connect! Update documentation when done.
-				lRes.code = -1;
-				lRes.localeKey = "jws.jsc.res.notConnected";
-				lRes.msg = "Not connected.";
-			} else {
-				lRes.code = -1;
-				lRes.localeKey = "jws.jsc.res.notConnected";
-				lRes.msg = "Not connected.";
-			}
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
 		}
 		return lRes;
 	},
@@ -2409,7 +2427,7 @@ jws.SystemClientPlugIn = {
 		}
 		// if already connected, just send the login token 
 		if( this.isConnected() ) {
-			this.login( aUsername, aPassword );
+			this.login( aUsername, aPassword, aOptions );
 		} else {
 			var lAppOnWelcomeClBk = aOptions.OnWelcome;
 			var lThis = this;
@@ -2417,7 +2435,7 @@ jws.SystemClientPlugIn = {
 				if( lAppOnWelcomeClBk ) {
 					lAppOnWelcomeClBk.call( lThis, aEvent );
 				}
-				lThis.login( aUsername, aPassword );
+				lThis.login( aUsername, aPassword, aOptions );
 			};
 			this.open(
 				aURL,
