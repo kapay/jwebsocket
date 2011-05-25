@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -150,9 +151,20 @@ public class ReportingPlugIn extends TokenPlugIn {
 			lServer.sendToken(aConnector, lResponse);
 			return;
 		}
-		JasperReport lReport;
-		JasperPrint lPrint;
-		Map<String, String> lParms = new FastMap<String, String>();
+
+		Map<String, Object> lParams = new FastMap<String, Object>();
+		List<Map<String, Object>> lInParams = aToken.getList("params");
+		if (lInParams != null) {
+			for (Map lParam : lInParams) {
+				String lType = (String) lParam.get("type");
+				if (lType != null) {
+					Object lValue = Tools.castGenericToJava(lParam.get("value"), lType, "timestamp");
+					if (lValue != null) {
+						lParams.put((String) lParam.get("name"), lValue);
+					}
+				}
+			}
+		}
 
 		// instantiate response token
 		lResponse = lServer.createResponse(aToken);
@@ -161,10 +173,10 @@ public class ReportingPlugIn extends TokenPlugIn {
 			DataSource lDataSource = (DataSource) Tools.invoke(
 					lJDBCPlugIn, "getNativeDataSource", null);
 
-			lReport = JasperCompileManager.compileReport(
+			JasperReport lReport = JasperCompileManager.compileReport(
 					getReportPath(lReportId));
-			lPrint = JasperFillManager.fillReport(lReport,
-					lParms, lDataSource.getConnection());
+			JasperPrint lPrint = JasperFillManager.fillReport(lReport,
+					lParams, lDataSource.getConnection());
 			if ("pdf".equals(lOutputType)) {
 				JasperExportManager.exportReportToPdfFile(lPrint,
 						mOutputFolder + lReportId + ".pdf");
@@ -206,8 +218,21 @@ public class ReportingPlugIn extends TokenPlugIn {
 		lFilemasks.add("*.jrxml");
 		lGetFilelist.setList("filemasks", lFilemasks);
 
-		lResponse = lFileSystemPlugIn.invoke(aConnector, lGetFilelist);
-		lServer.setResponseFields(aToken, lResponse);
+		Token lFilesToken = lFileSystemPlugIn.invoke(aConnector, lGetFilelist);
+		List<Map> lFiles = lFilesToken.getList("files");
+		for (Map lItem : lFiles) {
+			String lFilename = (String) lItem.get("filename");
+			int lIdx = lFilename.lastIndexOf('.');
+			String lReportname = lFilename;
+			if (lIdx > 0) {
+				lReportname = lFilename.substring(0, lIdx);
+			}
+			lItem.put("reportname", lReportname);
+		}
+		// lServer.setResponseFields(aToken, lResponse);
+		lResponse.setInteger("code", lFilesToken.getInteger("code"));
+		lResponse.setString("msg", lFilesToken.getString("msg"));
+		lResponse.setList("reports", lFiles);
 
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
@@ -227,20 +252,26 @@ public class ReportingPlugIn extends TokenPlugIn {
 		}
 
 		try {
-			JasperReport lReport = JasperCompileManager.compileReport(
-					getReportPath(lReportId));
+			String lReportPath = getReportPath(lReportId);
+			JasperReport lReport = JasperCompileManager.compileReport(lReportPath);
 
+			List lParamsList = new FastList<Map>();
 			JRParameter[] lParams = lReport.getParameters();
-			Map lParamMap = new FastMap<String, String>();
 			for (int lIdx = 0; lIdx < lParams.length; lIdx++) {
 				JRParameter lParam = lParams[lIdx];
 				Map lParamData = new FastMap<String, String>();
+				lParamData.put("name", lParam.getName());
+				lParamData.put("type", Tools.getGenericTypeStringFromJavaClassname(lParam.getValueClassName()));
 				lParamData.put("className", lParam.getValueClassName());
 				lParamData.put("description", lParam.getDescription());
+				JRExpression lJRExpr = lParam.getDefaultValueExpression();
+				if (lJRExpr != null) {
+					lParamData.put("default", lJRExpr.getText());
+				}
 				lParamData.put("isForPrompting", lParam.isForPrompting());
-				lParamMap.put(lParam.getName(), lParamData);
+				lParamsList.add(lParamData);
 			}
-			lResponse.setMap("params", lParamMap);
+			lResponse.setList("params", lParamsList);
 		} catch (Exception ex) {
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", ex.getClass().getSimpleName() + ": " + ex.getMessage());

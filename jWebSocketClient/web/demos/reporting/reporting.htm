@@ -32,12 +32,15 @@
 
 		<script type="text/javascript" language="JavaScript">
 			
+			var
+				gReportParams = [];
+			
 			function getReports() {
 				log( "Retreiving list of reports via jWebSocket..." );
 				if( lWSC.isConnected() ) {
 					lWSC.reportingGetReports({
 						OnResponse: function( aToken ) {
-							log("Reports " + JSON.stringify( aToken ) );
+							// log("Reports " + JSON.stringify( aToken ) );
 						}
 					});
 				} else {
@@ -46,12 +49,12 @@
 			}
 
 			function getReportParams() {
-				var lReportId = "Browser Usage";
+				var lReportId = eReportSel.value;
 				log( "Retreiving parameters for report '" + lReportId + "' via jWebSocket..." );
 				if( lWSC.isConnected() ) {
 					lWSC.reportingGetReportParams( lReportId, {
 						OnResponse: function( aToken ) {
-							log("Reports " + JSON.stringify( aToken ) );
+							// log("Reports " + JSON.stringify( aToken ) );
 						}
 					});
 				} else {
@@ -59,7 +62,98 @@
 				}
 			}
 
+			function createReport() {
+				var lReportId = eReportSel.value;
+				log( "Creating Report..." );
+				if( lWSC.isConnected() ) {
+					var lParams = [];
+					for(var lIdx = 0, lCnt = gReportParams.length; lIdx < lCnt; lIdx++ ) {
+						var lParam = gReportParams[ lIdx ];
+						lParams.push({
+							name: lParam.name,
+							type: lParam.type,
+							value: lParam.elem.value
+						});
+					}
+					// lParams.push({ name: "aFrom", type: "datetime", value: "2011-05-20T13:04:00Z" });
+					// lParams.push({ name: "aTo", type: "datetime", value: "2011-05-25T00:00:00Z" });
+					lWSC.reportingCreateReport(lReportId, lParams, {
+						OnResponse: function( aToken ) {
+							if( aToken.code == 0) {
+								window.open( aToken.url, "jWebSocket Report", "" );
+							} else {
+								log("Report creation error: " + aToken.msg );
+							}	
+						}
+					});
+				} else {
+					log( "Not connected." );
+				}
+			}
+
+			function handleReportAvail() {
+				// show pdf
+				log("Report is available");
+			}
+			
+			function handleReports( aToken ) {
+				// remove all existing reports in drop down box
+				while( eReportSel.options.length > 0 ) {
+					var lOption = eReportSel.options[ 0 ];
+					eReportSel.removeChild(lOption);
+				}
+				// add all reports from incoming token
+				for( var lIdx = 0, lCnt = aToken.reports.length; lIdx < lCnt; lIdx++ ) {
+					var lOption = document.createElement("option");
+					lOption.value = aToken.reports[ lIdx ].reportname;
+					lOption.text = aToken.reports[ lIdx ].reportname;
+					eReportSel.appendChild(lOption);
+				}
+			}
+			
+			function handleReportParams( aToken ) {
+				// remove all existing reports in drop down box
+				eFilterDiv.innerHTML = "";
+				gReportParams = [];
+				// analyze report params from incoming token
+				var lTable = document.createElement("table");
+				for( var lIdx = 0, lCnt = aToken.params.length; lIdx < lCnt; lIdx++ ) {
+					var lParam = aToken.params[ lIdx ];
+					var lDescr = lParam.description;
+					if( lDescr ) {
+						var lTR = document.createElement("tr");
+						var lTD1 = document.createElement("td");
+						var lTD2 = document.createElement("td");
+						var lLbl = document.createElement("span");
+						var lInp = document.createElement("input");
+						lInp.id = "param." + lParam.name;
+
+						gReportParams.push({
+							name: lParam.name,
+							type: lParam.type,
+							elem: lInp
+						});
+						
+						lTD1.appendChild(lLbl);
+						lTD2.appendChild(lInp);
+						lTR.appendChild(lTD1);
+						lTR.appendChild(lTD2);
+						lTable.appendChild(lTR);
+
+						lLbl.innerHTML = lDescr;
+					}	
+				}
+				eFilterDiv.appendChild(lTable);
+			}
+
 			function initPage() {
+				eReportSel = jws.$( "sselChannel" );
+				eFilterDiv = jws.$( "sdivFilter" );
+				lWSC.setReportingCallbacks({
+					OnReportAvail: handleReportAvail,
+					OnReports: handleReports,
+					OnReportParams: handleReportParams
+				});
 			}
 
 			function exitPage() {
@@ -87,12 +181,27 @@
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnGetReports" type="button" value="Get Reports" onclick="getReports();"
 							   title="Gets the list of avaliable reports.">
+					</td>
+					<td class="stdDlg" width="5">
+						<select id="sselChannel" title="Available Reports on the server." style="width:150px">
+						</select>
+					</td>
+					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnGetReportParams" type="button" value="Get Params" onclick="getReportParams();"
 							   title="Gets the list of avaliable reports.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtCreateReport" type="button" value="Create Report" onclick="createReport();"
+							   title="Creates the currently selected report using the given parameters.">
 					</td>
 				</tr>
 			</table>
 		</div>
+		
+		<div class="sdivContainer" id="sdivFilter">
+			
+		</div>
+		
 
 	</body>
 </html>

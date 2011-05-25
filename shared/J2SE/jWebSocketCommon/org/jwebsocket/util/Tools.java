@@ -17,12 +17,14 @@ package org.jwebsocket.util;
 
 import java.lang.reflect.Method;
 import java.security.MessageDigest;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javolution.util.FastMap;
 
 /**
  * Provides some convenience methods to support the web socket
@@ -31,6 +33,29 @@ import java.util.regex.Pattern;
  */
 public class Tools {
 
+	private static final Map<String,String> JAVA_2_GENERIC_MAP = new FastMap<String,String>();
+	Map GENERIC_2_JAVA_MAP = new FastMap<String,String>();
+	
+	static {
+		JAVA_2_GENERIC_MAP.put("java.lang.Boolean", "boolean");
+		JAVA_2_GENERIC_MAP.put("java.lang.Byte", "integer");
+		JAVA_2_GENERIC_MAP.put("java.lang.Short", "integer");
+		JAVA_2_GENERIC_MAP.put("java.lang.Integer", "integer");
+		JAVA_2_GENERIC_MAP.put("java.lang.Long", "long");
+		JAVA_2_GENERIC_MAP.put("java.lang.Float", "float");
+		JAVA_2_GENERIC_MAP.put("java.lang.Double", "double");
+		JAVA_2_GENERIC_MAP.put("java.math.BigDecimal", "double");
+	
+		JAVA_2_GENERIC_MAP.put("java.sql.Timestamp", "datetime");
+		JAVA_2_GENERIC_MAP.put("java.sql.Date", "date");
+		JAVA_2_GENERIC_MAP.put("java.sql.Time", "time");
+
+		JAVA_2_GENERIC_MAP.put("java.util.Collection", "list");
+		JAVA_2_GENERIC_MAP.put("java.util.Collection", "list");
+		JAVA_2_GENERIC_MAP.put("java.util.Set", "list");
+		JAVA_2_GENERIC_MAP.put("java.util.Map", "map");
+	}
+	
 	/**
 	 * 
 	 */
@@ -143,7 +168,7 @@ public class Tools {
 	 * @return
 	 */
 	public static Date ISO8601ToDate(String aISO8601Date) {
-		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 		try {
 			return lSDF.parse(aISO8601Date);
 		} catch (Exception lEx) {
@@ -179,6 +204,46 @@ public class Tools {
 		return lSDF.format(aDate);
 	}
 
+	/**
+	 * Tries to convert a given object into the given java data type
+	 * @param aValue
+	 * @param aFromType
+	 * @return
+	 */
+	public static Object castGenericToJava(Object aValue, String aFromType, String aToType) {
+		if (aFromType != null
+				&& aToType != null
+				&& aValue != null) {
+			aFromType = aFromType.toLowerCase();
+			aToType = aToType.toLowerCase();
+
+			// convert from datetime (java.sql.Date)
+			if ("datetime".equals(aFromType)) {
+				if (aValue instanceof String) {
+					Date lDate = ISO8601ToDate((String) aValue);
+					if ("timestamp".equals(aToType)) {
+						return new Timestamp(lDate.getTime());
+					} else {
+						return lDate;
+					}
+				}
+			}
+			
+		}
+		return null;
+	}
+
+	/**
+	 * Tries to convert a given object into the given java data type
+	 * @param aValue
+	 * @param aFromType
+	 * @return
+	 */
+	public static String getGenericTypeStringFromJavaClassname(String aClassname) {
+		return JAVA_2_GENERIC_MAP.get(aClassname);
+	}
+	
+	
 	/**
 	 * 
 	 * @param aString

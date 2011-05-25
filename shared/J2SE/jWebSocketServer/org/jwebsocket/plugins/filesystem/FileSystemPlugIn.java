@@ -403,20 +403,21 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				for (File lFile : lFiles) {
 					Map lFileData = new FastMap< String, Object>();
 					String lName = lFile.getName();
-					lFileData.put("name", lName);
+					lFileData.put("filename", lName);
 					String lPath = lFile.getPath();
 					if (lPath != null && lPath.indexOf(lFolder) == 0) {
 						lPath = lPath.substring(lFolder.length() + 1, lPath.length() - lName.length());
 					}
 					lFileData.put("path", lPath);
 					lFileData.put("size", lFile.length());
-					lFileData.put("modified1", Tools.DateToISO8601(new Date(lFile.lastModified())));
+					lFileData.put("modified", Tools.DateToISO8601(new Date(lFile.lastModified())));
 					lFileData.put("hidden", lFile.isHidden());
 					lFileData.put("canRead", lFile.canRead());
 					lFileData.put("canWrite", lFile.canWrite());
 					lFileList.add(lFileData);
 				}
 				lToken.setList("files", lFileList);
+				lToken.setInteger("code", 0);
 				lToken.setString("msg", "ok");
 			} else {
 				lToken.setInteger("code", -1);

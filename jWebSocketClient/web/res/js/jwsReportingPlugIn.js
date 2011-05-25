@@ -36,8 +36,16 @@ jws.ReportingPlugIn = {
 			// here you can handle incomimng tokens from the server
 			// directy in the plug-in if desired.
 			if( "createReport" == aToken.reqType ) {
-				if( this.OnReportAvail ) {
-					this.OnReportAvail( aToken );
+				if( this.OnReport ) {
+					this.OnReport( aToken );
+				}
+			} else if( "getReports" == aToken.reqType ) {
+				if( this.OnReports ) {
+					this.OnReports( aToken );
+				}
+			} else if( "getReportParams" == aToken.reqType ) {
+				if( this.OnReportParams ) {
+					this.OnReportParams( aToken );
 				}
 			}
 		}
@@ -95,6 +103,12 @@ jws.ReportingPlugIn = {
 		}
 		if( aListeners.OnReportAvail !== undefined ) {
 			this.OnReportAvail = aListeners.OnReportAvail;
+		}
+		if( aListeners.OnReports !== undefined ) {
+			this.OnReports = aListeners.OnReports;
+		}
+		if( aListeners.OnReportParams !== undefined ) {
+			this.OnReportParams = aListeners.OnReportParams;
 		}
 	}
 
