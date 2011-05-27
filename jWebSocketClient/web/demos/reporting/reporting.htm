@@ -147,7 +147,7 @@
 			}
 
 			function initPage() {
-				eReportSel = jws.$( "sselChannel" );
+				eReportSel = jws.$( "sselReports" );
 				eFilterDiv = jws.$( "sdivFilter" );
 				lWSC.setReportingCallbacks({
 					OnReportAvail: handleReportAvail,
@@ -170,7 +170,8 @@
 		<script type="text/javascript">
 			jws.DemoPlugIn.buildDemoPage({
 				title: "Reporting",
-				header: "jWebSocket Reporting Demo"
+				header: "jWebSocket Reporting Demo",
+				description: "This demo shows how to easily create reports via jWebSocket."
 			});
 			processInitPage();
 		</script>
@@ -183,7 +184,7 @@
 							   title="Gets the list of avaliable reports.">
 					</td>
 					<td class="stdDlg" width="5">
-						<select id="sselChannel" title="Available Reports on the server." style="width:150px">
+						<select id="sselReports" title="Available Reports on the server." style="width:150px">
 						</select>
 					</td>
 					<td class="stdDlg" width="5">

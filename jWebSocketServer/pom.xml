@@ -404,6 +404,7 @@
 			<artifactId>itext</artifactId>
 			<version>2.1.7</version>
 		</dependency>		
+		
 	</dependencies>
 
 	<!-- define repositories -->

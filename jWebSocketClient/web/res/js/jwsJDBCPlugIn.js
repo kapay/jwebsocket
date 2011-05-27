@@ -35,9 +35,9 @@ jws.JDBCPlugIn = {
 		if( aToken.ns == jws.JDBCPlugIn.NS ) {
 			// here you can handle incomimng tokens from the server
 			// directy in the plug-in if desired.
-			if( "select" == aToken.reqType ) {
-				if( this.OnJDBCResult ) {
-					this.OnJDBCResult( aToken );
+			if( "selectSQL" == aToken.reqType ) {
+				if( this.OnJDBCRowSet ) {
+					this.OnJDBCRowSet( aToken );
 				}
 			}
 		}
@@ -165,6 +165,9 @@ jws.JDBCPlugIn = {
 	setJDBCCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
+		}
+		if( aListeners.OnJDBCRowSet !== undefined ) {
+			this.OnJDBCRowSet = aListeners.OnJDBCRowSet;
 		}
 		if( aListeners.OnJDBCResult !== undefined ) {
 			this.OnJDBCResult = aListeners.OnJDBCResult;
