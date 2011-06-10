@@ -29,6 +29,7 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JRPropertiesMap;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -205,6 +206,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 			lConnection = lDataSource.getConnection();
 			JasperReport lReport = JasperCompileManager.compileReport(
 					getReportPath(lReportId));
+			// lReport.getSortFields().
 			JasperPrint lPrint = JasperFillManager.fillReport(lReport,
 					lParams, lConnection);
 			String lReportName = generateReportName(aConnector, lReportId);
@@ -319,6 +321,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 					lParamData.put("default", lJRExpr.getText());
 				}
 				lParamData.put("isForPrompting", lParam.isForPrompting());
+				lParamData.put("properties", lParam.getPropertiesMap());
 				lParamsList.add(lParamData);
 			}
 			lResponse.setList("params", lParamsList);
