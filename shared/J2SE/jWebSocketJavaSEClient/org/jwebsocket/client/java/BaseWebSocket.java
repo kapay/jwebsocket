@@ -115,6 +115,11 @@ public class BaseWebSocket implements WebSocketClient {
 		String lSubProtocol = makeSubprotocolHeader();
 		WebSocketHandshake lHandshake = new WebSocketHandshake(mURL, lSubProtocol, mDraft);
 		try {
+			// close current socket if still connected 
+			// to avoid open connections on server
+			if (mSocket != null && mSocket.isConnected()) {
+				mSocket.close();
+			}
 			mSocket = createSocket();
 			mInput = mSocket.getInputStream();
 			mOutput = new PrintStream(mSocket.getOutputStream());
@@ -358,14 +363,17 @@ public class BaseWebSocket implements WebSocketClient {
 					TrustManager[] lTrustManager = new TrustManager[]{
 						new X509TrustManager() {
 
+							@Override
 							public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 								return null;
 							}
 
+							@Override
 							public void checkClientTrusted(
 									java.security.cert.X509Certificate[] aCerts, String aAuthType) {
 							}
 
+							@Override
 							public void checkServerTrusted(
 									java.security.cert.X509Certificate[] aCerts, String aAuthType) {
 							}

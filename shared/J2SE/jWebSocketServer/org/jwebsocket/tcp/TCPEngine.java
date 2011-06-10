@@ -130,7 +130,7 @@ public class TCPEngine extends BaseEngine {
 					KeyStore lKeyStore = KeyStore.getInstance("JKS");
 
 					String lKeyStorePath = JWebSocketConfig.getConfigFolder(mKeyStore);
-					if( lKeyStorePath != null ) {
+					if (lKeyStorePath != null) {
 						char[] lPassword = mKeyStorePassword.toCharArray();
 						lKeyStore.load(new FileInputStream(lKeyStorePath), lPassword);
 						lKMF.init(lKeyStore, lPassword);
@@ -148,7 +148,7 @@ public class TCPEngine extends BaseEngine {
 									+ getId() + "' started' at port "
 									+ mSSLListenerPort + " with default timeout "
 									+ (mSessionTimeout > 0
-										? mSessionTimeout + "ms" : "infinite")
+									? mSessionTimeout + "ms" : "infinite")
 									+ ".");
 						}
 					} else {
@@ -493,6 +493,11 @@ public class TCPEngine extends BaseEngine {
 
 		@Override
 		public void run() {
+			Thread.currentThread().setName(
+					"jWebSocket TCP-Engine (" + mServer.getLocalPort() + ", "
+					+ (mServer instanceof SSLServerSocket
+					? "SSL secured)"
+					: "non secured)"));
 
 			// notify server that engine has started
 			if (!mEventsFired) {

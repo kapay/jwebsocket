@@ -118,6 +118,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 				mLog.debug("Starting FlashBridge process...");
 			}
 			mIsRunning = true;
+			Thread.currentThread().setName("jWebSocket FlashBridge");
 			while (mIsRunning) {
 				try {
 					// accept is blocking so here is no need

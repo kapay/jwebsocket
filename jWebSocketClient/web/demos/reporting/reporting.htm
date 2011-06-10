@@ -63,10 +63,11 @@
 			}
 
 			function createReport() {
-				var lReportId = eReportSel.value;
+				var lReportId = ""; // eReportSel.value;
 				log( "Creating Report..." );
-				if( lWSC.isConnected() ) {
+				if( jWSC.isConnected() ) {
 					var lParams = [];
+					/*
 					for(var lIdx = 0, lCnt = gReportParams.length; lIdx < lCnt; lIdx++ ) {
 						var lParam = gReportParams[ lIdx ];
 						lParams.push({
@@ -75,9 +76,10 @@
 							value: lParam.elem.value
 						});
 					}
-					// lParams.push({ name: "aFrom", type: "datetime", value: "2011-05-20T13:04:00Z" });
-					// lParams.push({ name: "aTo", type: "datetime", value: "2011-05-25T00:00:00Z" });
-					lWSC.reportingCreateReport(lReportId, lParams, {
+					*/
+					lParams.push({ name: "aFrom", type: "datetime", value: "2011-05-20T13:04:00Z" });
+					lParams.push({ name: "aTo", type: "datetime", value: "2011-05-25T00:00:00Z" });
+					jWSC.reportingCreateReport(lReportId, lParams, {
 						OnResponse: function( aToken ) {
 							if( aToken.code == 0) {
 								window.open( aToken.url, "jWebSocket Report", "" );

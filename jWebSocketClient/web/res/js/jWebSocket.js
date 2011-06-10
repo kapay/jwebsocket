@@ -798,18 +798,25 @@ jws.tools = {
 		var lTZO = -aDate.getTimezoneOffset();
 		var lAbsTZO = Math.abs( lTZO );
 		var lRes =
-			aDate.getUTCFullYear()
+			aDate.getUTCFullYear() 
+			+ "-"
 			+ this.zerofill( aDate.getUTCMonth() + 1, 2 )
+			+ "-"
 			+ this.zerofill( aDate.getUTCDate(), 2 )
 			// use time separator
-			+ "T" + 
+			+ "T"
 			+ this.zerofill( aDate.getUTCHours(), 2 )
+			+ ":"
 			+ this.zerofill( aDate.getUTCMinutes(), 2 )
+			+ ":"
 			+ this.zerofill( aDate.getUTCSeconds(), 2 )
-			+ this.zerofill( aDate.getUTCMilliseconds(), 2 )
+			+ "."
+			+ this.zerofill( aDate.getUTCMilliseconds(), 3 )
+			/*
 			+ ( lTZO >= 0 ? "+" : "-" )
 			+ this.zerofill( lAbsTZO / 60, 2 )
 			+ this.zerofill( lAbsTZO % 60, 2 )
+			*/
 			// trailing Z means it's UTC
 			+ "Z";
 		return lRes;
@@ -819,17 +826,43 @@ jws.tools = {
 		var lDate = new Date();
 		// date part
 		lDate.setUTCFullYear( aISO.substr( 0, 4 ) );
-		lDate.setUTCMonth( aISO.substr( 4, 2 ) - 1 );
-		lDate.setUTCDate( aISO.substr( 6, 2 ) );
+		lDate.setUTCMonth( aISO.substr( 5, 2 ) - 1 );
+		lDate.setUTCDate( aISO.substr( 8, 2 ) );
 		// time
-		lDate.setUTCHours( aISO.substr( 9, 2 ) );
-		lDate.setUTCMinutes( aISO.substr( 11, 2 ) );
-		lDate.setUTCSeconds( aISO.substr( 13, 2 ) );
-		lDate.setUTCMilliseconds( aISO.substr( 15, 3 ) );
+		lDate.setUTCHours( aISO.substr( 11, 2 ) );
+		lDate.setUTCMinutes( aISO.substr( 14, 2 ) );
+		lDate.setUTCSeconds( aISO.substr( 17, 2 ) );
+		lDate.setUTCMilliseconds( aISO.substr( 20, 3 ) );
 		//:TODO:en:Analyze timezone
 		return lDate;
 	},
 
+	date2String: function( aDate ) {
+		var lRes =
+			aDate.getUTCFullYear() 
+			+ this.zerofill( aDate.getUTCMonth() + 1, 2 )
+			+ this.zerofill( aDate.getUTCDate(), 2 )
+			+ this.zerofill( aDate.getUTCHours(), 2 )
+			+ this.zerofill( aDate.getUTCMinutes(), 2 )
+			+ this.zerofill( aDate.getUTCSeconds(), 2 )
+			+ this.zerofill( aDate.getUTCMilliseconds(), 2 )
+		return lRes;
+	},
+
+	string2Date: function( aISO ) {
+		var lDate = new Date();
+		// date part
+		lDate.setUTCFullYear( aISO.substr( 0, 4 ) );
+		lDate.setUTCMonth( aISO.substr( 4, 2 ) - 1 );
+		lDate.setUTCDate( aISO.substr( 6, 2 ) );
+		// time
+		lDate.setUTCHours( aISO.substr( 8, 2 ) );
+		lDate.setUTCMinutes( aISO.substr( 10, 2 ) );
+		lDate.setUTCSeconds( aISO.substr( 12, 2 ) );
+		lDate.setUTCMilliseconds( aISO.substr( 14, 3 ) );
+		return lDate;
+	},
+	
 	generateSharedUTID: function(aToken){
 		var string = JSON.stringify(aToken);
 		var chars = string.split('');

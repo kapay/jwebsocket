@@ -182,6 +182,8 @@ public class BaseStream implements WebSocketStream {
 		@Override
 		public void run() {
 			mIsRunning = true;
+			Thread.currentThread().setName("jWebSocket StreamingPlugIn Queue");
+			
 			while (mIsRunning) {
 				synchronized (mQueue) {
 					if (mQueue.size() > 0) {

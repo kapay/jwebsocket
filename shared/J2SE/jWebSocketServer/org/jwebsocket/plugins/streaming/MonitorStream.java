@@ -99,6 +99,8 @@ public class MonitorStream extends TokenStream {
 				mLog.debug("Running monitor stream...");
 			}
 			mIsRunning = true;
+			Thread.currentThread().setName("jWebSocket MonitorStream");
+			
 			while (mIsRunning) {
 				try {
 					Thread.sleep(1000);

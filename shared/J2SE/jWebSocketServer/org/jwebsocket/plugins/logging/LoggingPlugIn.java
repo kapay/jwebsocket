@@ -127,8 +127,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 
 	private void unsubscribe(WebSocketConnector aConnector, Token aToken) {
 	}
-	
-	
+
 	private void logEvent(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		Token lResponse = lServer.createResponse(aToken);
@@ -187,6 +186,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 		lResponse.setString("msg", lExecResp.getString("msg"));
 		lResponse.setInteger("rowsAffected", lExecResp.getInteger("rowsAffected"));
 		lResponse.setInteger("key", lValue);
+
 		lServer.sendToken(aConnector, lResponse);
 	}
 
@@ -212,7 +212,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 			if (lFromKey != null) {
 				lSQLString += " " + lPrimaryKey + " >= " + lFromKey;
 			}
-			if (lFromKey != null && lToKey != null ) {
+			if (lFromKey != null && lToKey != null) {
 				lSQLString += " and";
 			}
 			if (lToKey != null) {

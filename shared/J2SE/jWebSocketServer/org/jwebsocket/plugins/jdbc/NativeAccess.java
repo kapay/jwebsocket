@@ -32,6 +32,7 @@ public class NativeAccess {
 
 	public void setDataSource(DataSource aDataSource) {
 		mJDBCTemplate = new JdbcTemplate(aDataSource);
+		mJDBCTemplate.setQueryTimeout(10); // seconds
 	}
 
 	public void setSelectSequenceSQL(String aSQL) {
@@ -48,8 +49,8 @@ public class NativeAccess {
 
 	public Token query(String aSQL, Object[] aArgs) {
 		Token lResToken;
+		SqlRowSet lRowSet;
 		try {
-			SqlRowSet lRowSet;
 			if (aArgs != null) {
 				lRowSet = mJDBCTemplate.queryForRowSet(aSQL, aArgs);
 			} else {
@@ -85,6 +86,7 @@ public class NativeAccess {
 					lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 		}
 		lResToken.setInteger("rowsAffected", lAffectedRows);
+
 		return lResToken;
 	}
 

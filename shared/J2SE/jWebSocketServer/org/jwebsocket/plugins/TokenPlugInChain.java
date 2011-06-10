@@ -46,21 +46,27 @@ public class TokenPlugInChain extends BasePlugInChain {
 	 * @return
 	 */
 	public PlugInResponse processToken(WebSocketConnector aConnector, Token aToken) {
-		PlugInResponse lPluginResponse = new PlugInResponse();
-		for (WebSocketPlugIn lPlugIn : getPlugIns()) {
-			// TODO: introduce optimization: only pass token to plug-ins that match the token name space!
-			try {
-				((TokenPlugIn) lPlugIn).processToken(lPluginResponse, aConnector, aToken);
-			} catch (Exception lEx) {
-				mLog.error("(plugin '"
-						+ ((TokenPlugIn) lPlugIn).getNamespace() + "') "
-						+ lEx.getClass().getSimpleName() + ": "
-						+ lEx.getMessage());
-			}
-			if (lPluginResponse.isChainAborted()) {
-				break;
+		PlugInResponse lPlugInResponse = new PlugInResponse();
+		String lNS = aToken.getNS();
+		// tokens without namespace are not accepted anymore since jWebSocket 1.0a11
+		if (lNS != null) {
+			for (WebSocketPlugIn lPlugIn : getPlugIns()) {
+				try {
+					TokenPlugIn lTokenPlugIn = ((TokenPlugIn) lPlugIn);
+					if (lNS.equals(lTokenPlugIn.getNamespace())) {
+						lTokenPlugIn.processToken(lPlugInResponse, aConnector, aToken);
+					}
+				} catch (Exception lEx) {
+					mLog.error("(plug-in '"
+							+ ((TokenPlugIn) lPlugIn).getNamespace() + "') "
+							+ lEx.getClass().getSimpleName() + ": "
+							+ lEx.getMessage());
+				}
+				if (lPlugInResponse.isChainAborted()) {
+					break;
+				}
 			}
 		}
-		return lPluginResponse;
+		return lPlugInResponse;
 	}
 }

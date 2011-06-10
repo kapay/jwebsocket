@@ -74,6 +74,9 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String BROADCAST_LOGIN_KEY = "broadcastLoginEvent";
 	private static boolean BROADCAST_LOGOUT = true;
 	private static final String BROADCAST_LOGOUT_KEY = "broadcastLogoutEvent";
+	private static String ALLOW_ANONYMOUS_KEY = "allowAnonymousLogin";
+	private static String ANONYMOUS_USER = "anonymous";
+	private static boolean ALLOW_ANONYMOUS_LOGIN = false;
 
 	/**
 	 * Constructor with configuration object
@@ -94,6 +97,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		BROADCAST_CLOSE = "true".equals(getString(BROADCAST_CLOSE_KEY, "true"));
 		BROADCAST_LOGIN = "true".equals(getString(BROADCAST_LOGIN_KEY, "true"));
 		BROADCAST_LOGOUT = "true".equals(getString(BROADCAST_LOGOUT_KEY, "true"));
+		ALLOW_ANONYMOUS_LOGIN = "true".equals(getString(ALLOW_ANONYMOUS_KEY, "false"));
 	}
 
 	@Override
@@ -151,10 +155,14 @@ public class SystemPlugIn extends TokenPlugIn {
 				Tools.getMD5(aConnector.generateUID()
 				+ "." + lRand.nextInt()));
 
+		if (ALLOW_ANONYMOUS_LOGIN) {
+			setUsername(aConnector, ANONYMOUS_USER);
+		}
 		// and send the welcome message incl. the session id
 		sendWelcome(aConnector);
 		// if new connector is active broadcast this event to then network
 		broadcastConnectEvent(aConnector);
+
 	}
 
 	@Override
@@ -250,6 +258,13 @@ public class SystemPlugIn extends TokenPlugIn {
 			lWelcome.setString("unid", lNodeId);
 		}
 		lWelcome.setInteger("timeout", aConnector.getEngine().getConfiguration().getTimeout());
+		String lUsername = getUsername(aConnector);
+		if (lUsername != null) {
+			lWelcome.setString("username", lUsername);
+		}
+		if (lNodeId != null) {
+			lWelcome.setString("unid", lNodeId);
+		}
 
 		sendToken(aConnector, aConnector, lWelcome);
 	}

@@ -33,9 +33,9 @@ import javolution.util.FastMap;
  */
 public class Tools {
 
-	private static final Map<String,String> JAVA_2_GENERIC_MAP = new FastMap<String,String>();
-	Map GENERIC_2_JAVA_MAP = new FastMap<String,String>();
-	
+	private static final Map<String, String> JAVA_2_GENERIC_MAP = new FastMap<String, String>();
+	Map GENERIC_2_JAVA_MAP = new FastMap<String, String>();
+
 	static {
 		JAVA_2_GENERIC_MAP.put("java.lang.Boolean", "boolean");
 		JAVA_2_GENERIC_MAP.put("java.lang.Byte", "integer");
@@ -45,7 +45,7 @@ public class Tools {
 		JAVA_2_GENERIC_MAP.put("java.lang.Float", "float");
 		JAVA_2_GENERIC_MAP.put("java.lang.Double", "double");
 		JAVA_2_GENERIC_MAP.put("java.math.BigDecimal", "double");
-	
+
 		JAVA_2_GENERIC_MAP.put("java.sql.Timestamp", "datetime");
 		JAVA_2_GENERIC_MAP.put("java.sql.Date", "date");
 		JAVA_2_GENERIC_MAP.put("java.sql.Time", "time");
@@ -55,7 +55,6 @@ public class Tools {
 		JAVA_2_GENERIC_MAP.put("java.util.Set", "list");
 		JAVA_2_GENERIC_MAP.put("java.util.Map", "map");
 	}
-	
 	/**
 	 * 
 	 */
@@ -168,16 +167,14 @@ public class Tools {
 	 * @return
 	 */
 	public static Date ISO8601ToDate(String aISO8601Date) {
-		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		SimpleDateFormat lSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		try {
+			// TimeZone lTimeZone = TimeZone.getTimeZone("GMT");
+			// lSDF.setTimeZone(lTimeZone);
 			return lSDF.parse(aISO8601Date);
 		} catch (Exception lEx) {
 			return null;
 		}
-		/* this one cannot be used under Android, thus replacing by above code!
-		Calendar lCal = javax.xml.bind.DatatypeConverter.parseDateTime(aISO8601Date);
-		return lCal.getTime();
-		 */
 	}
 
 	/**
@@ -208,6 +205,7 @@ public class Tools {
 	 * Tries to convert a given object into the given java data type
 	 * @param aValue
 	 * @param aFromType
+	 * @param aToType 
 	 * @return
 	 */
 	public static Object castGenericToJava(Object aValue, String aFromType, String aToType) {
@@ -221,29 +219,29 @@ public class Tools {
 			if ("datetime".equals(aFromType)) {
 				if (aValue instanceof String) {
 					Date lDate = ISO8601ToDate((String) aValue);
-					if ("timestamp".equals(aToType)) {
-						return new Timestamp(lDate.getTime());
-					} else {
-						return lDate;
+					if (lDate != null) {
+						if ("timestamp".equals(aToType)) {
+							return new Timestamp(lDate.getTime());
+						} else {
+							return lDate;
+						}
 					}
 				}
 			}
-			
+
 		}
 		return null;
 	}
 
 	/**
 	 * Tries to convert a given object into the given java data type
-	 * @param aValue
-	 * @param aFromType
+	 * @param aClassname 
 	 * @return
 	 */
 	public static String getGenericTypeStringFromJavaClassname(String aClassname) {
 		return JAVA_2_GENERIC_MAP.get(aClassname);
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param aString
@@ -254,13 +252,14 @@ public class Tools {
 	public static String expandVars(String aString, Map<String, String> aVars,
 			boolean aIgnoreCase) {
 		String lPattern = "\\$\\{([A-Za-z0-9_]+)\\}";
-		Pattern lRegExpr = Pattern.compile(lPattern);
+		int lFlags = aIgnoreCase ? Pattern.CASE_INSENSITIVE : 0;
+		Pattern lRegExpr = Pattern.compile(lPattern, lFlags);
 		Matcher lMatcher = lRegExpr.matcher(aString);
 		while (lMatcher.find()) {
 			String lFoundVal = lMatcher.group(1);
-			if (aIgnoreCase) {
-				lFoundVal = lFoundVal.toUpperCase();
-			}
+			// if (aIgnoreCase) {
+			// 	lFoundVal = lFoundVal.toUpperCase();
+			// }
 			String lEnvVal = aVars.get(lFoundVal);
 			if (lEnvVal == null) {
 				lEnvVal = "";

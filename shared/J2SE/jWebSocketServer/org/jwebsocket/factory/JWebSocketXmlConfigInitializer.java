@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.factory;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -69,14 +70,15 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 		List<LibraryConfig> lLibs = jWebSocketConfig.getLibraries();
 		JWebSocketJarClassLoader lJarLoader = null;
 		if (lLibs != null) {
-			lJarLoader = new JWebSocketJarClassLoader();
+			// lJarLoader = new JWebSocketJarClassLoader();
 			try {
 				for (LibraryConfig lLibConf : lLibs) {
 					if (mLog.isDebugEnabled()) {
 						mLog.debug("Adding external library '" + lLibConf.getId()
 								+ "' from '" + lLibConf.getURL() + "'...");
 					}
-					lJarLoader.addFile(lLibConf.getURL());
+					// lJarLoader.addFile(lLibConf.getURL());
+					ClassPathUpdater.add(new File(lLibConf.getURL()));
 				}
 			} catch (Exception ex) {
 				System.out.println(ex.toString());

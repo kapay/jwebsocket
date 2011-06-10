@@ -19,6 +19,9 @@
 package org.jwebsocket.plugins.reporting;
 
 import java.io.File;
+import java.sql.Connection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -37,6 +40,7 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketServerConstants;
+import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
@@ -53,10 +57,12 @@ public class ReportingPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(ReportingPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
-	private static final String NS_TEST = JWebSocketServerConstants.NS_BASE + ".plugins.reporting";
+	private static final String NS_REPORTING = JWebSocketServerConstants.NS_BASE + ".plugins.reporting";
+	private static final String VAR_FILES_TO_DELETE = NS_REPORTING + ".filesToDelete";
 	private String mReportFolder = null;
 	private String mOutputFolder = null;
 	private String mOutputURL = null;
+	private String mReportNamePattern = null;
 
 	/**
 	 *
@@ -68,7 +74,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 			mLog.debug("Instantiating reporting plug-in...");
 		}
 		// specify default name space for admin plugin
-		this.setNamespace(NS_TEST);
+		this.setNamespace(NS_REPORTING);
 		mGetSettings();
 	}
 
@@ -88,6 +94,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 		if (!mOutputURL.endsWith("/")) {
 			mOutputURL += "/";
 		}
+		mReportNamePattern = getString("reportNamePattern", "${reportname}_${username}_${timestamp}");
 	}
 
 	@Override
@@ -111,8 +118,29 @@ public class ReportingPlugIn extends TokenPlugIn {
 		}
 	}
 
+	@Override
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
+		// cleanup reports once connection is terminated
+		List<String> lFiles = (List<String>) aConnector.getVar(VAR_FILES_TO_DELETE);
+		if (lFiles != null) {
+			for (String lFile : lFiles) {
+				FileUtils.deleteQuietly(new File(lFile));
+			}
+		}
+	}
+
 	private String getReportPath(String aReportId) {
 		return mReportFolder + aReportId + ".jrxml";
+	}
+
+	private String generateReportName(WebSocketConnector aConnector, String aReportName) {
+		Map<String, String> lVars = new FastMap<String, String>();
+		lVars.put("reportname", aReportName);
+		lVars.put("username", aConnector.getUsername());
+		lVars.put("timestamp", new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS").format(new Date()));
+		aReportName = Tools.expandVars(mReportNamePattern, lVars,
+				Tools.EXPAND_CASE_INSENSITIVE);
+		return aReportName;
 	}
 
 	private void createReport(WebSocketConnector aConnector, Token aToken) {
@@ -169,28 +197,50 @@ public class ReportingPlugIn extends TokenPlugIn {
 		// instantiate response token
 		lResponse = lServer.createResponse(aToken);
 
+		DataSource lDataSource = null;
+		Connection lConnection = null;
 		try {
-			DataSource lDataSource = (DataSource) Tools.invoke(
+			lDataSource = (DataSource) Tools.invoke(
 					lJDBCPlugIn, "getNativeDataSource", null);
-
+			lConnection = lDataSource.getConnection();
 			JasperReport lReport = JasperCompileManager.compileReport(
 					getReportPath(lReportId));
 			JasperPrint lPrint = JasperFillManager.fillReport(lReport,
-					lParams, lDataSource.getConnection());
+					lParams, lConnection);
+			String lReportName = generateReportName(aConnector, lReportId);
+			String lExportFilePath;
 			if ("pdf".equals(lOutputType)) {
+				lExportFilePath = mOutputFolder + lReportName + ".pdf";
 				JasperExportManager.exportReportToPdfFile(lPrint,
-						mOutputFolder + lReportId + ".pdf");
-				lResponse.setString("url", mOutputURL + lReportId + ".pdf");
+						lExportFilePath);
+				lResponse.setString("url", mOutputURL + lReportName + ".pdf");
 			} else {
+				lExportFilePath = mOutputFolder + lReportName + ".html";
 				JasperExportManager.exportReportToHtmlFile(lPrint,
-						mOutputFolder + lReportId + ".html");
-				lResponse.setString("url", mOutputURL + lReportId + ".html");
+						lExportFilePath);
+				lResponse.setString("url", mOutputURL + lReportName + ".html");
 			}
-		} catch (Exception ex) {
+			List<String> lFiles = (List<String>) aConnector.getVar(VAR_FILES_TO_DELETE);
+			if (lFiles == null) {
+				lFiles = new FastList<String>();
+				aConnector.setVar(VAR_FILES_TO_DELETE, lFiles);
+			}
+			lFiles.add(lExportFilePath);
+		} catch (Exception lEx) {
 			lResponse.setInteger("code", -1);
-			lResponse.setString("msg", ex.getClass().getSimpleName() + ": " + ex.getMessage());
+			String lMsg = lEx.getClass().getSimpleName() + ": " + lEx.getMessage();
+			lResponse.setString("msg", lMsg);
+			mLog.error(lMsg);
 		}
-
+		try {
+			// ensure that connection is committed and closed
+			if (lConnection != null && !lConnection.isClosed()) {
+				lConnection.commit();
+				lConnection.close();
+			}
+		} catch (Exception lEx) {
+			mLog.debug("Instantiating reporting plug-in...");
+		}
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);
 	}

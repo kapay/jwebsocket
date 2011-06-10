@@ -99,6 +99,7 @@ public class StressStream extends TokenStream {
 				mLog.debug("Running stress stream...");
 			}
 			mIsRunning = true;
+			Thread.currentThread().setName("jWebSocket StressStream");
 			while (mIsRunning) {
 				try {
 					Thread.sleep(50);

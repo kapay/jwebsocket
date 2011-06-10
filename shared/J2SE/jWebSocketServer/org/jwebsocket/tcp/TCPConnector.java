@@ -184,6 +184,7 @@ public class TCPConnector extends BaseConnector {
 		public void run() {
 			WebSocketEngine lEngine = getEngine();
 			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
+			Thread.currentThread().setName("jWebSocket TCP-Connector " + getId());
 
 			try {
 				// start client listener loop

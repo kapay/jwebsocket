@@ -19,9 +19,15 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.jdbc;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
+import javolution.util.FastList;
 import javolution.util.FastMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
@@ -273,8 +279,10 @@ public class JDBCPlugIn extends TokenPlugIn {
 			return;
 		}
 
+		Token lResToken = updateSQL(aToken);
+
 		// send response to requester
-		lServer.sendToken(aConnector, updateSQL(aToken));
+		lServer.sendToken(aConnector, lResToken);
 	}
 
 	private Token execSQL(Token aToken) {
@@ -851,4 +859,63 @@ public class JDBCPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResponse);
 		 */
 	}
+
+	private void getDBInfo(WebSocketConnector aConnector, Token aToken) {
+
+		Token lResponse = createResponse(aToken);
+
+		List lResDrivers = new FastList();
+		Enumeration lDrivers = DriverManager.getDrivers();
+		Driver lDriver;
+		while (lDrivers.hasMoreElements()) {
+			lDriver = (Driver) lDrivers.nextElement();
+			Map lDriverInfo = new FastMap();
+			lDriverInfo.put("majorVersion", lDriver.getMajorVersion());
+			lDriverInfo.put("minorVersion", lDriver.getMinorVersion());
+			lDriverInfo.put("simpleName", lDriver.getClass().getSimpleName());
+			lDriverInfo.put("className", lDriver.getClass().getName());
+			lDriverInfo.put("isJdbcCompliant", lDriver.jdbcCompliant());
+			lResDrivers.add(lDriverInfo);
+		}
+		lResponse.setList("drivers", lResDrivers);
+
+		Connection lConn = null;
+		try {
+			DataSource lDataSource = getNativeDataSource();
+			Map lConnInfo = new FastMap();
+
+			lConn = lDataSource.getConnection();
+			DatabaseMetaData meta = lConn.getMetaData();
+			lConnInfo.put("serverName", meta.getDatabaseProductName());
+			lConnInfo.put("serverVersion", meta.getDatabaseProductVersion());
+			lConnInfo.put("driverName", meta.getDriverName());
+			lConnInfo.put("driverVersion", meta.getDriverVersion());
+			lConnInfo.put("majorJdbcVersion", meta.getJDBCMajorVersion());
+			lConnInfo.put("minorJdbcVersion", meta.getJDBCMinorVersion());
+			/*				
+			System.out.println("Server name: "
+			+ meta.getDatabaseProductName());
+			System.out.println("Server version: "
+			+ meta.getDatabaseProductVersion());
+			System.out.println("Driver name: "
+			+ meta.getDriverName());
+			System.out.println("Driver version: "
+			+ meta.getDriverVersion());
+			System.out.println("JDBC major version: "
+			+ meta.getJDBCMajorVersion());
+			System.out.println("JDBC minor version: "
+			+ meta.getJDBCMinorVersion());
+			 */
+			lResponse.setMap("currentConnection", lConnInfo);
+		} catch (Exception lEx) {
+		}
+		try {
+			if (lConn == null) {
+				lConn.commit();
+				lConn.close();
+			}
+		} catch (Exception lEx) {
+		}
+	}
+	
 }

@@ -490,7 +490,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 0);
         getContentPane().add(lblPassword, gridBagConstraints);
 
-        txfUser.setText("guest");
+        txfUser.setText("root");
         txfUser.setMinimumSize(new java.awt.Dimension(100, 20));
         txfUser.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -500,7 +500,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(txfUser, gridBagConstraints);
 
-        pwfPassword.setText("guest");
+        pwfPassword.setText("root");
         pwfPassword.setMinimumSize(new java.awt.Dimension(100, 20));
         pwfPassword.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();

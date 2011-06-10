@@ -362,12 +362,12 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>4.0.1</version>
+			<version>4.0.2</version>
 		</dependency>		
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports-fonts</artifactId>
-			<version>4.0.0</version>
+			<version>4.0.2</version>
 		</dependency>		
 		<dependency>
 			<groupId>commons-digester</groupId>

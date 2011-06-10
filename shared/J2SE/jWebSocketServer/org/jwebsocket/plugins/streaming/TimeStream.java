@@ -99,6 +99,7 @@ public class TimeStream extends TokenStream {
 				log.debug("Running time stream...");
 			}
 			mIsRunning = true;
+			Thread.currentThread().setName("jWebSocket TimeStream");
 			while (mIsRunning) {
 				try {
 					Thread.sleep(1000);
