@@ -110,14 +110,14 @@ public class WebSocketProtocolHandler {
 		// (Integer.MAX_VALUE).
 		if (lPayloadLen < 126) {
 			lBuff[1] = (byte) (lPayloadLen << 1); // just write the payload length
-		} else if (lPayloadLen > 126 && lPayloadLen < 0xFFFF) {
+		} else if (lPayloadLen >= 126 && lPayloadLen < 0xFFFF) {
 			// first write 126 (meaning, there will follow two bytes for actual length)
 			lBuff[1] = (byte) (126 << 1);
 			int lSize = lBuff.length;
 			lBuff = copyOf(lBuff, lSize + 2);
 			lBuff[lSize] = (byte) ((lPayloadLen >>> 8) & 0xFF);
 			lBuff[lSize + 1] = (byte) (lPayloadLen & 0xFF);
-		} else if (lPayloadLen > 0xFFFF) {
+		} else if (lPayloadLen >= 0xFFFF) {
 			// first write 127 (meaning, there will follow eight bytes for actual length)
 			lBuff[1] = (byte) (127 << 1);
 			long len = (long) lPayloadLen;
@@ -137,6 +137,10 @@ public class WebSocketProtocolHandler {
 		lBuff = copyOf(lBuff, lSize + aDataPacket.getByteArray().length);
 		System.arraycopy(aDataPacket.getByteArray(), 0, lBuff, lSize, aDataPacket.getByteArray().length);
 		return lBuff;
+	}
+
+	public static void main(String[] args) {
+		System.out.println("(byte) (127 << 1)" + (byte) (0xFF));
 	}
 
 	/* TODO: implement fragmentation */

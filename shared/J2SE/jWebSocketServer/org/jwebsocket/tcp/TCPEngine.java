@@ -344,81 +344,11 @@ public class TCPEngine extends BaseEngine {
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(
 				lReq,
 				aClientSocket instanceof SSLSocketImpl);
-		// maybe the request is a flash policy-file-request
-		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
-		if (lFlashBridgeReq != null) {
-			mLog.warn("TCPEngine returned policy file request ('"
-					+ lFlashBridgeReq
-					+ "'), check for FlashBridge plug-in.");
+		RequestHeader lHeader = WebSocketHandshake.validateC2SRequest(lRespMap, mLog);
+		if(lHeader == null) {
+			return null;
 		}
-
-		// Check for draft. If it is present and if it's something unrecognizable, force disconnect (return null).
-		String lDraft = (String) lRespMap.get(RequestHeader.WS_DRAFT);
-		if (lDraft != null) {
-			// Since this field was introduced in draft 02, we can safely assume that
-			// it will only be supplied with clients that use draft #02 and greater.
-			if (JWebSocketCommonConstants.WS_DRAFT_02.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_DRAFT_03.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(lDraft)) {
-				if (mLog.isDebugEnabled()) {
-					mLog.debug("Client uses draft-" + lDraft + " for protocol communication");
-				}
-			} else {
-				mLog.warn("Illegal handshake: header 'Sec-WebSocket-Draft' contains unrecognized value: " + lDraft);
-				return null;
-			}
-		}
-
-		RequestHeader lHeader = new RequestHeader();
-		Map<String, String> lArgs = new FastMap<String, String>();
-		String lPath = (String) lRespMap.get("path");
-
-		// isolate search string
-		String lSearchString = "";
-		if (lPath != null) {
-			int lPos = lPath.indexOf(JWebSocketCommonConstants.PATHARG_SEPARATOR);
-			if (lPos >= 0) {
-				lSearchString = lPath.substring(lPos + 1);
-				if (lSearchString.length() > 0) {
-					String[] lArgsArray =
-							lSearchString.split(JWebSocketCommonConstants.ARGARG_SEPARATOR);
-					for (int lIdx = 0; lIdx < lArgsArray.length; lIdx++) {
-						String[] lKeyValuePair =
-								lArgsArray[lIdx].split(JWebSocketCommonConstants.KEYVAL_SEPARATOR, 2);
-						if (lKeyValuePair.length == 2) {
-							lArgs.put(lKeyValuePair[0], lKeyValuePair[1]);
-							if (mLog.isDebugEnabled()) {
-								mLog.debug("arg" + lIdx + ": "
-										+ lKeyValuePair[0] + "="
-										+ lKeyValuePair[1]);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// if no sub protocol given in request header , try
-		String lSubProt = (String) lRespMap.get(RequestHeader.WS_PROTOCOL);
-		if (lSubProt == null) {
-			lSubProt = lArgs.get(RequestHeader.WS_PROTOCOL);
-		}
-		if (lSubProt == null) {
-			lSubProt = JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/'
-					+ JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
-		}
-
-		// Sub protocol header might contain multiple entries
-		// (e.g. 'jwebsocket.org/json jwebsocket.org/xml chat.example.com/custom').
-		// So, someone has to decide, which entry to use and send the client appropriate
-		// choice. Right now, we will just choose the first one if more than one are
-		// available.
-		// TODO: implement subprotocol choice handling by deferring the decision to plugins/listeners
-		if (lSubProt.indexOf(' ') != -1) {
-			lSubProt = lSubProt.split(" ")[0];
-			lRespMap.put(RequestHeader.WS_PROTOCOL, lSubProt);
-		}
-
+		
 		// generate the websocket handshake
 		// if policy-file-request is found answer it
 		byte[] lBA = WebSocketHandshake.generateS2CResponse(lRespMap);
@@ -438,6 +368,15 @@ public class TCPEngine extends BaseEngine {
 		lOut.write(lBA);
 		lOut.flush();
 
+		// maybe the request is a flash policy-file-request
+		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
+		if (lFlashBridgeReq != null) {
+			mLog.warn("TCPEngine returned policy file request ('"
+					+ lFlashBridgeReq
+					+ "'), check for FlashBridge plug-in.");
+		}
+
+
 		// if we detected a flash policy-file-request return "null"
 		// (no websocket header detected)
 		if (lFlashBridgeReq != null) {
@@ -450,18 +389,6 @@ public class TCPEngine extends BaseEngine {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Handshake flushed.");
 		}
-
-		lHeader.put(RequestHeader.WS_HOST, lRespMap.get(RequestHeader.WS_HOST));
-		lHeader.put(RequestHeader.WS_ORIGIN, lRespMap.get(RequestHeader.WS_ORIGIN));
-		lHeader.put(RequestHeader.WS_LOCATION, lRespMap.get(RequestHeader.WS_LOCATION));
-		lHeader.put(RequestHeader.WS_PROTOCOL, lSubProt);
-		lHeader.put(RequestHeader.WS_PATH, lRespMap.get(RequestHeader.WS_PATH));
-		lHeader.put(RequestHeader.WS_SEARCHSTRING, lSearchString);
-		lHeader.put(RequestHeader.URL_ARGS, lArgs);
-		lHeader.put(RequestHeader.WS_DRAFT,
-				lDraft == null
-				? JWebSocketCommonConstants.WS_DRAFT_DEFAULT
-				: lDraft);
 
 		return lHeader;
 	}
