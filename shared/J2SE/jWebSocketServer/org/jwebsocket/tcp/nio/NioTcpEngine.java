@@ -28,10 +28,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -149,8 +146,11 @@ public class NioTcpEngine extends BaseEngine {
 		if (wQueue != null) {
 			wQueue.clear();
 		}
-		SocketChannel channel = connectorToChannelMap.remove(conn.getId());
-		channelToConnectorMap.remove(channel);
+
+		if(connectorToChannelMap.containsKey(conn.getId())) {
+			SocketChannel channel = connectorToChannelMap.remove(conn.getId());
+			channelToConnectorMap.remove(channel);
+		}
 
 		super.connectorStopped(conn, aCloseReason);
 	}
@@ -181,17 +181,22 @@ public class NioTcpEngine extends BaseEngine {
 							SelectionKey key = keys.next();
 							keys.remove();
 							if (key.isValid()) {
-								if (key.isAcceptable()) {
-									//accept new client connection
-									accept(key);
-								} else {
-									if (key.isReadable()) {
-										read(key);
-									}
+								try {
+									if (key.isAcceptable()) {
+										//accept new client connection
+										accept(key);
+									} else {
+										if (key.isReadable()) {
+											read(key);
+										}
 
-									if (key.isWritable()) {
-										write(key);
+										if (key.isWritable()) {
+											write(key);
+										}
 									}
+								} catch (CancelledKeyException e) {
+									// ignore, key was cancelled an instant after isValid() returned true,
+									// most probably the client disconnected just at the wrong moment
 								}
 							}
 						}
@@ -340,7 +345,8 @@ public class NioTcpEngine extends BaseEngine {
 								// todo: consider ssl connections
 								Map headers = WebSocketHandshake.parseC2SRequest(bean.data, false);
 								byte[] response = WebSocketHandshake.generateS2CResponse(headers);
-								if (response == null) {
+								RequestHeader reqHeader = WebSocketHandshake.validateC2SRequest(headers, mLog);
+								if (response == null || reqHeader == null) {
 									if (mLog.isDebugEnabled()) {
 										mLog.warn("TCPEngine detected illegal handshake.");
 									}
@@ -348,7 +354,8 @@ public class NioTcpEngine extends BaseEngine {
 									// disconnect the client
 									clientDisconnect(connector);
 								}
-								RequestHeader reqHeader = WebSocketHandshake.validateC2SRequest(headers, mLog);
+
+								send(connector.getId(), new DataFuture(connector, ByteBuffer.wrap(response)));
 								int timeout = reqHeader.getTimeout(getSessionTimeout());
 								if(timeout > 0) {
 									connectorToChannelMap.get(bean.connectorId).socket().setSoTimeout(timeout);
@@ -501,7 +508,7 @@ public class NioTcpEngine extends BaseEngine {
 			boolean stop = false;
 			int count = buffer.length;
 			for(int i = start;i < buffer.length;i++) {
-				if(buffer[i] == 0xFF) {
+				if(buffer[i] == (byte)0xFF) {
 					// end of packet
 					stop = true;
 					count = i + 1;
@@ -509,13 +516,21 @@ public class NioTcpEngine extends BaseEngine {
 				}
 			}
 
-			connector.extendPacketBuffer(buffer, start, count);
+			if(connector.isPacketBufferEmpty() && buffer.length == 1) {
+				connector.extendPacketBuffer(buffer, 0, 0);
+			} else {
+				connector.extendPacketBuffer(buffer, start, count);
+			}
 			if(stop) {
 				connector.flushPacketBuffer();
 			}
 		} catch(Exception e) {
-			mLog.error("Error while processing incoming packer", e);
+			mLog.error("Error while processing incoming packet", e);
 			clientDisconnect(connector, CloseReason.SERVER);
 		}
+	}
+
+	public static void main(String[] args) {
+		System.out.println("args = " + ((byte) 0xff));
 	}
 }

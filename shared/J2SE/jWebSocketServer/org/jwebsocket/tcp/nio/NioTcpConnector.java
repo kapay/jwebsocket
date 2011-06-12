@@ -90,7 +90,9 @@ public class NioTcpConnector extends BaseConnector {
 			// packet buffer grows with new data
 			if(packetBuffer == null) {
 				packetBuffer = new byte[count];
-				System.arraycopy(newData, start, packetBuffer, 0, count);
+				if(count > 0) {
+					System.arraycopy(newData, start, packetBuffer, 0, count);
+				}
 			} else {
 				byte[] newBuffer = new byte[packetBuffer.length + count];
 				System.arraycopy(packetBuffer, 0, newBuffer, 0, packetBuffer.length);
