@@ -85,9 +85,9 @@ public class LoggingPlugIn extends TokenPlugIn {
 			} else if (lType.equals("getEvents")) {
 				getEvents(aConnector, aToken);
 			} else if (lType.equals("subscribe")) {
-				logEvent(aConnector, aToken);
+				// logEvent(aConnector, aToken);
 			} else if (lType.equals("unsubscribe")) {
-				logEvent(aConnector, aToken);
+				// logEvent(aConnector, aToken);
 			}
 
 		}

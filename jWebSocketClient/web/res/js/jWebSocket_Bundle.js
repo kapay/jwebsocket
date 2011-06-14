@@ -26,9 +26,9 @@
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0a10
+	//:const:*:VERSION:String:1.0a11
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0a10 (10519)",
+	VERSION: "1.0a11 (10530)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -531,7 +531,7 @@ var jws = {
 					} else {
 						jws.fIsIExplorer = navigator.appName == "Microsoft Internet Explorer";
 						if( jws.fIsIExplorer ) {
-							jws.fBrowserType = fjws.BT_IEXPLORER;
+							jws.fBrowserType = jws.BT_IEXPLORER;
 						} else {
 							jws.fIsPocketIE = navigator.appName == "Microsoft Pocket Internet Explorer";
 							if( jws.fIsPocketIE ) {
@@ -798,18 +798,25 @@ jws.tools = {
 		var lTZO = -aDate.getTimezoneOffset();
 		var lAbsTZO = Math.abs( lTZO );
 		var lRes =
-			aDate.getUTCFullYear()
+			aDate.getUTCFullYear() 
+			+ "-"
 			+ this.zerofill( aDate.getUTCMonth() + 1, 2 )
+			+ "-"
 			+ this.zerofill( aDate.getUTCDate(), 2 )
 			// use time separator
-			+ "T" + 
+			+ "T"
 			+ this.zerofill( aDate.getUTCHours(), 2 )
+			+ ":"
 			+ this.zerofill( aDate.getUTCMinutes(), 2 )
+			+ ":"
 			+ this.zerofill( aDate.getUTCSeconds(), 2 )
-			+ this.zerofill( aDate.getUTCMilliseconds(), 2 )
+			+ "."
+			+ this.zerofill( aDate.getUTCMilliseconds(), 3 )
+			/*
 			+ ( lTZO >= 0 ? "+" : "-" )
 			+ this.zerofill( lAbsTZO / 60, 2 )
 			+ this.zerofill( lAbsTZO % 60, 2 )
+			*/
 			// trailing Z means it's UTC
 			+ "Z";
 		return lRes;
@@ -819,17 +826,43 @@ jws.tools = {
 		var lDate = new Date();
 		// date part
 		lDate.setUTCFullYear( aISO.substr( 0, 4 ) );
-		lDate.setUTCMonth( aISO.substr( 4, 2 ) - 1 );
-		lDate.setUTCDate( aISO.substr( 6, 2 ) );
+		lDate.setUTCMonth( aISO.substr( 5, 2 ) - 1 );
+		lDate.setUTCDate( aISO.substr( 8, 2 ) );
 		// time
-		lDate.setUTCHours( aISO.substr( 9, 2 ) );
-		lDate.setUTCMinutes( aISO.substr( 11, 2 ) );
-		lDate.setUTCSeconds( aISO.substr( 13, 2 ) );
-		lDate.setUTCMilliseconds( aISO.substr( 15, 3 ) );
+		lDate.setUTCHours( aISO.substr( 11, 2 ) );
+		lDate.setUTCMinutes( aISO.substr( 14, 2 ) );
+		lDate.setUTCSeconds( aISO.substr( 17, 2 ) );
+		lDate.setUTCMilliseconds( aISO.substr( 20, 3 ) );
 		//:TODO:en:Analyze timezone
 		return lDate;
 	},
 
+	date2String: function( aDate ) {
+		var lRes =
+			aDate.getUTCFullYear() 
+			+ this.zerofill( aDate.getUTCMonth() + 1, 2 )
+			+ this.zerofill( aDate.getUTCDate(), 2 )
+			+ this.zerofill( aDate.getUTCHours(), 2 )
+			+ this.zerofill( aDate.getUTCMinutes(), 2 )
+			+ this.zerofill( aDate.getUTCSeconds(), 2 )
+			+ this.zerofill( aDate.getUTCMilliseconds(), 2 )
+		return lRes;
+	},
+
+	string2Date: function( aISO ) {
+		var lDate = new Date();
+		// date part
+		lDate.setUTCFullYear( aISO.substr( 0, 4 ) );
+		lDate.setUTCMonth( aISO.substr( 4, 2 ) - 1 );
+		lDate.setUTCDate( aISO.substr( 6, 2 ) );
+		// time
+		lDate.setUTCHours( aISO.substr( 8, 2 ) );
+		lDate.setUTCMinutes( aISO.substr( 10, 2 ) );
+		lDate.setUTCSeconds( aISO.substr( 12, 2 ) );
+		lDate.setUTCMilliseconds( aISO.substr( 14, 3 ) );
+		return lDate;
+	},
+	
 	generateSharedUTID: function(aToken){
 		var string = JSON.stringify(aToken);
 		var chars = string.split('');
@@ -2341,6 +2374,17 @@ jws.SystemClientPlugIn = {
 	//:const:*:NON_AUTHENTICATED:Number:2
 	//:d:en:For [tt]getClients[/tt] method: Returns all non-authenticated clients only.
 	NON_AUTHENTICATED: 2,
+	
+	//:const:*:PW_PLAIN:Number:null
+	//:d:en:Use no password encoding, password is passed as plain text.
+	PW_PLAIN		: null,
+	//:const:*:PW_ENCODE_MD5:Number:1
+	//:d:en:Use MD5 password encoding, password is given as plain but converted and passed as a MD5 hash.
+	PW_ENCODE_MD5	: 1,
+	//:const:*:PW_MD5_ENCODED:Number:2
+	//:d:en:Use MD5 password encoding, password is given and passed as a MD5 hash. _
+	//:d:en:The method relies on the correct encoding and does not check the hash.
+	PW_MD5_ENCODED	: 2,
 
 	//:m:*:login
 	//:d:en:Tries to authenticate the client against the jWebSocket Server by _
@@ -2353,13 +2397,26 @@ jws.SystemClientPlugIn = {
 	//:r:*:::void:none
 	login: function( aUsername, aPassword, aOptions ) {
 		var lPool = null;
-		var lAutoConnect = false;
+		var lEncoding = null;
 		if( aOptions ) {
 			if( aOptions.pool !== undefined ) {
 				lPool = aOptions.pool;
 			}
-			if( aOptions.autoConnect !== undefined ) {
-				lAutoConnect = aOptions.autoConnect;
+			if( aOptions.encoding !== undefined ) {
+				lEncoding = aOptions.encoding;
+				// check if password has to be converted into a MD5 sum
+				if( jws.SystemClientPlugIn.PW_ENCODE_MD5 == lEncoding ) {
+					if( aPassword ) {
+						aPassword = jws.tools.calcMD5( aPassword );
+					}
+					lEncoding = "md5";
+				// check if password is already md5 encoded
+				} else if( jws.SystemClientPlugIn.PW_MD5_ENCODED == lEncoding ) {
+					lEncoding = "md5";
+				} else {
+					// TODO: raise error here due to invalid encoding option
+					lEncoding = null;
+				}
 			}
 		}
 		var lRes = this.createDefaultResult();
@@ -2369,19 +2426,13 @@ jws.SystemClientPlugIn = {
 				type: "login",
 				username: aUsername,
 				password: aPassword,
+				encoding: lEncoding,
 				pool: lPool
 			});
 		} else {
-			if( lAutoConnect ) {
-				// TODO: Implement auto connect! Update documentation when done.
-				lRes.code = -1;
-				lRes.localeKey = "jws.jsc.res.notConnected";
-				lRes.msg = "Not connected.";
-			} else {
-				lRes.code = -1;
-				lRes.localeKey = "jws.jsc.res.notConnected";
-				lRes.msg = "Not connected.";
-			}
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notConnected";
+			lRes.msg = "Not connected.";
 		}
 		return lRes;
 	},
@@ -2409,7 +2460,7 @@ jws.SystemClientPlugIn = {
 		}
 		// if already connected, just send the login token 
 		if( this.isConnected() ) {
-			this.login( aUsername, aPassword );
+			this.login( aUsername, aPassword, aOptions );
 		} else {
 			var lAppOnWelcomeClBk = aOptions.OnWelcome;
 			var lThis = this;
@@ -2417,7 +2468,7 @@ jws.SystemClientPlugIn = {
 				if( lAppOnWelcomeClBk ) {
 					lAppOnWelcomeClBk.call( lThis, aEvent );
 				}
-				lThis.login( aUsername, aPassword );
+				lThis.login( aUsername, aPassword, aOptions );
 			};
 			this.open(
 				aURL,
@@ -5249,9 +5300,9 @@ jws.JDBCPlugIn = {
 		if( aToken.ns == jws.JDBCPlugIn.NS ) {
 			// here you can handle incomimng tokens from the server
 			// directy in the plug-in if desired.
-			if( "select" == aToken.reqType ) {
-				if( this.OnJDBCResult ) {
-					this.OnJDBCResult( aToken );
+			if( "selectSQL" == aToken.reqType ) {
+				if( this.OnJDBCRowSet ) {
+					this.OnJDBCRowSet( aToken );
 				}
 			}
 		}
@@ -5379,6 +5430,9 @@ jws.JDBCPlugIn = {
 	setJDBCCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
+		}
+		if( aListeners.OnJDBCRowSet !== undefined ) {
+			this.OnJDBCRowSet = aListeners.OnJDBCRowSet;
 		}
 		if( aListeners.OnJDBCResult !== undefined ) {
 			this.OnJDBCResult = aListeners.OnJDBCResult;
@@ -5660,8 +5714,16 @@ jws.ReportingPlugIn = {
 			// here you can handle incomimng tokens from the server
 			// directy in the plug-in if desired.
 			if( "createReport" == aToken.reqType ) {
-				if( this.OnReportAvail ) {
-					this.OnReportAvail( aToken );
+				if( this.OnReport ) {
+					this.OnReport( aToken );
+				}
+			} else if( "getReports" == aToken.reqType ) {
+				if( this.OnReports ) {
+					this.OnReports( aToken );
+				}
+			} else if( "getReportParams" == aToken.reqType ) {
+				if( this.OnReportParams ) {
+					this.OnReportParams( aToken );
 				}
 			}
 		}
@@ -5700,12 +5762,31 @@ jws.ReportingPlugIn = {
 		return lRes;
 	},
 	
+	reportingGetReportParams: function( aReportId, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.ReportingPlugIn.NS,
+				type: "getReportParams",
+				reportId: aReportId
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+	
 	setReportingCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};
 		}
 		if( aListeners.OnReportAvail !== undefined ) {
 			this.OnReportAvail = aListeners.OnReportAvail;
+		}
+		if( aListeners.OnReports !== undefined ) {
+			this.OnReports = aListeners.OnReports;
+		}
+		if( aListeners.OnReportParams !== undefined ) {
+			this.OnReportParams = aListeners.OnReportParams;
 		}
 	}
 

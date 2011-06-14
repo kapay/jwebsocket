@@ -34,9 +34,10 @@ import javolution.util.FastMap;
 public class Tools {
 
 	private static final Map<String, String> JAVA_2_GENERIC_MAP = new FastMap<String, String>();
-	Map GENERIC_2_JAVA_MAP = new FastMap<String, String>();
+	private static final Map<String, String> GENERIC_2_JAVA_MAP = new FastMap<String, String>();
 
 	static {
+		JAVA_2_GENERIC_MAP.put("java.lang.String", "string");
 		JAVA_2_GENERIC_MAP.put("java.lang.Boolean", "boolean");
 		JAVA_2_GENERIC_MAP.put("java.lang.Byte", "integer");
 		JAVA_2_GENERIC_MAP.put("java.lang.Short", "integer");
@@ -49,11 +50,26 @@ public class Tools {
 		JAVA_2_GENERIC_MAP.put("java.sql.Timestamp", "datetime");
 		JAVA_2_GENERIC_MAP.put("java.sql.Date", "date");
 		JAVA_2_GENERIC_MAP.put("java.sql.Time", "time");
+		JAVA_2_GENERIC_MAP.put("java.util.Date", "datetime");
 
 		JAVA_2_GENERIC_MAP.put("java.util.Collection", "list");
-		JAVA_2_GENERIC_MAP.put("java.util.Collection", "list");
+		JAVA_2_GENERIC_MAP.put("java.util.List", "list");
 		JAVA_2_GENERIC_MAP.put("java.util.Set", "list");
 		JAVA_2_GENERIC_MAP.put("java.util.Map", "map");
+
+		// these are just the conversion/casting defaults 
+		// which optionally can be overwritten 
+		GENERIC_2_JAVA_MAP.put("string", "java.lang.String");
+		GENERIC_2_JAVA_MAP.put("boolean", "java.lang.Boolean");
+		GENERIC_2_JAVA_MAP.put("integer", "java.lang.Integer");
+		GENERIC_2_JAVA_MAP.put("long", "java.lang.Long");
+		GENERIC_2_JAVA_MAP.put("float", "java.lang.Float");
+		GENERIC_2_JAVA_MAP.put("double", "java.lang.Double");
+		GENERIC_2_JAVA_MAP.put("list", "java.util.List");
+		GENERIC_2_JAVA_MAP.put("map", "java.util.Map");
+		GENERIC_2_JAVA_MAP.put("time", "java.util.Date");
+		GENERIC_2_JAVA_MAP.put("date", "java.util.Date");
+		GENERIC_2_JAVA_MAP.put("datetime", "java.util.Date");
 	}
 	/**
 	 * 
@@ -209,11 +225,16 @@ public class Tools {
 	 * @return
 	 */
 	public static Object castGenericToJava(Object aValue, String aFromType, String aToType) {
+		if (aValue == null) {
+			return null;
+		}
 		if (aFromType != null
-				&& aToType != null
+				// && aToType != null
 				&& aValue != null) {
 			aFromType = aFromType.toLowerCase();
-			aToType = aToType.toLowerCase();
+			if (aToType != null) {
+				aToType = aToType.toLowerCase();
+			}
 
 			// convert from datetime (java.sql.Date)
 			if ("datetime".equals(aFromType)) {
@@ -227,8 +248,27 @@ public class Tools {
 						}
 					}
 				}
+			} else if ("string".equals(aFromType)) {
+				if (aValue instanceof String) {
+					return (String) aValue;
+				}
+			} else if ("integer".equals(aFromType)) {
+				if (aValue instanceof Integer) {
+					return (Integer) aValue;
+				}
+			} else if ("float".equals(aFromType)) {
+				if (aValue instanceof Float) {
+					return (Float) aValue;
+				}
+			} else if ("double".equals(aFromType)) {
+				if (aValue instanceof Double) {
+					return (Double) aValue;
+				}
+			} else if ("boolean".equals(aFromType)) {
+				if (aValue instanceof Boolean) {
+					return (Boolean) aValue;
+				}
 			}
-
 		}
 		return null;
 	}

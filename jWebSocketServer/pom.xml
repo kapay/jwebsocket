@@ -328,6 +328,13 @@
 			<artifactId>spring-jdbc</artifactId>
 			<version>${org.springframework.version}</version>
 		</dependency>
+		
+		<!-- Spring JMS database abastraction -->
+		<dependency> 
+			<groupId>org.springframework</groupId> 
+			<artifactId>spring-jms</artifactId> 
+			<version>${org.springframework.version}</version> 
+		</dependency>		
 
 		<!-- Spring LDAP directory service abastraction -->
 		<!-- http://static.springsource.org/spring-security/site/docs/3.0.x/reference/ldap.html -->
@@ -351,6 +358,12 @@
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache-core</artifactId>
 			<version>2.4.2</version>
+		</dependency>
+
+		<dependency> 
+			<groupId>org.apache.activemq</groupId> 
+			<artifactId>activemq-core</artifactId> 
+			<version>5.5.0</version> 
 		</dependency>
 
 		<!-- jasper reporting dependencies -->

@@ -29,7 +29,6 @@ import javolution.util.FastList;
 import javolution.util.FastMap;
 import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JRPropertiesMap;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -185,16 +184,21 @@ public class ReportingPlugIn extends TokenPlugIn {
 		List<Map<String, Object>> lInParams = aToken.getList("params");
 		if (lInParams != null) {
 			for (Map lParam : lInParams) {
-				String lType = (String) lParam.get("type");
-				if (lType != null) {
-					Object lValue = Tools.castGenericToJava(lParam.get("value"), lType, "timestamp");
+				String lFromType = (String) lParam.get("type");
+				if (lFromType != null) {
+					String lToType = null;
+					if ("datetime".equals(lFromType)) {
+						lToType = "timestamp";
+					}
+					Object lValue = Tools.castGenericToJava(lParam.get("value"), lFromType, lToType);
 					if (lValue != null) {
 						lParams.put((String) lParam.get("name"), lValue);
 					}
 				}
 			}
 		}
-
+		lParams.put("IMAGE_PATH", mReportFolder);
+		
 		// instantiate response token
 		lResponse = lServer.createResponse(aToken);
 
@@ -206,7 +210,6 @@ public class ReportingPlugIn extends TokenPlugIn {
 			lConnection = lDataSource.getConnection();
 			JasperReport lReport = JasperCompileManager.compileReport(
 					getReportPath(lReportId));
-			// lReport.getSortFields().
 			JasperPrint lPrint = JasperFillManager.fillReport(lReport,
 					lParams, lConnection);
 			String lReportName = generateReportName(aConnector, lReportId);
