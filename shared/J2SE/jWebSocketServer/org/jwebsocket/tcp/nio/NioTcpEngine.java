@@ -358,11 +358,6 @@ public class NioTcpEngine extends BaseEngine {
 									clientDisconnect(connector);
 								}
 
-								Object lDraft = reqHeader.get(RequestHeader.WS_DRAFT);
-								if(lDraft != null && mLog.isDebugEnabled()) {
-									mLog.debug("Client uses draft-" + lDraft + " for protocol communication");
-								}
-
 								send(connector.getId(), new DataFuture(connector, ByteBuffer.wrap(response)));
 								int timeout = reqHeader.getTimeout(getSessionTimeout());
 								if(timeout > 0) {
