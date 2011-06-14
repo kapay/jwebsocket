@@ -41,6 +41,7 @@ public final class RequestHeader {
 	public static final String WS_SECKEY2 = "secKey2";
 	public static final String URL_ARGS = "args";
 	public static final String TIMEOUT = "timeout";
+	public static final String PARSE_LOGS = "parseLogs";
 
 	/**
 	 * Puts a new object value to the request header.

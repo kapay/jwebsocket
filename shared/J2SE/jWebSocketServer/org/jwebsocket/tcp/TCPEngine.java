@@ -344,7 +344,7 @@ public class TCPEngine extends BaseEngine {
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(
 				lReq,
 				aClientSocket instanceof SSLSocketImpl);
-		RequestHeader lHeader = WebSocketHandshake.validateC2SRequest(lRespMap, mLog);
+		RequestHeader lHeader = EngineUtils.validateC2SRequest(lRespMap, mLog);
 		if(lHeader == null) {
 			return null;
 		}

@@ -23,6 +23,7 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.*;
 import org.jwebsocket.logging.Logging;
+import org.jwebsocket.tcp.EngineUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -315,7 +316,9 @@ public class NioTcpEngine extends BaseEngine {
 	}
 
 	private void clientDisconnect(WebSocketConnector connector, CloseReason reason) throws IOException {
-		clientDisconnect(connectorToChannelMap.get(connector.getId()).keyFor(selector), reason);
+		if(connectorToChannelMap.containsKey(connector.getId())) {
+			clientDisconnect(connectorToChannelMap.get(connector.getId()).keyFor(selector), reason);
+		}
 	}
 
 	private class ReadBean {
@@ -345,7 +348,7 @@ public class NioTcpEngine extends BaseEngine {
 								// todo: consider ssl connections
 								Map headers = WebSocketHandshake.parseC2SRequest(bean.data, false);
 								byte[] response = WebSocketHandshake.generateS2CResponse(headers);
-								RequestHeader reqHeader = WebSocketHandshake.validateC2SRequest(headers, mLog);
+								RequestHeader reqHeader = EngineUtils.validateC2SRequest(headers, mLog);
 								if (response == null || reqHeader == null) {
 									if (mLog.isDebugEnabled()) {
 										mLog.warn("TCPEngine detected illegal handshake.");
@@ -353,6 +356,11 @@ public class NioTcpEngine extends BaseEngine {
 
 									// disconnect the client
 									clientDisconnect(connector);
+								}
+
+								Object lDraft = reqHeader.get(RequestHeader.WS_DRAFT);
+								if(lDraft != null && mLog.isDebugEnabled()) {
+									mLog.debug("Client uses draft-" + lDraft + " for protocol communication");
 								}
 
 								send(connector.getId(), new DataFuture(connector, ByteBuffer.wrap(response)));
@@ -510,17 +518,22 @@ public class NioTcpEngine extends BaseEngine {
 			for(int i = start;i < buffer.length;i++) {
 				if(buffer[i] == (byte)0xFF) {
 					// end of packet
+					count = i - start;
 					stop = true;
-					count = i + 1;
 					break;
 				}
 			}
 
-			if(connector.isPacketBufferEmpty() && buffer.length == 1) {
-				connector.extendPacketBuffer(buffer, 0, 0);
+			if(start + count > buffer.length) {
+				// ignore -> broken packet (perhaps client disconnected in middle of sending
 			} else {
-				connector.extendPacketBuffer(buffer, start, count);
+				if(connector.isPacketBufferEmpty() && buffer.length == 1) {
+					connector.extendPacketBuffer(buffer, 0, 0);
+				} else {
+					connector.extendPacketBuffer(buffer, start, count);
+				}
 			}
+
 			if(stop) {
 				connector.flushPacketBuffer();
 			}
@@ -528,9 +541,5 @@ public class NioTcpEngine extends BaseEngine {
 			mLog.error("Error while processing incoming packet", e);
 			clientDisconnect(connector, CloseReason.SERVER);
 		}
-	}
-
-	public static void main(String[] args) {
-		System.out.println("args = " + ((byte) 0xff));
 	}
 }

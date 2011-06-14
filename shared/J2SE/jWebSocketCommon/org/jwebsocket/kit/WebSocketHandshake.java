@@ -24,11 +24,8 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-
-import javolution.util.FastMap;
-import org.apache.log4j.Logger;
-import org.jwebsocket.config.JWebSocketCommonConstants;
 
 /**
  * Utility class for all the handshaking related request/response.
@@ -157,7 +154,7 @@ public final class WebSocketHandshake {
 		Long lSecNum2 = null;
 		byte[] lSecKeyResp = new byte[8];
 
-		Map lRes = new FastMap();
+		Map lRes = new HashMap();
 
 		int lReqLen = aReq.length;
 		String lRequest = "";
@@ -338,89 +335,6 @@ public final class WebSocketHandshake {
 		return lRes;
 	}
 
-	public static RequestHeader validateC2SRequest(Map lRespMap, Logger logger) throws UnsupportedEncodingException {
-		// Check for draft. If it is present and if it's something unrecognizable, force disconnect (return null).
-		String lDraft = (String) lRespMap.get(RequestHeader.WS_DRAFT);
-		if (lDraft != null) {
-			// Since this field was introduced in draft 02, we can safely assume that
-			// it will only be supplied with clients that use draft #02 and greater.
-			if (JWebSocketCommonConstants.WS_DRAFT_02.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_DRAFT_03.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(lDraft)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Client uses draft-" + lDraft + " for protocol communication");
-				}
-			} else {
-				logger.warn("Illegal handshake: header 'Sec-WebSocket-Draft' contains unrecognized value: " + lDraft);
-				return null;
-			}
-		}
-
-		RequestHeader lHeader = new RequestHeader();
-		Map<String, String> lArgs = new FastMap<String, String>();
-		String lPath = (String) lRespMap.get("path");
-
-		// isolate search string
-		String lSearchString = "";
-		if (lPath != null) {
-			int lPos = lPath.indexOf(JWebSocketCommonConstants.PATHARG_SEPARATOR);
-			if (lPos >= 0) {
-				lSearchString = lPath.substring(lPos + 1);
-				if (lSearchString.length() > 0) {
-					String[] lArgsArray =
-							lSearchString.split(JWebSocketCommonConstants.ARGARG_SEPARATOR);
-					for (int lIdx = 0; lIdx < lArgsArray.length; lIdx++) {
-						String[] lKeyValuePair =
-								lArgsArray[lIdx].split(JWebSocketCommonConstants.KEYVAL_SEPARATOR, 2);
-						if (lKeyValuePair.length == 2) {
-							lArgs.put(lKeyValuePair[0], lKeyValuePair[1]);
-							if (logger.isDebugEnabled()) {
-								logger.debug("arg" + lIdx + ": "
-										+ lKeyValuePair[0] + "="
-										+ lKeyValuePair[1]);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// if no sub protocol given in request header , try
-		String lSubProt = (String) lRespMap.get(RequestHeader.WS_PROTOCOL);
-		if (lSubProt == null) {
-			lSubProt = lArgs.get(RequestHeader.WS_PROTOCOL);
-		}
-		if (lSubProt == null) {
-			lSubProt = JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/'
-					+ JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
-		}
-
-		// Sub protocol header might contain multiple entries
-		// (e.g. 'jwebsocket.org/json jwebsocket.org/xml chat.example.com/custom').
-		// So, someone has to decide, which entry to use and send the client appropriate
-		// choice. Right now, we will just choose the first one if more than one are
-		// available.
-		// TODO: implement subprotocol choice handling by deferring the decision to plugins/listeners
-		if (lSubProt.indexOf(' ') != -1) {
-			lSubProt = lSubProt.split(" ")[0];
-			lRespMap.put(RequestHeader.WS_PROTOCOL, lSubProt);
-		}
-
-		lHeader.put(RequestHeader.WS_HOST, lRespMap.get(RequestHeader.WS_HOST));
-		lHeader.put(RequestHeader.WS_ORIGIN, lRespMap.get(RequestHeader.WS_ORIGIN));
-		lHeader.put(RequestHeader.WS_LOCATION, lRespMap.get(RequestHeader.WS_LOCATION));
-		lHeader.put(RequestHeader.WS_PROTOCOL, lSubProt);
-		lHeader.put(RequestHeader.WS_PATH, lRespMap.get(RequestHeader.WS_PATH));
-		lHeader.put(RequestHeader.WS_SEARCHSTRING, lSearchString);
-		lHeader.put(RequestHeader.URL_ARGS, lArgs);
-		lHeader.put(RequestHeader.WS_DRAFT,
-				lDraft == null
-				? JWebSocketCommonConstants.WS_DRAFT_DEFAULT
-				: lDraft);
-
-		return lHeader;
-	}
-
 	/**
 	 * Generates the response for the server to answer an initial client
 	 * request. This is performed on the server only as an answer to a client's
@@ -529,7 +443,7 @@ public final class WebSocketHandshake {
 	 * @return
 	 */
 	public static Map parseS2CResponse(byte[] aResp) {
-		Map lRes = new FastMap();
+		Map lRes = new HashMap();
 		String lResp = null;
 		try {
 			lResp = new String(aResp, "US-ASCII");
