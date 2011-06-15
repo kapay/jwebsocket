@@ -177,6 +177,7 @@
 			var lSharePorts = false;
 			var lContext = "jWebSocket";
 			var lServlet = "jWebSocket";
+			var lArgs = [{name : "arg1", value : "val1" }, { name : "arg2", value : "val2" }];
 			
 			function buildURL() {
 				var lURL = 
@@ -188,7 +189,15 @@
 					) 
 					+ "/" + lContext 
 					+ "/" + lServlet;
-				eURL.value = lURL;		
+				if( lArgs.length > 0 ) {
+					for( var lIdx = 0, lCnt =lArgs.length; lIdx < lCnt; lIdx++ ) {
+						var lArg = lArgs[ lIdx ];
+						lURL +=
+							( lIdx == 0 ? "?" : "&" )
+							+ encodeURIComponent( lArg.name ) + "=" + encodeURIComponent( lArg.value );
+					}
+				}	
+				eURL.value = lURL;
 			}
 			
 			function tooglePorts() {

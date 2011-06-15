@@ -147,7 +147,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		// set session id first, so that it can be processed in the connectorStarted
 		// method
 		Random lRand = new Random(System.nanoTime());
-
+		
 		// TODO: if unique node id is passed check if already assigned in the
 		// network and reject connect if so!
 

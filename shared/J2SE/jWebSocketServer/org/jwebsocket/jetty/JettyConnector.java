@@ -16,6 +16,7 @@
 package org.jwebsocket.jetty;
 
 import java.net.InetAddress;
+import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javolution.util.FastMap;
@@ -59,55 +60,37 @@ public class JettyConnector extends BaseConnector {
 		mRequest = aRequest;
 		mProtocol = aProtocol;
 
+		RequestHeader lHeader = new RequestHeader();
 
+		// iterate throught URL args
 		Map<String, String> lArgs = new FastMap<String, String>();
-		String lPath = (String) aRequest.getRequestURL().toString();
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Requesting '" + lPath
-					+ "', " + (aProtocol != null ? "'" + aProtocol + "'" : "[w/o protocol]")
-					+ "...");
-		}
-
-		// isolate search string
-		String lSearchString = "";
-		if (lPath != null) {
-			int lPos = lPath.indexOf(JWebSocketCommonConstants.PATHARG_SEPARATOR);
-			if (lPos >= 0) {
-				lSearchString = lPath.substring(lPos + 1);
-				if (lSearchString.length() > 0) {
-					String[] lArgsArray =
-							lSearchString.split(JWebSocketCommonConstants.ARGARG_SEPARATOR);
-					for (int lIdx = 0; lIdx < lArgsArray.length; lIdx++) {
-						String[] lKeyValuePair =
-								lArgsArray[lIdx].split(JWebSocketCommonConstants.KEYVAL_SEPARATOR, 2);
-						if (lKeyValuePair.length == 2) {
-							lArgs.put(lKeyValuePair[0], lKeyValuePair[1]);
-							if (mLog.isDebugEnabled()) {
-								mLog.debug("arg" + lIdx + ": "
-										+ lKeyValuePair[0] + "="
-										+ lKeyValuePair[1]);
-							}
-						}
-					}
-				}
+		Map<String, String[]> lReqArgs = aRequest.getParameterMap();
+		for (String lArgName : lReqArgs.keySet()) {
+			String[] lArgVals = lReqArgs.get(lArgName);
+			if (lArgVals != null && lArgVals.length > 0) {
+				lArgs.put(lArgName, lArgVals[0]);
 			}
 		}
+		lHeader.put(RequestHeader.URL_ARGS, lArgs);
 
-		RequestHeader lHeader = new RequestHeader();
 		// set default sub protocol if none passed
-
 		if (aProtocol == null) {
 			aProtocol = JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
 		}
 		lHeader.put(RequestHeader.WS_PROTOCOL, aProtocol);
+		lHeader.put(RequestHeader.WS_PATH, aRequest.getPathInfo());
 
-		// lHeader.put(RequestHeader.WS_HOST, lRespMap.get(RequestHeader.WS_HOST));
-		// lHeader.put(RequestHeader.WS_ORIGIN, lRespMap.get(RequestHeader.WS_ORIGIN));
-		// lHeader.put(RequestHeader.WS_LOCATION, lRespMap.get(RequestHeader.WS_LOCATION));
-		// lHeader.put(RequestHeader.WS_PATH, lRespMap.get("path"));
-
-		lHeader.put(RequestHeader.WS_SEARCHSTRING, lSearchString);
-		lHeader.put(RequestHeader.URL_ARGS, lArgs);
+		// iterate throught header params
+		Enumeration<String> lHeaderNames = aRequest.getHeaderNames();
+		while (lHeaderNames.hasMoreElements()) {
+			String lHeaderName = lHeaderNames.nextElement();
+			if (lHeaderName != null) {
+				lHeaderName = lHeaderName.toLowerCase();
+				lHeader.put(lHeaderName, aRequest.getHeader(lHeaderName));
+			}
+		}
+		
+		lHeader.put(RequestHeader.WS_SEARCHSTRING, aRequest.getQueryString());
 		setHeader(lHeader);
 	}
 
