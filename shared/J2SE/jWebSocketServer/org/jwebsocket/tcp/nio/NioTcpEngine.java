@@ -304,11 +304,15 @@ public class NioTcpEngine extends BaseEngine {
 
 	private void clientDisconnect(SelectionKey key, CloseReason reason) throws IOException {
 		SocketChannel channel = (SocketChannel) key.channel();
-		String id = channelToConnectorMap.remove(channel);
-		connectorToChannelMap.remove(id);
 		key.cancel();
 		key.channel().close();
-		connectorStopped(getConnectors().get(id), reason);
+		if(channelToConnectorMap.containsKey(channel)) {
+			String id = channelToConnectorMap.remove(channel);
+			if(id != null) {
+				connectorToChannelMap.remove(id);
+				connectorStopped(getConnectors().get(id), reason);
+			}
+		}
 	}
 
 	private void clientDisconnect(WebSocketConnector connector) throws IOException {
