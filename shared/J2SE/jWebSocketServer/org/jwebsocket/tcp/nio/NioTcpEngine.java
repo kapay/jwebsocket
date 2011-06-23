@@ -26,6 +26,7 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.tcp.EngineUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.nio.ByteBuffer;
@@ -283,7 +284,7 @@ public class NioTcpEngine extends BaseEngine {
 			return;
 		}
 
-		if (numRead > 0) {
+		if (numRead > 0 && channelToConnectorMap.containsKey(socketChannel)) {
 			String connectorId = channelToConnectorMap.get(socketChannel);
 			ReadBean bean = new ReadBean();
 			bean.connectorId = connectorId;
@@ -335,41 +336,20 @@ public class NioTcpEngine extends BaseEngine {
 		public void run() {
 			while (running) {
 				try {
-					ReadBean bean = pendingReads.poll(200, TimeUnit.MILLISECONDS);
+					final ReadBean bean = pendingReads.poll(200, TimeUnit.MILLISECONDS);
 					if (bean != null) {
 						if (getConnectors().containsKey(bean.connectorId)) {
-							NioTcpConnector connector = (NioTcpConnector) getConnectors().get(bean.connectorId);
-							if (connector.isAfterHandshake()) {
-								boolean hixie = JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(
-										connector.getHeader().getDraft());
-								if (hixie) {
-									readHixie(bean.data, connector);
-								} else {
-									// assume that #02 and #03 are the same regarding packet processing
-									readHybi(bean.data, connector);
-								}
-							} else {
-								// todo: consider ssl connections
-								Map headers = WebSocketHandshake.parseC2SRequest(bean.data, false);
-								byte[] response = WebSocketHandshake.generateS2CResponse(headers);
-								RequestHeader reqHeader = EngineUtils.validateC2SRequest(headers, mLog);
-								if (response == null || reqHeader == null) {
-									if (mLog.isDebugEnabled()) {
-										mLog.warn("TCPEngine detected illegal handshake.");
+							final NioTcpConnector connector = (NioTcpConnector) getConnectors().get(bean.connectorId);
+							if(connector.getWorkerId() > -1 && connector.getWorkerId() != hashCode()) {
+								// another worker is right in the middle of packet processing for this connector
+								connector.setDelayedPacketNotifier(new DelayedPacketNotifier() {
+									@Override
+									public void handleDelayedPacket() throws IOException {
+										doRead(connector, bean);
 									}
-
-									// disconnect the client
-									clientDisconnect(connector);
-								}
-
-								send(connector.getId(), new DataFuture(connector, ByteBuffer.wrap(response)));
-								int timeout = reqHeader.getTimeout(getSessionTimeout());
-								if(timeout > 0) {
-									connectorToChannelMap.get(bean.connectorId).socket().setSoTimeout(timeout);
-								}
-								connector.handshakeValidated();
-								connector.setHeader(reqHeader);
-								connector.startConnector();
+								});
+							} else {
+								doRead(connector, bean);
 							}
 						} else {
 							// connector was already closed ...
@@ -385,6 +365,43 @@ public class NioTcpEngine extends BaseEngine {
 					break;
 				}
 			}
+		}
+
+		private void doRead(NioTcpConnector connector, ReadBean bean) throws IOException {
+			connector.setWorkerId(hashCode());
+			if (connector.isAfterHandshake()) {
+				boolean hixie = JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(
+						connector.getHeader().getDraft());
+				if (hixie) {
+					readHixie(bean.data, connector);
+				} else {
+					// assume that #02 and #03 are the same regarding packet processing
+					readHybi(bean.data, connector);
+				}
+			} else {
+				// todo: consider ssl connections
+				Map headers = WebSocketHandshake.parseC2SRequest(bean.data, false);
+				byte[] response = WebSocketHandshake.generateS2CResponse(headers);
+				RequestHeader reqHeader = EngineUtils.validateC2SRequest(headers, mLog);
+				if (response == null || reqHeader == null) {
+					if (mLog.isDebugEnabled()) {
+						mLog.warn("TCPEngine detected illegal handshake.");
+					}
+
+					// disconnect the client
+					clientDisconnect(connector);
+				}
+
+				send(connector.getId(), new DataFuture(connector, ByteBuffer.wrap(response)));
+				int timeout = reqHeader.getTimeout(getSessionTimeout());
+				if(timeout > 0) {
+					connectorToChannelMap.get(bean.connectorId).socket().setSoTimeout(timeout);
+				}
+				connector.handshakeValidated();
+				connector.setHeader(reqHeader);
+				connector.startConnector();
+			}
+			connector.setWorkerId(-1);
 		}
 	}
 

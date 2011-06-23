@@ -9,9 +9,9 @@ import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketProtocolHandler;
 import org.jwebsocket.logging.Logging;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class NioTcpConnector extends BaseConnector {
 	private static Logger mLog = Logging.getLogger(NioTcpConnector.class);
@@ -22,6 +22,8 @@ public class NioTcpConnector extends BaseConnector {
 	private int payloadLength = -1;
 	private int bufferPosition = -1;
 	private int packetType = -1;
+	private int workerId;
+    private DelayedPacketNotifier delayedPacketNotifier;
 
 	public NioTcpConnector(NioTcpEngine engine, InetAddress remoteAddress, int remotePort) {
 		super(engine);
@@ -29,6 +31,7 @@ public class NioTcpConnector extends BaseConnector {
 		this.remoteAddress = remoteAddress;
 		this.remotePort = remotePort;
 		afterHandshake = false;
+		workerId = -1;
 	}
 
 	@Override
@@ -85,7 +88,7 @@ public class NioTcpConnector extends BaseConnector {
 		return packetBuffer == null;
 	}
 	
-	public void extendPacketBuffer(byte[] newData, int start, int count) {
+	public void extendPacketBuffer(byte[] newData, int start, int count) throws IOException {
 		if(payloadLength == -1) {
 			// packet buffer grows with new data
 			if(packetBuffer == null) {
@@ -104,6 +107,7 @@ public class NioTcpConnector extends BaseConnector {
 		    System.arraycopy(newData, start, packetBuffer, bufferPosition, count);
 			bufferPosition += count;
 		}
+		notifyWorker();
 	}
 
 	public byte[] getPacketBuffer() {
@@ -120,15 +124,17 @@ public class NioTcpConnector extends BaseConnector {
 		}
 		try {
 			getEngine().processPacket(this, lPacket);
+
+			packetBuffer = null;
+			payloadLength = -1;
+			packetType = -1;
+			workerId = -1;
+			notifyWorker();
 		} catch (Exception e) {
 			mLog.error(e.getClass().getSimpleName()
 					+ " in processPacket of connector "
 					+ getClass().getSimpleName(), e);
 		}
-
-		packetBuffer = null;
-		payloadLength = -1;
-		packetType = -1;
 	}
 
 	public void setPayloadLength(int length) {
@@ -145,7 +151,30 @@ public class NioTcpConnector extends BaseConnector {
 		this.packetType = packetType;
 	}
 
+	public int getWorkerId() {
+		return workerId;
+	}
+
+	public void setWorkerId(int workerId) {
+		this.workerId = workerId;
+	}
+
+	public DelayedPacketNotifier getDelayedPacketNotifier() {
+		return delayedPacketNotifier;
+	}
+
+	public void setDelayedPacketNotifier(DelayedPacketNotifier delayedPacketNotifier) {
+		this.delayedPacketNotifier = delayedPacketNotifier;
+	}
+
 	private boolean isHixieDraft() {
 		return JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(getHeader().getDraft());
-	}	
+	}
+
+	private void notifyWorker() throws IOException {
+		if(delayedPacketNotifier != null) {
+			delayedPacketNotifier.handleDelayedPacket();
+			delayedPacketNotifier = null;
+		}
+	}
 }
