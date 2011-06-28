@@ -1,3 +1,18 @@
+//	---------------------------------------------------------------------------
+//	jWebSocket - WebSocket NIO Engine
+//	Copyright (c) 2011 Innotrade GmbH, jWebSocket.org, Author: Jan Gnezda
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
 package org.jwebsocket.tcp.nio;
 
 import org.apache.log4j.Logger;
@@ -15,45 +30,46 @@ import java.nio.ByteBuffer;
 
 public class NioTcpConnector extends BaseConnector {
 	private static Logger mLog = Logging.getLogger(NioTcpConnector.class);
-	private InetAddress remoteAddress;
-	private int remotePort;
-	private boolean afterHandshake;
-	private byte[] packetBuffer;
-	private int payloadLength = -1;
-	private int bufferPosition = -1;
-	private int packetType = -1;
-	private int workerId;
-    private DelayedPacketNotifier delayedPacketNotifier;
+	private InetAddress mRemoteAddress;
+	private int mRemotePort;
+	private boolean mIsAfterHandshake;
+	private byte[] mPacketBuffer;
+	private int mPayloadLength = -1;
+	private int mBufferPosition = -1;
+	private int mPacketType = -1;
+	private int mWorkerId;
+    private DelayedPacketNotifier mDelayedPacketNotifier;
 
-	public NioTcpConnector(NioTcpEngine engine, InetAddress remoteAddress, int remotePort) {
-		super(engine);
+	public NioTcpConnector(NioTcpEngine aEngine, InetAddress aRemoteAddress, 
+			int aRemotePort) {
+		super(aEngine);
 
-		this.remoteAddress = remoteAddress;
-		this.remotePort = remotePort;
-		afterHandshake = false;
-		workerId = -1;
+		this.mRemoteAddress = aRemoteAddress;
+		this.mRemotePort = aRemotePort;
+		mIsAfterHandshake = false;
+		mWorkerId = -1;
 	}
 
 	@Override
-	public void sendPacket(WebSocketPacket packet) {
-		sendPacketAsync(packet); // nio engine works asynchronously by default
+	public void sendPacket(WebSocketPacket aPacket) {
+		sendPacketAsync(aPacket); // nio engine works asynchronously by default
 	}
 
 	@Override
-	public IOFuture sendPacketAsync(WebSocketPacket packet) {
-		byte[] protocolPacket;
+	public IOFuture sendPacketAsync(WebSocketPacket aPacket) {
+		byte[] lProtocolPacket;
 		if (isHixieDraft()) {
-			protocolPacket = new byte[packet.getByteArray().length + 2];
-			protocolPacket[0] = 0x00;
-			System.arraycopy(packet.getByteArray(), 0, protocolPacket, 1, packet.getByteArray().length);
-			protocolPacket[protocolPacket.length - 1] = (byte) 0xFF;
+			lProtocolPacket = new byte[aPacket.getByteArray().length + 2];
+			lProtocolPacket[0] = 0x00;
+			System.arraycopy(aPacket.getByteArray(), 0, lProtocolPacket, 1, aPacket.getByteArray().length);
+			lProtocolPacket[lProtocolPacket.length - 1] = (byte) 0xFF;
 		} else {
-			protocolPacket = WebSocketProtocolHandler.toProtocolPacket(packet);
+			lProtocolPacket = WebSocketProtocolHandler.toProtocolPacket(aPacket);
 		}
 
-		DataFuture future = new DataFuture(this, ByteBuffer.wrap(protocolPacket));
-		((NioTcpEngine) getEngine()).send(getId(), future);
-		return future;
+		DataFuture lFuture = new DataFuture(this, ByteBuffer.wrap(lProtocolPacket));
+		((NioTcpEngine) getEngine()).send(getId(), lFuture);
+		return lFuture;
 	}
 
 	@Override
@@ -63,72 +79,72 @@ public class NioTcpConnector extends BaseConnector {
 
 	@Override
 	public String generateUID() {
-		return remoteAddress.getHostAddress() + '@' + remotePort;
+		return mRemoteAddress.getHostAddress() + '@' + mRemotePort;
 	}
 
 	@Override
 	public InetAddress getRemoteHost() {
-		return remoteAddress;
+		return mRemoteAddress;
 	}
 
 	@Override
 	public int getRemotePort() {
-		return remotePort;
+		return mRemotePort;
 	}
 
 	public void handshakeValidated() {
-		afterHandshake = true;
+		mIsAfterHandshake = true;
 	}
 
 	public boolean isAfterHandshake() {
-		return afterHandshake;
+		return mIsAfterHandshake;
 	}
 
 	public boolean isPacketBufferEmpty() {
-		return packetBuffer == null;
+		return mPacketBuffer == null;
 	}
 	
-	public void extendPacketBuffer(byte[] newData, int start, int count) throws IOException {
-		if(payloadLength == -1) {
+	public void extendPacketBuffer(byte[] aNewData, int aStart, int aCount) throws IOException {
+		if(mPayloadLength == -1) {
 			// packet buffer grows with new data
-			if(packetBuffer == null) {
-				packetBuffer = new byte[count];
-				if(count > 0) {
-					System.arraycopy(newData, start, packetBuffer, 0, count);
+			if(mPacketBuffer == null) {
+				mPacketBuffer = new byte[aCount];
+				if(aCount > 0) {
+					System.arraycopy(aNewData, aStart, mPacketBuffer, 0, aCount);
 				}
 			} else {
-				byte[] newBuffer = new byte[packetBuffer.length + count];
-				System.arraycopy(packetBuffer, 0, newBuffer, 0, packetBuffer.length);
-				System.arraycopy(newData, start, newBuffer, packetBuffer.length, count);
-				packetBuffer = newBuffer;
+				byte[] newBuffer = new byte[mPacketBuffer.length + aCount];
+				System.arraycopy(mPacketBuffer, 0, newBuffer, 0, mPacketBuffer.length);
+				System.arraycopy(aNewData, aStart, newBuffer, mPacketBuffer.length, aCount);
+				mPacketBuffer = newBuffer;
 			}
 		} else {
 			// packet buffer was already created with the correct length
-		    System.arraycopy(newData, start, packetBuffer, bufferPosition, count);
-			bufferPosition += count;
+		    System.arraycopy(aNewData, aStart, mPacketBuffer, mBufferPosition, aCount);
+			mBufferPosition += aCount;
 		}
 		notifyWorker();
 	}
 
 	public byte[] getPacketBuffer() {
-		return packetBuffer;
+		return mPacketBuffer;
 	}
 
 	public void flushPacketBuffer() {
-		byte[] copy = new byte[packetBuffer.length];
-		System.arraycopy(packetBuffer, 0, copy, 0, packetBuffer.length);
+		byte[] lCopy = new byte[mPacketBuffer.length];
+		System.arraycopy(mPacketBuffer, 0, lCopy, 0, mPacketBuffer.length);
 
-		RawPacket lPacket = new RawPacket(copy);
-		if(packetType != -1) {
-			lPacket.setFrameType(packetType);
+		RawPacket lPacket = new RawPacket(lCopy);
+		if(mPacketType != -1) {
+			lPacket.setFrameType(mPacketType);
 		}
 		try {
 			getEngine().processPacket(this, lPacket);
 
-			packetBuffer = null;
-			payloadLength = -1;
-			packetType = -1;
-			workerId = -1;
+			mPacketBuffer = null;
+			mPayloadLength = -1;
+			mPacketType = -1;
+			mWorkerId = -1;
 			notifyWorker();
 		} catch (Exception e) {
 			mLog.error(e.getClass().getSimpleName()
@@ -137,34 +153,34 @@ public class NioTcpConnector extends BaseConnector {
 		}
 	}
 
-	public void setPayloadLength(int length) {
-		payloadLength = length;
-		packetBuffer = new byte[length];
-		bufferPosition = 0;
+	public void setPayloadLength(int aLength) {
+		mPayloadLength = aLength;
+		mPacketBuffer = new byte[aLength];
+		mBufferPosition = 0;
 	}
 
 	public boolean isPacketBufferFull() {
-		return bufferPosition >= payloadLength;
+		return mBufferPosition >= mPayloadLength;
 	}
 
-	public void setPacketType(int packetType) {
-		this.packetType = packetType;
+	public void setPacketType(int aPacketType) {
+		this.mPacketType = aPacketType;
 	}
 
 	public int getWorkerId() {
-		return workerId;
+		return mWorkerId;
 	}
 
-	public void setWorkerId(int workerId) {
-		this.workerId = workerId;
+	public void setWorkerId(int aWorkerId) {
+		this.mWorkerId = aWorkerId;
 	}
 
 	public DelayedPacketNotifier getDelayedPacketNotifier() {
-		return delayedPacketNotifier;
+		return mDelayedPacketNotifier;
 	}
 
 	public void setDelayedPacketNotifier(DelayedPacketNotifier delayedPacketNotifier) {
-		this.delayedPacketNotifier = delayedPacketNotifier;
+		this.mDelayedPacketNotifier = delayedPacketNotifier;
 	}
 
 	private boolean isHixieDraft() {
@@ -172,9 +188,9 @@ public class NioTcpConnector extends BaseConnector {
 	}
 
 	private void notifyWorker() throws IOException {
-		if(delayedPacketNotifier != null) {
-			delayedPacketNotifier.handleDelayedPacket();
-			delayedPacketNotifier = null;
+		if(mDelayedPacketNotifier != null) {
+			mDelayedPacketNotifier.handleDelayedPacket();
+			mDelayedPacketNotifier = null;
 		}
 	}
 }

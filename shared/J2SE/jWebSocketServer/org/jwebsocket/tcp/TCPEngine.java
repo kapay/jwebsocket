@@ -24,14 +24,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.util.Date;
 import java.util.Map;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
-import javolution.util.FastMap;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
