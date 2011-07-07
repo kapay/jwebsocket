@@ -713,7 +713,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			lFilter.put(BaseConnector.VAR_USERNAME, ".*");
 			List<String> listOut = new FastList<String>();
 			for (WebSocketConnector lConnector : getServer().selectConnectors(lFilter).values()) {
-				listOut.add(getUsername(lConnector) + "@" + lConnector.getRemotePort());
+				listOut.add(getUsername(lConnector) + "@" + lConnector.getId());
 			}
 			lResponse.setList("clients", listOut);
 			lResponse.setInteger("count", listOut.size());
