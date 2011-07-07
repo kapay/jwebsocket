@@ -77,6 +77,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static String ALLOW_ANONYMOUS_KEY = "allowAnonymousLogin";
 	private static String ANONYMOUS_USER = "anonymous";
 	private static boolean ALLOW_ANONYMOUS_LOGIN = false;
+	private static String ALLOW_AUTO_ANONYMOUS_KEY = "allowAutoAnonymous";
+	private static boolean ALLOW_AUTO_ANONYMOUS = false;
 
 	/**
 	 * Constructor with configuration object
@@ -98,6 +100,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		BROADCAST_LOGIN = "true".equals(getString(BROADCAST_LOGIN_KEY, "true"));
 		BROADCAST_LOGOUT = "true".equals(getString(BROADCAST_LOGOUT_KEY, "true"));
 		ALLOW_ANONYMOUS_LOGIN = "true".equals(getString(ALLOW_ANONYMOUS_KEY, "false"));
+		ALLOW_AUTO_ANONYMOUS = "true".equals(getString(ALLOW_AUTO_ANONYMOUS_KEY, "false"));
+		SecurityFactory.setAutoAnonymous(ALLOW_AUTO_ANONYMOUS);
 	}
 
 	@Override
@@ -147,7 +151,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		// set session id first, so that it can be processed in the connectorStarted
 		// method
 		Random lRand = new Random(System.nanoTime());
-		
+
 		// TODO: if unique node id is passed check if already assigned in the
 		// network and reject connect if so!
 
@@ -369,8 +373,13 @@ public class SystemPlugIn extends TokenPlugIn {
 
 		if (lUsername != null) {
 
-			// get user from security factory
+			// try to get user from security factory
 			User lUser = SecurityFactory.getUser(lUsername);
+			if (null == lUser && ALLOW_AUTO_ANONYMOUS) {
+				// if user not found and auto anonymous user selected, 
+				// try to pick anonymous user
+				lUser = SecurityFactory.getUser(ANONYMOUS_USER);
+			}
 
 			// check if user exists and if password matches
 			if (lUser != null && lUser.checkPassword(lPassword, lEncoding)) {

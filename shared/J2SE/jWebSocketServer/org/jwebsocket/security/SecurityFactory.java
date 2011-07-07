@@ -36,10 +36,12 @@ public class SecurityFactory {
 	/**
 	 *
 	 */
-	public static String USER_ANONYMOUS = "guest";
-	public static String USER_REG_USER = "user";
-	public static String USER_ADMIN = "admin";
+	public static String USER_ANONYMOUS = "anonymous";
+	public static String USER_GUEST = "guest";
+	public static String USER_USER = "user";
+	public static String USER_ROOT = "root";
 	public static String USER_LOCKED = "locked";
+	private static boolean mAutoAnonymous = false;
 
 	/**
 	 * initializes the security system with some default settings to allow to
@@ -69,17 +71,19 @@ public class SecurityFactory {
 		Roles lRegRoles = new Roles(lGuestRole, lRegRole);
 		Roles lAdminRoles = new Roles(lGuestRole, lRegRole, lAdminRole);
 
-		User lGuestUser = new User(USER_ANONYMOUS, "Guest", "Guest", "guest", lGuestRoles);
-		User lRegUser = new User(USER_REG_USER, "User", "User", "user", lRegRoles);
-		User lAdminUser = new User(USER_ADMIN, "Admin", "Admin", "admin", lAdminRoles);
+		User lAnonymous = new User(USER_ANONYMOUS, "anonymous", "", "", lGuestRoles);
+		User lGuest = new User(USER_GUEST, "guest", "guest", "guest", lGuestRoles);
+		User lUser = new User(USER_USER, "user", "user", "user", lRegRoles);
+		User lRoot = new User(USER_ROOT, "root", "root", "root", lAdminRoles);
 		// add a locked user for test purposes, e.g. to reject token in system filter
-		User lLockedUser = new User(USER_LOCKED, "Locked", "Locked", "locked", lGuestRoles);
+		User lLockedUser = new User(USER_LOCKED, "locked", "locked", "locked", lGuestRoles);
 		lLockedUser.setStatus(User.ST_LOCKED);
 
 		mUsers = new Users();
-		mUsers.addUser(lGuestUser);
-		mUsers.addUser(lRegUser);
-		mUsers.addUser(lAdminUser);
+		mUsers.addUser(lAnonymous);
+		mUsers.addUser(lGuest);
+		mUsers.addUser(lUser);
+		mUsers.addUser(lRoot);
 		mUsers.addUser(lLockedUser);
 
 		// log.info("Default rights, roles and users initialized.");
@@ -165,6 +169,9 @@ public class SecurityFactory {
 		User lUser = null;
 		if (aLoginname != null) {
 			lUser = mUsers.getUserByLoginName(aLoginname);
+			if (null == lUser && mAutoAnonymous) {
+				lUser = mUsers.getUserByLoginName(USER_ANONYMOUS);
+			}
 		}
 		return lUser;
 	}
@@ -182,7 +189,7 @@ public class SecurityFactory {
 	 * Returns the root user for the jWebSocket system.
 	 */
 	public static User getRootUser() {
-		return mUsers.getUserByLoginName("root");
+		return mUsers.getUserByLoginName(USER_ROOT);
 	}
 
 	/**
@@ -296,5 +303,19 @@ public class SecurityFactory {
 			}
 		}
 		return lRights;
+	}
+
+	/**
+	 * @return the mAutoAnonymous
+	 */
+	public static boolean isAutoAnonymous() {
+		return mAutoAnonymous;
+	}
+
+	/**
+	 * @param aAutoAnonymous the autoAnonymous flag to set
+	 */
+	public static void setAutoAnonymous(boolean aAutoAnonymous) {
+		mAutoAnonymous = aAutoAnonymous;
 	}
 }

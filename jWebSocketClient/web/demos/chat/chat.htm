@@ -31,6 +31,7 @@
 			lWSC = null,
 			eLog = null,
 			eUsername = null,
+			ePassword = null,
 			ePool = null,
 			eMessage = null,
 			eTarget = null,
@@ -85,7 +86,7 @@
 				log( SYS, OUT, "Connecting to " + lJWSID + " at " + lURL + "..." );
 
 				// try to establish connection to jWebSocket server
-				lWSC.logon( lURL, eUsername.value, "", {
+				lWSC.logon( lURL, eUsername.value, ePassword.value, {
 
 					// OnOpen callback
 					OnOpen: function( aEvent ) {
@@ -127,7 +128,7 @@
 											pool: null
 										});
 									} else {
-										log( SYS, IN, "Error logging in '" + + "': " + aToken.msg );
+										log( SYS, IN, "Error logging in '" + eUsername.value + "': " + aToken.msg );
 										// select username again for convenience
 										doFocus( eUsername );
 									}
@@ -255,6 +256,7 @@
 				// get some required HTML elements
 				eLog = jws.$( "sdivChat" );
 				eUsername = jws.$( "stxfUsername" );
+				ePassword = jws.$( "spwfPassword" );
 				ePool = jws.$( "stxfPool" );
 				eReceiver = jws.$( "stxfReceiver" );
 				eMessage = jws.$( "stxaMsg" );
