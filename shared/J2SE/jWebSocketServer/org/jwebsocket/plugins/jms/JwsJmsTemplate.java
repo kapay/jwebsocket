@@ -17,7 +17,7 @@ package org.jwebsocket.plugins.jms;
 
 /**
  * 
- * @author Johannes Smutny
+ * @author jsmutny
  */
 import javax.jms.Connection;
 import javax.jms.JMSException;

@@ -13,31 +13,14 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.plugins.jms;
+package org.jwebsocket.plugins.jms.test;
 
 /**
  * 
  * @author Johannes Smutny
  */
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
+public interface JMSStockMarketDataProducer {
+	
+	void sendStockMarketData();
 
-public class StockMarketDataListener implements MessageListener {
-
-	public void onMessage(Message message) {
-		if (message instanceof TextMessage) {
-			TextMessage txtMsg = (TextMessage) message;
-			try {
-				System.out.println("Received text message = " + txtMsg.getText());
-			} catch (JMSException e) {
-				e.printStackTrace();
-			}
-		} else {
-			System.out.println("Received message = " + message);
-		}
-
-
-	}
 }
