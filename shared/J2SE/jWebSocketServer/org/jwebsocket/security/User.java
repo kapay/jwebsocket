@@ -63,7 +63,8 @@ public class User {
 	 * He can be activated again to get access to the system.
 	 */
 	public static int ST_DELETED = 4;
-	private Integer mIserId = null;
+	private Integer mUserId = null;
+	private String mUUID = null;
 	private String mLoginname = null;
 	private String mTitle = null;
 	private String mCompany = null;
@@ -92,7 +93,13 @@ public class User {
 	 * @param aPassword
 	 * @param aRoles
 	 */
-	public User(String aLoginName, String aFirstname, String aLastname, String aPassword, Roles aRoles) {
+	public User(String aUUID, String aLoginName, String aFirstname, String aLastname, String aPassword, Roles aRoles) {
+		// if no UUID is passed generate a temporary one
+		if (null == aUUID) {
+			mUUID = generateUUID();
+		} else {
+			mUUID = aUUID;
+		}
 		mLoginname = aLoginName;
 		mFirstname = aFirstname;
 		mLastname = aLastname;
@@ -106,7 +113,7 @@ public class User {
 	 * @return id of the user.
 	 */
 	public Integer getUserId() {
-		return mIserId;
+		return mUserId;
 	}
 
 	/**
@@ -115,7 +122,26 @@ public class User {
 	 * @param userId
 	 */
 	public void setUserId(Integer userId) {
-		this.mIserId = userId;
+		this.mUserId = userId;
+	}
+
+	/**
+	 * @return the UUID
+	 */
+	public String getUUID() {
+		return mUUID;
+	}
+
+	/**
+	 * @param aUUID the UUID to set
+	 */
+	public void setUUID(String aUUID) {
+		this.mUUID = aUUID;
+	}
+
+	public static String generateUUID() {
+		String lData = Double.toString(Math.random()) + Double.toString(System.nanoTime());
+		return Tools.getMD5(lData);
 	}
 
 	/**
@@ -211,7 +237,7 @@ public class User {
 	 */
 	public boolean checkPassword(String aPassword, String aEncoding) {
 		String lPassword = mPassword;
-		if( "md5".equalsIgnoreCase(aEncoding)) {
+		if ("md5".equalsIgnoreCase(aEncoding)) {
 			lPassword = Tools.getMD5(lPassword);
 		}
 		boolean lOk = (aPassword != null && aPassword.equals(lPassword));

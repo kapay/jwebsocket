@@ -63,20 +63,20 @@ public class SecurityFactory {
 		// specify roles and assign rights to roles
 		// TODO: needs to be removed in final release!
 		Role lGuestRole = new Role("guest", "Guests", lRPC, lRRPC);
-		Role lRegRole = new Role("regUser", "Registered Users", lRPC, lRRPC);
+		Role lUserRole = new Role("regUser", "Registered Users", lRPC, lRRPC);
 		Role lAdminRole = new Role("admin", "Administrators", lRPC, lRRPC);
 
 		// specify role sets for a simpler assignment to the users
 		Roles lGuestRoles = new Roles(lGuestRole);
-		Roles lRegRoles = new Roles(lGuestRole, lRegRole);
-		Roles lAdminRoles = new Roles(lGuestRole, lRegRole, lAdminRole);
+		Roles lUserRoles = new Roles(lGuestRole, lUserRole);
+		Roles lAdminRoles = new Roles(lGuestRole, lUserRole, lAdminRole);
 
-		User lAnonymous = new User(USER_ANONYMOUS, "anonymous", "", "", lGuestRoles);
-		User lGuest = new User(USER_GUEST, "guest", "guest", "guest", lGuestRoles);
-		User lUser = new User(USER_USER, "user", "user", "user", lRegRoles);
-		User lRoot = new User(USER_ROOT, "root", "root", "root", lAdminRoles);
+		User lAnonymous = new User(User.generateUUID(), USER_ANONYMOUS, "anonymous", "", "", lGuestRoles);
+		User lGuest = new User(User.generateUUID(), USER_GUEST, "guest", "guest", "guest", lGuestRoles);
+		User lUser = new User(User.generateUUID(), USER_USER, "user", "user", "user", lUserRoles);
+		User lRoot = new User(User.generateUUID(), USER_ROOT, "root", "root", "root", lAdminRoles);
 		// add a locked user for test purposes, e.g. to reject token in system filter
-		User lLockedUser = new User(USER_LOCKED, "locked", "locked", "locked", lGuestRoles);
+		User lLockedUser = new User(User.generateUUID(), USER_LOCKED, "locked", "locked", "locked", lGuestRoles);
 		lLockedUser.setStatus(User.ST_LOCKED);
 
 		mUsers = new Users();
@@ -137,6 +137,7 @@ public class SecurityFactory {
 				}
 			}
 			User lUser = new User(
+					lUserConfig.getUUID(),
 					lUserConfig.getLoginname(),
 					lUserConfig.getFirstname(),
 					lUserConfig.getLastname(),

@@ -21,18 +21,20 @@ import javax.xml.stream.XMLStreamReader;
 import javolution.util.FastList;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.config.ConfigHandler;
+
 /**
  * The config handler for user config
- * @author puran
+ * @author puran, aschulze
  * @version $Id: UserConfigHandler.java 596 2010-06-22 17:09:54Z fivefeetfurther $
  */
 public class UserConfigHandler implements ConfigHandler {
-	
+
+	private final static String UUID = "uuid";
 	private final static String LOGIN_NAME = "loginname";
 	private final static String FIRST_NAME = "firstname";
 	private final static String LAST_NAME = "lastname";
 	private final static String PASSWORD = "password";
-	private final static String DESCRIPTION= "description";
+	private final static String DESCRIPTION = "description";
 	private final static String STATUS = "status";
 	private final static String ELEMENT_USER = "user";
 	private final static String ELEMENT_ROLES = "roles";
@@ -42,78 +44,83 @@ public class UserConfigHandler implements ConfigHandler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Config processConfig(XMLStreamReader streamReader) throws XMLStreamException {
-		String loginname = "", firstname = "", lastname = "", password = "", description = "";
+	public Config processConfig(XMLStreamReader aStreamReader) throws XMLStreamException {
+		String lUUID = "", lLoginname = "", lFirstname = "", lLastname = "",
+				lPassword = "", lDescription = "";
 		int status = 0;
 		List<String> roles = null;
-		while (streamReader.hasNext()) {
-			streamReader.next();
-			if (streamReader.isStartElement()) {
-				String elementName = streamReader.getLocalName();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(LOGIN_NAME)) {
-					streamReader.next();
-					loginname = streamReader.getText();
+					aStreamReader.next();
+					lLoginname = aStreamReader.getText();
+				} else if (elementName.equals(UUID)) {
+					aStreamReader.next();
+					lUUID = aStreamReader.getText();
 				} else if (elementName.equals(FIRST_NAME)) {
-					streamReader.next();
-					firstname = streamReader.getText();
+					aStreamReader.next();
+					lFirstname = aStreamReader.getText();
 				} else if (elementName.equals(LAST_NAME)) {
-					streamReader.next();
-					lastname = streamReader.getText();
+					aStreamReader.next();
+					lLastname = aStreamReader.getText();
 				} else if (elementName.equals(PASSWORD)) {
-					streamReader.next();
+					aStreamReader.next();
 					//TODO: temporary fix to handle error because of blank password value
 					//better figure out something cleaner.
-					if (streamReader.getEventType() != 2) {
-						password = streamReader.getText();
+					if (aStreamReader.getEventType() != 2) {
+						lPassword = aStreamReader.getText();
 					}
 				} else if (elementName.equals(DESCRIPTION)) {
-					streamReader.next();
-					description = streamReader.getText();
+					aStreamReader.next();
+					lDescription = aStreamReader.getText();
 				} else if (elementName.equals(STATUS)) {
-					streamReader.next();
-					status  = Integer.parseInt(streamReader.getText());
+					aStreamReader.next();
+					status = Integer.parseInt(aStreamReader.getText());
 				} else if (elementName.equals(ELEMENT_ROLES)) {
-					streamReader.next();
-					roles = getRoles(streamReader);
+					aStreamReader.next();
+					roles = getRoles(aStreamReader);
 				} else {
 					//ignore
 				}
 			}
-			if (streamReader.isEndElement()) {
-				String elementName = streamReader.getLocalName();
+			if (aStreamReader.isEndElement()) {
+				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(ELEMENT_USER)) {
 					break;
 				}
 			}
 		}
-		return new UserConfig(loginname, firstname, lastname, password, description, status, roles);
+
+		return new UserConfig(lUUID, lLoginname, lFirstname, lLastname,
+				lPassword, lDescription, status, roles);
 	}
 
 	/**
 	 * private method that reads the roles 
-	 * @param streamReader the stream reader object
+	 * @param aStreamReader the stream reader object
 	 * @return the list of user roles
 	 */
-	private List<String> getRoles(XMLStreamReader streamReader) throws XMLStreamException {
-		List<String> roles = new FastList<String>();
-		while (streamReader.hasNext()) {
-			streamReader.next();
-			if (streamReader.isStartElement()) {
-				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ELEMENT_ROLE)) {
-					streamReader.next();
-					String role = streamReader.getText();
-					roles.add(role);
+	private List<String> getRoles(XMLStreamReader aStreamReader) throws XMLStreamException {
+		List<String> lRoles = new FastList<String>();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(ELEMENT_ROLE)) {
+					aStreamReader.next();
+					String role = aStreamReader.getText();
+					lRoles.add(role);
 				}
 			}
-			if (streamReader.isEndElement()) {
-				String elementName = streamReader.getLocalName();
-				if (elementName.equals(ELEMENT_ROLES)) {
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(ELEMENT_ROLES)) {
 					break;
 				}
 			}
 		}
-		return roles;
+		return lRoles;
 	}
-
 }

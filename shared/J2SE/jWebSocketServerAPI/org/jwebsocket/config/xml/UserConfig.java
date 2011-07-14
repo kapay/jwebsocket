@@ -21,90 +21,99 @@ import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
- * @author puran
+ * @authors puran, aschulze
  * @version $Id: UserConfig.java 596 2010-06-22 17:09:54Z fivefeetfurther $
  * 
  */
 public final class UserConfig implements Config {
 
-	private final String loginname;
-	private final String firstname;
-	private final String lastname;
-	private final String password;
-	private final String description;
-	private final int status;
-	private final List<String> roles;
+	private final String mUUID;
+	private final String mLoginname;
+	private final String mFirstname;
+	private final String mLastname;
+	private final String mPassword;
+	private final String mDescription;
+	private final int mStatus;
+	private final List<String> mRoles;
 
 	/**
 	 * Default user config constructor
-	 * @param loginname the login name
-	 * @param firstname the first name 
-	 * @param lastname the last name
-	 * @param password the password
-	 * @param description the descritpion 
-	 * @param status the user status
-	 * @param roles the user roles
+	 * @param aLoginname the login name
+	 * @param aFirstname the first name 
+	 * @param aLastname the last name
+	 * @param aPassword the password
+	 * @param aDescription the descritpion 
+	 * @param aStatus the user status
+	 * @param aRoles the user roles
 	 */
-	public UserConfig(String loginname, String firstname, String lastname,
-			String password, String description, int status, List<String> roles) {
-		this.loginname = loginname;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.password = password;
-		this.description = description;
-		this.status = status;
-		this.roles = roles;
+	public UserConfig(String aUUID, String aLoginname, String aFirstname, String aLastname,
+			String aPassword, String aDescription, int aStatus, List<String> aRoles) {
+		mUUID = aUUID;
+		mLoginname = aLoginname;
+		mFirstname = aFirstname;
+		mLastname = aLastname;
+		mPassword = aPassword;
+		mDescription = aDescription;
+		mStatus = aStatus;
+		mRoles = aRoles;
 		//validate user config
 		validate();
+	}
+
+	/**
+	 * @return the mUUID
+	 */
+	public String getUUID() {
+		return mUUID;
 	}
 
 	/**
 	 * @return the loginname
 	 */
 	public String getLoginname() {
-		return loginname;
+		return mLoginname;
 	}
 
 	/**
 	 * @return the firstname
 	 */
 	public String getFirstname() {
-		return firstname;
+		return mFirstname;
 	}
 
 	/**
 	 * @return the lastname
 	 */
 	public String getLastname() {
-		return lastname;
+		return mLastname;
 	}
 
 	/**
 	 * @return the password
 	 */
 	public String getPassword() {
-		return password;
+		return mPassword;
 	}
 
 	/**
 	 * @return the description
 	 */
 	public String getDescription() {
-		return description;
+		return mDescription;
 	}
 
 	/**
 	 * @return the status
 	 */
 	public int getStatus() {
-		return status;
+		return mStatus;
 	}
-	
+
 	/**
 	 * @return the list of roles
 	 */
 	public List<String> getRoles() {
-		return Collections.unmodifiableList(roles);
+		return Collections.unmodifiableList(mRoles);
 	}
 
 	/**
@@ -112,11 +121,11 @@ public final class UserConfig implements Config {
 	 */
 	@Override
 	public void validate() {
-		if ((loginname != null && loginname.length() > 0)
-				&& (firstname != null && firstname.length() > 0)
-				&& (lastname != null && lastname.length() > 0)
-				&& (description != null && description.length() > 0)
-				&& (status > 0)) {
+		if ((mLoginname != null && mLoginname.length() > 0)
+				&& (mFirstname != null && mFirstname.length() > 0)
+				&& (mLastname != null && mLastname.length() > 0)
+				&& (mDescription != null && mDescription.length() > 0)
+				&& (mStatus > 0)) {
 			return;
 		}
 		throw new WebSocketRuntimeException(
