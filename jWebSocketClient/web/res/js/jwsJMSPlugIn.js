@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
 //	jWebSocket JMS PlugIn (uses jWebSocket Client and Server)
-//	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
+//	(c) 2011 Innotrade GmbH - jWebSocket.org, Alexander Schulze
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -14,10 +14,8 @@
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 
-
-//	---------------------------------------------------------------------------
-//  jWebSocket JMS Plug-In
-//	---------------------------------------------------------------------------
+ 
+//:author:*:Johannes Smutny
 
 //:package:*:jws
 //:class:*:jws.JMSPlugIn
@@ -33,7 +31,8 @@ jws.JMSPlugIn = {
 	// if namespace changes update server plug-in accordingly!
 	NS: jws.NS_BASE + ".plugins.jms",
 	
-	SEND_STRING_MESSAGE: "sendStringMessage",
+	SEND_TEXT: "sendText",
+	SEND_MAP: "sendMap",
 	LISTEN: "listen",
 	UNLISTEN: "unlisten",
 	
@@ -65,16 +64,31 @@ jws.JMSPlugIn = {
 		return lRes;
 	},
 	
-	sendStringMessage: function(aConnectionFactoryName, aDestinationName, aPubSubDomain, aStringMessage) {
+	sendJmsText: function(aConnectionFactoryName, aDestinationName, aPubSubDomain, aText) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.JMSPlugIn.NS,
-				type: jws.JMSPlugIn.SEND_STRING_MESSAGE,
+				type: jws.JMSPlugIn.SEND_TEXT,
 				connectionFactoryName: aConnectionFactoryName,
 				destinationName: aDestinationName,
 				isPubSubDomain: aPubSubDomain,
-				stringMessage: aStringMessage
+				text: aText
+			});
+		}
+		return lRes;
+	},
+	
+	sendJmsMap: function(aConnectionFactoryName, aDestinationName, aPubSubDomain, aMap) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			this.sendToken({
+				ns: jws.JMSPlugIn.NS,
+				type: jws.JMSPlugIn.SEND_MAP,
+				connectionFactoryName: aConnectionFactoryName,
+				destinationName: aDestinationName,
+				isPubSubDomain: aPubSubDomain,
+				map: aMap
 			});
 		}
 		return lRes;
@@ -86,9 +100,13 @@ jws.JMSPlugIn = {
 			// here you can handle incoming tokens from the server
 			// directy in the plug-in if desired.
 			if( "event" == aToken.type ) {
-				if( "handleMessageString" == aToken.name ) {
-					if( this.OnHandleMessageString ) {
-						this.OnHandleMessageString( aToken );
+				if( "handleText" == aToken.name ) {
+					if( this.OnHandleText ) {
+						this.OnHandleText( aToken );
+					}
+				} else if( "handleMap" == aToken.name ) {
+					if( this.OnHandleMap ) {
+						this.OnHandleMap( aToken );
 					}
 				} else if( "channelRemoved" == aToken.name ) {
 					if( this.OnChannelRemoved ) {
@@ -107,8 +125,11 @@ jws.JMSPlugIn = {
 		if( !aListeners ) {
 			aListeners = {};
 		}
-		if( aListeners.OnHandleMessageString !== undefined ) {
-			this.OnHandleMessageString = aListeners.OnHandleMessageString;
+		if( aListeners.OnHandleText !== undefined ) {
+			this.OnHandleText = aListeners.OnHandleText;
+		}
+		if( aListeners.OnHandleMap !== undefined ) {
+			this.OnHandleMap = aListeners.OnHandleMap;
 		}
 		if( aListeners.OnChannelsReceived !== undefined ) {
 			this.OnChannelsReceived = aListeners.OnChannelsReceived;
