@@ -21,6 +21,8 @@ package org.jwebsocket.plugins.jms;
  * @author Johannes Smutny
  * 
  */
+import java.util.Collection;
+
 import org.springframework.jms.core.JmsTemplate;
 
 public interface SenderStore {
@@ -32,8 +34,7 @@ public interface SenderStore {
 	 *            the subscriber id to fetch
 	 * @return the subscriber object, null if the subscriber doesn't exist.
 	 */
-	JmsTemplate getSender(
-			DestinationIdentifier aId);
+	JmsTemplate getSender(DestinationIdentifier aId);
 
 	/**
 	 * Store the given channel in the channel store
@@ -42,8 +43,7 @@ public interface SenderStore {
 	 *            the channel object
 	 * @return {@code true} if insert successful
 	 */
-	void storeSender(DestinationIdentifier aId,
-			JmsTemplate aListener);
+	void storeSender(DestinationIdentifier aId, JmsTemplate aListener);
 
 	/**
 	 * Removes the subscriber from the store based on given id
@@ -66,4 +66,6 @@ public interface SenderStore {
 	 * @return the size value
 	 */
 	int getSendersStoreSize();
+
+	Collection<JmsTemplate> getAll();
 }

@@ -23,6 +23,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.CloseReason;
@@ -92,6 +93,13 @@ public class JMSPlugIn extends TokenPlugIn {
 	public void connectorStopped(WebSocketConnector aConnector,
 			CloseReason aCloseReason) {
 		mJmsManager.stopListeners(aConnector.getId());
+	}
+	
+	
+
+	@Override
+	public void engineStopped(WebSocketEngine aEngine) {
+		mJmsManager.shutDownListeners();
 	}
 
 	@Override
