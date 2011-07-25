@@ -15,6 +15,7 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.jms;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,8 +24,7 @@ import org.jwebsocket.logging.Logging;
 import org.springframework.jms.core.JmsTemplate;
 
 /**
- * @author jsmutny
- * holds references to all available jms senders
+ * @author jsmutny holds references to all available jms senders
  */
 public class BaseSenderStore implements SenderStore {
 
@@ -58,4 +58,10 @@ public class BaseSenderStore implements SenderStore {
 	public int getSendersStoreSize() {
 		return mListeners.size();
 	}
+
+	@Override
+	public Collection<JmsTemplate> getAll() {
+		return mListeners.values();
+	}
+
 }
