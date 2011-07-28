@@ -263,6 +263,17 @@
 			// example how to request a result from a server side plugin
 			
 			function sampleSelect() {
+				
+				// example how to request a database 
+				// result from a server side plugin
+				log( "Requesting JDBC data via WebSockets..." );
+				// call the getTime method of the client side plug-in
+				var lRes = lWSC.jdbcQuerySQL("select * from demo_master");
+				// log error only, on success don't confuse the user
+				if( lRes.code != 0 ) {
+					log( lWSC.resultToString( lRes ) );
+				}
+				
 				/*
 				log( "Requesting JDBC data via WebSockets..." );
 				// call the getTime method of the client side plug-in
@@ -314,26 +325,9 @@
 					where	: "master_id=6"
 				});
 				*/
-				var lRes = lWSC.sendToken({
-					ns	: "org.jwebsocket.plugins.reporting",
-					type: "test"
-				});
 			}
 			
-/*
-			// example how to request a result from a server side plugin
-			function sampleSelect() {
-				log( "Requesting JDBC data via WebSockets..." );
-				// call the getTime method of the client side plug-in
-				var lRes = lWSC.jdbcQuerySQL("select * from demo_master");
-				// log error only, on success don't confuse the user
-				if( lRes.code != 0 ) {
-					log( lWSC.resultToString( lRes ) );
-				}
-			}
-*/
 			function getFilelist() {
-				/*
 				log( "Retrieving file list from the server via WebSockets..." );
 				// call the getFilelist method of the client side plug-in
 				var lRes = lWSC.fileGetFilelist(
@@ -345,7 +339,7 @@
 				if( lRes.code != 0 ) {
 					log( lWSC.resultToString( lRes ) );
 				}
-				*/
+				/*
 				log( "Creating a report via WebSockets..." );
 				// call the getReports method of the client side plug-in
 				var lRes = lWSC.reportingCreateReport(
@@ -356,7 +350,6 @@
 				if( lRes.code != 0 ) {
 					log( lWSC.resultToString( lRes ) );
 				}
-				/*
 				log( "Retrieving reports via WebSockets..." );
 				// call the getReports method of the client side plug-in
 				var lRes = lWSC.reportingGetReports				(
