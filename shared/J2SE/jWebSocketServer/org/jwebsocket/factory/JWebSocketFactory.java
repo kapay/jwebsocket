@@ -223,6 +223,21 @@ public class JWebSocketFactory {
 	}
 
 	/**
+	 * 
+	 */
+	public static void run() {
+		// remain here until shut down request
+		while (JWebSocketInstance.getStatus() != JWebSocketInstance.SHUTTING_DOWN) {
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException lEx) {
+				// no handling required here
+			}
+		}
+
+	}
+
+	/**
 	 *
 	 */
 	public static void stop() {

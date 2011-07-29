@@ -1,5 +1,5 @@
 /* This script creates the uses jwsSys and grants him the "system" rights
- * This database user is supposed to be used for external user access for usual work purposes!
+ * This database user is supposed to be used for internal administrator access only!
  */
 
 /* use this database schema */

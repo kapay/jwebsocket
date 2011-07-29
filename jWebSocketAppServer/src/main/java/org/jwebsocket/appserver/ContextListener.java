@@ -36,7 +36,7 @@ public class ContextListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent aSCE) {
 		// start the jWebSocket server sub system
 		JWebSocketFactory.start("");
-		
+
 		// get the token server
 		// and and a listener to it (for demo purposes)
 		TokenServer lTS0 = JWebSocketFactory.getTokenServer();
@@ -44,7 +44,6 @@ public class ContextListener implements ServletContextListener {
 			// and add the sample listener to the server's listener chain
 			lTS0.addListener(new JWebSocketTokenListenerSample());
 		}
-
 	}
 
 	/**

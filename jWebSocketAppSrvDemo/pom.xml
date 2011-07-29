@@ -16,7 +16,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+		<netbeans.hint.deploy.server>Tomcat70</netbeans.hint.deploy.server>
 	</properties>
 
 	<scm>

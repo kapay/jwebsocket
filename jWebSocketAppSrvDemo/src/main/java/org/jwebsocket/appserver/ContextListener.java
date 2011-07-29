@@ -46,8 +46,6 @@ public class ContextListener implements ServletContextListener {
 			lTS0.addListener(new JWebSocketTokenListenerSample());
 		}
 
-
-
 		// assign web socket server to servlet bridge
 		ServletBridge.setServer(JWebSocketFactory.getTokenServer());
 	}
