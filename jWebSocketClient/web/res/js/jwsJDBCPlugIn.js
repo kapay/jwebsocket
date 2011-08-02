@@ -51,7 +51,20 @@ jws.JDBCPlugIn = {
 				type: "querySQL",
 				sql: aQuery
 			};
-			this.sendToken( lToken,	aOptions );
+			this.sendToken( lToken, aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcQueryScript: function( aScript, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "querySQL",
+				script: aScript
+			};
+			this.sendToken( lToken, aOptions );
 		}
 		return lRes;
 	},
@@ -63,6 +76,19 @@ jws.JDBCPlugIn = {
 				ns: jws.JDBCPlugIn.NS,
 				type: "updateSQL",
 				sql: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcUpdateScript: function( aScript, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "updateSQL",
+				script: aScript
 			};
 			this.sendToken( lToken,	aOptions );
 		}

@@ -28,7 +28,7 @@ var jws = {
 
 	//:const:*:VERSION:String:1.0a11
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0a11 (10530)",
+	VERSION: "1.0b1 (10731)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -1681,7 +1681,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				// thus reset the timeout observer
 				clearTimeout( lClbkRec.hCleanUp );
 			}
-			lClbkRec.callback.OnResponse( aToken );
+			var lArgs = lClbkRec.args;
+			lClbkRec.callback.OnResponse( aToken, lArgs );
 			delete this.fRequestCallbacks[ lField ];
 		}
 	},
@@ -2039,6 +2040,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			var lSpawnThread = false;
 			var lL2FragmSize = 0;
 			var lTimeout = jws.DEF_RESP_TIMEOUT;
+			var lArgs = null;
 			var lCallbacks = {
 				OnResponse: null,
 				OnSuccess: null,
@@ -2065,6 +2067,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					lCallbacks.OnTimeout = aOptions.OnTimeout;
 					lControlResponse = true;
 				}
+				if( aOptions.args ) {
+					lArgs = aOptions.args;
+				}
 				if( aOptions.timeout ) {
 					lTimeout = aOptions.timeout;
 				}
@@ -2083,6 +2088,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				var lClbkRec = {
 					request: new Date().getTime(),
 					callback: lCallbacks,
+					args: lArgs,
 					timeout: lTimeout
 				};
 				this.fRequestCallbacks[ lClbkId ] = lClbkRec;
