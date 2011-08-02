@@ -204,20 +204,44 @@ public class JDBCPlugIn extends TokenPlugIn {
 
 		// load SQL query string
 		String lSQL = aToken.getString("sql");
+		// load SQL script
+		List<String> lScript = aToken.getList("script");
 		// load expiration, default is no cache (expiration = 0)
 		Integer lExpiration = aToken.getInteger("expiration", 0);
 
-		// run the query, optionally considering cache
-		Token lResponse = mNativeAccess.query(lSQL);
-		// and add the token standard response fields for the request
-		lServer.setResponseFields(aToken, lResponse);
+		Token lResToken = lServer.createResponse(aToken);
+		Token lSQLResponse;
+		List<String> lDetails = new FastList<String>();
+		List<Map> lResultSets = new FastList<Map>();
+		lResToken.setList("details", lDetails);
+		lResToken.setList("resultSets", lResultSets);
+
+		if (lScript != null) {
+			for (String lSQLn : lScript) {
+				lSQLResponse = mNativeAccess.query(lSQLn);
+				Map<String, Object> lResultSet = new FastMap<String, Object>();
+				lResultSet.put("colcount", lSQLResponse.getInteger("colcount", -1));
+				lResultSet.put("rowcount", lSQLResponse.getInteger("rowcount", -1));
+				lResultSet.put("columns", lSQLResponse.getList("columns"));
+				lResultSet.put("data", lSQLResponse.getList("data"));
+				lResultSets.add(lResultSet);
+			}
+		}
+		if (lSQL != null) {
+			lSQLResponse = mNativeAccess.query(lSQL);
+			lResToken.setInteger("colcount", lSQLResponse.getInteger("colcount", -1));
+			lResToken.setInteger("rowcount", lSQLResponse.getInteger("rowcount", -1));
+			lResToken.setList("columns", lSQLResponse.getList("columns"));
+			lResToken.setList("data", lSQLResponse.getList("data"));
+		}
 
 		// send response to requester
-		return lResponse;
+		return lResToken;
 	}
 
 	private Token getNextSeqVal(Token aToken) {
 		String lSequence = aToken.getString("sequence");
+		Integer lCount = aToken.getInteger("count", 1);
 		Token lResToken = TokenFactory.createToken();
 		if (lSequence != null) {
 			Map<String, String> lVars = new FastMap<String, String>();
@@ -264,10 +288,35 @@ public class JDBCPlugIn extends TokenPlugIn {
 		TokenServer lServer = getServer();
 		// load SQL string
 		String lSQL = aToken.getString("sql");
-		Token lExecToken = mNativeAccess.update(lSQL);
-		// and add the token standard response fields for the request
-		lServer.setResponseFields(aToken, lExecToken);
-		return lExecToken;
+		List<String> lScript = aToken.getList("script");
+
+		Token lSQLResult = null;
+		Token lResToken = lServer.createResponse(aToken);
+		List lDetails = new FastList<String>();
+		lResToken.setList("details", lDetails);
+
+		// first execute SQL script if such passed
+		if (lScript != null) {
+			for (String lSQLn : lScript) {
+				lSQLResult = mNativeAccess.update(lSQLn);
+				if (lSQLResult.getInteger("code", 0) != 0) {
+					lResToken.setInteger("code", -1);
+					lResToken.setString("msg", "Update error. Please refer to 'details' field.");
+					lDetails.add(lSQLn + ": " + lSQLResult + "\n");
+				}
+			}
+		}
+		// then execute single SQL if such passed
+		if (lSQL != null) {
+			lSQLResult = mNativeAccess.update(lSQL);
+			if (lSQLResult.getInteger("code", 0) != 0) {
+				lResToken.setInteger("code", -1);
+				lResToken.setString("msg", "Update error. Please refer to 'details' field.");
+				lDetails.add(lSQL + ": " + lSQLResult + "\n");
+			}
+		}
+
+		return lResToken;
 	}
 
 	private void updateSQL(WebSocketConnector aConnector, Token aToken) {
@@ -917,5 +966,4 @@ public class JDBCPlugIn extends TokenPlugIn {
 		} catch (Exception lEx) {
 		}
 	}
-	
 }
