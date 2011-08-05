@@ -29,6 +29,7 @@
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
+			var eReconnect = null;
 
 			function log( aString ) {
 				eLog.innerHTML +=
@@ -94,6 +95,11 @@
 
 						},
 
+						// OnReconnecting callback
+						OnReconnecting: function( aEvent ) {
+							log( "Re-establishing jWebSocket connection..." );
+						},
+						
 						// OnClose callback
 						OnClose: function( aEvent ) {
 							log( "jWebSocket connection closed." );
@@ -157,6 +163,29 @@
 				}
 			}
 
+			function toggleReconnect() {
+				if( lWSC ) {
+					var lReconnect = eReconnect.checked;
+					log( "Turning auto-reconnect " + ( lReconnect ? "on" : "off" ) );
+					lWSC.setReliabilityOptions( lReconnect ? jws.RO_ON : jws.RO_OFF );
+				}	
+			}
+			
+			function showReliabilityOptions() {
+				if( lWSC ) {
+					var lOptions = lWSC.getReliabilityOptions();
+					var lQueue = lWSC.getOutQueue();
+					log( "Reliability Options: " 
+						+ ( lQueue ? lQueue.length : "no" ) + " items in queue"
+						+ ", auto-reconnect: " + lOptions.autoReconnect
+						+ ", reconnectDelay: " + lOptions.reconnectDelay
+						+ ", queueItemLimit: " + lOptions.queueItemLimit
+						+ ", queueSizeLimit: " + lOptions.queueSizeLimit
+					);
+					
+				}	
+			}
+
 			function echo() {
 				var lMsg = eMessage.value;
 				log( "Sending '" + lMsg + "', waiting for echo..." );
@@ -192,11 +221,13 @@
 
 			function initPage() {
 				eLog = jws.$( "sdivLog" );
+				eReconnect = jws.$( "schkReconnect" );
 				eMessage = jws.$( "stxfMsg" );
 
 				if( window.WebSocket ) {
 					lWSC = new jws.jWebSocketJSONClient();
 				} else {
+					jws.$( "schkReconnct" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnConnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnDisconnect" ).setAttribute( "disabled", "disabled" );
 					jws.$( "sbtnClear" ).setAttribute( "disabled", "disabled" );
@@ -274,7 +305,15 @@
 						<input class="sbtnDlg" id="sbtnLogout" type="button" value="Logout" onclick="logout();"
 							   title="Logs you out and disconnects from the jWebSocket server.">
 					</td>
-					<td class="stdDlg" width="" colspan="3"></td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnReliability" type="button" value="Conn.Opt." onclick="showReliabilityOptions();"
+							   title="Returns the current connection reliability options." >
+					</td>
+					<td class="stdDlg" width="5" >Auto-Reconnect</td>
+					<td class="stdDlg" width="">
+						<input class="sbtnDlg" id="schkReconnect" type="checkbox" value="off" onclick="toggleReconnect();"
+							   title="Toggle the auto-reconnect status.">
+					</td>
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnLogout" type="button" value="Thread" onclick="thread();"
 							   title="Runs the echo operation as a thread." >
