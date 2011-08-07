@@ -13,17 +13,6 @@
                 <script>${project.jWebSocketJavaMEClient}/build.xml</script>
                 <target>jar</target>
                 <clean-target>clean</clean-target>
-                <id>jar.BlackBerry9800</id>
-                <properties>
-                    <property name="config.active">BlackBerry9800</property>
-                </properties>
-            </reference>
-            <reference>
-                <foreign-project>jWebSocketJavaMEClient</foreign-project>
-                <artifact-type>jar</artifact-type>
-                <script>${project.jWebSocketJavaMEClient}/build.xml</script>
-                <target>jar</target>
-                <clean-target>clean</clean-target>
                 <id>jar.DefaultCldcJtwiPhone1</id>
                 <properties>
                     <property name="config.active">DefaultCldcJtwiPhone1</property>
@@ -35,31 +24,9 @@
                 <script>${project.javolution}/build.xml</script>
                 <target>jar</target>
                 <clean-target>clean</clean-target>
-                <id>jar.BlackBerry9800</id>
-                <properties>
-                    <property name="config.active">BlackBerry9800</property>
-                </properties>
-            </reference>
-            <reference>
-                <foreign-project>javolution</foreign-project>
-                <artifact-type>jar</artifact-type>
-                <script>${project.javolution}/build.xml</script>
-                <target>jar</target>
-                <clean-target>clean</clean-target>
                 <id>jar.DefaultCldcJtwiPhone1</id>
                 <properties>
                     <property name="config.active">DefaultCldcJtwiPhone1</property>
-                </properties>
-            </reference>
-            <reference>
-                <foreign-project>json</foreign-project>
-                <artifact-type>jar</artifact-type>
-                <script>${project.json}/build.xml</script>
-                <target>jar</target>
-                <clean-target>clean</clean-target>
-                <id>jar.BlackBerry9800</id>
-                <properties>
-                    <property name="config.active">BlackBerry9800</property>
                 </properties>
             </reference>
             <reference>
