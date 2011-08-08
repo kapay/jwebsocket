@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - MessageConsumerRegistry
+//	jWebSocket - JmsListenerContainer
 //	Copyright (c) 2011, Innotrade GmbH - jWebSocket.org, Alexander Schulze
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -19,15 +19,12 @@ package org.jwebsocket.plugins.jms.infra;
  * 
  * @author Johannes Smutny
  */
-import org.jwebsocket.token.Token;
+import java.util.HashMap;
 
-public interface MessageConsumerRegistry {
+public interface MessagePayloadDelegate {
 
-	void addMessageConsumer(String aConnectionId, Token aToken);
+	void handleMessage(String aMessage);
 
-	void addMessagePayloadConsumer(String aConnectionId, Token aToken);
+	void handleMessage(HashMap<String, Object> aMessage);
 
-	void removeMessageConsumer(String aConectionId);
-
-	int size();
 }

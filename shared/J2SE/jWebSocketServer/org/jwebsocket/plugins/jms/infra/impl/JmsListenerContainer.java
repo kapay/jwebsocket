@@ -33,30 +33,52 @@ public class JmsListenerContainer extends DefaultMessageListenerContainer {
 	private Logger mLog = Logging.getLogger(getClass());
 	private MessageConsumerRegistry mMessageConsumerRegistry;
 
-	private JmsListenerContainer(DefaultMessageDelegate aMessageDelegate,
-			ConnectionFactory aConnectionFactory, Destination aDestination) {
-		super();
-		mMessageConsumerRegistry = aMessageDelegate;
-		MessageListenerAdapter lListener = new MessageListenerAdapter(
-				aMessageDelegate);
-		setMessageListener(lListener);
-		setConnectionFactory(aConnectionFactory);
-		setDestination(aDestination);
+	private JmsListenerContainer() {
+
 	}
 
-	public static JmsListenerContainer valueOf(
-			DefaultMessageDelegate aMessageDelegate,
+	public static JmsListenerContainer valueOf(DefaultMessageDelegate aMessageDelegate,
 			ConnectionFactory aConnectionFactory, Destination aDestination) {
-		JmsListenerContainer result = new JmsListenerContainer(
-				aMessageDelegate, aConnectionFactory, aDestination);
+		JmsListenerContainer result = initContainer(aMessageDelegate);
+		init(result, aMessageDelegate, aConnectionFactory, aDestination);
 		return result;
+	}
+
+	private static JmsListenerContainer initContainer(DefaultMessageDelegate aMessageDelegate) {
+		JmsListenerContainer lResult = new JmsListenerContainer();
+		MessageListenerAdapter lAdapter = new MessageListenerAdapter(aMessageDelegate);
+		lAdapter.setMessageConverter(null);
+		lResult.setMessageListener(lAdapter);
+		return lResult;
+	}
+
+	// public static JmsListenerContainer valueOf(DefaultMessagePayloadDelegate
+	// aMessageDelegate,
+	// ConnectionFactory aConnectionFactory, Destination aDestination) {
+	// JmsListenerContainer result = new JmsListenerContainer();
+	// result.setMessageListener(new MessageListenerAdapter(aMessageDelegate));
+	// init(result, aMessageDelegate, aConnectionFactory, aDestination);
+	// return result;
+	// }
+
+	private static void init(JmsListenerContainer result, MessageConsumerRegistry aMessageConsumerRegistry,
+			ConnectionFactory aConnectionFactory, Destination aDestination) {
+		result.setMessageConsumerRegistry(aMessageConsumerRegistry);
+		result.setConnectionFactory(aConnectionFactory);
+		result.setDestination(aDestination);
+		result.setConcurrentConsumers(1);
+	}
+
+	private void setMessageConsumerRegistry(MessageConsumerRegistry aMessageConsumerRegistry) {
+		mMessageConsumerRegistry = aMessageConsumerRegistry;
+
 	}
 
 	public MessageConsumerRegistry getMessageConsumerRegistry() {
 		return mMessageConsumerRegistry;
 	}
 
-	public DefaultMessageDelegate getMessageDelegate() {
-		return (DefaultMessageDelegate) mMessageConsumerRegistry;
-	}
+	// public DefaultMessagePayloadDelegate getMessageDelegate() {
+	// return (DefaultMessagePayloadDelegate) mMessageConsumerRegistry;
+	// }
 }

@@ -14,7 +14,6 @@
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 
- 
 //:author:*:Johannes Smutny
 
 //:package:*:jws
@@ -29,116 +28,171 @@ jws.JMSPlugIn = {
 	// ".plugins.channels")
 	// :d:en:Namespace for the [tt]ChannelPlugIn[/tt] class.
 	// if namespace changes update server plug-in accordingly!
-	NS: jws.NS_BASE + ".plugins.jms",
-	
-	SEND_TEXT: "sendText",
-	SEND_MAP: "sendMap",
-	LISTEN: "listen",
-	UNLISTEN: "unlisten",
-	
-	listen: function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
+	NS : jws.NS_BASE + ".plugins.jms",
+
+	SEND_TEXT : "sendJmsText",
+	SEND_TEXT_MESSAGE : "sendJmsTextMessage",
+	SEND_MAP : "sendJmsMap",
+	SEND_MAP_MESSAGE : "sendJmsMapMessage",
+	LISTEN : "listenJms",
+	LISTEN_MESSAGE : "listenJmsMessage",
+	UNLISTEN : "unlistenJms",
+
+	listenJms : function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
 		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
+		if (0 == lRes.code) {
 			this.sendToken({
-				ns: jws.JMSPlugIn.NS,
-				type: jws.JMSPlugIn.LISTEN,
-				connectionFactoryName: aConnectionFactoryName,
-				destinationName: aDestinationName,
-				isPubSubDomain: aPubSubDomain
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.LISTEN,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain
+			});
+		}
+		return lRes;
+	},
+
+	listenJmsMessage : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.LISTEN_MESSAGE,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain
+			});
+		}
+		return lRes;
+	},
+
+	unlistenJms : function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.UNLISTEN,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain
 			});
 		}
 		return lRes;
 	},
 	
-	unlisten: function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
+
+	sendJmsText : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain, aText) {
 		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
+		if (0 == lRes.code) {
 			this.sendToken({
-				ns: jws.JMSPlugIn.NS,
-				type: jws.JMSPlugIn.UNLISTEN,
-				connectionFactoryName: aConnectionFactoryName,
-				destinationName: aDestinationName,
-				isPubSubDomain: aPubSubDomain
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.SEND_TEXT,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain,
+				msgPayLoad : aText
+			});
+		}
+		return lRes;
+	},
+
+	sendJmsTextMessage : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain, aText, aJmsHeaderProperties) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.SEND_TEXT_MESSAGE,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain,
+				msgPayLoad : aText,
+				jmsHeaderProperties : aJmsHeaderProperties
+			});
+		}
+		return lRes;
+	},
+
+	sendJmsMap : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain, aMap) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.SEND_MAP,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain,
+				msgPayLoad : aMap
 			});
 		}
 		return lRes;
 	},
 	
-	sendJmsText: function(aConnectionFactoryName, aDestinationName, aPubSubDomain, aText) {
+	sendJmsMapMessage : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain, aMap, aJmsHeaderProperties) {
 		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
+		if (0 == lRes.code) {
 			this.sendToken({
-				ns: jws.JMSPlugIn.NS,
-				type: jws.JMSPlugIn.SEND_TEXT,
-				connectionFactoryName: aConnectionFactoryName,
-				destinationName: aDestinationName,
-				isPubSubDomain: aPubSubDomain,
-				text: aText
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.SEND_MAP_MESSAGE,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain,
+				msgPayLoad : aMap,
+				jmsHeaderProperties : aJmsHeaderProperties
 			});
 		}
 		return lRes;
 	},
-	
-	sendJmsMap: function(aConnectionFactoryName, aDestinationName, aPubSubDomain, aMap) {
-		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
-			this.sendToken({
-				ns: jws.JMSPlugIn.NS,
-				type: jws.JMSPlugIn.SEND_MAP,
-				connectionFactoryName: aConnectionFactoryName,
-				destinationName: aDestinationName,
-				isPubSubDomain: aPubSubDomain,
-				map: aMap
-			});
-		}
-		return lRes;
-	},
-	
-	processToken: function( aToken ) {
+
+	processToken : function(aToken) {
 		// check if namespace matches
-		if( aToken.ns == jws.JMSPlugIn.NS ) {
+		if (aToken.ns == jws.JMSPlugIn.NS) {
 			// here you can handle incoming tokens from the server
 			// directy in the plug-in if desired.
-			if( "event" == aToken.type ) {
-				if( "handleText" == aToken.name ) {
-					if( this.OnHandleText ) {
-						this.OnHandleText( aToken );
+			if ("event" == aToken.type) {
+				if ("handleJmsText" == aToken.name) {
+					if (this.OnHandleJmsText) {
+						this.OnHandleJmsText(aToken);
 					}
-				} else if( "handleMap" == aToken.name ) {
-					if( this.OnHandleMap ) {
-						this.OnHandleMap( aToken );
+				} else if ("handleJmsTextMessage" == aToken.name) {
+					if (this.OnHandleJmsTextMessage) {
+						this.OnHandleJmsTextMessage(aToken);
 					}
-				} else if( "channelRemoved" == aToken.name ) {
-					if( this.OnChannelRemoved ) {
-						this.OnChannelRemoved( aToken );
+				} else if ("handleJmsMap" == aToken.name) {
+					if (this.OnHandleJmsMap) {
+						this.OnHandleJmsMap(aToken);
 					}
-				} 
-			} else if( "getChannels" == aToken.reqType ) {
-				if( this.OnChannelsReceived ) {
-					this.OnChannelsReceived( aToken );
+				} else if ("handleJmsMapMessage" == aToken.name) {
+					if (this.OnHandleJmsMapMessage) {
+						this.OnHandleJmsMapMessage(aToken);
+					}
 				}
 			}
 		}
 	},
-	
-	setHandleMessageCallbacks: function( aListeners ) {
-		if( !aListeners ) {
+
+	setHandleMessageCallbacks : function(aListeners) {
+		if (!aListeners) {
 			aListeners = {};
 		}
-		if( aListeners.OnHandleText !== undefined ) {
-			this.OnHandleText = aListeners.OnHandleText;
+		if (aListeners.OnHandleJmsText !== undefined) {
+			this.OnHandleJmsText = aListeners.OnHandleJmsText;
 		}
-		if( aListeners.OnHandleMap !== undefined ) {
-			this.OnHandleMap = aListeners.OnHandleMap;
+		if (aListeners.OnHandleJmsTextMessage !== undefined) {
+			this.OnHandleJmsTextMessage = aListeners.OnHandleJmsTextMessage;
 		}
-		if( aListeners.OnChannelsReceived !== undefined ) {
-			this.OnChannelsReceived = aListeners.OnChannelsReceived;
+		if (aListeners.OnHandleJmsMap !== undefined) {
+			this.OnHandleJmsMap = aListeners.OnHandleJmsMap;
 		}
-		if( aListeners.OnChannelRemoved !== undefined ) {
-			this.OnChannelRemoved = aListeners.OnChannelRemoved;
+		if (aListeners.OnHandleJmsMapMessage !== undefined) {
+			this.OnHandleJmsMapMessage = aListeners.OnHandleJmsMapMessage;
 		}
 	}
 
 };
 // add the JMSPlugIn PlugIn into the jWebSocketTokenClient class
-jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.JMSPlugIn );
+jws.oop.addPlugIn(jws.jWebSocketTokenClient, jws.JMSPlugIn);

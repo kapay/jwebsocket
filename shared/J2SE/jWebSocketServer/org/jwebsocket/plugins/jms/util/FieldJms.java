@@ -21,9 +21,13 @@ package org.jwebsocket.plugins.jms.util;
  */
 public enum FieldJms {
 
-	CONNECTION_FACTORY_NAME("connectionFactoryName"),
-	DESTINATION_NAME("destinationName"), IS_PUB_SUB_DOMAIN("isPubSubDomain"),
-	TEXT("text"), MAP("map");
+	CONNECTION_FACTORY_NAME("connectionFactoryName"), DESTINATION_NAME("destinationName"), IS_PUB_SUB_DOMAIN(
+			"isPubSubDomain"), TEXT("text"), MAP("map"), JMS_HEADER_CORRELATION_ID("JMSCorrelationID"), JMS_HEADER_REPLY_TO(
+			"JMSReplyTo"), JMS_HEADER_TYPE("JMSType"), JMS_HEADER_DESTINATION("JMSDestination"), JMS_HEADER_MESSAGE_ID(
+			"JMSMessageID"), JMS_HEADER_DELIVERY_MODE("JMSDeliveryMode"), JMS_HEADER_TIMESTAMP("JMSTimestamp"), JMS_HEADER_REDELIVERED(
+			"JMSRedelivered"), JMS_HEADER_EXPIRATION("JMSExpiration"), JMS_HEADER_PRIORITY("JMSPriority"), MESSSAGE_PAYLOAD(
+			"msgPayLoad"), NAME("name"), CODE("code"), MSG("msg"), EVENT("event"), JMS_HEADER_PROPERTIES(
+			"jmsHeaderProperties");
 	private String mValue;
 
 	private FieldJms(String value) {

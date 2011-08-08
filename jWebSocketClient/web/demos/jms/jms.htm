@@ -114,44 +114,140 @@
 
 	function listen() {
 		log("Listen...");
-		lWSC.listen(jws.$("stxfConnectionFactoryName").value, jws
-				.$("stxfDestinationName").value,
-				jws.$("stxfPubSubDomain").checked);
+		lWSC.listenJms(getConnectionFactoryName(), getDestinationName(),
+				isPubSubDomain());
+	}
+
+	function listenMessage() {
+		log("Listen message...");
+		lWSC.listenJmsMessage(getConnectionFactoryName(), getDestinationName(),
+				isPubSubDomain());
 	}
 
 	function unlisten() {
 		log("Unlisten...");
-		lWSC.unlisten(jws.$("stxfConnectionFactoryName").value, jws
-				.$("stxfDestinationName").value,
-				jws.$("stxfPubSubDomain").checked);
+		lWSC.unlistenJms(getConnectionFactoryName(), getDestinationName(),
+				isPubSubDomain());
 	}
+
+	/*function unlistenMessage() {
+		log("Unlisten message...");
+		lWSC.unlistenJmsMessage(getConnectionFactoryName(), getDestinationName(),
+				isPubSubDomain());
+	}*/
 
 	function sendText() {
 		log("Sending Text...");
-		lWSC.sendJmsText(jws.$("stxfConnectionFactoryName").value, jws
-				.$("stxfDestinationName").value,
-				jws.$("stxfPubSubDomain").checked,
-				jws.$("stxfText").value);
+		lWSC.sendJmsText(getConnectionFactoryName(), getDestinationName(),
+				isPubSubDomain(), getTextMessagePayLoad());
 	}
 	
-	function sendMap() {
-		log("Sending Map...");
-		lWSC.sendJmsMap(jws.$("stxfConnectionFactoryName").value, jws
-				.$("stxfDestinationName").value,
-				jws.$("stxfPubSubDomain").checked,
-				eval('('+jws.$("stxfMap").value+')'));
+	function sendTextMessage() {
+		log("Sending Text Message...");
+		lWSC.sendJmsTextMessage(getConnectionFactoryName(), getDestinationName(),
+				isPubSubDomain(), getTextMessagePayLoad(), getJmsHeaderProperties());
 	}
 
-	function onHandleText(aEvent) {
-		var msg = aEvent.msg;
-		log("text message received:");
+	function sendMap() {
+		log("Sending Map...");
+		lWSC.sendJmsMap(getConnectionFactoryName(),
+				getDestinationName(),
+				isPubSubDomain(), getMapMessagePayLoad());
+	}
+
+	function sendMapMessage() {
+		log("Sending Map Message...");
+		lWSC.sendJmsMapMessage(getConnectionFactoryName(), getDestinationName(),
+				isPubSubDomain(), getMapMessagePayLoad(), getJmsHeaderProperties());
+	}
+
+	function onHandleJmsText(aEvent) {
+		var msg = aEvent.msgPayLoad;
+		log("text received:");
 		log(msg);
 	}
-	
-	function onHandleMap(aEvent) {
-		var msg = aEvent.msg;
-		log("map message received:");
+
+	function onHandleJmsTextMessage(aEvent) {
+		var msg = aEvent.msgPayLoad;
+		var jmsCorrelationId = aEvent.jmsHeaderProperties.JMSCorrelationID;
+		log("text message received:");
+		log(msg + " with the following JMS headers: " + getJmsHeadersToString(aEvent));
+	}
+
+	function onHandleJmsMap(aEvent) {
+		var msg = aEvent.msgPayLoad;
+		log("map received:");
 		log(msg);
+	}
+
+	function onHandleJmsMapMessage(aEvent) {
+		var msg = aEvent.msgPayLoad;
+		var jmsCorrelationId = aEvent.jmsHeaderProperties.JMSCorrelationID;
+		log("map message received:");
+		log(msg + " with the following JMS headers: " + getJmsHeadersToString(aEvent));
+	}
+	
+	function getJmsHeadersToString(aEvent) {
+		if (!aEvent.jmsHeaderProperties)
+			return;
+		
+		var headers = aEvent.jmsHeaderProperties;
+		var result = "";
+		result += "JMSDestination: "+headers.JMSDestination + "; ";
+		result += "JMSDeliveryMode: "+headers.JMSDeliveryMode + "; ";
+		result += "JMSMessageID: "+headers.JMSMessageID + "; ";
+		result += "JMSTimestamp: "+headers.JMSTimestamp + "; ";
+		result += "JMSCorrelationID: "+headers.JMSCorrelationID + "; ";
+		result += "JMSReplyTo: "+headers.JMSReplyTo + "; ";
+		result += "JMSRedelivered: "+headers.JMSRedelivered + "; ";
+		result += "JMSType: "+headers.JMSType + "; ";
+		result += "JMSExpiration: "+headers.JMSExpiration + "; ";
+		result += "JMSPriority: "+headers.JMSPriority;
+		return result;
+	}
+	
+	function getJmsHeaderProperties() {
+		var lJMSReplyTo = {
+				connectionFactoryName: getConnectionFactoryName(),
+				destinationName : getDestinationName(),
+				isPubSubDomain : isPubSubDomain(),
+		}
+	
+		var lJmsHeaderProperties = {
+			JMSCorrelationID: getJMSCorrelationID(),
+			JMSReplyTo: lJMSReplyTo,
+			JMSType: getJMSType()
+		}
+		
+		return lJmsHeaderProperties;
+	}
+	
+	function getMapMessagePayLoad() {
+		return eval('('	+ jws.$("stxfMap").value + ')');
+	}
+	
+	function getTextMessagePayLoad() {
+		return jws.$("stxfText").value;
+	}
+	
+	function getConnectionFactoryName() {
+		return jws.$("stxfConnectionFactoryName").value;
+	}
+	
+	function getDestinationName() {
+		return jws.$("stxfDestinationName").value;
+	}
+	
+	function isPubSubDomain() {
+		return jws.$("stxfPubSubDomain").checked;
+	}
+	
+	function getJMSCorrelationID() {
+		return jws.$("stxfJMSCorrelationID").value;
+	}
+	
+	function getJMSType() {
+		return jws.$("stxfJMSType").value;
 	}
 
 	function initPage() {
@@ -161,8 +257,10 @@
 		if (window.WebSocket) {
 			lWSC = new jws.jWebSocketJSONClient();
 			lWSC.setHandleMessageCallbacks({
-				OnHandleText : onHandleText,
-				OnHandleMap : onHandleMap
+				OnHandleJmsText : onHandleJmsText,
+				OnHandleJmsTextMessage : onHandleJmsTextMessage,
+				OnHandleJmsMap : onHandleJmsMap,
+				OnHandleJmsMapMessage : onHandleJmsMapMessage
 			});
 		} else {
 			var lMsg = jws.MSG_WS_NOT_SUPPORTED;
@@ -191,8 +289,7 @@
 		<tr>
 			<td class="tdHeader" width="">jWebSocket JMS Demo</td>
 			<td class="tdHeader" width="1%"><img id="simgStatus"
-				src="../../images/disconnected.png" align="right" />
-			</td>
+				src="../../images/disconnected.png" align="right" /></td>
 			<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span>
 			</td>
 		</tr>
@@ -225,46 +322,83 @@
 			</tr>
 			<tr class="strDlg">
 				<td width=""><input class="sbtnDlg" id="sbtnListen"
-					type="button" value="Listen" onclick="listen();" title="Listen to a JMS destination.">
-				</td>
+					type="button" value="Listen" onclick="listen();"
+					title="Listen to a JMS destination."></td>
 				<td class="stdDlg" width="5"><input class="sbtnDlg"
 					id="sbtnClear" type="button" value="Clear Log"
 					onclick="clearLog();"
-					title="Clears the result and event log above."></td>
+					title="Clears the result and event log above.">
+				</td>
 				<td class="stdDlg" width="5">&nbsp;Destination Name:</td>
 
 				<td width="70"><input class="stxfDlg" id="stxfDestinationName"
 					type="text" value="testQueue" style="width: 99%"
-					title="Enter the name of a JMS destination."></td>
+					title="Enter the name of a JMS destination.">
+				</td>
+			</tr>
+			<tr class="strDlg">
+				<td width=""><input class="sbtnDlg" id="sbtnListenMessage"
+					type="button" value="Listen Msg" onclick="listenMessage();"
+					title="Listen to a JMS destination." />
+				</td>
+				<td width=""><input class="sbtnDlg" id="sbtnSendText"
+					type="button" value="Send Text" onclick="sendText();"
+					title="Send text">
+				</td>
+				<td class="stdDlg" width="5">&nbsp;Text Message:</td>
+				<td width="70"><input class="stxfDlg" id="stxfText" type="text"
+					value="text" style="width: 99%"
+					title="Enter the content of text message">
+				</td>
 			</tr>
 			<tr class="strDlg">
 				<td width=""><input class="sbtnDlg" id="sbtUnlisten"
 					type="button" value="Unlisten" onclick="unlisten();"
-					title="Unlisten from a JMS destination."></td>
-				<td width=""><input class="sbtnDlg" id="sbtnSendText"
-					type="button" value="Send Text" onclick="sendText();"
-					title="Send text."></td>
-				<td class="stdDlg" width="5">&nbsp;Text Message:</td>
-				<td width="70"><input class="stxfDlg" id="stxfText"
-					type="text" value="text" style="width: 99%"
-					title="Enter the content of text message"></td>
-			</tr>
-			<tr class="strDlg">
-				<td width=""></td>
-				<td width=""><input class="sbtnDlg" id="sbtnSendMap"
-					type="button" value="Send Map" onclick="sendMap();"
-					title="Send map."></td>
+					title="Unlisten from a JMS destination." />
+				</td>
+				<td width=""><input class="sbtnDlg" id="sbtnSendTextMessage"
+					type="button" value="Send Text Msg" onclick="sendTextMessage();"
+					title="Send text message" /></td>
 				<td class="stdDlg" width="5">&nbsp;Topic:</td>
 				<td width="70"><input class="stxfDlg" id="stxfPubSubDomain"
-					type="checkbox" title="isPubSubDomain"></td>
+					type="checkbox" title="isPubSubDomain" />
+				</td>
+			</tr>
+			<tr class="strDlg">
+				<td width="">
+				<!-- input class="sbtnDlg" id="sbtUnlistenMessage"
+					type="button" value="Unlisten Msg" onclick="unlistenMessage();"
+					title="Unlisten from a JMS destination." /-->
+				</td>
+				<td width=""><input class="sbtnDlg" id="sbtnSendMap"
+					type="button" value="Send Map" onclick="sendMap();"
+					title="Send map." />
+				</td>
+				<td class="stdDlg" width="5">&nbsp;Map message:</td>
+				<td width="70"><input class="stxfDlg" id="stxfMap" type="text"
+					value="{&quot;first&quot;:&quot;first&quot;,&quot;second&quot;:&quot;second&quot;,&quot;third&quot;:&quot;third&quot;}"
+					style="width: 99%" title="Enter the content of map message">
+				</td>
 			</tr>
 			<tr class="strDlg">
 				<td width=""></td>
-				<td width=""></td>
-				<td class="stdDlg" width="5">&nbsp;Map message:</td>
-				<td width="70"><input class="stxfDlg" id="stxfMap"
-					type="text" value="{&quot;first&quot;:&quot;first&quot;,&quot;second&quot;:&quot;second&quot;,&quot;third&quot;:&quot;third&quot;}" style="width: 99%"
-					title="Enter the content of map message"></td>
+				<td width=""><input class="sbtnDlg" id="sbtnSendMapMessage"
+					type="button" value="Send Map Msg" onclick="sendMapMessage();"
+					title="Send map message." /></td>
+				<td class="stdDlg" width="5">&nbsp;JMSCorrelationID:</td>
+				<td width="70"><input class="stxfDlg" id="stxfJMSCorrelationID"
+					type="text" value="JMSCorrelationID" style="width: 99%"
+					title="Enter the jms header JMSCorrelationID">
+				</td>
+			</tr>
+			<tr class="strDlg">
+				<td width="" />
+				<td width="" />
+				<td class="stdDlg" width="5">&nbsp;JMSType:</td>
+				<td width="70"><input class="stxfDlg" id="stxfJMSType"
+					type="text" value="JMSType" style="width: 99%"
+					title="Enter the jms header JMSType">
+				</td>
 			</tr>
 		</table>
 	</div>

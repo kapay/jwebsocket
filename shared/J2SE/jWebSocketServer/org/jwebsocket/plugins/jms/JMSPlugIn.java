@@ -42,8 +42,7 @@ import org.springframework.core.io.FileSystemResource;
 public class JMSPlugIn extends TokenPlugIn {
 
 	private Logger mLog = Logging.getLogger(getClass());
-	private static final String NS_JMS = JWebSocketServerConstants.NS_BASE
-			+ ".plugins.jms";
+	private static final String NS_JMS = JWebSocketServerConstants.NS_BASE + ".plugins.jms";
 	private BeanFactory mBeanFactory;
 	private JmsManager mJmsManager = null;
 
@@ -56,11 +55,9 @@ public class JMSPlugIn extends TokenPlugIn {
 		this.setNamespace(NS_JMS);
 		try {
 			createBeanFactory();
-			mJmsManager = JmsManager.getInstance(aConfiguration.getSettings(),
-					mBeanFactory);
+			mJmsManager = JmsManager.getInstance(aConfiguration.getSettings(), mBeanFactory);
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName() + " instantiation: "
-					+ lEx.getMessage());
+			mLog.error(lEx.getClass().getSimpleName() + " instantiation: " + lEx.getMessage());
 		}
 
 	}
@@ -90,12 +87,9 @@ public class JMSPlugIn extends TokenPlugIn {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void connectorStopped(WebSocketConnector aConnector,
-			CloseReason aCloseReason) {
-		mJmsManager.stopListeners(aConnector.getId());
+	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
+		mJmsManager.stopListener(aConnector.getId());
 	}
-	
-	
 
 	@Override
 	public void engineStopped(WebSocketEngine aEngine) {
@@ -103,8 +97,7 @@ public class JMSPlugIn extends TokenPlugIn {
 	}
 
 	@Override
-	public void processToken(PlugInResponse aResponse,
-			WebSocketConnector aConnector, Token aToken) {
+	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 		if (null == mBeanFactory) {
 			sendMissingBeanFactoryResponseToken(aConnector, aToken);
 		} else if (null == mJmsManager) {
@@ -121,31 +114,36 @@ public class JMSPlugIn extends TokenPlugIn {
 		if (lType != null && getNamespace().equals(lNS)) {
 			if (ActionJms.LISTEN.equals(lType)) {
 				listen(aConnector, aToken);
+			} else if (ActionJms.LISTEN_MESSAGE.equals(lType)) {
+				listenMessage(aConnector, aToken);
 			} else if (ActionJms.SEND_TEXT.equals(lType)) {
 				sendText(aConnector, aToken);
+			} else if (ActionJms.SEND_TEXT_MESSAGE.equals(lType)) {
+				sendTextMessage(aConnector, aToken);
 			} else if (ActionJms.SEND_MAP.equals(lType)) {
 				sendMap(aConnector, aToken);
+			} else if (ActionJms.SEND_MAP_MESSAGE.equals(lType)) {
+				sendMapMessage(aConnector, aToken);
 			} else if (ActionJms.UNLISTEN.equals(lType)) {
 				unlisten(aConnector, aToken);
 			}
+			// else if (ActionJms.UNLISTEN_MESSAGE.equals(lType)) {
+			// unlistenMessage(aConnector, aToken);
+			// }
 		}
 	}
 
-	private void sendMissingJmsManagerResponseToken(
-			WebSocketConnector aConnector, Token aToken) {
+	private void sendMissingJmsManagerResponseToken(WebSocketConnector aConnector, Token aToken) {
 		Token lResponseToken = createResponse(aToken);
 		lResponseToken.setInteger("code", -1);
-		lResponseToken.setString("msg",
-				"missing jms manager: correct your config");
+		lResponseToken.setString("msg", "missing jms manager: correct your config");
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
 
-	private void sendMissingBeanFactoryResponseToken(
-			WebSocketConnector aConnector, Token aToken) {
+	private void sendMissingBeanFactoryResponseToken(WebSocketConnector aConnector, Token aToken) {
 		Token lResponseToken = createResponse(aToken);
 		lResponseToken.setInteger("code", -1);
-		lResponseToken.setString("msg",
-				"missing jms spring beanfactory: correct your config");
+		lResponseToken.setString("msg", "missing jms spring beanfactory: correct your config");
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
 
@@ -158,20 +156,45 @@ public class JMSPlugIn extends TokenPlugIn {
 
 		if (lDestinationIdentifier.isMissingData()) {
 			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg",
-					"Missing input data for unlisten a jms listener");
+			lResponseToken.setString("msg", "Missing input data for unlisten a jms listener");
 			sendToken(aConnector, aConnector, lResponseToken);
 			return;
 		}
 
-		mJmsManager.deregisterConnectorFromListener(aConnector.getId(),
-				lDestinationIdentifier);
+		mJmsManager.deregisterConnectorFromMessageListener(aConnector.getId(), lDestinationIdentifier);
 
 		lResponseToken.setInteger("code", 1);
 		lResponseToken.setString("msg", "Successfully unlisten jms listener");
 		// send the response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
+
+	// private void unlistenMessage(WebSocketConnector aConnector, Token aToken)
+	// {
+	// mLog.debug("Processing 'unlistenMessage'...");
+	//
+	// Token lResponseToken = createResponse(aToken);
+	//
+	// DestinationIdentifier lDestinationIdentifier =
+	// DestinationIdentifier.valueOf(aToken);
+	//
+	// if (lDestinationIdentifier.isMissingData()) {
+	// lResponseToken.setInteger("code", -1);
+	// lResponseToken.setString("msg",
+	// "Missing input data for unlisten a jms message listener");
+	// sendToken(aConnector, aConnector, lResponseToken);
+	// return;
+	// }
+	//
+	// mJmsManager.deregisterConnectorFromMessageListener(aConnector.getId(),
+	// lDestinationIdentifier);
+	//
+	// lResponseToken.setInteger("code", 1);
+	// lResponseToken.setString("msg",
+	// "Successfully unlisten jms message listener");
+	// // send the response
+	// sendToken(aConnector, aConnector, lResponseToken);
+	// }
 
 	private void listen(WebSocketConnector aConnector, Token aToken) {
 		mLog.debug("Processing 'listen'...");
@@ -181,22 +204,19 @@ public class JMSPlugIn extends TokenPlugIn {
 
 		if (lDestinationIdentifier.isMissingData()) {
 			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg",
-					"Missing input data for establishing a jms listener");
+			lResponseToken.setString("msg", "Missing input data for establishing a jms listener");
 			sendToken(aConnector, aConnector, lResponseToken);
 			return;
 		}
 
-		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(),
-				lDestinationIdentifier.getDestinationName(), RightJms.LISTEN,
-				RightJms.SEND_AND_LISTEN)) {
+		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
+				RightJms.LISTEN, RightJms.SEND_AND_LISTEN)) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
 
 		try {
-			mJmsManager.registerConnectorWithListener(aConnector.getId(),
-					aToken, lDestinationIdentifier, this);
+			mJmsManager.registerConnectorWithListener(aConnector.getId(), aToken, lDestinationIdentifier, this);
 		} catch (Exception e) {
 			lResponseToken.setInteger("code", -1);
 			lResponseToken.setString("msg", e.getMessage());
@@ -211,6 +231,41 @@ public class JMSPlugIn extends TokenPlugIn {
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
 
+	private void listenMessage(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'listenMessage'...");
+
+		Token lResponseToken = createResponse(aToken);
+		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
+
+		if (lDestinationIdentifier.isMissingData()) {
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", "Missing input data for establishing a jms message listener");
+			sendToken(aConnector, aConnector, lResponseToken);
+			return;
+		}
+
+		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
+				RightJms.LISTEN, RightJms.SEND_AND_LISTEN)) {
+			sendToken(aConnector, aConnector, createAccessDenied(aToken));
+			return;
+		}
+
+		try {
+			mJmsManager.registerConnectorWithMessageListener(aConnector.getId(), aToken, lDestinationIdentifier, this);
+		} catch (Exception e) {
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", e.getMessage());
+			// send the response
+			sendToken(aConnector, aConnector, lResponseToken);
+			return;
+		}
+
+		lResponseToken.setInteger("code", 1);
+		lResponseToken.setString("msg", "Successfully got jms message listener");
+		// send the response
+		sendToken(aConnector, aConnector, lResponseToken);
+	}
+
 	private void sendText(WebSocketConnector aConnector, Token aToken) {
 		mLog.debug("Processing 'sendText'...");
 
@@ -219,22 +274,19 @@ public class JMSPlugIn extends TokenPlugIn {
 
 		if (lDestinationIdentifier.isMissingData()) {
 			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg",
-					"Missing destination input data for sending a string message");
+			lResponseToken.setString("msg", "Missing destination input data for sending text");
 			sendToken(aConnector, aConnector, lResponseToken);
 			return;
 		}
 
-		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(),
-				lDestinationIdentifier.getDestinationName(), RightJms.SEND,
-				RightJms.SEND_AND_LISTEN)) {
+		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
+				RightJms.SEND, RightJms.SEND_AND_LISTEN)) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
 
 		try {
-			mJmsManager.sendText(lDestinationIdentifier,
-					aToken.getString(FieldJms.TEXT.getValue()));
+			mJmsManager.sendText(lDestinationIdentifier, aToken.getString(FieldJms.MESSSAGE_PAYLOAD.getValue()));
 		} catch (Exception e) {
 			lResponseToken.setInteger("code", -1);
 			lResponseToken.setString("msg", e.getMessage());
@@ -243,7 +295,42 @@ public class JMSPlugIn extends TokenPlugIn {
 		}
 
 		lResponseToken.setInteger("code", 1);
-		lResponseToken.setString("msg", "Jms string message successfully sent");
+		lResponseToken.setString("msg", "Text successfully sent");
+		// send the response
+		sendToken(aConnector, aConnector, lResponseToken);
+	}
+
+	private void sendTextMessage(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'sendTextMessage'...");
+
+		Token lResponseToken = createResponse(aToken);
+		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
+
+		if (lDestinationIdentifier.isMissingData()) {
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", "Missing destination input data for sending a text message");
+			sendToken(aConnector, aConnector, lResponseToken);
+			return;
+		}
+
+		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
+				RightJms.SEND, RightJms.SEND_AND_LISTEN)) {
+			sendToken(aConnector, aConnector, createAccessDenied(aToken));
+			return;
+		}
+
+		try {
+			mJmsManager.sendTextMessage(lDestinationIdentifier, aToken.getString(FieldJms.MESSSAGE_PAYLOAD.getValue()),
+					aToken.getMap(FieldJms.JMS_HEADER_PROPERTIES.getValue()));
+		} catch (Exception e) {
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", e.getMessage());
+			// send the response
+			sendToken(aConnector, aConnector, lResponseToken);
+		}
+
+		lResponseToken.setInteger("code", 1);
+		lResponseToken.setString("msg", "Jms text message successfully sent");
 		// send the response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
@@ -256,22 +343,54 @@ public class JMSPlugIn extends TokenPlugIn {
 
 		if (lDestinationIdentifier.isMissingData()) {
 			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg",
-					"Missing destination input data for sending a map message");
+			lResponseToken.setString("msg", "Missing destination input data for sending a map");
 			sendToken(aConnector, aConnector, lResponseToken);
 			return;
 		}
 
-		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(),
-				lDestinationIdentifier.getDestinationName(), RightJms.SEND,
-				RightJms.SEND_AND_LISTEN)) {
+		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
+				RightJms.SEND, RightJms.SEND_AND_LISTEN)) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
 
 		try {
-			mJmsManager.sendMap(lDestinationIdentifier,
-					aToken.getMap(FieldJms.MAP.getValue()));
+			mJmsManager.sendMap(lDestinationIdentifier, aToken.getMap(FieldJms.MESSSAGE_PAYLOAD.getValue()));
+		} catch (Exception e) {
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", e.getMessage());
+			// send the response
+			sendToken(aConnector, aConnector, lResponseToken);
+		}
+
+		lResponseToken.setInteger("code", 1);
+		lResponseToken.setString("msg", "Map message successfully sent");
+		// send the response
+		sendToken(aConnector, aConnector, lResponseToken);
+	}
+
+	private void sendMapMessage(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'sendMapMessage'...");
+
+		Token lResponseToken = createResponse(aToken);
+		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
+
+		if (lDestinationIdentifier.isMissingData()) {
+			lResponseToken.setInteger("code", -1);
+			lResponseToken.setString("msg", "Missing destination input data for sending a map message");
+			sendToken(aConnector, aConnector, lResponseToken);
+			return;
+		}
+
+		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
+				RightJms.SEND, RightJms.SEND_AND_LISTEN)) {
+			sendToken(aConnector, aConnector, createAccessDenied(aToken));
+			return;
+		}
+
+		try {
+			mJmsManager.sendMapMessage(lDestinationIdentifier, aToken.getMap(FieldJms.MESSSAGE_PAYLOAD.getValue()),
+					aToken.getMap(FieldJms.JMS_HEADER_PROPERTIES.getValue()));
 		} catch (Exception e) {
 			lResponseToken.setInteger("code", -1);
 			lResponseToken.setString("msg", e.getMessage());
@@ -285,12 +404,11 @@ public class JMSPlugIn extends TokenPlugIn {
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
 
-	private boolean hasRight(WebSocketConnector aConnector,
-			boolean aPubSubDomain, String aDestinationName, RightJms... aRights) {
+	private boolean hasRight(WebSocketConnector aConnector, boolean aPubSubDomain, String aDestinationName,
+			RightJms... aRights) {
 		for (RightJms next : aRights) {
-			if (SecurityFactory.hasRight(getUsername(aConnector), NS_JMS + "."
-					+ next + "." + (aPubSubDomain ? "topic" : "queue") + "."
-					+ aDestinationName)) {
+			if (SecurityFactory.hasRight(getUsername(aConnector), NS_JMS + "." + next + "."
+					+ (aPubSubDomain ? "topic" : "queue") + "." + aDestinationName)) {
 				return true;
 			}
 		}

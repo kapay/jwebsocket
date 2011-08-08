@@ -21,8 +21,10 @@ package org.jwebsocket.plugins.jms.util;
  */
 public enum ActionJms {
 
-	LISTEN("listen"), UNLISTEN("unlisten"), SEND("send"),
-	SEND_TEXT("sendText"), SEND_MAP("sendMap");
+	LISTEN("listenJms"), LISTEN_MESSAGE("listenJmsMessage"), UNLISTEN("unlistenJms"),
+	// UNLISTEN_MESSAGE("unlistenJmsMessage"),
+	SEND_TEXT("sendJmsText"), SEND_TEXT_MESSAGE("sendJmsTextMessage"), SEND_MAP("sendJmsMap"), SEND_MAP_MESSAGE(
+			"sendJmsMapMessage");
 	private String mValue;
 
 	private ActionJms(String value) {

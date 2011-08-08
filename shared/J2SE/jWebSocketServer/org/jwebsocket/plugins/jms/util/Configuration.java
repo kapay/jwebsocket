@@ -22,8 +22,7 @@ package org.jwebsocket.plugins.jms.util;
 public enum Configuration {
 
 	CF_PREFIX("connectionFactory:"), QUEUE_PREFIX("queue:"), TOPIC_PREFIX(
-	"topic:"), NAME("name"), LISTENER_CONCURRENCY("listenerConcurrency"), CONNECTION_FACTORY_NAME(
-	"cfName");
+			"topic:"), NAME("name"), CONNECTION_FACTORY_NAME("cfName");
 	private String mValue;
 
 	private Configuration(String value) {

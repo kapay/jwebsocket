@@ -19,16 +19,13 @@ package org.jwebsocket.plugins.jms.infra;
  * 
  * @author Johannes Smutny
  */
-import java.io.Serializable;
-import java.util.HashMap;
+import javax.jms.MapMessage;
+import javax.jms.TextMessage;
 
 public interface MessageDelegate {
 
-	void handleMessage(String aMessage);
+	void handleMessage(TextMessage aMessage);
 
-	void handleMessage(HashMap<String, Object> aMessage);
+	void handleMessage(MapMessage aMessage);
 
-	void handleMessage(byte[] aMessage);
-
-	void handleMessage(Serializable aMessage);
 }

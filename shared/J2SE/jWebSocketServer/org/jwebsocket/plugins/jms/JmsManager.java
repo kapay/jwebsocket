@@ -20,21 +20,27 @@ import java.util.Map;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.Queue;
+import javax.jms.Session;
 import javax.jms.Topic;
 
-import javolution.util.FastMap;
-
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.plugins.jms.infra.impl.DefaultMessageDelegate;
 import org.jwebsocket.plugins.jms.infra.impl.JmsListenerContainer;
 import org.jwebsocket.plugins.jms.util.Configuration;
+import org.jwebsocket.plugins.jms.util.FieldJms;
 import org.jwebsocket.token.Token;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
+import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.SimpleMessageConverter;
 
 /**
  * 
@@ -49,33 +55,17 @@ public class JmsManager {
 	private final Map<String, Queue> mQueues = new HashMap<String, Queue>();
 	private final Map<String, Topic> mTopics = new HashMap<String, Topic>();
 
-	private final ListenerStore mListenerStore = new BaseListenerStore();
+	// private final ListenerStore mListenerStore = new BaseListenerStore();
+	private ListenerStore mMessageListenerStore = new BaseListenerStore();
 	private final SenderStore mSenderStore = new BaseSenderStore();
-	private Map<DestinationIdentifier, QueueSettings> mQueueSettings = new FastMap<DestinationIdentifier, JmsManager.QueueSettings>();
 
-	private static class QueueSettings {
-		private String mListenerConcurrency;
-
-		public QueueSettings(String aListenerConcurrency) {
-			setListenerConcurrency(aListenerConcurrency);
-		}
-
-		public void setListenerConcurrency(String listenerConcurrency) {
-			mListenerConcurrency = listenerConcurrency;
-		}
-
-		public String getListenerConcurrency() {
-			return mListenerConcurrency;
-		}
-
-	}
+	private final MessageConverter mMsgConverter = new SimpleMessageConverter();
 
 	private JmsManager() {
 
 	}
 
-	public void initJmsAssets(Map<String, Object> aSettings,
-			BeanFactory aBeanFactory) {
+	public void initJmsAssets(Map<String, Object> aSettings, BeanFactory aBeanFactory) {
 		for (String lOption : aSettings.keySet()) {
 			if (lOption.startsWith(Configuration.CF_PREFIX.getValue()))
 				initConnectionFactory(aSettings, aBeanFactory, lOption);
@@ -86,15 +76,13 @@ public class JmsManager {
 		}
 	}
 
-	public static JmsManager getInstance(Map<String, Object> aSettings,
-			BeanFactory aBeanFactory) {
+	public static JmsManager getInstance(Map<String, Object> aSettings, BeanFactory aBeanFactory) {
 		JmsManager lManager = new JmsManager();
 		lManager.initJmsAssets(aSettings, aBeanFactory);
 		return lManager;
 	}
 
-	private void initConnectionFactory(Map<String, Object> aSettings,
-			BeanFactory aBeanFactory, String aOption) {
+	private void initConnectionFactory(Map<String, Object> aSettings, BeanFactory aBeanFactory, String aOption) {
 		Object lObj = aSettings.get(aOption);
 		JSONObject lJSON = null;
 		if (lObj instanceof JSONObject) {
@@ -109,60 +97,38 @@ public class JmsManager {
 		} catch (Exception lEx) {
 		}
 
-		mConnectionFactories.put(lName,
-				(ConnectionFactory) aBeanFactory.getBean(lName));
+		mConnectionFactories.put(lName, (ConnectionFactory) aBeanFactory.getBean(lName));
 
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("added jms connectionFactory with bean name: '" + lName
-					+ "'");
+			mLog.debug("added jms connectionFactory with bean name: '" + lName + "'");
 		}
 	}
 
-	private void initQueue(Map<String, Object> aSettings,
-			BeanFactory aBeanFactory, String aOption) {
+	private void initQueue(Map<String, Object> aSettings, BeanFactory aBeanFactory, String aOption) {
 		JSONObject lJSON = getJSONObject(aSettings, aOption);
-		storeQueue(aBeanFactory, getName(lJSON),
-				getConnectionFactoryName(lJSON), getlistenerConcurrency(lJSON));
+		storeQueue(aBeanFactory, getName(lJSON), getConnectionFactoryName(lJSON));
 	}
 
-	private void storeQueue(BeanFactory aBeanFactory, String aName,
-			String aCfName, String aListenerConcurrency) {
+	private void storeQueue(BeanFactory aBeanFactory, String aName, String aCfName) {
 		mQueues.put(aName, (Queue) aBeanFactory.getBean(aName));
-		mQueueSettings.put(
-				DestinationIdentifier.valueOf(aCfName, aName, false),
-				new QueueSettings(aListenerConcurrency));
 		if (mLog.isDebugEnabled())
 			mLog.debug("added jms queue with bean name: '" + aName + "'");
 	}
 
-	private void initTopic(Map<String, Object> aSettings,
-			BeanFactory aBeanFactory, String aOption) {
+	private void initTopic(Map<String, Object> aSettings, BeanFactory aBeanFactory, String aOption) {
 		JSONObject lJSON = getJSONObject(aSettings, aOption);
-		storeTopic(aBeanFactory, getName(lJSON),
-				getConnectionFactoryName(lJSON));
+		storeTopic(aBeanFactory, getName(lJSON), getConnectionFactoryName(lJSON));
 	}
 
-	private void storeTopic(BeanFactory aBeanFactory, String aName,
-			String aCfName) {
+	private void storeTopic(BeanFactory aBeanFactory, String aName, String aCfName) {
 		mTopics.put(aName, (Topic) aBeanFactory.getBean(aName));
 		if (mLog.isDebugEnabled())
 			mLog.debug("added jms topic with bean name: '" + aName + "'");
 	}
 
-	private String getlistenerConcurrency(JSONObject aJson) {
-		try {
-			return aJson.getString(Configuration.LISTENER_CONCURRENCY
-					.getValue());
-		} catch (Exception lEx) {
-			mLog.error("could not get listener concurrency");
-			return null;
-		}
-	}
-
 	private String getConnectionFactoryName(JSONObject aJson) {
 		try {
-			return aJson.getString(Configuration.CONNECTION_FACTORY_NAME
-					.getValue());
+			return aJson.getString(Configuration.CONNECTION_FACTORY_NAME.getValue());
 		} catch (Exception lEx) {
 			mLog.error("could not get connection factory name");
 			return null;
@@ -178,8 +144,7 @@ public class JmsManager {
 		}
 	}
 
-	private JSONObject getJSONObject(Map<String, Object> aSettings,
-			String aOption) {
+	private JSONObject getJSONObject(Map<String, Object> aSettings, String aOption) {
 		Object lObj = aSettings.get(aOption);
 		JSONObject lJSON = null;
 		if (lObj instanceof JSONObject) {
@@ -190,17 +155,16 @@ public class JmsManager {
 		return lJSON;
 	}
 
-	public void deregisterConnectorFromListener(String aConnectionId,
+	public void deregisterConnectorFromMessageListener(String aConnectionId,
 			DestinationIdentifier aDestinationIdentifier) {
-		JmsListenerContainer lListener = mListenerStore
-				.getListener(aDestinationIdentifier);
+		JmsListenerContainer lListener = mMessageListenerStore.getListener(aDestinationIdentifier);
 
-		if (null != lListener)
-			lListener.getMessageConsumerRegistry().removeMessageConsumer(
-					aConnectionId);
+		if (null != lListener) {
+			lListener.getMessageConsumerRegistry().removeMessageConsumer(aConnectionId);
 
-		if (0 == lListener.getMessageConsumerRegistry().size())
-			lListener.stop();
+			if (0 == lListener.getMessageConsumerRegistry().size())
+				lListener.stop();
+		}
 	}
 
 	private JmsTemplate getSender(DestinationIdentifier aDestinationIdentifier) {
@@ -208,136 +172,193 @@ public class JmsManager {
 		return null == lSender ? createSender(aDestinationIdentifier) : lSender;
 	}
 
-	private JmsTemplate createSender(
-			DestinationIdentifier aDestinationIdentifier) {
+	private JmsTemplate createSender(DestinationIdentifier aDestinationIdentifier) {
 		JmsTemplate lSender = new JmsTemplate();
-		lSender.setConnectionFactory(mConnectionFactories
-				.get(aDestinationIdentifier.getConnectionFactoryName()));
+		lSender.setConnectionFactory(mConnectionFactories.get(aDestinationIdentifier.getConnectionFactoryName()));
 		lSender.setDefaultDestination(getDestination(aDestinationIdentifier));
 		lSender.setPubSubDomain(aDestinationIdentifier.isPubSubDomain());
 		mSenderStore.storeSender(aDestinationIdentifier, lSender);
 		return lSender;
 	}
 
-	public void sendText(DestinationIdentifier aDestinationIdentifier,
-			String aStringMessage) {
-		JmsTemplate lSender = getSender(aDestinationIdentifier);
+	public void sendText(DestinationIdentifier aDestinationIdentifier, String aStringMessage) {
+		getSender(aDestinationIdentifier).convertAndSend(aStringMessage);
+	}
 
-		lSender.convertAndSend(aStringMessage);
+	@SuppressWarnings("rawtypes")
+	public void sendTextMessage(DestinationIdentifier aDestinationIdentifier, final String aStringMessage,
+			final Map jmsHeaderProperties) {
+		JmsTemplate lSender = getSender(aDestinationIdentifier);
+		lSender.send(lSender.getDefaultDestination(), new MessageCreator() {
+			public Message createMessage(Session session) throws JMSException {
+				Message result = session.createTextMessage(aStringMessage);
+				try {
+					enrichMessageWithHeaders(result, jmsHeaderProperties);
+				} catch (JSONException e) {
+					mLog.error("could not enrich message with headers: " + e.getMessage());
+				}
+				return result;
+			}
+		});
 	}
 
 	@SuppressWarnings("rawtypes")
 	public void sendMap(DestinationIdentifier aDestinationIdentifier, Map aMap) {
 		JmsTemplate lSender = getSender(aDestinationIdentifier);
 		if (null == lSender)
-			throw new IllegalArgumentException(
-					"missing sender for destination: isPubSubdomain: "
-							+ aDestinationIdentifier.isPubSubDomain()
-							+ " name: "
-							+ aDestinationIdentifier.getDestinationName());
+			throw new IllegalArgumentException("missing sender for destination: isPubSubdomain: "
+					+ aDestinationIdentifier.isPubSubDomain() + " name: " + aDestinationIdentifier.getDestinationName());
 
 		lSender.convertAndSend((Map) aMap);
 	}
 
-	public void registerConnectorWithListener(String aConnectionId,
-			Token aToken, DestinationIdentifier aDestinationIdentifier,
-			TokenPlugIn aTokenPlugIn) {
-		JmsListenerContainer lListener = mListenerStore
-				.getListener(aDestinationIdentifier);
-		if (null != lListener) {
-			registerConnector(lListener, aConnectionId, aToken);
-		} else {
-			createListener(aConnectionId, aToken, aDestinationIdentifier,
-					aTokenPlugIn);
+	@SuppressWarnings("rawtypes")
+	public void sendMapMessage(DestinationIdentifier aDestinationIdentifier, final Map aMap,
+			final Map jmsHeaderProperties) {
+		JmsTemplate lSender = getSender(aDestinationIdentifier);
+		lSender.send(lSender.getDefaultDestination(), new MessageCreator() {
+			public Message createMessage(Session session) throws JMSException {
+				Message result = mMsgConverter.toMessage(aMap, session);
+				try {
+					enrichMessageWithHeaders(result, jmsHeaderProperties);
+				} catch (JSONException e) {
+					mLog.error("could not enrich message with headers: " + e.getMessage());
+				}
+				return result;
+			}
+		});
+	}
+
+	private void enrichMessageWithHeaders(Message msg, @SuppressWarnings("rawtypes") Map jmsHeaderProperties)
+			throws JMSException, JSONException {
+		if (null == jmsHeaderProperties || jmsHeaderProperties.size() == 0)
+			return;
+
+		addHeader(FieldJms.JMS_HEADER_CORRELATION_ID, msg, jmsHeaderProperties);
+		addHeader(FieldJms.JMS_HEADER_REPLY_TO, msg, jmsHeaderProperties);
+		addHeader(FieldJms.JMS_HEADER_TYPE, msg, jmsHeaderProperties);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private void addHeader(FieldJms headerName, Message msg, Map jmsHeaderProperties) throws JMSException,
+			JSONException {
+		Object headerValue = jmsHeaderProperties.get(headerName.getValue());
+		if (null == headerValue)
+			return;
+		switch (headerName) {
+		case JMS_HEADER_CORRELATION_ID:
+			if (!(headerValue instanceof String))
+				return;
+			msg.setJMSCorrelationID((String) headerValue);
+			break;
+		case JMS_HEADER_REPLY_TO:
+			if (!(headerValue instanceof Map))
+				return;
+			msg.setJMSReplyTo(getDestination((Map) headerValue));
+			break;
+		case JMS_HEADER_TYPE:
+			if (!(headerValue instanceof String))
+				return;
+			msg.setJMSType((String) headerValue);
 		}
+
 	}
 
-	private void createListener(String aConnectionId, Token aToken,
-			DestinationIdentifier aDestinationIdentifier,
+	private Destination getDestination(@SuppressWarnings("rawtypes") Map headerValue) throws JSONException {
+		if (null == headerValue || headerValue.size() != 3)
+			return null;
+
+		String lConnectionFactoryName = (String) headerValue.get(FieldJms.CONNECTION_FACTORY_NAME.getValue());
+		String lDestinationName = (String) headerValue.get(FieldJms.DESTINATION_NAME.getValue());
+		Boolean lPubSubDomain = (Boolean) headerValue.get(FieldJms.IS_PUB_SUB_DOMAIN.getValue());
+		return getDestination(DestinationIdentifier.valueOf(lConnectionFactoryName, lDestinationName, lPubSubDomain));
+	}
+
+	public void registerConnectorWithListener(String aConnectionId, Token aToken,
+			DestinationIdentifier aDestinationIdentifier, TokenPlugIn aTokenPlugIn) {
+		JmsListenerContainer lListener = mMessageListenerStore.getListener(aDestinationIdentifier);
+		if (null != lListener)
+			registerMessagePayloadConnector(lListener, aConnectionId, aToken);
+		else
+			createListener(aConnectionId, aToken, aDestinationIdentifier, aTokenPlugIn);
+	}
+
+	public void registerConnectorWithMessageListener(String aConnectionId, Token aToken,
+			DestinationIdentifier aDestinationIdentifier, TokenPlugIn aTokenPlugIn) {
+		JmsListenerContainer lListener = mMessageListenerStore.getListener(aDestinationIdentifier);
+		if (null != lListener)
+			registerConnector(lListener, aConnectionId, aToken);
+		else
+			createMessageListener(aConnectionId, aToken, aDestinationIdentifier, aTokenPlugIn);
+
+	}
+
+	private void createListener(String aConnectionId, Token aToken, DestinationIdentifier aDestinationIdentifier,
 			TokenPlugIn aTokenPlugIn) {
-		initializeListener(JmsListenerContainer.valueOf(
+		initializeListener(JmsListenerContainer.valueOf(createMessageDelegate(aDestinationIdentifier, aTokenPlugIn),
+				mConnectionFactories.get(aDestinationIdentifier.getConnectionFactoryName()),
+				getDestination(aDestinationIdentifier)), aDestinationIdentifier, aConnectionId, aToken);
+	}
+
+	private void createMessageListener(String aConnectionId, Token aToken,
+			DestinationIdentifier aDestinationIdentifier, TokenPlugIn aTokenPlugIn) {
+		initializeMessageListener(JmsListenerContainer.valueOf(
 				createMessageDelegate(aDestinationIdentifier, aTokenPlugIn),
-				mConnectionFactories.get(aDestinationIdentifier
-						.getConnectionFactoryName()),
-				getDestination(aDestinationIdentifier)),
-				aDestinationIdentifier, aConnectionId, aToken);
+				mConnectionFactories.get(aDestinationIdentifier.getConnectionFactoryName()),
+				getDestination(aDestinationIdentifier)), aDestinationIdentifier, aConnectionId, aToken);
 	}
 
-	private DefaultMessageDelegate createMessageDelegate(
-			DestinationIdentifier aDestinationIdentifier,
-			TokenPlugIn aTokenPlugIn) {
-		return new DefaultMessageDelegate(aTokenPlugIn,
-				aDestinationIdentifier.isPubSubDomain());
-	}
-
-	private Destination getDestination(
-			DestinationIdentifier aDestinationIdentifier) {
-		Destination lDestination = aDestinationIdentifier.isPubSubDomain() ? mTopics
-				.get(aDestinationIdentifier.getDestinationName()) : mQueues
-				.get(aDestinationIdentifier.getDestinationName());
-		if (null == lDestination)
-			throw new IllegalArgumentException(
-					"missing destination: isPubSubdomain: "
-							+ aDestinationIdentifier.isPubSubDomain()
-							+ " name: "
-							+ aDestinationIdentifier.getDestinationName());
-		return lDestination;
-	}
-
-	private void initializeListener(JmsListenerContainer aJmsListenerContainer,
-			DestinationIdentifier aDestinationIdentifier, String aConnectionId,
-			Token aToken) {
-		mListenerStore.storeListener(aDestinationIdentifier,
-				aJmsListenerContainer);
-		aJmsListenerContainer.getMessageConsumerRegistry().addMessageConsumer(
-				aConnectionId, aToken);
-		initDestinationListener(aJmsListenerContainer, aDestinationIdentifier);
+	private void initializeMessageListener(JmsListenerContainer aJmsListenerContainer,
+			DestinationIdentifier aDestinationIdentifier, String aConnectionId, Token aToken) {
+		mMessageListenerStore.storeListener(aDestinationIdentifier, aJmsListenerContainer);
+		aJmsListenerContainer.getMessageConsumerRegistry().addMessageConsumer(aConnectionId, aToken);
 		aJmsListenerContainer.afterPropertiesSet();
 		aJmsListenerContainer.start();
 	}
 
-	private void initDestinationListener(
-			JmsListenerContainer aJmsListenerContainer,
-			DestinationIdentifier aDestinationIdentifier) {
-		if (aDestinationIdentifier.isPubSubDomain())
-			initTopicListener(aJmsListenerContainer, aDestinationIdentifier);
-		else
-			initQueueListener(aJmsListenerContainer, aDestinationIdentifier);
+	private DefaultMessageDelegate createMessageDelegate(DestinationIdentifier aDestinationIdentifier,
+			TokenPlugIn aTokenPlugIn) {
+		return new DefaultMessageDelegate(aTokenPlugIn, aDestinationIdentifier.isPubSubDomain());
 	}
 
-	private void initQueueListener(JmsListenerContainer aJmsListenerContainer,
-			DestinationIdentifier aDestinationIdentifier) {
-		QueueSettings lSettings = mQueueSettings.get(aDestinationIdentifier);
-		aJmsListenerContainer
-				.setConcurrency(lSettings.getListenerConcurrency());
+	private Destination getDestination(DestinationIdentifier aDestinationIdentifier) {
+		Destination lDestination = aDestinationIdentifier.isPubSubDomain() ? mTopics.get(aDestinationIdentifier
+				.getDestinationName()) : mQueues.get(aDestinationIdentifier.getDestinationName());
+		if (null == lDestination)
+			throw new IllegalArgumentException("missing destination: isPubSubdomain: "
+					+ aDestinationIdentifier.isPubSubDomain() + " name: " + aDestinationIdentifier.getDestinationName());
+		return lDestination;
 	}
 
-	private void initTopicListener(JmsListenerContainer aJmsListenerContainer,
-			DestinationIdentifier aDestinationIdentifier) {
-		// multithreaded topic listeners are avoided, otherwise each consumer
-		// would receive the same message as often as many threads are
-		// configured
-		// Note: this is not the case with queues
-		aJmsListenerContainer.setMaxConcurrentConsumers(1);
+	private void initializeListener(JmsListenerContainer aJmsListenerContainer,
+			DestinationIdentifier aDestinationIdentifier, String aConnectionId, Token aToken) {
+		mMessageListenerStore.storeListener(aDestinationIdentifier, aJmsListenerContainer);
+		aJmsListenerContainer.getMessageConsumerRegistry().addMessagePayloadConsumer(aConnectionId, aToken);
+		aJmsListenerContainer.afterPropertiesSet();
+		aJmsListenerContainer.start();
 	}
 
-	private void registerConnector(JmsListenerContainer aListener,
-			String aConnectionId, Token aToken) {
-		aListener.getMessageConsumerRegistry().addMessageConsumer(
-				aConnectionId, aToken);
+	private void registerConnector(JmsListenerContainer aListener, String aConnectionId, Token aToken) {
+		aListener.getMessageConsumerRegistry().addMessageConsumer(aConnectionId, aToken);
 
 		if (!aListener.isRunning())
 			aListener.start();
 	}
 
-	public void stopListeners(String aConnectionId) {
-		for (JmsListenerContainer next : mListenerStore.getAll())
-			next.getMessageConsumerRegistry().removeMessageConsumer(
-					aConnectionId);
+	private void registerMessagePayloadConnector(JmsListenerContainer aListener, String aConnectionId, Token aToken) {
+		aListener.getMessageConsumerRegistry().addMessagePayloadConsumer(aConnectionId, aToken);
+
+		if (!aListener.isRunning())
+			aListener.start();
+	}
+
+	public void stopListener(String aConnectionId) {
+		for (JmsListenerContainer next : mMessageListenerStore.getAll())
+			next.getMessageConsumerRegistry().removeMessageConsumer(aConnectionId);
 	}
 
 	public void shutDownListeners() {
-		for (JmsListenerContainer next : mListenerStore.getAll())
+		for (JmsListenerContainer next : mMessageListenerStore.getAll())
 			next.shutdown();
 	}
 
