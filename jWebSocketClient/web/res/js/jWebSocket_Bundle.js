@@ -26,9 +26,9 @@
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0a11
+	//:const:*:VERSION:String:1.0b1 (10812)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0a11 (10530)",
+	VERSION: "1.0b1 (10812)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -87,6 +87,28 @@ var jws = {
 	//:d:en:The connection has been closed or could not be opened.
 	CLOSED: 3,
 
+	//:const:*:RECONNECTING:Integer:1000
+	//:d:en:The connection manager is trying to re-connect, but not yet connected. _
+	//:d:en:This is jWebSocket specific and not part of the W3C API.
+	RECONNECTING: 1000,
+
+	// Default connection reliability options
+	RO_OFF: {
+		autoReconnect : false,
+		reconnectDelay: -1,
+		reconnectTimeout: -1,
+		queueItemLimit: -1,
+		queueSizeLimit: -1
+	},
+
+	RO_ON: {
+		autoReconnect: true,
+		reconnectDelay: 500,
+		reconnectTimeout: 30000,
+		queueItemLimit: 1000,
+		queueSizeLimit: 1024 * 1024 * 10 // 10 MByte
+	},
+	
 	//:const:*:WS_SUBPROT_JSON:String:jwebsocket.org/json
 	//:d:en:jWebSocket sub protocol JSON
 	WS_SUBPROT_JSON: "jwebsocket.org/json",
@@ -1210,15 +1232,18 @@ jws.oop = {};
 // implement simple class declaration to support multi-level inheritance
 // and easy 'inherited' calls (super-calls) in JavaScript
 jws.oop.declareClass = function( aNamespace, aClassname, aAncestor, aFields ) {
+	
 	var lNS = self[ aNamespace ];
 	if( !lNS ) { 
-		self[ aNamespace ] = { };
+		self[ aNamespace ] = {};
 	}
+	
 	var lConstructor = function() {
 		if( this.create ) {
 			this.create.apply( this, arguments );
 		}
 	};
+	
 	// publish the new class in the given name space
 	lNS[ aClassname ] = lConstructor;
 
@@ -1293,6 +1318,13 @@ jws.oop.addPlugIn = function( aClass, aPlugIn ) {
 
 jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 
+	create: function( aOptions ) {
+		// turn off connection reliability by default
+		if( !this.fReliabilityOptions ) {
+			this.fReliabilityOptions = jws.RO_OFF;
+		}
+	},
+
 	//:m:*:processOpened
 	//:d:en:Called when the WebSocket connection successfully was established. _
 	//:d:en:Can to be overwritten in descendant classes to process _
@@ -1349,20 +1381,37 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				if( aOptions.subProtocol ) {
 					lSubProt = aOptions.subProtocol;
 				}
-				// console.log("Opening with sub-prot: " + lSubProt)
-
+				// check if connection reliability is desired
+				if( aOptions.reliabilityOptions ) {
+					this.fReliabilityOptions = aOptions.reliabilityOptions;
+				}
+				// turn off isExplicitClose flag
+				// to allow optional reconnect
+				if( this.fReliabilityOptions ) {
+					this.fReliabilityOptions.isExplicitClose = false;
+				}
+				
+				// maintain own status flag
+				if( this.fStatus != jws.RECONNECTING ) {
+					this.fStatus = jws.CONNECTING;
+				}	
 				// create a new web socket instance
 				this.fConn = new WebSocket( aURL, lSubProt );
+				// save URL and sub prot for optional re-connect
 				this.fURL = aURL; 
+				this.fSubProt = lSubProt;
 				
 				// assign the listeners to local functions (closure) to allow
 				// to handle event before and after the application
 				this.fConn.onopen = function( aEvent ) {
+					lThis.fStatus = jws.OPEN;
 					lValue = lThis.processOpened( aEvent );
 					// give application change to handle event
 					if( aOptions.OnOpen ) {
 						aOptions.OnOpen( aEvent, lValue, lThis );
 					}
+					// process outgoing queue
+					lThis.processQueue();
 				};
 
 				this.fConn.onmessage = function( aEvent ) {
@@ -1374,6 +1423,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				};
 
 				this.fConn.onclose = function( aEvent ) {
+					lThis.fStatus = jws.CLOSED;
 					// check if still disconnect timeout active and clear if needed
 					if( lThis.hDisconnectTimeout ) {
 						clearTimeout( lThis.hDisconnectTimeout );
@@ -1385,6 +1435,25 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 						aOptions.OnClose( aEvent, lValue, lThis );
 					}
 					lThis.fConn = null;
+					
+					// connection was closed, 
+					// check if auto-reconnect was configured
+					if( lThis.fReliabilityOptions 
+						&& lThis.fReliabilityOptions.autoReconnect 
+						&& !lThis.fReliabilityOptions.isExplicitClose ) {
+						
+						lThis.fStatus = jws.RECONNECTING;
+						
+						lThis.hReconnectDelayTimeout = setTimeout(
+							function() {
+								if( aOptions.OnReconnecting ) {
+									aOptions.OnReconnecting( aEvent, lValue, lThis );
+								}
+								lThis.open( lThis.fURL, aOptions );
+							},
+							lThis.fReliabilityOptions.reconnectDelay
+						);
+					}
 				};
 
 			} else {
@@ -1409,13 +1478,16 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:a:en::::-
 	//:r:*:::void:none
 	processQueue: function() {
-		if( this.mQueue ) {
+		// is there a queue at all?
+		if( this.fOutQueue ) {
 			var lRes = this.checkConnected();
 			if( lRes.code == 0 ) {
-				var lPacket;
-				while( this.mQueue.length > 0 ) {
+				var lItem;
+				while( this.fOutQueue.length > 0 ) {
 					// get first element of the queue
-					lPacket = this.mQueue[ 0 ];
+					lItem = this.fOutQueue.shift();
+					// and send it to the server
+					this.fConn.send( lItem.packet );
 				}
 			}
 		}
@@ -1430,14 +1502,13 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
 	//:r:*:::void:none
 	queuePacket: function( aPacket, aOptions ) {
-		if( !this.mQueue ) {
-			this.mQueue = [];
+		if( !this.fOutQueue ) {
+			this.fOutQueue = [];
 		}
-		this.mQueue.push({
+		this.fOutQueue.push({
 			packet: aPacket,
 			options: aOptions
 		});
-		this.processQueue();
 	},
 
 	//:m:*:sendStream
@@ -1447,17 +1518,124 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:r:*:::void:none
 	sendStream: function( aData ) {
 		// is client already connected
-		if( this.isConnected() ) {
+		if( this.isOpened() ) {
 			try {
 				this.fConn.send( aData );
 			} catch( lEx ) {
 				// this is never fired !
 				// console.log( "Could not send!" );
 			}
-		// if not raise exception
 		} else {
-			throw new Error( "Not connected" );
+			if( this.isWriteable() ) {
+				this.queuePacket( aData, null );
+			} else {
+				// if not raise exception
+				throw new Error( "Not connected" );
+			}	
 		}
+	},
+
+	//:m:*:abortReconnect
+	//:d:en:Aborts a pending automatic re-connection, if such.
+	//:a:en::::none
+	//:r:*:::boolean:[tt]true[/tt], if re-connect was pending, [tt]false[/tt] if nothing to abort.
+	abortReconnect: function() {
+		// in case connection could be established 
+		// reset the re-connect interval.
+		if( this.hReconnectDelayTimeout ) {
+			clearTimeout( this.hReconnectDelayTimeout );
+			this.hReconnectDelayTimeout = null;
+			return true;
+		}	
+		return false;
+	},
+
+	//:m:*:setAutoReconnect
+	//:d:en:Specifies whether to automatically re-connect in case of _
+	//:d:en:connection loss.
+	//:a:en::aAutoReconnect:Boolean:[tt]true[/tt] if auto-reconnect is desired, otherwise [tt]false[/tt].
+	//:r:*:::void:none
+	setAutoReconnect: function( aAutoReconnect ) {
+		if( aAutoReconnect && typeof( aLimit ) == "boolean" ) {
+			this.fReliabilityOptions.autoReconnect = aAutoReconnect;
+		} else {
+			this.fReliabilityOptions.autoReconnect = false;
+		}
+		// if no auto-reconnect is desired, abort a pending re-connect, if such.
+		if( !( this.fReliabilityOptions && this.fReliabilityOptions.autoReconnect ) ) {
+			abortReconnect();
+		}
+	},
+
+	//:m:*:setQueueItemLimit
+	//:d:en:Specifies the maximum number of allowed queue items. If a zero or _
+	//:d:en:negative number is passed the number of items is not checked. _
+	//:d:en:If the limit is exceeded the OnBufferOverflow event is fired.
+	//:a:en::aLimit:Integer:Maximum of allowed messages in the queue.
+	//:r:*:::void:none
+	setQueueItemLimit: function( aLimit ) {
+		if( aLimit && typeof( aLimit ) == "number" && aLimit > 0 ) {
+			this.fReliabilityOptions.queueItemLimit = parseInt( aLimit );
+		} else {
+			this.fReliabilityOptions.queueItemLimit = 0;
+		}
+	},
+
+	//:m:*:setQueueSizeLimit
+	//:d:en:Specifies the maximum size in bytes allowed for the queue. If a zero or _
+	//:d:en:negative number is passed the size of the queue is not checked. _
+	//:d:en:If the limit is exceeded the OnBufferOverflow event is fired.
+	//:a:en::aLimit:Integer:Maximum size of the queue in bytes.
+	//:r:*:::void:none
+	setQueueSizeLimit: function( aLimit ) {
+		if( aLimit && typeof( aLimit ) == "number" && aLimit > 0 ) {
+			this.fReliabilityOptions.queueSizeLimit = parseInt( aLimit );
+		} else {
+			this.fReliabilityOptions.queueSizeLimit = 0;
+		}
+	},
+
+	//:m:*:setReliabilityOptions
+	//:d:en:Specifies how the connection is management (null = no management) is done.
+	//:a:en::aOptions:Object:The various connection management options.
+	//:r:*:::void:none
+	setReliabilityOptions: function( aOptions ) {
+		this.fReliabilityOptions = aOptions;
+		// if no auto-reconnect is desired, abort a pending re-connect, if such.
+		// if no auto-reconnect is desired, abort a pending re-connect, if such.
+		if( this.fReliabilityOptions ) {
+			if( this.fReliabilityOptions.autoReconnect ) {
+				//:todo:en:here we could think about establishing the connection
+				// but this would required to pass all args for open!
+			} else {
+				abortReconnect();
+			}	
+		}
+	},
+
+	//:m:*:getReliabilityOptions
+	//:d:en:Returns how the connection is management (null = no management) is done.
+	//:a:en::aOptions:Object:The various connection management options.
+	//:r:*:::void:none
+	getReliabilityOptions: function() {
+		return this.fReliabilityOptions;
+	},
+
+	//:m:*:getOutQueue
+	//:d:en:Returns the outgoing message queue.
+	//:a:en::::none
+	//:r:*:::Array:The outgoing message queue, if such, otherwise [tt]undefined[/tt] or [tt]null[/tt].
+	getOutQueue: function() {
+		return this.fOutQueue;
+	},
+
+	//:m:*:resetSendQueue
+	//:d:en:resets the send queue by simply deleting the queue field _
+	//:d:en:of the connection.
+	//:a:en::::none
+	//:r:*:::void:none
+	resetSendQueue: function() {
+		delete this.fOutQueue;
 	},
 
 	//:m:*:isOpened
@@ -1465,9 +1643,11 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 	//:a:en::::none
 	//:r:*:::boolean:[tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
 	isOpened: function() {
-		return( this.fConn != undefined
+		return(
+			this.fConn != undefined
 			&& this.fConn != null
-			&& this.fConn.readyState == jws.OPEN );
+			&& this.fConn.readyState == jws.OPEN
+		);
 	},
 
 	//:m:*:getURL
@@ -1487,6 +1667,15 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		*/
 	},
 
+	//:m:*:getSubProt
+	//:d:en:Returns the selected sub protocol when the WebSocket connection 
+	//:d:en:was opened, otherwise [tt]null[/tt].
+	//:a:en::::none
+	//:r:*:::String:the URL if the WebSocket connection opened up, otherwise [tt]null[/tt].
+	getSubProt: function() {
+		return this.fSubProt;
+	},
+	
 	//:m:*:isConnected
 	//:@deprecated:en:Use [tt]isOpened()[/tt] instead.
 	//:d:en:Returns [tt]true[/tt] if the WebSocket connection is up otherwise [tt]false[/tt].
@@ -1506,6 +1695,11 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		// if client closes usually no event is fired
 		// here you optionally can fire it if required in your app!
 		var lFireClose = false;
+		// turn on isExplicitClose flag to not auto re-connect in case
+		// of an explicit, i.e. desired client side close operation
+		if( this.fReliabilityOptions ) {
+			this.fReliabilityOptions.isExplicitClose = true;
+		}
 		if( aOptions ) {
 			if( aOptions.fireClose && this.fConn.onclose ) {
 				// TODO: Adjust to event fields 
@@ -1606,8 +1800,9 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 		}
 		// add the plug-in to the class
 		this.fPlugIns.push( aPlugIn );
-
-		var lField;
+/*
+ 		 var lField;
+ */
 		if( !aId ) {
 			aId = aPlugIn.ID;
 		}
@@ -1650,6 +1845,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::::none
 	//:r:*:::void:none
 	create: function( aOptions ) {
+		// call inherited create
+		arguments.callee.inherited.call( this, aOptions );
 		this.fRequestCallbacks = {};
 	},
 
@@ -1681,7 +1878,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				// thus reset the timeout observer
 				clearTimeout( lClbkRec.hCleanUp );
 			}
-			lClbkRec.callback.OnResponse( aToken );
+			var lArgs = lClbkRec.args;
+			lClbkRec.callback.OnResponse( aToken, lArgs );
 			delete this.fRequestCallbacks[ lField ];
 		}
 	},
@@ -1713,10 +1911,42 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:r:*:::void:none
 	checkConnected: function() {
 		var lRes = this.createDefaultResult();
-		if( !this.isConnected() ) {
+		if( !this.isOpened() ) {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
 			lRes.msg = "Not connected.";
+		}
+		return lRes;
+	},
+
+	//:m:*:isWriteable
+	//:d:en:Checks if the client currently is able to process send commands. _
+	//:d:en:In case the connection-reliability option in turned on the _
+	//:d:en:write queue is used to buffer outgoing packets. The queue may be _
+	//:d:en:in number of items as as well as in size and time.
+	//:a:en::::none
+	//:r:*:::void:none
+	isWriteable: function() {
+		return(
+			this.isOpened() || this.fStatus == jws.RECONNECTING
+		);
+	},
+
+	//:m:*:checkWriteable
+	//:d:en:Checks if the client is connected and if so returns a default _
+	//:d:en:response token (please refer to [tt]createDefaultResult[/tt] _
+	//:d:en:method. If the client is not connected an error token is returned _
+	//:d:en:with [tt]code = -1[/tt] and [tt]msg = "Not connected"[/tt]. _
+	//:d:en:This is a convenience method if a function needs to check if _
+	//:d:en:the client is connected and return an error token if not.
+	//:a:en::::none
+	//:r:*:::void:none
+	checkWriteable: function() {
+		var lRes = this.createDefaultResult();
+		if( !this.isWriteable() ) {
+			lRes.code = -1;
+			lRes.localeKey = "jws.jsc.res.notWriteable";
+			lRes.msg = "Not writable.";
 		}
 		return lRes;
 	},
@@ -2034,11 +2264,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en:aOptions:OnResponse:Function:Reference to callback function, which is called when the response is received.
 	//:r:*:::void:none
 	sendToken: function( aToken, aOptions ) {
-		var lRes = this.checkConnected();
+		var lRes = this.checkWriteable();
 		if( lRes.code == 0 ) {
 			var lSpawnThread = false;
 			var lL2FragmSize = 0;
 			var lTimeout = jws.DEF_RESP_TIMEOUT;
+			var lArgs = null;
 			var lCallbacks = {
 				OnResponse: null,
 				OnSuccess: null,
@@ -2065,6 +2296,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					lCallbacks.OnTimeout = aOptions.OnTimeout;
 					lControlResponse = true;
 				}
+				if( aOptions.args ) {
+					lArgs = aOptions.args;
+				}
 				if( aOptions.timeout ) {
 					lTimeout = aOptions.timeout;
 				}
@@ -2083,6 +2317,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				var lClbkRec = {
 					request: new Date().getTime(),
 					callback: lCallbacks,
+					args: lArgs,
 					timeout: lTimeout
 				};
 				this.fRequestCallbacks[ lClbkId ] = lClbkRec;
@@ -2222,7 +2457,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 	//:a:en::aData:String:An arbitrary string to be returned by the server.
 	//:r:*:::void:none
 	echo: function( aData ) {
-		var lRes = this.checkConnected();
+		var lRes = this.checkWriteable();
 		if( lRes.code == 0 ) {
 			this.sendToken({
 				ns: jws.NS_SYSTEM,
@@ -2286,6 +2521,12 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 		var lNoLogoutBroadcast = false;
 		var lNoDisconnectBroadcast = false;
 
+		// turn on isExplicitClose flag to not auto re-connect in case
+		// of an explicit, i.e. desired client side close operation
+		if( this.fReliabilityOptions ) {
+			this.fReliabilityOptions.isExplicitClose = true;
+		}
+		
 		if( aOptions ) {
 			if( aOptions.timeout ) {
 				lTimeout = aOptions.timeout;
@@ -2420,7 +2661,7 @@ jws.SystemClientPlugIn = {
 			}
 		}
 		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+		if( this.isOpened() ) {
 			this.sendToken({
 				ns: jws.SystemClientPlugIn.NS,
 				type: "login",
@@ -2459,7 +2700,7 @@ jws.SystemClientPlugIn = {
 			aOptions = {};
 		}
 		// if already connected, just send the login token 
-		if( this.isConnected() ) {
+		if( this.isOpened() ) {
 			this.login( aUsername, aPassword, aOptions );
 		} else {
 			var lAppOnWelcomeClBk = aOptions.OnWelcome;
@@ -2505,7 +2746,7 @@ jws.SystemClientPlugIn = {
 	//:a:en::::none
 	//:r:*:::Boolean:[tt]true[/tt] when the client is authenticated, otherwise [tt]false[/tt].
 	isLoggedIn: function() {
-		return( this.isConnected() && this.fUsername );
+		return( this.isOpened() && this.fUsername );
 	},
 
 	broadcastToken: function( aToken, aOptions ) {
@@ -2626,7 +2867,7 @@ jws.SystemClientPlugIn = {
 			}
 		}
 		var lRes = this.createDefaultResult();
-		if( this.isConnected() ) {
+		if( this.isOpened() ) {
 			this.sendToken({
 				ns: jws.SystemClientPlugIn.NS,
 				type: "ping",
@@ -2689,7 +2930,7 @@ jws.SystemClientPlugIn = {
 			stopKeepAlive();
 		}
 		// return if not (yet) connected
-		if( !this.isConnected() ) {
+		if( !this.isOpened() ) {
 			// TODO: provide reasonable result here!
 			return;
 		}
@@ -2717,7 +2958,7 @@ jws.SystemClientPlugIn = {
 		var lThis = this;
 		this.hKeepAlive = setInterval(
 			function() {
-				if( lThis.isConnected() ) {
+				if( lThis.isOpened() ) {
 					lThis.ping({
 						echo: lEcho
 					});
@@ -5316,7 +5557,20 @@ jws.JDBCPlugIn = {
 				type: "querySQL",
 				sql: aQuery
 			};
-			this.sendToken( lToken,	aOptions );
+			this.sendToken( lToken, aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcQueryScript: function( aScript, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "querySQL",
+				script: aScript
+			};
+			this.sendToken( lToken, aOptions );
 		}
 		return lRes;
 	},
@@ -5328,6 +5582,19 @@ jws.JDBCPlugIn = {
 				ns: jws.JDBCPlugIn.NS,
 				type: "updateSQL",
 				sql: aQuery
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	jdbcUpdateScript: function( aScript, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "updateSQL",
+				script: aScript
 			};
 			this.sendToken( lToken,	aOptions );
 		}
@@ -5443,6 +5710,204 @@ jws.JDBCPlugIn = {
 
 // add the JWebSocket Shared Objects PlugIn into the TokenClient class
 jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.JDBCPlugIn );
+//	---------------------------------------------------------------------------
+//	jWebSocket JMS PlugIn (uses jWebSocket Client and Server)
+//	(c) 2011 Innotrade GmbH - jWebSocket.org, Alexander Schulze
+//	---------------------------------------------------------------------------
+//	This program is free software; you can redistribute it and/or modify it
+//	under the terms of the GNU Lesser General Public License as published by the
+//	Free Software Foundation; either version 3 of the License, or (at your
+//	option) any later version.
+//	This program is distributed in the hope that it will be useful, but WITHOUT
+//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+//	more details.
+//	You should have received a copy of the GNU Lesser General Public License along
+//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
+//	---------------------------------------------------------------------------
+
+//:author:*:Johannes Smutny
+
+//:package:*:jws
+//:class:*:jws.JMSPlugIn
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.JMSPlugIn[/tt] class. This _
+//:d:en:plug-in provides the methods to subscribe and unsubscribe at certain _
+//:d:en:channel on the server.
+jws.JMSPlugIn = {
+
+	// :const:*:NS:String:org.jwebsocket.plugins.channels (jws.NS_BASE +
+	// ".plugins.channels")
+	// :d:en:Namespace for the [tt]ChannelPlugIn[/tt] class.
+	// if namespace changes update server plug-in accordingly!
+	NS : jws.NS_BASE + ".plugins.jms",
+
+	SEND_TEXT : "sendJmsText",
+	SEND_TEXT_MESSAGE : "sendJmsTextMessage",
+	SEND_MAP : "sendJmsMap",
+	SEND_MAP_MESSAGE : "sendJmsMapMessage",
+	LISTEN : "listenJms",
+	LISTEN_MESSAGE : "listenJmsMessage",
+	UNLISTEN : "unlistenJms",
+
+	listenJms : function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.LISTEN,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain
+			});
+		}
+		return lRes;
+	},
+
+	listenJmsMessage : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.LISTEN_MESSAGE,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain
+			});
+		}
+		return lRes;
+	},
+
+	unlistenJms : function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.UNLISTEN,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain
+			});
+		}
+		return lRes;
+	},
+	
+
+	sendJmsText : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain, aText) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.SEND_TEXT,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain,
+				msgPayLoad : aText
+			});
+		}
+		return lRes;
+	},
+
+	sendJmsTextMessage : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain, aText, aJmsHeaderProperties) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.SEND_TEXT_MESSAGE,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain,
+				msgPayLoad : aText,
+				jmsHeaderProperties : aJmsHeaderProperties
+			});
+		}
+		return lRes;
+	},
+
+	sendJmsMap : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain, aMap) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.SEND_MAP,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain,
+				msgPayLoad : aMap
+			});
+		}
+		return lRes;
+	},
+	
+	sendJmsMapMessage : function(aConnectionFactoryName, aDestinationName,
+			aPubSubDomain, aMap, aJmsHeaderProperties) {
+		var lRes = this.checkConnected();
+		if (0 == lRes.code) {
+			this.sendToken({
+				ns : jws.JMSPlugIn.NS,
+				type : jws.JMSPlugIn.SEND_MAP_MESSAGE,
+				connectionFactoryName : aConnectionFactoryName,
+				destinationName : aDestinationName,
+				isPubSubDomain : aPubSubDomain,
+				msgPayLoad : aMap,
+				jmsHeaderProperties : aJmsHeaderProperties
+			});
+		}
+		return lRes;
+	},
+
+	processToken : function(aToken) {
+		// check if namespace matches
+		if (aToken.ns == jws.JMSPlugIn.NS) {
+			// here you can handle incoming tokens from the server
+			// directy in the plug-in if desired.
+			if ("event" == aToken.type) {
+				if ("handleJmsText" == aToken.name) {
+					if (this.OnHandleJmsText) {
+						this.OnHandleJmsText(aToken);
+					}
+				} else if ("handleJmsTextMessage" == aToken.name) {
+					if (this.OnHandleJmsTextMessage) {
+						this.OnHandleJmsTextMessage(aToken);
+					}
+				} else if ("handleJmsMap" == aToken.name) {
+					if (this.OnHandleJmsMap) {
+						this.OnHandleJmsMap(aToken);
+					}
+				} else if ("handleJmsMapMessage" == aToken.name) {
+					if (this.OnHandleJmsMapMessage) {
+						this.OnHandleJmsMapMessage(aToken);
+					}
+				}
+			}
+		}
+	},
+
+	setHandleMessageCallbacks : function(aListeners) {
+		if (!aListeners) {
+			aListeners = {};
+		}
+		if (aListeners.OnHandleJmsText !== undefined) {
+			this.OnHandleJmsText = aListeners.OnHandleJmsText;
+		}
+		if (aListeners.OnHandleJmsTextMessage !== undefined) {
+			this.OnHandleJmsTextMessage = aListeners.OnHandleJmsTextMessage;
+		}
+		if (aListeners.OnHandleJmsMap !== undefined) {
+			this.OnHandleJmsMap = aListeners.OnHandleJmsMap;
+		}
+		if (aListeners.OnHandleJmsMapMessage !== undefined) {
+			this.OnHandleJmsMapMessage = aListeners.OnHandleJmsMapMessage;
+		}
+	}
+
+};
+// add the JMSPlugIn PlugIn into the jWebSocketTokenClient class
+jws.oop.addPlugIn(jws.jWebSocketTokenClient, jws.JMSPlugIn);
 //	---------------------------------------------------------------------------
 //	jWebSocket Logging PlugIn (uses jWebSocket Client and Server)
 //	(C) 2011 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath

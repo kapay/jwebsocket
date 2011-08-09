@@ -52,21 +52,14 @@ public class JmsListenerContainer extends DefaultMessageListenerContainer {
 		return lResult;
 	}
 
-	// public static JmsListenerContainer valueOf(DefaultMessagePayloadDelegate
-	// aMessageDelegate,
-	// ConnectionFactory aConnectionFactory, Destination aDestination) {
-	// JmsListenerContainer result = new JmsListenerContainer();
-	// result.setMessageListener(new MessageListenerAdapter(aMessageDelegate));
-	// init(result, aMessageDelegate, aConnectionFactory, aDestination);
-	// return result;
-	// }
-
 	private static void init(JmsListenerContainer result, MessageConsumerRegistry aMessageConsumerRegistry,
 			ConnectionFactory aConnectionFactory, Destination aDestination) {
 		result.setMessageConsumerRegistry(aMessageConsumerRegistry);
 		result.setConnectionFactory(aConnectionFactory);
 		result.setDestination(aDestination);
 		result.setConcurrentConsumers(1);
+		result.setSessionAcknowledgeMode(1);
+		result.setSessionTransacted(true);
 	}
 
 	private void setMessageConsumerRegistry(MessageConsumerRegistry aMessageConsumerRegistry) {
@@ -77,8 +70,4 @@ public class JmsListenerContainer extends DefaultMessageListenerContainer {
 	public MessageConsumerRegistry getMessageConsumerRegistry() {
 		return mMessageConsumerRegistry;
 	}
-
-	// public DefaultMessagePayloadDelegate getMessageDelegate() {
-	// return (DefaultMessagePayloadDelegate) mMessageConsumerRegistry;
-	// }
 }

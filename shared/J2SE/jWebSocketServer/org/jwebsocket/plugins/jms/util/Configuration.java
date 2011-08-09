@@ -21,8 +21,9 @@ package org.jwebsocket.plugins.jms.util;
  */
 public enum Configuration {
 
-	CF_PREFIX("connectionFactory:"), QUEUE_PREFIX("queue:"), TOPIC_PREFIX(
-			"topic:"), NAME("name"), CONNECTION_FACTORY_NAME("cfName");
+	CF_PREFIX("connectionFactory:"), DESTINATION_PREFIX("destination:"), NAME("name"), CONNECTION_FACTORY_NAME("cfName"), PUB_SUB_DOMAIN(
+			"pubSubDomain");
+
 	private String mValue;
 
 	private Configuration(String value) {

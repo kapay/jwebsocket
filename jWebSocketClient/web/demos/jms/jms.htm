@@ -128,13 +128,7 @@
 		log("Unlisten...");
 		lWSC.unlistenJms(getConnectionFactoryName(), getDestinationName(),
 				isPubSubDomain());
-	}
-
-	/*function unlistenMessage() {
-		log("Unlisten message...");
-		lWSC.unlistenJmsMessage(getConnectionFactoryName(), getDestinationName(),
-				isPubSubDomain());
-	}*/
+	}	
 
 	function sendText() {
 		log("Sending Text...");
@@ -169,7 +163,6 @@
 
 	function onHandleJmsTextMessage(aEvent) {
 		var msg = aEvent.msgPayLoad;
-		var jmsCorrelationId = aEvent.jmsHeaderProperties.JMSCorrelationID;
 		log("text message received:");
 		log(msg + " with the following JMS headers: " + getJmsHeadersToString(aEvent));
 	}
@@ -182,7 +175,6 @@
 
 	function onHandleJmsMapMessage(aEvent) {
 		var msg = aEvent.msgPayLoad;
-		var jmsCorrelationId = aEvent.jmsHeaderProperties.JMSCorrelationID;
 		log("map message received:");
 		log(msg + " with the following JMS headers: " + getJmsHeadersToString(aEvent));
 	}

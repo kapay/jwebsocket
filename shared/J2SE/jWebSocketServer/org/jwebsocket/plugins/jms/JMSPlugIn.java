@@ -127,9 +127,6 @@ public class JMSPlugIn extends TokenPlugIn {
 			} else if (ActionJms.UNLISTEN.equals(lType)) {
 				unlisten(aConnector, aToken);
 			}
-			// else if (ActionJms.UNLISTEN_MESSAGE.equals(lType)) {
-			// unlistenMessage(aConnector, aToken);
-			// }
 		}
 	}
 
@@ -168,33 +165,6 @@ public class JMSPlugIn extends TokenPlugIn {
 		// send the response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
-
-	// private void unlistenMessage(WebSocketConnector aConnector, Token aToken)
-	// {
-	// mLog.debug("Processing 'unlistenMessage'...");
-	//
-	// Token lResponseToken = createResponse(aToken);
-	//
-	// DestinationIdentifier lDestinationIdentifier =
-	// DestinationIdentifier.valueOf(aToken);
-	//
-	// if (lDestinationIdentifier.isMissingData()) {
-	// lResponseToken.setInteger("code", -1);
-	// lResponseToken.setString("msg",
-	// "Missing input data for unlisten a jms message listener");
-	// sendToken(aConnector, aConnector, lResponseToken);
-	// return;
-	// }
-	//
-	// mJmsManager.deregisterConnectorFromMessageListener(aConnector.getId(),
-	// lDestinationIdentifier);
-	//
-	// lResponseToken.setInteger("code", 1);
-	// lResponseToken.setString("msg",
-	// "Successfully unlisten jms message listener");
-	// // send the response
-	// sendToken(aConnector, aConnector, lResponseToken);
-	// }
 
 	private void listen(WebSocketConnector aConnector, Token aToken) {
 		mLog.debug("Processing 'listen'...");

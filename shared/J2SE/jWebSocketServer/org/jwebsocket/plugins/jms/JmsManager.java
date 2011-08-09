@@ -55,24 +55,20 @@ public class JmsManager {
 	private final Map<String, Queue> mQueues = new HashMap<String, Queue>();
 	private final Map<String, Topic> mTopics = new HashMap<String, Topic>();
 
-	// private final ListenerStore mListenerStore = new BaseListenerStore();
 	private ListenerStore mMessageListenerStore = new BaseListenerStore();
 	private final SenderStore mSenderStore = new BaseSenderStore();
-
 	private final MessageConverter mMsgConverter = new SimpleMessageConverter();
 
 	private JmsManager() {
 
 	}
 
-	public void initJmsAssets(Map<String, Object> aSettings, BeanFactory aBeanFactory) {
+	private void initJmsAssets(Map<String, Object> aSettings, BeanFactory aBeanFactory) {
 		for (String lOption : aSettings.keySet()) {
 			if (lOption.startsWith(Configuration.CF_PREFIX.getValue()))
 				initConnectionFactory(aSettings, aBeanFactory, lOption);
-			else if (lOption.startsWith(Configuration.QUEUE_PREFIX.getValue()))
-				initQueue(aSettings, aBeanFactory, lOption);
-			else if (lOption.startsWith(Configuration.TOPIC_PREFIX.getValue()))
-				initTopic(aSettings, aBeanFactory, lOption);
+			else if (lOption.startsWith(Configuration.DESTINATION_PREFIX.getValue()))
+				initDestination(aSettings, aBeanFactory, lOption);
 		}
 	}
 
@@ -83,6 +79,27 @@ public class JmsManager {
 	}
 
 	private void initConnectionFactory(Map<String, Object> aSettings, BeanFactory aBeanFactory, String aOption) {
+		JSONObject lJSON = getJSONObject(aSettings, aOption);
+		String lName = getName(lJSON);
+		mConnectionFactories.put(lName, (ConnectionFactory) aBeanFactory.getBean(lName));
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("added jms connectionFactory with bean name: '" + lName + "'");
+		}
+	}
+
+	private void initDestination(Map<String, Object> aSettings, BeanFactory aBeanFactory, String aOption) {
+		JSONObject lJSON = getJSONObject(aSettings, aOption);
+		String name = getName(lJSON);
+		String cfName = getConnectionFactoryName(lJSON);
+		Boolean pubSubDomain = getPubSubDomain(lJSON);
+
+		if (pubSubDomain)
+			storeTopic(aBeanFactory, name, cfName);
+		else
+			storeQueue(aBeanFactory, name, cfName);
+	}
+
+	private JSONObject getJSONObject(Map<String, Object> aSettings, String aOption) {
 		Object lObj = aSettings.get(aOption);
 		JSONObject lJSON = null;
 		if (lObj instanceof JSONObject) {
@@ -90,34 +107,13 @@ public class JmsManager {
 		} else {
 			lJSON = new JSONObject();
 		}
-
-		String lName = null;
-		try {
-			lName = lJSON.getString(Configuration.NAME.getValue());
-		} catch (Exception lEx) {
-		}
-
-		mConnectionFactories.put(lName, (ConnectionFactory) aBeanFactory.getBean(lName));
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("added jms connectionFactory with bean name: '" + lName + "'");
-		}
-	}
-
-	private void initQueue(Map<String, Object> aSettings, BeanFactory aBeanFactory, String aOption) {
-		JSONObject lJSON = getJSONObject(aSettings, aOption);
-		storeQueue(aBeanFactory, getName(lJSON), getConnectionFactoryName(lJSON));
+		return lJSON;
 	}
 
 	private void storeQueue(BeanFactory aBeanFactory, String aName, String aCfName) {
 		mQueues.put(aName, (Queue) aBeanFactory.getBean(aName));
 		if (mLog.isDebugEnabled())
 			mLog.debug("added jms queue with bean name: '" + aName + "'");
-	}
-
-	private void initTopic(Map<String, Object> aSettings, BeanFactory aBeanFactory, String aOption) {
-		JSONObject lJSON = getJSONObject(aSettings, aOption);
-		storeTopic(aBeanFactory, getName(lJSON), getConnectionFactoryName(lJSON));
 	}
 
 	private void storeTopic(BeanFactory aBeanFactory, String aName, String aCfName) {
@@ -130,8 +126,7 @@ public class JmsManager {
 		try {
 			return aJson.getString(Configuration.CONNECTION_FACTORY_NAME.getValue());
 		} catch (Exception lEx) {
-			mLog.error("could not get connection factory name");
-			return null;
+			throw new IllegalArgumentException("JMSPlugIn configuration error: missing cfName Property", lEx);
 		}
 	}
 
@@ -139,20 +134,16 @@ public class JmsManager {
 		try {
 			return aJson.getString(Configuration.NAME.getValue());
 		} catch (Exception lEx) {
-			mLog.error("could not get name");
-			return null;
+			throw new IllegalArgumentException("JMSPlugIn configuration error: missing name Property", lEx);
 		}
 	}
 
-	private JSONObject getJSONObject(Map<String, Object> aSettings, String aOption) {
-		Object lObj = aSettings.get(aOption);
-		JSONObject lJSON = null;
-		if (lObj instanceof JSONObject) {
-			lJSON = (JSONObject) lObj;
-		} else {
-			lJSON = new JSONObject();
+	private Boolean getPubSubDomain(JSONObject aJson) {
+		try {
+			return aJson.getBoolean(Configuration.PUB_SUB_DOMAIN.getValue());
+		} catch (Exception lEx) {
+			throw new IllegalArgumentException("JMSPlugIn configuration error: missing pubSubDomain Property", lEx);
 		}
-		return lJSON;
 	}
 
 	public void deregisterConnectorFromMessageListener(String aConnectionId,
@@ -216,6 +207,10 @@ public class JmsManager {
 	public void sendMapMessage(DestinationIdentifier aDestinationIdentifier, final Map aMap,
 			final Map jmsHeaderProperties) {
 		JmsTemplate lSender = getSender(aDestinationIdentifier);
+		/**
+		 * TODO create a private field of type MessageCreator instead of
+		 * instantiating one each time
+		 */
 		lSender.send(lSender.getDefaultDestination(), new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
 				Message result = mMsgConverter.toMessage(aMap, session);
@@ -261,7 +256,6 @@ public class JmsManager {
 				return;
 			msg.setJMSType((String) headerValue);
 		}
-
 	}
 
 	private Destination getDestination(@SuppressWarnings("rawtypes") Map headerValue) throws JSONException {
@@ -353,8 +347,12 @@ public class JmsManager {
 	}
 
 	public void stopListener(String aConnectionId) {
-		for (JmsListenerContainer next : mMessageListenerStore.getAll())
+		for (JmsListenerContainer next : mMessageListenerStore.getAll()) {
 			next.getMessageConsumerRegistry().removeMessageConsumer(aConnectionId);
+
+			if (0 == next.getMessageConsumerRegistry().size())
+				next.stop();
+		}
 	}
 
 	public void shutDownListeners() {
