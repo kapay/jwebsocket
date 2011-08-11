@@ -104,6 +104,29 @@ public class Tools {
 	}
 
 	/**
+	 * Returns the SHA1 sum of the given string. The output always has 32 digits.
+	 * @param aMsg String the string to calculate the MD5 sum for.
+	 * @return MD5 sum of the given string.
+	 */
+	public static String getSHA1(String aMsg) {
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("SHA-1");
+			byte[] lBufSource = aMsg.getBytes("UTF-8");
+			byte[] lBufTarget = md.digest(lBufSource);
+			Formatter formatter = new Formatter();
+			for (byte b : lBufTarget) {
+				formatter.format("%02x", b);
+			}
+			return (formatter.toString());
+		} catch (Exception ex) {
+			// log.error("getMD5: " + ex.getMessage());
+			System.out.println("getSHA: " + ex.getMessage());
+		}
+		return null;
+	}
+
+	/**
 	 * Returns the hex value of the given int as a string. If {@code aLen} is
 	 * greater than zero the output is cut or filled to the given length
 	 * otherwise the exact number of digits is returned.

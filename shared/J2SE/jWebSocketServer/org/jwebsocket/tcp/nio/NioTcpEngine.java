@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.*;
 import org.jwebsocket.logging.Logging;
@@ -389,8 +388,7 @@ public class NioTcpEngine extends BaseEngine {
 		private void doRead(NioTcpConnector lConnector, ReadBean lBean) throws IOException {
 			lConnector.setWorkerId(hashCode());
 			if (lConnector.isAfterHandshake()) {
-				boolean lIsHixie = JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(
-						lConnector.getHeader().getDraft());
+				boolean lIsHixie = lConnector.isHixieDraft();
 				if (lIsHixie) {
 					readHixie(lBean.data, lConnector);
 				} else {
@@ -466,16 +464,17 @@ public class NioTcpEngine extends BaseEngine {
 				// determine fragmentation
 				boolean lFragmented = (0x01 & lFlags) == 0x01;
 				// shift 4 bits to skip the first bit and three RSVx bits
-				int lType = lFlags >> 4;
-				int lPacketType = WebSocketProtocolHandler.toRawPacketType(lType);
+				int lOpcode = lFlags >> 4;
+				WebSocketFrameType lFrameType = WebSocketProtocolHandler.opcodeToFrameType(connector.getVersion(), lOpcode);
+
 				int payloadStartIndex = 2;
 
-				if (lPacketType == -1) {
+				if (lFrameType == WebSocketFrameType.INVALID) {
 					// Could not determine packet type, ignore the packet.
 					// Maybe we need a setting to decide, if such packets should abort the connection?
-					mLog.trace("Dropping packet with unknown type: " + lType);
+					mLog.trace("Dropping packet with unknown type: " + lOpcode);
 				} else {
-					connector.setPacketType(lPacketType);
+					connector.setPacketType(lFrameType);
 					// Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
 					long lPayloadLen = buffer[1] >> 1;
 					if (lPayloadLen == 126) {
@@ -511,17 +510,17 @@ public class NioTcpEngine extends BaseEngine {
 					}
 				}
 
-				if (lPacketType == RawPacket.FRAMETYPE_PING) {
+				if (lFrameType == WebSocketFrameType.PING) {
 					// As per spec, server must respond to PING with PONG (maybe
 					// this should be handled higher up in the hierarchy?)
 					WebSocketPacket lPong = new RawPacket(connector.getPacketBuffer());
-					lPong.setFrameType(RawPacket.FRAMETYPE_PONG);
+					lPong.setFrameType(WebSocketFrameType.PONG);
 					connector.sendPacket(lPong);
-				} else if (lPacketType == RawPacket.FRAMETYPE_CLOSE) {
+				} else if (lFrameType == WebSocketFrameType.CLOSE) {
 					// As per spec, server must respond to CLOSE with acknowledgment CLOSE (maybe
 					// this should be handled higher up in the hierarchy?)
 					WebSocketPacket lClose = new RawPacket(connector.getPacketBuffer());
-					lClose.setFrameType(RawPacket.FRAMETYPE_CLOSE);
+					lClose.setFrameType(WebSocketFrameType.CLOSE);
 					connector.sendPacket(lClose);
 					clientDisconnect(connector, CloseReason.CLIENT);
 				}

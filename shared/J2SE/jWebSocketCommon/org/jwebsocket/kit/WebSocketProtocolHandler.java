@@ -16,8 +16,6 @@
 package org.jwebsocket.kit;
 
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.config.JWebSocketCommonConstants;
-
 import java.util.List;
 
 /**
@@ -48,51 +46,28 @@ import java.util.List;
  * </pre>
  *
  * @author jang
+ * @author aschulze
  */
 public class WebSocketProtocolHandler {
 	// web socket protocol packet types
 
 	/**
-	 *
-	 */
-	public static final int FRAGMENT_PT = 0x00;
-	/**
-	 *
-	 */
-	public static final int CLOSE_PT = 0x01;
-	/**
-	 *
-	 */
-	public static final int PING_PT = 0x02;
-	/**
-	 *
-	 */
-	public static final int PONG_PT = 0x03;
-	/**
-	 *
-	 */
-	public static final int UTF8_PT = 0x04;
-	/**
-	 * 
-	 */
-	public static final int BINARY_PT = 0x05;
-
-	/**
-	 *
+	 * converts an abstract data packet into a protocol specific frame
+	 * according to the correct version.
 	 * @param aDataPacket
 	 * @return
 	 */
-	public static byte[] toProtocolPacket(WebSocketPacket aDataPacket) {
+	public static byte[] toProtocolPacket(int aVersion, WebSocketPacket aDataPacket) {
+
 		byte[] lBuff = new byte[2]; // resulting packet will have at least 2 bytes
-		int lType = aDataPacket.getFrameType();
-		int lTargetType = toWebSocketFrameType(lType);
+		WebSocketFrameType lFrameType = aDataPacket.getFrameType();
+		int lTargetType = frameTypeToOpcode(aVersion, lFrameType);
 		if (lTargetType == -1) {
-			throw new WebSocketRuntimeException("Cannot construct a packet with unknown packet type: " + lType);
+			throw new WebSocketRuntimeException("Cannot construct a packet with unknown packet type: " + lFrameType);
 		}
 
-		// just shift four bits to the left (MORE and RSVx bits are not set)
-		lTargetType = lTargetType << 4;
-		lBuff[0] = (byte) lTargetType;
+		// 0x80 means it's the final frame, the RSV bits are not yet set
+		lBuff[0] = (byte) (lTargetType | 0x80);
 
 		int lPayloadLen = aDataPacket.getByteArray().length;
 
@@ -109,10 +84,10 @@ public class WebSocketProtocolHandler {
 		// Therefore, we never set target payload length greater than signed 32-bit number
 		// (Integer.MAX_VALUE).
 		if (lPayloadLen < 126) {
-			lBuff[1] = (byte) (lPayloadLen << 1); // just write the payload length
+			lBuff[1] = (byte) (lPayloadLen); // just write the payload length
 		} else if (lPayloadLen >= 126 && lPayloadLen < 0xFFFF) {
 			// first write 126 (meaning, there will follow two bytes for actual length)
-			lBuff[1] = (byte) (126 << 1);
+			lBuff[1] = (byte) (126 /*<< 1*/);
 			int lSize = lBuff.length;
 			lBuff = copyOf(lBuff, lSize + 2);
 			lBuff[lSize] = (byte) ((lPayloadLen >>> 8) & 0xFF);
@@ -139,10 +114,6 @@ public class WebSocketProtocolHandler {
 		return lBuff;
 	}
 
-	public static void main(String[] args) {
-		System.out.println("(byte) (127 << 1)" + (byte) (0xFF));
-	}
-
 	/* TODO: implement fragmentation */
 	/**
 	 *
@@ -155,27 +126,28 @@ public class WebSocketProtocolHandler {
 	}
 
 	/**
-	 *
-	 * @param aWebSocketFrameType
+	 * converts a WebSocket protocol opcode to an abstract jWebSocket frame type
+	 * @param aOpCode
 	 * @return
 	 */
-	public static int toRawPacketType(int aWebSocketFrameType) {
-		switch (aWebSocketFrameType) {
-			case FRAGMENT_PT:
-				return RawPacket.FRAMETYPE_FRAGMENT;
-			case CLOSE_PT:
-				return RawPacket.FRAMETYPE_CLOSE;
-			case PING_PT:
-				return RawPacket.FRAMETYPE_PING;
-			case PONG_PT:
-				return RawPacket.FRAMETYPE_PONG;
-			case UTF8_PT:
-				return RawPacket.FRAMETYPE_UTF8;
-			case BINARY_PT:
-				return RawPacket.FRAMETYPE_BINARY;
-			// other types are reserved for future use
-			default:
-				return -1;
+	public static WebSocketFrameType opcodeToFrameType(int aVersion, int aOpcode) {
+
+		WebSocketOpcode lOpcode = new WebSocketOpcode(aVersion);
+
+		if (aOpcode == lOpcode.OPCODE_FRAGMENT) {
+			return WebSocketFrameType.FRAGMENT;
+		} else if (aOpcode == lOpcode.OPCODE_TEXT) {
+			return WebSocketFrameType.TEXT;
+		} else if (aOpcode == lOpcode.OPCODE_BINARY) {
+			return WebSocketFrameType.BINARY;
+		} else if (aOpcode == lOpcode.OPCODE_CLOSE) {
+			return WebSocketFrameType.CLOSE;
+		} else if (aOpcode == lOpcode.OPCODE_PING) {
+			return WebSocketFrameType.PING;
+		} else if (aOpcode == lOpcode.OPCODE_PONG) {
+			return WebSocketFrameType.PONG;
+		} else {
+			return WebSocketFrameType.INVALID;
 		}
 	}
 
@@ -184,32 +156,38 @@ public class WebSocketProtocolHandler {
 	 * @param aJWebSocketFormatConstant
 	 * @return
 	 */
+	/*
 	public static int toRawPacketType(String aJWebSocketFormatConstant) {
-		return JWebSocketCommonConstants.WS_FORMAT_BINARY.equals(aJWebSocketFormatConstant)
-				? RawPacket.FRAMETYPE_BINARY
-				// treat everything else as utf8 packet type
-				: RawPacket.FRAMETYPE_UTF8;
+	return JWebSocketCommonConstants.WSWS_FORMAT_BINARY.equals(aJWebSocketFormatConstant)
+	? RawPacket.FRAMETYPE_BINARY
+	// treat everything else as utf8 packet type
+	: RawPacket.FRAMETYPE_UTF8;
 	}
-
+	 */
 	/**
 	 *
-	 * @param aRawPacketType
+	 * @param aFrameType
 	 * @return
 	 */
-	public static int toWebSocketFrameType(int aRawPacketType) {
-		switch (aRawPacketType) {
-			case RawPacket.FRAMETYPE_CLOSE:
-				return CLOSE_PT;
-			case RawPacket.FRAMETYPE_PING:
-				return PING_PT;
-			case RawPacket.FRAMETYPE_PONG:
-				return PONG_PT;
-			case RawPacket.FRAMETYPE_UTF8:
-				return UTF8_PT;
-			case RawPacket.FRAMETYPE_BINARY:
-				return BINARY_PT;
+	public static int frameTypeToOpcode(int aVersion, WebSocketFrameType aFrameType) {
+
+		WebSocketOpcode lOpcode = new WebSocketOpcode(aVersion);
+
+		switch (aFrameType) {
+			case FRAGMENT:
+				return lOpcode.OPCODE_FRAGMENT;
+			case TEXT:
+				return lOpcode.OPCODE_TEXT;
+			case BINARY:
+				return lOpcode.OPCODE_BINARY;
+			case CLOSE:
+				return lOpcode.OPCODE_CLOSE;
+			case PING:
+				return lOpcode.OPCODE_PING;
+			case PONG:
+				return lOpcode.OPCODE_PONG;
 			default:
-				return -1;
+				return lOpcode.OPCODE_INVALID;
 		}
 	}
 

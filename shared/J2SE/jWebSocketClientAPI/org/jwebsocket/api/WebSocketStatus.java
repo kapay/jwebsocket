@@ -19,12 +19,22 @@ package org.jwebsocket.api;
  * HTML5 WebSocket API specification
  * {@linkplain http://dev.w3.org/html5/websockets/#websocket}
  * 
- * @author puran
- * @version $Id: WebSocketStatus.java 683 2010-07-17 04:35:39Z mailtopuran@gmail.com $
+ * @author puran, aschulze
  */
 public enum WebSocketStatus {
     
-    CONNECTING(0), OPEN(1), CLOSING(2), CLOSED(3);
+	/** The connection has not yet been established. */
+	CONNECTING(0), 
+	//** The WebSocket connection is established and communication is possible */
+	OPEN(1), 
+	/** The connection is going through the closing handshake. */
+	CLOSING(2), 
+	/** The connection has been closed or could not be opened. */
+	CLOSED(3),
+	/** The connection manager is trying to re-connect, but not yet connected.
+		This is jWebSocket specific and not part of the W3C API. */
+	RECONNECTING(1000),
+	AUTHENTICATED(1001);
 
     private int status;
 

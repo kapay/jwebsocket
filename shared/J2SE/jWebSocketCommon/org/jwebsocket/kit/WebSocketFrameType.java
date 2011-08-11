@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - Copyright (c) 2010 Innotrade GmbH
+//  jWebSocket Protocol Frametype Enum - Copyright (c) 2011 Innotrade GmbH
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
 //  under the terms of the GNU Lesser General Public License as published by the
@@ -12,17 +12,38 @@
 //  You should have received a copy of the GNU Lesser General Public License along
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
-package org.jwebsocket.api;
+package org.jwebsocket.kit;
 
 /**
- * Base interface jWebSocket events
- * @author puran
+ *
  * @author aschulze
- * @version $Id: WebSocketClientEvent.java 702 2010-07-18 17:54:17Z mailtopuran@gmail.com $
  */
-public interface WebSocketClientEvent {
+public enum WebSocketFrameType {
 
-	String getName();
+	/**  */
+	INVALID(-1),
+	/**  */
+	FRAGMENT(0x00),
+	/**  */
+	TEXT(0x01),
+	/**  */
+	BINARY(0x02),
+	/**  */
+	CLOSE(0x09),
+	/**  */
+	PING(0x09),
+	/**  */
+	PONG(0x0A);
+	private int mType;
 
-	String getData();
+	WebSocketFrameType(int aType) {
+		mType = aType;
+	}
+
+	/**
+	 * @return the status int value
+	 */
+	public int getType() {
+		return mType;
+	}
 }

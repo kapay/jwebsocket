@@ -29,6 +29,7 @@ import javax.swing.ImageIcon;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.api.WebSocketStatus;
 import org.jwebsocket.client.token.BaseTokenClient;
 import org.jwebsocket.config.JWebSocketClientConstants;
 import org.jwebsocket.kit.WebSocketException;
@@ -44,25 +45,25 @@ import org.jwebsocket.token.TokenFactory;
 public class TestDialog extends javax.swing.JFrame implements WebSocketClientTokenListener {
 
 	private static final long serialVersionUID = 1L;
-	private BaseTokenClient client = null;
-	private int prevStatus = BaseTokenClient.DISCONNECTED;
-	private ImageIcon icoDisconnected = null;
-	private ImageIcon icoConnected = null;
-	private ImageIcon icoAuthenticated = null;
+	private BaseTokenClient mClient = null;
+	private WebSocketStatus mPrevStatus = WebSocketStatus.CLOSED;
+	private ImageIcon mIcoDisconnected = null;
+	private ImageIcon mIcoConnected = null;
+	private ImageIcon mIcoAuthenticated = null;
 
 	/** Creates new form TestDialog */
 	public TestDialog() {
 		initComponents();
 		try {
 			lblTitle.setText(lblTitle.getText().replace("{ver}", JWebSocketClientConstants.VERSION_STR));
-			client = new BaseTokenClient();
+			mClient = new BaseTokenClient();
 			// uncomment following line to test #03 draft 
 			// (nothing else is required, because server-side orients itself according to client request)
 			//client.setDraft(JWebSocketCommonConstants.WS_DRAFT_03);
-			client.addListener(this);
-			icoDisconnected = new ImageIcon(getClass().getResource("/images/disconnected.png"));
-			icoConnected = new ImageIcon(getClass().getResource("/images/connected.png"));
-			icoAuthenticated = new ImageIcon(getClass().getResource("/images/authenticated.png"));
+			mClient.addListener(this);
+			mIcoDisconnected = new ImageIcon(getClass().getResource("/images/disconnected.png"));
+			mIcoConnected = new ImageIcon(getClass().getResource("/images/connected.png"));
+			mIcoAuthenticated = new ImageIcon(getClass().getResource("/images/authenticated.png"));
 			checkStatusIcon();
 		} catch (Exception ex) {
 			System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
@@ -70,24 +71,25 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 	}
 
 	private void checkStatusIcon() {
-		int lStatus = BaseTokenClient.DISCONNECTED;
-		if (client.getUsername() != null) {
-			lStatus = BaseTokenClient.AUTHENTICATED;
-		} else if (client.isConnected()) {
-			lStatus = BaseTokenClient.CONNECTED;
-		}
-		String lClientId = client.getClientId();
+		WebSocketStatus lStatus = mClient.getStatus();
+		String lClientId = mClient.getClientId();
 		lblStatus.setText("Client-Id: " + (lClientId != null ? lClientId : "-"));
-		if (lStatus != prevStatus) {
-			prevStatus = lStatus;
-			if (lStatus == BaseTokenClient.AUTHENTICATED) {
-				lblStatus.setIcon(icoAuthenticated);
-			} else if (lStatus == BaseTokenClient.CONNECTED) {
-				lblStatus.setIcon(icoConnected);
+		if (lStatus != mPrevStatus) {
+			mPrevStatus = lStatus;
+			if (lStatus == WebSocketStatus.AUTHENTICATED) {
+				lblStatus.setIcon(mIcoAuthenticated);
+			} else if (lStatus == WebSocketStatus.OPEN) {
+				lblStatus.setIcon(mIcoConnected);
 			} else {
-				lblStatus.setIcon(icoDisconnected);
+				lblStatus.setIcon(mIcoDisconnected);
 			}
 		}
+	}
+
+	@Override
+	public void processOpening(WebSocketClientEvent aEvent) {
+		txaLog.append("Opening...\n");
+		checkStatusIcon();
 	}
 
 	@Override
@@ -110,6 +112,12 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 	@Override
 	public void processClosed(WebSocketClientEvent aEvent) {
 		txaLog.append("Closed.\n");
+		checkStatusIcon();
+	}
+
+	@Override
+	public void processReconnecting(WebSocketClientEvent aEvent) {
+		txaLog.append("Reconnecting...\n");
 		checkStatusIcon();
 	}
 
@@ -555,8 +563,8 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	public void checkDisconnect() {
 		try {
-			if (client.isConnected()) {
-				client.close();
+			if (mClient.isConnected()) {
+				mClient.close();
 			}
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
@@ -582,7 +590,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnGetUserRightsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetUserRightsActionPerformed
 		try {
-			client.getUserRights(txfTarget.getText());
+			mClient.getUserRights(txfTarget.getText());
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -590,7 +598,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnGetUserRolesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetUserRolesActionPerformed
 		try {
-			client.getUserRoles(txfTarget.getText());
+			mClient.getUserRoles(txfTarget.getText());
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -636,7 +644,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		// pass the list of arguments to the method (automatic methods matching)
 		lToken.setList("args", lArgs);
 		try {
-			client.sendToken(lToken);
+			mClient.sendToken(lToken);
 		} catch (WebSocketException ex) {
 			// process potential exception
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
@@ -645,7 +653,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnConnectActionPerformed
 		try {
-			client.open(txfURL.getText()); // "ws://localhost:8787/;unid=admin_ui_1"
+			mClient.open(txfURL.getText()); // "ws://localhost:8787/;unid=admin_ui_1"
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -653,7 +661,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnDisconnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnDisconnectActionPerformed
 		try {
-			client.close();
+			mClient.close();
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -661,9 +669,9 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnShutdownActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnShutdownActionPerformed
 		try {
-			client.shutdown();
+			mClient.shutdown();
 			Thread.sleep(500);
-			client.close();
+			mClient.close();
 		} catch (Exception ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -671,7 +679,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnLoginActionPerformed
 		try {
-			client.login(txfUser.getText(), new String(pwfPassword.getPassword()));
+			mClient.login(txfUser.getText(), new String(pwfPassword.getPassword()));
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -679,7 +687,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnLogoutActionPerformed
 		try {
-			client.logout();
+			mClient.logout();
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -691,7 +699,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnBroadcastActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnBroadcastActionPerformed
 		try {
-			client.broadcastText(txfMessage.getText());
+			mClient.broadcastText(txfMessage.getText());
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -699,7 +707,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnPingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnPingActionPerformed
 		try {
-			client.ping(true);
+			mClient.ping(true);
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -707,7 +715,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnSendActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnSendActionPerformed
 		try {
-			client.sendText(txfTarget.getText(), txfMessage.getText());
+			mClient.sendText(txfTarget.getText(), txfMessage.getText());
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
@@ -715,7 +723,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnGetSessionsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnGetSessionsActionPerformed
 		try {
-			client.getConnections();
+			mClient.getConnections();
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}

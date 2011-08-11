@@ -27,6 +27,7 @@ import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.packetProcessors.XMLProcessor;
 import org.jwebsocket.token.Token;
 import org.apache.commons.codec.binary.Base64;
+import org.jwebsocket.api.WebSocketStatus;
 import org.jwebsocket.token.TokenFactory;
 
 /**
@@ -40,10 +41,6 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 
 	/** base name space for jWebSocket */
 	private final static String NS_BASE = "org.jwebsocket";
-	/** constants for connection status */
-	public final static int DISCONNECTED = 0;
-	public final static int CONNECTED = 1;
-	public final static int AUTHENTICATED = 2;
 	/** token client protocols */
 	private final static String WELCOME = "welcome";
 	private final static String LOGIN = "login";
@@ -84,6 +81,13 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 		 * {@inheritDoc} Initialize all the variables when the process starts
 		 */
 		@Override
+		public void processOpening(WebSocketClientEvent aEvent) {
+		}
+
+		/**
+		 * {@inheritDoc} Initialize all the variables when the process starts
+		 */
+		@Override
 		public void processOpened(WebSocketClientEvent aEvent) {
 			fUsername = null;
 			fClientId = null;
@@ -116,7 +120,9 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 					if (lReqType != null) {
 						if (LOGIN.equals(lReqType)) {
 							fUsername = lToken.getString("username");
+							mStatus = WebSocketStatus.AUTHENTICATED;
 						} else if (LOGOUT.equals(lReqType)) {
+							mStatus = WebSocketStatus.OPEN;
 							fUsername = null;
 						}
 					}
@@ -134,6 +140,13 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 			fUsername = null;
 			fClientId = null;
 			fSessionId = null;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void processReconnecting(WebSocketClientEvent aEvent) {
 		}
 	}
 
@@ -193,14 +206,14 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	 */
 	public Token packetToToken(WebSocketPacket aPacket) {
 		Token lToken = null;
-		if(JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mFormat)) {
+		if (JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mFormat)) {
 			lToken = JSONProcessor.packetToToken(aPacket);
 		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(mFormat)) {
 			lToken = CSVProcessor.packetToToken(aPacket);
 		} else if (JWebSocketCommonConstants.WS_FORMAT_XML.equals(mFormat)) {
 			lToken = XMLProcessor.packetToToken(aPacket);
 		}
-
+		
 		return lToken;
 	}
 
@@ -213,7 +226,7 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	public WebSocketPacket tokenToPacket(Token aToken) {
 		WebSocketPacket lPacket = null;
 
-		if(JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mFormat)) {
+		if (JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mFormat)) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
 		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(mFormat)) {
 			lPacket = CSVProcessor.tokenToPacket(aToken);

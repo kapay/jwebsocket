@@ -30,6 +30,7 @@ import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.WebSocketFrameType;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -89,7 +90,7 @@ public class JettyConnector extends BaseConnector {
 				lHeader.put(lHeaderName, aRequest.getHeader(lHeaderName));
 			}
 		}
-		
+
 		lHeader.put(RequestHeader.WS_SEARCHSTRING, aRequest.getQueryString());
 		setHeader(lHeader);
 	}
@@ -152,7 +153,7 @@ public class JettyConnector extends BaseConnector {
 		}
 
 		try {
-			if (aDataPacket.getFrameType() == RawPacket.FRAMETYPE_BINARY) {
+			if (aDataPacket.getFrameType() == WebSocketFrameType.BINARY) {
 				// mOutbound.sendMessage((byte) 0, );
 				byte[] lBA = aDataPacket.getByteArray();
 				mOutbound.sendMessage((byte) 0, lBA, 0, lBA.length);

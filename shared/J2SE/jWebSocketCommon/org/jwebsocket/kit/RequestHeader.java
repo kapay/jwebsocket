@@ -31,12 +31,13 @@ public final class RequestHeader {
 
 	private Map<String, Object> mFields = new FastMap<String, Object>();
 	public static final String WS_PROTOCOL = "subprot";
-	public static final String WS_DRAFT = "draft";
+	public static final String WS_VERSION = "version";
 	public static final String WS_ORIGIN = "origin";
 	public static final String WS_LOCATION = "location";
 	public static final String WS_PATH = "path";
 	public static final String WS_SEARCHSTRING = "searchString";
 	public static final String WS_HOST = "host";
+	public static final String WS_SECKEY = "secKey";
 	public static final String WS_SECKEY1 = "secKey1";
 	public static final String WS_SECKEY2 = "secKey2";
 	public static final String URL_ARGS = "args";
@@ -153,7 +154,7 @@ public final class RequestHeader {
 		return (lTimeout != null ? lTimeout : aDefault);
 	}
 
-	public String getDraft() {
-		return (String) mFields.get(WS_DRAFT);
+	public String getVersion() {
+		return (String) mFields.get(WS_VERSION);
 	}
 }

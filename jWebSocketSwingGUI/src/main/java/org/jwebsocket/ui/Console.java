@@ -38,6 +38,10 @@ public class Console implements WebSocketClientTokenListener {
 	}
 
 	@Override
+	public void processOpening(WebSocketClientEvent aEvent) {
+	}
+
+	@Override
 	public void processOpened(WebSocketClientEvent aEvent) {
 	}
 
@@ -53,6 +57,10 @@ public class Console implements WebSocketClientTokenListener {
 	public void processClosed(WebSocketClientEvent aEvent) {
 	}
 
+	@Override
+	public void processReconnecting(WebSocketClientEvent aEvent) {
+	}
+	
 	public static void main(String args[]) {
 
 

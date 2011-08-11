@@ -243,6 +243,18 @@ public interface WebSocketConnector {
 
 	/**
 	 *
+	 * @return
+	 */
+	int getVersion();
+
+	/**
+	 *
+	 * @param aSubprot
+	 */
+	void setVersion(int aVersion);
+
+	/**
+	 *
 	 */
 	void removeSubprot();
 

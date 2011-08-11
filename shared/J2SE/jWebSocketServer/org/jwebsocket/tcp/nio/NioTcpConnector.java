@@ -18,7 +18,6 @@ package org.jwebsocket.tcp.nio;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.async.IOFuture;
-import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketProtocolHandler;
@@ -27,8 +26,10 @@ import org.jwebsocket.logging.Logging;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import org.jwebsocket.kit.WebSocketFrameType;
 
 public class NioTcpConnector extends BaseConnector {
+
 	private static Logger mLog = Logging.getLogger(NioTcpConnector.class);
 	private InetAddress mRemoteAddress;
 	private int mRemotePort;
@@ -36,11 +37,11 @@ public class NioTcpConnector extends BaseConnector {
 	private byte[] mPacketBuffer;
 	private int mPayloadLength = -1;
 	private int mBufferPosition = -1;
-	private int mPacketType = -1;
+	private WebSocketFrameType mFrameType = WebSocketFrameType.INVALID;
 	private int mWorkerId;
-    private DelayedPacketNotifier mDelayedPacketNotifier;
+	private DelayedPacketNotifier mDelayedPacketNotifier;
 
-	public NioTcpConnector(NioTcpEngine aEngine, InetAddress aRemoteAddress, 
+	public NioTcpConnector(NioTcpEngine aEngine, InetAddress aRemoteAddress,
 			int aRemotePort) {
 		super(aEngine);
 
@@ -64,7 +65,7 @@ public class NioTcpConnector extends BaseConnector {
 			System.arraycopy(aPacket.getByteArray(), 0, lProtocolPacket, 1, aPacket.getByteArray().length);
 			lProtocolPacket[lProtocolPacket.length - 1] = (byte) 0xFF;
 		} else {
-			lProtocolPacket = WebSocketProtocolHandler.toProtocolPacket(aPacket);
+			lProtocolPacket = WebSocketProtocolHandler.toProtocolPacket(getVersion(), aPacket);
 		}
 
 		DataFuture lFuture = new DataFuture(this, ByteBuffer.wrap(lProtocolPacket));
@@ -103,13 +104,13 @@ public class NioTcpConnector extends BaseConnector {
 	public boolean isPacketBufferEmpty() {
 		return mPacketBuffer == null;
 	}
-	
+
 	public void extendPacketBuffer(byte[] aNewData, int aStart, int aCount) throws IOException {
-		if(mPayloadLength == -1) {
+		if (mPayloadLength == -1) {
 			// packet buffer grows with new data
-			if(mPacketBuffer == null) {
+			if (mPacketBuffer == null) {
 				mPacketBuffer = new byte[aCount];
-				if(aCount > 0) {
+				if (aCount > 0) {
 					System.arraycopy(aNewData, aStart, mPacketBuffer, 0, aCount);
 				}
 			} else {
@@ -120,7 +121,7 @@ public class NioTcpConnector extends BaseConnector {
 			}
 		} else {
 			// packet buffer was already created with the correct length
-		    System.arraycopy(aNewData, aStart, mPacketBuffer, mBufferPosition, aCount);
+			System.arraycopy(aNewData, aStart, mPacketBuffer, mBufferPosition, aCount);
 			mBufferPosition += aCount;
 		}
 		notifyWorker();
@@ -135,15 +136,15 @@ public class NioTcpConnector extends BaseConnector {
 		System.arraycopy(mPacketBuffer, 0, lCopy, 0, mPacketBuffer.length);
 
 		RawPacket lPacket = new RawPacket(lCopy);
-		if(mPacketType != -1) {
-			lPacket.setFrameType(mPacketType);
+		if (mFrameType != WebSocketFrameType.INVALID) {
+			lPacket.setFrameType(mFrameType);
 		}
 		try {
 			getEngine().processPacket(this, lPacket);
 
 			mPacketBuffer = null;
 			mPayloadLength = -1;
-			mPacketType = -1;
+			mFrameType = WebSocketFrameType.INVALID;
 			mWorkerId = -1;
 			notifyWorker();
 		} catch (Exception e) {
@@ -163,8 +164,8 @@ public class NioTcpConnector extends BaseConnector {
 		return mBufferPosition >= mPayloadLength;
 	}
 
-	public void setPacketType(int aPacketType) {
-		this.mPacketType = aPacketType;
+	public void setPacketType(WebSocketFrameType aPacketType) {
+		this.mFrameType = aPacketType;
 	}
 
 	public int getWorkerId() {
@@ -183,12 +184,8 @@ public class NioTcpConnector extends BaseConnector {
 		this.mDelayedPacketNotifier = delayedPacketNotifier;
 	}
 
-	private boolean isHixieDraft() {
-		return JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(getHeader().getDraft());
-	}
-
 	private void notifyWorker() throws IOException {
-		if(mDelayedPacketNotifier != null) {
+		if (mDelayedPacketNotifier != null) {
 			mDelayedPacketNotifier.handleDelayedPacket();
 			mDelayedPacketNotifier = null;
 		}

@@ -5,8 +5,6 @@ import java.util.List;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.client.token.BaseTokenClient;
-import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.plugins.rpc.CommonRpcPlugin;
 import org.jwebsocket.token.Token;
 
@@ -16,8 +14,13 @@ public class RpcListener implements WebSocketClientTokenListener {
 //  public RpcListener(BaseTokenClient aBaseTokenClient) {
 //  	mBaseTokenClient = aBaseTokenClient;
 //  }
+
 	@Override
 	public void processOpened(WebSocketClientEvent aEvent) {
+	}
+
+	@Override
+	public void processOpening(WebSocketClientEvent aEvent) {
 	}
 
 	@Override
@@ -26,6 +29,10 @@ public class RpcListener implements WebSocketClientTokenListener {
 
 	@Override
 	public void processClosed(WebSocketClientEvent aEvent) {
+	}
+
+	@Override
+	public void processReconnecting(WebSocketClientEvent aEvent) {
 	}
 
 	@Override
@@ -47,5 +54,5 @@ public class RpcListener implements WebSocketClientTokenListener {
 //				// TODO add some beautiful log compatible with all clients here ?
 //			}
 		}
-	}	
+	}
 }

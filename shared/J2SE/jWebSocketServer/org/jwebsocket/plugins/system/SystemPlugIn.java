@@ -269,6 +269,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		if (lNodeId != null) {
 			lWelcome.setString("unid", lNodeId);
 		}
+		lWelcome.setInteger("version", aConnector.getVersion());
 
 		sendToken(aConnector, aConnector, lWelcome);
 	}

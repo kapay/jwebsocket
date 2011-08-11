@@ -17,6 +17,7 @@ package org.jwebsocket.api;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import org.jwebsocket.kit.WebSocketFrameType;
 
 /**
  * Specifies the API for low level data packets which are interchanged between
@@ -156,11 +157,11 @@ public interface WebSocketPacket {
 	 *
 	 * @return
 	 */
-	int getFrameType();
+	WebSocketFrameType getFrameType();
 
 	/**
 	 *
 	 * @param aFrameType
 	 */
-	void setFrameType(int aFrameType);
+	void setFrameType(WebSocketFrameType aFrameType);
 }

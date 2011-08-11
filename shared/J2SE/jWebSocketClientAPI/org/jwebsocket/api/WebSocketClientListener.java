@@ -19,24 +19,38 @@ package org.jwebsocket.api;
  * @author aschulze
  */
 public interface WebSocketClientListener {
-   /**
-    * This method is invoked when a new client connects to the Client.
-    * @param aEvent
-    */
-   void processOpened(WebSocketClientEvent aEvent);
 
-   /**
-    * This method is invoked when a data packet from a client is received.
-    * The event provides getter for the Client and the connector to send
-    * responses to back the client.
-    * @param aEvent
-    * @param aPacket
-    */
-   void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket);
+	/**
+	 * This method is invoked when a client start to connect to the server.
+	 * @param aEvent
+	 */
+	void processOpening(WebSocketClientEvent aEvent);
 
-   /**
-    * This method is invoked when a client was disconnted from the Client.
-    * @param aEvent
-    */
-   void processClosed(WebSocketClientEvent aEvent);
+	/**
+	 * This method is invoked when a new client successfully connected to the server.
+	 * @param aEvent
+	 */
+	void processOpened(WebSocketClientEvent aEvent);
+
+	/**
+	 * This method is invoked when a data packet from a client is received.
+	 * The event provides getter for the Client and the connector to send
+	 * responses to back the client.
+	 * @param aEvent
+	 * @param aPacket
+	 */
+	void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket);
+
+	/**
+	 * This method is invoked when a client was disconnted from the Client.
+	 * @param aEvent
+	 */
+	void processClosed(WebSocketClientEvent aEvent);
+
+	/**
+	 * This method is invoked when the client starts to automatically re-connect
+	 * triggered by the Reliability Manager.
+	 * @param aEvent
+	 */
+	void processReconnecting(WebSocketClientEvent aEvent);
 }

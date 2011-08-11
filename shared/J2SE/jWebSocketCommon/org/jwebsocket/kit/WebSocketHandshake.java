@@ -26,6 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * Utility class for all the handshaking related request/response.
@@ -38,6 +39,7 @@ public final class WebSocketHandshake {
 	 *
 	 */
 	public static int MAX_HEADER_SIZE = 16834;
+	private String mKey = null;
 	private String mKey1 = null;
 	private String mKey2 = null;
 	private byte[] mKey3 = null;
@@ -45,7 +47,7 @@ public final class WebSocketHandshake {
 	private URI mURL = null;
 	private String mOrigin = null;
 	private String mProtocol = null;
-	private String mDraft = null;
+	private String mVersion = null;
 
 	/**
 	 *
@@ -68,12 +70,12 @@ public final class WebSocketHandshake {
 	 *
 	 * @param aURL
 	 * @param aProtocol
-	 * @param aDraft
+	 * @param aVersion
 	 */
-	public WebSocketHandshake(URI aURL, String aProtocol, String aDraft) {
+	public WebSocketHandshake(URI aURL, String aProtocol, String aVersion) {
 		this.mURL = aURL;
 		this.mProtocol = aProtocol;
-		this.mDraft = aDraft;
+		this.mVersion = aVersion;
 		generateKeys();
 	}
 
@@ -105,7 +107,25 @@ public final class WebSocketHandshake {
 		return lBA;
 	}
 
-	private static long calcSecKeyNum(String aKey) {
+	private static String calcHybiSecKeyNum(String aKey) {
+		// add fix GUID according to 
+		// http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-10
+		aKey = aKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+		String lAccept = null;
+
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("SHA-1");
+			byte[] lBufSource = aKey.getBytes("UTF-8");
+			byte[] lBufTarget = md.digest(lBufSource);
+			lAccept = Base64.encodeBase64String(lBufTarget);
+		} catch (Exception lEx) {
+			System.out.println("calcHybiSecKeyNum: " + lEx.getMessage());
+		}
+		return lAccept;
+	}
+
+	private static long calcHixieSecKeyNum(String aKey) {
 		StringBuilder lSB = new StringBuilder();
 		// StringBuuffer lSB = new StringBuuffer();
 		int lSpaces = 0;
@@ -145,11 +165,13 @@ public final class WebSocketHandshake {
 		String lLocation = null;
 		String lPath = null;
 		String lSubProt = null;
-		String lDraft = null;                                 
+		String lVersion = null;
+		String lSecKey = null;
 		String lSecKey1 = null;
 		String lSecKey2 = null;
 		byte[] lSecKey3 = new byte[8];
 		Boolean lIsSecure = false;
+		String lSecKeyAccept = null;
 		Long lSecNum1 = null;
 		Long lSecNum2 = null;
 		byte[] lSecKeyResp = new byte[8];
@@ -171,7 +193,9 @@ public final class WebSocketHandshake {
 
 		lIsSecure = (lRequest.indexOf("Sec-WebSocket") > 0);
 
-		if (lIsSecure) {
+		if (lRequest.indexOf("Sec-WebSocket-Key1:") >= 0
+				&& lRequest.indexOf("Sec-WebSocket-Key2:") >= 0) {
+		// if (lIsSecure) {
 			lReqLen -= 8;
 			for (int lIdx = 0; lIdx < 8; lIdx++) {
 				lSecKey3[lIdx] = aReq[lReqLen + lIdx];
@@ -198,7 +222,7 @@ public final class WebSocketHandshake {
 		lPos = lPath.indexOf("HTTP");
 		lPath = lPath.substring(0, lPos - 1);
 
-		lLocation = ( aIsSSL ? "wss" : "ws" ) +  "://" + lHost + lPath;
+		lLocation = (aIsSSL ? "wss" : "ws") + "://" + lHost + lPath;
 
 		// get websocket sub protocol (irrespective of Sec- prefix for older browsers)
 		lPos = lRequest.indexOf("WebSocket-Protocol:");
@@ -223,9 +247,16 @@ public final class WebSocketHandshake {
 		lPos = lRequest.indexOf("Sec-WebSocket-Draft:");
 		if (lPos > 0) {
 			lPos += 21;
-			lDraft = lRequest.substring(lPos);
-			lPos = lDraft.indexOf("\r\n");
-			lDraft = lDraft.substring(0, lPos);
+			lVersion = lRequest.substring(lPos);
+			lPos = lVersion.indexOf("\r\n");
+			lVersion = lVersion.substring(0, lPos).trim();
+		}
+		lPos = lRequest.indexOf("Sec-WebSocket-Version:");
+		if (lPos > 0) {
+			lPos += 22;
+			lVersion = lRequest.substring(lPos);
+			lPos = lVersion.indexOf("\r\n");
+			lVersion = lVersion.substring(0, lPos).trim();
 		}
 
 		// the following section implements the sec-key process in WebSocket
@@ -253,8 +284,7 @@ public final class WebSocketHandshake {
 			lSecKey1 = lRequest.substring(lPos);
 			lPos = lSecKey1.indexOf("\r\n");
 			lSecKey1 = lSecKey1.substring(0, lPos);
-			lSecNum1 = calcSecKeyNum(lSecKey1);
-			// log.debug("Sec-WebSocket-Key1:" + secKey1 + " => " + secNum1);
+			lSecNum1 = calcHixieSecKeyNum(lSecKey1);
 		}
 
 		lPos = lRequest.indexOf("Sec-WebSocket-Key2:");
@@ -263,8 +293,18 @@ public final class WebSocketHandshake {
 			lSecKey2 = lRequest.substring(lPos);
 			lPos = lSecKey2.indexOf("\r\n");
 			lSecKey2 = lSecKey2.substring(0, lPos);
-			lSecNum2 = calcSecKeyNum(lSecKey2);
-			// log.debug("Sec-WebSocket-Key2:" + secKey2 + " => " + secNum2);
+			lSecNum2 = calcHixieSecKeyNum(lSecKey2);
+		}
+
+		// the following section implements the sec-key process in WebSocket
+		// Since Hybi Draft 04
+		lPos = lRequest.indexOf("Sec-WebSocket-Key:");
+		if (lPos > 0) {
+			lPos += 19;
+			lSecKey = lRequest.substring(lPos);
+			lPos = lSecKey.indexOf("\r\n");
+			lSecKey = lSecKey.substring(0, lPos);
+			lSecKeyAccept = calcHybiSecKeyNum(lSecKey);
 		}
 
 		/*
@@ -325,12 +365,20 @@ public final class WebSocketHandshake {
 		lRes.put(RequestHeader.WS_ORIGIN, lOrigin);
 		lRes.put(RequestHeader.WS_LOCATION, lLocation);
 		lRes.put(RequestHeader.WS_PROTOCOL, lSubProt);
-		lRes.put(RequestHeader.WS_SECKEY1, lSecKey1);
-		lRes.put(RequestHeader.WS_SECKEY2, lSecKey2);
-		lRes.put(RequestHeader.WS_DRAFT, lDraft);
+		if (lSecKey != null) {
+			lRes.put(RequestHeader.WS_SECKEY, lSecKey);
+			lRes.put("secKeyAccept", lSecKeyAccept);
+		}
+		if (lSecKey1 != null && lSecKey2 != null) {
+			lRes.put(RequestHeader.WS_SECKEY1, lSecKey1);
+			lRes.put(RequestHeader.WS_SECKEY2, lSecKey2);
+			lRes.put("secKeyResponse", lSecKeyResp);
+		}
+		if (lVersion != null) {
+			lRes.put(RequestHeader.WS_VERSION, lVersion);
+		}
 
 		lRes.put("isSecure", lIsSecure);
-		lRes.put("secKeyResponse", lSecKeyResp);
 
 		return lRes;
 	}
@@ -360,37 +408,38 @@ public final class WebSocketHandshake {
 		// now that we have parsed the header send handshake...
 		// since 0.9.0.0609 considering Sec-WebSocket-Key processing
 		Boolean lIsSecure = (Boolean) aRequest.get("isSecure");
+		String lSecKeyAccept = (String) aRequest.get("secKeyAccept");
+		byte[] lSecKeyResponse = (byte[]) aRequest.get("secKeyResponse");
 		String lOrigin = (String) aRequest.get(RequestHeader.WS_ORIGIN);
 		String lLocation = (String) aRequest.get(RequestHeader.WS_LOCATION);
 		String lSubProt = (String) aRequest.get(RequestHeader.WS_PROTOCOL);
 		String lRes =
 				// since IETF draft 76 "WebSocket Protocol" not "Web Socket Protocol"
 				// change implemented since v0.9.5.0701
-				"HTTP/1.1 101 Web" + (lIsSecure ? "" : " ")
-				+ "Socket Protocol Handshake\r\n"
-				+ "Upgrade: WebSocket\r\n"
-				+ "Connection: Upgrade\r\n"
+				(lSecKeyAccept == null
+				? "HTTP/1.1 101 Web" + (lIsSecure ? "" : " ") + "Socket Protocol Handshake\r\n" + "Upgrade: WebSocket\r\n" + "Connection: Upgrade\r\n"
+				: "HTTP/1.1 101 Switching Protocols\r\n" + "Upgrade: websocket\r\n" + "Connection: Upgrade\r\n")
+				+ (lSecKeyAccept != null ? "Sec-WebSocket-Accept: " + lSecKeyAccept + "\r\n" : "")
 				+ (lSubProt != null ? (lIsSecure ? "Sec-" : "") + "WebSocket-Protocol: " + lSubProt + "\r\n" : "")
-				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Origin: " + lOrigin + "\r\n" + (lIsSecure ? "Sec-" : "")
-				+ "WebSocket-Location: " + lLocation + "\r\n" + "\r\n";
-
+				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Origin: " + lOrigin + "\r\n"
+				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Location: " + lLocation + "\r\n";
+		lRes += "\r\n";
+		System.out.println(lRes);
 		byte[] lBA;
 		try {
 			lBA = lRes.getBytes("US-ASCII");
-			// if Sec-WebSocket-Keys are used send security response first
-			if (lIsSecure) {
-				byte[] lSecKey = (byte[]) aRequest.get("secKeyResponse");
-				byte[] lResult = new byte[lBA.length + lSecKey.length];
-				System.arraycopy(lBA, 0, lResult, 0, lBA.length);
-				System.arraycopy(lSecKey, 0, lResult, lBA.length, lSecKey.length);
-				return lResult;
-			} else {
-				return lBA;
-			}
 		} catch (UnsupportedEncodingException lEx) {
 			return null;
 		}
-
+		if (lSecKeyResponse != null) {
+			// if Sec-WebSocket-Keys are used send security response first
+			byte[] lSecKey = lSecKeyResponse;
+			byte[] lResult = new byte[lBA.length + lSecKey.length];
+			System.arraycopy(lBA, 0, lResult, 0, lBA.length);
+			System.arraycopy(lSecKey, 0, lResult, lBA.length, lSecKey.length);
+			return lResult;
+		}
+		return lBA;
 	}
 
 	/**
@@ -474,8 +523,8 @@ public final class WebSocketHandshake {
 			lHandshake += "Sec-WebSocket-Protocol: " + mProtocol + "\r\n";
 		}
 
-		if(mDraft != null) {
-			lHandshake += "Sec-WebSocket-Draft: " + mDraft + "\r\n";
+		if (mVersion != null) {
+			lHandshake += "Sec-WebSocket-Draft: " + mVersion + "\r\n";
 		}
 
 		lHandshake +=
@@ -530,11 +579,11 @@ public final class WebSocketHandshake {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Connection");
 		} else if (!aHeaders.get("Sec-WebSocket-Origin").equals(mOrigin)) {
 			throw new WebSocketException("connection failed: missing header field in server handshake: Sec-WebSocket-Origin");
-		} else if(aHeaders.containsKey("Sec-WebSocket-Protocol") && (mProtocol.indexOf(aHeaders.get("Sec-WebSocket-Protocol")) == -1)) {
+		} else if (aHeaders.containsKey("Sec-WebSocket-Protocol") && (mProtocol.indexOf(aHeaders.get("Sec-WebSocket-Protocol")) == -1)) {
 			// server returned sub protocol that wasn't proposed by the client? Illegal answer from server.
 			throw new WebSocketException(
-					"connection failed: invalid header field in server handshake: Sec-WebSocket-Protocol," +
-					" expected one of : " + mProtocol + ", but got: " + aHeaders.get("Sec-WebSocket-Protocol"));
+					"connection failed: invalid header field in server handshake: Sec-WebSocket-Protocol,"
+					+ " expected one of : " + mProtocol + ", but got: " + aHeaders.get("Sec-WebSocket-Protocol"));
 		}
 	}
 

@@ -57,7 +57,7 @@ public class JWebSocketCommonConstants {
 	 */
 	public final static String SUB_PROT_XML = "xml";
 	/**
-	 * Binary sub protocol
+	 * Custom specific binary sub protocol
 	 * @deprecated
 	 */
 	public final static String SUB_PROT_BINARY = "binary";
@@ -92,45 +92,57 @@ public class JWebSocketCommonConstants {
 	 */
 	public static String WS_SUBPROT_DEFAULT = WS_SUBPROT_JSON;
 	/**
-	 * JSON subprotocol format
+	 * JSON sub protocol format
 	 */
 	public final static String WS_FORMAT_JSON = "json";
 	/**
-	 * CSV subprotocol format
+	 * CSV sub protocol format
 	 */
 	public final static String WS_FORMAT_CSV = "csv";
 	/**
-	 * XML subprotocol format
+	 * XML sub protocol format
 	 */
 	public final static String WS_FORMAT_XML = "xml";
 	/**
-	 * Binary subprotocol format
+	 * Binary sub protocol format
 	 */
 	public final static String WS_FORMAT_BINARY = "binary";
 	/**
-	 * Custom specific subprotocol format
+	 * Custom specific sub protocol format
 	 */
 	public final static String WS_FORMAT_CUSTOM = "custom";
 	/**
-	 * Default subprotocol format
+	 * Default sub protocol format
 	 */
 	public static String WS_FORMAT_DEFAULT = WS_FORMAT_JSON;
 	/**
-	 * Default subprotocol domain (used when client doesn't set its own subprotocol)
+	 * Default sub protocol domain (used when client doesn't set its own subprotocol)
 	 */
 	public static String WS_SUBPROTOCOL_DEFAULT = "jwebsocket.org";
-    /**
-	 * WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-03)
-	 */
-    public final static String WS_DRAFT_03 = "3";
-    /**
+	/**
 	 * WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-02)
 	 */
-    public final static String WS_DRAFT_02 = "2";
-    /**
+	public final static String WS_DRAFT_02 = "2";
+	/**
+	 * WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-03)
+	 */
+	public final static String WS_DRAFT_03 = "3";
+	/**
+	 * WebSocket protocol hybi draft 07 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07)
+	 */
+	public final static String WS_DRAFT_07 = "7";
+	/**
+	 * WebSocket protocol hybi draft 08 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-08)
+	 */
+	public final static String WS_DRAFT_08 = "8";
+	/**
+	 * WebSocket protocol hybi draft 10 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-10)
+	 */
+	public final static String WS_DRAFT_10 = "10";
+	/**
 	 * WebSocket protocol hixie draft 76 (http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76)
 	 */
-    public final static String WS_DRAFT_DEFAULT = "76";
+	public final static String WS_DRAFT_DEFAULT = "76";
 	/**
 	 * Separator between the path and the argument list in the URL.
 	 */
@@ -175,7 +187,6 @@ public class JWebSocketCommonConstants {
 	 * Default Session Timeout for client connections (120000ms = 2min)
 	 */
 	public static int DEFAULT_TIMEOUT = 120000;
-
 	/**
 	 * private scope, only authenticated user can read and write his personal items
 	 */
@@ -184,5 +195,4 @@ public class JWebSocketCommonConstants {
 	 * public scope, everybody can read and write items from this scope
 	 */
 	public static final String SCOPE_PUBLIC = "public";
-
 }

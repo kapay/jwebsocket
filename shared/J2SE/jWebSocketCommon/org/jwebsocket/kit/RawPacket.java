@@ -17,8 +17,6 @@ package org.jwebsocket.kit;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jwebsocket.api.WebSocketPacket;
 
 /**
@@ -29,6 +27,7 @@ import org.jwebsocket.api.WebSocketPacket;
  */
 public class RawPacket implements WebSocketPacket {
 
+/*
 	public static final int FRAMETYPE_UTF8 = 0;
 	public static final int FRAMETYPE_BINARY = 1;
 	// control frames
@@ -36,6 +35,7 @@ public class RawPacket implements WebSocketPacket {
 	public static final int FRAMETYPE_PONG = 3;
 	public static final int FRAMETYPE_CLOSE = 4;
 	public static final int FRAMETYPE_FRAGMENT = 5;
+*/
 	private byte[] mData = null;
 	private String[] mFragments = null;
 	// private String mUTF8 = null;
@@ -46,7 +46,7 @@ public class RawPacket implements WebSocketPacket {
 	private boolean mIsComplete = false;
 	private Date mCreationDate = null;
 	private long mTimeout = 0;
-	private int mFrameType = FRAMETYPE_UTF8;
+	private WebSocketFrameType mFrameType = WebSocketFrameType.TEXT;
 
 	public RawPacket(int aInitialSize) {
 		initFragmented(aInitialSize);
@@ -154,7 +154,7 @@ public class RawPacket implements WebSocketPacket {
 	 * @return the frameType
 	 */
 	@Override
-	public int getFrameType() {
+	public WebSocketFrameType getFrameType() {
 		return mFrameType;
 	}
 
@@ -162,7 +162,7 @@ public class RawPacket implements WebSocketPacket {
 	 * @param aFrameType the frameType to set
 	 */
 	@Override
-	public void setFrameType(int aFrameType) {
+	public void setFrameType(WebSocketFrameType aFrameType) {
 		this.mFrameType = aFrameType;
 	}
 

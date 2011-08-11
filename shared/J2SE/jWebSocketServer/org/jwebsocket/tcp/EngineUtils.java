@@ -34,19 +34,23 @@ public class EngineUtils {
 	 * Validates draft header and constructs RequestHeader object.
 	 */
 	public static RequestHeader validateC2SRequest(Map lRespMap, Logger logger) throws UnsupportedEncodingException {
-		// Check for draft. If it is present and if it's something unrecognizable, force disconnect (return null).
-		String lDraft = (String) lRespMap.get(RequestHeader.WS_DRAFT);
-		if (lDraft != null) {
+		// Check for WebSocket protocol version.
+		// If it is present and if it's something unrecognizable, force disconnect (return null).
+		String lVersion = (String) lRespMap.get(RequestHeader.WS_VERSION);
+		if (lVersion != null) {
 			// Since this field was introduced in draft 02, we can safely assume that
 			// it will only be supplied with clients that use draft #02 and greater.
-			if (JWebSocketCommonConstants.WS_DRAFT_02.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_DRAFT_03.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(lDraft)) {
+			if (JWebSocketCommonConstants.WS_DRAFT_02.equals(lVersion)
+					|| JWebSocketCommonConstants.WS_DRAFT_03.equals(lVersion)
+					|| JWebSocketCommonConstants.WS_DRAFT_07.equals(lVersion)
+					|| JWebSocketCommonConstants.WS_DRAFT_08.equals(lVersion)
+					|| JWebSocketCommonConstants.WS_DRAFT_10.equals(lVersion)
+					|| JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(lVersion)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Client uses draft-" + lDraft + " for protocol communication");
+					logger.debug("Client uses draft-" + lVersion + " for protocol communication");
 				}
 			} else {
-				logger.warn("Illegal handshake: header 'Sec-WebSocket-Draft' contains unrecognized value: " + lDraft);
+				logger.error("Error in Handshake: Version '" + lVersion + "' not supported.");
 				return null;
 			}
 		}
@@ -108,10 +112,10 @@ public class EngineUtils {
 		lHeader.put(RequestHeader.WS_PATH, lRespMap.get(RequestHeader.WS_PATH));
 		lHeader.put(RequestHeader.WS_SEARCHSTRING, lSearchString);
 		lHeader.put(RequestHeader.URL_ARGS, lArgs);
-		lHeader.put(RequestHeader.WS_DRAFT,
-				lDraft == null
+		lHeader.put(RequestHeader.WS_VERSION,
+				lVersion == null
 				? JWebSocketCommonConstants.WS_DRAFT_DEFAULT
-				: lDraft);
+				: lVersion);
 
 		return lHeader;
 	}

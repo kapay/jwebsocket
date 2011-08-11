@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -33,13 +34,14 @@ import javax.net.ssl.X509TrustManager;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import org.jwebsocket.api.WebSocketBaseClientEvent;
 import org.jwebsocket.api.WebSocketClient;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.api.WebSocketPacket;
 
 import org.jwebsocket.api.WebSocketStatus;
-import org.jwebsocket.client.token.WebSocketClientTokenEvent;
+import org.jwebsocket.client.token.WebSocketTokenClientEvent;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketException;
@@ -62,17 +64,13 @@ import org.jwebsocket.kit.WebSocketProtocolHandler;
 public class BaseWebSocket implements WebSocketClient {
 
 	/**
-	 * WebSocket connection url
+	 * WebSocket connection URI
 	 */
-	private URI mURL = null;
+	private URI mURI = null;
 	/**
 	 * list of the listeners registered
 	 */
 	private List<WebSocketClientListener> mListeners = new FastList<WebSocketClientListener>();
-	/**
-	 * flag for connection test
-	 */
-	private volatile boolean mConnected = false;
 	/**
 	 * TCP socket
 	 */
@@ -89,10 +87,16 @@ public class BaseWebSocket implements WebSocketClient {
 	/**
 	 * represents the WebSocket status
 	 */
-	private WebSocketStatus mStatus = WebSocketStatus.CLOSED;
+	protected volatile WebSocketStatus mStatus = WebSocketStatus.CLOSED;
 	private List<SubProtocol> mSubprotocols;
 	private SubProtocol mNegotiatedSubprotocol;
 	private String mDraft = JWebSocketCommonConstants.WS_DRAFT_DEFAULT;
+	
+	public static String EVENT_CLOSE = "close";
+	public static String DATA_CLOSE_ERROR = "error";
+	public static String DATA_CLOSE_CLIENT = "client";
+	public static String DATA_CLOSE_SERVER = "server";
+	public static String DATA_CLOSE_SHUTDOWN = "shutdown";
 
 	/**
 	 * Base constructor
@@ -111,9 +115,9 @@ public class BaseWebSocket implements WebSocketClient {
 		} catch (URISyntaxException lEx) {
 			throw new WebSocketException("Error parsing WebSocket URL:" + aURIString, lEx);
 		}
-		this.mURL = lURI;
+		this.mURI = lURI;
 		String lSubProtocol = makeSubprotocolHeader();
-		WebSocketHandshake lHandshake = new WebSocketHandshake(mURL, lSubProtocol, mDraft);
+		WebSocketHandshake lHandshake = new WebSocketHandshake(mURI, lSubProtocol, mDraft);
 		try {
 			// close current socket if still connected 
 			// to avoid open connections on server
@@ -195,7 +199,6 @@ public class BaseWebSocket implements WebSocketClient {
 			notifyOpened(null);
 
 			mReceiver.start();
-			mConnected = true;
 			mStatus = WebSocketStatus.OPEN;
 		} catch (IOException lIOEx) {
 			throw new WebSocketException(
@@ -228,7 +231,6 @@ public class BaseWebSocket implements WebSocketClient {
 					"Encoding exception while sending the data:"
 					+ lEx.getMessage(), lEx);
 		}
-
 		send(lData);
 	}
 
@@ -251,7 +253,7 @@ public class BaseWebSocket implements WebSocketClient {
 	}
 
 	private void sendInternal(byte[] aData) throws WebSocketException {
-		if (!mConnected) {
+		if (mStatus != WebSocketStatus.OPEN) {
 			throw new WebSocketException("error while sending binary data: not connected");
 		}
 		try {
@@ -277,7 +279,7 @@ public class BaseWebSocket implements WebSocketClient {
 
 	public void handleReceiverError() {
 		try {
-			if (mConnected) {
+			if (mStatus != WebSocketStatus.OPEN) {
 				mStatus = WebSocketStatus.CLOSING;
 				close();
 			}
@@ -289,9 +291,10 @@ public class BaseWebSocket implements WebSocketClient {
 
 	@Override
 	public synchronized void close() throws WebSocketException {
-		if (!mConnected) {
+		if (mStatus != WebSocketStatus.OPEN) {
 			return;
 		}
+		mStatus = WebSocketStatus.CLOSING;
 		sendCloseHandshake();
 		if (mReceiver.isRunning()) {
 			mReceiver.stopit();
@@ -312,7 +315,7 @@ public class BaseWebSocket implements WebSocketClient {
 	}
 
 	private void sendCloseHandshake() throws WebSocketException {
-		if (!mConnected) {
+		if (mStatus != WebSocketStatus.OPEN) {
 			throw new WebSocketException("error while sending close handshake: not connected");
 		}
 		try {
@@ -329,13 +332,13 @@ public class BaseWebSocket implements WebSocketClient {
 		} catch (IOException lIOEx) {
 			throw new WebSocketException("error while sending close handshake", lIOEx);
 		}
-		mConnected = false;
+		mStatus = WebSocketStatus.CLOSED;
 	}
 
 	private Socket createSocket() throws WebSocketException {
-		String lScheme = mURL.getScheme();
-		String lHost = mURL.getHost();
-		int lPort = mURL.getPort();
+		String lScheme = mURI.getScheme();
+		String lHost = mURI.getHost();
+		int lPort = mURI.getPort();
 
 		mSocket = null;
 
@@ -348,7 +351,7 @@ public class BaseWebSocket implements WebSocketClient {
 			} catch (UnknownHostException lUHEx) {
 				throw new WebSocketException("unknown host: " + lHost, lUHEx);
 			} catch (IOException lIOEx) {
-				throw new WebSocketException("error while creating socket to " + mURL, lIOEx);
+				throw new WebSocketException("error while creating socket to " + mURI, lIOEx);
 			}
 		} else if (lScheme != null && lScheme.equals("wss")) {
 			if (lPort == -1) {
@@ -391,9 +394,9 @@ public class BaseWebSocket implements WebSocketClient {
 			} catch (UnknownHostException lUHEx) {
 				throw new WebSocketException("unknown host: " + lHost, lUHEx);
 			} catch (IOException lIOEx) {
-				throw new WebSocketException("error while creating secure socket to " + mURL, lIOEx);
+				throw new WebSocketException("error while creating secure socket to " + mURI, lIOEx);
 			} catch (Exception lEx) {
-				throw new WebSocketException(lEx.getClass().getSimpleName() + " while creating secure socket to " + mURL, lEx);
+				throw new WebSocketException(lEx.getClass().getSimpleName() + " while creating secure socket to " + mURI, lEx);
 			}
 		} else {
 			throw new WebSocketException("unsupported protocol: " + lScheme);
@@ -407,7 +410,12 @@ public class BaseWebSocket implements WebSocketClient {
 	 */
 	@Override
 	public boolean isConnected() {
-		return mConnected && mStatus.equals(WebSocketStatus.OPEN);
+		return mStatus.equals(WebSocketStatus.OPEN);
+	}
+
+	@Override
+	public WebSocketStatus getStatus() {
+		return mStatus;
 	}
 
 	/**
@@ -472,10 +480,44 @@ public class BaseWebSocket implements WebSocketClient {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public void notifyReconnecting(WebSocketClientEvent aEvent) {
+		for (WebSocketClientListener lListener : getListeners()) {
+			lListener.processReconnecting(aEvent);
+		}
+	}
+
+	class ReOpener implements Runnable {
+
+		private WebSocketClientEvent mEvent;
+
+		public ReOpener(WebSocketClientEvent aEvent) {
+			mEvent = aEvent;
+		}
+
+		@Override
+		public void run() {
+			notifyReconnecting(mEvent);
+			try {
+				open(mURI.toString());
+			} catch (WebSocketException ex) {
+				// TODO: process potential exception here!
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void notifyClosed(WebSocketClientEvent aEvent) {
 		for (WebSocketClientListener lListener : getListeners()) {
 			lListener.processClosed(aEvent);
 		}
+
+		ReliabilityManager.getExecutor().schedule(
+				new ReOpener(aEvent),
+				1000,
+				TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -503,7 +545,7 @@ public class BaseWebSocket implements WebSocketClient {
 	}
 
 	/**
-	 * Make a subprotocol string for Sec-WebSocket-Protocol header.
+	 * Make a sub protocol string for Sec-WebSocket-Protocol header.
 	 * The result is something like this:
 	 * <pre>
 	 * chat.example.com/json v2.chat.example.com/xml audio.chat.example.com/binary
@@ -584,7 +626,7 @@ public class BaseWebSocket implements WebSocketClient {
 					readHybi();
 				}
 			} catch (Exception lEx) {
-				handleError();
+				handleErrorAndClose();
 			}
 		}
 
@@ -599,7 +641,7 @@ public class BaseWebSocket implements WebSocketClient {
 				} else if (lB == 0xff && lFrameStart == true) {
 					lFrameStart = false;
 
-					WebSocketClientEvent lWSCE = new WebSocketClientTokenEvent();
+					WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent();
 					RawPacket lPacket = new RawPacket(lBuff.toByteArray());
 
 					lBuff.reset();
@@ -607,7 +649,7 @@ public class BaseWebSocket implements WebSocketClient {
 				} else if (lFrameStart == true) {
 					lBuff.write(lB);
 				} else if (lB == -1) {
-					handleError();
+					handleErrorAndClose();
 				}
 			}
 		}
@@ -631,7 +673,7 @@ public class BaseWebSocket implements WebSocketClient {
 				if (lPacketType == -1) {
 					// Could not determine packet type, ignore the packet.
 					// Maybe we need a setting to decide, if such packets should abort the connection?
-					handleError();
+					handleErrorAndClose();
 				} else {
 					// Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
 					long lPayloadLen = mIS.read() >> 1;
@@ -666,7 +708,7 @@ public class BaseWebSocket implements WebSocketClient {
 						// Packet was read, pass it forward.
 						WebSocketPacket lPacket = new RawPacket(lBuff.toByteArray());
 						lPacket.setFrameType(lPacketType);
-						WebSocketClientEvent lWSCE = new WebSocketClientTokenEvent();
+						WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent();
 						notifyPacket(lWSCE, lPacket);
 						lBuff.reset();
 					}
@@ -682,7 +724,11 @@ public class BaseWebSocket implements WebSocketClient {
 			return !mStop;
 		}
 
-		private void handleError() {
+		private void handleErrorAndClose() {
+			mStatus = WebSocketStatus.CLOSED;
+			// TODO: Add event parameter
+			WebSocketClientEvent lEvent = new WebSocketBaseClientEvent("close", "error");
+			notifyClosed(lEvent);
 			stopit();
 		}
 	}

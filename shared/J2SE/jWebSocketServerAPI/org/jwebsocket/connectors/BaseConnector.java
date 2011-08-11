@@ -46,6 +46,10 @@ public class BaseConnector implements WebSocketConnector {
 	 */
 	public final static String VAR_SUBPROT = "$subprot";
 	/**
+	 * Default reserved name for shared custom variable <tt>version</tt>.
+	 */
+	public final static String VAR_VERSION = "$version";
+	/**
 	 * Default name for shared custom variable <tt>nodeid</tt>.
 	 */
 	public final static String VAR_NODEID = "$nodeid";
@@ -248,6 +252,16 @@ public class BaseConnector implements WebSocketConnector {
 	}
 
 	@Override
+	public int getVersion() {
+		return getInteger(BaseConnector.VAR_VERSION);
+	}
+
+	@Override
+	public void setVersion(int aVersion) {
+		setInteger(BaseConnector.VAR_VERSION, aVersion);
+	}
+
+	@Override
 	public void removeSubprot() {
 		removeVar(BaseConnector.VAR_SUBPROT);
 	}
@@ -281,5 +295,10 @@ public class BaseConnector implements WebSocketConnector {
 	@Override
 	public void setSSL(boolean aIsSSL) {
 		mIsSSL = aIsSSL;
+	}
+
+	public boolean isHixieDraft() {
+		// TODO: here we need a different identification of the Hixie/Hybi Switch!
+		return (getVersion() >= 75);
 	}
 }
