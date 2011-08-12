@@ -36,21 +36,22 @@ public class EngineUtils {
 	public static RequestHeader validateC2SRequest(Map lRespMap, Logger logger) throws UnsupportedEncodingException {
 		// Check for WebSocket protocol version.
 		// If it is present and if it's something unrecognizable, force disconnect (return null).
-		String lVersion = (String) lRespMap.get(RequestHeader.WS_VERSION);
-		if (lVersion != null) {
-			// Since this field was introduced in draft 02, we can safely assume that
-			// it will only be supplied with clients that use draft #02 and greater.
-			if (JWebSocketCommonConstants.WS_DRAFT_02.equals(lVersion)
-					|| JWebSocketCommonConstants.WS_DRAFT_03.equals(lVersion)
-					|| JWebSocketCommonConstants.WS_DRAFT_07.equals(lVersion)
-					|| JWebSocketCommonConstants.WS_DRAFT_08.equals(lVersion)
-					|| JWebSocketCommonConstants.WS_DRAFT_10.equals(lVersion)
-					|| JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(lVersion)) {
+		String lDraft = (String) lRespMap.get(RequestHeader.WS_DRAFT);
+		Integer lVersion = (Integer) lRespMap.get(RequestHeader.WS_VERSION);
+		if (lDraft != null) {
+			if (JWebSocketCommonConstants.WS_HIXIE_DRAFT_76.equals(lDraft)
+					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_02.equals(lDraft)
+					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_03.equals(lDraft)
+					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_07.equals(lDraft)
+					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_08.equals(lDraft)
+					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_10.equals(lDraft)
+					|| JWebSocketCommonConstants.WS_HIXIE_DRAFT_76.equals(lDraft)
+					|| JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(lDraft)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Client uses draft-" + lVersion + " for protocol communication");
+					logger.debug("Client uses draft #" + lDraft + " for protocol communication");
 				}
 			} else {
-				logger.error("Error in Handshake: Version '" + lVersion + "' not supported.");
+				logger.error("Error in Handshake: Draft #'" + lDraft + "' not supported.");
 				return null;
 			}
 		}
@@ -90,8 +91,7 @@ public class EngineUtils {
 			lSubProt = lArgs.get(RequestHeader.WS_PROTOCOL);
 		}
 		if (lSubProt == null) {
-			lSubProt = JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/'
-					+ JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
+			lSubProt = JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
 		}
 
 		// Sub protocol header might contain multiple entries
@@ -112,9 +112,13 @@ public class EngineUtils {
 		lHeader.put(RequestHeader.WS_PATH, lRespMap.get(RequestHeader.WS_PATH));
 		lHeader.put(RequestHeader.WS_SEARCHSTRING, lSearchString);
 		lHeader.put(RequestHeader.URL_ARGS, lArgs);
+		lHeader.put(RequestHeader.WS_DRAFT,
+				lDraft == null
+				? JWebSocketCommonConstants.WS_DRAFT_DEFAULT
+				: lDraft);
 		lHeader.put(RequestHeader.WS_VERSION,
 				lVersion == null
-				? JWebSocketCommonConstants.WS_DRAFT_DEFAULT
+				? JWebSocketCommonConstants.WS_VERSION_DEFAULT
 				: lVersion);
 
 		return lHeader;

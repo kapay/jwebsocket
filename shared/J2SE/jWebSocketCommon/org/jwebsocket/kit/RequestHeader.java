@@ -31,6 +31,7 @@ public final class RequestHeader {
 
 	private Map<String, Object> mFields = new FastMap<String, Object>();
 	public static final String WS_PROTOCOL = "subprot";
+	public static final String WS_DRAFT = "draft";
 	public static final String WS_VERSION = "version";
 	public static final String WS_ORIGIN = "origin";
 	public static final String WS_LOCATION = "location";
@@ -107,31 +108,26 @@ public final class RequestHeader {
 	private String[] resolveSubprotocol() {
 		String lSubProt = (String) mFields.get(WS_PROTOCOL);
 		if (lSubProt == null) {
-			return new String[] {
-					JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT,
-					JWebSocketCommonConstants.WS_FORMAT_DEFAULT};
+			lSubProt = JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
+		}
+		if (lSubProt.indexOf('/') != -1) {
+			// expecting 'subprotocol/format' scheme
+			return lSubProt.split("/");
 		} else {
-			if(lSubProt.indexOf('/') != -1) {
-				// expecting 'subprotocol/format' scheme
-				return lSubProt.split("/");
-			} else {
-				String format = JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
-				if(JWebSocketCommonConstants.WS_SUBPROT_JSON.equals(lSubProt)
-						|| JWebSocketCommonConstants.SUB_PROT_JSON.equals(lSubProt)) {
-					format = JWebSocketCommonConstants.WS_FORMAT_JSON;
-				} else if(JWebSocketCommonConstants.WS_SUBPROT_XML.equals(lSubProt)
-						|| JWebSocketCommonConstants.SUB_PROT_XML.equals(lSubProt)) {
-					format = JWebSocketCommonConstants.WS_FORMAT_XML;
-				} else if(JWebSocketCommonConstants.WS_SUBPROT_CSV.equals(lSubProt)
-						|| JWebSocketCommonConstants.SUB_PROT_CSV.equals(lSubProt)) {
-					format = JWebSocketCommonConstants.WS_FORMAT_CSV;
-				} else if(JWebSocketCommonConstants.WS_SUBPROT_CUSTOM.equals(lSubProt)
-						|| JWebSocketCommonConstants.SUB_PROT_CUSTOM.equals(lSubProt)) {
-					format = JWebSocketCommonConstants.WS_FORMAT_CUSTOM;
-				}
-
-				return new String[] { lSubProt, format };
+			String lFormat = JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
+			if (JWebSocketCommonConstants.WS_SUBPROT_JSON.equals(lSubProt)) {
+				lFormat = JWebSocketCommonConstants.WS_FORMAT_JSON;
+			} else if (JWebSocketCommonConstants.WS_SUBPROT_XML.equals(lSubProt)) {
+				lFormat = JWebSocketCommonConstants.WS_FORMAT_XML;
+			} else if (JWebSocketCommonConstants.WS_SUBPROT_CSV.equals(lSubProt)) {
+				lFormat = JWebSocketCommonConstants.WS_FORMAT_CSV;
+			} else if (JWebSocketCommonConstants.WS_SUBPROT_TEXT.equals(lSubProt)) {
+				lFormat = JWebSocketCommonConstants.WS_FORMAT_TEXT;
+			} else if (JWebSocketCommonConstants.WS_SUBPROT_BINARY.equals(lSubProt)) {
+				lFormat = JWebSocketCommonConstants.WS_FORMAT_BINARY;
 			}
+
+			return new String[]{lSubProt, lFormat};
 		}
 	}
 
@@ -154,7 +150,7 @@ public final class RequestHeader {
 		return (lTimeout != null ? lTimeout : aDefault);
 	}
 
-	public String getVersion() {
-		return (String) mFields.get(WS_VERSION);
+	public int getVersion() {
+		return (Integer) mFields.get(WS_VERSION);
 	}
 }

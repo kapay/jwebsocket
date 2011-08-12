@@ -15,6 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.kit;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import org.jwebsocket.api.WebSocketPacket;
 import java.util.List;
 
@@ -48,7 +50,7 @@ import java.util.List;
  * @author jang
  * @author aschulze
  */
-public class WebSocketProtocolHandler {
+public class WebSocketProtocolAbstraction {
 	// web socket protocol packet types
 
 	/**
@@ -57,7 +59,7 @@ public class WebSocketProtocolHandler {
 	 * @param aDataPacket
 	 * @return
 	 */
-	public static byte[] toProtocolPacket(int aVersion, WebSocketPacket aDataPacket) {
+	public static byte[] rawToProtocolPacket(int aVersion, WebSocketPacket aDataPacket) {
 
 		byte[] lBuff = new byte[2]; // resulting packet will have at least 2 bytes
 		WebSocketFrameType lFrameType = aDataPacket.getFrameType();
@@ -66,8 +68,18 @@ public class WebSocketProtocolHandler {
 			throw new WebSocketRuntimeException("Cannot construct a packet with unknown packet type: " + lFrameType);
 		}
 
+		boolean lMasked = false;
+
+		// determine fragmentation
+		// from Hybi Draft 04 it's the FIN flag < 04 its a more flag ;-)
+		boolean lIsFIN = (aVersion >= 4);
+
 		// 0x80 means it's the final frame, the RSV bits are not yet set
-		lBuff[0] = (byte) (lTargetType | 0x80);
+		if (lIsFIN) {
+			lBuff[0] = (byte) (lTargetType | 0x80);
+		} else {
+			lBuff[0] = (byte) (lTargetType);
+		}
 
 		int lPayloadLen = aDataPacket.getByteArray().length;
 
@@ -112,6 +124,84 @@ public class WebSocketProtocolHandler {
 		lBuff = copyOf(lBuff, lSize + aDataPacket.getByteArray().length);
 		System.arraycopy(aDataPacket.getByteArray(), 0, lBuff, lSize, aDataPacket.getByteArray().length);
 		return lBuff;
+	}
+
+	public static WebSocketPacket protocolToRawPacket(int aVersion, InputStream aDIS) throws Exception {
+		// begin normal packet read
+		int lFlags = aDIS.read();
+
+		ByteArrayOutputStream aBuff = new ByteArrayOutputStream();
+
+		// determine fragmentation
+		// from Hybi Draft 04 it's the FIN flag < 04 its a more flag ;-)
+		boolean lFragmented = (aVersion >= 4
+				? (lFlags & 0x80) == 0x00
+				: (lFlags & 0x80) == 0x80);
+		boolean lMasked = true;
+		int[] lMask = new int[4];
+
+		// ignore upper 4 bits for now
+		int lOpcode = lFlags & 0x0F;
+		WebSocketFrameType lFrameType = WebSocketProtocolAbstraction.opcodeToFrameType(aVersion, lOpcode);
+
+		if (lFrameType == WebSocketFrameType.INVALID) {
+			// Could not determine packet type, ignore the packet.
+			// Maybe we need a setting to decide, if such packets should abort the connection?
+			/*
+			if (mLog.isDebugEnabled()) {
+			mLog.debug("Dropping packet with unknown type: " + lOpcode);
+			}
+			 */
+		} else {
+			// Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
+			long lPayloadLen = aDIS.read();
+			lMasked = (lPayloadLen & 0x80) == 0x80;
+			lPayloadLen &= 0x7F;
+
+			if (lPayloadLen == 126) {
+				// following two bytes are acutal payload length (16-bit unsigned integer)
+				lPayloadLen = aDIS.read() & 0xFF;
+				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+			} else if (lPayloadLen == 127) {
+				// following eight bytes are actual payload length (64-bit unsigned integer)
+				lPayloadLen = aDIS.read() & 0xFF;
+				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+			}
+
+			if (lMasked) {
+				lMask[0] = aDIS.read() & 0xFF;
+				lMask[1] = aDIS.read() & 0xFF;
+				lMask[2] = aDIS.read() & 0xFF;
+				lMask[3] = aDIS.read() & 0xFF;
+			}
+
+			if (lPayloadLen > 0) {
+				// payload length may be extremely long, so we read in loop rather
+				// than construct one byte[] array and fill it with read() method,
+				// because java does not allow longs as array size
+				if (lMasked) {
+					int j = 0;
+					while (lPayloadLen-- > 0) {
+						aBuff.write(aDIS.read() ^ lMask[j]);
+						j++;
+						j &= 3;
+					}
+				} else {
+					while (lPayloadLen-- > 0) {
+						aBuff.write(aDIS.read());
+					}
+				}
+			}
+		}
+
+		WebSocketPacket lRes = new RawPacket(aBuff.toByteArray());
+		return lRes;
 	}
 
 	/* TODO: implement fragmentation */
@@ -188,6 +278,20 @@ public class WebSocketProtocolHandler {
 				return lOpcode.OPCODE_PONG;
 			default:
 				return lOpcode.OPCODE_INVALID;
+		}
+	}
+
+	public static WebSocketFrameType encodingToFrameType(WebSocketEncoding aEncoding) {
+		switch (aEncoding) {
+			case TEXT: {
+				return WebSocketFrameType.TEXT;
+			}
+			case BINARY: {
+				return WebSocketFrameType.BINARY;
+			}
+			default: {
+				return WebSocketFrameType.INVALID;
+			}
 		}
 	}
 

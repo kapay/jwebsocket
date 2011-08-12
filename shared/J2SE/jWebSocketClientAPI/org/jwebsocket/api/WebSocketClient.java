@@ -15,8 +15,10 @@
 package org.jwebsocket.api;
 
 import java.util.List;
+import org.jwebsocket.kit.WebSocketEncoding;
 
 import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.kit.WebSocketSubProtocol;
 
 /**
  * Base interface that represents the <tt>jWebSocket</tt> java client and it defines
@@ -132,33 +134,33 @@ public interface WebSocketClient {
 	 * Adds subprotocol to the list of supported protocols which are negotiated during handshake with
 	 * web socket server.
 	 *
-	 * @param protocolName name of the subprotocol, prefferably in domain format (see section 1.9 of the hybi-03 draft).
-	 * @param protocolFormat actual formatting of the packets (json, csv, binary or something custom)
+	 * @param aSubProt sub protocol
+	 * @param aEncoding, currently either text or binary
 	 */
-	void addSubProtocol(String protocolName, String protocolFormat);
+	void addSubProtocol(WebSocketSubProtocol aSubProt);
 
 	/**
 	 * If subprotocol was negotiated, then this method returns sub protocol name.
 	 *
 	 * @return name of the subprotocol or null if no subprotocol was negotiated
 	 */
-	String getNegotiatedProtocolName();
+	String getNegotiatedSubProtocol();
 
 	/**
 	 * If subprotocol was negotiated, then this method returns sub protocol format (json, csv, binary, custom)
 	 *
 	 * @return format of the subprotocol or null if no subprotocol was negotiated
 	 */
-	String getNegotiatedProtocolFormat();
+	WebSocketEncoding getNegotiatedEncoding();
 
 	/**
-	 * Web socket protocol draft. Sepcification recommends using only draft number in
-	 * relevant header, but anything may be used as long as server undertstands it.
+	 * Web socket protocol draft. Specification recommends using only draft number in
+	 * relevant header, but anything may be used as long as server understands it.
 	 * JWebSocket adheres to the specification and therefore understands only draft number
 	 * as valid value, e.g. "Sec-WebSocket-Draft: 3". Anything else will probably fail on
 	 * server side.
 	 *
-	 * @param aDraft which draft to use for web socket protocol communication
+	 * @param aVersion which draft to use for web socket protocol communication
 	 */
-	void setDraft(String aDraft);
+	void setVersion(int aVersion);
 }

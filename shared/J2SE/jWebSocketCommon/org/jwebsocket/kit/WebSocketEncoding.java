@@ -18,32 +18,24 @@ package org.jwebsocket.kit;
  *
  * @author aschulze
  */
-public enum WebSocketFrameType {
+public enum WebSocketEncoding {
 
 	/**  */
 	INVALID(-1),
 	/**  */
-	FRAGMENT(0x00),
+	TEXT(0x00),
 	/**  */
-	TEXT(0x01),
-	/**  */
-	BINARY(0x02),
-	/**  */
-	CLOSE(0x09),
-	/**  */
-	PING(0x09),
-	/**  */
-	PONG(0x0A);
-	private int mFrameType;
+	BINARY(0x01);
+	private int mEncoding;
 
-	WebSocketFrameType(int aFrameType) {
-		mFrameType = aFrameType;
+	WebSocketEncoding(int aEncoding) {
+		mEncoding = aEncoding;
 	}
 
 	/**
 	 * @return the status int value
 	 */
-	public int getFrameType() {
-		return mFrameType;
+	public int getEncoding() {
+		return mEncoding;
 	}
 }

@@ -18,7 +18,7 @@ package org.jwebsocket.client.cgi;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.jwebsocket.client.java.BaseWebSocket;
+import org.jwebsocket.client.java.BaseWebSocketClient;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.WebSocketException;
 
@@ -28,7 +28,7 @@ import org.jwebsocket.kit.WebSocketException;
  * stdErr channel to the linked application.
  * @author aschulze
  */
-public class CGIClient extends BaseWebSocket {
+public class CGIClient extends BaseWebSocketClient {
 
     private boolean isRunning = false;
     private Thread inboundThread;

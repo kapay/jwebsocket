@@ -269,7 +269,11 @@ public class SystemPlugIn extends TokenPlugIn {
 		if (lNodeId != null) {
 			lWelcome.setString("unid", lNodeId);
 		}
-		lWelcome.setInteger("version", aConnector.getVersion());
+		// to let the client know about the negotiated protocol
+		lWelcome.setInteger("protocolVersion", aConnector.getVersion());
+		// and negotiated sub protocol
+		// TODO: The client does not get anything here!
+		lWelcome.setString("subProtocol", aConnector.getSubprot());
 
 		sendToken(aConnector, aConnector, lWelcome);
 	}

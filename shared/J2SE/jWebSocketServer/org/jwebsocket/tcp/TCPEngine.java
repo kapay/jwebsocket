@@ -333,20 +333,19 @@ public class TCPEngine extends BaseEngine {
 		byte[] lReq = new byte[lRead];
 		System.arraycopy(lBuff, 0, lReq, 0, lRead);
 
-		/* please keep comment for debugging purposes!
+		/* please keep comment for debugging purposes! */
 		if (mLog.isDebugEnabled()) {
-		mLog.debug("Handshake Request:\n" + new String(lReq));
-		mLog.debug("Parsing initial WebSocket handshake...");
+			mLog.debug("Handshake Request:\n" + new String(lReq));
+			mLog.debug("Parsing initial WebSocket handshake...");
 		}
-		 */
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(
 				lReq,
 				aClientSocket instanceof SSLSocketImpl);
 		RequestHeader lHeader = EngineUtils.validateC2SRequest(lRespMap, mLog);
-		if(lHeader == null) {
+		if (lHeader == null) {
 			return null;
 		}
-		
+
 		// generate the websocket handshake
 		// if policy-file-request is found answer it
 		byte[] lBA = WebSocketHandshake.generateS2CResponse(lRespMap);
@@ -357,12 +356,12 @@ public class TCPEngine extends BaseEngine {
 			return null;
 		}
 
-		/* please keep comment for debugging purposes!
+		/* please keep comment for debugging purposes!*/
 		if (mLog.isDebugEnabled()) {
-		mLog.debug("Handshake Response:\n" + new String(lBA));
-		mLog.debug("Flushing initial WebSocket handshake...");
+			mLog.debug("Handshake Response:\n" + new String(lBA));
+			mLog.debug("Flushing initial WebSocket handshake...");
 		}
-		 */
+
 		lOut.write(lBA);
 		lOut.flush();
 
@@ -462,6 +461,7 @@ public class TCPEngine extends BaseEngine {
 							// create connector and pass header
 							// log.debug("Instantiating connector...");
 							WebSocketConnector lConnector = new TCPConnector(mEngine, lClientSocket);
+							lConnector.setVersion(lHeader.getVersion());
 
 							String lLogInfo = lConnector.isSSL() ? "SSL" : "TCP";
 							if (mLog.isDebugEnabled()) {

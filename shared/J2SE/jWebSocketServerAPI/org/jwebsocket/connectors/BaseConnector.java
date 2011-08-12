@@ -22,6 +22,7 @@ import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.async.IOFuture;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
@@ -57,6 +58,10 @@ public class BaseConnector implements WebSocketConnector {
 	 * Is connector using SSL encryption?
 	 */
 	private boolean mIsSSL = false;
+	/**
+	 * the WebSocket protocol version
+	 */
+	private int mVersion = JWebSocketCommonConstants.WS_VERSION_DEFAULT;
 	/**
 	 * Backward reference to the engine of this connector.
 	 */
@@ -253,12 +258,12 @@ public class BaseConnector implements WebSocketConnector {
 
 	@Override
 	public int getVersion() {
-		return getInteger(BaseConnector.VAR_VERSION);
+		return mVersion;
 	}
 
 	@Override
 	public void setVersion(int aVersion) {
-		setInteger(BaseConnector.VAR_VERSION, aVersion);
+		mVersion = aVersion;
 	}
 
 	@Override

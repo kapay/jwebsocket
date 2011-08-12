@@ -20,7 +20,7 @@ import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.RawPacket;
-import org.jwebsocket.kit.WebSocketProtocolHandler;
+import org.jwebsocket.kit.WebSocketProtocolAbstraction;
 import org.jwebsocket.logging.Logging;
 
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class NioTcpConnector extends BaseConnector {
 			System.arraycopy(aPacket.getByteArray(), 0, lProtocolPacket, 1, aPacket.getByteArray().length);
 			lProtocolPacket[lProtocolPacket.length - 1] = (byte) 0xFF;
 		} else {
-			lProtocolPacket = WebSocketProtocolHandler.toProtocolPacket(getVersion(), aPacket);
+			lProtocolPacket = WebSocketProtocolAbstraction.rawToProtocolPacket(getVersion(), aPacket);
 		}
 
 		DataFuture lFuture = new DataFuture(this, ByteBuffer.wrap(lProtocolPacket));

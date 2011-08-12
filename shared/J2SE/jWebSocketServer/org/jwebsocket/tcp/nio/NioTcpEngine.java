@@ -465,7 +465,7 @@ public class NioTcpEngine extends BaseEngine {
 				boolean lFragmented = (0x01 & lFlags) == 0x01;
 				// shift 4 bits to skip the first bit and three RSVx bits
 				int lOpcode = lFlags >> 4;
-				WebSocketFrameType lFrameType = WebSocketProtocolHandler.opcodeToFrameType(connector.getVersion(), lOpcode);
+				WebSocketFrameType lFrameType = WebSocketProtocolAbstraction.opcodeToFrameType(connector.getVersion(), lOpcode);
 
 				int payloadStartIndex = 2;
 

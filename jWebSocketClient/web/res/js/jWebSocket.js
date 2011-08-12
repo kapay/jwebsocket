@@ -109,18 +109,25 @@ var jws = {
 		queueSizeLimit: 1024 * 1024 * 10 // 10 MByte
 	},
 	
-	//:const:*:WS_SUBPROT_JSON:String:jwebsocket.org/json
+	//:const:*:WS_SUBPROT_JSON:String:org.jwebsocket.json
 	//:d:en:jWebSocket sub protocol JSON
-	WS_SUBPROT_JSON: "jwebsocket.org/json",
-	//:const:*:WS_SUBPROT_XML:String:jwebsocket.org/xml
+	WS_SUBPROT_JSON: "org.jwebsocket.json",
+	//:const:*:WS_SUBPROT_XML:String:org.jwebsocket.xml
 	//:d:en:jWebSocket sub protocol XML
-	WS_SUBPROT_XML: "jwebsocket.org/xml",
-	//:const:*:WS_SUBPROT_CSV:String:jwebsocket.org/csv
+	WS_SUBPROT_XML: "org.jwebsocket.xml",
+	//:const:*:WS_SUBPROT_CSV:String:org.jwebsocket.csv
 	//:d:en:jWebSocket sub protocol CSV
-	WS_SUBPROT_CSV: "jwebsocket.org/csv",
-	//:const:*:WS_SUBPROT_CUSTOM:String:jwebsocket.org/custom
-	//:d:en:jWebSocket sub protocol Custom
-	WS_SUBPROT_CUSTOM: "jwebsocket.org/custom",
+	WS_SUBPROT_CSV: "org.jwebsocket.csv",
+	//:const:*:WS_SUBPROT_CUSTOM:String:org.jwebsocket.text
+	//:d:en:jWebSocket sub protocol text
+	//:@deprecated:en:Use [tt]WS_SUBPROT_TEXT()[/tt] instead.
+	WS_SUBPROT_CUSTOM: "org.jwebsocket.text",
+	//:const:*:WS_SUBPROT_TEXT:String:org.jwebsocket.text
+	//:d:en:jWebSocket sub protocol text
+	WS_SUBPROT_TEXT: "org.jwebsocket.text",
+	//:const:*:WS_SUBPROT_BINARY:String:org.jwebsocket.binary
+	//:d:en:jWebSocket sub protocol binary
+	WS_SUBPROT_BINARY: "org.jwebsocket.binary",
 
 	//:const:*:SCOPE_PRIVATE:String:private
 	//:d:en:private scope, only authenticated user can read and write his personal items
@@ -169,7 +176,13 @@ var jws = {
 		"Safari",
 		"Chrome"
 	],
-
+	
+	//:const:*:GUEST_USER_LOGINNAME:String:guest
+	//:d:en:Guest user login name is "guest" (if not changed on the server).
+	GUEST_USER_LOGINNAME: "guest",
+	//:const:*:GUEST_USER_PASSWORD:String:guest
+	//:d:en:Guest user password is "guest" (if not changed on the server).
+	GUEST_USER_PASSWORD: "guest",
 
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _

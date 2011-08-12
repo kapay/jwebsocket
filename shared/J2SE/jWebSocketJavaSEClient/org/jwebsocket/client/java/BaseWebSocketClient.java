@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -44,9 +43,12 @@ import org.jwebsocket.api.WebSocketStatus;
 import org.jwebsocket.client.token.WebSocketTokenClientEvent;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.RawPacket;
+import org.jwebsocket.kit.WebSocketEncoding;
 import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.kit.WebSocketFrameType;
 import org.jwebsocket.kit.WebSocketHandshake;
-import org.jwebsocket.kit.WebSocketProtocolHandler;
+import org.jwebsocket.kit.WebSocketProtocolAbstraction;
+import org.jwebsocket.kit.WebSocketSubProtocol;
 
 /**
  * Base {@code WebSocket} implementation based on
@@ -59,9 +61,10 @@ import org.jwebsocket.kit.WebSocketProtocolHandler;
  * @author agali
  * @author puran
  * @author jang
+ * @author aschulze
  * @version $Id:$
  */
-public class BaseWebSocket implements WebSocketClient {
+public class BaseWebSocketClient implements WebSocketClient {
 
 	/**
 	 * WebSocket connection URI
@@ -88,36 +91,65 @@ public class BaseWebSocket implements WebSocketClient {
 	 * represents the WebSocket status
 	 */
 	protected volatile WebSocketStatus mStatus = WebSocketStatus.CLOSED;
-	private List<SubProtocol> mSubprotocols;
-	private SubProtocol mNegotiatedSubprotocol;
-	private String mDraft = JWebSocketCommonConstants.WS_DRAFT_DEFAULT;
-	
+	private List<WebSocketSubProtocol> mSubprotocols;
+	private WebSocketSubProtocol mNegotiatedSubProtocol;
 	public static String EVENT_CLOSE = "close";
 	public static String DATA_CLOSE_ERROR = "error";
 	public static String DATA_CLOSE_CLIENT = "client";
 	public static String DATA_CLOSE_SERVER = "server";
 	public static String DATA_CLOSE_SHUTDOWN = "shutdown";
+	private int mVersion = JWebSocketCommonConstants.WS_VERSION_DEFAULT;
+	private WebSocketEncoding mEncoding = WebSocketEncoding.TEXT;
 
 	/**
 	 * Base constructor
 	 */
-	public BaseWebSocket() {
+	public BaseWebSocketClient() {
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void open(String aURIString) throws WebSocketException {
+	public void open(String aURI) throws WebSocketException {
+		open(JWebSocketCommonConstants.WS_VERSION_DEFAULT, aURI);
+	}
+
+	/**
+	 * Make a sub protocol string for Sec-WebSocket-Protocol header.
+	 * The result is something like this:
+	 * <pre>
+	 * chat.example.com/json v2.chat.example.com/xml audio.chat.example.com/binary
+	 * </pre>
+	 *
+	 * @return subprotocol list in one string
+	 */
+	private String makeSubprotocolHeader() {
+		if (mSubprotocols == null || mSubprotocols.size() < 1) {
+			//return JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/' + JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
+			return null;
+		} else {
+			StringBuilder lBuff = new StringBuilder();
+			for (WebSocketSubProtocol lProt : mSubprotocols) {
+				lBuff.append(lProt.getSubProt()).append(' ');
+			}
+			return lBuff.toString().trim();
+		}
+	}
+
+	public void open(int aVersion, String aURI) throws WebSocketException {
 		URI lURI = null;
 		try {
-			lURI = new URI(aURIString);
+			lURI = new URI(aURI);
 		} catch (URISyntaxException lEx) {
-			throw new WebSocketException("Error parsing WebSocket URL:" + aURIString, lEx);
+			throw new WebSocketException("Error parsing WebSocket URL:" + aURI, lEx);
 		}
-		this.mURI = lURI;
+
+		mURI = lURI;
+		mVersion = aVersion;
+
 		String lSubProtocol = makeSubprotocolHeader();
-		WebSocketHandshake lHandshake = new WebSocketHandshake(mURI, lSubProtocol, mDraft);
+		WebSocketHandshake lHandshake = new WebSocketHandshake(mVersion, mURI, lSubProtocol);
 		try {
 			// close current socket if still connected 
 			// to avoid open connections on server
@@ -176,21 +208,21 @@ public class BaseWebSocket implements WebSocketClient {
 			}
 			lHandshake.verifyServerHandshakeHeaders(lHeaders);
 
-			// set negotiated sub protocol
+			// parse negotiated sub protocol
 			if (lHeaders.containsKey("Sec-WebSocket-Protocol")) {
 				String llHeader = lHeaders.get("Sec-WebSocket-Protocol");
 				if (llHeader.indexOf('/') == -1) {
-					mNegotiatedSubprotocol = new SubProtocol(
-							llHeader, JWebSocketCommonConstants.WS_FORMAT_DEFAULT);
+					mNegotiatedSubProtocol = new WebSocketSubProtocol(
+							llHeader, mEncoding);
 				} else {
 					String[] lSplit = llHeader.split("/");
-					mNegotiatedSubprotocol = new SubProtocol(lSplit[0], lSplit[1]);
+					mNegotiatedSubProtocol = new WebSocketSubProtocol(lSplit[0], mEncoding);
 				}
 			} else {
-				// just default to 'jwebsocket.org/json'
-				mNegotiatedSubprotocol = new SubProtocol(
-						JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT,
-						JWebSocketCommonConstants.WS_FORMAT_DEFAULT);
+				// just default to 'jwebsocket.org/json' and 'text'
+				mNegotiatedSubProtocol = new WebSocketSubProtocol(
+						JWebSocketCommonConstants.WS_SUBPROT_DEFAULT,
+						JWebSocketCommonConstants.WS_ENCODING_DEFAULT);
 			}
 
 			mReceiver = new WebSocketReceiver(mInput);
@@ -213,8 +245,8 @@ public class BaseWebSocket implements WebSocketClient {
 			sendInternal(aData);
 		} else {
 			WebSocketPacket lPacket = new RawPacket(aData);
-			lPacket.setFrameType(WebSocketProtocolHandler.toRawPacketType(mNegotiatedSubprotocol.mFormat));
-			sendInternal(WebSocketProtocolHandler.toProtocolPacket(lPacket));
+			lPacket.setFrameType(WebSocketProtocolAbstraction.encodingToFrameType(mNegotiatedSubProtocol.getEncoding()));
+			sendInternal(WebSocketProtocolAbstraction.rawToProtocolPacket(mVersion, lPacket));
 		}
 	}
 
@@ -242,13 +274,7 @@ public class BaseWebSocket implements WebSocketClient {
 		if (isHixieDraft()) {
 			sendInternal(aDataPacket.getByteArray());
 		} else {
-			if (isBinaryFormat() && (aDataPacket.getFrameType() != RawPacket.FRAMETYPE_BINARY)) {
-				// we negotiated binary format with the server
-				throw new WebSocketException(
-						"Only binary packets are allowed for this connection");
-			}
-
-			sendInternal(WebSocketProtocolHandler.toProtocolPacket(aDataPacket));
+			sendInternal(WebSocketProtocolAbstraction.rawToProtocolPacket(mVersion, aDataPacket));
 		}
 	}
 
@@ -258,7 +284,7 @@ public class BaseWebSocket implements WebSocketClient {
 		}
 		try {
 			if (isHixieDraft()) {
-				if (isBinaryFormat()) {
+				if (WebSocketEncoding.BINARY.equals(mNegotiatedSubProtocol.getEncoding())) {
 					mOutput.write(0x80);
 					// TODO: what if frame is longer than 255 characters (8bit?) Refer to IETF spec!
 					mOutput.write(aData.length);
@@ -326,7 +352,7 @@ public class BaseWebSocket implements WebSocketClient {
 				// TODO: shouldn't we put a flush here?
 			} else {
 				WebSocketPacket lPacket = new RawPacket("BYE");
-				lPacket.setFrameType(RawPacket.FRAMETYPE_CLOSE);
+				lPacket.setFrameType(WebSocketFrameType.CLOSE);
 				send(lPacket);
 			}
 		} catch (IOException lIOEx) {
@@ -513,99 +539,40 @@ public class BaseWebSocket implements WebSocketClient {
 		for (WebSocketClientListener lListener : getListeners()) {
 			lListener.processClosed(aEvent);
 		}
-
+/*
 		ReliabilityManager.getExecutor().schedule(
 				new ReOpener(aEvent),
 				1000,
 				TimeUnit.MILLISECONDS);
+ */
 	}
 
 	@Override
-	public void addSubProtocol(String aProtocolName, String aProtocolFormat) {
+	public void addSubProtocol(WebSocketSubProtocol aSubProt) {
 		if (mSubprotocols == null) {
-			mSubprotocols = new ArrayList<SubProtocol>(5);
+			mSubprotocols = new ArrayList<WebSocketSubProtocol>(3);
 		}
-
-		mSubprotocols.add(new SubProtocol(aProtocolName, aProtocolFormat));
+		mSubprotocols.add(aSubProt);
 	}
 
 	@Override
-	public String getNegotiatedProtocolName() {
-		return mNegotiatedSubprotocol == null ? null : mNegotiatedSubprotocol.mName;
+	public String getNegotiatedSubProtocol() {
+		return mNegotiatedSubProtocol == null ? null : mNegotiatedSubProtocol.getSubProt();
 	}
 
 	@Override
-	public String getNegotiatedProtocolFormat() {
-		return mNegotiatedSubprotocol == null ? null : mNegotiatedSubprotocol.mFormat;
+	public WebSocketEncoding getNegotiatedEncoding() {
+		return mNegotiatedSubProtocol == null ? null : mNegotiatedSubProtocol.getEncoding();
 	}
 
 	@Override
-	public void setDraft(String aDraft) {
-		this.mDraft = aDraft;
+	public void setVersion(int aVersion) {
+		this.mVersion = aVersion;
 	}
 
-	/**
-	 * Make a sub protocol string for Sec-WebSocket-Protocol header.
-	 * The result is something like this:
-	 * <pre>
-	 * chat.example.com/json v2.chat.example.com/xml audio.chat.example.com/binary
-	 * </pre>
-	 *
-	 * @return subprotocol list in one string
-	 */
-	private String makeSubprotocolHeader() {
-		if (mSubprotocols == null || mSubprotocols.size() < 1) {
-			//return JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/' + JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
-			return null;
-		} else {
-			StringBuilder lBuff = new StringBuilder();
-			for (SubProtocol lProt : mSubprotocols) {
-				lBuff.append(lProt.toString()).append(' ');
-			}
-			return lBuff.toString().trim();
-		}
-	}
-
+	// TODO: Need to adjust this, hybi may exceed 75 ine day as well!
 	private boolean isHixieDraft() {
-		return JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(mDraft);
-	}
-
-	private boolean isBinaryFormat() {
-		return mNegotiatedSubprotocol != null
-				&& JWebSocketCommonConstants.WS_FORMAT_BINARY.equals(mNegotiatedSubprotocol.mFormat);
-	}
-
-	class SubProtocol {
-
-		private String mName;
-		private String mFormat;
-
-		private SubProtocol(String aName, String aFormat) {
-			this.mName = aName;
-			this.mFormat = aFormat;
-		}
-
-		@Override
-		public int hashCode() {
-			return mName.hashCode() * 31 + mFormat.hashCode();
-		}
-
-		@Override
-		public boolean equals(Object aObj) {
-			if (aObj instanceof SubProtocol) {
-				SubProtocol lOther = (SubProtocol) aObj;
-				return mName.equals(lOther.mName) && mFormat.equals(lOther.mFormat);
-			} else {
-				return super.equals(aObj);
-			}
-		}
-
-		@Override
-		public String toString() {
-			StringBuilder lBuff = new StringBuilder();
-			lBuff.append(mName).append('/').append(mFormat);
-			return lBuff.toString();
-		}
+		return mVersion >= 75;
 	}
 
 	class WebSocketReceiver extends Thread {
@@ -655,64 +622,72 @@ public class BaseWebSocket implements WebSocketClient {
 		}
 
 		private void readHybi() throws WebSocketException, IOException {
-			int lPacketType;
 			// utilize data input stream, because it has convenient methods for reading
 			// signed/unsigned bytes, shorts, ints and longs
-			DataInputStream lDis = new DataInputStream(mIS);
-			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
+			// DataInputStream lDis = new DataInputStream(mIS);
+			// ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
 
 			while (!mStop) {
+				try {
+					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(mVersion, mIS);
+					WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent();
+					notifyPacket(lWSCE, lPacket);
+				} catch (Exception lEx) {
+					handleErrorAndClose();
+				}
+				/*				
 				// begin normal packet read
 				int lFlags = lDis.read();
 				// determine fragmentation
 				boolean lFragmented = (0x01 & lFlags) == 0x01;
 				// shift 4 bits to skip the first bit and three RSVx bits
 				int lType = lFlags >> 4;
-				lPacketType = WebSocketProtocolHandler.toRawPacketType(lType);
-
+				lPacketType = WebSocketProtocolAbstraction.toRawPacketType(lType);
+				
 				if (lPacketType == -1) {
-					// Could not determine packet type, ignore the packet.
-					// Maybe we need a setting to decide, if such packets should abort the connection?
-					handleErrorAndClose();
+				// Could not determine packet type, ignore the packet.
+				// Maybe we need a setting to decide, if such packets should abort the connection?
+				handleErrorAndClose();
 				} else {
-					// Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
-					long lPayloadLen = mIS.read() >> 1;
-					if (lPayloadLen == 126) {
-						// following two bytes are acutal payload length (16-bit unsigned integer)
-						lPayloadLen = lDis.readUnsignedShort();
-					} else if (lPayloadLen == 127) {
-						// following eight bytes are actual payload length (64-bit unsigned integer)
-						lPayloadLen = lDis.readLong();
-					}
-
-					if (lPayloadLen > 0) {
-						// payload length may be extremely long, so we read in loop rather
-						// than construct one byte[] array and fill it with read() method,
-						// because java does not allow longs as array size
-						while (lPayloadLen-- > 0) {
-							lBuff.write(lDis.read());
-						}
-					}
-
-					if (!lFragmented) {
-						if (lPacketType == RawPacket.FRAMETYPE_PING) {
-							// As per spec, we must respond to PING with PONG (maybe
-							// this should be handled higher up in the hierarchy?)
-							WebSocketPacket lPong = new RawPacket(lBuff.toByteArray());
-							lPong.setFrameType(RawPacket.FRAMETYPE_PONG);
-							send(lPong);
-						} else if (lPacketType == RawPacket.FRAMETYPE_CLOSE) {
-							close();
-						}
-
-						// Packet was read, pass it forward.
-						WebSocketPacket lPacket = new RawPacket(lBuff.toByteArray());
-						lPacket.setFrameType(lPacketType);
-						WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent();
-						notifyPacket(lWSCE, lPacket);
-						lBuff.reset();
-					}
+				// Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
+				long lPayloadLen = mIS.read() >> 1;
+				if (lPayloadLen == 126) {
+				// following two bytes are acutal payload length (16-bit unsigned integer)
+				lPayloadLen = lDis.readUnsignedShort();
+				} else if (lPayloadLen == 127) {
+				// following eight bytes are actual payload length (64-bit unsigned integer)
+				lPayloadLen = lDis.readLong();
 				}
+				
+				if (lPayloadLen > 0) {
+				// payload length may be extremely long, so we read in loop rather
+				// than construct one byte[] array and fill it with read() method,
+				// because java does not allow longs as array size
+				while (lPayloadLen-- > 0) {
+				lBuff.write(lDis.read());
+				}
+				}
+				
+				if (!lFragmented) {
+				if (lPacketType == RawPacket.FRAMETYPE_PING) {
+				// As per spec, we must respond to PING with PONG (maybe
+				// this should be handled higher up in the hierarchy?)
+				WebSocketPacket lPong = new RawPacket(lBuff.toByteArray());
+				lPong.setFrameType(RawPacket.FRAMETYPE_PONG);
+				send(lPong);
+				} else if (lPacketType == RawPacket.FRAMETYPE_CLOSE) {
+				close();
+				}
+				
+				// Packet was read, pass it forward.
+				WebSocketPacket lPacket = new RawPacket(lBuff.toByteArray());
+				lPacket.setFrameType(lPacketType);
+				WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent();
+				notifyPacket(lWSCE, lPacket);
+				lBuff.reset();
+				}
+				}
+				 */
 			}
 		}
 

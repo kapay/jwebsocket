@@ -30,7 +30,7 @@ import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketFrameType;
-import org.jwebsocket.kit.WebSocketProtocolHandler;
+import org.jwebsocket.kit.WebSocketProtocolAbstraction;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -186,11 +186,6 @@ public class TCPConnector extends BaseConnector {
 			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
 			Thread.currentThread().setName("jWebSocket TCP-Connector " + getId());
 			try {
-				setVersion(Integer.parseInt(getHeader().getVersion(), 10));
-			} catch (Exception Ex) {
-				setVersion(10);
-			}
-			try {
 				// start client listener loop
 				mIsRunning = true;
 
@@ -200,7 +195,6 @@ public class TCPConnector extends BaseConnector {
 				if (isHixieDraft()) {
 					readHixie(lBuff, lEngine);
 				} else {
-					// assume that #02 and #03 are the same regarding packet processing
 					readHybi(getVersion(), lBuff, lEngine);
 				}
 
@@ -318,7 +312,7 @@ public class TCPConnector extends BaseConnector {
 
 					// ignore upper 4 bits for now
 					int lOpcode = lFlags & 0x0F;
-					lFrameType = WebSocketProtocolHandler.opcodeToFrameType(getVersion(), lOpcode);
+					lFrameType = WebSocketProtocolAbstraction.opcodeToFrameType(getVersion(), lOpcode);
 
 					if (lFrameType == WebSocketFrameType.INVALID) {
 						// Could not determine packet type, ignore the packet.
@@ -471,7 +465,7 @@ public class TCPConnector extends BaseConnector {
 
 	// TODO: implement fragmentation for packet sending
 	private void sendHybi(int aVersion, WebSocketPacket aDataPacket) throws IOException {
-		byte[] lPacket = WebSocketProtocolHandler.toProtocolPacket(aVersion, aDataPacket);
+		byte[] lPacket = WebSocketProtocolAbstraction.rawToProtocolPacket(aVersion, aDataPacket);
 		mOut.write(lPacket);
 	}
 }

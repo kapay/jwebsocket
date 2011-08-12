@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 
 /**
  * Utility class for all the handshaking related request/response.
@@ -47,24 +48,7 @@ public final class WebSocketHandshake {
 	private URI mURL = null;
 	private String mOrigin = null;
 	private String mProtocol = null;
-	private String mVersion = null;
-
-	/**
-	 *
-	 * @param aURL
-	 */
-	public WebSocketHandshake(URI aURL) {
-		this(aURL, null, null);
-	}
-
-	/**
-	 *
-	 * @param aURL
-	 * @param aProtocol
-	 */
-	public WebSocketHandshake(URI aURL, String aProtocol) {
-		this(aURL, aProtocol, null);
-	}
+	private Integer mVersion = null;
 
 	/**
 	 *
@@ -72,39 +56,16 @@ public final class WebSocketHandshake {
 	 * @param aProtocol
 	 * @param aVersion
 	 */
-	public WebSocketHandshake(URI aURL, String aProtocol, String aVersion) {
+	public WebSocketHandshake(int aVersion, URI aURL, String aProtocol) {
 		this.mURL = aURL;
 		this.mProtocol = aProtocol;
 		this.mVersion = aVersion;
-		generateKeys();
-	}
 
-	/**
-	 * Generates the initial handshake request from a client to the jWebSocket
-	 * Server. This is send from a Java client to the server when a connection
-	 * is about to be established. The browser's implement that internally.
-	 *
-	 * @param aHost
-	 * @param aPath
-	 * @return
-	 */
-	// public static byte[] generateC2SRequest(URI aURI) {
-	public static byte[] generateC2SRequest(String aHost, String aPath) {
-		// String lPath = aURI.getPath();
-		// String lHost = aURI.getHost();
-		String lOrigin = "http://" + aHost;
-		String lHandshake =
-				"GET " + aPath + " HTTP/1.1\r\n"
-				+ "Upgrade: WebSocket\r\n"
-				+ "Connection: Upgrade\r\n"
-				+ "Host: " + aHost + "\r\n"
-				+ "Origin: " + lOrigin + "\r\n" + "\r\n";
-		byte[] lBA = null;
-		try {
-			lBA = lHandshake.getBytes("US-ASCII");
-		} catch (Exception lEx) {
+		if (aVersion <= 76) {
+			generateHixieKeys();
+		} else {
+			generateHybiKeys();
 		}
-		return lBA;
 	}
 
 	private static String calcHybiSecKeyNum(String aKey) {
@@ -165,7 +126,8 @@ public final class WebSocketHandshake {
 		String lLocation = null;
 		String lPath = null;
 		String lSubProt = null;
-		String lVersion = null;
+		String lDraft = null;
+		Integer lVersion = null;
 		String lSecKey = null;
 		String lSecKey1 = null;
 		String lSecKey2 = null;
@@ -195,7 +157,6 @@ public final class WebSocketHandshake {
 
 		if (lRequest.indexOf("Sec-WebSocket-Key1:") >= 0
 				&& lRequest.indexOf("Sec-WebSocket-Key2:") >= 0) {
-		// if (lIsSecure) {
 			lReqLen -= 8;
 			for (int lIdx = 0; lIdx < 8; lIdx++) {
 				lSecKey3[lIdx] = aReq[lReqLen + lIdx];
@@ -247,16 +208,16 @@ public final class WebSocketHandshake {
 		lPos = lRequest.indexOf("Sec-WebSocket-Draft:");
 		if (lPos > 0) {
 			lPos += 21;
-			lVersion = lRequest.substring(lPos);
-			lPos = lVersion.indexOf("\r\n");
-			lVersion = lVersion.substring(0, lPos).trim();
+			lDraft = lRequest.substring(lPos);
+			lPos = lDraft.indexOf("\r\n");
+			lDraft = lDraft.substring(0, lPos).trim();
 		}
 		lPos = lRequest.indexOf("Sec-WebSocket-Version:");
 		if (lPos > 0) {
 			lPos += 22;
-			lVersion = lRequest.substring(lPos);
-			lPos = lVersion.indexOf("\r\n");
-			lVersion = lVersion.substring(0, lPos).trim();
+			lDraft = lRequest.substring(lPos);
+			lPos = lDraft.indexOf("\r\n");
+			lDraft = lDraft.substring(0, lPos).trim();
 		}
 
 		// the following section implements the sec-key process in WebSocket
@@ -374,6 +335,24 @@ public final class WebSocketHandshake {
 			lRes.put(RequestHeader.WS_SECKEY2, lSecKey2);
 			lRes.put("secKeyResponse", lSecKeyResp);
 		}
+
+		// old hixie versions had no version header
+		// so if not found and secKey1 and secKey2 set use latest hixie 
+		// else use latest hybi
+		if (lDraft != null) {
+			lRes.put(RequestHeader.WS_DRAFT, lVersion);
+			try {
+				lVersion = Integer.parseInt(lDraft, 10);
+			} catch (Exception Ex) {
+			}
+		}
+		if (lVersion == null) {
+			if (lSecKey1 != null && lSecKey2 != null) {
+				lVersion = JWebSocketCommonConstants.WS_HIXIE_VERSION_LATEST;
+			} else {
+				lVersion = JWebSocketCommonConstants.WS_HYBI_VERSION_LATEST;
+			}
+		}
 		if (lVersion != null) {
 			lRes.put(RequestHeader.WS_VERSION, lVersion);
 		}
@@ -444,7 +423,7 @@ public final class WebSocketHandshake {
 
 	/**
 	 * Reads the handshake response from the server into an byte array. This is
-	 * used on clients only. The browser client implement that internally.
+	 * used on clients only. The browser clients implement that internally.
 	 *
 	 * @param aIS
 	 * @return
@@ -523,6 +502,7 @@ public final class WebSocketHandshake {
 			lHandshake += "Sec-WebSocket-Protocol: " + mProtocol + "\r\n";
 		}
 
+		// TODO: This needs to be fixed!	
 		if (mVersion != null) {
 			lHandshake += "Sec-WebSocket-Draft: " + mVersion + "\r\n";
 		}
@@ -587,7 +567,10 @@ public final class WebSocketHandshake {
 		}
 	}
 
-	private void generateKeys() {
+	private void generateHybiKeys() {
+	}
+
+	private void generateHixieKeys() {
 
 		int lSpaces1 = rand(1, 12);
 		int lSpaces2 = rand(1, 12);

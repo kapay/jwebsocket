@@ -135,7 +135,10 @@
 				if( lWSC ) {
 					log( "Logging in..." );
 					try {
-						var lRes = lWSC.login( "guest", "aPassword" );
+						var lRes = lWSC.login(
+							jws.GUEST_USER_LOGINNAME, 
+							jws.GUEST_USER_PASSWORD
+						);
 						if( lRes.code == 0 ) {
 							log( "Asychronously waiting for response..." );
 						} else {

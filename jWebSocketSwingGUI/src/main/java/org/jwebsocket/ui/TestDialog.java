@@ -653,7 +653,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnConnectActionPerformed
 		try {
-			mClient.open(txfURL.getText()); // "ws://localhost:8787/;unid=admin_ui_1"
+			mClient.open(76, txfURL.getText());
 		} catch (WebSocketException ex) {
 			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}

@@ -15,6 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config;
 
+import org.jwebsocket.kit.WebSocketEncoding;
+
 /**
  *
  * @author aschulze
@@ -37,56 +39,29 @@ public class JWebSocketCommonConstants {
 	 */
 	public static final String VENDOR = "jWebSocket.org";
 	/**
-	 * Default protocol
-	 * @deprecated
+	 * jWebSocket sub protocol prefix
 	 */
-	public static String DEFAULT_PROTOCOL = "json";
-	/**
-	 * JSON sub protocol
-	 * @deprecated
-	 */
-	public final static String SUB_PROT_JSON = "json";
-	/**
-	 * CSV sub protocol
-	 * @deprecated
-	 */
-	public final static String SUB_PROT_CSV = "csv";
-	/**
-	 * XML sub protocol
-	 * @deprecated
-	 */
-	public final static String SUB_PROT_XML = "xml";
-	/**
-	 * Custom specific binary sub protocol
-	 * @deprecated
-	 */
-	public final static String SUB_PROT_BINARY = "binary";
-	/**
-	 * Custom specific sub protocol
-	 * @deprecated
-	 */
-	public final static String SUB_PROT_CUSTOM = "custom";
-	/**
-	 * Default sub protocol if not explicitely specified by client (json).
-	 * @deprecated
-	 */
-	public final static String SUB_PROT_DEFAULT = SUB_PROT_JSON;
+	public final static String WS_SUBPROT_PREFIX = "org.jwebsocket";
 	/**
 	 * jWebSocket JSON sub protocol
 	 */
-	public final static String WS_SUBPROT_JSON = "jWebSocket-JSON";
+	public final static String WS_SUBPROT_JSON = WS_SUBPROT_PREFIX + ".json";
 	/**
 	 * jWebSocket CSV sub protocol
 	 */
-	public final static String WS_SUBPROT_CSV = "jWebSocket-CSV";
+	public final static String WS_SUBPROT_CSV = WS_SUBPROT_PREFIX + ".csv";
 	/**
 	 * jWebSocket XML sub protocol
 	 */
-	public final static String WS_SUBPROT_XML = "jWebSocket-XML";
+	public final static String WS_SUBPROT_XML = WS_SUBPROT_PREFIX + ".xml";
 	/**
-	 * jWebSocket Custom specific sub protocol
+	 * jWebSocket custom specific text sub protocol
 	 */
-	public final static String WS_SUBPROT_CUSTOM = "jWebSocket-Custom";
+	public final static String WS_SUBPROT_TEXT = WS_SUBPROT_PREFIX + ".text";
+	/**
+	 * jWebSocket custom specific binary sub protocol
+	 */
+	public final static String WS_SUBPROT_BINARY = WS_SUBPROT_PREFIX + ".binary";
 	/**
 	 * Default protocol
 	 */
@@ -110,39 +85,55 @@ public class JWebSocketCommonConstants {
 	/**
 	 * Custom specific sub protocol format
 	 */
-	public final static String WS_FORMAT_CUSTOM = "custom";
+	public final static String WS_FORMAT_TEXT = "text";
 	/**
 	 * Default sub protocol format
 	 */
 	public static String WS_FORMAT_DEFAULT = WS_FORMAT_JSON;
 	/**
-	 * Default sub protocol domain (used when client doesn't set its own subprotocol)
+	 * WebSocket protocol hybi draft 10 (http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76)
 	 */
-	public static String WS_SUBPROTOCOL_DEFAULT = "jwebsocket.org";
+	public final static String WS_HIXIE_DRAFT_76 = "76";
 	/**
 	 * WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-02)
 	 */
-	public final static String WS_DRAFT_02 = "2";
+	public final static String WS_HYBI_DRAFT_02 = "2";
 	/**
 	 * WebSocket protocol hybi draft 03 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-03)
 	 */
-	public final static String WS_DRAFT_03 = "3";
+	public final static String WS_HYBI_DRAFT_03 = "3";
 	/**
 	 * WebSocket protocol hybi draft 07 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07)
 	 */
-	public final static String WS_DRAFT_07 = "7";
+	public final static String WS_HYBI_DRAFT_07 = "7";
 	/**
 	 * WebSocket protocol hybi draft 08 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-08)
 	 */
-	public final static String WS_DRAFT_08 = "8";
+	public final static String WS_HYBI_DRAFT_08 = "8";
 	/**
 	 * WebSocket protocol hybi draft 10 (http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-10)
 	 */
-	public final static String WS_DRAFT_10 = "10";
+	public final static String WS_HYBI_DRAFT_10 = "10";
 	/**
-	 * WebSocket protocol hixie draft 76 (http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76)
+	 * WebSocket default protocol draft
 	 */
-	public final static String WS_DRAFT_DEFAULT = "76";
+	public final static String WS_DRAFT_DEFAULT = WS_HYBI_DRAFT_10;
+	/**
+	 * WebSocket latest supported hixie version
+	 */
+	public final static int WS_HIXIE_VERSION_LATEST = 76;
+	/**
+	 * WebSocket latest supported hybi version
+	 */
+	public final static int WS_HYBI_VERSION_LATEST = 10;
+	/**
+	 * WebSocket default protocol version
+	 */
+	public final static int WS_VERSION_DEFAULT = WS_HYBI_VERSION_LATEST;
+	/**
+	 * Use text format as default encoding for WebSocket Packets if not explicitly specified
+	 */
+	public final static WebSocketEncoding WS_ENCODING_DEFAULT = WebSocketEncoding.TEXT;
 	/**
 	 * Separator between the path and the argument list in the URL.
 	 */

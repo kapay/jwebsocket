@@ -60,7 +60,7 @@ public class CustomServer extends BaseServer {
 
 		// the custom server here answers with a simple echo packet.
 		// this section can be used as an example for your own protol handling.
-		if (lFormat != null && JWebSocketCommonConstants.WS_FORMAT_CUSTOM.equals(lFormat))  {
+		if (lFormat != null && JWebSocketCommonConstants.WS_FORMAT_TEXT.equals(lFormat))  {
 
 			// send a modified echo packet back to sender.
 			//

@@ -19,7 +19,7 @@ import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientListener;
 import org.jwebsocket.api.WebSocketClientTokenListener;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.client.java.BaseWebSocket;
+import org.jwebsocket.client.java.BaseWebSocketClient;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.packetProcessors.CSVProcessor;
@@ -28,6 +28,8 @@ import org.jwebsocket.packetProcessors.XMLProcessor;
 import org.jwebsocket.token.Token;
 import org.apache.commons.codec.binary.Base64;
 import org.jwebsocket.api.WebSocketStatus;
+import org.jwebsocket.kit.WebSocketEncoding;
+import org.jwebsocket.kit.WebSocketSubProtocol;
 import org.jwebsocket.token.TokenFactory;
 
 /**
@@ -37,7 +39,7 @@ import org.jwebsocket.token.TokenFactory;
  * @author jang
  * @version $Id:$
  */
-public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClient {
+public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTokenClient {
 
 	/** base name space for jWebSocket */
 	private final static String NS_BASE = "org.jwebsocket";
@@ -48,9 +50,10 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	private final static String LOGOUT = "logout";
 	/** token id */
 	private int CUR_TOKEN_ID = 0;
-	/** subprotocol value */
-	private String mSubProt;
-	private String mFormat;
+	/** sub protocol value */
+	private WebSocketSubProtocol mSubProt = null;
+	// private String mSubProt;
+	// private WebSocketEncoding mEncoding;
 	private String fUsername = null;
 	private String fClientId = null;
 	private String fSessionId = null;
@@ -59,13 +62,18 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	 * Default constructor
 	 */
 	public BaseTokenClient() {
-		this(JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT, JWebSocketCommonConstants.WS_FORMAT_DEFAULT);
+		this(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT, JWebSocketCommonConstants.WS_ENCODING_DEFAULT);
 	}
 
-	public BaseTokenClient(String subprotocol, String format) {
-		mSubProt = subprotocol;
-		mFormat = format;
-		addSubProtocol(mSubProt, mFormat);
+	public BaseTokenClient(String aSubProt, WebSocketEncoding aEncoding) {
+		mSubProt = new WebSocketSubProtocol(aSubProt, aEncoding);
+		addSubProtocol(mSubProt);
+		addListener(new TokenClientListener());
+	}
+
+	public BaseTokenClient(WebSocketSubProtocol aSubProt) {
+		mSubProt = aSubProt;
+		addSubProtocol(mSubProt);
 		addListener(new TokenClientListener());
 	}
 
@@ -206,14 +214,14 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	 */
 	public Token packetToToken(WebSocketPacket aPacket) {
 		Token lToken = null;
-		if (JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mFormat)) {
+		if (JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mSubProt.getFormat())) {
 			lToken = JSONProcessor.packetToToken(aPacket);
-		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(mFormat)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(mSubProt.getFormat())) {
 			lToken = CSVProcessor.packetToToken(aPacket);
-		} else if (JWebSocketCommonConstants.WS_FORMAT_XML.equals(mFormat)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_XML.equals(mSubProt.getFormat())) {
 			lToken = XMLProcessor.packetToToken(aPacket);
 		}
-		
+
 		return lToken;
 	}
 
@@ -226,11 +234,11 @@ public class BaseTokenClient extends BaseWebSocket implements WebSocketTokenClie
 	public WebSocketPacket tokenToPacket(Token aToken) {
 		WebSocketPacket lPacket = null;
 
-		if (JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mFormat)) {
+		if (JWebSocketCommonConstants.WS_FORMAT_JSON.equals(mSubProt.getFormat())) {
 			lPacket = JSONProcessor.tokenToPacket(aToken);
-		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(mFormat)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_CSV.equals(mSubProt.getFormat())) {
 			lPacket = CSVProcessor.tokenToPacket(aToken);
-		} else if (JWebSocketCommonConstants.WS_FORMAT_XML.equals(mFormat)) {
+		} else if (JWebSocketCommonConstants.WS_FORMAT_XML.equals(mSubProt.getFormat())) {
 			lPacket = XMLProcessor.tokenToPacket(aToken);
 		}
 
