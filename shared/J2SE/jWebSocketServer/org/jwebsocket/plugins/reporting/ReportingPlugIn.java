@@ -206,7 +206,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 		Connection lConnection = null;
 		try {
 			lDataSource = (DataSource) Tools.invoke(
-					lJDBCPlugIn, "getNativeDataSource", null);
+					lJDBCPlugIn, "getNativeDataSource");
 			lConnection = lDataSource.getConnection();
 			JasperReport lReport = JasperCompileManager.compileReport(
 					getReportPath(lReportId));

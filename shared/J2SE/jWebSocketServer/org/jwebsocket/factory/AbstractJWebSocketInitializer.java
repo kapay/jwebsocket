@@ -111,12 +111,12 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 		try {
 			Class<WebSocketPlugIn> lPluginClass = (Class<WebSocketPlugIn>) Class.forName(aPluginName);
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("PlugIn '" + aPluginName + "' loaded from classpath.");
+				mLog.debug("Plug-in '" + aPluginName + "' loaded from classpath.");
 			}
 			return lPluginClass;
 		} catch (ClassNotFoundException ex) {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("PlugIn '" + aPluginName + "' not yet in classpath.");
+				mLog.debug("Plug-in '" + aPluginName + "' not yet in classpath.");
 			}
 		}
 		return null;

@@ -59,7 +59,7 @@ public class NioTcpConnector extends BaseConnector {
 	@Override
 	public IOFuture sendPacketAsync(WebSocketPacket aPacket) {
 		byte[] lProtocolPacket;
-		if (isHixieDraft()) {
+		if (isHixie()) {
 			lProtocolPacket = new byte[aPacket.getByteArray().length + 2];
 			lProtocolPacket[0] = 0x00;
 			System.arraycopy(aPacket.getByteArray(), 0, lProtocolPacket, 1, aPacket.getByteArray().length);

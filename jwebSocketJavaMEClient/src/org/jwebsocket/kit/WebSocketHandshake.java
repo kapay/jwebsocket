@@ -14,10 +14,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.kit;
 
+import j2me.util.Map;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-// import java.security.MessageDigest;
 import javolution.util.FastMap;
 
 /**
@@ -86,7 +86,7 @@ public class WebSocketHandshake {
 	 * @param aResp
 	 * @return
 	 */
-	public static FastMap parseC2SRequest(byte[] aResp) {
+	public static Map parseC2SRequest(byte[] aResp) {
 		String lHost = null;
 		String lOrigin = null;
 		String lLocation = null;
@@ -98,7 +98,7 @@ public class WebSocketHandshake {
 		long lSecNum1 = -1;
 		long lSecNum2 = -1;
 		byte[] lSecKeyResp = new byte[8];
-
+				
 		FastMap lRes = new FastMap();
 
 		int lRespLen = aResp.length;

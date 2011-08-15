@@ -26,6 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 
@@ -40,35 +41,40 @@ public final class WebSocketHandshake {
 	 *
 	 */
 	public static int MAX_HEADER_SIZE = 16834;
-	private String mKey = null;
-	private String mKey1 = null;
-	private String mKey2 = null;
-	private byte[] mKey3 = null;
-	private byte[] mExpectedServerResponse = null;
-	private URI mURL = null;
+	private String mHybiKey = null;
+	private String mHybiKeyAccept = null;
+	private String mHixieKey1 = null;
+	private String mHixieKey2 = null;
+	private byte[] mHixieKey3 = null;
+	private byte[] mHixieKeyAccept = null;
+	private URI mURI = null;
 	private String mOrigin = null;
 	private String mProtocol = null;
 	private Integer mVersion = null;
 
 	/**
 	 *
-	 * @param aURL
+	 * @param aURI
 	 * @param aProtocol
 	 * @param aVersion
+	 * @throws WebSocketException  
 	 */
-	public WebSocketHandshake(int aVersion, URI aURL, String aProtocol) {
-		this.mURL = aURL;
+	public WebSocketHandshake(int aVersion, URI aURI, String aProtocol) throws WebSocketException {
+		this.mURI = aURI;
 		this.mProtocol = aProtocol;
 		this.mVersion = aVersion;
 
-		if (aVersion <= 76) {
+		if (WebSocketProtocolAbstraction.isHybiVersion(aVersion)) {
+			generateHybiKeys();
+		} else if (WebSocketProtocolAbstraction.isHixieVersion(aVersion)) {
 			generateHixieKeys();
 		} else {
-			generateHybiKeys();
+			throw new WebSocketException("WebSocket handshake: Illegal WebSocket protocol version '"
+					+ aVersion + "' detected.");
 		}
 	}
 
-	private static String calcHybiSecKeyNum(String aKey) {
+	private static String calcHybiSecKeyAccept(String aKey) {
 		// add fix GUID according to 
 		// http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-10
 		aKey = aKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -118,6 +124,7 @@ public final class WebSocketHandshake {
 	 * connection.
 	 *
 	 * @param aReq
+	 * @param aIsSSL 
 	 * @return
 	 */
 	public static Map parseC2SRequest(byte[] aReq, boolean aIsSSL) {
@@ -137,6 +144,13 @@ public final class WebSocketHandshake {
 		Long lSecNum1 = null;
 		Long lSecNum2 = null;
 		byte[] lSecKeyResp = new byte[8];
+
+		String lUserAgent = null;
+		String lPragma = null;
+		String lAccept = null;
+		String lAcceptLanguage = null;
+		String lAcceptEncoding = null;
+		String lCacheControl = null;
 
 		Map lRes = new HashMap();
 
@@ -182,6 +196,15 @@ public final class WebSocketHandshake {
 		lPath = lRequest.substring(lPos);
 		lPos = lPath.indexOf("HTTP");
 		lPath = lPath.substring(0, lPos - 1);
+
+		// get user agent....
+		lPos = lRequest.indexOf("User-Agent:");
+		if (lPos >= 0) {
+			lPos += 12;
+			lUserAgent = lRequest.substring(lPos);
+			lPos = lUserAgent.indexOf("\r\n");
+			lUserAgent = lUserAgent.substring(0, lPos);
+		}
 
 		lLocation = (aIsSSL ? "wss" : "ws") + "://" + lHost + lPath;
 
@@ -265,7 +288,7 @@ public final class WebSocketHandshake {
 			lSecKey = lRequest.substring(lPos);
 			lPos = lSecKey.indexOf("\r\n");
 			lSecKey = lSecKey.substring(0, lPos);
-			lSecKeyAccept = calcHybiSecKeyNum(lSecKey);
+			lSecKeyAccept = calcHybiSecKeyAccept(lSecKey);
 		}
 
 		/*
@@ -340,7 +363,6 @@ public final class WebSocketHandshake {
 		// so if not found and secKey1 and secKey2 set use latest hixie 
 		// else use latest hybi
 		if (lDraft != null) {
-			lRes.put(RequestHeader.WS_DRAFT, lVersion);
 			try {
 				lVersion = Integer.parseInt(lDraft, 10);
 			} catch (Exception Ex) {
@@ -348,13 +370,23 @@ public final class WebSocketHandshake {
 		}
 		if (lVersion == null) {
 			if (lSecKey1 != null && lSecKey2 != null) {
-				lVersion = JWebSocketCommonConstants.WS_HIXIE_VERSION_LATEST;
+				// acceptable since kept for upward compatibility only!
+				lVersion = JWebSocketCommonConstants.WS_LATEST_SUPPORTED_HIXIE_VERSION;
+				lDraft = JWebSocketCommonConstants.WS_LATEST_SUPPORTED_HIXIE_DRAFT;
 			} else {
-				lVersion = JWebSocketCommonConstants.WS_HYBI_VERSION_LATEST;
+				// TODO: This should be report as error! Don't assume default if value is not given! Required!
+				lVersion = JWebSocketCommonConstants.WS_LATEST_SUPPORTED_HYBI_VERSION;
+				lDraft = JWebSocketCommonConstants.WS_LATEST_SUPPORTED_HYBI_DRAFT;
 			}
+		}
+		if (lDraft != null) {
+			lRes.put(RequestHeader.WS_DRAFT, lDraft);
 		}
 		if (lVersion != null) {
 			lRes.put(RequestHeader.WS_VERSION, lVersion);
+		}
+		if (lUserAgent != null) {
+			lRes.put(RequestHeader.USER_AGENT, lUserAgent);
 		}
 
 		lRes.put("isSecure", lIsSecure);
@@ -482,39 +514,50 @@ public final class WebSocketHandshake {
 	}
 
 	/**
-	 *
+	 * Generates the initial Handshake from a Java Client to the WebSocket 
+	 * Server.
 	 * @return
 	 */
-	public byte[] getHandshake() {
-		String lPath = mURL.getPath();
-		String lHost = mURL.getHost();
+	public byte[] generateC2SRequest() {
+		String lPath = mURI.getPath();
+		String lHost = mURI.getHost();
 		mOrigin = "http://" + lHost;
 		if ("".equals(lPath)) {
 			lPath = "/";
 		}
+		byte[] lHandshakeBytes;
+
 		String lHandshake =
 				"GET " + lPath + " HTTP/1.1\r\n"
 				+ "Host: " + lHost + "\r\n"
+				+ "Upgrade: WebSocket\r\n"
 				+ "Connection: Upgrade\r\n"
-				+ "Sec-WebSocket-Key2: " + mKey2 + "\r\n";
-
+				+ "Sec-WebSocket-Origin: " + mOrigin + "\r\n";
 		if (mProtocol != null) {
 			lHandshake += "Sec-WebSocket-Protocol: " + mProtocol + "\r\n";
 		}
 
-		// TODO: This needs to be fixed!	
-		if (mVersion != null) {
-			lHandshake += "Sec-WebSocket-Draft: " + mVersion + "\r\n";
+		if (WebSocketProtocolAbstraction.isHixieVersion(mVersion)) {
+			lHandshake +=
+					"Sec-WebSocket-Key1: " + mHixieKey1 + "\r\n"
+					+ "Sec-WebSocket-Key2: " + mHixieKey2 + "\r\n"
+					+ "\r\n";
+			lHandshakeBytes = new byte[lHandshake.getBytes().length + 8];
+			System.arraycopy(lHandshake.getBytes(), 0, lHandshakeBytes, 0, lHandshake.getBytes().length);
+			System.arraycopy(mHixieKey3, 0, lHandshakeBytes, lHandshake.getBytes().length, 8);
+		} else {
+			lHandshake +=
+					"Sec-WebSocket-Key: " + mHybiKey + "\r\n";
+			// TODO: This needs to be fixed!	
+			if (mVersion != null) {
+				lHandshake += "Sec-WebSocket-Version: " + mVersion + "\r\n";
+			}
+			try {
+				lHandshakeBytes = lHandshake.getBytes("UTF-8");
+			} catch (UnsupportedEncodingException ex) {
+				lHandshakeBytes = lHandshake.getBytes();
+			}
 		}
-
-		lHandshake +=
-				"Upgrade: WebSocket\r\n"
-				+ "Sec-WebSocket-Key1: " + mKey1 + "\r\n"
-				+ "Origin: " + mOrigin + "\r\n" + "\r\n";
-
-		byte[] lHandshakeBytes = new byte[lHandshake.getBytes().length + 8];
-		System.arraycopy(lHandshake.getBytes(), 0, lHandshakeBytes, 0, lHandshake.getBytes().length);
-		System.arraycopy(mKey3, 0, lHandshakeBytes, lHandshake.getBytes().length, 8);
 
 		return lHandshakeBytes;
 	}
@@ -524,10 +567,22 @@ public final class WebSocketHandshake {
 	 * @param aBytes
 	 * @throws WebSocketException
 	 */
-	public void verifyServerResponse(byte[] aBytes) throws WebSocketException {
-		if (!Arrays.equals(aBytes, mExpectedServerResponse)) {
-			throw new WebSocketException("not a WebSocket Server");
+	public void verifyServerResponse(Headers aHeaders) throws WebSocketException {
+		if (WebSocketProtocolAbstraction.isHybiVersion(mVersion)) {
+			String lWebSocketAccept = aHeaders.getField(Headers.SEC_WEBSOCKET_ACCEPT);
+			if (null == mHybiKeyAccept || !mHybiKeyAccept.equals(lWebSocketAccept)) {
+				throw new WebSocketException("WebSocket handshake: Illegal hybi server response detected.");
+			}
+		} else if (WebSocketProtocolAbstraction.isHixieVersion(mVersion)) {
+			byte[] lWebSocketAccept = aHeaders.getTrailingBytes();
+			if (null == mHixieKeyAccept || !Arrays.equals(mHixieKeyAccept, lWebSocketAccept)) {
+				throw new WebSocketException("WebSocket handshake: Illegal hixie server response detected.");
+			}
+		} else {
+			throw new WebSocketException("WebSocket handshake: Illegal WebSocket protocol version '"
+					+ mVersion + "' detected during response verification.");
 		}
+
 	}
 
 	/**
@@ -539,11 +594,11 @@ public final class WebSocketHandshake {
 		int lStatusCode = Integer.valueOf(aStatusLine.substring(9, 12));
 
 		if (lStatusCode == 407) {
-			throw new WebSocketException("connection failed: proxy authentication not supported");
+			throw new WebSocketException("Connection failed: proxy authentication not supported");
 		} else if (lStatusCode == 404) {
-			throw new WebSocketException("connection failed: 404 not found");
+			throw new WebSocketException("Connection failed: 404 not found");
 		} else if (lStatusCode != 101) {
-			throw new WebSocketException("connection failed: unknown status code " + lStatusCode);
+			throw new WebSocketException("Connection failed: unknown status code " + lStatusCode);
 		}
 	}
 
@@ -568,6 +623,52 @@ public final class WebSocketHandshake {
 	}
 
 	private void generateHybiKeys() {
+		UUID lUUID = UUID.randomUUID();
+		long lLeast = lUUID.getLeastSignificantBits();
+		long lMost = lUUID.getMostSignificantBits();
+
+		// Sec-WebSocket-Key is a 16 byte random Number encoded as Base64
+		byte[] lBA = new byte[16];
+
+		// copy least significant bytes into key
+		lBA[ 0] = (byte) (lLeast & 0xFF);
+		lLeast >>= 8;
+		lBA[ 1] = (byte) (lLeast & 0xFF);
+		lLeast >>= 8;
+		lBA[ 2] = (byte) (lLeast & 0xFF);
+		lLeast >>= 8;
+		lBA[ 3] = (byte) (lLeast & 0xFF);
+		lLeast >>= 8;
+		lBA[ 4] = (byte) (lLeast & 0xFF);
+		lLeast >>= 8;
+		lBA[ 5] = (byte) (lLeast & 0xFF);
+		lLeast >>= 8;
+		lBA[ 6] = (byte) (lLeast & 0xFF);
+		lLeast >>= 8;
+		lBA[ 7] = (byte) (lLeast & 0xFF);
+
+		// copy most significant bytes into key
+		lBA[ 8] = (byte) (lMost & 0xFF);
+		lMost >>= 8;
+		lBA[ 9] = (byte) (lMost & 0xFF);
+		lMost >>= 8;
+		lBA[10] = (byte) (lMost & 0xFF);
+		lMost >>= 8;
+		lBA[11] = (byte) (lMost & 0xFF);
+		lMost >>= 8;
+		lBA[12] = (byte) (lMost & 0xFF);
+		lMost >>= 8;
+		lBA[13] = (byte) (lMost & 0xFF);
+		lMost >>= 8;
+		lBA[14] = (byte) (lMost & 0xFF);
+		lMost >>= 8;
+		lBA[15] = (byte) (lMost & 0xFF);
+
+		// generate the key
+		mHybiKey = Base64.encodeBase64String(lBA);
+
+		// generate the expected accept value
+		mHybiKeyAccept = calcHybiSecKeyAccept(mHybiKey);
 	}
 
 	private void generateHixieKeys() {
@@ -584,16 +685,16 @@ public final class WebSocketHandshake {
 		int lProduct1 = lNumber1 * lSpaces1;
 		int lProduct2 = lNumber2 * lSpaces2;
 
-		mKey1 = Integer.toString(lProduct1);
-		mKey2 = Integer.toString(lProduct2);
+		mHixieKey1 = Integer.toString(lProduct1);
+		mHixieKey2 = Integer.toString(lProduct2);
 
-		mKey1 = insertRandomCharacters(mKey1);
-		mKey2 = insertRandomCharacters(mKey2);
+		mHixieKey1 = insertRandomCharacters(mHixieKey1);
+		mHixieKey2 = insertRandomCharacters(mHixieKey2);
 
-		mKey1 = insertSpaces(mKey1, lSpaces1);
-		mKey2 = insertSpaces(mKey2, lSpaces2);
+		mHixieKey1 = insertSpaces(mHixieKey1, lSpaces1);
+		mHixieKey2 = insertSpaces(mHixieKey2, lSpaces2);
 
-		mKey3 = createRandomBytes();
+		mHixieKey3 = createRandomBytes();
 
 		ByteBuffer lBuffer = ByteBuffer.allocate(4);
 		lBuffer.putInt(lNumber1);
@@ -605,9 +706,9 @@ public final class WebSocketHandshake {
 		byte[] lChallenge = new byte[16];
 		System.arraycopy(lNumber1Array, 0, lChallenge, 0, 4);
 		System.arraycopy(lNumber2Array, 0, lChallenge, 4, 4);
-		System.arraycopy(mKey3, 0, lChallenge, 8, 8);
+		System.arraycopy(mHixieKey3, 0, lChallenge, 8, 8);
 
-		mExpectedServerResponse = md5(lChallenge);
+		mHixieKeyAccept = md5(lChallenge);
 	}
 
 	private String insertRandomCharacters(String aKey) {

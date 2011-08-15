@@ -354,22 +354,106 @@ public class Tools {
 	 * @throws Exception
 	 */
 	public static Object invoke(String aClassName, String aMethodName,
-			Object[] aArgs) throws Exception {
+			Object... aArgs) throws Exception {
 		Class lClass = Class.forName(aClassName);
+		/*
 		if (lClass == null) {
-			throw new Exception("Class '" + aClassName + "' not found.");
+		throw new Exception("Class '" + aClassName + "' not found.");
+		}
+		 */
+		Object lRes = null;
+
+		Class[] lArgClasses = null;
+		if (aArgs != null) {
+			lArgClasses = new Class[aArgs.length];
+			for (int lIdx = 0; lIdx < lArgClasses.length; lIdx++) {
+				lArgClasses[lIdx] = aArgs[lIdx].getClass();
+			}
+		}
+		Method lMthd = lClass.getMethod(aMethodName, lArgClasses);
+		/*
+		if (lMthd == null) {
+		throw new Exception("Method '" + aMethodName + "' not found.");
+		}
+		 */
+		lRes = lMthd.invoke(null, aArgs);
+
+		return lRes;
+	}
+
+	/**
+	 * 
+	 * @param aClass
+	 * @param aMethodName
+	 * @param aArgs
+	 * @return
+	 * @throws Exception
+	 */
+	public static Object invoke(Class aClass, String aMethodName,
+			Object... aArgs) throws Exception {
+		if (aClass == null) {
+			throw new Exception("No class passed for call.");
 		}
 		Object lRes = null;
 
 		Class[] lArgClasses = null;
 		if (aArgs != null) {
 			lArgClasses = new Class[aArgs.length];
+			for (int lIdx = 0; lIdx < lArgClasses.length; lIdx++) {
+				Class lClass = aArgs[lIdx].getClass();
+				lArgClasses[lIdx] = lClass;
+			}
 		}
-		Method lMthd = lClass.getDeclaredMethod(aMethodName, lArgClasses);
+		Method lMthd = aClass.getMethod(aMethodName, lArgClasses);
+		/*
+		if (lMthd == null) {
+		throw new Exception("Method '" + aMethodName + "' not found.");
+		}
+		 */
+		lRes = lMthd.invoke(null, aArgs);
+
+		return lRes;
+	}
+
+	/**
+	 * 
+	 * @param aClass
+	 * @param aMethodName
+	 * @param aArgs
+	 * @return
+	 * @throws Exception
+	 */
+	public static Object invokeUnique(Class aClass, String aMethodName,
+			Object... aArgs) throws Exception {
+		if (aClass == null) {
+			throw new Exception("No class passed for call.");
+		}
+		if (aMethodName == null) {
+			throw new Exception("No method name passed for call.");
+		}
+		Object lRes = null;
+
+		Class[] lArgClasses = null;
+		if (aArgs != null) {
+			lArgClasses = new Class[aArgs.length];
+			for (int lIdx = 0; lIdx < lArgClasses.length; lIdx++) {
+				Class lClass = aArgs[lIdx].getClass();
+				lArgClasses[lIdx] = lClass;
+			}
+		}
+
+		Method lMthd = null;
+		Method[] lMethods = aClass.getMethods();
+		for (int lIdx = 0; lIdx < lMethods.length; lIdx++) {
+			if (aMethodName.equals(lMethods[lIdx].getName())) {
+				lMthd = lMethods[lIdx];
+				break;
+			}
+		}
 		if (lMthd == null) {
 			throw new Exception("Method '" + aMethodName + "' not found.");
 		}
-		lRes = lMthd.invoke(aArgs);
+		lRes = lMthd.invoke(null, aArgs);
 
 		return lRes;
 	}
@@ -383,23 +467,26 @@ public class Tools {
 	 * @throws Exception
 	 */
 	public static Object invoke(Object aInstance, String aMethodName,
-			Object[] aArgs) throws Exception {
+			Object... aArgs) throws Exception {
 		if (aInstance == null) {
 			throw new Exception("No instance passed for call.");
 		}
 		Class lClass = aInstance.getClass();
 		Object lRes = null;
 
-		Class[] lArgClasses;
+		Class[] lArgClasses = null;
 		if (aArgs != null) {
 			lArgClasses = new Class[aArgs.length];
-		} else {
-			lArgClasses = new Class[0];
+			for (int lIdx = 0; lIdx < lArgClasses.length; lIdx++) {
+				lArgClasses[lIdx] = aArgs[lIdx].getClass();
+			}
 		}
-		Method lMthd = lClass.getDeclaredMethod(aMethodName, lArgClasses);
+		Method lMthd = lClass.getMethod(aMethodName, lArgClasses);
+		/*
 		if (lMthd == null) {
-			throw new Exception("Method '" + aMethodName + "' not found.");
+		throw new Exception("Method '" + aMethodName + "' not found.");
 		}
+		 */
 		if (aArgs == null) {
 			aArgs = new Object[0];
 		}

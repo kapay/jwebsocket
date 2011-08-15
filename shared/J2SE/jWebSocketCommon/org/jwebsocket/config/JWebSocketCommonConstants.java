@@ -15,6 +15,8 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config;
 
+import java.util.List;
+import javolution.util.FastList;
 import org.jwebsocket.kit.WebSocketEncoding;
 
 /**
@@ -115,21 +117,45 @@ public class JWebSocketCommonConstants {
 	 */
 	public final static String WS_HYBI_DRAFT_10 = "10";
 	/**
-	 * WebSocket default protocol draft
-	 */
-	public final static String WS_DRAFT_DEFAULT = WS_HYBI_DRAFT_10;
-	/**
 	 * WebSocket latest supported hixie version
 	 */
-	public final static int WS_HIXIE_VERSION_LATEST = 76;
+	public final static int WS_LATEST_SUPPORTED_HIXIE_VERSION = 76;
 	/**
 	 * WebSocket latest supported hybi version
 	 */
-	public final static int WS_HYBI_VERSION_LATEST = 10;
+	public final static int WS_LATEST_SUPPORTED_HYBI_VERSION = 8;
+	/**
+	 * WebSocket latest supported hixie draft
+	 */
+	public final static String WS_LATEST_SUPPORTED_HIXIE_DRAFT = "76";
+	/**
+	 * WebSocket latest supported hybi draft
+	 */
+	public final static String WS_LATEST_SUPPORTED_HYBI_DRAFT = "10";
+	/**
+	 * WebSocket supported hixie versions
+	 */
+	public final static List<Integer> WS_SUPPORTED_HIXIE_VERSIONS = new FastList<Integer>();
+	/**
+	 * WebSocket supported hixie drafts
+	 */
+	public final static List<String> WS_SUPPORTED_HIXIE_DRAFTS = new FastList<String>();
+	/**
+	 * WebSocket supported hybi versions
+	 */
+	public final static List<Integer> WS_SUPPORTED_HYBI_VERSIONS = new FastList<Integer>();
+	/**
+	 * WebSocket supported hybi drafts
+	 */
+	public final static List<String> WS_SUPPORTED_HYBI_DRAFTS = new FastList<String>();
 	/**
 	 * WebSocket default protocol version
 	 */
-	public final static int WS_VERSION_DEFAULT = WS_HYBI_VERSION_LATEST;
+	public final static int WS_VERSION_DEFAULT = 8;
+	/**
+	 * WebSocket default protocol version
+	 */
+	public final static int WS_DRAFT_DEFAULT = 10;
 	/**
 	 * Use text format as default encoding for WebSocket Packets if not explicitly specified
 	 */
@@ -186,4 +212,18 @@ public class JWebSocketCommonConstants {
 	 * public scope, everybody can read and write items from this scope
 	 */
 	public static final String SCOPE_PUBLIC = "public";
+
+	static {
+		WS_SUPPORTED_HIXIE_VERSIONS.add(75);
+		WS_SUPPORTED_HIXIE_VERSIONS.add(76);
+
+		WS_SUPPORTED_HYBI_VERSIONS.add(8);
+
+		WS_SUPPORTED_HIXIE_DRAFTS.add("75");
+		WS_SUPPORTED_HIXIE_DRAFTS.add("76");
+
+		WS_SUPPORTED_HYBI_DRAFTS.add("8");
+		WS_SUPPORTED_HYBI_DRAFTS.add("9");
+		WS_SUPPORTED_HYBI_DRAFTS.add("10");
+	}
 }

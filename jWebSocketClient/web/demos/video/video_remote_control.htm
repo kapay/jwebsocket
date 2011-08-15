@@ -44,47 +44,47 @@
 			var deltaTime = 0;
 			var eElapsed = null;
 			
-			var mSec = 0;
-			var mMin = 0;
-			var mHour = 0;
-			
-			var mDelta = 1;
-			var mIsPaused = false;
+			var PLAYING = 1, PAUSED = 2, STOPPED = 0;
+			var mState = STOPPED;
 			// interval to update the progressbar
 			var hProgressIntv = null;
 			// interval to send progress synchronization tokens
 			var hSyncIntv = null;
+			var SYNC_INTV = 3000;
 
 			// broadcasts the new slider position
-			function sendProgress( aPos ) {
+			function sendPosition( aPosition ) {
 				lWSC.broadcastToken({
 					subNS: "org.jwebsocket.demos.vidremctrl",
-					subType: "progress",
-					progress: aPos
+					subType: "position",
+					position: aPosition
 				});
 			}
   
 			// broadcasts the playVideo action
-			function sendPlay() {
+			function sendPlay( aPosition ) {
 				lWSC.broadcastToken({
 					subNS: "org.jwebsocket.demos.vidremctrl",
-					subType: "play"
+					subType: "play",
+					position: aPosition
 				});
 			}
   
 			// broadcasts the pauseVideo action
-			function sendPause() {
+			function sendPause( aPosition ) {
 				lWSC.broadcastToken({
 					subNS: "org.jwebsocket.demos.vidremctrl",
-					subType: "pause"
+					subType: "pause",
+					position: aPosition
 				});
 			}
   
 			// broadcasts the stopVideo action
-			function sendStop() {
+			function sendStop( aPosition ) {
 				lWSC.broadcastToken({
 					subNS: "org.jwebsocket.demos.vidremctrl",
-					subType: "stop"
+					subType: "stop",
+					position: aPosition
 				});
 			}
   
@@ -95,19 +95,14 @@
 					return false;
 				}
 				
-				if( mIsPaused == false ) {
+				if( mState != PLAYING ) {
 					resetVideo(); 
-					mDelta = 1; 
 				}
 				
 				// Retrieves the length of the current playing video
 				// in seconds
 				// calculating video duration and time increment in delta
-				if( mVideo.readyState > 0 && mIsPaused == false ) {
-
-					duration = mVideo.duration.toFixed(2);
-					deltaTime = ( duration / 99.00 ).toFixed( 2 ) ;
-
+				if( mVideo.readyState > 0 && mState == STOPPED ) {
 					// starts video timer;
 					startSyncIntv(); 
 				} 
@@ -115,7 +110,10 @@
 				// starts progress interval
 				startProgressIntv();
 				mVideo.play();
-				log( "Video started." );   
+				mState = PLAYING;
+				// set button label to "pause"
+				ePause.value = "Pause";
+				// log( "Video started." );
 				return true;
 			}
 			
@@ -123,27 +121,25 @@
 			// if playVideo succeeeds it broadcasts the play event
 			function processPlayVideoClick() {
 				if( playVideo() ) {
-					sendPlay();
+					sendPlay( mVideo.currentTime );
 				}	
 			}
 
 			function resetVideo() {
-				mDelta = 0;
-				mHour = 0; 
-				mMin = 0;  
-				mSec = 0;  
-				showProgress( mDelta );
+				showPosition();
 				showElapsed();
 			}
   
 			// This method is used to pauseVideo the
 			// current video play
 			function pauseVideo() {
-				if( mVideo ) {
-					mIsPaused = true;
-					mVideo.pause();
+				if( mVideo && mState != PAUSED ) {
 					stopProgressIntv();
-					log( "Video paused." );   
+					mVideo.pause();
+					mState = PAUSED;
+					// set button label to "resume"
+					ePause.value = "Resume";
+					// log( "Video paused." );   
 					return true;
 				}	
 				return false;
@@ -152,8 +148,14 @@
 			// the event handler for the pause button
 			// if pauseVideo succeeeds it broadcasts the pause event
 			function processPauseVideoClick() {
-				if( pauseVideo() ) {
-					sendPause();
+				if( mState == PAUSED ) {
+					if( playVideo() ) {
+						sendPlay( mVideo.currentTime );
+					}
+				} else if( mState == PLAYING ) {
+					if( pauseVideo() ) {
+						sendPause( mVideo.currentTime );
+					}
 				}
 			}
 
@@ -161,41 +163,58 @@
 			// and moves the slider automatically with the 
 			// value broadcasted by its peer. Note that the method
 			// is checking to avoid the current slider not to move
-			function setProgress() {
-				mDelta = getProgress();   
-				mVideo.currentTime = Math.round( mDelta * deltaTime );
+			function setPosition( aPosition ) {
+				pauseVideo();
+				mVideo.currentTime = aPosition;
+				showPosition();
+				// log( "setting position to " + aPosition );
 				showElapsed();
 			}	
+			
+			function processPosition() {
+				var lPosition = ( mVideo.duration * ( getProgress() / 100 ) ).toFixed( 3 );
+				setPosition( lPosition );
+				sendPosition( lPosition );
+			}
 			
 			// This method is used to stopVideo the 
 			// current video play as abort is 
 			// not a method and cannot be used. 
 			function stopVideo() {
+				// set button label to "pause"
+				ePause.value = "Pause";
 				if( mVideo ) {
-					mVideo.currentTime = duration + 10;  
-					mIsPaused = false;
 					stopProgressIntv();
 					stopSyncIntv();
+					mVideo.pause();
+					mVideo.currentTime = 0;
+					mState = STOPPED;
 					resetVideo();
 					showElapsed();
 					return true;
-				}	
+				}
 				return false;
 			}
 
 			function processStopVideoClick() {
 				if( stopVideo() ) {
-					sendStop();
+					sendStop(  mVideo.currentTime );
 				}
 			}
 
 
-			// This method adjusts video current time to mSec
-			// so that it will be in sync with video current
-			// time
+			function showPosition() {
+				$( "#sliderProgress" ).slider( "value", mVideo.currentTime / mVideo.duration * 100 );
+			}
+
+			// This method adjusts video current time to min and sec
+			// so that it will be in sync with video current time
 			function showElapsed() {
-				mMin = parseInt( mVideo.currentTime / 60 );
-				mSec = parseInt( mVideo.currentTime % 60 );
+				var lCT = mVideo.currentTime;
+				var mHour = parseInt( lCT / 3600 );
+				lCT = lCT % 3600;
+				var mMin = parseInt( lCT / 60 );
+				var mSec = parseInt( lCT % 60 );
 				eElapsed.firstChild.nodeValue = 
 					jws.tools.zerofill( mHour, 2 )
 					+ ":" + jws.tools.zerofill( mMin, 2 )
@@ -207,19 +226,18 @@
 			function startSyncIntv() {
 				stopSyncIntv();
 				hSyncIntv = window.setInterval(
-					function() {
-						if( !mVideo.ended ) {
-						} else {
-							resetVideo();
-							showProgress( mDelta );
-							stopSyncIntv();
-							stopProgressIntv();
-							log( "Video stopped." );   
-						}
-						showElapsed(); 				
-					}, 
-					10000
-				);
+				function() {
+					if( mVideo.ended ) {
+						resetVideo();
+						showPosition();
+						stopSyncIntv();
+						stopProgressIntv();
+						// log( "Video stopped." );   
+					}
+					showElapsed(); 				
+				}, 
+				SYNC_INTV
+			);
 			}
 
 			function stopSyncIntv() {
@@ -234,24 +252,17 @@
 			}	
 
 
-			function showProgress( aValue ) {
-				$( "#sliderProgress" ).slider( "value", aValue );
-			}
-
 			// start progress interval for update
 			function startProgressIntv() {
 				if( hProgressIntv ) {
 					stopProgressIntv();
 				}
-				var stimer = deltaTime * 1000;
 				hProgressIntv = window.setInterval(
-					function() {
-						showProgress( mDelta );
-						mDelta++;
-						// sendProgress( mDelta );
-					}, 
-					stimer
-				);
+				function() {
+					showPosition();
+				}, 
+				1000
+			);
 			}
 
 			// stop progress interval
@@ -276,12 +287,14 @@
 					OnMessage: function( aEvent, aToken ) {
 						log( JSON.stringify( aToken) );
 						if( "org.jwebsocket.demos.vidremctrl" == aToken.subNS ) {
-							if( "progress" == aToken.subType ) {
-								setProgress( aToken.progress );
-							} else if( "start" == aToken.subType ) {
+							if( "position" == aToken.subType ) {
+								setPosition( aToken.position );
+							} else if( "play" == aToken.subType ) {
+								setPosition( aToken.position );
 								playVideo();
 							} else if( "pause" == aToken.subType ) {
 								pauseVideo();
+								setPosition( aToken.position );
 							} else if( "stop" == aToken.subType ) {
 								stopVideo();
 							}
@@ -317,6 +330,9 @@
 				eLog = jws.$( "sdivLog" );
 				mVideo = jws.$( "vid" );
 				eElapsed = jws.$( "elapsed" );
+				ePlay = jws.$( "sbtnPlay" );
+				ePause = jws.$( "sbtnPause" );
+				eStop = jws.$( "sbtnStop" );
 				
 				resetVideo();
 				showElapsed();
@@ -339,7 +355,7 @@
 		>
 		<table class="tblHeader" width="100%" cellspacing="0" cellpadding="0">
 			<tr>
-				<td class="tdHeader" width="">Video Streaming Demo</td>
+				<td class="tdHeader" width="">Video Remote Control Demo</td>
 				<!--				
 				<td class="tdHeader" width="1%"><img id="simgStatus" src="../../images/disconnected.png" align="right"/></td>
 				<td class="tdHeader" width="1%"><span id="slblClientId">{nbsp}Client{nbdash}Id:{nbsp}-</span></td>
@@ -354,28 +370,38 @@
 		 webm standdard, yet another mVideo format type initiated
 		 by google and ogv.  
 		-->
-		<video id="vid"  height = "240"  width = "420">
+		<div style="border:1px solid red">
+			<video id="vid" height="240" width="420" style="position: relative; left:0; top:0">
 
-			<source src="sintel-trailer.ogv" type='video/ogg; codecs="theora, vorbis"'> 
+				<source src="sintel-trailer.ogv" type='video/ogg; codecs="theora, vorbis"'> 
 
-			<!--
+				<!--
 			<source src="pr6.webm"> -->
-		</video>
+			</video>
+		</div>
 
 		<style>
 			#demo-frame > div.demo { padding: 10px !important; }
 		</style>
+		
 		<script>
 			$(function() {
 				mSliderProgress = $( "#sliderProgress" ).slider({
 					max: 100,
-					change: function(event, ui) {
-						setProgress();
+					start: function(event, ui) {
+						pauseVideo();
+					},
+					slide: function(event, ui) {
+						processPosition();
+					},
+					stop: function(event, ui) {
+						// processPosition();
+						// playVideo();
 					}
 				});
 				mSliderVolume = $( "#sliderVolume" ).slider({
 					max: 100,
-					change: function(event, ui) { 
+					slide: function(event, ui) { 
 					}
 				});
 			});
@@ -415,16 +441,16 @@
 		<table>
 			<tr>
 				<td>
-					<input type="button" value="Play"  onclick="processPlayVideoClick();" class="sbtnDlg"> 
+					<input type="button" id="sbtnPlay" value="Play"  onclick="processPlayVideoClick();" class="sbtnDlg"> 
 				</td>
 				<td>
-					<input type="button" value="Pause" onclick="processPauseVideoClick();" class="sbtnDlg">
+					<input type="button" id="sbtnPause" value="Pause" onclick="processPauseVideoClick();" class="sbtnDlg">
 				</td>
 				<td>
-					<input type="button" value="Stop"  onclick="processStopVideoClick();"  class="sbtnDlg">
+					<input type="button" id="sbtnStop" value="Stop"  onclick="processStopVideoClick();"  class="sbtnDlg">
 				</td>
 				<td>
-					<input type="button" value="Clear Log"  onclick="clearLog();"  class="sbtnDlg">
+					<input type="button" id="sbtnClear" value="Clear Log"  onclick="clearLog();"  class="sbtnDlg">
 				</td>
 			</tr>
 		</table>

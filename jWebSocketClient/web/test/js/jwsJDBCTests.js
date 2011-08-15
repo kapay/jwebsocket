@@ -164,7 +164,7 @@ jws.tests.JDBC = {
 			// check result if ok
 			runs( function() {
 				expect( lResponse.msg ).toEqual( "ok" );
-				expect( lResponse.rowsAffected ).toEqual( 1 );
+				expect( lResponse.rowsAffected[0] ).toEqual( 1 );
 			});
 
 		});
@@ -203,7 +203,7 @@ jws.tests.JDBC = {
 			// check result if ok
 			runs( function() {
 				expect( lResponse.msg ).toEqual( "ok" );
-				expect( lResponse.rowsAffected ).toEqual( 1 );
+				expect( lResponse.rowsAffected[0] ).toEqual( 1 );
 			});
 
 		});
@@ -241,7 +241,7 @@ jws.tests.JDBC = {
 			// check result if ok
 			runs( function() {
 				expect( lResponse.msg ).toEqual( "ok" );
-				expect( lResponse.rowsAffected ).toEqual( 1 );
+				expect( lResponse.rowsAffected[0] ).toEqual( 1 );
 			});
 
 		});
@@ -321,7 +321,7 @@ jws.tests.JDBC = {
 			// check result if ok
 			runs( function() {
 				expect( lResponse.msg ).toEqual( "ok" );
-				expect( lResponse.rowsAffected ).toEqual( 1 );
+				expect( lResponse.rowsAffected[0] ).toEqual( 1 );
 			});
 
 		});
@@ -361,7 +361,7 @@ jws.tests.JDBC = {
 			// check result if ok
 			runs( function() {
 				expect( lResponse.msg ).toEqual( "ok" );
-				expect( lResponse.rowsAffected ).toEqual( 1 );
+				expect( lResponse.rowsAffected[0] ).toEqual( 1 );
 			});
 
 		});
@@ -399,7 +399,7 @@ jws.tests.JDBC = {
 			// check result if ok
 			runs( function() {
 				expect( lResponse.msg ).toEqual( "ok" );
-				expect( lResponse.rowsAffected ).toEqual( 1 );
+				expect( lResponse.rowsAffected[0] ).toEqual( 1 );
 			});
 
 		});

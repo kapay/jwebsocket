@@ -249,7 +249,7 @@ public interface WebSocketConnector {
 
 	/**
 	 *
-	 * @param aSubprot
+	 * @param aVersion 
 	 */
 	void setVersion(int aVersion);
 
@@ -284,11 +284,29 @@ public interface WebSocketConnector {
 
 	/**
 	 *
+	 * 
+	 * @return 
 	 */
 	boolean isSSL();
 
 	/**
 	 *
+	 * 
+	 * @param aIsSSL 
 	 */
 	void setSSL(boolean aIsSSL);
+	
+
+	/**
+	 * 
+	 * @return
+	 */
+	boolean isHixie();
+
+	/**
+	 * 
+	 * @return
+	 */
+	boolean isHybi();
+	
 }

@@ -1,36 +1,19 @@
- /*
- * Init plugin when the page is already load
- * 
- * 
- */	        
-            
-        
-Ext.onReady(function(){
-		
-    // if your browser supports websockets
-    if(jws.browserSupportsWebSockets()){
-
-        //creating a jwebsocket conector
-        jws.myConn = new jws.jWebSocketJSONClient();
-        jws.myConn.open(jws.JWS_SERVER_URL);
-
-        cfg = {
-            conn: jws.myConn
-        }
-        //initializing the ExtJs plugIn for jWebSocket
-        Ext.jws.init(cfg);
-    }else{
-        Ext.Error.raise("your browser does not support WebSocket");
-    }
-
-});	
-		
-		
-		
 		
 Ext.define('Ext.jws', {
-		
+    extend: 'Ext.util.Observable',
     singleton: true,
+
+    constructor: function(config){
+
+        this.addEvents({
+            "open" : true,
+            "close" : true,
+            "timeout":true
+        });
+
+        // Call our superclass constructor to complete construction process.
+        this.superclass.constructor.call(this, config)
+    },
 		
     init:function(config){
         
@@ -44,14 +27,42 @@ Ext.define('Ext.jws', {
             return this.doAction(this.api ? 'directload' : this.jwsSubmit ? 'jwsload' : 'load', options);
 	}
 							
-        if (this.aTokenClient != undefined)
-            Ext.Error.raise("Ext.jws plugin is already initialized");
+    },
 
-        this.aTokenClient = config.conn;
+    open: function(jwsServerURL, aTokenClient, timeout){
+        var me = this;
+        if(jws.browserSupportsWebSockets()){
+            var url = jwsServerURL || jws.JWS_SERVER_URL;
+
+            if(aTokenClient)
+                this.aTokenClient = aTokenClient;
+            else
+                this.aTokenClient = new jws.jWebSocketJSONClient();
+
+
+            this.aTokenClient.open(url, {
+                OnOpen: function(aToken){
+                    me.init();
+                    me.fireEvent('open');
+                },
+                OnClose: function(){
+                    me.fireEvent('close');
+                },
+                OnTimeout: function(){
+                    me.fireEvent('timeout');
+                }
+            });
+            if(timeout)
+                this.setDefaultTimeOut(timeout);
+        }
+        else{
+            var lMsg = jws.MSG_WS_NOT_SUPPORTED;
+            Ext.Error.raise(lMsg);
+        }
     },
 		
     send: function(ns, type, args, callbacks, scope){
-			
+        
         var meScope  = scope;
         var lToken   = {};
         if (args){
@@ -87,6 +98,17 @@ Ext.define('Ext.jws', {
 		
     addPlugIn: function(aPlugin){
         this.aTokenClient.addPlugIn(aPlugin);
+    },
+    setDefaultTimeOut:function(timeout){
+
+        if(this.aTokenClient)
+            this.aTokenClient.DEF_RESP_TIMEOUT = timeout;
+        else
+            jws.DEF_RESP_TIMEOUT = timeout;
+    },
+    close : function(){
+        this.aTokenClient.close();
+        this.fireEvent('close');
     }
 
 });
@@ -132,7 +154,7 @@ Ext.define('Ext.jws.data.proxy', {
 
     
     doRequest: function(operation, callback, scope) {
-        
+
         var  me      = this;
         var  writer  = this.getWriter(),
         request = this.buildRequest(operation, callback, scope);
@@ -179,7 +201,6 @@ Ext.define('Ext.jws.data.proxy', {
                 me.processResponse(false, operation, request, response, callback, scope);
             }
         },scope);
-        
         
     },
     setupDataForRequest:function(options){
@@ -286,7 +307,6 @@ Ext.define('Ext.jws.form.action.Submit', {
 
         }
 
-
         Ext.jws.send(jwsOptions.ns,jwsOptions.tokentype,jwsOptions.params,callbacks,this);
         if (formEl) {
             Ext.removeNode(formEl);
@@ -375,7 +395,6 @@ run: function() {
         if (response) {
             
             data = response.data[0] ? response.data : null;
-            console.log(data);
             return {
                 success : response.success,
                 data : data

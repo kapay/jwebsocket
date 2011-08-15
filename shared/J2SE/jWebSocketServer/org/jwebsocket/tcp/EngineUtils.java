@@ -22,6 +22,7 @@ import org.jwebsocket.kit.RequestHeader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import org.jwebsocket.kit.WebSocketProtocolAbstraction;
 
 /**
  * Utility methods for tcp and nio engines.
@@ -38,23 +39,25 @@ public class EngineUtils {
 		// If it is present and if it's something unrecognizable, force disconnect (return null).
 		String lDraft = (String) lRespMap.get(RequestHeader.WS_DRAFT);
 		Integer lVersion = (Integer) lRespMap.get(RequestHeader.WS_VERSION);
-		if (lDraft != null) {
-			if (JWebSocketCommonConstants.WS_HIXIE_DRAFT_76.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_02.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_03.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_07.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_08.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_HYBI_DRAFT_10.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_HIXIE_DRAFT_76.equals(lDraft)
-					|| JWebSocketCommonConstants.WS_DRAFT_DEFAULT.equals(lDraft)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Client uses draft #" + lDraft + " for protocol communication");
-				}
-			} else {
-				logger.error("Error in Handshake: Draft #'" + lDraft + "' not supported.");
-				return null;
+
+		if (WebSocketProtocolAbstraction.isValidDraft(lDraft)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Client uses draft #" + lDraft + " for protocol communication.");
 			}
+		} else {
+			logger.error("Error in Handshake: Draft #'" + lDraft + "' not supported.");
+			return null;
 		}
+
+		if (WebSocketProtocolAbstraction.isValidVersion(lVersion)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Client uses version #" + lVersion + " for protocol communication.");
+			}
+		} else {
+			logger.error("Error in Handshake: Version #'" + lVersion + "' not supported.");
+			return null;
+		}
+
 
 		RequestHeader lHeader = new RequestHeader();
 		Map<String, String> lArgs = new HashMap<String, String>();

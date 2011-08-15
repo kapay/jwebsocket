@@ -18,6 +18,8 @@
 		<module>jWebSocketServer</module>
 		<module>jWebSocketJavaSEClient</module>
 		<module>jWebSocketSamples</module>
+		<module>jWebSocketPlugIns/jWebSocketSenchaPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketJDBCPlugIn</module>
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>

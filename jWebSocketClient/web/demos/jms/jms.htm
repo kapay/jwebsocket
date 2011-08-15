@@ -29,10 +29,8 @@
 	href="../../res/css/jwebsocket.css">
 <!-- load the jWebSocket JavaScript client library -->
 <script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
-<!-- this one imports the client side streaming plug-in -->
+<!-- this one imports the client side JMS plug-in -->
 <script type="text/javascript" src="../../res/js/jwsJMSPlugIn.js"></script>
-<!-- this one imports the client side streaming plug-in -->
-<!-- <script type="text/javascript" src="../../res/js/jWebSocket_bundle.js"></script> -->
 <script type="text/javascript" language="JavaScript">
 	var eLog = null, eKeepAlive = null, eMessage = null, eChannelId = null, eChannelName = null, eAccessKey = null, eSecretKey = null, eIsPrivate = null, eIsSystem = null, eKeepAlive = null, eChannelSel = null;
 
@@ -202,7 +200,7 @@
 		var lJMSReplyTo = {
 				connectionFactoryName: getConnectionFactoryName(),
 				destinationName : getDestinationName(),
-				isPubSubDomain : isPubSubDomain(),
+				pubSubDomain : isPubSubDomain(),
 		}
 	
 		var lJmsHeaderProperties = {
@@ -281,7 +279,8 @@
 		<tr>
 			<td class="tdHeader" width="">jWebSocket JMS Demo</td>
 			<td class="tdHeader" width="1%"><img id="simgStatus"
-				src="../../images/disconnected.png" align="right" /></td>
+				src="../../images/disconnected.png" align="right" />
+			</td>
 			<td class="tdHeader" width="1%"><span id="slblClientId">&nbsp;Client&#x2011;Id:&nbsp;-</span>
 			</td>
 		</tr>
@@ -315,57 +314,50 @@
 			<tr class="strDlg">
 				<td width=""><input class="sbtnDlg" id="sbtnListen"
 					type="button" value="Listen" onclick="listen();"
-					title="Listen to a JMS destination."></td>
+					title="Listen to a JMS destination.">
+				</td>
 				<td class="stdDlg" width="5"><input class="sbtnDlg"
 					id="sbtnClear" type="button" value="Clear Log"
 					onclick="clearLog();"
-					title="Clears the result and event log above.">
-				</td>
+					title="Clears the result and event log above."></td>
 				<td class="stdDlg" width="5">&nbsp;Destination Name:</td>
 
 				<td width="70"><input class="stxfDlg" id="stxfDestinationName"
 					type="text" value="testQueue" style="width: 99%"
-					title="Enter the name of a JMS destination.">
-				</td>
+					title="Enter the name of a JMS destination."></td>
 			</tr>
 			<tr class="strDlg">
 				<td width=""><input class="sbtnDlg" id="sbtnListenMessage"
 					type="button" value="Listen Msg" onclick="listenMessage();"
-					title="Listen to a JMS destination." />
-				</td>
+					title="Listen to a JMS destination." /></td>
 				<td width=""><input class="sbtnDlg" id="sbtnSendText"
 					type="button" value="Send Text" onclick="sendText();"
-					title="Send text">
-				</td>
+					title="Send text"></td>
 				<td class="stdDlg" width="5">&nbsp;Text Message:</td>
-				<td width="70"><input class="stxfDlg" id="stxfText" type="text"
-					value="text" style="width: 99%"
-					title="Enter the content of text message">
-				</td>
+				<td width="70"><input class="stxfDlg" id="stxfPubSubDomain"
+					type="checkbox" title="isPubSubDomain" /></td>
 			</tr>
 			<tr class="strDlg">
 				<td width=""><input class="sbtnDlg" id="sbtUnlisten"
 					type="button" value="Unlisten" onclick="unlisten();"
-					title="Unlisten from a JMS destination." />
-				</td>
+					title="Unlisten from a JMS destination." /></td>
 				<td width=""><input class="sbtnDlg" id="sbtnSendTextMessage"
 					type="button" value="Send Text Msg" onclick="sendTextMessage();"
-					title="Send text message" /></td>
-				<td class="stdDlg" width="5">&nbsp;Topic:</td>
-				<td width="70"><input class="stxfDlg" id="stxfPubSubDomain"
-					type="checkbox" title="isPubSubDomain" />
+					title="Send text message" />
 				</td>
+				<td class="stdDlg" width="5">&nbsp;Topic:</td>
+				<td width="70"><input class="stxfDlg" id="stxfText" type="text"
+					value="text" style="width: 99%"
+					title="Enter the content of text message"></td>
 			</tr>
 			<tr class="strDlg">
 				<td width="">
-				<!-- input class="sbtnDlg" id="sbtUnlistenMessage"
+					<!-- input class="sbtnDlg" id="sbtUnlistenMessage"
 					type="button" value="Unlisten Msg" onclick="unlistenMessage();"
-					title="Unlisten from a JMS destination." /-->
-				</td>
+					title="Unlisten from a JMS destination." /--></td>
 				<td width=""><input class="sbtnDlg" id="sbtnSendMap"
 					type="button" value="Send Map" onclick="sendMap();"
-					title="Send map." />
-				</td>
+					title="Send map." /></td>
 				<td class="stdDlg" width="5">&nbsp;Map message:</td>
 				<td width="70"><input class="stxfDlg" id="stxfMap" type="text"
 					value="{&quot;first&quot;:&quot;first&quot;,&quot;second&quot;:&quot;second&quot;,&quot;third&quot;:&quot;third&quot;}"
@@ -376,12 +368,12 @@
 				<td width=""></td>
 				<td width=""><input class="sbtnDlg" id="sbtnSendMapMessage"
 					type="button" value="Send Map Msg" onclick="sendMapMessage();"
-					title="Send map message." /></td>
+					title="Send map message." />
+				</td>
 				<td class="stdDlg" width="5">&nbsp;JMSCorrelationID:</td>
 				<td width="70"><input class="stxfDlg" id="stxfJMSCorrelationID"
 					type="text" value="JMSCorrelationID" style="width: 99%"
-					title="Enter the jms header JMSCorrelationID">
-				</td>
+					title="Enter the jms header JMSCorrelationID"></td>
 			</tr>
 			<tr class="strDlg">
 				<td width="" />
@@ -389,8 +381,7 @@
 				<td class="stdDlg" width="5">&nbsp;JMSType:</td>
 				<td width="70"><input class="stxfDlg" id="stxfJMSType"
 					type="text" value="JMSType" style="width: 99%"
-					title="Enter the jms header JMSType">
-				</td>
+					title="Enter the jms header JMSType"></td>
 			</tr>
 		</table>
 	</div>

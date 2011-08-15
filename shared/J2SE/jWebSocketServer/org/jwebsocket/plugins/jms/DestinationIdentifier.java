@@ -15,6 +15,9 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.jms;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jwebsocket.plugins.jms.util.FieldJms;
 import org.jwebsocket.token.Token;
 
@@ -34,8 +37,7 @@ public class DestinationIdentifier {
 	private final String mDestinationName;
 	private final String mConnectionFactoryName;
 
-	private DestinationIdentifier(String aConnectionFactoryName,
-			String aDestinationName, Boolean aPubSubDomain) {
+	private DestinationIdentifier(String aConnectionFactoryName, String aDestinationName, Boolean aPubSubDomain) {
 		this.mConnectionFactoryName = aConnectionFactoryName;
 		this.mDestinationName = aDestinationName;
 		this.mPubSubDomain = aPubSubDomain;
@@ -57,13 +59,8 @@ public class DestinationIdentifier {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime
-				* result
-				+ ((mConnectionFactoryName == null) ? 0
-						: mConnectionFactoryName.hashCode());
-		result = prime
-				* result
-				+ ((mDestinationName == null) ? 0 : mDestinationName.hashCode());
+		result = prime * result + ((mConnectionFactoryName == null) ? 0 : mConnectionFactoryName.hashCode());
+		result = prime * result + ((mDestinationName == null) ? 0 : mDestinationName.hashCode());
 		result = prime * result + (mPubSubDomain ? 1231 : 1237);
 		return result;
 	}
@@ -92,29 +89,37 @@ public class DestinationIdentifier {
 		return true;
 	}
 
-	public static DestinationIdentifier valueOf(String aConnectionFactoryName,
-			String aDestinationName, Boolean aPubSubDomain) {
-		return new DestinationIdentifier(aConnectionFactoryName,
-				aDestinationName, aPubSubDomain);
+	public static DestinationIdentifier valueOf(String aConnectionFactoryName, String aDestinationName,
+			Boolean aPubSubDomain) {
+		return new DestinationIdentifier(aConnectionFactoryName, aDestinationName, aPubSubDomain);
 	}
 
 	public static DestinationIdentifier valueOf(Token aToken) {
-		String lConnectionFactoryName = aToken
-				.getString(FieldJms.CONNECTION_FACTORY_NAME.getValue());
-		String lDestinationName = aToken.getString(FieldJms.DESTINATION_NAME
-				.getValue());
-		Boolean lPubSubDomain = aToken.getBoolean(FieldJms.IS_PUB_SUB_DOMAIN
-				.getValue());
+		String lConnectionFactoryName = aToken.getString(FieldJms.CONNECTION_FACTORY_NAME.getValue());
+		String lDestinationName = aToken.getString(FieldJms.DESTINATION_NAME.getValue());
+		Boolean lPubSubDomain = aToken.getBoolean(FieldJms.PUB_SUB_DOMAIN.getValue());
 
 		return valueOf(lConnectionFactoryName, lDestinationName, lPubSubDomain);
 	}
 
 	public boolean isMissingData() {
-		return null == mConnectionFactoryName
-				|| mConnectionFactoryName.trim().length() == 0
-				|| null == mDestinationName
-				|| mDestinationName.trim().length() == 0
-				|| null == mPubSubDomain;
+		return null == mConnectionFactoryName || mConnectionFactoryName.trim().length() == 0
+				|| null == mDestinationName || mDestinationName.trim().length() == 0 || null == mPubSubDomain;
+	}
+
+	public Token setDestinationIdentifier(Token aToken) {
+		if (null == aToken)
+			return null;
+		aToken.setMap(FieldJms.DESTINATION_IDENTIFIER.getValue(), getJSONMap());
+		return aToken;
+	}
+
+	public Map<String, Object> getJSONMap() {
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put(FieldJms.CONNECTION_FACTORY_NAME.getValue(), mConnectionFactoryName);
+		result.put(FieldJms.DESTINATION_NAME.getValue(), mDestinationName);
+		result.put(FieldJms.PUB_SUB_DOMAIN.getValue(), mPubSubDomain);
+		return result;
 	}
 
 }

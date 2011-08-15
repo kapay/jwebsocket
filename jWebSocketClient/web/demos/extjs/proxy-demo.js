@@ -1,8 +1,11 @@
 
 function findCustomer(){
-	
+
+    	
     var id = Ext.fly('textIdSearch').getValue();
-                
+    if(isNaN(id))
+       log("id must be numeric");
+    else
     Customer.load(id,{
         success: function(customer, response) { 
             log(response.response.responseObject.message);
@@ -173,24 +176,35 @@ function log(text)
       
 
 
-
-
-
-
-
 Ext.onReady(function(){
     
     
-    /*
+    Ext.jws.open();
+
+    Ext.jws.on('open',function(){
+        initDemo();
+    });
+    
+    Ext.jws.on('close',function(){
+        alert("you are disconnect");
+    });
+
+});
+
+
+function initDemo(){
+
+
+      /*
      * creating jWebsocket proxy settings
-     * 
-     * ns properties is not optional: thi is the namespace than 
-     * 
+     *
+     * ns properties is not optional: thi is the namespace than
+     *
      * if api is not specified in the config object,
      * the default is taken as below;
-     * 
+     *
      */
-    
+
     var proxy_cfg = {
         ns:'jws.ext.demo',
         api:{
@@ -202,42 +216,44 @@ Ext.onReady(function(){
         reader: {
             root: 'data'
         }
-                        
+
     };
-		
+
     var jWSproxy  = new Ext.jws.data.proxy(proxy_cfg);
-                
+
     Ext.regModel('Customer', {
         fields: ['id','name', 'email'],
         proxy: jWSproxy
     });
-                
-                
+
+
     Ext.fly('btnSearch').on("click",findCustomer);
     Ext.fly('btnSend').on("click",createCustomer);
     Ext.fly('btnDel').on("click",delCustomer);
     Ext.fly('btnShow').on("click",getAllCustomers);
     Ext.fly('btnUpdate').on("click",updateCustomer);
-    
+
     Ext.fly('listUser').on("dblclick",function(event, el){
-       
+
        var el    =  Ext.get(el);
-       var value = el.getValue(); 
+       var value = el.getValue();
        if (el.dom.selectedIndex == -1)
            return;
-       
+
        var arrayValue = value.split(':');
-       
+
        if (arrayValue[0].trim() == "id"){
            log("you can not change id field ");
            return;
        }
-       
+
        var a = prompt("change the value", arrayValue[1]);
+       a = a ? a : arrayValue[1];
        el.update( arrayValue[0] +" : "+a);
-              
+
     });
     
-        
-});
 
+
+
+}

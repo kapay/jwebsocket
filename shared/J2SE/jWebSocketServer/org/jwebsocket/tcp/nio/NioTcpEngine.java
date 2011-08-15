@@ -388,7 +388,7 @@ public class NioTcpEngine extends BaseEngine {
 		private void doRead(NioTcpConnector lConnector, ReadBean lBean) throws IOException {
 			lConnector.setWorkerId(hashCode());
 			if (lConnector.isAfterHandshake()) {
-				boolean lIsHixie = lConnector.isHixieDraft();
+				boolean lIsHixie = lConnector.isHixie();
 				if (lIsHixie) {
 					readHixie(lBean.data, lConnector);
 				} else {

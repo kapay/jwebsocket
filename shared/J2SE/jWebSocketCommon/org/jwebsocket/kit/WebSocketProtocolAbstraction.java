@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import org.jwebsocket.api.WebSocketPacket;
 import java.util.List;
+import org.jwebsocket.config.JWebSocketCommonConstants;
 
 /**
  * Utility class for packetizing WebSocketPacket into web socket protocol packet or packets (with fragmentation) and
@@ -54,8 +55,63 @@ public class WebSocketProtocolAbstraction {
 	// web socket protocol packet types
 
 	/**
+	 * 
+	 * @param aVersion
+	 * @return
+	 */
+	public static boolean isHixieVersion(int aVersion) {
+		return JWebSocketCommonConstants.WS_SUPPORTED_HIXIE_VERSIONS.contains(aVersion);
+	}
+
+	/**
+	 * 
+	 * @param aVersion
+	 * @return
+	 */
+	public static boolean isHybiVersion(int aVersion) {
+		return JWebSocketCommonConstants.WS_SUPPORTED_HYBI_VERSIONS.contains(aVersion);
+	}
+
+	/**
+	 * 
+	 * @param aVersion
+	 * @return
+	 */
+	public static boolean isValidVersion(int aVersion) {
+		return isHixieVersion(aVersion) || isHybiVersion(aVersion);
+	}
+
+	/**
+	 * 
+	 * @param aDraft
+	 * @return
+	 */
+	public static boolean isHixieDraft(String aDraft) {
+		return JWebSocketCommonConstants.WS_SUPPORTED_HIXIE_DRAFTS.contains(aDraft);
+	}
+
+	/**
+	 * 
+	 * @param aDraft
+	 * @return
+	 */
+	public static boolean isHybiDraft(String aDraft) {
+		return JWebSocketCommonConstants.WS_SUPPORTED_HYBI_DRAFTS.contains(aDraft);
+	}
+
+	/**
+	 * 
+	 * @param aDraft
+	 * @return
+	 */
+	public static boolean isValidDraft(String aDraft) {
+		return isHixieDraft(aDraft) || isHybiDraft(aDraft);
+	}
+
+	/**
 	 * converts an abstract data packet into a protocol specific frame
 	 * according to the correct version.
+	 * @param aVersion 
 	 * @param aDataPacket
 	 * @return
 	 */
@@ -126,10 +182,22 @@ public class WebSocketProtocolAbstraction {
 		return lBuff;
 	}
 
-	public static WebSocketPacket protocolToRawPacket(int aVersion, InputStream aDIS) throws Exception {
+	/**
+	 * 
+	 * @param aVersion
+	 * @param aIS
+	 * @return
+	 * @throws Exception
+	 */
+	public static WebSocketPacket protocolToRawPacket(int aVersion, InputStream aIS) throws Exception {
 		// begin normal packet read
-		int lFlags = aDIS.read();
+		int lFlags = aIS.read();
+		if (lFlags == -1) {
+			throw new WebSocketException("Stream closed.");
+		}
 
+		// TODO: handle if stream gets closed within this method!
+		
 		ByteArrayOutputStream aBuff = new ByteArrayOutputStream();
 
 		// determine fragmentation
@@ -154,31 +222,33 @@ public class WebSocketProtocolAbstraction {
 			 */
 		} else {
 			// Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
-			long lPayloadLen = aDIS.read();
+			long lPayloadLen = aIS.read();
+		
+			// TODO: officially unmasked frames may not be accepted anymore, since hybi draft #10
 			lMasked = (lPayloadLen & 0x80) == 0x80;
 			lPayloadLen &= 0x7F;
 
 			if (lPayloadLen == 126) {
 				// following two bytes are acutal payload length (16-bit unsigned integer)
-				lPayloadLen = aDIS.read() & 0xFF;
-				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+				lPayloadLen = aIS.read() & 0xFF;
+				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
 			} else if (lPayloadLen == 127) {
 				// following eight bytes are actual payload length (64-bit unsigned integer)
-				lPayloadLen = aDIS.read() & 0xFF;
-				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aDIS.read() & 0xFF);
+				lPayloadLen = aIS.read() & 0xFF;
+				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
 			}
 
 			if (lMasked) {
-				lMask[0] = aDIS.read() & 0xFF;
-				lMask[1] = aDIS.read() & 0xFF;
-				lMask[2] = aDIS.read() & 0xFF;
-				lMask[3] = aDIS.read() & 0xFF;
+				lMask[0] = aIS.read() & 0xFF;
+				lMask[1] = aIS.read() & 0xFF;
+				lMask[2] = aIS.read() & 0xFF;
+				lMask[3] = aIS.read() & 0xFF;
 			}
 
 			if (lPayloadLen > 0) {
@@ -188,13 +258,13 @@ public class WebSocketProtocolAbstraction {
 				if (lMasked) {
 					int j = 0;
 					while (lPayloadLen-- > 0) {
-						aBuff.write(aDIS.read() ^ lMask[j]);
+						aBuff.write(aIS.read() ^ lMask[j]);
 						j++;
 						j &= 3;
 					}
 				} else {
 					while (lPayloadLen-- > 0) {
-						aBuff.write(aDIS.read());
+						aBuff.write(aIS.read());
 					}
 				}
 			}
@@ -217,7 +287,8 @@ public class WebSocketProtocolAbstraction {
 
 	/**
 	 * converts a WebSocket protocol opcode to an abstract jWebSocket frame type
-	 * @param aOpCode
+	 * @param aVersion 
+	 * @param aOpcode 
 	 * @return
 	 */
 	public static WebSocketFrameType opcodeToFrameType(int aVersion, int aOpcode) {
@@ -256,6 +327,7 @@ public class WebSocketProtocolAbstraction {
 	 */
 	/**
 	 *
+	 * @param aVersion 
 	 * @param aFrameType
 	 * @return
 	 */
@@ -281,6 +353,11 @@ public class WebSocketProtocolAbstraction {
 		}
 	}
 
+	/**
+	 * 
+	 * @param aEncoding
+	 * @return
+	 */
 	public static WebSocketFrameType encodingToFrameType(WebSocketEncoding aEncoding) {
 		switch (aEncoding) {
 			case TEXT: {

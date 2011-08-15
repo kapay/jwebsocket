@@ -31,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.plugins.jms.JMSPlugIn.ActionInput;
 import org.jwebsocket.plugins.jms.infra.impl.DefaultMessageDelegate;
 import org.jwebsocket.plugins.jms.infra.impl.JmsListenerContainer;
 import org.jwebsocket.plugins.jms.util.Configuration;
@@ -146,12 +147,11 @@ public class JmsManager {
 		}
 	}
 
-	public void deregisterConnectorFromMessageListener(String aConnectionId,
-			DestinationIdentifier aDestinationIdentifier) {
-		JmsListenerContainer lListener = mMessageListenerStore.getListener(aDestinationIdentifier);
+	public void deregisterConnectorFromMessageListener(ActionInput aInput) {
+		JmsListenerContainer lListener = mMessageListenerStore.getListener(aInput.mDi);
 
 		if (null != lListener) {
-			lListener.getMessageConsumerRegistry().removeMessageConsumer(aConnectionId);
+			lListener.getMessageConsumerRegistry().removeMessageConsumer(aInput.mConnector.getId());
 
 			if (0 == lListener.getMessageConsumerRegistry().size())
 				lListener.stop();
@@ -172,19 +172,17 @@ public class JmsManager {
 		return lSender;
 	}
 
-	public void sendText(DestinationIdentifier aDestinationIdentifier, String aStringMessage) {
-		getSender(aDestinationIdentifier).convertAndSend(aStringMessage);
+	public void sendText(ActionInput aInput) {
+		getSender(aInput.mDi).convertAndSend(aInput.mReqToken.getString(FieldJms.MESSSAGE_PAYLOAD.getValue()));
 	}
 
-	@SuppressWarnings("rawtypes")
-	public void sendTextMessage(DestinationIdentifier aDestinationIdentifier, final String aStringMessage,
-			final Map jmsHeaderProperties) {
-		JmsTemplate lSender = getSender(aDestinationIdentifier);
+	public void sendTextMessage(final ActionInput aInput) {
+		JmsTemplate lSender = getSender(aInput.mDi);
 		lSender.send(lSender.getDefaultDestination(), new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
-				Message result = session.createTextMessage(aStringMessage);
+				Message result = session.createTextMessage(aInput.mReqToken.getString(FieldJms.MESSSAGE_PAYLOAD.getValue()));
 				try {
-					enrichMessageWithHeaders(result, jmsHeaderProperties);
+					enrichMessageWithHeaders(result, aInput.mReqToken.getMap(FieldJms.JMS_HEADER_PROPERTIES.getValue()));
 				} catch (JSONException e) {
 					mLog.error("could not enrich message with headers: " + e.getMessage());
 				}
@@ -193,29 +191,23 @@ public class JmsManager {
 		});
 	}
 
-	@SuppressWarnings("rawtypes")
-	public void sendMap(DestinationIdentifier aDestinationIdentifier, Map aMap) {
-		JmsTemplate lSender = getSender(aDestinationIdentifier);
+	public void sendMap(ActionInput aInput) {
+		JmsTemplate lSender = getSender(aInput.mDi);
 		if (null == lSender)
 			throw new IllegalArgumentException("missing sender for destination: isPubSubdomain: "
-					+ aDestinationIdentifier.isPubSubDomain() + " name: " + aDestinationIdentifier.getDestinationName());
+					+ aInput.mDi.isPubSubDomain() + " name: " + aInput.mDi.getDestinationName());
 
-		lSender.convertAndSend((Map) aMap);
+		lSender.convertAndSend(aInput.mReqToken.getMap(FieldJms.MESSSAGE_PAYLOAD.getValue()));
 	}
 
-	@SuppressWarnings("rawtypes")
-	public void sendMapMessage(DestinationIdentifier aDestinationIdentifier, final Map aMap,
-			final Map jmsHeaderProperties) {
-		JmsTemplate lSender = getSender(aDestinationIdentifier);
-		/**
-		 * TODO create a private field of type MessageCreator instead of
-		 * instantiating one each time
-		 */
+	public void sendMapMessage(final ActionInput aInput) {
+		JmsTemplate lSender = getSender(aInput.mDi);
 		lSender.send(lSender.getDefaultDestination(), new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
-				Message result = mMsgConverter.toMessage(aMap, session);
+				Message result = mMsgConverter.toMessage(aInput.mReqToken.getMap(FieldJms.MESSSAGE_PAYLOAD.getValue()),
+						session);
 				try {
-					enrichMessageWithHeaders(result, jmsHeaderProperties);
+					enrichMessageWithHeaders(result, aInput.mReqToken.getMap(FieldJms.JMS_HEADER_PROPERTIES.getValue()));
 				} catch (JSONException e) {
 					mLog.error("could not enrich message with headers: " + e.getMessage());
 				}
@@ -264,26 +256,24 @@ public class JmsManager {
 
 		String lConnectionFactoryName = (String) headerValue.get(FieldJms.CONNECTION_FACTORY_NAME.getValue());
 		String lDestinationName = (String) headerValue.get(FieldJms.DESTINATION_NAME.getValue());
-		Boolean lPubSubDomain = (Boolean) headerValue.get(FieldJms.IS_PUB_SUB_DOMAIN.getValue());
+		Boolean lPubSubDomain = (Boolean) headerValue.get(FieldJms.PUB_SUB_DOMAIN.getValue());
 		return getDestination(DestinationIdentifier.valueOf(lConnectionFactoryName, lDestinationName, lPubSubDomain));
 	}
 
-	public void registerConnectorWithListener(String aConnectionId, Token aToken,
-			DestinationIdentifier aDestinationIdentifier, TokenPlugIn aTokenPlugIn) {
-		JmsListenerContainer lListener = mMessageListenerStore.getListener(aDestinationIdentifier);
+	public void registerConnectorWithListener(ActionInput aInput, TokenPlugIn aTokenPlugIn) {
+		JmsListenerContainer lListener = mMessageListenerStore.getListener(aInput.mDi);
 		if (null != lListener)
-			registerMessagePayloadConnector(lListener, aConnectionId, aToken);
+			registerMessagePayloadConnector(lListener, aInput.mConnector.getId(), aInput.mReqToken);
 		else
-			createListener(aConnectionId, aToken, aDestinationIdentifier, aTokenPlugIn);
+			createListener(aInput.mConnector.getId(), aInput.mReqToken, aInput.mDi, aTokenPlugIn);
 	}
 
-	public void registerConnectorWithMessageListener(String aConnectionId, Token aToken,
-			DestinationIdentifier aDestinationIdentifier, TokenPlugIn aTokenPlugIn) {
-		JmsListenerContainer lListener = mMessageListenerStore.getListener(aDestinationIdentifier);
+	public void registerConnectorWithMessageListener(ActionInput aInput, TokenPlugIn aTokenPlugIn) {
+		JmsListenerContainer lListener = mMessageListenerStore.getListener(aInput.mDi);
 		if (null != lListener)
-			registerConnector(lListener, aConnectionId, aToken);
+			registerConnector(lListener, aInput.mConnector.getId(), aInput.mReqToken);
 		else
-			createMessageListener(aConnectionId, aToken, aDestinationIdentifier, aTokenPlugIn);
+			createMessageListener(aInput.mConnector.getId(), aInput.mReqToken, aInput.mDi, aTokenPlugIn);
 
 	}
 
@@ -312,7 +302,7 @@ public class JmsManager {
 
 	private DefaultMessageDelegate createMessageDelegate(DestinationIdentifier aDestinationIdentifier,
 			TokenPlugIn aTokenPlugIn) {
-		return new DefaultMessageDelegate(aTokenPlugIn, aDestinationIdentifier.isPubSubDomain());
+		return new DefaultMessageDelegate(aTokenPlugIn, aDestinationIdentifier);
 	}
 
 	private Destination getDestination(DestinationIdentifier aDestinationIdentifier) {

@@ -41,4 +41,15 @@ public enum ActionJms {
 	public String toString() {
 		return mValue;
 	}
+
+	public static ActionJms get(String value) {
+		if (null == value)
+			throw new IllegalArgumentException("missing value");
+
+		for (ActionJms next : ActionJms.values())
+			if (next.getValue().equals(value))
+				return next;
+
+		throw new IllegalArgumentException("missing ActionJms for value: '" + value + "'");
+	}
 }

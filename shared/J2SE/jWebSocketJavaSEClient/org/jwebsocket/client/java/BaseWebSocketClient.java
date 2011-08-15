@@ -24,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -32,7 +31,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import javolution.util.FastList;
-import javolution.util.FastMap;
 import org.jwebsocket.api.WebSocketBaseClientEvent;
 import org.jwebsocket.api.WebSocketClient;
 import org.jwebsocket.api.WebSocketClientEvent;
@@ -42,6 +40,7 @@ import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketStatus;
 import org.jwebsocket.client.token.WebSocketTokenClientEvent;
 import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.kit.Headers;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketEncoding;
 import org.jwebsocket.kit.WebSocketException;
@@ -93,10 +92,25 @@ public class BaseWebSocketClient implements WebSocketClient {
 	protected volatile WebSocketStatus mStatus = WebSocketStatus.CLOSED;
 	private List<WebSocketSubProtocol> mSubprotocols;
 	private WebSocketSubProtocol mNegotiatedSubProtocol;
+	/**
+	 * 
+	 */
 	public static String EVENT_CLOSE = "close";
+	/**
+	 * 
+	 */
 	public static String DATA_CLOSE_ERROR = "error";
+	/**
+	 * 
+	 */
 	public static String DATA_CLOSE_CLIENT = "client";
+	/**
+	 * 
+	 */
 	public static String DATA_CLOSE_SERVER = "server";
+	/**
+	 * 
+	 */
 	public static String DATA_CLOSE_SHUTDOWN = "shutdown";
 	private int mVersion = JWebSocketCommonConstants.WS_VERSION_DEFAULT;
 	private WebSocketEncoding mEncoding = WebSocketEncoding.TEXT;
@@ -109,6 +123,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 	/**
 	 * {@inheritDoc}
+	 * 
+	 * @param aURI 
 	 */
 	@Override
 	public void open(String aURI) throws WebSocketException {
@@ -119,15 +135,14 @@ public class BaseWebSocketClient implements WebSocketClient {
 	 * Make a sub protocol string for Sec-WebSocket-Protocol header.
 	 * The result is something like this:
 	 * <pre>
-	 * chat.example.com/json v2.chat.example.com/xml audio.chat.example.com/binary
+	 * org.jwebsocket.json org.websocket.text org.jwebsocket.binary
 	 * </pre>
 	 *
-	 * @return subprotocol list in one string
+	 * @return sub protocol list in one string
 	 */
-	private String makeSubprotocolHeader() {
-		if (mSubprotocols == null || mSubprotocols.size() < 1) {
-			//return JWebSocketCommonConstants.WS_SUBPROTOCOL_DEFAULT + '/' + JWebSocketCommonConstants.WS_FORMAT_DEFAULT;
-			return null;
+	private String generateSubProtocolsHeaderValue() {
+		if (mSubprotocols == null || mSubprotocols.size() <= 0) {
+			return JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
 		} else {
 			StringBuilder lBuff = new StringBuilder();
 			for (WebSocketSubProtocol lProt : mSubprotocols) {
@@ -137,7 +152,25 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 	}
 
+	/**
+	 * 
+	 * @param aVersion
+	 * @param aURI
+	 * @throws WebSocketException
+	 */
 	public void open(int aVersion, String aURI) throws WebSocketException {
+		String lSubProtocols = generateSubProtocolsHeaderValue();
+		open(aVersion, aURI, lSubProtocols);
+	}
+
+	/**
+	 * 
+	 * @param aVersion
+	 * @param aURI
+	 * @param aSubProtocols 
+	 * @throws WebSocketException
+	 */
+	public void open(int aVersion, String aURI, String aSubProtocols) throws WebSocketException {
 		URI lURI = null;
 		try {
 			lURI = new URI(aURI);
@@ -148,8 +181,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 		mURI = lURI;
 		mVersion = aVersion;
 
-		String lSubProtocol = makeSubprotocolHeader();
-		WebSocketHandshake lHandshake = new WebSocketHandshake(mVersion, mURI, lSubProtocol);
+		// the WebSocket Handshake here generates the initial client side Handshake only
+		WebSocketHandshake lHandshake = new WebSocketHandshake(mVersion, mURI, aSubProtocols);
 		try {
 			// close current socket if still connected 
 			// to avoid open connections on server
@@ -160,8 +193,11 @@ public class BaseWebSocketClient implements WebSocketClient {
 			mInput = mSocket.getInputStream();
 			mOutput = new PrintStream(mSocket.getOutputStream());
 
-			mOutput.write(lHandshake.getHandshake());
+			mOutput.write(lHandshake.generateC2SRequest());
 
+
+			mStatus = WebSocketStatus.CONNECTING;
+			/*
 			boolean lHandshakeComplete = false;
 			boolean lHeader = true;
 			// TODO: handle this length! >Could lead to buffer overflow!
@@ -169,55 +205,52 @@ public class BaseWebSocketClient implements WebSocketClient {
 			byte[] lBuffer = new byte[len];
 			int lPos = 0;
 			ArrayList<String> lHandshakeLines = new ArrayList<String>();
-
+			
 			byte[] lServerResponse = new byte[16];
-
+			
 			while (!lHandshakeComplete) {
-				mStatus = WebSocketStatus.CONNECTING;
-				int lB = mInput.read();
-				lBuffer[lPos] = (byte) lB;
-				lPos += 1;
-
-				if (!lHeader) {
-					lServerResponse[lPos - 1] = (byte) lB;
-					if (lPos == 16) {
-						lHandshakeComplete = true;
-					}
-				} else if (lBuffer[lPos - 1] == 0x0A && lBuffer[lPos - 2] == 0x0D) {
-					String line = new String(lBuffer, "UTF-8");
-					if (line.trim().equals("")) {
-						lHeader = false;
-					} else {
-						lHandshakeLines.add(line.trim());
-					}
-
-					lBuffer = new byte[len];
-					lPos = 0;
-				}
+			int lB = mInput.read();
+			lBuffer[lPos] = (byte) lB;
+			lPos += 1;
+			
+			if (!lHeader) {
+			lServerResponse[lPos - 1] = (byte) lB;
+			if (lPos == 16) {
+			lHandshakeComplete = true;
 			}
-
+			} else if (lBuffer[lPos - 1] == 0x0A && lBuffer[lPos - 2] == 0x0D) {
+			String line = new String(lBuffer, "UTF-8");
+			if (line.trim().equals("")) {
+			lHeader = false;
+			} else {
+			lHandshakeLines.add(line.trim());
+			}
+			
+			lBuffer = new byte[len];
+			lPos = 0;
+			}
+			}
+			
 			lHandshake.verifyServerStatusLine(lHandshakeLines.get(0));
 			lHandshake.verifyServerResponse(lServerResponse);
-
+			
 			lHandshakeLines.remove(0);
-
+			
 			Map<String, String> lHeaders = new FastMap<String, String>();
 			for (String lLine : lHandshakeLines) {
-				String[] lKeyVal = lLine.split(": ", 2);
-				lHeaders.put(lKeyVal[0], lKeyVal[1]);
+			String[] lKeyVal = lLine.split(": ", 2);
+			lHeaders.put(lKeyVal[0], lKeyVal[1]);
 			}
 			lHandshake.verifyServerHandshakeHeaders(lHeaders);
+			 */
 
+			Headers lHeaders = new Headers();
+			lHeaders.readFromStream(aVersion, mInput);
+			
 			// parse negotiated sub protocol
-			if (lHeaders.containsKey("Sec-WebSocket-Protocol")) {
-				String llHeader = lHeaders.get("Sec-WebSocket-Protocol");
-				if (llHeader.indexOf('/') == -1) {
-					mNegotiatedSubProtocol = new WebSocketSubProtocol(
-							llHeader, mEncoding);
-				} else {
-					String[] lSplit = llHeader.split("/");
-					mNegotiatedSubProtocol = new WebSocketSubProtocol(lSplit[0], mEncoding);
-				}
+			String lProtocol = lHeaders.getField(Headers.SEC_WEBSOCKET_PROTOCOL);
+			if (lProtocol != null) {
+				mNegotiatedSubProtocol = new WebSocketSubProtocol(lProtocol, mEncoding);
 			} else {
 				// just default to 'jwebsocket.org/json' and 'text'
 				mNegotiatedSubProtocol = new WebSocketSubProtocol(
@@ -225,13 +258,15 @@ public class BaseWebSocketClient implements WebSocketClient {
 						JWebSocketCommonConstants.WS_ENCODING_DEFAULT);
 			}
 
+			// create new thread to receive the data from the new client
 			mReceiver = new WebSocketReceiver(mInput);
-
+			// and start the receiver thread for the port
+			mReceiver.start();
+			// now set official status, may listeners ask for that
+			mStatus = WebSocketStatus.OPEN;
+			// and finally notify listeners for OnOpen event
 			// TODO: Add event parameter
 			notifyOpened(null);
-
-			mReceiver.start();
-			mStatus = WebSocketStatus.OPEN;
 		} catch (IOException lIOEx) {
 			throw new WebSocketException(
 					"Error while connecting: "
@@ -241,7 +276,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 	@Override
 	public void send(byte[] aData) throws WebSocketException {
-		if (isHixieDraft()) {
+		if (isHixie()) {
 			sendInternal(aData);
 		} else {
 			WebSocketPacket lPacket = new RawPacket(aData);
@@ -268,10 +303,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 	/**
 	 * {@inheritDoc}
+	 * 
+	 * @param aDataPacket 
 	 */
 	@Override
 	public void send(WebSocketPacket aDataPacket) throws WebSocketException {
-		if (isHixieDraft()) {
+		if (isHixie()) {
 			sendInternal(aDataPacket.getByteArray());
 		} else {
 			sendInternal(WebSocketProtocolAbstraction.rawToProtocolPacket(mVersion, aDataPacket));
@@ -279,11 +316,11 @@ public class BaseWebSocketClient implements WebSocketClient {
 	}
 
 	private void sendInternal(byte[] aData) throws WebSocketException {
-		if (mStatus != WebSocketStatus.OPEN) {
-			throw new WebSocketException("error while sending binary data: not connected");
+		if (!mStatus.isWriteble()) {
+			throw new WebSocketException("Error while sending binary data: not connected");
 		}
 		try {
-			if (isHixieDraft()) {
+			if (isHixie()) {
 				if (WebSocketEncoding.BINARY.equals(mNegotiatedSubProtocol.getEncoding())) {
 					mOutput.write(0x80);
 					// TODO: what if frame is longer than 255 characters (8bit?) Refer to IETF spec!
@@ -303,10 +340,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	public void handleReceiverError() {
 		try {
-			if (mStatus != WebSocketStatus.OPEN) {
-				mStatus = WebSocketStatus.CLOSING;
+			if (mStatus.isClosable()) {
 				close();
 			}
 		} catch (WebSocketException lWSE) {
@@ -317,11 +356,20 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 	@Override
 	public synchronized void close() throws WebSocketException {
-		if (mStatus != WebSocketStatus.OPEN) {
+		if (!mStatus.isWriteble()) {
 			return;
 		}
+		String lExMsg = "Error(s) on close:";
+		boolean lThrowEx = false;
+		try {
+			sendCloseHandshake();
+		} catch (Exception lEx) {
+			lExMsg += " " + lEx.getMessage();
+			lThrowEx = true;
+		}
+		// set status AFTER close frame was sent, otherwise sending
+		// close frame leads to an exception.
 		mStatus = WebSocketStatus.CLOSING;
-		sendCloseHandshake();
 		if (mReceiver.isRunning()) {
 			mReceiver.stopit();
 		}
@@ -331,21 +379,30 @@ public class BaseWebSocketClient implements WebSocketClient {
 				mSocket.shutdownInput();
 				mSocket.shutdownOutput();
 			}
-			mSocket.close();
-			mStatus = WebSocketStatus.CLOSED;
 		} catch (IOException lIOEx) {
-			throw new WebSocketException("error while closing websocket connection: ", lIOEx);
+			lExMsg += " " + lIOEx.getMessage();
+			lThrowEx = true;
 		}
-		// TODO: add event
+		try {
+			mSocket.close();
+		} catch (IOException lIOEx) {
+			lExMsg += " " + lIOEx.getMessage();
+			lThrowEx = true;
+		}
+		mStatus = WebSocketStatus.CLOSED;
+		if (lThrowEx) {
+			throw new WebSocketException(lExMsg);
+		}
+		// TODO: add event object
 		notifyClosed(null);
 	}
 
 	private void sendCloseHandshake() throws WebSocketException {
-		if (mStatus != WebSocketStatus.OPEN) {
+		if (!mStatus.isClosable()) {
 			throw new WebSocketException("error while sending close handshake: not connected");
 		}
 		try {
-			if (isHixieDraft()) {
+			if (isHixie()) {
 				mOutput.write(0xff00);
 				// TODO: check if final CR/LF is required/valid!
 				mOutput.write("\r\n".getBytes());
@@ -436,7 +493,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 	 */
 	@Override
 	public boolean isConnected() {
-		return mStatus.equals(WebSocketStatus.OPEN);
+		return mStatus.isConnected();
 	}
 
 	@Override
@@ -446,6 +503,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 	/**
 	 * {@inheritDoc }
+	 * 
+	 * @return 
 	 */
 	public WebSocketStatus getConnectionStatus() {
 		return mStatus;
@@ -539,12 +598,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 		for (WebSocketClientListener lListener : getListeners()) {
 			lListener.processClosed(aEvent);
 		}
-/*
+		/*
 		ReliabilityManager.getExecutor().schedule(
-				new ReOpener(aEvent),
-				1000,
-				TimeUnit.MILLISECONDS);
- */
+		new ReOpener(aEvent),
+		1000,
+		TimeUnit.MILLISECONDS);
+		 */
 	}
 
 	@Override
@@ -570,9 +629,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 		this.mVersion = aVersion;
 	}
 
-	// TODO: Need to adjust this, hybi may exceed 75 ine day as well!
-	private boolean isHixieDraft() {
-		return mVersion >= 75;
+	private boolean isHixie() {
+		return WebSocketProtocolAbstraction.isHixieVersion(mVersion);
 	}
 
 	class WebSocketReceiver extends Thread {
@@ -587,7 +645,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 		@Override
 		public void run() {
 			try {
-				if (isHixieDraft()) {
+				if (isHixie()) {
 					readHixie();
 				} else {
 					readHybi();
@@ -700,10 +758,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 
 		private void handleErrorAndClose() {
-			mStatus = WebSocketStatus.CLOSED;
-			// TODO: Add event parameter
-			WebSocketClientEvent lEvent = new WebSocketBaseClientEvent("close", "error");
-			notifyClosed(lEvent);
+			if (!mStatus.isClosed()) {
+				mStatus = WebSocketStatus.CLOSED;
+				// TODO: Add event parameter
+				WebSocketClientEvent lEvent = new WebSocketBaseClientEvent("close", "error");
+				notifyClosed(lEvent);
+			}
 			stopit();
 		}
 	}

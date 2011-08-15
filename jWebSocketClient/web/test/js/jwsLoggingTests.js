@@ -92,14 +92,14 @@ jws.tests.Logging = {
 
 			waitsFor(
 				function() {
-					return( lResponse.rowsAffected == 1 && lResponse.key > 0 );
+					return( lResponse.rowsAffected && lResponse.rowsAffected[0] == 1 && lResponse.key > 0 );
 				},
 				lSpec,
 				3000
 			);
 
 			runs( function() {
-				expect( lResponse.rowsAffected ).toEqual( 1 );
+				expect( lResponse.rowsAffected[0] ).toEqual( 1 );
 			});
 
 		});

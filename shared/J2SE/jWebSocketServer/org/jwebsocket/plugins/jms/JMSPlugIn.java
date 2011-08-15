@@ -65,11 +65,12 @@ public class JMSPlugIn extends TokenPlugIn {
 	private void createBeanFactory() {
 		String lSpringConfig = getString("spring_config");
 		String lPath = FilenameUtils.getPath(lSpringConfig);
-		if (lPath == null || lPath.length() <= 0) {
+
+		if (lPath == null || lPath.length() <= 0)
 			lPath = JWebSocketConfig.getConfigFolder(lSpringConfig);
-		} else {
+		else
 			lPath = lSpringConfig;
-		}
+
 		mBeanFactory = new XmlBeanFactory(new FileSystemResource(lPath));
 	}
 
@@ -78,9 +79,7 @@ public class JMSPlugIn extends TokenPlugIn {
 	 */
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
-		// call super connectorStarted
 		super.connectorStarted(aConnector);
-		// currently no further action required here
 	}
 
 	/**
@@ -98,291 +97,236 @@ public class JMSPlugIn extends TokenPlugIn {
 
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-		if (null == mBeanFactory) {
+		if (null == mBeanFactory)
 			sendMissingBeanFactoryResponseToken(aConnector, aToken);
-		} else if (null == mJmsManager) {
+		else if (null == mJmsManager)
 			sendMissingJmsManagerResponseToken(aConnector, aToken);
-		} else {
+		else
 			processToken(aConnector, aToken);
-		}
 	}
 
 	public void processToken(WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-		if (lType != null && getNamespace().equals(lNS)) {
-			if (ActionJms.LISTEN.equals(lType)) {
-				listen(aConnector, aToken);
-			} else if (ActionJms.LISTEN_MESSAGE.equals(lType)) {
-				listenMessage(aConnector, aToken);
-			} else if (ActionJms.SEND_TEXT.equals(lType)) {
-				sendText(aConnector, aToken);
-			} else if (ActionJms.SEND_TEXT_MESSAGE.equals(lType)) {
-				sendTextMessage(aConnector, aToken);
-			} else if (ActionJms.SEND_MAP.equals(lType)) {
-				sendMap(aConnector, aToken);
-			} else if (ActionJms.SEND_MAP_MESSAGE.equals(lType)) {
-				sendMapMessage(aConnector, aToken);
-			} else if (ActionJms.UNLISTEN.equals(lType)) {
-				unlisten(aConnector, aToken);
-			}
+		if (lType == null || !getNamespace().equals(lNS))
+			return;
+
+		switch (ActionJms.get(lType)) {
+		case LISTEN:
+			listen(aConnector, aToken);
+			break;
+		case LISTEN_MESSAGE:
+			listenMessage(aConnector, aToken);
+			break;
+		case SEND_TEXT:
+			sendText(aConnector, aToken);
+			break;
+		case SEND_TEXT_MESSAGE:
+			sendTextMessage(aConnector, aToken);
+			break;
+		case SEND_MAP:
+			sendMap(aConnector, aToken);
+			break;
+		case SEND_MAP_MESSAGE:
+			sendMapMessage(aConnector, aToken);
+			break;
+		case UNLISTEN:
+			unlisten(aConnector, aToken);
 		}
+	}
+
+	private void unlisten(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'unlisten'...");
+		executeAction(createActionInput(aConnector, aToken, "Successfully unlisten jms listener"), new ActionCommand() {
+			@Override
+			void execute(ActionInput aInput) throws Exception {
+				mJmsManager.deregisterConnectorFromMessageListener(aInput);
+			}
+		});
+	}
+
+	private void listen(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'listen'...");
+		executeAction(
+				createActionInput(aConnector, aToken, "Successfully got jms listener", RightJms.LISTEN,
+						RightJms.SEND_AND_LISTEN), new ActionCommand() {
+					@Override
+					void execute(ActionInput aInput) throws Exception {
+						mJmsManager.registerConnectorWithListener(aInput, JMSPlugIn.this);
+					}
+				});
+	}
+
+	private void listenMessage(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'listenMessage'...");
+		executeAction(
+				createActionInput(aConnector, aToken, "Successfully got jms message listener", RightJms.LISTEN,
+						RightJms.SEND_AND_LISTEN), new ActionCommand() {
+					@Override
+					void execute(ActionInput aInput) throws Exception {
+						mJmsManager.registerConnectorWithMessageListener(aInput, JMSPlugIn.this);
+					}
+				});
+	}
+
+	private void sendText(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'sendText'...");
+		executeAction(
+				createActionInput(aConnector, aToken, "Text successfully sent", RightJms.SEND, RightJms.SEND_AND_LISTEN),
+				new ActionCommand() {
+					@Override
+					void execute(ActionInput aInput) throws Exception {
+						mJmsManager.sendText(aInput);
+					}
+				});
+	}
+
+	private void sendTextMessage(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'sendTextMessage'...");
+		executeAction(
+				createActionInput(aConnector, aToken, "Jms text message successfully sent", RightJms.SEND,
+						RightJms.SEND_AND_LISTEN), new ActionCommand() {
+					@Override
+					void execute(ActionInput aInput) throws Exception {
+						mJmsManager.sendTextMessage(aInput);
+					}
+				});
+	}
+
+	private void sendMap(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'sendMap'...");
+		executeAction(
+				createActionInput(aConnector, aToken, "Map message successfully sent", RightJms.SEND,
+						RightJms.SEND_AND_LISTEN), new ActionCommand() {
+					@Override
+					void execute(ActionInput aInput) throws Exception {
+						mJmsManager.sendMap(aInput);
+					}
+				});
+	}
+
+	private void sendMapMessage(WebSocketConnector aConnector, Token aToken) {
+		mLog.debug("Processing 'sendMapMessage'...");
+		executeAction(
+				createActionInput(aConnector, aToken, "Jms map message successfully sent", RightJms.SEND,
+						RightJms.SEND_AND_LISTEN), new ActionCommand() {
+					@Override
+					void execute(ActionInput aInput) throws Exception {
+						mJmsManager.sendMapMessage(aInput);
+					}
+				});
+	}
+
+	private void executeAction(ActionInput aInput, ActionCommand aCommand) {
+		if (!actionIsExecutable(aInput))
+			return;
+
+		if (!executeCommand(aInput, aCommand))
+			return;
+
+		sendPositiveToken(aInput);
+	}
+
+	private boolean executeCommand(ActionInput aInput, ActionCommand aCommand) {
+		try {
+			aCommand.execute(aInput);
+			return true;
+		} catch (Exception e) {
+			sendNegativeToken(aInput, e);
+			return false;
+		}
+	}
+
+	private boolean actionIsExecutable(ActionInput aInput) {
+		return isDestinationIdentifierValid(aInput) && hasRight(aInput);
+	}
+
+	private void sendPositiveToken(ActionInput aInput) {
+		setCodeAndMsg(aInput.mResToken, 1, aInput.mPositiveMsg);
+		sendToken(aInput);
 	}
 
 	private void sendMissingJmsManagerResponseToken(WebSocketConnector aConnector, Token aToken) {
 		Token lResponseToken = createResponse(aToken);
-		lResponseToken.setInteger("code", -1);
-		lResponseToken.setString("msg", "missing jms manager: correct your config");
+		setCodeAndMsg(aToken, -1, "missing jms manager: correct your config");
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
 
 	private void sendMissingBeanFactoryResponseToken(WebSocketConnector aConnector, Token aToken) {
 		Token lResponseToken = createResponse(aToken);
-		lResponseToken.setInteger("code", -1);
-		lResponseToken.setString("msg", "missing jms spring beanfactory: correct your config");
+		setCodeAndMsg(aToken, -1, "missing jms spring beanfactory: correct your config");
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
 
-	private void unlisten(WebSocketConnector aConnector, Token aToken) {
-		mLog.debug("Processing 'unlisten'...");
-
-		Token lResponseToken = createResponse(aToken);
-
-		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
-
-		if (lDestinationIdentifier.isMissingData()) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "Missing input data for unlisten a jms listener");
-			sendToken(aConnector, aConnector, lResponseToken);
-			return;
+	private boolean isDestinationIdentifierValid(ActionInput aInput) {
+		if (aInput.mDi.isMissingData()) {
+			setCodeAndMsg(aInput.mResToken, -1, "Missing destination identifier input  data");
+			sendToken(aInput);
+			return false;
 		}
-
-		mJmsManager.deregisterConnectorFromMessageListener(aConnector.getId(), lDestinationIdentifier);
-
-		lResponseToken.setInteger("code", 1);
-		lResponseToken.setString("msg", "Successfully unlisten jms listener");
-		// send the response
-		sendToken(aConnector, aConnector, lResponseToken);
+		return true;
 	}
 
-	private void listen(WebSocketConnector aConnector, Token aToken) {
-		mLog.debug("Processing 'listen'...");
-
-		Token lResponseToken = createResponse(aToken);
-		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
-
-		if (lDestinationIdentifier.isMissingData()) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "Missing input data for establishing a jms listener");
-			sendToken(aConnector, aConnector, lResponseToken);
-			return;
-		}
-
-		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
-				RightJms.LISTEN, RightJms.SEND_AND_LISTEN)) {
-			sendToken(aConnector, aConnector, createAccessDenied(aToken));
-			return;
-		}
-
-		try {
-			mJmsManager.registerConnectorWithListener(aConnector.getId(), aToken, lDestinationIdentifier, this);
-		} catch (Exception e) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", e.getMessage());
-			// send the response
-			sendToken(aConnector, aConnector, lResponseToken);
-			return;
-		}
-
-		lResponseToken.setInteger("code", 1);
-		lResponseToken.setString("msg", "Successfully got jms listener");
-		// send the response
-		sendToken(aConnector, aConnector, lResponseToken);
+	private void setCodeAndMsg(Token aToken, int aCode, String aMsg) {
+		aToken.setInteger(FieldJms.CODE.getValue(), aCode);
+		aToken.setString(FieldJms.MSG.getValue(), aMsg);
 	}
 
-	private void listenMessage(WebSocketConnector aConnector, Token aToken) {
-		mLog.debug("Processing 'listenMessage'...");
-
-		Token lResponseToken = createResponse(aToken);
-		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
-
-		if (lDestinationIdentifier.isMissingData()) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "Missing input data for establishing a jms message listener");
-			sendToken(aConnector, aConnector, lResponseToken);
-			return;
-		}
-
-		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
-				RightJms.LISTEN, RightJms.SEND_AND_LISTEN)) {
-			sendToken(aConnector, aConnector, createAccessDenied(aToken));
-			return;
-		}
-
-		try {
-			mJmsManager.registerConnectorWithMessageListener(aConnector.getId(), aToken, lDestinationIdentifier, this);
-		} catch (Exception e) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", e.getMessage());
-			// send the response
-			sendToken(aConnector, aConnector, lResponseToken);
-			return;
-		}
-
-		lResponseToken.setInteger("code", 1);
-		lResponseToken.setString("msg", "Successfully got jms message listener");
-		// send the response
-		sendToken(aConnector, aConnector, lResponseToken);
+	private void sendToken(ActionInput aInput) {
+		sendToken(aInput.mConnector, aInput.mConnector, aInput.mResToken);
 	}
 
-	private void sendText(WebSocketConnector aConnector, Token aToken) {
-		mLog.debug("Processing 'sendText'...");
-
-		Token lResponseToken = createResponse(aToken);
-		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
-
-		if (lDestinationIdentifier.isMissingData()) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "Missing destination input data for sending text");
-			sendToken(aConnector, aConnector, lResponseToken);
-			return;
-		}
-
-		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
-				RightJms.SEND, RightJms.SEND_AND_LISTEN)) {
-			sendToken(aConnector, aConnector, createAccessDenied(aToken));
-			return;
-		}
-
-		try {
-			mJmsManager.sendText(lDestinationIdentifier, aToken.getString(FieldJms.MESSSAGE_PAYLOAD.getValue()));
-		} catch (Exception e) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", e.getMessage());
-			// send the response
-			sendToken(aConnector, aConnector, lResponseToken);
-		}
-
-		lResponseToken.setInteger("code", 1);
-		lResponseToken.setString("msg", "Text successfully sent");
-		// send the response
-		sendToken(aConnector, aConnector, lResponseToken);
+	private void sendAccessDeniedToken(ActionInput aInput) {
+		aInput.mResToken = createAccessDenied(aInput.mResToken);
+		sendToken(aInput);
 	}
 
-	private void sendTextMessage(WebSocketConnector aConnector, Token aToken) {
-		mLog.debug("Processing 'sendTextMessage'...");
-
-		Token lResponseToken = createResponse(aToken);
-		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
-
-		if (lDestinationIdentifier.isMissingData()) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "Missing destination input data for sending a text message");
-			sendToken(aConnector, aConnector, lResponseToken);
-			return;
-		}
-
-		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
-				RightJms.SEND, RightJms.SEND_AND_LISTEN)) {
-			sendToken(aConnector, aConnector, createAccessDenied(aToken));
-			return;
-		}
-
-		try {
-			mJmsManager.sendTextMessage(lDestinationIdentifier, aToken.getString(FieldJms.MESSSAGE_PAYLOAD.getValue()),
-					aToken.getMap(FieldJms.JMS_HEADER_PROPERTIES.getValue()));
-		} catch (Exception e) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", e.getMessage());
-			// send the response
-			sendToken(aConnector, aConnector, lResponseToken);
-		}
-
-		lResponseToken.setInteger("code", 1);
-		lResponseToken.setString("msg", "Jms text message successfully sent");
-		// send the response
-		sendToken(aConnector, aConnector, lResponseToken);
+	private void sendNegativeToken(ActionInput aInput, Exception aEx) {
+		aInput.mResToken.setInteger(FieldJms.CODE.getValue(), -1);
+		aInput.mResToken.setString(FieldJms.MSG.getValue(), aEx.getMessage());
+		sendToken(aInput);
 	}
 
-	private void sendMap(WebSocketConnector aConnector, Token aToken) {
-		mLog.debug("Processing 'sendMap'...");
-
-		Token lResponseToken = createResponse(aToken);
-		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
-
-		if (lDestinationIdentifier.isMissingData()) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "Missing destination input data for sending a map");
-			sendToken(aConnector, aConnector, lResponseToken);
-			return;
-		}
-
-		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
-				RightJms.SEND, RightJms.SEND_AND_LISTEN)) {
-			sendToken(aConnector, aConnector, createAccessDenied(aToken));
-			return;
-		}
-
-		try {
-			mJmsManager.sendMap(lDestinationIdentifier, aToken.getMap(FieldJms.MESSSAGE_PAYLOAD.getValue()));
-		} catch (Exception e) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", e.getMessage());
-			// send the response
-			sendToken(aConnector, aConnector, lResponseToken);
-		}
-
-		lResponseToken.setInteger("code", 1);
-		lResponseToken.setString("msg", "Map message successfully sent");
-		// send the response
-		sendToken(aConnector, aConnector, lResponseToken);
-	}
-
-	private void sendMapMessage(WebSocketConnector aConnector, Token aToken) {
-		mLog.debug("Processing 'sendMapMessage'...");
-
-		Token lResponseToken = createResponse(aToken);
-		DestinationIdentifier lDestinationIdentifier = DestinationIdentifier.valueOf(aToken);
-
-		if (lDestinationIdentifier.isMissingData()) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", "Missing destination input data for sending a map message");
-			sendToken(aConnector, aConnector, lResponseToken);
-			return;
-		}
-
-		if (!hasRight(aConnector, lDestinationIdentifier.isPubSubDomain(), lDestinationIdentifier.getDestinationName(),
-				RightJms.SEND, RightJms.SEND_AND_LISTEN)) {
-			sendToken(aConnector, aConnector, createAccessDenied(aToken));
-			return;
-		}
-
-		try {
-			mJmsManager.sendMapMessage(lDestinationIdentifier, aToken.getMap(FieldJms.MESSSAGE_PAYLOAD.getValue()),
-					aToken.getMap(FieldJms.JMS_HEADER_PROPERTIES.getValue()));
-		} catch (Exception e) {
-			lResponseToken.setInteger("code", -1);
-			lResponseToken.setString("msg", e.getMessage());
-			// send the response
-			sendToken(aConnector, aConnector, lResponseToken);
-		}
-
-		lResponseToken.setInteger("code", 1);
-		lResponseToken.setString("msg", "Jms map message successfully sent");
-		// send the response
-		sendToken(aConnector, aConnector, lResponseToken);
-	}
-
-	private boolean hasRight(WebSocketConnector aConnector, boolean aPubSubDomain, String aDestinationName,
-			RightJms... aRights) {
-		for (RightJms next : aRights) {
-			if (SecurityFactory.hasRight(getUsername(aConnector), NS_JMS + "." + next + "."
-					+ (aPubSubDomain ? "topic" : "queue") + "." + aDestinationName)) {
+	private boolean hasRight(ActionInput aInput) {
+		for (RightJms next : aInput.mRights)
+			if (SecurityFactory.hasRight(
+					getUsername(aInput.mConnector),
+					NS_JMS + "." + next + "." + (aInput.mDi.isPubSubDomain() ? "topic" : "queue") + "."
+							+ aInput.mDi.getDestinationName()))
 				return true;
-			}
+
+		sendAccessDeniedToken(aInput);
+		return false;
+	}
+
+	private ActionInput createActionInput(WebSocketConnector aConnector, Token aToken, String aPositiveMsg,
+			RightJms... aRights) {
+		return new ActionInput(aConnector, aToken, aPositiveMsg, aRights);
+	}
+
+	class ActionInput {
+		WebSocketConnector mConnector;
+		Token mReqToken;
+		Token mResToken;
+		String mPositiveMsg;
+		RightJms[] mRights;
+		DestinationIdentifier mDi;
+
+		private ActionInput(WebSocketConnector aConnector, Token aToken, String aPositiveMsg, RightJms... aRights) {
+			mDi = DestinationIdentifier.valueOf(aToken);
+			mConnector = aConnector;
+			mReqToken = aToken;
+			mResToken = createResponse(aToken);
+			mPositiveMsg = aPositiveMsg;
+			mRights = aRights;
+			mDi.setDestinationIdentifier(mResToken);
+			mDi.setDestinationIdentifier(mReqToken);
 		}
 
-		return false;
+	}
+
+	private abstract class ActionCommand {
+		abstract void execute(ActionInput aInput) throws Exception;
 	}
 }

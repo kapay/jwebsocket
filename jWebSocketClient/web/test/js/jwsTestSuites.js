@@ -80,6 +80,9 @@ function runFullTestSuite() {
 		// run RPC tests
 		jws.tests.RPC.runSuite();
 
+		// run JMS tests
+		// jws.tests.JMS.runSuite();
+		
 		// run JDBC tests
 		jws.tests.JDBC.runSuite();
 

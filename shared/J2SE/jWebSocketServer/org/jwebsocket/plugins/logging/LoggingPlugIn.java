@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.logging;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javolution.util.FastMap;
@@ -25,7 +26,6 @@ import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
-import org.jwebsocket.plugins.jdbc.JDBCTools;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
@@ -45,6 +45,8 @@ public class LoggingPlugIn extends TokenPlugIn {
 	private static final String DEF_IMPL = "log4j";
 	private String mImplementation = DEF_IMPL;
 	private Map<String, String> mListeners = new FastMap<String, String>();
+	private Class JDBCTools = null;
+	private TokenPlugIn mJDBCPlugIn = null;
 
 	public LoggingPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
@@ -60,6 +62,20 @@ public class LoggingPlugIn extends TokenPlugIn {
 		mImplementation = getString("implementation", DEF_IMPL);
 		mLogger = new Log4JLogger();
 	}
+
+	private boolean getJDBCPlugIn() {
+		TokenServer lServer = getServer();
+		mJDBCPlugIn = (TokenPlugIn) lServer.getPlugInById("jws.jdbc");
+		try {
+			JDBCTools = (Class) Tools.invoke(mJDBCPlugIn, "getJDBCTools");
+			// JDBCTools.getClassLoader().loadClass(JDBCTools.getName());
+			return true;
+		} catch (Exception ex) {
+			mLog.error("Logging plug-in requires JDBC-Plug-in.");
+		}
+		return false;
+	}
+
 	/*
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
@@ -69,7 +85,6 @@ public class LoggingPlugIn extends TokenPlugIn {
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseRease) {
 	}
 	 */
-
 	@Override
 	public void processToken(PlugInResponse aResponse,
 			WebSocketConnector aConnector, Token aToken) {
@@ -77,6 +92,18 @@ public class LoggingPlugIn extends TokenPlugIn {
 		String lNS = aToken.getNS();
 
 		if (lType != null && getNamespace().equals(lNS)) {
+
+			TokenServer lServer = getServer();
+			if (mJDBCPlugIn == null || JDBCTools == null) {
+				getJDBCPlugIn();
+			}
+			if (mJDBCPlugIn == null || JDBCTools == null) {
+				// send response to requester
+				Token lResponse = lServer.createErrorToken(aToken, -1, "JDBC plug-in not loaded.");
+				lServer.sendToken(aConnector, lResponse);
+				return;
+			}
+
 			// log
 			if (lType.equals("log")) {
 				log(aConnector, aToken);
@@ -132,14 +159,6 @@ public class LoggingPlugIn extends TokenPlugIn {
 		TokenServer lServer = getServer();
 		Token lResponse = lServer.createResponse(aToken);
 
-		TokenPlugIn lJDBCPlugIn = (TokenPlugIn) lServer.getPlugInById("jws.jdbc");
-		if (lJDBCPlugIn == null) {
-			// send response to requester
-			lResponse = lServer.createErrorToken(aToken, -1, "JDBC plug-in not loaded.");
-			lServer.sendToken(aConnector, lResponse);
-			return;
-		}
-
 		String lTable = aToken.getString("table");
 		List lFields = aToken.getList("fields");
 		List lValues = aToken.getList("values");
@@ -149,9 +168,9 @@ public class LoggingPlugIn extends TokenPlugIn {
 		Integer lValue = null;
 		if (lPrimaryKey != null && lSequence != null) {
 			Token lGetNextSeqToken = TokenFactory.createToken(
-					lJDBCPlugIn.getNamespace(), "getNextSeqVal");
+					mJDBCPlugIn.getNamespace(), "getNextSeqVal");
 			lGetNextSeqToken.setString("sequence", lSequence);
-			Token lNextSeqVal = lJDBCPlugIn.invoke(aConnector, lGetNextSeqToken);
+			Token lNextSeqVal = mJDBCPlugIn.invoke(aConnector, lGetNextSeqToken);
 
 			lValue = lNextSeqVal.getInteger("value");
 			if (lValue == null) {
@@ -165,15 +184,43 @@ public class LoggingPlugIn extends TokenPlugIn {
 			lValues.add(lValue);
 		}
 
-		String lFieldsStr = JDBCTools.fieldListToString(lFields);
-		String lValuesStr = JDBCTools.valueListToString(lValues);
+ 		String lFieldsStr = null;
+		String lValuesStr = null;
+		try {
+			List lTest = new ArrayList();
+			lTest.add("test1");
+			lTest.add("test2");
+			String lInt = (String) Tools.invokeUnique(JDBCTools, "test", lTest);
+			System.out.println("test: "+ lInt);
+		} catch (Exception ex) {
+			mLog.error(ex.getClass().getSimpleName() + ": Method 'test' could not be invoked: " + ex.getMessage());
+		}
+		try {
+			lFieldsStr = (String) Tools.invokeUnique(JDBCTools, "fieldListToString", lFields);
+		} catch (Exception ex) {
+			// TODO: return error here
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Method 'fieldListToString' could not be invoked: " + ex.getMessage());
+			}
+		}
+		try {
+			lValuesStr = (String) Tools.invokeUnique(JDBCTools, "valueListToString", lValues);
+		} catch (Exception ex) {
+			// TODO: return error here
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Method 'valueListToString' could not be invoked: " + ex.getMessage());
+			}
+		}
+		// JDBCTools.
+		// String lFieldsStr = JDBCTools.fieldListToString(lFields);
+		// String lValuesStr = JDBCTools.valueListToString(lValues);
 
 		Map<String, String> lVars = new FastMap<String, String>();
 		lVars.put("ip", aConnector.getRemoteHost().getHostAddress());
 		lValuesStr = Tools.expandVars(lValuesStr, lVars, Tools.EXPAND_CASE_SENSITIVE);
 
 		Token lExecToken = TokenFactory.createToken(
-				lJDBCPlugIn.getNamespace(), "updateSQL");
+				mJDBCPlugIn.getNamespace(), "updateSQL");
 		lExecToken.setString("sql",
 				"insert into "
 				+ lTable
@@ -181,10 +228,10 @@ public class LoggingPlugIn extends TokenPlugIn {
 				+ " values "
 				+ " (" + lValuesStr + ")");
 
-		Token lExecResp = lJDBCPlugIn.invoke(aConnector, lExecToken);
+		Token lExecResp = mJDBCPlugIn.invoke(aConnector, lExecToken);
 		lResponse.setInteger("code", lExecResp.getInteger("code"));
 		lResponse.setString("msg", lExecResp.getString("msg"));
-		lResponse.setInteger("rowsAffected", lExecResp.getInteger("rowsAffected"));
+		lResponse.setList("rowsAffected", lExecResp.getList("rowsAffected"));
 		lResponse.setInteger("key", lValue);
 
 		lServer.sendToken(aConnector, lResponse);
@@ -194,8 +241,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 		TokenServer lServer = getServer();
 		Token lResponse = lServer.createResponse(aToken);
 
-		TokenPlugIn lJDBCPlugIn = (TokenPlugIn) lServer.getPlugInById("jws.jdbc");
-		if (lJDBCPlugIn == null) {
+		if (mJDBCPlugIn == null) {
 			// send response to requester
 			lResponse = lServer.createErrorToken(aToken, -1, "JDBC plug-in not loaded.");
 			lServer.sendToken(aConnector, lResponse);
@@ -221,10 +267,10 @@ public class LoggingPlugIn extends TokenPlugIn {
 		}
 
 		Token lQueryToken = TokenFactory.createToken(
-				lJDBCPlugIn.getNamespace(), "querySQL");
+				mJDBCPlugIn.getNamespace(), "querySQL");
 		lQueryToken.setString("sql", lSQLString);
 
-		Token lQueryResp = lJDBCPlugIn.invoke(aConnector, lQueryToken);
+		Token lQueryResp = mJDBCPlugIn.invoke(aConnector, lQueryToken);
 		lResponse.setList("data", lQueryResp.getList("data"));
 		lServer.sendToken(aConnector, lResponse);
 	}

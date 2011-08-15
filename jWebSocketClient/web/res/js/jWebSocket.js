@@ -19,6 +19,15 @@
 // ## :#file:*:jWebSocket.js
 // ## :#d:en:Implements the jWebSocket Web Client.
 
+
+// Firefox temporarily used MozWebSocket (why?), anyway, consider this here.
+// Since the browserSupportNativeWebSocket method evaluates the existance of
+// the window.WebSocket class, this abstraction need to be done on the very top.
+// please do not move this lines down.
+if( window.MozWebSocket ) {
+	window.WebSocket = window.MozWebSocket;
+}
+
 //:package:*:jws
 //:class:*:jws
 //:ancestor:*:-
@@ -529,11 +538,6 @@ var jws = {
 //i:en:Browser detection (embedded into a function to not polute global namespace...
 (function() {
 
-	// Firefox temporarily used MozWebSocket (why?), anyway, consider this here
-	if( window.MozWebSocket ) {
-		window.WebSocket = window.MozWebSocket;
-	}
-	
 	jws.fBrowserName	= "unknown";
 	jws.fBrowserType	= jws.BT_UNKNOWN;
 	jws.fBrowserVerNo	= undefined;

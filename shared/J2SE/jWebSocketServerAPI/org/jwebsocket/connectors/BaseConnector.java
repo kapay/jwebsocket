@@ -26,6 +26,7 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.WebSocketProtocolAbstraction;
 import org.jwebsocket.kit.WebSocketSession;
 
 /**
@@ -302,8 +303,13 @@ public class BaseConnector implements WebSocketConnector {
 		mIsSSL = aIsSSL;
 	}
 
-	public boolean isHixieDraft() {
-		// TODO: here we need a different identification of the Hixie/Hybi Switch!
-		return (getVersion() >= 75);
+	@Override
+	public boolean isHixie() {
+		return WebSocketProtocolAbstraction.isHixieVersion(getVersion());
+	}
+
+	@Override
+	public boolean isHybi() {
+		return WebSocketProtocolAbstraction.isHybiVersion(getVersion());
 	}
 }

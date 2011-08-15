@@ -46,7 +46,7 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.LISTEN,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain
+				pubSubDomain : aPubSubDomain
 			});
 		}
 		return lRes;
@@ -61,7 +61,7 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.LISTEN_MESSAGE,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain
+				pubSubDomain : aPubSubDomain
 			});
 		}
 		return lRes;
@@ -75,7 +75,7 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.UNLISTEN,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain
+				pubSubDomain : aPubSubDomain
 			});
 		}
 		return lRes;
@@ -91,7 +91,7 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.SEND_TEXT,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain,
+				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aText
 			});
 		}
@@ -107,7 +107,7 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.SEND_TEXT_MESSAGE,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain,
+				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aText,
 				jmsHeaderProperties : aJmsHeaderProperties
 			});
@@ -124,7 +124,7 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.SEND_MAP,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain,
+				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aMap
 			});
 		}
@@ -140,7 +140,7 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.SEND_MAP_MESSAGE,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain,
+				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aMap,
 				jmsHeaderProperties : aJmsHeaderProperties
 			});

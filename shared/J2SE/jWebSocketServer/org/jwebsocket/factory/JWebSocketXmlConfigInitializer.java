@@ -209,67 +209,67 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, List<WebSocketPlugIn>> initializePlugins() {
-		Map<String, List<WebSocketPlugIn>> lPluginMap =
+		Map<String, List<WebSocketPlugIn>> lPlugInMap =
 				new FastMap<String, List<WebSocketPlugIn>>();
 		// populate the plugin FastMap with server id and empty list
 		for (ServerConfig lServerConfig : jWebSocketConfig.getServers()) {
-			lPluginMap.put(lServerConfig.getId(), new FastList<WebSocketPlugIn>());
+			lPlugInMap.put(lServerConfig.getId(), new FastList<WebSocketPlugIn>());
 		}
 		// now initialize the plugins
-		for (PluginConfig lPluginConfig : jWebSocketConfig.getPlugins()) {
+		for (PluginConfig lPlugInConfig : jWebSocketConfig.getPlugins()) {
 			try {
-				Class<WebSocketPlugIn> lPluginClass =
-						loadPluginFromClasspath(lPluginConfig.getName());
+				Class<WebSocketPlugIn> lPlugInClass =
+						loadPluginFromClasspath(lPlugInConfig.getName());
 				// if not in classpath..try to load plug-in from given .jar file
-				if (lPluginClass == null) {
+				if (lPlugInClass == null) {
 					if (mLog.isDebugEnabled()) {
-						mLog.debug("Plug-in '" + lPluginConfig.getName()
+						mLog.debug("Plug-in '" + lPlugInConfig.getName()
 								+ "' trying to load from file...");
 					}
-					String lJarFilePath = JWebSocketConfig.getLibsFolder(lPluginConfig.getJar());
+					String lJarFilePath = JWebSocketConfig.getLibsFolder(lPlugInConfig.getJar());
 					// jarFilePath may be null if .jar is included in server bundle
 					if (lJarFilePath != null) {
 						mClassLoader.addFile(lJarFilePath);
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Loading plug-in '"
-									+ lPluginConfig.getName()
+									+ lPlugInConfig.getName()
 									+ "' from '" + lJarFilePath + "'...");
 						}
-						lPluginClass = (Class<WebSocketPlugIn>) mClassLoader.loadClass(lPluginConfig.getName());
+						lPlugInClass = (Class<WebSocketPlugIn>) mClassLoader.loadClass(lPlugInConfig.getName());
 					}
 				}
 				// if class found try to create an instance
-				if (lPluginClass != null) {
+				if (lPlugInClass != null) {
 					WebSocketPlugIn lPlugIn = null;
 
-					Constructor<WebSocketPlugIn> lPluginConstructor = null;
-					lPluginConstructor =
-							lPluginClass.getConstructor(PluginConfiguration.class);
-					if (lPluginConstructor != null) {
-						lPluginConstructor.setAccessible(true);
-						lPlugIn = lPluginConstructor.newInstance(lPluginConfig);
+					Constructor<WebSocketPlugIn> lPlugInConstructor = null;
+					lPlugInConstructor =
+							lPlugInClass.getConstructor(PluginConfiguration.class);
+					if (lPlugInConstructor != null) {
+						lPlugInConstructor.setAccessible(true);
+						lPlugIn = lPlugInConstructor.newInstance(lPlugInConfig);
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Plug-in '" + lPluginConfig.getId()
+							mLog.debug("Plug-in '" + lPlugInConfig.getId()
 									+ "' successfully instantiated.");
 						}
 						// now add the plugin to plugin map based on server ids
-						for (String lServerId : lPluginConfig.getServers()) {
-							List<WebSocketPlugIn> lPlugIns = lPluginMap.get(lServerId);
+						for (String lServerId : lPlugInConfig.getServers()) {
+							List<WebSocketPlugIn> lPlugIns = lPlugInMap.get(lServerId);
 							if (lPlugIns != null) {
 								lPlugIns.add((WebSocketPlugIn) lPlugIn);
 							}
 						}
 					} else {
-						mLog.error("Plug-in '" + lPluginConfig.getId()
+						mLog.error("Plug-in '" + lPlugInConfig.getId()
 								+ "' could not be instantiated due to invalid constructor.");
 					}
 				}
 
 			} catch (Exception lEx) {
-				mLog.error("Couldn't instantiate the plugin.", lEx);
+				mLog.error("Couldn't instantiate the plug-in.", lEx);
 			}
 		}
-		return lPluginMap;
+		return lPlugInMap;
 	}
 
 	/**
