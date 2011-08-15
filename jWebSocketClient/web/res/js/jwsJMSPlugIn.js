@@ -38,7 +38,8 @@ jws.JMSPlugIn = {
 	LISTEN_MESSAGE : "listenJmsMessage",
 	UNLISTEN : "unlistenJms",
 
-	listenJms : function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
+	listenJms : function(aConnectionFactoryName, aDestinationName, 
+		aPubSubDomain, aOptions) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -47,13 +48,13 @@ jws.JMSPlugIn = {
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
 				pubSubDomain : aPubSubDomain
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
 
 	listenJmsMessage : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain) {
+		aPubSubDomain, aOptions) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -62,12 +63,13 @@ jws.JMSPlugIn = {
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
 				pubSubDomain : aPubSubDomain
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
 
-	unlistenJms : function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
+	unlistenJms : function(aConnectionFactoryName, aDestinationName,
+		aPubSubDomain, aOptions) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -76,14 +78,14 @@ jws.JMSPlugIn = {
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
 				pubSubDomain : aPubSubDomain
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
 	
 
 	sendJmsText : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain, aText) {
+		aPubSubDomain, aText, aOptions ) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -93,13 +95,13 @@ jws.JMSPlugIn = {
 				destinationName : aDestinationName,
 				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aText
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
 
 	sendJmsTextMessage : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain, aText, aJmsHeaderProperties) {
+		aPubSubDomain, aText, aJmsHeaderProperties, aOptions ) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -110,13 +112,13 @@ jws.JMSPlugIn = {
 				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aText,
 				jmsHeaderProperties : aJmsHeaderProperties
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
 
 	sendJmsMap : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain, aMap) {
+		aPubSubDomain, aMap, aOptions ) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -126,13 +128,13 @@ jws.JMSPlugIn = {
 				destinationName : aDestinationName,
 				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aMap
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
 	
 	sendJmsMapMessage : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain, aMap, aJmsHeaderProperties) {
+		aPubSubDomain, aMap, aJmsHeaderProperties, aOptions ) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -143,7 +145,7 @@ jws.JMSPlugIn = {
 				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aMap,
 				jmsHeaderProperties : aJmsHeaderProperties
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},

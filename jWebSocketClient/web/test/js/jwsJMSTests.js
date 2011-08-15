@@ -18,28 +18,26 @@ jws.tests.JMS = {
 
 	NS: "jws.tests.JMS", 
 
-	// this spec tests the login function of the system plug-in
-	testLoginValidCredentials: function() {
-		var lSpec = this.NS + ": Logging in with valid credentials";
+	// this spec tests the listen method of the JMS plug-in
+	testListen: function() {
+		var lSpec = this.NS + ": listen (no Pub/Sub)";
+		
 		it( lSpec, function () {
 
-			// we need to "control" the server to broadcast to all connections here
-			var lConn = new jws.jWebSocketJSONClient();
 			var lResponse = {};
-
-			// open a separate control connection
-			lConn.logon( jws.getDefaultServerURL(), "guest", "guest", {
-				OnToken: function ( aToken ) {
-					if( "org.jwebsocket.plugins.system" == aToken.ns
-						&& "login" == aToken.reqType) {
+			jws.Tests.getAdminConn().listenJms( 
+				"connectionFactory",	// aConnectionFactoryName, 
+				"testQueue",			// aDestinationName, 
+				false,					// aPubSubDomain,
+				{	OnResponse: function( aToken ) {
 						lResponse = aToken;
 					}
 				}
-			});
+			);
 
 			waitsFor(
 				function() {
-					return( lResponse.code != undefined );
+					return( lResponse.code == 0 );
 				},
 				lSpec,
 				3000
@@ -47,97 +45,46 @@ jws.tests.JMS = {
 
 			runs( function() {
 				expect( lResponse.code ).toEqual( 0 );
-				lConn.close();
 			});
+
 		});
 	},
 
-
-	// this spec tests the login function of the system plug-in
-	testLoginInvalidCredentials: function() {
-		var lSpec = this.NS + ": Logging in with invalid credentials";
+	// this spec tests the listen method of the JMS plug-in
+	testUnlisten: function() {
+		var lSpec = this.NS + ": unlisten (no Pub/Sub)";
+		
 		it( lSpec, function () {
 
-			// we need to "control" the server to broadcast to all connections here
-			var lConn = new jws.jWebSocketJSONClient();
 			var lResponse = {};
-
-			// open a separate control connection
-			lConn.logon( jws.getDefaultServerURL(), "InVaLiD", "iNvAlId", {
-				OnToken: function ( aToken ) {
-					if( "org.jwebsocket.plugins.system" == aToken.ns
-						&& "login" == aToken.reqType) {
+			jws.Tests.getAdminConn().unlistenJms( 
+				"connectionFactory",	// aConnectionFactoryName, 
+				"testQueue",			// aDestinationName, 
+				false,					// aPubSubDomain,
+				{	OnResponse: function( aToken ) {
 						lResponse = aToken;
 					}
 				}
-			});
+			);
 
 			waitsFor(
 				function() {
-					return( lResponse.code != undefined );
+					return( lResponse.code == 0 );
 				},
 				lSpec,
 				3000
 			);
 
 			runs( function() {
-				expect( lResponse.code ).toEqual( -1 );
-				lConn.close();
-			});
-		});
-	},
-
-
-	// this spec tests the send method of the system plug-in by sending
-	// this spec requires an established connection
-	testSendLoopBack: function() {
-		var lSpec = this.NS + ": Send and Loopback";
-		it( lSpec, function () {
-
-			// we need to "control" the server to broadcast to all connections here
-			var lResponse = {};
-			var lMsg = "This is my message";
-
-			// open a separate control connection
-			var lToken = {
-				ns: jws.NS_SYSTEM,
-				type: "send",
-				targetId: jws.Tests.getAdminConn().getId(),
-				sourceId: jws.Tests.getAdminConn().getId(),
-				sender: jws.Tests.getAdminConn().getUsername(),
-				data: lMsg
-			};
-
-			var lListener = function( aToken ) {
-				if( "org.jwebsocket.plugins.system" == aToken.ns
-					&& "send" == aToken.type) {
-					lResponse = aToken;
-				}
-			};
-
-			jws.Tests.getAdminConn().addListener( lListener );
-			jws.Tests.getAdminConn().sendToken( lToken );
-
-			waitsFor(
-				function() {
-					return( lResponse.data == lMsg );
-				},
-				lSpec,
-				3000
-			);
-
-			runs( function() {
-				expect( lResponse.data ).toEqual( lMsg );
-				jws.Tests.getAdminConn().removeListener( lListener );
+				expect( lResponse.code ).toEqual( 0 );
 			});
 
 		});
 	},
-
+	
 	runSpecs: function() {
-		jws.tests.JMS.testLoginValidCredentials();
-		jws.tests.JMS.testLoginInvalidCredentials();
-		jws.tests.JMS.testSendLoopBack();
+		jws.tests.JMS.testListen();
+		jws.tests.JMS.testUnlisten();
 	},
 
 	runSuite: function() {
