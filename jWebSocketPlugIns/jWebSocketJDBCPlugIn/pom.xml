@@ -8,7 +8,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jwebsocket</groupId>
-	<artifactId>jWebSocketJDBCPlugIn</artifactId>^
+	<artifactId>jWebSocketJDBCPlugIn</artifactId>
 	<name>jWebSocketJDBCPlugIn</name>
 	<description>jWebSocket JDBC Plug-in</description>
 	<packaging>jar</packaging>
