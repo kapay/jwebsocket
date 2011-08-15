@@ -34,11 +34,15 @@ import org.jwebsocket.plugins.jms.util.ActionJms;
 import org.jwebsocket.plugins.jms.util.FieldJms;
 import org.jwebsocket.plugins.jms.util.RightJms;
 import org.jwebsocket.security.SecurityFactory;
+import org.jwebsocket.spring.ServerXmlBeanFactory;
 import org.jwebsocket.token.Token;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 
+/**
+ * 
+ * @author aschulze
+ */
 public class JMSPlugIn extends TokenPlugIn {
 
 	private Logger mLog = Logging.getLogger(getClass());
@@ -46,6 +50,10 @@ public class JMSPlugIn extends TokenPlugIn {
 	private BeanFactory mBeanFactory;
 	private JmsManager mJmsManager = null;
 
+	/**
+	 * 
+	 * @param aConfiguration
+	 */
 	public JMSPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
@@ -66,12 +74,13 @@ public class JMSPlugIn extends TokenPlugIn {
 		String lSpringConfig = getString("spring_config");
 		String lPath = FilenameUtils.getPath(lSpringConfig);
 
-		if (lPath == null || lPath.length() <= 0)
+		if (lPath == null || lPath.length() <= 0) {
 			lPath = JWebSocketConfig.getConfigFolder(lSpringConfig);
-		else
+		} else {
 			lPath = lSpringConfig;
+		}
 
-		mBeanFactory = new XmlBeanFactory(new FileSystemResource(lPath));
+		mBeanFactory = new ServerXmlBeanFactory(new FileSystemResource(lPath));
 	}
 
 	/**
@@ -97,48 +106,57 @@ public class JMSPlugIn extends TokenPlugIn {
 
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-		if (null == mBeanFactory)
+		if (null == mBeanFactory) {
 			sendMissingBeanFactoryResponseToken(aConnector, aToken);
-		else if (null == mJmsManager)
+		} else if (null == mJmsManager) {
 			sendMissingJmsManagerResponseToken(aConnector, aToken);
-		else
+		} else {
 			processToken(aConnector, aToken);
+		}
 	}
 
+	/**
+	 * 
+	 * @param aConnector
+	 * @param aToken
+	 */
 	public void processToken(WebSocketConnector aConnector, Token aToken) {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-		if (lType == null || !getNamespace().equals(lNS))
+		if (lType == null || !getNamespace().equals(lNS)) {
 			return;
+		}
 
 		switch (ActionJms.get(lType)) {
-		case LISTEN:
-			listen(aConnector, aToken);
-			break;
-		case LISTEN_MESSAGE:
-			listenMessage(aConnector, aToken);
-			break;
-		case SEND_TEXT:
-			sendText(aConnector, aToken);
-			break;
-		case SEND_TEXT_MESSAGE:
-			sendTextMessage(aConnector, aToken);
-			break;
-		case SEND_MAP:
-			sendMap(aConnector, aToken);
-			break;
-		case SEND_MAP_MESSAGE:
-			sendMapMessage(aConnector, aToken);
-			break;
-		case UNLISTEN:
-			unlisten(aConnector, aToken);
+			case LISTEN:
+				listen(aConnector, aToken);
+				break;
+			case LISTEN_MESSAGE:
+				listenMessage(aConnector, aToken);
+				break;
+			case SEND_TEXT:
+				sendText(aConnector, aToken);
+				break;
+			case SEND_TEXT_MESSAGE:
+				sendTextMessage(aConnector, aToken);
+				break;
+			case SEND_MAP:
+				sendMap(aConnector, aToken);
+				break;
+			case SEND_MAP_MESSAGE:
+				sendMapMessage(aConnector, aToken);
+				break;
+			case UNLISTEN:
+				unlisten(aConnector, aToken);
 		}
 	}
 
 	private void unlisten(WebSocketConnector aConnector, Token aToken) {
 		mLog.debug("Processing 'unlisten'...");
-		executeAction(createActionInput(aConnector, aToken, "Successfully unlisten jms listener"), new ActionCommand() {
+		executeAction(createActionInput(aConnector, aToken, "Successfully unlisten jms listener", RightJms.LISTEN,
+				RightJms.SEND_AND_LISTEN), new ActionCommand() {
+
 			@Override
 			void execute(ActionInput aInput) throws Exception {
 				mJmsManager.deregisterConnectorFromMessageListener(aInput);
@@ -150,24 +168,26 @@ public class JMSPlugIn extends TokenPlugIn {
 		mLog.debug("Processing 'listen'...");
 		executeAction(
 				createActionInput(aConnector, aToken, "Successfully got jms listener", RightJms.LISTEN,
-						RightJms.SEND_AND_LISTEN), new ActionCommand() {
-					@Override
-					void execute(ActionInput aInput) throws Exception {
-						mJmsManager.registerConnectorWithListener(aInput, JMSPlugIn.this);
-					}
-				});
+				RightJms.SEND_AND_LISTEN), new ActionCommand() {
+
+			@Override
+			void execute(ActionInput aInput) throws Exception {
+				mJmsManager.registerConnectorWithListener(aInput, JMSPlugIn.this);
+			}
+		});
 	}
 
 	private void listenMessage(WebSocketConnector aConnector, Token aToken) {
 		mLog.debug("Processing 'listenMessage'...");
 		executeAction(
 				createActionInput(aConnector, aToken, "Successfully got jms message listener", RightJms.LISTEN,
-						RightJms.SEND_AND_LISTEN), new ActionCommand() {
-					@Override
-					void execute(ActionInput aInput) throws Exception {
-						mJmsManager.registerConnectorWithMessageListener(aInput, JMSPlugIn.this);
-					}
-				});
+				RightJms.SEND_AND_LISTEN), new ActionCommand() {
+
+			@Override
+			void execute(ActionInput aInput) throws Exception {
+				mJmsManager.registerConnectorWithMessageListener(aInput, JMSPlugIn.this);
+			}
+		});
 	}
 
 	private void sendText(WebSocketConnector aConnector, Token aToken) {
@@ -175,6 +195,7 @@ public class JMSPlugIn extends TokenPlugIn {
 		executeAction(
 				createActionInput(aConnector, aToken, "Text successfully sent", RightJms.SEND, RightJms.SEND_AND_LISTEN),
 				new ActionCommand() {
+
 					@Override
 					void execute(ActionInput aInput) throws Exception {
 						mJmsManager.sendText(aInput);
@@ -186,44 +207,49 @@ public class JMSPlugIn extends TokenPlugIn {
 		mLog.debug("Processing 'sendTextMessage'...");
 		executeAction(
 				createActionInput(aConnector, aToken, "Jms text message successfully sent", RightJms.SEND,
-						RightJms.SEND_AND_LISTEN), new ActionCommand() {
-					@Override
-					void execute(ActionInput aInput) throws Exception {
-						mJmsManager.sendTextMessage(aInput);
-					}
-				});
+				RightJms.SEND_AND_LISTEN), new ActionCommand() {
+
+			@Override
+			void execute(ActionInput aInput) throws Exception {
+				mJmsManager.sendTextMessage(aInput);
+			}
+		});
 	}
 
 	private void sendMap(WebSocketConnector aConnector, Token aToken) {
 		mLog.debug("Processing 'sendMap'...");
 		executeAction(
 				createActionInput(aConnector, aToken, "Map message successfully sent", RightJms.SEND,
-						RightJms.SEND_AND_LISTEN), new ActionCommand() {
-					@Override
-					void execute(ActionInput aInput) throws Exception {
-						mJmsManager.sendMap(aInput);
-					}
-				});
+				RightJms.SEND_AND_LISTEN), new ActionCommand() {
+
+			@Override
+			void execute(ActionInput aInput) throws Exception {
+				mJmsManager.sendMap(aInput);
+			}
+		});
 	}
 
 	private void sendMapMessage(WebSocketConnector aConnector, Token aToken) {
 		mLog.debug("Processing 'sendMapMessage'...");
 		executeAction(
 				createActionInput(aConnector, aToken, "Jms map message successfully sent", RightJms.SEND,
-						RightJms.SEND_AND_LISTEN), new ActionCommand() {
-					@Override
-					void execute(ActionInput aInput) throws Exception {
-						mJmsManager.sendMapMessage(aInput);
-					}
-				});
+				RightJms.SEND_AND_LISTEN), new ActionCommand() {
+
+			@Override
+			void execute(ActionInput aInput) throws Exception {
+				mJmsManager.sendMapMessage(aInput);
+			}
+		});
 	}
 
 	private void executeAction(ActionInput aInput, ActionCommand aCommand) {
-		if (!actionIsExecutable(aInput))
+		if (!actionIsExecutable(aInput)) {
 			return;
+		}
 
-		if (!executeCommand(aInput, aCommand))
+		if (!executeCommand(aInput, aCommand)) {
 			return;
+		}
 
 		sendPositiveToken(aInput);
 	}
@@ -243,7 +269,7 @@ public class JMSPlugIn extends TokenPlugIn {
 	}
 
 	private void sendPositiveToken(ActionInput aInput) {
-		setCodeAndMsg(aInput.mResToken, 1, aInput.mPositiveMsg);
+		setCodeAndMsg(aInput.mResToken, 0, aInput.mPositiveMsg);
 		sendToken(aInput);
 	}
 
@@ -289,12 +315,14 @@ public class JMSPlugIn extends TokenPlugIn {
 	}
 
 	private boolean hasRight(ActionInput aInput) {
-		for (RightJms next : aInput.mRights)
+		for (RightJms next : aInput.mRights) {
 			if (SecurityFactory.hasRight(
 					getUsername(aInput.mConnector),
 					NS_JMS + "." + next + "." + (aInput.mDi.isPubSubDomain() ? "topic" : "queue") + "."
-							+ aInput.mDi.getDestinationName()))
+					+ aInput.mDi.getDestinationName())) {
 				return true;
+			}
+		}
 
 		sendAccessDeniedToken(aInput);
 		return false;
@@ -306,6 +334,7 @@ public class JMSPlugIn extends TokenPlugIn {
 	}
 
 	class ActionInput {
+
 		WebSocketConnector mConnector;
 		Token mReqToken;
 		Token mResToken;
@@ -323,10 +352,10 @@ public class JMSPlugIn extends TokenPlugIn {
 			mDi.setDestinationIdentifier(mResToken);
 			mDi.setDestinationIdentifier(mReqToken);
 		}
-
 	}
 
 	private abstract class ActionCommand {
+
 		abstract void execute(ActionInput aInput) throws Exception;
 	}
 }
