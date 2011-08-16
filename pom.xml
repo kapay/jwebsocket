@@ -21,7 +21,10 @@
 		<module>jWebSocketPlugIns/jWebSocketSenchaPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketJDBCPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketJMSPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketMailPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketReportingPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketFileSystemPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketChannelPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketLoggingPlugIn</module>
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>
