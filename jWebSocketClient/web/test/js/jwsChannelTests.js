@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket TestSpecs for the JMS Plug-in
+//	jWebSocket TestSpecs for the Channel Plug-in
 //	(C) 2011 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -14,21 +14,20 @@
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
 
-jws.tests.JMS = {
+jws.tests.Channels = {
 
-	NS: "jws.tests.jms", 
+	NS: "jws.tests.channels", 
 
-	// this spec tests the listen method of the JMS plug-in
-	testListen: function() {
-		var lSpec = this.NS + ": listen (no Pub/Sub)";
+	// this spec tests the listen method of the Channels plug-in
+	testSubscribe: function( aChannelName, aAccessKey ) {
+		var lSpec = this.NS + ": subscribe (" + aChannelName + ")";
 		
 		it( lSpec, function () {
 
 			var lResponse = {};
-			jws.Tests.getAdminConn().listenJms( 
-				"connectionFactory",	// aConnectionFactoryName, 
-				"testQueue",			// aDestinationName, 
-				false,					// aPubSubDomain,
+			jws.Tests.getAdminConn().channelSubscribe( 
+				aChannelName,
+				aAccessKey,
 				{	OnResponse: function( aToken ) {
 						lResponse = aToken;
 					}
@@ -50,17 +49,15 @@ jws.tests.JMS = {
 		});
 	},
 
-	// this spec tests the listen method of the JMS plug-in
-	testUnlisten: function() {
-		var lSpec = this.NS + ": unlisten (no Pub/Sub)";
+	// this spec tests the listen method of the Channels plug-in
+	testUnsubscribe: function( aChannelName ) {
+		var lSpec = this.NS + ": Unsubscribe (publicA)";
 		
 		it( lSpec, function () {
 
 			var lResponse = {};
-			jws.Tests.getAdminConn().unlistenJms( 
-				"connectionFactory",	// aConnectionFactoryName, 
-				"testQueue",			// aDestinationName, 
-				false,					// aPubSubDomain,
+			jws.Tests.getAdminConn().channelUnsubscribe( 
+				aChannelName,
 				{	OnResponse: function( aToken ) {
 						lResponse = aToken;
 					}
@@ -83,8 +80,8 @@ jws.tests.JMS = {
 	},
 	
 	runSpecs: function() {
-		jws.tests.JMS.testListen();
-		jws.tests.JMS.testUnlisten();
+		jws.tests.Channels.testSubscribe( "systemA", "access" );
+		jws.tests.Channels.testUnsubscribe( "systemA", "access" );
 	},
 
 	runSuite: function() {

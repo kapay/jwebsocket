@@ -83,6 +83,9 @@ function runFullTestSuite() {
 		// run JMS tests
 		jws.tests.JMS.runSuite();
 		
+		// run Channel tests
+		jws.tests.Channels.runSuite();
+		
 		// run JDBC tests
 		jws.tests.JDBC.runSuite();
 	   
