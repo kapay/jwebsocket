@@ -175,6 +175,10 @@ public class StreamingPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void registerConnector(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'register'...");
 		}
@@ -191,12 +195,17 @@ public class StreamingPlugIn extends TokenPlugIn {
 					mLog.debug("Registering client at stream '" + lStreamID + "'...");
 				}
 				lStream.registerConnector(aConnector);
+			} else {
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "Client is already registered at stream '" + lStreamID + "'.");
 			}
-			// else...
-			// todo: error handling
+		} else {
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "Stream '" + lStreamID + "' not found.");
 		}
-		// else...
-		// todo: error handling
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
 	}
 
 	/**
@@ -206,6 +215,10 @@ public class StreamingPlugIn extends TokenPlugIn {
 	 * @param aToken
 	 */
 	public void unregisterConnector(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		// instantiate response token
+		Token lResponse = lServer.createResponse(aToken);
+
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'unregister'...");
 		}
@@ -222,12 +235,17 @@ public class StreamingPlugIn extends TokenPlugIn {
 					mLog.debug("Unregistering client from stream '" + lStreamID + "'...");
 				}
 				lStream.unregisterConnector(aConnector);
+			} else {
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", "Client is not registered at stream '" + lStreamID + "'.");
 			}
-			// else...
-			// todo: error handling
+		} else {
+			lResponse.setInteger("code", -1);
+			lResponse.setString("msg", "Stream '" + lStreamID + "' not found.");
 		}
-		// else...
-		// todo: error handling
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
 	}
 
 	/**

@@ -42,14 +42,14 @@ jws.StreamingPlugIn = {
 	//:a:en::aStream:String:The id of the server side data stream.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
-	registerStream: function( aStream ) {
+	registerStream: function( aStream, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
 				ns: jws.StreamingPlugIn.NS,
 				type: "register",
 				stream: aStream
-			});
+			}, aOptions );
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -63,14 +63,14 @@ jws.StreamingPlugIn = {
 	//:a:en::aStream:String:The id of the server side data stream.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
-	unregisterStream: function( aStream ) {
+	unregisterStream: function( aStream, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
 				ns: jws.StreamingPlugIn.NS,
 				type: "unregister",
 				stream: aStream
-			});
+			}, aOptions );
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";

@@ -86,6 +86,9 @@ function runFullTestSuite() {
 		// run Channel tests
 		jws.tests.Channels.runSuite();
 		
+		// run Streaming tests
+		jws.tests.Streaming.runSuite();
+		
 		// run JDBC tests
 		jws.tests.JDBC.runSuite();
 	   
