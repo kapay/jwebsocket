@@ -328,7 +328,13 @@
 			<version>${org.springframework.version}</version>
 		</dependency>
 		
-		<!-- Spring JMS abastraction -->
+		<dependency> 
+			<groupId>org.apache.activemq</groupId> 
+			<artifactId>activemq-core</artifactId> 
+			<version>5.5.0</version> 
+		</dependency>
+		
+		<!-- Spring JMS abstraction -->
 		<dependency> 
 			<groupId>org.springframework</groupId> 
 			<artifactId>spring-jms</artifactId> 
@@ -371,12 +377,6 @@
 			<version>2.6.3</version>
 		</dependency>
 		
-		<dependency> 
-			<groupId>org.apache.activemq</groupId> 
-			<artifactId>activemq-core</artifactId> 
-			<version>5.5.0</version> 
-		</dependency>
-
 		<!-- jasper reporting dependencies -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>

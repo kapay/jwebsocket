@@ -19,6 +19,15 @@
 // ## :#file:*:jWebSocket.js
 // ## :#d:en:Implements the jWebSocket Web Client.
 
+
+// Firefox temporarily used MozWebSocket (why?), anyway, consider this here.
+// Since the browserSupportNativeWebSocket method evaluates the existance of
+// the window.WebSocket class, this abstraction need to be done on the very top.
+// please do not move this lines down.
+if( window.MozWebSocket ) {
+	window.WebSocket = window.MozWebSocket;
+}
+
 //:package:*:jws
 //:class:*:jws
 //:ancestor:*:-
@@ -26,9 +35,9 @@
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b1 (10812)
+	//:const:*:VERSION:String:1.0b1 (10817)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b1 (10812)",
+	VERSION: "1.0b1 (10817)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -109,18 +118,25 @@ var jws = {
 		queueSizeLimit: 1024 * 1024 * 10 // 10 MByte
 	},
 	
-	//:const:*:WS_SUBPROT_JSON:String:jwebsocket.org/json
+	//:const:*:WS_SUBPROT_JSON:String:org.jwebsocket.json
 	//:d:en:jWebSocket sub protocol JSON
-	WS_SUBPROT_JSON: "jwebsocket.org/json",
-	//:const:*:WS_SUBPROT_XML:String:jwebsocket.org/xml
+	WS_SUBPROT_JSON: "org.jwebsocket.json",
+	//:const:*:WS_SUBPROT_XML:String:org.jwebsocket.xml
 	//:d:en:jWebSocket sub protocol XML
-	WS_SUBPROT_XML: "jwebsocket.org/xml",
-	//:const:*:WS_SUBPROT_CSV:String:jwebsocket.org/csv
+	WS_SUBPROT_XML: "org.jwebsocket.xml",
+	//:const:*:WS_SUBPROT_CSV:String:org.jwebsocket.csv
 	//:d:en:jWebSocket sub protocol CSV
-	WS_SUBPROT_CSV: "jwebsocket.org/csv",
-	//:const:*:WS_SUBPROT_CUSTOM:String:jwebsocket.org/custom
-	//:d:en:jWebSocket sub protocol Custom
-	WS_SUBPROT_CUSTOM: "jwebsocket.org/custom",
+	WS_SUBPROT_CSV: "org.jwebsocket.csv",
+	//:const:*:WS_SUBPROT_CUSTOM:String:org.jwebsocket.text
+	//:d:en:jWebSocket sub protocol text
+	//:@deprecated:en:Use [tt]WS_SUBPROT_TEXT()[/tt] instead.
+	WS_SUBPROT_CUSTOM: "org.jwebsocket.text",
+	//:const:*:WS_SUBPROT_TEXT:String:org.jwebsocket.text
+	//:d:en:jWebSocket sub protocol text
+	WS_SUBPROT_TEXT: "org.jwebsocket.text",
+	//:const:*:WS_SUBPROT_BINARY:String:org.jwebsocket.binary
+	//:d:en:jWebSocket sub protocol binary
+	WS_SUBPROT_BINARY: "org.jwebsocket.binary",
 
 	//:const:*:SCOPE_PRIVATE:String:private
 	//:d:en:private scope, only authenticated user can read and write his personal items
@@ -169,7 +185,13 @@ var jws = {
 		"Safari",
 		"Chrome"
 	],
-
+	
+	//:const:*:GUEST_USER_LOGINNAME:String:guest
+	//:d:en:Guest user login name is "guest" (if not changed on the server).
+	GUEST_USER_LOGINNAME: "guest",
+	//:const:*:GUEST_USER_PASSWORD:String:guest
+	//:d:en:Guest user password is "guest" (if not changed on the server).
+	GUEST_USER_PASSWORD: "guest",
 
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
@@ -3776,7 +3798,7 @@ jws.ChannelPlugIn = {
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get notified on error or success.
-	channelSubscribe: function( aChannel, aAccessKey ) {
+	channelSubscribe: function( aChannel, aAccessKey, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
@@ -3784,7 +3806,7 @@ jws.ChannelPlugIn = {
 				type: jws.ChannelPlugIn.SUBSCRIBE,
 				channel: aChannel,
 				accessKey: aAccessKey
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
@@ -3796,16 +3818,16 @@ jws.ChannelPlugIn = {
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get notified on error or success.
-	channelUnsubscribe: function( aChannel ) {
+	channelUnsubscribe: function( aChannel, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.UNSUBSCRIBE,
 				channel: aChannel
-			});
+			}, aOptions );
 		}
-		return lRes;
+		return lRes ;
 	},
 
 	//:m:*:channelAuth
@@ -3815,7 +3837,7 @@ jws.ChannelPlugIn = {
 	//:a:en::aSecretKey:String:Secret key configured for the channel.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get notified on error or success.
-	channelAuth: function( aChannel, aAccessKey, aSecretKey ) {
+	channelAuth: function( aChannel, aAccessKey, aSecretKey, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
@@ -3825,7 +3847,7 @@ jws.ChannelPlugIn = {
 				login: this.getUsername(),
 				accessKey: aAccessKey,
 				secretKey: aSecretKey
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
@@ -3839,7 +3861,7 @@ jws.ChannelPlugIn = {
 	//:a:en::aData:String:Data to be sent to the server side data channel.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
-	channelPublish: function( aChannel, aData ) {
+	channelPublish: function( aChannel, aData, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
@@ -3847,7 +3869,7 @@ jws.ChannelPlugIn = {
 				type: jws.ChannelPlugIn.PUBLISH,
 				channel: aChannel,
 				data: aData
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
@@ -3901,7 +3923,7 @@ jws.ChannelPlugIn = {
 				secretKey: lSecretKey,
 				owner: lOwner,
 				password: lPassword
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
@@ -3942,7 +3964,7 @@ jws.ChannelPlugIn = {
 				secretKey: lSecretKey,
 				owner: lOwner,
 				password: lPassword
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
@@ -3955,7 +3977,7 @@ jws.ChannelPlugIn = {
 	//:a:en::aAccessKey:String:Access Key for the channel (required for private channels, optional for public channels).
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
-	channelGetSubscribers: function( aChannel, aAccessKey ) {
+	channelGetSubscribers: function( aChannel, aAccessKey, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
@@ -3963,7 +3985,7 @@ jws.ChannelPlugIn = {
 				type: jws.ChannelPlugIn.GET_SUBSCRIBERS,
 				channel: aChannel,
 				accessKey: aAccessKey
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
@@ -3975,13 +3997,13 @@ jws.ChannelPlugIn = {
 	//:a:en:::none
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
-	channelGetSubscriptions: function() {
+	channelGetSubscriptions: function( aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.GET_SUBSCRIPTIONS
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
@@ -3992,7 +4014,7 @@ jws.ChannelPlugIn = {
 	//:a:en:::none
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
-	channelGetIds: function() {
+	channelGetIds: function( aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
@@ -5750,7 +5772,8 @@ jws.JMSPlugIn = {
 	LISTEN_MESSAGE : "listenJmsMessage",
 	UNLISTEN : "unlistenJms",
 
-	listenJms : function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
+	listenJms : function(aConnectionFactoryName, aDestinationName, 
+		aPubSubDomain, aOptions) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -5758,14 +5781,14 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.LISTEN,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain
-			});
+				pubSubDomain : aPubSubDomain
+			}, aOptions );
 		}
 		return lRes;
 	},
 
 	listenJmsMessage : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain) {
+		aPubSubDomain, aOptions) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -5773,13 +5796,14 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.LISTEN_MESSAGE,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain
-			});
+				pubSubDomain : aPubSubDomain
+			}, aOptions );
 		}
 		return lRes;
 	},
 
-	unlistenJms : function(aConnectionFactoryName, aDestinationName, aPubSubDomain) {
+	unlistenJms : function(aConnectionFactoryName, aDestinationName,
+		aPubSubDomain, aOptions) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -5787,15 +5811,15 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.UNLISTEN,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain
-			});
+				pubSubDomain : aPubSubDomain
+			}, aOptions );
 		}
 		return lRes;
 	},
 	
 
 	sendJmsText : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain, aText) {
+		aPubSubDomain, aText, aOptions ) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -5803,15 +5827,15 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.SEND_TEXT,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain,
+				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aText
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
 
 	sendJmsTextMessage : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain, aText, aJmsHeaderProperties) {
+		aPubSubDomain, aText, aJmsHeaderProperties, aOptions ) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -5819,16 +5843,16 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.SEND_TEXT_MESSAGE,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain,
+				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aText,
 				jmsHeaderProperties : aJmsHeaderProperties
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
 
 	sendJmsMap : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain, aMap) {
+		aPubSubDomain, aMap, aOptions ) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -5836,15 +5860,15 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.SEND_MAP,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain,
+				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aMap
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
 	
 	sendJmsMapMessage : function(aConnectionFactoryName, aDestinationName,
-			aPubSubDomain, aMap, aJmsHeaderProperties) {
+		aPubSubDomain, aMap, aJmsHeaderProperties, aOptions ) {
 		var lRes = this.checkConnected();
 		if (0 == lRes.code) {
 			this.sendToken({
@@ -5852,10 +5876,10 @@ jws.JMSPlugIn = {
 				type : jws.JMSPlugIn.SEND_MAP_MESSAGE,
 				connectionFactoryName : aConnectionFactoryName,
 				destinationName : aDestinationName,
-				isPubSubDomain : aPubSubDomain,
+				pubSubDomain : aPubSubDomain,
 				msgPayLoad : aMap,
 				jmsHeaderProperties : aJmsHeaderProperties
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
@@ -6763,14 +6787,14 @@ jws.StreamingPlugIn = {
 	//:a:en::aStream:String:The id of the server side data stream.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
-	registerStream: function( aStream ) {
+	registerStream: function( aStream, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
 				ns: jws.StreamingPlugIn.NS,
 				type: "register",
 				stream: aStream
-			});
+			}, aOptions );
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";
@@ -6784,14 +6808,14 @@ jws.StreamingPlugIn = {
 	//:a:en::aStream:String:The id of the server side data stream.
 	//:r:*:::void:none
 	// TODO: introduce OnResponse here too to get noticed on error or success.
-	unregisterStream: function( aStream ) {
+	unregisterStream: function( aStream, aOptions ) {
 		var lRes = this.createDefaultResult();
 		if( this.isConnected() ) {
 			this.sendToken({
 				ns: jws.StreamingPlugIn.NS,
 				type: "unregister",
 				stream: aStream
-			});
+			}, aOptions );
 		} else {
 			lRes.code = -1;
 			lRes.localeKey = "jws.jsc.res.notConnected";

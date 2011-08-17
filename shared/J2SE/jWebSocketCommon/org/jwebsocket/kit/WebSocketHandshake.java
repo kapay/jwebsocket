@@ -374,9 +374,8 @@ public final class WebSocketHandshake {
 				lVersion = JWebSocketCommonConstants.WS_LATEST_SUPPORTED_HIXIE_VERSION;
 				lDraft = JWebSocketCommonConstants.WS_LATEST_SUPPORTED_HIXIE_DRAFT;
 			} else {
-				// TODO: This should be report as error! Don't assume default if value is not given! Required!
-				lVersion = JWebSocketCommonConstants.WS_LATEST_SUPPORTED_HYBI_VERSION;
-				lDraft = JWebSocketCommonConstants.WS_LATEST_SUPPORTED_HYBI_DRAFT;
+				lVersion = JWebSocketCommonConstants.WS_EARLIEST_SUPPORTED_HIXIE_VERSION;
+				lDraft = JWebSocketCommonConstants.WS_EARLIEST_SUPPORTED_HIXIE_DRAFT;
 			}
 		}
 		if (lDraft != null) {
