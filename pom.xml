@@ -26,6 +26,9 @@
 		<module>jWebSocketPlugIns/jWebSocketFileSystemPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketChannelPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketLoggingPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketStreamingPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketTwitterPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketXMPPPlugIn</module>
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>

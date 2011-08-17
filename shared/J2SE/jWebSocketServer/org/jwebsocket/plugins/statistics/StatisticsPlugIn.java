@@ -28,8 +28,6 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
-import org.jwebsocket.plugins.streaming.BaseStream;
-import org.jwebsocket.plugins.streaming.StreamingPlugIn;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
@@ -48,8 +46,8 @@ public class StatisticsPlugIn extends TokenPlugIn {
 	 */
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_STATISTICS = JWebSocketServerConstants.NS_BASE + ".plugins.statistics";
-	private WebSocketPlugIn mStreamingPlugin = null;
-	private BaseStream mStream = null;
+	// private WebSocketPlugIn mStreamingPlugin = null;
+	// private BaseStream mStream = null;
 
 	public StatisticsPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
@@ -64,16 +62,20 @@ public class StatisticsPlugIn extends TokenPlugIn {
 	private void mGetSettings() {
 		// SMTP_HOST = getString(SMTP_HOST_KEY, null);
 		// TODO: remove this hardcoded stuff!
+		// TODO: switch to dynamic dependencies here!
+		/*
 		WebSocketPlugInChain lPluginChain = getPlugInChain();
 		mStreamingPlugin = lPluginChain.getPlugIn("jws.streaming");
 		if (mStreamingPlugin != null) {
 			mStream = (BaseStream) ((StreamingPlugIn) mStreamingPlugin).getStream("statisticStream");
 		}
+		 */
 	}
 
 	@Override
 	public void connectorStarted(WebSocketConnector aConnector) {
 		mGetSettings();
+		/*
 		if (null != mStream) {
 			Token lToken = TokenFactory.createToken(NS_STATISTICS, BaseToken.TT_EVENT);
 			lToken.setString("msg", "client connected");
@@ -82,10 +84,12 @@ public class StatisticsPlugIn extends TokenPlugIn {
 		} else {
 			mLog.warn("'statisticStream' not yet initialized or running!");
 		}
+		 */
 	}
 
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseRease) {
+		/*
 		if (null != mStream) {
 			Token lToken = TokenFactory.createToken(NS_STATISTICS, BaseToken.TT_EVENT);
 			lToken.setString("msg", "client disconnected");
@@ -94,6 +98,7 @@ public class StatisticsPlugIn extends TokenPlugIn {
 		} else {
 			mLog.warn("'statisticStream' not yet initialized or running!");
 		}
+		 */
 	}
 
 	@Override
