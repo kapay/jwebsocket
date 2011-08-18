@@ -19,6 +19,7 @@
 		<module>jWebSocketJavaSEClient</module>
 		<module>jWebSocketSamples</module>
 		<module>jWebSocketPlugIns/jWebSocketSenchaPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketJQueryPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketJDBCPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketRPCPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketJMSPlugIn</module>
