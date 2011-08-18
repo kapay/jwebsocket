@@ -95,7 +95,7 @@ jws.tests.Logging = {
 					return( lResponse.rowsAffected && lResponse.rowsAffected[0] == 1 && lResponse.key > 0 );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			runs( function() {
@@ -138,7 +138,7 @@ jws.tests.Logging = {
 					return( lDone == true );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			runs( function() {
@@ -147,7 +147,6 @@ jws.tests.Logging = {
 
 		});
 	},
-
 
 	runSpecs: function() {
 		this.testLog();

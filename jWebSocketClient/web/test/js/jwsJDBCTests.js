@@ -48,7 +48,7 @@ jws.tests.JDBC = {
 					return( lResponse.msg !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -84,7 +84,7 @@ jws.tests.JDBC = {
 					return( lResponse.msg !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -120,7 +120,7 @@ jws.tests.JDBC = {
 					return( lResponse.code !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -158,7 +158,7 @@ jws.tests.JDBC = {
 					return( lResponse.code !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -197,7 +197,7 @@ jws.tests.JDBC = {
 					return( lResponse.code !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -235,7 +235,7 @@ jws.tests.JDBC = {
 					return( lResponse.code !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -275,7 +275,7 @@ jws.tests.JDBC = {
 					return( lResponse.code !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -315,7 +315,7 @@ jws.tests.JDBC = {
 					return( lResponse.code !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -355,7 +355,7 @@ jws.tests.JDBC = {
 					return( lResponse.code !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -393,7 +393,7 @@ jws.tests.JDBC = {
 					return( lResponse.code !== undefined );
 				},
 				lSpec,
-				3000
+				1500
 			);
 
 			// check result if ok
@@ -408,6 +408,7 @@ jws.tests.JDBC = {
 	runSpecs: function() {
 		// run alls tests within an outer test suite
 		
+		// create a temporary table (test for DDL commands)
 		this.testCreateTable();
 		
 		// run native tests
@@ -422,6 +423,7 @@ jws.tests.JDBC = {
 		this.testSelect();
 		this.testDelete();
 		
+		// drop the temporary table (test for DDL commands)
 		this.testDropTable();
 	},
 

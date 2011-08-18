@@ -72,6 +72,7 @@ function runFullTestSuite() {
 		jws.Tests.testOpenSharedGuestConn();
 
 		// run test suites for the various plug-ins
+		
 		jws.tests.System.runSuite();
 		jws.tests.FileSystem.runSuite();
 		jws.tests.Logging.runSuite();
@@ -83,14 +84,17 @@ function runFullTestSuite() {
 		// run JMS tests
 		jws.tests.JMS.runSuite();
 		
+	   
 		// run Channel tests
 		jws.tests.Channels.runSuite();
+
 		
 		// run Streaming tests
 		jws.tests.Streaming.runSuite();
 		
 		// run JDBC tests
 		jws.tests.JDBC.runSuite();
+		
 	   
 		// close connections for admin and guest
 		jws.Tests.testCloseSharedAdminConn();

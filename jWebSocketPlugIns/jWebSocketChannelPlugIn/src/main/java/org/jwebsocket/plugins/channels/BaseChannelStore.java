@@ -65,7 +65,12 @@ public class BaseChannelStore
 	 */
 	@Override
 	public Channel getChannel(String aId) {
-		return json2Channel((String) super.get(aId));
+		Object lObj = super.get(aId);
+		String lJSONString = (String) lObj;
+		if (null == lJSONString) {
+			return null;
+		}
+		return json2Channel(lJSONString);
 	}
 
 	private Channel json2Channel(String lJSONStr) {
