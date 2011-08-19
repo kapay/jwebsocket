@@ -35,109 +35,115 @@ import org.jwebsocket.token.Token;
  */
 public class Fundamentals extends Activity implements WebSocketClientTokenListener {
 
-    private Button lBtnSend;
-    private Button lBtnBroadcast;
-    private Button lBtnClearLog;
-    private EditText lMessage;
-    private EditText lTarget;
-    private TextView lLog;
+	private Button lBtnSend;
+	private Button lBtnBroadcast;
+	private Button lBtnClearLog;
+	private EditText lMessage;
+	private EditText lTarget;
+	private TextView lLog;
 
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        setContentView(R.layout.fundamentals_hvga_p);
-        lBtnSend = (Button) findViewById(R.id.btnFundSend);
-        lBtnBroadcast = (Button) findViewById(R.id.btnFundBroadcast);
-        lBtnClearLog = (Button) findViewById(R.id.btnFundClearLog);
-        lMessage = (EditText) findViewById(R.id.txfFundMessage);
-        lTarget = (EditText) findViewById(R.id.txfFundTarget);
-        lLog = (EditText) findViewById(R.id.lblFundLog);
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
+		setContentView(R.layout.fundamentals_hvga_p);
+		lBtnSend = (Button) findViewById(R.id.btnFundSend);
+		lBtnBroadcast = (Button) findViewById(R.id.btnFundBroadcast);
+		lBtnClearLog = (Button) findViewById(R.id.btnFundClearLog);
+		lMessage = (EditText) findViewById(R.id.txfFundMessage);
+		lTarget = (EditText) findViewById(R.id.txfFundTarget);
+		lLog = (EditText) findViewById(R.id.lblFundLog);
 
-        lBtnSend.setOnClickListener(new OnClickListener() {
+		lBtnSend.setOnClickListener(new OnClickListener() {
 
-            public void onClick(View aView) {
-                try {
-                    JWC.sendText(lTarget.getText().toString(), lMessage.getText().toString());
-                } catch (WebSocketException ex) {
-                    // TODO: handle exception
-                }
-            }
-        });
+			public void onClick(View aView) {
+				try {
+					JWC.sendText(lTarget.getText().toString(), lMessage.getText().toString());
+				} catch (WebSocketException ex) {
+					// TODO: handle exception
+				}
+			}
+		});
 
-        lBtnBroadcast.setOnClickListener(new OnClickListener() {
+		lBtnBroadcast.setOnClickListener(new OnClickListener() {
 
-            public void onClick(View aView) {
-                try {
-                    JWC.broadcastText(lMessage.getText().toString());
-                } catch (WebSocketException ex) {
-                    // TODO: handle exception
-                }
+			public void onClick(View aView) {
+				try {
+					JWC.broadcastText(lMessage.getText().toString());
+				} catch (WebSocketException ex) {
+					// TODO: handle exception
+				}
 
-            }
-        });
+			}
+		});
 
-        lBtnClearLog.setOnClickListener(new OnClickListener() {
+		lBtnClearLog.setOnClickListener(new OnClickListener() {
 
-            public void onClick(View aView) {
-                lLog.setText("");
-            }
-        });
-    }
+			public void onClick(View aView) {
+				lLog.setText("");
+			}
+		});
+	}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        log("* opening... ");
-        try {
-            JWC.addListener(this);
-            JWC.open();
-        } catch (WebSocketException ex) {
-        }
-    }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		log("* opening... ");
+		try {
+			JWC.addListener(this);
+			JWC.open();
+		} catch (WebSocketException ex) {
+		}
+	}
 
-    @Override
-    protected void onPause() {
-        log("* closing... ");
-        try {
-            JWC.close();
-            JWC.removeListener(this);
-        } catch (WebSocketException ex) {
-        }
-        super.onPause();
-    }
+	@Override
+	protected void onPause() {
+		log("* closing... ");
+		try {
+			JWC.close();
+			JWC.removeListener(this);
+		} catch (WebSocketException ex) {
+		}
+		super.onPause();
+	}
 
-    private void log(CharSequence aString) {
-        try {
-            lLog.append(aString);
-        } catch (Exception ex) {
-            Toast.makeText(getApplicationContext(), ex.getClass().getSimpleName(),
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
+	private void log(CharSequence aString) {
+		try {
+			lLog.append(aString);
+		} catch (Exception ex) {
+			Toast.makeText(getApplicationContext(), ex.getClass().getSimpleName(),
+					Toast.LENGTH_SHORT).show();
+		}
+	}
 
-    public void processOpened(WebSocketClientEvent aEvent) {
-        log("opened\n");
+	public void processOpened(WebSocketClientEvent aEvent) {
+		log("opened\n");
 		ImageView lImgView = (ImageView) findViewById(R.id.fundImgStatus);
 		if (lImgView != null) {
 			// TODO: in fact it is only connected, not yet authenticated!
 			lImgView.setImageResource(R.drawable.authenticated);
 		}
-    }
+	}
 
-    public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
-        log("> " + aPacket.getUTF8() + "\n");
-    }
+	public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+		log("> " + aPacket.getUTF8() + "\n");
+	}
 
-    public void processToken(WebSocketClientEvent aEvent, Token aToken) {
-        // log("> " + aToken.toString() + "\n");
-    }
+	public void processToken(WebSocketClientEvent aEvent, Token aToken) {
+		// log("> " + aToken.toString() + "\n");
+	}
 
-    public void processClosed(WebSocketClientEvent aEvent) {
-        log("closed\n");
+	public void processClosed(WebSocketClientEvent aEvent) {
+		log("closed\n");
 		ImageView lImgView = (ImageView) findViewById(R.id.fundImgStatus);
 		if (lImgView != null) {
 			lImgView.setImageResource(R.drawable.disconnected);
 		}
-    }
+	}
+
+	public void processOpening(WebSocketClientEvent aEvent) {
+	}
+
+	public void processReconnecting(WebSocketClientEvent aEvent) {
+	}
 }

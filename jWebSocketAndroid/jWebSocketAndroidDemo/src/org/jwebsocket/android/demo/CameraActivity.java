@@ -177,4 +177,10 @@ public class CameraActivity extends Activity implements WebSocketClientTokenList
 			lImgStatus.setImageResource(R.drawable.disconnected);
 		}
 	}
+
+	public void processOpening(WebSocketClientEvent aEvent) {
+	}
+
+	public void processReconnecting(WebSocketClientEvent aEvent) {
+	}
 }

@@ -103,205 +103,204 @@ import android.widget.Toast;
  */
 public class JWSLocalAndroidService extends Service {
 
-  /** callback events */
-  private final static int MT_OPENED = 0;
-  private final static int MT_PACKET = 1;
-  private final static int MT_CLOSED = 2;
-  private final static int MT_TOKEN = 3;
+	/** callback events */
+	private final static int MT_OPENED = 0;
+	private final static int MT_PACKET = 1;
+	private final static int MT_CLOSED = 2;
+	private final static int MT_TOKEN = 3;
+	private final static String CONFIG_FILE = "jWebSocket";
+	private static String baseJWSUrl = "ws://jwebsocket.org:8787";
+	private static BaseTokenClient baseTokenClient;
+	protected NotificationManager jwsNotification;
+	/**
+	 * Each client activity or service can be a listener to receives event notification of jwebsocket events.
+	 */
+	private static List<WebSocketClientTokenListener> mListeners = new FastList<WebSocketClientTokenListener>();
+	private static String DEF_ENCODING = "UTF-8";
 
-  private final static String CONFIG_FILE = "jWebSocket";
-  private static String baseJWSUrl = "ws://jwebsocket.org:8787";
+	/**
+	 * Class for clients to access. Because we know this service always runs in
+	 * the same process as its clients, we don't need to deal with IPC.
+	 */
+	public class LocalBinder extends Binder {
 
-  private static BaseTokenClient baseTokenClient;
-  
-  protected NotificationManager jwsNotification;
-  
-  /**
-   * Each client activity or service can be a listener to receives event notification of jwebsocket events.
-   */
-  private static List<WebSocketClientTokenListener> mListeners = new FastList<WebSocketClientTokenListener>();
-  private static String DEF_ENCODING = "UTF-8";
+		JWSLocalAndroidService getService() {
+			return JWSLocalAndroidService.this;
+		}
+	}
+	// This is the object that receives interactions from clients.
+	private final IBinder mBinder = new LocalBinder();
 
-  /**
-   * Class for clients to access. Because we know this service always runs in
-   * the same process as its clients, we don't need to deal with IPC.
-   */
-  public class LocalBinder extends Binder {
-    JWSLocalAndroidService getService() {
-      return JWSLocalAndroidService.this;
-    }
-  }
+	@Override
+	public IBinder onBind(Intent intent) {
+		return mBinder;
+	}
 
-  // This is the object that receives interactions from clients.
-  private final IBinder mBinder = new LocalBinder();
+	@Override
+	public void onCreate() {
+		jwsNotification = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		// Display a notification about us starting. 
+		showStartingNotification();
 
-  @Override
-  public IBinder onBind(Intent intent) {
-    return mBinder;
-  }
+		baseTokenClient = new BaseTokenClient();
+		baseTokenClient.addListener(new Listener());
+	}
 
-  @Override
-  public void onCreate() {
-    jwsNotification = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-    // Display a notification about us starting. 
-    showStartingNotification();
+	@Override
+	public void onDestroy() {
+	}
 
-    baseTokenClient = new BaseTokenClient();
-    baseTokenClient.addListener(new Listener());
-  }
+	public void loadSettings(Activity aActivity) {
+		Properties lProps = new Properties();
+		try {
+			lProps.load(aActivity.openFileInput(CONFIG_FILE));
+		} catch (Exception ex) {
+			Toast.makeText(aActivity.getApplicationContext(), ex.getClass().getSimpleName() + ":" + ex.getMessage(), Toast.LENGTH_SHORT).show();
+		}
+		baseJWSUrl = (String) lProps.getProperty("url", "http://jwebsocket.org:8787/");
+	}
 
-  @Override
-  public void onDestroy() {
-  }
+	public void saveSettings(Activity aActivity) {
+		Properties lProps = new Properties();
+		try {
+			lProps.put("url", baseJWSUrl);
+			lProps.save(aActivity.openFileOutput(CONFIG_FILE, Context.MODE_PRIVATE), "jWebSocketClient Configuration");
+		} catch (Exception ex) {
+			Toast.makeText(aActivity.getApplicationContext(), ex.getClass().getSimpleName() + ":" + ex.getMessage(), Toast.LENGTH_SHORT).show();
+		}
+	}
 
-  public void loadSettings(Activity aActivity) {
-    Properties lProps = new Properties();
-    try {
-      lProps.load(aActivity.openFileInput(CONFIG_FILE));
-    } catch (Exception ex) {
-      Toast.makeText(aActivity.getApplicationContext(), ex.getClass().getSimpleName() + ":" + ex.getMessage(), Toast.LENGTH_SHORT).show();
-    }
-    baseJWSUrl = (String) lProps.getProperty("url", "http://jwebsocket.org:8787/");
-  }
+	public void open() throws WebSocketException {
+		baseTokenClient.open(baseJWSUrl);
+	}
 
-  public void saveSettings(Activity aActivity) {
-    Properties lProps = new Properties();
-    try {
-      lProps.put("url", baseJWSUrl);
-      lProps.save(aActivity.openFileOutput(CONFIG_FILE, Context.MODE_PRIVATE), "jWebSocketClient Configuration");
-    } catch (Exception ex) {
-      Toast.makeText(aActivity.getApplicationContext(), ex.getClass().getSimpleName() + ":" + ex.getMessage(), Toast.LENGTH_SHORT).show();
-    }
-  }
+	public void close() throws WebSocketException {
+		baseTokenClient.close();
+	}
 
-  public void open() throws WebSocketException {
-    baseTokenClient.open(baseJWSUrl);
-  }
+	public void send(String aString) throws WebSocketException {
+		baseTokenClient.send(baseJWSUrl, DEF_ENCODING);
+	}
 
-  public void close() throws WebSocketException {
-    baseTokenClient.close();
-  }
+	public void sendToken(Token aToken) throws WebSocketException {
+		baseTokenClient.sendToken(aToken);
+	}
 
-  public void send(String aString) throws WebSocketException {
-    baseTokenClient.send(baseJWSUrl, DEF_ENCODING);
-  }
+	public void sendText(String aTarget, String aData) throws WebSocketException {
+		baseTokenClient.sendText(aTarget, aData);
 
-  public void sendToken(Token aToken) throws WebSocketException {
-    baseTokenClient.sendToken(aToken);
-  }
+	}
 
-  public void sendText(String aTarget, String aData) throws WebSocketException {
-    baseTokenClient.sendText(aTarget, aData);
+	public void broadcastText(String aData) throws WebSocketException {
+		baseTokenClient.broadcastText(aData);
+	}
 
-  }
+	public void saveFile(byte[] aData, String aFilename, String aScope, Boolean aNotify) throws WebSocketException {
+		baseTokenClient.saveFile(aData, aFilename, aScope, aNotify);
+	}
 
-  public void broadcastText(String aData) throws WebSocketException {
-    baseTokenClient.broadcastText(aData);
-  }
+	public void addListener(WebSocketClientTokenListener aListener) {
+		mListeners.add(aListener);
+	}
 
-  public void saveFile(byte[] aData, String aFilename, String aScope, Boolean aNotify) throws WebSocketException {
-    baseTokenClient.saveFile(aData, aFilename, aScope, aNotify);
-  }
+	public void removeListener(WebSocketClientTokenListener aListener) {
+		mListeners.remove(aListener);
+	}
+	private Handler messageHandler = new Handler() {
 
-  public void addListener(WebSocketClientTokenListener aListener) {
-    mListeners.add(aListener);
-  }
+		@Override
+		public void handleMessage(Message message) {
 
-  public void removeListener(WebSocketClientTokenListener aListener) {
-    mListeners.remove(aListener);
-  }
+			switch (message.what) {
+				case MT_OPENED:
+					notifyOpened(null);
+					break;
+				case MT_PACKET:
+					notifyPacket(null, (RawPacket) message.obj);
+					break;
+				case MT_TOKEN:
+					notifyToken(null, (Token) message.obj);
+					break;
+				case MT_CLOSED:
+					notifyClosed(null);
+					break;
+			}
+		}
+	};
 
-  private Handler messageHandler = new Handler() {
+	public void notifyOpened(WebSocketClientEvent aEvent) {
+		for (WebSocketClientTokenListener lListener : mListeners) {
+			lListener.processOpened(aEvent);
+		}
+	}
 
-    @Override
-    public void handleMessage(Message message) {
+	public void notifyPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+		for (WebSocketClientTokenListener lListener : mListeners) {
+			lListener.processPacket(aEvent, aPacket);
+		}
+	}
 
-      switch (message.what) {
-      case MT_OPENED:
-        notifyOpened(null);
-        break;
-      case MT_PACKET:
-        notifyPacket(null, (RawPacket) message.obj);
-        break;
-      case MT_TOKEN:
-        notifyToken(null, (Token) message.obj);
-        break;
-      case MT_CLOSED:
-        notifyClosed(null);
-        break;
-      }
-    }
-  };
+	public void notifyToken(WebSocketClientEvent aEvent, Token aToken) {
+		for (WebSocketClientTokenListener lListener : mListeners) {
+			lListener.processToken(aEvent, aToken);
+		}
+	}
 
-  public void notifyOpened(WebSocketClientEvent aEvent) {
-    for (WebSocketClientTokenListener lListener : mListeners) {
-      lListener.processOpened(aEvent);
-    }
-  }
+	public void notifyClosed(WebSocketClientEvent aEvent) {
+		for (WebSocketClientTokenListener lListener : mListeners) {
+			lListener.processClosed(aEvent);
+		}
+	}
 
-  public void notifyPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
-    for (WebSocketClientTokenListener lListener : mListeners) {
-      lListener.processPacket(aEvent, aPacket);
-    }
-  }
+	/**
+	 * @return the URL
+	 */
+	public String getURL() {
+		return baseJWSUrl;
+	}
 
-  public void notifyToken(WebSocketClientEvent aEvent, Token aToken) {
-    for (WebSocketClientTokenListener lListener : mListeners) {
-      lListener.processToken(aEvent, aToken);
-    }
-  }
+	/**
+	 * private listener for receiving notification from the server 
+	 *
+	 */
+	class Listener implements WebSocketClientTokenListener {
 
-  public void notifyClosed(WebSocketClientEvent aEvent) {
-    for (WebSocketClientTokenListener lListener : mListeners) {
-      lListener.processClosed(aEvent);
-    }
-  }
+		public void processOpened(WebSocketClientEvent aEvent) {
+			Message lMsg = new Message();
+			lMsg.what = MT_OPENED;
+			messageHandler.sendMessage(lMsg);
+		}
 
-  /**
-   * @return the URL
-   */
-  public String getURL() {
-    return baseJWSUrl;
-  }
+		public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
+			Message lMsg = new Message();
+			lMsg.what = MT_PACKET;
+			lMsg.obj = aPacket;
+			messageHandler.sendMessage(lMsg);
+		}
 
-  /**
-   * private listener for receiving notification from the server 
-   *
-   */
-  class Listener implements WebSocketClientTokenListener {
+		public void processToken(WebSocketClientEvent aEvent, Token aToken) {
+			Message lMsg = new Message();
+			lMsg.what = MT_TOKEN;
+			lMsg.obj = aToken;
+			messageHandler.sendMessage(lMsg);
+		}
 
-    public void processOpened(WebSocketClientEvent aEvent) {
-      Message lMsg = new Message();
-      lMsg.what = MT_OPENED;
-      messageHandler.sendMessage(lMsg);
-    }
+		public void processClosed(WebSocketClientEvent aEvent) {
+			Message lMsg = new Message();
+			lMsg.what = MT_CLOSED;
+			messageHandler.sendMessage(lMsg);
+		}
 
-    public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
-      Message lMsg = new Message();
-      lMsg.what = MT_PACKET;
-      lMsg.obj = aPacket;
-      messageHandler.sendMessage(lMsg);
-    }
+		public void processOpening(WebSocketClientEvent aEvent) {
+		}
 
-    public void processToken(WebSocketClientEvent aEvent, Token aToken) {
-      Message lMsg = new Message();
-      lMsg.what = MT_TOKEN;
-      lMsg.obj = aToken;
-      messageHandler.sendMessage(lMsg);
-    }
+		public void processReconnecting(WebSocketClientEvent aEvent) {
+		}
+	}
 
-    public void processClosed(WebSocketClientEvent aEvent) {
-      Message lMsg = new Message();
-      lMsg.what = MT_CLOSED;
-      messageHandler.sendMessage(lMsg);
-    }
-  }
-  /**
-   * client should override this method to show notification
-   */
-  public void showStartingNotification() {
-    
-  }
-
-
+	/**
+	 * client should override this method to show notification
+	 */
+	public void showStartingNotification() {
+	}
 }

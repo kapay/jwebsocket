@@ -212,5 +212,11 @@ public class JWC {
 			lMsg.what = MT_CLOSED;
 			messageHandler.sendMessage(lMsg);
 		}
+
+		public void processOpening(WebSocketClientEvent aEvent) {
+		}
+
+		public void processReconnecting(WebSocketClientEvent aEvent) {
+		}
 	}
 }

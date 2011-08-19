@@ -178,6 +178,12 @@ public class TwitterStreamActivity extends ListActivity implements
 		int test = 1;
 	}
 
+	public void processOpening(WebSocketClientEvent aEvent) {
+	}
+
+	public void processReconnecting(WebSocketClientEvent aEvent) {
+	}
+
 	public class Tweet {
 
 		private String mTweet;

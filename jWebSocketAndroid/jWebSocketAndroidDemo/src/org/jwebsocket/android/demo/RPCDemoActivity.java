@@ -45,9 +45,9 @@ public class RPCDemoActivity extends Activity implements
 		WebSocketClientTokenListener {
 
 	private enum Target {
+
 		ANDROID, BROWSER
 	};
-
 	private EditText classTxt;
 	private EditText methodTxt;
 	private EditText parameterTxt;
@@ -79,6 +79,7 @@ public class RPCDemoActivity extends Activity implements
 
 		final CheckBox checkbox = (CheckBox) findViewById(R.id.rrpcCheckBox);
 		checkbox.setOnClickListener(new OnClickListener() {
+
 			public void onClick(View v) {
 				if (((CheckBox) v).isChecked()) {
 					targetTxt.setVisibility(EditText.VISIBLE);
@@ -100,6 +101,7 @@ public class RPCDemoActivity extends Activity implements
 		});
 
 		invokeBtn.setOnClickListener(new OnClickListener() {
+
 			public void onClick(View arg0) {
 				sendMethodInvokeToken();
 			}
@@ -111,14 +113,13 @@ public class RPCDemoActivity extends Activity implements
 //		radio_android.setOnClickListener(radio_listener);
 
 	}
-	
-	private void predefinedValues () {
+
+	private void predefinedValues() {
 		if (useRRPC) {
-			if (selectedTarget.equals(Target.ANDROID)) {				
+			if (selectedTarget.equals(Target.ANDROID)) {
 				classTxt.setText("org.jwebsocket.android.demo.RPCDemoActivity");
 				methodTxt.setText("rrpcTest1");
-			}
-			else if (selectedTarget.equals(Target.BROWSER)) {
+			} else if (selectedTarget.equals(Target.BROWSER)) {
 				classTxt.setText("demo");
 				methodTxt.setText("rrpcTest1");
 			}
@@ -141,7 +142,6 @@ public class RPCDemoActivity extends Activity implements
 //			predefinedValues();
 //		}
 //	};
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu aMenu) {
 		MenuInflater lMenInfl = getMenuInflater();
@@ -153,11 +153,11 @@ public class RPCDemoActivity extends Activity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
-		case R.id.rpcMenuExit:
-			this.finish();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
+			case R.id.rpcMenuExit:
+				this.finish();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 	}
 
@@ -175,7 +175,7 @@ public class RPCDemoActivity extends Activity implements
 			//Sending "" or "null" will send null.
 			if ("".equals(lParameter) || "null".equals(lParameter)) {
 				new Rpc(lClassName, lMethodName).call();
-			}else {
+			} else {
 				new Rpc(lClassName, lMethodName).send(lParameter).call();
 			}
 		}
@@ -234,6 +234,11 @@ public class RPCDemoActivity extends Activity implements
 	public void processClosed(WebSocketClientEvent aEvent) {
 	}
 
+	public void processOpening(WebSocketClientEvent aEvent) {
+	}
+
+	public void processReconnecting(WebSocketClientEvent aEvent) {
+	}
 	private static Handler handler = new Handler() {
 
 		@Override
@@ -241,12 +246,12 @@ public class RPCDemoActivity extends Activity implements
 			Toast.makeText(
 					mContext,
 					msg.getData().get("method") + " has been called by the server (args "
-							+ msg.getData().get("args"), Toast.LENGTH_SHORT).show();
+					+ msg.getData().get("args"), Toast.LENGTH_SHORT).show();
 		}
 	};
 	private static Context mContext;
 
-	@RPCCallable(C2CAuthorized=true)
+	@RPCCallable(C2CAuthorized = true)
 	public static void rrpcTest1() {
 		Bundle b = new Bundle();
 		b.putString("method", "rrpcTest1");
@@ -256,7 +261,7 @@ public class RPCDemoActivity extends Activity implements
 		handler.sendMessage(msg);
 	}
 
-	@RPCCallable(C2CAuthorized=true)
+	@RPCCallable(C2CAuthorized = true)
 	public static void rrpcTest1(String arg1) {
 		Bundle b = new Bundle();
 		b.putString("method", "rrpcTest1");
@@ -266,7 +271,7 @@ public class RPCDemoActivity extends Activity implements
 		handler.sendMessage(msg);
 	}
 
-	@RPCCallable(C2CAuthorized=true)
+	@RPCCallable(C2CAuthorized = true)
 	public static void rrpcTest1(int arg1) {
 		Bundle b = new Bundle();
 		b.putString("method", "rrpcTest1");
@@ -276,7 +281,7 @@ public class RPCDemoActivity extends Activity implements
 		handler.sendMessage(msg);
 	}
 
-	@RPCCallable(C2CAuthorized=true)
+	@RPCCallable(C2CAuthorized = true)
 	public static void rrpcTest2(List<String> aList, List<List<Integer>> aList2) {
 		Bundle b = new Bundle();
 		b.putString("method", "rrpcTest2");
@@ -285,8 +290,8 @@ public class RPCDemoActivity extends Activity implements
 		msg.setData(b);
 		handler.sendMessage(msg);
 	}
-	
-	@RPCCallable(C2CAuthorized=true)
+
+	@RPCCallable(C2CAuthorized = true)
 	public static void receiveMessage(String aMessage) {
 		Bundle b = new Bundle();
 		b.putString("method", "receiveMessage");
