@@ -15,10 +15,6 @@
 package org.jwebsocket.android.demo;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.hardware.Camera;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
@@ -29,7 +25,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientTokenListener;

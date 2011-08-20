@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.commons.codec.binary.Base64;
 import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.util.Tools;
 
 /**
  * Utility class for all the handshaking related request/response.
@@ -85,7 +85,8 @@ public final class WebSocketHandshake {
 			md = MessageDigest.getInstance("SHA-1");
 			byte[] lBufSource = aKey.getBytes("UTF-8");
 			byte[] lBufTarget = md.digest(lBufSource);
-			lAccept = Base64.encodeBase64String(lBufTarget);
+			lAccept = Tools.base64Encode(lBufTarget);
+			// lAccept = Base64.encodeBase64String(lBufTarget);
 		} catch (Exception lEx) {
 			System.out.println("calcHybiSecKeyNum: " + lEx.getMessage());
 		}
@@ -664,7 +665,8 @@ public final class WebSocketHandshake {
 		lBA[15] = (byte) (lMost & 0xFF);
 
 		// generate the key
-		mHybiKey = Base64.encodeBase64String(lBA);
+		mHybiKey = Tools.base64Encode(lBA);
+		// mHybiKey = Base64.encodeBase64String(lBA);
 
 		// generate the expected accept value
 		mHybiKeyAccept = calcHybiSecKeyAccept(mHybiKey);

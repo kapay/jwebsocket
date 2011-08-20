@@ -17,6 +17,7 @@ package org.jwebsocket.android.demo;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
+// import android.os.Debug;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -33,6 +34,10 @@ public class MainActivity extends ListActivity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+
+		
+		// start tracing to "[/sdcard/]jWebSocketAndroidDemo.trace"
+		// Debug.startMethodTracing("/sdcard/jws");
 
 		JWC.init();
 		JWC.loadSettings(this);
@@ -74,5 +79,12 @@ public class MainActivity extends ListActivity {
 				}
 			}
 		});
+	}
+
+	@Override
+	protected void onDestroy() {
+		// stop tracing
+		// Debug.stopMethodTracing();
+		super.onDestroy();
 	}
 }

@@ -494,4 +494,47 @@ public class Tools {
 
 		return lRes;
 	}
+	private static char[] BASE64_CHAR_MAP = new char[64];
+
+	static {
+		int lIdx = 0;
+		for (char lC = 'A'; lC <= 'Z'; lC++) {
+			BASE64_CHAR_MAP[lIdx++] = lC;
+		}
+		for (char lC = 'a'; lC <= 'z'; lC++) {
+			BASE64_CHAR_MAP[lIdx++] = lC;
+		}
+		for (char lC = '0'; lC <= '9'; lC++) {
+			BASE64_CHAR_MAP[lIdx++] = lC;
+		}
+		BASE64_CHAR_MAP[lIdx++] = '+';
+		BASE64_CHAR_MAP[lIdx++] = '/';
+	}
+
+	public static String base64Encode(byte[] aBA) {
+		int lLen = aBA.length;
+		int oDataLen = (lLen * 4 + 2) / 3;// output length without padding
+		int oLen = ((lLen + 2) / 3) * 4;// output length including padding
+		char[] out = new char[oLen];
+		int ip = 0;
+		int op = 0;
+		int i0, i1, i2;
+		int o0, o1, o2, o3;
+		while (ip < lLen) {
+			i0 = aBA[ip++] & 0xff;
+			i1 = ip < lLen ? aBA[ip++] & 0xff : 0;
+			i2 = ip < lLen ? aBA[ip++] & 0xff : 0;
+			o0 = i0 >>> 2;
+			o1 = ((i0 & 3) << 4) | (i1 >>> 4);
+			o2 = ((i1 & 0xf) << 2) | (i2 >>> 6);
+			o3 = i2 & 0x3F;
+			out[op++] = BASE64_CHAR_MAP[o0];
+			out[op++] = BASE64_CHAR_MAP[o1];
+			out[op] = op < oDataLen ? BASE64_CHAR_MAP[o2] : '=';
+			op++;
+			out[op] = op < oDataLen ? BASE64_CHAR_MAP[o3] : '=';
+			op++;
+		}
+		return new String(out);
+	}
 }
