@@ -28,6 +28,7 @@
 		<module>jWebSocketPlugIns/jWebSocketReportingPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketFileSystemPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketChannelPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketEventsPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketLoggingPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketStreamingPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketTwitterPlugIn</module>

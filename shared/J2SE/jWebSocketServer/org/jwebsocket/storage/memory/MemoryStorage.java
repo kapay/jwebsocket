@@ -24,6 +24,8 @@ import org.jwebsocket.api.IBasicStorage;
 
 /**
  *
+ * @param <K> 
+ * @param <V> 
  * @author rbetancourt
  */
 public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
@@ -40,10 +42,18 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 		this.name = name;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public static FastMap<String, FastMap> getContainer() {
 		return container;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	@Override
 	public String getName() {
 		return name;
@@ -53,6 +63,7 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 	 * {@inheritDoc
 	 * 
 	 * @param newName 
+	 * @throws Exception 
 	 */
 	@Override
 	public synchronized void setName(String newName) throws Exception {
@@ -70,6 +81,9 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 
 	/**
 	 * {@inheritDoc
+	 * 
+	 * @param keys
+	 * @return  
 	 */
 	@Override
 	public Map<K, V> getAll(Collection<K> keys) {
@@ -83,6 +97,8 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 
 	/**
 	 * {@inheritDoc
+	 * 
+	 * @throws Exception 
 	 */
 	@Override
 	public void initialize() throws Exception {
@@ -100,11 +116,12 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 	 */
 	@Override
 	public void shutdown() throws Exception {
-		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	/**
 	 * {@inheritDoc
+	 * 
+	 * @return 
 	 */
 	@Override
 	public int size() {
@@ -113,6 +130,8 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 
 	/**
 	 * {@inheritDoc
+	 * 
+	 * @return 
 	 */
 	@Override
 	public boolean isEmpty() {
@@ -124,6 +143,9 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 
 	/**
 	 * {@inheritDoc
+	 * 
+	 * @param key 
+	 * @return 
 	 */
 	@Override
 	public boolean containsKey(Object key) {
@@ -137,6 +159,7 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 	 * {@inheritDoc
 	 * 
 	 * @param value 
+	 * @return 
 	 */
 	@Override
 	public boolean containsValue(Object value) {
@@ -150,6 +173,7 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 	 * {@inheritDoc
 	 * 
 	 * @param key 
+	 * @return 
 	 */
 	@Override
 	public V get(Object key) {
@@ -158,6 +182,10 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 
 	/**
 	 * {@inheritDoc
+	 * 
+	 * @param key 
+	 * @param value 
+	 * @return 
 	 */
 	@Override
 	public V put(K key, V value) {
@@ -167,8 +195,8 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 	/**
 	 * {@inheritDoc
 	 * 
-	 * @param key
-	 * @return  
+	 * @param key 
+	 * @return 
 	 */
 	@Override
 	public V remove(Object key) {
@@ -177,6 +205,8 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 
 	/**
 	 * {@inheritDoc
+	 * 
+	 * @param m 
 	 */
 	@Override
 	public void putAll(Map<? extends K, ? extends V> m) {
@@ -193,6 +223,8 @@ public class MemoryStorage<K, V> implements IBasicStorage<K, V> {
 
 	/**
 	 * {@inheritDoc
+	 * 
+	 * @return 
 	 */
 	@Override
 	public Set<K> keySet() {

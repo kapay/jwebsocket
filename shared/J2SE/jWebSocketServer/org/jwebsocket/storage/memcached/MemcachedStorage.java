@@ -28,6 +28,8 @@ import java.util.Arrays;
 
 /**
  * 
+ * @param <K> 
+ * @param <V> 
  * @author kyberneees
  */
 public class MemcachedStorage<K extends Object, V extends Object> implements IBasicStorage<K, V> {
@@ -38,11 +40,20 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 	private final static String KEY_SEPARATOR = "::-::";
 	private final static int NOT_EXPIRE = 0;
 
+	/**
+	 * 
+	 * @param name
+	 * @param memcachedClient
+	 */
 	public MemcachedStorage(String name, MemcachedClient memcachedClient) {
 		this.name = name;
 		this.memcachedClient = memcachedClient;
 	}
 
+	/**
+	 * 
+	 * @throws Exception
+	 */
 	public void initialize() throws Exception {
 		//Key index support
 		if (null == get(name + KEYS_LOCATION)) {
@@ -50,6 +61,9 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		}
 	}
 
+	/**
+	 * 
+	 */
 	@SuppressWarnings("unchecked")
 	public void clear() {
 		for (Object key : keySet()) {
@@ -59,6 +73,10 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		memcachedClient.set(name + KEYS_LOCATION, NOT_EXPIRE, "");
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public Set<K> keySet() {
 		String index = (String) get(name + KEYS_LOCATION);
@@ -73,20 +91,39 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Collection<V> values() {
 		return getAll(keySet()).values();
 	}
 
+	/**
+	 * 
+	 * @param key
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public boolean containsKey(Object key) {
 		return keySet().contains((K) key);
 	}
 
+	/**
+	 * 
+	 * @param value
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public boolean containsValue(Object value) {
 		return values().contains((V) value);
 	}
 
+	/**
+	 * 
+	 * @param keys
+	 * @return
+	 */
 	public Map<K, V> getAll(Collection<K> keys) {
 		FastMap<K, V> m = new FastMap<K, V>();
 		for (K key : keys) {
@@ -96,6 +133,11 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		return m;
 	}
 
+	/**
+	 * 
+	 * @param key
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public V get(Object key) {
 		V myObj = null;
@@ -104,6 +146,11 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		return myObj;
 	}
 
+	/**
+	 * 
+	 * @param key
+	 * @return
+	 */
 	public V remove(Object key) {
 		V myObj = get(key);
 		memcachedClient.delete(key.toString());
@@ -116,6 +163,12 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		return myObj;
 	}
 
+	/**
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public V put(K key, V value) {
 		memcachedClient.set(key.toString(), NOT_EXPIRE, value);
 
@@ -129,28 +182,53 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		return value;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public boolean isEmpty() {
 		return keySet().isEmpty();
 	}
 
+	/**
+	 * 
+	 * @param m
+	 */
 	public void putAll(Map<? extends K, ? extends V> m) {
 		for (K key : m.keySet()) {
 			put(key, m.get(key));
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public MemcachedClient getMemcachedClient() {
 		return memcachedClient;
 	}
 
+	/**
+	 * 
+	 * @param memcachedClient
+	 */
 	public void setMemcachedClient(MemcachedClient memcachedClient) {
 		this.memcachedClient = memcachedClient;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * 
+	 * @param name
+	 * @throws Exception
+	 */
 	public void setName(String name) throws Exception {
 		if (name.length() == 0) {
 			throw new InvalidParameterException();
@@ -165,14 +243,25 @@ public class MemcachedStorage<K extends Object, V extends Object> implements IBa
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public int size() {
 		return keySet().size();
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Set<Entry<K, V>> entrySet() {
 		return getAll(keySet()).entrySet();
 	}
 
+	/**
+	 * 
+	 */
 	public void shutdown() {
 	}
 }
