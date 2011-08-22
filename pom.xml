@@ -35,6 +35,9 @@
 		<module>jWebSocketPlugIns/jWebSocketXMPPPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketStatisticsPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketSharedObjectsPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketBenchmarkPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketProxyPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketAdminPlugIn</module>
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>
