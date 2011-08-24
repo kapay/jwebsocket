@@ -17,8 +17,12 @@
 jws.tests.Channels = {
 
 	NS: "jws.tests.channels", 
+	TEST_MESSAGE: "this is a test message",
+	
+	ST_INIT: 0,
+	ST_AUTH: 1,
 
-	// this spec tests the listen method of the Channels plug-in
+	// this spec tests the subscribe method of the Channels plug-in
 	testSubscribe: function( aChannelName, aAccessKey ) {
 		var lSpec = this.NS + ": subscribe (" + aChannelName + ")";
 		
@@ -33,7 +37,7 @@ jws.tests.Channels = {
 						lResponse = aToken;
 					}
 				}
-			);
+				);
 
 			waitsFor(
 				function() {
@@ -41,7 +45,7 @@ jws.tests.Channels = {
 				},
 				lSpec,
 				1000
-			);
+				);
 
 			runs( function() {
 				expect( lResponse.code ).toEqual( 0 );
@@ -50,7 +54,7 @@ jws.tests.Channels = {
 		});
 	},
 
-	// this spec tests the listen method of the Channels plug-in
+	// this spec tests the unsubscribe method of the Channels plug-in
 	testUnsubscribe: function( aChannelName ) {
 		var lSpec = this.NS + ": Unsubscribe (publicA)";
 		
@@ -64,7 +68,7 @@ jws.tests.Channels = {
 						lResponse = aToken;
 					}
 				}
-			);
+				);
 
 			waitsFor(
 				function() {
@@ -72,7 +76,7 @@ jws.tests.Channels = {
 				},
 				lSpec,
 				1000
-			);
+				);
 
 			runs( function() {
 				expect( lResponse.code ).toEqual( 0 );
@@ -92,7 +96,8 @@ jws.tests.Channels = {
 			jws.Tests.getAdminConn().channelCreate( 
 				aChannelId, 
 				aChannelName,
-				{	isPrivate: aIsPrivate,
+				{
+					isPrivate: aIsPrivate,
 					isSystem: aIsSystem,
 					accessKey: aAccessKey,
 					secretKey: aSecretKey,
@@ -101,7 +106,7 @@ jws.tests.Channels = {
 						lResponse = aToken;
 					}
 				}
-			);
+				);
 
 			waitsFor(
 				function() {
@@ -109,7 +114,7 @@ jws.tests.Channels = {
 				},
 				lSpec,
 				1000
-			);
+				);
 
 			runs( function() {
 				expect( lResponse.code ).toEqual( aExpectedReturnCode );
@@ -118,6 +123,175 @@ jws.tests.Channels = {
 		});
 	},
 
+	// this spec tests the create method for a new channel
+	testChannelAuth: function( aChannelId, aAccessKey, aSecretKey, 
+		aComment, aExpectedReturnCode ) {
+		var lSpec = this.NS + ": channelAuth (id: " + aChannelId + ", " + aComment + ")";
+		
+		it( lSpec, function () {
+
+			var lResponse = {};
+			jws.Tests.getAdminConn().channelAuth( 
+				aChannelId, 
+				aAccessKey,
+				aSecretKey,
+				{
+					OnResponse: function( aToken ) {
+						lResponse = aToken;
+					}
+				}
+				);
+
+			waitsFor(
+				function() {
+					return( lResponse.code !== undefined );
+				},
+				lSpec,
+				1000
+				);
+
+			runs( function() {
+				expect( lResponse.code ).toEqual( aExpectedReturnCode );
+			});
+
+		});
+	},
+	
+	// this spec tests the create method for a new channel
+	testChannelPublish: function( aChannelId, aData,
+		aComment, aExpectedReturnCode ) {
+		var lSpec = this.NS + ": channelAuth (id: " + aChannelId + ", data: " + aData + ", " + aComment + ")";
+		
+		it( lSpec, function () {
+
+			var lResponse = {};
+			jws.Tests.getAdminConn().channelPublish( 
+				aChannelId, 
+				aData,
+				{
+					OnResponse: function( aToken ) {
+						lResponse = aToken;
+					}
+				}
+				);
+
+			waitsFor(
+				function() {
+					return( lResponse.code !== undefined );
+				},
+				lSpec,
+				1000
+				);
+
+			runs( function() {
+				expect( lResponse.code ).toEqual( aExpectedReturnCode );
+			});
+
+		});
+	},
+	
+	// this spec tests the create method for a new channel
+	testChannelComplexTest: function( aComment) {
+		var lSpec = this.NS + ": complex test (" + aComment + ")";
+		
+		it( lSpec, function () {
+
+			var lPubCnt = 3;
+			var lSubCnt = 6;
+
+			var lPubs = [];
+			var lSubs = [];
+			
+			var lPub, lSub;
+			
+			var lLoggedIn = 0, lChannelId = 0;
+
+			// create a number of publishers
+			for( var lPubIdx = 0; lPubIdx < lPubCnt; lPubIdx++ ) {
+				lPub = new jws.jWebSocketJSONClient();
+				lPubs[ lPubIdx ] = {
+					client: lPub, 
+					status: jws.tests.Channels.INIT
+				};
+				lPub.logon( jws.getDefaultServerURL(), jws.Tests.ADMIN_USER, jws.Tests.ADMIN_PWD, {
+					OnToken: function ( aToken ) {
+						if( "org.jwebsocket.plugins.system" == aToken.ns
+							&& "login" == aToken.reqType) {
+							// jws.tests.Channels.AUTH;
+							// lResponse = aToken;
+							lLoggedIn++;
+							lChannelId++;
+							debugger;
+							this.channelCreate( 
+								"ch_" + lChannelId, 
+								"channel_" + lChannelId, 
+								{	isPrivate: false,
+									isSystem: false,
+									accessKey: "testAccessKey",
+									secretKey: "testSecretKey",
+
+									OnResponse: function( aToken ) {
+										if( aToken.code == 0 ) {
+											this.channelAuth( 
+												aChannelId, 
+												aAccessKey,
+												aSecretKey,
+												{
+													OnResponse: function( aToken ) {
+														lResponse = aToken;
+													}
+												}
+											);
+										}
+									}
+								}
+							);
+						}
+					}
+				});
+			}
+			// create a number of subscribers
+			for( var lSubIdx = 0; lSubIdx < lSubCnt; lSubIdx++ ) {
+				lSub = new jws.jWebSocketJSONClient();
+				lSubs[ lSubIdx ] = {
+					client: lSub,
+					status: jws.tests.Channels.INIT
+				};
+				lSub.logon( jws.getDefaultServerURL(), jws.Tests.ADMIN_USER, jws.Tests.ADMIN_PWD, {
+					OnToken: function ( aToken ) {
+						if( "org.jwebsocket.plugins.system" == aToken.ns
+							&& "login" == aToken.reqType) {
+							// jws.tests.Channels.AUTH;
+							// lResponse = aToken;
+							lLoggedIn++;
+						}
+					}
+				});
+			}
+
+			waitsFor(
+				function() {
+					return( lLoggedIn == lPubCnt + lSubCnt );
+				},
+				lSpec,
+				3000
+			);
+
+			runs( function() {
+				expect( lLoggedIn ).toEqual( lPubCnt + lSubCnt );
+
+				// close all opened connections
+				for( var lPubIdx = 0; lPubIdx < lPubCnt; lPubIdx++ ) {
+					lPubs[ lPubIdx ].client.close();
+				}
+				for( var lSubIdx = 0; lSubIdx < lSubCnt; lSubIdx++ ) {
+					lSubs[ lSubIdx ].client.close();
+				}
+			});
+
+		});
+	},
+	
 	// this spec tests the create method for a new channel
 	testChannelRemove: function( aChannelId, aAccessKey, aSecretKey, 
 		aComment, aExpectedReturnCode ) {
@@ -128,14 +302,15 @@ jws.tests.Channels = {
 			var lResponse = {};
 			jws.Tests.getAdminConn().channelRemove( 
 				aChannelId, 
-				{	accessKey: aAccessKey,
+				{
+					accessKey: aAccessKey,
 					secretKey: aSecretKey,
 					
 					OnResponse: function( aToken ) {
 						lResponse = aToken;
 					}
 				}
-			);
+				);
 
 			waitsFor(
 				function() {
@@ -143,10 +318,14 @@ jws.tests.Channels = {
 				},
 				lSpec,
 				1000
-			);
+				);
 
 			runs( function() {
 				expect( lResponse.code ).toEqual( aExpectedReturnCode );
+				if( lResponse.code !== undefined 
+					&& lResponse.code != aExpectedReturnCode ) {
+					jasmine.log( "Error: " + lResponse.msg );
+				}
 			});
 
 		});
@@ -170,7 +349,23 @@ jws.tests.Channels = {
 			"Creating private channel with access key and secret key (allowed)", 0 );
 		jws.tests.Channels.testChannelCreate( "myPrivUnsec", "myUnsecurePrivateChannel", "", "", true, false, 
 			"Creating private channel w/o access key and secret key (not allowed)", -1 );
-			
+
+		// channel authentication prior to publishing
+		jws.tests.Channels.testChannelAuth( "myInvalid", "myPublicAccess", "myPublicSecret",
+			"Authenticating against invalid channel with access key and secret key (not allowed)", -1 );
+		jws.tests.Channels.testChannelAuth( "myPubSec", "", "",
+			"Authenticating against public channel w/o access key and secret key (not allowed)", -1 );
+		jws.tests.Channels.testChannelPublish( "myPubSec", jws.tests.Channels.TEST_MESSAGE,
+			"Publishing test message on a non-authenticated channel (not allowed)", -1 );
+		jws.tests.Channels.testChannelAuth( "myPubSec", "myPublicAccess", "myPublicSecret",
+			"Authenticating against public channel access key and secret key (allowed)", 0 );
+		jws.tests.Channels.testChannelPublish( "myPubSec", jws.tests.Channels.TEST_MESSAGE,
+			"Publishing test message on authenticated channel (allowed)", 0 );
+
+		// run complex publish and subscribe test
+		jws.tests.Channels.testChannelComplexTest(
+			"Multiple publishers distributing messages to multiple subscribers.", 0 );
+
 		// removing public channels
 		jws.tests.Channels.testChannelRemove( "myPubSec", "myInvalidAccess", "myInvalidSecret",
 			"Removing secure public channel with incorrect credentials (not allowed)", -1 );
@@ -198,4 +393,3 @@ jws.tests.Channels = {
 	}	
 
 }
-

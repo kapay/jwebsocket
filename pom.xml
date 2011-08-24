@@ -36,8 +36,11 @@
 		<module>jWebSocketPlugIns/jWebSocketStatisticsPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketSharedObjectsPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketBenchmarkPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketAPIPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketProxyPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketAdminPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketTestPlugIn</module>
+		<module>jWebSocketPlugIns/jWebSocketClusterPlugIn</module>
 		<module>jWebSocketSwingGUI</module>
 		<module>jWebSocketAppServer</module>
 		<module>jWebSocketAppSrvDemo</module>

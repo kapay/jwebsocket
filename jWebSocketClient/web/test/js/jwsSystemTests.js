@@ -43,7 +43,7 @@ jws.tests.System = {
 				},
 				lSpec,
 				3000
-			);
+				);
 
 			runs( function() {
 				expect( lResponse.code ).toEqual( 0 );
@@ -77,8 +77,8 @@ jws.tests.System = {
 					return( lResponse.code != undefined );
 				},
 				lSpec,
-				3000
-			);
+				1500
+				);
 
 			runs( function() {
 				expect( lResponse.code ).toEqual( -1 );
@@ -123,8 +123,8 @@ jws.tests.System = {
 					return( lResponse.data == lMsg );
 				},
 				lSpec,
-				3000
-			);
+				1500
+				);
 
 			runs( function() {
 				expect( lResponse.data ).toEqual( lMsg );
@@ -134,10 +134,118 @@ jws.tests.System = {
 		});
 	},
 
+	// this spec tests the connect timeout behaviour of the client
+	testConnectTimeout: function( aURL, aOpenTimeout, aExpectedResult ) {
+		var lSpec = this.NS + ": connect timeout" 
+			+ " (timeout: " + aOpenTimeout + "ms)";
+		
+		it( lSpec, function () {
+
+			// we need to "control" the server to broadcast to all connections here
+			var lConn = new jws.jWebSocketJSONClient();
+			var lStatus = jws.CONNECTING;
+
+			// open a separate control connection
+			lConn.open( aURL ? aURL : jws.getDefaultServerURL(), {
+				
+				openTimeout: aOpenTimeout,
+				OnOpenTimeout: function ( aToken ) {
+					debugger;
+					lStatus = jws.OPEN_TIMED_OUT;
+				},
+				
+				OnOpen: function ( aToken ) {
+					// prevent screwing up result 
+					// if timeout has been fired before
+					if( lStatus == jws.CONNECTING ) {
+						lStatus = jws.OPEN;
+					}
+				},
+				
+				OnClose: function ( aToken ) {
+					lStatus = jws.CLOSED;
+				}
+			});
+
+			waitsFor(
+				function() {
+					return( lStatus != jws.CONNECTING );
+				},
+				lSpec,
+				aOpenTimeout + 500
+			);
+
+			runs( function() {
+				expect( lStatus ).toEqual( aExpectedResult );
+				lConn.close();
+			});
+		});
+	},
+
+	// this spec tests the response timeout behaviour of the client
+	testResponseTimeout: function( aServerDelay, aClientTimeout ) {
+		var lSpec = this.NS + ": response timeout" 
+			+ " (Server: " + aServerDelay + "ms," 
+			+ " client: " + aClientTimeout + "ms)";
+		
+		it( lSpec, function () {
+
+			var lResponse = {};
+			var lExpectTimeout = aServerDelay > aClientTimeout;
+			var lTimeoutFired = false;
+			jws.Tests.getAdminConn().testTimeout( 
+				aServerDelay,
+				{
+					OnResponse: function( aToken ) {
+						lResponse = aToken;
+					},
+					
+					timeout: aClientTimeout,
+					OnTimeout: function( aToken ) {
+						lTimeoutFired = true;
+					}
+				}
+				);
+
+			waitsFor(
+				function() {
+					if( lExpectTimeout ) {
+						return( lTimeoutFired === true );
+					} else {
+						return( lResponse.code == 0 );
+					}	
+				},
+				lSpec,
+				aClientTimeout + 1000
+			);
+
+			runs( function() {
+				if( lExpectTimeout ) {
+					expect( lTimeoutFired ).toEqual( true );
+				} else {
+					expect( lResponse.code ).toEqual( 0 );
+				}	
+			});
+
+		});
+	},
+
 	runSpecs: function() {
 		jws.tests.System.testLoginValidCredentials();
 		jws.tests.System.testLoginInvalidCredentials();
 		jws.tests.System.testSendLoopBack();
+
+		jws.tests.System.testConnectTimeout( null, 5000, jws.OPEN );
+		// jws.tests.System.testConnectTimeout( null, 20, jws.OPEN_TIMED_OUT );
+		 
+		// use an invalid port to simulate "server not available" case
+		// jws.tests.System.testConnectTimeout( "ws://jwebsocket.org:1234", 10000, jws.CLOSED );
+		// jws.tests.System.testConnectTimeout( "ws://jwebsocket.org:1234", 1000, jws.OPEN_TIMED_OUT );
+	   
+		// should return a result within timeout
+		jws.tests.System.testResponseTimeout( 500, 100 );
+		// should exceed the timeout and fire timeout event
+		jws.tests.System.testResponseTimeout( 1000, 500 );
 	},
 
 	runSuite: function() {

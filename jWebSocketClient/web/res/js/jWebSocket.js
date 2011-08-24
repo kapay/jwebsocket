@@ -35,9 +35,9 @@ if( window.MozWebSocket ) {
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b1 (10820)
+	//:const:*:VERSION:String:1.0b1 (10823)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b1 (10820)",
+	VERSION: "1.0b1 (10823)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -100,6 +100,10 @@ var jws = {
 	//:d:en:The connection manager is trying to re-connect, but not yet connected. _
 	//:d:en:This is jWebSocket specific and not part of the W3C API.
 	RECONNECTING: 1000,
+	//:const:*:OPEN_TIMED_OUT:Integer:1001
+	//:d:en:The connection could not be established within the given timeout. _
+	//:d:en:This is jWebSocket specific and not part of the W3C API.
+	OPEN_TIMED_OUT: 1001,
 
 	// Default connection reliability options
 	RO_OFF: {
@@ -1417,6 +1421,19 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				if( this.fStatus != jws.RECONNECTING ) {
 					this.fStatus = jws.CONNECTING;
 				}	
+				
+				if( aOptions.OnOpenTimeout
+					&& typeof aOptions.OnOpenTimeout == "function"
+					&& aOptions.openTimeout ) {
+					this.fOpenTimeout = aOptions.openTimeout;
+					this.hOpenTimeout = setTimeout( function() {
+						// debugger;
+						lThis.fOpenTimeout = null;
+						var aToken = {};
+						aOptions.OnOpenTimeout( aToken );
+					}, this.fOpenTimeout );
+				}
+
 				// create a new web socket instance
 				this.fConn = new WebSocket( aURL, lSubProt );
 				// save URL and sub prot for optional re-connect
@@ -1426,6 +1443,10 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				// assign the listeners to local functions (closure) to allow
 				// to handle event before and after the application
 				this.fConn.onopen = function( aEvent ) {
+					if( lThis.hOpenTimeout ) {
+						clearTimeout( lThis.hOpenTimeout );
+						lThis.hOpenTimeout = null;
+					}
 					lThis.fStatus = jws.OPEN;
 					lValue = lThis.processOpened( aEvent );
 					// give application change to handle event
@@ -1445,6 +1466,10 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				};
 
 				this.fConn.onclose = function( aEvent ) {
+					if( lThis.hOpenTimeout ) {
+						clearTimeout( lThis.hOpenTimeout );
+						lThis.hOpenTimeout = null;
+					}
 					lThis.fStatus = jws.CLOSED;
 					// check if still disconnect timeout active and clear if needed
 					if( lThis.hDisconnectTimeout ) {
@@ -1901,7 +1926,19 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				clearTimeout( lClbkRec.hCleanUp );
 			}
 			var lArgs = lClbkRec.args;
-			lClbkRec.callback.OnResponse( aToken, lArgs );
+			var lCallback = lClbkRec.callback;
+			if( lCallback.OnResponse ) {
+				lCallback.OnResponse.call( this, aToken, lArgs );
+			}	
+			if( lCallback.OnSuccess
+				&& aToken.code === 0 ) {
+				lCallback.OnSuccess.call( this, aToken, lArgs );
+			}	
+			if( lCallback.OnFailure
+				&& aToken.code != undefined 
+				&& aToken.code != 0 ) {
+				lCallback.OnFailure.call( this, aToken, lArgs );
+			}
 			delete this.fRequestCallbacks[ lField ];
 		}
 	},
@@ -2295,7 +2332,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			var lCallbacks = {
 				OnResponse: null,
 				OnSuccess: null,
-				OnError: null,
+				OnFailure: null,
 				OnTimeout: null
 			};
 			// we need to check for a response only
@@ -2306,8 +2343,8 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					lCallbacks.OnResponse = aOptions.OnResponse;
 					lControlResponse = true;
 				}
-				if( aOptions.OnError ) {
-					lCallbacks.OnError = aOptions.OnError;
+				if( aOptions.OnFailure) {
+					lCallbacks.OnFailure = aOptions.OnFailure;
 					lControlResponse = true;
 				}
 				if( aOptions.OnSuccess ) {
@@ -2352,10 +2389,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					delete lThis.fRequestCallbacks[ lClbkId ];
 					// now the OnTimeout Callback can be called.
 					if( lCallbacks.OnTimeout ) {
-						lCallbacks.OnTimeout({
+						lCallbacks.OnTimeout.call( this, aToken, {
 							utid: lUTID,
-							timeout: lTimeout,
-							token: aToken
+							timeout: lTimeout
 						});
 					}
 				}, lTimeout );
@@ -2648,6 +2684,38 @@ jws.SystemClientPlugIn = {
 	//:d:en:Use MD5 password encoding, password is given and passed as a MD5 hash. _
 	//:d:en:The method relies on the correct encoding and does not check the hash.
 	PW_MD5_ENCODED	: 2,
+
+	//:m:*:processToken
+	//:d:en:Processes an incoming token. Checks if certains events are supposed to be fired.
+	//:a:en::aToken:Object:Token to be processed by the plug-ins in the plug-in chain.
+	//:r:*:::void:none
+	processToken: function( aToken ) {
+
+		// is it a token from the system plug-in at all?
+		if( jws.NS_SYSTEM == aToken.ns ) {
+			if( "login" == aToken.reqType ) {
+				if( aToken.code == 0 ) {
+					if( this.OnLoggedIn ) {
+						this.OnLoggedIn( aToken );
+					}
+				} else {
+					if( this.OnLoginError ) {
+						this.OnLoginError( aToken );
+					}
+				}
+			} else if( "logout" == aToken.reqType ) {
+				if( aToken.code == 0 ) {
+					if( this.OnLoggedOut ) {
+						this.OnLoggedOut( aToken );
+					}
+				} else {
+					if( this.OnLogoutError ) {
+						this.OnLogoutError( aToken );
+					}
+				}
+			}
+		}
+	},
 
 	//:m:*:login
 	//:d:en:Tries to authenticate the client against the jWebSocket Server by _

@@ -49,6 +49,19 @@ jws.TestPlugIn = {
 		}
 	},
 
+	testTimeout: function( aDelay, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.TestPlugIn.NS,
+				type: "delay",
+				delay: aDelay
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	testS2CPerformance: function( aCount, aMessage, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {

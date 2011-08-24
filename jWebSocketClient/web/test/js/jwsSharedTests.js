@@ -35,6 +35,9 @@ jws.Tests = {
 	mAdminConn: null,
 	mGuestConn: null,
 	
+	mAdminConnSSL: null,
+	mGuestConnSSL: null,
+	
 	mTestConnsOpened: 0,
 	mTestConns: [],
 	
@@ -54,6 +57,22 @@ jws.Tests = {
 		this.mGuestConn = aConn;
 	},
 
+	getAdminConnSSL: function() {
+		return this.mAdminConnSSL;
+	},
+	
+	setAdminConnSSL: function( aConn ) {
+		this.mAdminConnSSL = aConn;
+	},
+	
+	getGuestConnSSL: function() {
+		return this.mGuestConnSSL;
+	},
+	
+	setGuestConnSSL: function( aConn ) {
+		this.mGuestConnSSL = aConn;
+	},
+
 	getTestConns: function() {
 		return this.mTestConns;
 	},
@@ -69,6 +88,41 @@ jws.Tests = {
 
 			// open a separate control connection
 			jws.Tests.getAdminConn().logon( jws.getDefaultServerURL(), 
+				jws.Tests.ADMIN_USER, 
+				jws.Tests.ADMIN_PWD, {
+				OnToken: function ( aToken ) {
+					if( "org.jwebsocket.plugins.system" == aToken.ns
+						&& "login" == aToken.reqType) {
+						lResponse = aToken;
+					}
+				}
+			});
+
+			waitsFor(
+				function() {
+					return( lResponse.code != undefined );
+				},
+				lSpec,
+				3000
+			);
+
+			runs( function() {
+				expect( lResponse.username ).toEqual( jws.Tests.ADMIN_USER );
+			});
+		});
+	},
+
+	// this spec tries to open a SSL connection to be shared across multiple tests
+	testOpenSharedAdminConnSSL: function() {
+		var lSpec = this.NS + ": Opening shared SSL connection with administrator role";
+		it( lSpec, function () {
+
+			// we need to "control" the server to broadcast to all connections here
+			jws.Tests.setAdminConnSSL( new jws.jWebSocketJSONClient() );
+			var lResponse = {};
+
+			// open a separate control connection
+			jws.Tests.getAdminConnSSL().logon( jws.getDefaultSSLServerURL(), 
 				jws.Tests.ADMIN_USER, 
 				jws.Tests.ADMIN_PWD, {
 				OnToken: function ( aToken ) {
@@ -117,6 +171,30 @@ jws.Tests = {
 		});
 	},
 
+	// this spec tries to open a SSL connection to be shared across multiple tests
+	testCloseSharedAdminConnSSL: function() {
+		var lSpec = this.NS + ": Closing shared SSL connection with administrator role";
+		it( lSpec, function () {
+
+			// open a separate control connection
+			jws.Tests.getAdminConnSSL().close({
+				timeout: 3000
+			});
+
+			waitsFor(
+				function() {
+					return( !jws.Tests.getAdminConnSSL().isOpened() );
+				},
+				lSpec,
+				3000
+			);
+
+			runs( function() {
+				expect( jws.Tests.getAdminConnSSL().isOpened() ).toEqual( false );
+			});
+		});
+	},
+
 	// this spec tries to open a connection to be shared across multiple tests
 	testOpenSharedGuestConn: function() {
 		var lSpec = this.NS + ": Opening shared connection with guest role";
@@ -128,6 +206,41 @@ jws.Tests = {
 
 			// open a separate control connection
 			jws.Tests.getGuestConn().logon( jws.getDefaultServerURL(), 
+				jws.Tests.GUEST_USER, 
+				jws.Tests.GUEST_PWD, {
+				OnToken: function ( aToken ) {
+					if( "org.jwebsocket.plugins.system" == aToken.ns
+						&& "login" == aToken.reqType) {
+						lResponse = aToken;
+					}
+				}
+			});
+
+			waitsFor(
+				function() {
+					return( lResponse.code != undefined );
+				},
+				lSpec,
+				3000
+			);
+
+			runs( function() {
+				expect( lResponse.username ).toEqual( jws.Tests.GUEST_USER );
+			});
+		});
+	},
+
+	// this spec tries to open a connection to be shared across multiple tests
+	testOpenSharedGuestConnSSL: function() {
+		var lSpec = this.NS + ": Opening shared SSL connection with guest role";
+		it( lSpec, function () {
+
+			// we need to "control" the server to broadcast to all connections here
+			jws.Tests.setGuestConnSSL( new jws.jWebSocketJSONClient() );
+			var lResponse = {};
+
+			// open a separate control connection
+			jws.Tests.getGuestConnSSL().logon( jws.getDefaultSSLServerURL(), 
 				jws.Tests.GUEST_USER, 
 				jws.Tests.GUEST_PWD, {
 				OnToken: function ( aToken ) {
@@ -172,6 +285,30 @@ jws.Tests = {
 
 			runs( function() {
 				expect( jws.Tests.getGuestConn().isOpened() ).toEqual( false );
+			});
+		});
+	},
+
+	// this spec tries to open a connection to be shared across multiple tests
+	testCloseSharedGuestConnSSL: function() {
+		var lSpec = this.NS + ": Closing shared SSL connection with guest role";
+		it( lSpec, function () {
+
+			// open a separate control connection
+			jws.Tests.getGuestConnSSL().close({
+				timeout: 3000
+			});
+
+			waitsFor(
+				function() {
+					return( !jws.Tests.getGuestConnSSL().isOpened() );
+				},
+				lSpec,
+				3000
+			);
+
+			runs( function() {
+				expect( jws.Tests.getGuestConnSSL().isOpened() ).toEqual( false );
 			});
 		});
 	},

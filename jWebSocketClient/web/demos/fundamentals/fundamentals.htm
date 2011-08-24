@@ -63,6 +63,15 @@
 						// use JSON sub protocol
 						subProtocol: jws.WS_SUBPROT_JSON,
 
+						// connection timeout in ms
+						openTimeout: 5,
+						
+						// OnConnectionTimeout callback
+						OnOpenTimeout: function( aEvent ) {
+							log( "Opening timeout exceeded!" );
+							jws.$("simgStatus").src = "../../images/disconnected.png";
+						},
+
 						// OnOpen callback
 						OnOpen: function( aEvent ) {
 							log( "jWebSocket connection established." );

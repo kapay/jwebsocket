@@ -39,8 +39,10 @@ public class AutomTestPlugIn extends TokenPlugIn {
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_TEST_AUTOMATION =
 			JWebSocketServerConstants.NS_BASE + ".plugins.test";
-	private String BROADCAST = "t.broadcast";
-	private String COMPLEX_VALIDATION = "t.complex_validation";
+	// TODO: remove t. prefix here!
+	private final static String BROADCAST = "t.broadcast";
+	private final static String COMPLEX_VALIDATION = "t.complex_validation";
+	private final static String DELAY = "delay";
 
 	public AutomTestPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
@@ -61,11 +63,13 @@ public class AutomTestPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 		// if (lType != null && getNamespace().equals(lNS)) {
-			if (BROADCAST.equals(lType)) {
-				broadcast(aConnector, aToken);
-			} else if (COMPLEX_VALIDATION.equals(lType)) {
-				complexValidation(aConnector, aToken);
-			}
+		if (BROADCAST.equals(lType)) {
+			broadcast(aConnector, aToken);
+		} else if (COMPLEX_VALIDATION.equals(lType)) {
+			complexValidation(aConnector, aToken);
+		} else if (DELAY.equals(lType)) {
+			delay(aConnector, aToken);
+		}
 		// }
 	}
 
@@ -82,6 +86,25 @@ public class AutomTestPlugIn extends TokenPlugIn {
 		lToken.setString("text", lText);
 
 		getServer().broadcastToken(aToken);
+	}
+
+	/**
+	 * Simply waits for a given amount of milliseconds.
+	 * This is to test the timeout behaviour of the client.
+	 * Default is 2000ms (=2sec).
+	 * @param aConnector
+	 * @param aToken 
+	 */
+	public void delay(WebSocketConnector aConnector, Token aToken) {
+		Token lResponse = createResponse(aToken);
+
+		int lDelay = aToken.getInteger( "delay", 2000 );
+		try {
+			Thread.sleep(lDelay);
+		} catch (Exception lEx) {
+		}
+
+		sendToken(aConnector, aConnector, lResponse);
 	}
 
 	/**
