@@ -157,9 +157,9 @@ public class JDBCPlugIn extends TokenPlugIn {
 	public DataSource getNativeDataSource() {
 		return mNativeAccess.getDataSource();
 	}
-	
+
 	public Class getJDBCTools() {
-		return JDBCTools.class; 
+		return JDBCTools.class;
 	}
 
 	@Override
@@ -194,8 +194,10 @@ public class JDBCPlugIn extends TokenPlugIn {
 			return;
 		}
 
+		// run query
+		Token lResToken = query(aToken);
 		// send response to requester
-		lServer.sendToken(aConnector, query(aToken));
+		lServer.sendToken(aConnector, lResToken);
 	}
 
 	/**
