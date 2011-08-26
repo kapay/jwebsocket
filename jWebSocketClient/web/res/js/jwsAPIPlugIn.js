@@ -117,7 +117,7 @@ jws.APIPlugInClass = {
 			var lToken = aServerPlugIn.supportedTokens[ lIdx ];
 			lToken.ns = aServerPlugIn.namespace;
 
-			console.log( JSON.stringify( lToken ) );
+			// console.log( JSON.stringify( lToken ) );
 
 			// this is the function which has to be executed as a parameter
 			// of the it call within a describe statement (actually the suite).

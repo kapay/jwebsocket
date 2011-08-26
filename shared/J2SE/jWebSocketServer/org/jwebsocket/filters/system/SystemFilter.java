@@ -48,7 +48,10 @@ public class SystemFilter extends TokenFilter {
 	@Override
 	public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Checking incoming token from " + (aConnector != null ? aConnector.getId() : "[not given]") + ": " + aToken.toString() + "...");
+			String lOut = aToken.toString();
+			mLog.debug("Checking incoming token from " 
+					+ (aConnector != null ? aConnector.getId() : "[not given]") 
+					+ " (" + lOut.length() + "b): " + lOut + "...");
 		}
 
 		TokenServer lServer = getServer();
@@ -73,7 +76,11 @@ public class SystemFilter extends TokenFilter {
 	@Override
 	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Checking outgoing token from " + (aSource != null ? aSource.getId() : "[not given]") + " to " + (aTarget != null ? aTarget.getId() : "[not given]") + ": " + aToken.toString() + "...");
+			String lOut = aToken.toString();
+			mLog.debug("Checking outgoing token from " 
+					+ (aSource != null ? aSource.getId() : "[not given]") 
+					+ " to " + (aTarget != null ? aTarget.getId() : "[not given]") 
+					+ " (" + lOut.length() + "b): " + lOut + "...");
 		}
 	}
 }

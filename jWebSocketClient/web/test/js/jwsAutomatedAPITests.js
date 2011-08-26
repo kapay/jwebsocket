@@ -62,7 +62,7 @@ jws.tests.AutomatedAPI = {
 					return lDone == true;
 				},
 				"Running against API...",
-				5000
+				3000
 			);
 
 			runs( function() {
@@ -88,7 +88,7 @@ jws.tests.AutomatedAPI = {
 		// get the default specs from the API
 		this.testGetAPIDefaults();
 		// run all the obtained default specs
-		this.testRunAPIDefaults();
+		// this.testRunAPIDefaults();
 	},
 
 	runSuite: function() {

@@ -363,9 +363,11 @@ jws.tests.Channels = {
 			"Publishing test message on authenticated channel (allowed)", 0 );
 
 		// run complex publish and subscribe test
+		/*
 		jws.tests.Channels.testChannelComplexTest(
 			"Multiple publishers distributing messages to multiple subscribers.", 0 );
-
+		*/
+	   
 		// removing public channels
 		jws.tests.Channels.testChannelRemove( "myPubSec", "myInvalidAccess", "myInvalidSecret",
 			"Removing secure public channel with incorrect credentials (not allowed)", -1 );

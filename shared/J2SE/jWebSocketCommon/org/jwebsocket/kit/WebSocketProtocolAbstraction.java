@@ -155,25 +155,25 @@ public class WebSocketProtocolAbstraction {
 			lBuff[1] = (byte) (lPayloadLen); // just write the payload length
 		} else if (lPayloadLen >= 126 && lPayloadLen < 0xFFFF) {
 			// first write 126 (meaning, there will follow two bytes for actual length)
-			lBuff[1] = (byte) (126 /*<< 1*/);
+			lBuff[1] = (byte) 126;
 			int lSize = lBuff.length;
 			lBuff = copyOf(lBuff, lSize + 2);
 			lBuff[lSize] = (byte) ((lPayloadLen >>> 8) & 0xFF);
 			lBuff[lSize + 1] = (byte) (lPayloadLen & 0xFF);
 		} else if (lPayloadLen >= 0xFFFF) {
 			// first write 127 (meaning, there will follow eight bytes for actual length)
-			lBuff[1] = (byte) (127 << 1);
-			long len = (long) lPayloadLen;
+			lBuff[1] = (byte) 127;
+			long lLen = (long) lPayloadLen;
 			int lSize = lBuff.length;
 			lBuff = copyOf(lBuff, lSize + 8);
-			lBuff[lSize] = (byte) (len >>> 56);
-			lBuff[lSize + 1] = (byte) (len >>> 48);
-			lBuff[lSize + 2] = (byte) (len >>> 40);
-			lBuff[lSize + 3] = (byte) (len >>> 32);
-			lBuff[lSize + 4] = (byte) (len >>> 24);
-			lBuff[lSize + 5] = (byte) (len >>> 16);
-			lBuff[lSize + 6] = (byte) (len >>> 8);
-			lBuff[lSize + 7] = (byte) len;
+			lBuff[lSize] = (byte) (lLen >>> 56);
+			lBuff[lSize + 1] = (byte) (lLen >>> 48);
+			lBuff[lSize + 2] = (byte) (lLen >>> 40);
+			lBuff[lSize + 3] = (byte) (lLen >>> 32);
+			lBuff[lSize + 4] = (byte) (lLen >>> 24);
+			lBuff[lSize + 5] = (byte) (lLen >>> 16);
+			lBuff[lSize + 6] = (byte) (lLen >>> 8);
+			lBuff[lSize + 7] = (byte) lLen;
 		}
 
 		int lSize = lBuff.length;
