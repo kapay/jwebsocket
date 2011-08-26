@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - EventsPlugIn
+//  jWebSocket - API Plug-in
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -24,10 +24,10 @@ import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.plugins.TokenPlugIn;
+import org.jwebsocket.spring.ServerXmlBeanFactory;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 
 /**
@@ -52,7 +52,8 @@ public class APIPlugIn extends TokenPlugIn {
 
 		//Creating the Spring Bean Factory
 		String lPath = JWebSocketConfig.getConfigFolder(getString("config_file"));
-		mBeanFactory = new XmlBeanFactory(new FileSystemResource(lPath));
+		mBeanFactory = new ServerXmlBeanFactory(new FileSystemResource(lPath),
+				getClass().getClassLoader());
 
 		//Specify default name space for interface plugin
 		this.setNamespace(NS_INTERFACE);
@@ -91,10 +92,10 @@ public class APIPlugIn extends TokenPlugIn {
 
 		List<Token> lPlugIns = new FastList<Token>();
 		Token lTempPlugIn;
-		for (WebSocketPlugIn p : getPlugInChain().getPlugIns()) {
-			if (mBeanFactory.containsBean(p.getId())) {
+		for (WebSocketPlugIn lPlugIn : getPlugInChain().getPlugIns()) {
+			if (mBeanFactory.containsBean(lPlugIn.getId())) {
 				lTempPlugIn = TokenFactory.createToken();
-				PlugInDefinition pd = (PlugInDefinition) mBeanFactory.getBean(p.getId());
+				PlugInDefinition pd = (PlugInDefinition) mBeanFactory.getBean(lPlugIn.getId());
 				pd.writeToToken(lTempPlugIn);
 				lPlugIns.add(lTempPlugIn);
 			}
@@ -123,8 +124,13 @@ public class APIPlugIn extends TokenPlugIn {
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", "Missing '" + lPlugInId + "' plug-in definition!");
 		} else {
-			PlugInDefinition lPlugInDef = (PlugInDefinition) mBeanFactory.getBean(lPlugInId);
-			lPlugInDef.writeToToken(lResponse);
+			try {
+				PlugInDefinition lPlugInDef = (PlugInDefinition) mBeanFactory.getBean(lPlugInId);
+				lPlugInDef.writeToToken(lResponse);
+			} catch (Exception lEx) {
+				lResponse.setInteger("code", -1);
+				lResponse.setString("msg", lEx.getClass().getSimpleName() + ":" + lEx.getMessage());
+			}
 		}
 
 		//Sending the response
