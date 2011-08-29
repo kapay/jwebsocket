@@ -18,6 +18,8 @@ package org.jwebsocket.plugins.jms;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jms.Session;
+
 import org.jwebsocket.plugins.jms.util.FieldJms;
 import org.jwebsocket.token.Token;
 
@@ -34,8 +36,29 @@ import org.jwebsocket.token.Token;
 public class DestinationIdentifier {
 
 	private final Boolean mPubSubDomain;
+	private Boolean mDeliveryPersistent = Boolean.TRUE;
+	private Boolean mSessionTransacted = Boolean.FALSE;
 	private final String mDestinationName;
 	private final String mConnectionFactoryName;
+	private Integer mSessionAcknowledgeMode = Session.AUTO_ACKNOWLEDGE;
+
+	private DestinationIdentifier(String aConnectionFactoryName, String aDestinationName, Boolean aPubSubDomain,
+			Boolean aSessionTransacted, Integer aSessionAcknowledgeMode, Boolean deliveryPersistent) {
+		this.mConnectionFactoryName = aConnectionFactoryName;
+		this.mDestinationName = aDestinationName;
+		this.mPubSubDomain = aPubSubDomain;
+		if (null != aSessionTransacted)
+			this.mSessionTransacted = aSessionTransacted;
+		if (null != aSessionAcknowledgeMode) {
+			if (aSessionAcknowledgeMode != Session.AUTO_ACKNOWLEDGE
+					&& aSessionAcknowledgeMode != Session.CLIENT_ACKNOWLEDGE
+					&& aSessionAcknowledgeMode != Session.DUPS_OK_ACKNOWLEDGE)
+				throw new IllegalArgumentException("wrong arg for session Ack mode: " + aSessionAcknowledgeMode);
+			this.mSessionAcknowledgeMode = aSessionAcknowledgeMode;
+		}
+		if (null != deliveryPersistent)
+			this.mDeliveryPersistent = deliveryPersistent;
+	}
 
 	private DestinationIdentifier(String aConnectionFactoryName, String aDestinationName, Boolean aPubSubDomain) {
 		this.mConnectionFactoryName = aConnectionFactoryName;
@@ -55,13 +78,66 @@ public class DestinationIdentifier {
 		return mConnectionFactoryName;
 	}
 
+	public Boolean isSessionTransacted() {
+		return mSessionTransacted;
+	}
+
+	public int getSessionAcknowledgeMode() {
+		return mSessionAcknowledgeMode;
+	}
+
+	public Boolean getDeliveryPersistent() {
+		return mDeliveryPersistent;
+	}
+
+	public static DestinationIdentifier valueOf(String aConnectionFactoryName, String aDestinationName,
+			Boolean aPubSubDomain, Boolean aSessionTransacted, Integer aSessionAcknowledgeMode,
+			Boolean deliveryPersistent) {
+		return new DestinationIdentifier(aConnectionFactoryName, aDestinationName, aPubSubDomain, aSessionTransacted,
+				aSessionAcknowledgeMode, deliveryPersistent);
+	}
+
+	public static DestinationIdentifier valueOf(String aConnectionFactoryName, String aDestinationName,
+			Boolean aPubSubDomain) {
+		return new DestinationIdentifier(aConnectionFactoryName, aDestinationName, aPubSubDomain);
+	}
+
+	public static DestinationIdentifier valueOf(Token aToken) {
+		String lConnectionFactoryName = aToken.getString(FieldJms.CONNECTION_FACTORY_NAME.getValue());
+		String lDestinationName = aToken.getString(FieldJms.DESTINATION_NAME.getValue());
+		Boolean lPubSubDomain = aToken.getBoolean(FieldJms.PUB_SUB_DOMAIN.getValue());
+		return valueOf(lConnectionFactoryName, lDestinationName, lPubSubDomain);
+	}
+
+	public boolean isMissingData() {
+		return null == mConnectionFactoryName || mConnectionFactoryName.trim().length() == 0
+				|| null == mDestinationName || mDestinationName.trim().length() == 0 || null == mPubSubDomain;
+	}
+
+	public Token setDestinationIdentifier(Token aToken) {
+		if (null == aToken)
+			return null;
+		aToken.setMap(FieldJms.DESTINATION_IDENTIFIER.getValue(), getJSONMap());
+		return aToken;
+	}
+
+	public Map<String, Object> getJSONMap() {
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put(FieldJms.CONNECTION_FACTORY_NAME.getValue(), mConnectionFactoryName);
+		result.put(FieldJms.DESTINATION_NAME.getValue(), mDestinationName);
+		result.put(FieldJms.PUB_SUB_DOMAIN.getValue(), mPubSubDomain);
+		return result;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((mConnectionFactoryName == null) ? 0 : mConnectionFactoryName.hashCode());
 		result = prime * result + ((mDestinationName == null) ? 0 : mDestinationName.hashCode());
-		result = prime * result + (mPubSubDomain ? 1231 : 1237);
+		result = prime * result + ((mPubSubDomain == null) ? 0 : mPubSubDomain.hashCode());
+		result = prime * result + mSessionAcknowledgeMode;
+		result = prime * result + ((mSessionTransacted == null) ? 0 : mSessionTransacted.hashCode());
 		return result;
 	}
 
@@ -84,42 +160,19 @@ public class DestinationIdentifier {
 				return false;
 		} else if (!mDestinationName.equals(other.mDestinationName))
 			return false;
-		if (mPubSubDomain != other.mPubSubDomain)
+		if (mPubSubDomain == null) {
+			if (other.mPubSubDomain != null)
+				return false;
+		} else if (!mPubSubDomain.equals(other.mPubSubDomain))
+			return false;
+		if (mSessionAcknowledgeMode != other.mSessionAcknowledgeMode)
+			return false;
+		if (mSessionTransacted == null) {
+			if (other.mSessionTransacted != null)
+				return false;
+		} else if (!mSessionTransacted.equals(other.mSessionTransacted))
 			return false;
 		return true;
-	}
-
-	public static DestinationIdentifier valueOf(String aConnectionFactoryName, String aDestinationName,
-			Boolean aPubSubDomain) {
-		return new DestinationIdentifier(aConnectionFactoryName, aDestinationName, aPubSubDomain);
-	}
-
-	public static DestinationIdentifier valueOf(Token aToken) {
-		String lConnectionFactoryName = aToken.getString(FieldJms.CONNECTION_FACTORY_NAME.getValue());
-		String lDestinationName = aToken.getString(FieldJms.DESTINATION_NAME.getValue());
-		Boolean lPubSubDomain = aToken.getBoolean(FieldJms.PUB_SUB_DOMAIN.getValue());
-
-		return valueOf(lConnectionFactoryName, lDestinationName, lPubSubDomain);
-	}
-
-	public boolean isMissingData() {
-		return null == mConnectionFactoryName || mConnectionFactoryName.trim().length() == 0
-				|| null == mDestinationName || mDestinationName.trim().length() == 0 || null == mPubSubDomain;
-	}
-
-	public Token setDestinationIdentifier(Token aToken) {
-		if (null == aToken)
-			return null;
-		aToken.setMap(FieldJms.DESTINATION_IDENTIFIER.getValue(), getJSONMap());
-		return aToken;
-	}
-
-	public Map<String, Object> getJSONMap() {
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put(FieldJms.CONNECTION_FACTORY_NAME.getValue(), mConnectionFactoryName);
-		result.put(FieldJms.DESTINATION_NAME.getValue(), mDestinationName);
-		result.put(FieldJms.PUB_SUB_DOMAIN.getValue(), mPubSubDomain);
-		return result;
 	}
 
 }

@@ -19,14 +19,15 @@ package org.jwebsocket.plugins.jms.util;
  * 
  * @author Johannes Smutny
  */
-public enum Configuration {
+public enum ConfigurationJms {
 
 	CF_PREFIX("connectionFactory:"), DESTINATION_PREFIX("destination:"), NAME("name"), CONNECTION_FACTORY_NAME("cfName"), PUB_SUB_DOMAIN(
-			"pubSubDomain");
+			"pubSubDomain"), SESSION_ACKNOWLEDGE_MODE("sessionAckMode"), SESSION_TRANSACTED("sessionTransacted"), DELIVERY_PERSISTENT(
+			"deliveryPersistent");
 
 	private String mValue;
 
-	private Configuration(String value) {
+	private ConfigurationJms(String value) {
 		this.mValue = value;
 	}
 

@@ -17,6 +17,7 @@ package org.jwebsocket.plugins.jms;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -26,6 +27,8 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 
+import javolution.util.FastSet;
+
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +37,7 @@ import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.plugins.jms.JMSPlugIn.ActionInput;
 import org.jwebsocket.plugins.jms.infra.impl.DefaultMessageDelegate;
 import org.jwebsocket.plugins.jms.infra.impl.JmsListenerContainer;
-import org.jwebsocket.plugins.jms.util.Configuration;
+import org.jwebsocket.plugins.jms.util.ConfigurationJms;
 import org.jwebsocket.plugins.jms.util.FieldJms;
 import org.jwebsocket.token.Token;
 import org.springframework.beans.factory.BeanFactory;
@@ -56,27 +59,28 @@ public class JmsManager {
 	private final Map<String, Queue> mQueues = new HashMap<String, Queue>();
 	private final Map<String, Topic> mTopics = new HashMap<String, Topic>();
 
-	private ListenerStore mMessageListenerStore = new BaseListenerStore();
+	private final ListenerStore mMessageListenerStore = new BaseListenerStore();
 	private final SenderStore mSenderStore = new BaseSenderStore();
+	private final Set<DestinationIdentifier> mDIs = new FastSet<DestinationIdentifier>();
 	private final MessageConverter mMsgConverter = new SimpleMessageConverter();
 
 	private JmsManager() {
 
 	}
 
-	private void initJmsAssets(Map<String, Object> aSettings, BeanFactory aBeanFactory) {
-		for (String lOption : aSettings.keySet()) {
-			if (lOption.startsWith(Configuration.CF_PREFIX.getValue()))
-				initConnectionFactory(aSettings, aBeanFactory, lOption);
-			else if (lOption.startsWith(Configuration.DESTINATION_PREFIX.getValue()))
-				initDestination(aSettings, aBeanFactory, lOption);
-		}
-	}
-
 	public static JmsManager getInstance(Map<String, Object> aSettings, BeanFactory aBeanFactory) {
 		JmsManager lManager = new JmsManager();
 		lManager.initJmsAssets(aSettings, aBeanFactory);
 		return lManager;
+	}
+
+	private void initJmsAssets(Map<String, Object> aSettings, BeanFactory aBeanFactory) {
+		for (String lOption : aSettings.keySet()) {
+			if (lOption.startsWith(ConfigurationJms.CF_PREFIX.getValue()))
+				initConnectionFactory(aSettings, aBeanFactory, lOption);
+			else if (lOption.startsWith(ConfigurationJms.DESTINATION_PREFIX.getValue()))
+				initDestination(aSettings, aBeanFactory, lOption);
+		}
 	}
 
 	private void initConnectionFactory(Map<String, Object> aSettings, BeanFactory aBeanFactory, String aOption) {
@@ -93,11 +97,17 @@ public class JmsManager {
 		String name = getName(lJSON);
 		String cfName = getConnectionFactoryName(lJSON);
 		Boolean pubSubDomain = getPubSubDomain(lJSON);
+		Boolean sessionTransacted = getSessionTransacted(lJSON);
+		Integer sessionAckMode = getSessionAcknowledgeMode(lJSON);
+		Boolean deliveryPersistent = getDeliveryPersistent(lJSON);
+		DestinationIdentifier lDi = DestinationIdentifier.valueOf(cfName, name, pubSubDomain, sessionTransacted,
+				sessionAckMode, deliveryPersistent);
+		mDIs.add(lDi);
 
 		if (pubSubDomain)
-			storeTopic(aBeanFactory, name, cfName);
+			storeTopic(aBeanFactory, name);
 		else
-			storeQueue(aBeanFactory, name, cfName);
+			storeQueue(aBeanFactory, name);
 	}
 
 	private JSONObject getJSONObject(Map<String, Object> aSettings, String aOption) {
@@ -111,13 +121,13 @@ public class JmsManager {
 		return lJSON;
 	}
 
-	private void storeQueue(BeanFactory aBeanFactory, String aName, String aCfName) {
+	private void storeQueue(BeanFactory aBeanFactory, String aName) {
 		mQueues.put(aName, (Queue) aBeanFactory.getBean(aName));
 		if (mLog.isDebugEnabled())
 			mLog.debug("added jms queue with bean name: '" + aName + "'");
 	}
 
-	private void storeTopic(BeanFactory aBeanFactory, String aName, String aCfName) {
+	private void storeTopic(BeanFactory aBeanFactory, String aName) {
 		mTopics.put(aName, (Topic) aBeanFactory.getBean(aName));
 		if (mLog.isDebugEnabled())
 			mLog.debug("added jms topic with bean name: '" + aName + "'");
@@ -125,7 +135,7 @@ public class JmsManager {
 
 	private String getConnectionFactoryName(JSONObject aJson) {
 		try {
-			return aJson.getString(Configuration.CONNECTION_FACTORY_NAME.getValue());
+			return aJson.getString(ConfigurationJms.CONNECTION_FACTORY_NAME.getValue());
 		} catch (Exception lEx) {
 			throw new IllegalArgumentException("JMSPlugIn configuration error: missing cfName Property", lEx);
 		}
@@ -133,7 +143,7 @@ public class JmsManager {
 
 	private String getName(JSONObject aJson) {
 		try {
-			return aJson.getString(Configuration.NAME.getValue());
+			return aJson.getString(ConfigurationJms.NAME.getValue());
 		} catch (Exception lEx) {
 			throw new IllegalArgumentException("JMSPlugIn configuration error: missing name Property", lEx);
 		}
@@ -141,9 +151,33 @@ public class JmsManager {
 
 	private Boolean getPubSubDomain(JSONObject aJson) {
 		try {
-			return aJson.getBoolean(Configuration.PUB_SUB_DOMAIN.getValue());
+			return aJson.getBoolean(ConfigurationJms.PUB_SUB_DOMAIN.getValue());
 		} catch (Exception lEx) {
 			throw new IllegalArgumentException("JMSPlugIn configuration error: missing pubSubDomain Property", lEx);
+		}
+	}
+
+	private Boolean getSessionTransacted(JSONObject aJson) {
+		try {
+			return aJson.getBoolean(ConfigurationJms.SESSION_TRANSACTED.getValue());
+		} catch (Exception lEx) {
+			return null;
+		}
+	}
+
+	private Boolean getDeliveryPersistent(JSONObject aJson) {
+		try {
+			return aJson.getBoolean(ConfigurationJms.DELIVERY_PERSISTENT.getValue());
+		} catch (Exception lEx) {
+			return null;
+		}
+	}
+
+	private Integer getSessionAcknowledgeMode(JSONObject aJson) {
+		try {
+			return aJson.getInt(ConfigurationJms.SESSION_ACKNOWLEDGE_MODE.getValue());
+		} catch (Exception lEx) {
+			return null;
 		}
 	}
 
@@ -168,6 +202,8 @@ public class JmsManager {
 		lSender.setConnectionFactory(mConnectionFactories.get(aDestinationIdentifier.getConnectionFactoryName()));
 		lSender.setDefaultDestination(getDestination(aDestinationIdentifier));
 		lSender.setPubSubDomain(aDestinationIdentifier.isPubSubDomain());
+		setSessionAckModeAndSessionTransacted(lSender, aDestinationIdentifier);
+		setDeliveryPersistent(lSender, aDestinationIdentifier);
 		mSenderStore.storeSender(aDestinationIdentifier, lSender);
 		return lSender;
 	}
@@ -180,7 +216,8 @@ public class JmsManager {
 		JmsTemplate lSender = getSender(aInput.mDi);
 		lSender.send(lSender.getDefaultDestination(), new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
-				Message result = session.createTextMessage(aInput.mReqToken.getString(FieldJms.MESSSAGE_PAYLOAD.getValue()));
+				Message result = session.createTextMessage(aInput.mReqToken.getString(FieldJms.MESSSAGE_PAYLOAD
+						.getValue()));
 				try {
 					enrichMessageWithHeaders(result, aInput.mReqToken.getMap(FieldJms.JMS_HEADER_PROPERTIES.getValue()));
 				} catch (JSONException e) {
@@ -279,23 +316,29 @@ public class JmsManager {
 
 	private void createListener(String aConnectionId, Token aToken, DestinationIdentifier aDestinationIdentifier,
 			TokenPlugIn aTokenPlugIn) {
-		initializeListener(JmsListenerContainer.valueOf(createMessageDelegate(aDestinationIdentifier, aTokenPlugIn),
-				mConnectionFactories.get(aDestinationIdentifier.getConnectionFactoryName()),
-				getDestination(aDestinationIdentifier)), aDestinationIdentifier, aConnectionId, aToken);
+		JmsListenerContainer aCont = createJmsListenerContainer(aDestinationIdentifier, aTokenPlugIn);
+		aCont.getMessageConsumerRegistry().addMessagePayloadConsumer(aConnectionId, aToken);
+		initializeJmsListenerContainer(aCont, aDestinationIdentifier);
 	}
 
 	private void createMessageListener(String aConnectionId, Token aToken,
 			DestinationIdentifier aDestinationIdentifier, TokenPlugIn aTokenPlugIn) {
-		initializeMessageListener(JmsListenerContainer.valueOf(
-				createMessageDelegate(aDestinationIdentifier, aTokenPlugIn),
-				mConnectionFactories.get(aDestinationIdentifier.getConnectionFactoryName()),
-				getDestination(aDestinationIdentifier)), aDestinationIdentifier, aConnectionId, aToken);
+		JmsListenerContainer aCont = createJmsListenerContainer(aDestinationIdentifier, aTokenPlugIn);
+		aCont.getMessageConsumerRegistry().addMessageConsumer(aConnectionId, aToken);
+		initializeJmsListenerContainer(aCont, aDestinationIdentifier);
 	}
 
-	private void initializeMessageListener(JmsListenerContainer aJmsListenerContainer,
-			DestinationIdentifier aDestinationIdentifier, String aConnectionId, Token aToken) {
+	private JmsListenerContainer createJmsListenerContainer(DestinationIdentifier aDestinationIdentifier,
+			TokenPlugIn aTokenPlugIn) {
+		return setSessionAckModeAndSessionTransacted(JmsListenerContainer.valueOf(
+				createMessageDelegate(aDestinationIdentifier, aTokenPlugIn),
+				mConnectionFactories.get(aDestinationIdentifier.getConnectionFactoryName()),
+				getDestination(aDestinationIdentifier)), aDestinationIdentifier);
+	}
+
+	private void initializeJmsListenerContainer(JmsListenerContainer aJmsListenerContainer,
+			DestinationIdentifier aDestinationIdentifier) {
 		mMessageListenerStore.storeListener(aDestinationIdentifier, aJmsListenerContainer);
-		aJmsListenerContainer.getMessageConsumerRegistry().addMessageConsumer(aConnectionId, aToken);
 		aJmsListenerContainer.afterPropertiesSet();
 		aJmsListenerContainer.start();
 	}
@@ -314,12 +357,39 @@ public class JmsManager {
 		return lDestination;
 	}
 
-	private void initializeListener(JmsListenerContainer aJmsListenerContainer,
-			DestinationIdentifier aDestinationIdentifier, String aConnectionId, Token aToken) {
-		mMessageListenerStore.storeListener(aDestinationIdentifier, aJmsListenerContainer);
-		aJmsListenerContainer.getMessageConsumerRegistry().addMessagePayloadConsumer(aConnectionId, aToken);
-		aJmsListenerContainer.afterPropertiesSet();
-		aJmsListenerContainer.start();
+	private JmsListenerContainer setSessionAckModeAndSessionTransacted(JmsListenerContainer aJmsListenerContainer,
+			DestinationIdentifier aDi) {
+		DestinationIdentifier lDi = getFromConfig(aDi);
+		aJmsListenerContainer.setSessionAcknowledgeMode(lDi.getSessionAcknowledgeMode());
+		aJmsListenerContainer.setSessionTransacted(lDi.isSessionTransacted());
+		return aJmsListenerContainer;
+	}
+
+	private JmsTemplate setSessionAckModeAndSessionTransacted(JmsTemplate aTemplate, DestinationIdentifier aDi) {
+		DestinationIdentifier lDi = getFromConfig(aDi);
+		aTemplate.setSessionAcknowledgeMode(lDi.getSessionAcknowledgeMode());
+		aTemplate.setSessionTransacted(lDi.isSessionTransacted());
+		return aTemplate;
+	}
+
+	private JmsTemplate setDeliveryPersistent(JmsTemplate aTemplate, DestinationIdentifier aDi) {
+		aTemplate.setDeliveryPersistent(getFromConfig(aDi).getDeliveryPersistent());
+		return aTemplate;
+	}
+
+	private DestinationIdentifier getFromConfig(DestinationIdentifier aDi) {
+		if (null == aDi)
+			return aDi;
+
+		for (DestinationIdentifier lDi : mDIs) {
+			if (lDi.getConnectionFactoryName().equals(aDi.getConnectionFactoryName())
+					&& lDi.getDestinationName().equals(aDi.getDestinationName())
+					&& lDi.isPubSubDomain().equals(aDi.isPubSubDomain())) {
+				return lDi;
+			}
+		}
+
+		return aDi;
 	}
 
 	private void registerConnector(JmsListenerContainer aListener, String aConnectionId, Token aToken) {

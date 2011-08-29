@@ -58,8 +58,6 @@ public class JmsListenerContainer extends DefaultMessageListenerContainer {
 		result.setConnectionFactory(aConnectionFactory);
 		result.setDestination(aDestination);
 		result.setConcurrentConsumers(1);
-		result.setSessionAcknowledgeMode(1);
-		result.setSessionTransacted(true);
 	}
 
 	private void setMessageConsumerRegistry(MessageConsumerRegistry aMessageConsumerRegistry) {
