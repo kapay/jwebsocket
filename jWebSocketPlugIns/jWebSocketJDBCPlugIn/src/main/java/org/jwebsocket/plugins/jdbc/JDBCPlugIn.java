@@ -92,8 +92,12 @@ public class JDBCPlugIn extends TokenPlugIn {
 			mBeanFactory = new ServerXmlBeanFactory(lFSRes, getClass().getClassLoader());
 			mNativeAccess = (NativeAccess) mBeanFactory.getBean("nativeAccess");
 			mSelectSequenceSQL = mNativeAccess.getSelectSequenceSQL();
+			// give a success message to the administrator
+			if (mLog.isInfoEnabled()) {
+				mLog.info("JDBC plug-in successfully loaded.");
+			}
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName() + " instantiation: " + lEx.getMessage());
+			mLog.error(lEx.getClass().getSimpleName() + " at JDBC plug-in instantiation: " + lEx.getMessage());
 		}
 	}
 

@@ -91,6 +91,10 @@ public class SystemPlugIn extends TokenPlugIn {
 		// specify default name space for system plugin
 		this.setNamespace(NS_SYSTEM_DEFAULT);
 		mGetSettings();
+		// give a success message to the administrator
+		if (mLog.isInfoEnabled()) {
+			mLog.info("System plug-in successfully loaded.");
+		}
 	}
 
 	private void mGetSettings() {

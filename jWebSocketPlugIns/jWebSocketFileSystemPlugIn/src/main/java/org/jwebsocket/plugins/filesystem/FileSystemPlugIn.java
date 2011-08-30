@@ -67,10 +67,14 @@ public class FileSystemPlugIn extends TokenPlugIn {
 	public FileSystemPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating file system plug-in...");
+			mLog.debug("Instantiating FileSystem plug-in...");
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_FILESYSTEM);
+		// give a success message to the administrator
+		if (mLog.isInfoEnabled()) {
+			mLog.info("FileSystem plug-in successfully loaded.");
+		}
 	}
 	
 	@Override

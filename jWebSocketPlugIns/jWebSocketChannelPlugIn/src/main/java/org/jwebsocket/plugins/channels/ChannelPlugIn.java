@@ -161,6 +161,10 @@ public class ChannelPlugIn extends TokenPlugIn {
 		this.setNamespace(NS_CHANNELS);
 		// setting up the system channels configure in jWebSocket.xml
 		mChannelManager = ChannelManager.getChannelManager(aConfiguration.getSettings());
+		// give a success message to the administrator
+		if (mLog.isInfoEnabled()) {
+			mLog.info("Channel plug-in successfully loaded.");
+		}
 	}
 
 	/**
@@ -174,11 +178,16 @@ public class ChannelPlugIn extends TokenPlugIn {
 		}
 		try {
 			mChannelManager.startChannels();
+			Map lChannels = mChannelManager.getChannels();
 			if (mLog.isInfoEnabled()) {
-				mLog.info("Channels started.");
+				if( lChannels != null) {
+					mLog.info(lChannels.size() + " channels started.");
+				} else {
+					mLog.info("No channels configured to be started.");
+				}
 			}
 		} catch (ChannelLifeCycleException lEx) {
-			mLog.error("Failed to start channels", lEx);
+			mLog.error("Failed to start channels: " + lEx.getMessage());
 		}
 	}
 

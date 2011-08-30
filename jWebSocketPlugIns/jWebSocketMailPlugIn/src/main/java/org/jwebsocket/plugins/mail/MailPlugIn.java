@@ -55,7 +55,7 @@ public class MailPlugIn extends TokenPlugIn {
 	private static String SMTP_PASSWORD = null;
 	private static final String SMTP_PASSWORD_KEY = "smtp_password";
 	private static Boolean SMTP_POP3BEFORE = false;
-	private static final String SMTP_POP3BEFORE_KEY  = "smtp_pop3before";
+	private static final String SMTP_POP3BEFORE_KEY = "smtp_pop3before";
 	private static String POP3_HOST = null;
 	private static final String POP3_HOST_KEY = "pop3_host";
 	private static Integer POP3_PORT = -1;
@@ -74,11 +74,15 @@ public class MailPlugIn extends TokenPlugIn {
 	public MailPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Instantiating mail plug-in...");
+			mLog.debug("Instantiating Mail plug-in...");
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_MAIL);
 		mGetSettings();
+		// give a success message to the administrator
+		if (mLog.isInfoEnabled()) {
+			mLog.info("Mail plug-in successfully loaded.");
+		}
 	}
 
 	private void mGetSettings() {
@@ -100,7 +104,7 @@ public class MailPlugIn extends TokenPlugIn {
 		String lType = aToken.getType();
 		String lNS = aToken.getNS();
 
-	    if (lType != null && getNamespace().equals(lNS)) {
+		if (lType != null && getNamespace().equals(lNS)) {
 			// select from database
 			if (lType.equals("sendMail")) {
 				sendMail(aConnector, aToken);
@@ -199,10 +203,10 @@ public class MailPlugIn extends TokenPlugIn {
 					/*
 					URL lURL = new URL("http://five-feet-further.com/aschulze/images/portrait_web_kleiner.jpg");
 					String lCID = ((HtmlEmail )lEmail).embed(lURL, "five feet further logo");
-
+					
 					//url = new URL( "http://five-feet-further.com/resources/css/IJX4FWDocu.css" );
 					// String css = ((HtmlEmail)lEmail).embed( url, "name of css" );
-
+					
 					((HtmlEmail )lEmail).setHtmlMsg(
 					"<html><body>" +
 					"<style type=\"text/css\">" +
@@ -222,31 +226,31 @@ public class MailPlugIn extends TokenPlugIn {
 					/*
 					// Now the message body.
 					Multipart mp = new MimeMultipart();
-
+					
 					BodyPart textPart = new MimeBodyPart();
 					// sets type to "text/plain"
 					textPart.setText("Kann Ihr Browser keine HTML-Mails darstellen?");
-
+					
 					BodyPart pixPart = new MimeBodyPart();
 					pixPart.setContent(lMsg, "text/html");
-
+					
 					// Collect the Parts into the MultiPart
 					mp.addBodyPart(textPart);
 					mp.addBodyPart(pixPart);
-
+					
 					// Put the MultiPart into the Message
 					((HtmlEmail) lEmail).setContent((MimeMultipart)mp);
 					((HtmlEmail) lEmail).buildMimeMessage();
-
+					
 					/*
 					// ((HtmlEmail) lEmail).setContent(lMsg, Email.TEXT_HTML);
-
+					
 					// lHeaders.put("Innotrade-Id", "4711-0815");
 					// lHTML.setHeaders(lHeaders);
 					// ((HtmlEmail) lEmail).setCharset("UTF-8");
 					// ((HtmlEmail) lEmail).setMsg(lMsg);
 					lMM.setHeader("Innotrade-Id", "4711-0815");
-
+					
 					// ((HtmlEmail) lEmail).setContent(lTxtMsg, Email.TEXT_PLAIN);
 					 */
 					// String lTxtMsg = "Your Email-Client does not support HTML messages.";

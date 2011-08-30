@@ -38,7 +38,7 @@ import org.jwebsocket.token.Token;
  */
 public class AdminPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logging.getLogger(AdminPlugIn.class);
+	private static Logger mLog = Logging.getLogger(AdminPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_ADMIN = JWebSocketServerConstants.NS_BASE + ".plugins.admin";
 
@@ -47,11 +47,15 @@ public class AdminPlugIn extends TokenPlugIn {
 	 */
 	public AdminPlugIn(PluginConfiguration configuration) {
 		super(configuration);
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating admin plug-in...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating admin plug-in...");
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_ADMIN);
+		// give a success message to the administrator
+		if (mLog.isInfoEnabled()) {
+			mLog.info("Admin plug-in successfully loaded.");
+		}
 	}
 
 	@Override
@@ -82,8 +86,8 @@ public class AdminPlugIn extends TokenPlugIn {
 	private void shutdown(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'shutdown'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'shutdown'...");
 		}
 
 		// check if 'shutdown' command is allowed at all
@@ -115,8 +119,8 @@ public class AdminPlugIn extends TokenPlugIn {
 	private void getConnections(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'getConnections'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'getConnections'...");
 		}
 
 		// check if user is allowed to run 'getConnections' command
@@ -142,7 +146,7 @@ public class AdminPlugIn extends TokenPlugIn {
 			}
 			lResponse.setList("connections", lResultList);
 		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + " on getConnections: " + ex.getMessage());
+			mLog.error(ex.getClass().getSimpleName() + " on getConnections: " + ex.getMessage());
 		}
 		lServer.sendToken(aConnector, lResponse);
 	}
@@ -150,8 +154,8 @@ public class AdminPlugIn extends TokenPlugIn {
 	private void getUserRights(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'getUserRights'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'getUserRights'...");
 		}
 
 		// check if user is allowed to run 'getUserRights' command
@@ -176,7 +180,7 @@ public class AdminPlugIn extends TokenPlugIn {
 				lResponse.setString("msg", "invalid user");
 			}
 		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + " on getUserRights: " + ex.getMessage());
+			mLog.error(ex.getClass().getSimpleName() + " on getUserRights: " + ex.getMessage());
 		}
 
 		lServer.sendToken(aConnector, lResponse);
@@ -185,8 +189,8 @@ public class AdminPlugIn extends TokenPlugIn {
 	private void getUserRoles(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 
-		if (log.isDebugEnabled()) {
-			log.debug("Processing 'getUserRoles'...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'getUserRoles'...");
 		}
 
 		// check if user is allowed to run 'getUserRoles' command
@@ -210,7 +214,7 @@ public class AdminPlugIn extends TokenPlugIn {
 				lResponse.setString("msg", "invalid user");
 			}
 		} catch (Exception ex) {
-			log.error(ex.getClass().getSimpleName() + " on getUserRoles: " + ex.getMessage());
+			mLog.error(ex.getClass().getSimpleName() + " on getUserRoles: " + ex.getMessage());
 		}
 
 		lServer.sendToken(aConnector, lResponse);
