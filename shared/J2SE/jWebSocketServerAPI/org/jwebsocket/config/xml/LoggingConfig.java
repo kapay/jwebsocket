@@ -19,7 +19,7 @@ import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
  * Configuration for logging
- * User: puran
+ * User: puran, aschulze
  *
  * @version $Id: LoggingConfig.java 616 2010-07-01 08:04:51Z fivefeetfurther $
  */
@@ -30,42 +30,87 @@ public class LoggingConfig implements Config {
 	private final String mLevel;
 	private final String mFilename;
 	private final Integer mBufferSize;
+	
+	private final String mLog4JConfigFile;
+	private final Integer mReloadDelay;
 
 	/**
-	 * Costrutor
+	 * Constructor
 	 *
-	 * @param appender the logging appender
-	 * @param pattern  logging pattern
-	 * @param level    the level of logging
-	 * @param filename the log file name
+	 * @param aAppender the logging appender
+	 * @param aPattern  logging pattern
+	 * @param aLevel    the level of logging
+	 * @param aFilename the log file name
+	 * @param aBufferSize 
+	 * @param aLog4JConfigFile  
+	 * @param aReloadDelay
 	 */
-	public LoggingConfig(String appender, String pattern, String level,
-			String filename, Integer aBufferSize) {
-		this.mAppender = appender;
-		this.mPattern = pattern;
-		this.mLevel = level;
-		this.mFilename = filename;
+	public LoggingConfig(String aAppender, String aPattern, String aLevel,
+			String aFilename, Integer aBufferSize, String aLog4JConfigFile, 
+			Integer aReloadDelay) {
+		this.mAppender = aAppender;
+		this.mPattern = aPattern;
+		this.mLevel = aLevel;
+		this.mFilename = aFilename;
 		this.mBufferSize = aBufferSize;
+		this.mLog4JConfigFile = aLog4JConfigFile;
+		this.mReloadDelay = aReloadDelay;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getAppender() {
 		return mAppender;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getPattern() {
 		return mPattern;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getLevel() {
 		return mLevel;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getFilename() {
 		return mFilename;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Integer getBufferSize() {
 		return mBufferSize;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public String getConfigFile() {
+		return mLog4JConfigFile;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Integer getReloadDelay() {
+		return mReloadDelay;
 	}
 
 	/**

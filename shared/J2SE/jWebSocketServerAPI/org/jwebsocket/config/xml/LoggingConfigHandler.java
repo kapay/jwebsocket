@@ -14,17 +14,15 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
-
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.util.List;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.config.ConfigHandler;
 
 /**
  * Handler for the logging configuration
  *
- * @author puran
+ * @author puran, aschulze
  * @version $Id: LoggingConfigHandler.java 616 2010-07-01 08:04:51Z fivefeetfurther $
  */
 public class LoggingConfigHandler implements ConfigHandler {
@@ -35,48 +33,56 @@ public class LoggingConfigHandler implements ConfigHandler {
 	private static final String FILENAME = "filename";
 	private static final String BUFFERSIZE = "buffersize";
 	private static final String ELEMENT_LOG4J = "log4j";
+	private static final String CONFIG_FILE = "config";
+	private static final String RELOAD_DELAY = "reload";
 
 	/**
 	 * {@inheritDoc}
+	 * 
+	 * @param aStreamReader 
 	 */
 	@Override
-	public Config processConfig(XMLStreamReader streamReader)
+	public Config processConfig(XMLStreamReader aStreamReader)
 			throws XMLStreamException {
-		String appender = "", pattern = "", level = "", filename = "";
-		Boolean isBuffered = true;
-		Integer bufferSize = 2048;
-		List<String> loggings = null;
-		while (streamReader.hasNext()) {
-			streamReader.next();
-			if (streamReader.isStartElement()) {
-				String elementName = streamReader.getLocalName();
+		String lAppender = "", lPattern = "", lLevel = "", lFilename = "", lConfigFile = null;
+		Integer lBufferSize = 2048, lReloadDelay = 20000;
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(APPENDER)) {
-					streamReader.next();
-					appender = streamReader.getText();
+					aStreamReader.next();
+					lAppender = aStreamReader.getText();
 				} else if (elementName.equals(PATTERN)) {
-					streamReader.next();
-					pattern = streamReader.getText();
+					aStreamReader.next();
+					lPattern = aStreamReader.getText();
 				} else if (elementName.equals(LEVEL)) {
-					streamReader.next();
-					level = streamReader.getText();
+					aStreamReader.next();
+					lLevel = aStreamReader.getText();
 				} else if (elementName.equals(FILENAME)) {
-					streamReader.next();
-					filename = streamReader.getText();
+					aStreamReader.next();
+					lFilename = aStreamReader.getText();
+				} else if (elementName.equals(CONFIG_FILE)) {
+					aStreamReader.next();
+					lConfigFile = aStreamReader.getText();
 				} else if (elementName.equals(BUFFERSIZE)) {
-					streamReader.next();
-					bufferSize = Integer.parseInt(streamReader.getText());
+					aStreamReader.next();
+					lBufferSize = Integer.parseInt(aStreamReader.getText());
+				} else if (elementName.equals(RELOAD_DELAY)) {
+					aStreamReader.next();
+					lReloadDelay = Integer.parseInt(aStreamReader.getText());
 				} else {
 					//ignore
 				}
 			}
-			if (streamReader.isEndElement()) {
-				String elementName = streamReader.getLocalName();
+			if (aStreamReader.isEndElement()) {
+				String elementName = aStreamReader.getLocalName();
 				if (elementName.equals(ELEMENT_LOG4J)) {
 					break;
 				}
 			}
 		}
-		return new LoggingConfig(appender, pattern, level, filename,
-				bufferSize);
+		return new LoggingConfig(lAppender, lPattern, lLevel, lFilename,
+				lBufferSize, lConfigFile, lReloadDelay);
 	}
 }

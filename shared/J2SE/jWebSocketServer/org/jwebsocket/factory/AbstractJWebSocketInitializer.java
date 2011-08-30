@@ -52,14 +52,20 @@ public abstract class AbstractJWebSocketInitializer implements WebSocketInitiali
 		LoggingConfig lLoggingConfig = jWebSocketConfig.getLoggingConfig();
 		// initialize log4j logging engine
 		// BEFORE instantiating any jWebSocket classes
-		Logging.initLogs(lLoggingConfig.getLevel(), lLoggingConfig.getAppender(), lLoggingConfig.getFilename(),
-				lLoggingConfig.getPattern(), lLoggingConfig.getBufferSize(), new String[]{"%JWEBSOCKET_HOME%/logs",
-					"%CATALINA_HOME%/logs"});
+		Logging.initLogs(lLoggingConfig.getLevel(), lLoggingConfig.getAppender(),
+				lLoggingConfig.getFilename(), lLoggingConfig.getPattern(),
+				lLoggingConfig.getBufferSize(), lLoggingConfig.getConfigFile(),
+				lLoggingConfig.getReloadDelay());
 		mLog = Logging.getLogger(JWebSocketXmlConfigInitializer.class);
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Logging settings" + ": appender: " + lLoggingConfig.getAppender() + ", filename: "
-					+ lLoggingConfig.getFilename() + ", level: " + lLoggingConfig.getLevel() + ", buffersize: "
-					+ lLoggingConfig.getBufferSize() + ", pattern: " + lLoggingConfig.getPattern());
+			mLog.debug("Logging settings"
+					+ ": config: " + lLoggingConfig.getConfigFile()
+					+ ", reload: " + lLoggingConfig.getReloadDelay()
+					+ ", appender: " + lLoggingConfig.getAppender()
+					+ ", filename: " + lLoggingConfig.getFilename()
+					+ ", level: " + lLoggingConfig.getLevel()
+					+ ", buffersize: " + lLoggingConfig.getBufferSize()
+					+ ", pattern: " + lLoggingConfig.getPattern());
 		}
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Starting jWebSocket Server Sub System...");

@@ -23,7 +23,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
+import org.apache.log4j.xml.DOMConfigurator;
 import org.jwebsocket.config.xml.LoggingConfig;
+import org.jwebsocket.util.Tools;
 
 /**
  * Provides the common used jWebSocket logging support based on
@@ -35,7 +37,6 @@ public class Logging {
 	private static PatternLayout mLayout = null;
 	private static Appender mAppender = null;
 	private static Level mLogLevel = Level.DEBUG;
-	private static String[] mSearchPaths = null;
 	/**
 	 * Log output is send to the console (stdout).
 	 */
@@ -62,8 +63,13 @@ public class Logging {
 	 */
 	private static int mBuffersize = 8096; // 8K is log4j default
 	private static int mLogTarget = CONSOLE; // ROLLING_FILE;
+	private static String mConfigFile = null;
+	private static int mReloadDelay = 20000;
+	private final static int MIN_RELOAD_DELAY = 5000;
+	private static boolean mUseDeprecated = false;
+	private static boolean mSettingsLoaded = false;
 
-	private static String getLogsFolderPath(String aFileName, String[] aPaths) {
+	private static String getLogsFolderPath(String aFileName) {
 
 		// try to obtain JWEBSOCKET_HOME environment variable
 		String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
@@ -95,7 +101,6 @@ public class Logging {
 		return lWebSocketLogs;
 	}
 
-	// TODO: Load the conversion pattern and the logging target from a configuration file (e.g. jWebSocket.xml)
 	/**
 	 * Initializes the Apache log4j system to produce the desired logging
 	 * output.
@@ -103,50 +108,62 @@ public class Logging {
 	 *
 	 */
 	private static void checkLogAppender() {
-		if (mLayout == null) {
-			mLayout = new PatternLayout();
-			mLayout.setConversionPattern(mPattern);
-		}
-		if (mAppender == null) {
-			String logsPath = getLogsFolderPath(mFilename, mSearchPaths);
-			if (ROLLING_FILE == mLogTarget && logsPath != null) {
-				try {
-					RollingFileAppender lRFA = new RollingFileAppender(mLayout,
-							logsPath, true /* append, don't truncate */);
-					lRFA.setBufferedIO(mBuffersize > 0);
-					lRFA.setImmediateFlush(true);
-					if (mBuffersize > 0) {
-						lRFA.setBufferSize(mBuffersize);
+
+		if (mUseDeprecated) {
+			if (mLayout == null) {
+				mLayout = new PatternLayout();
+				mLayout.setConversionPattern(mPattern);
+			}
+			if (mAppender == null) {
+				String logsPath = getLogsFolderPath(mFilename);
+				if (ROLLING_FILE == mLogTarget && logsPath != null) {
+					try {
+						RollingFileAppender lRFA = new RollingFileAppender(mLayout,
+								logsPath, true /* append, don't truncate */);
+						lRFA.setBufferedIO(mBuffersize > 0);
+						lRFA.setImmediateFlush(true);
+						if (mBuffersize > 0) {
+							lRFA.setBufferSize(mBuffersize);
+						}
+						lRFA.setEncoding("UTF-8");
+						mAppender = lRFA;
+					} catch (IOException ex) {
+						mAppender = new ConsoleAppender(mLayout);
 					}
-					lRFA.setEncoding("UTF-8");
-					mAppender = lRFA;
-				} catch (IOException ex) {
-					mAppender = new ConsoleAppender(mLayout);
-				}
-			} else if (SINGLE_FILE == mLogTarget && logsPath != null) {
-				try {
-					FileAppender lFA = new FileAppender(mLayout, logsPath,
-							true /* append, don't truncate */);
-					lFA.setBufferedIO(mBuffersize > 0);
-					lFA.setImmediateFlush(true);
-					if (mBuffersize > 0) {
-						lFA.setBufferSize(mBuffersize);
+				} else if (SINGLE_FILE == mLogTarget && logsPath != null) {
+					try {
+						FileAppender lFA = new FileAppender(mLayout, logsPath,
+								true /* append, don't truncate */);
+						lFA.setBufferedIO(mBuffersize > 0);
+						lFA.setImmediateFlush(true);
+						if (mBuffersize > 0) {
+							lFA.setBufferSize(mBuffersize);
+						}
+						lFA.setEncoding("UTF-8");
+						mAppender = lFA;
+					} catch (IOException ex) {
+						mAppender = new ConsoleAppender(mLayout);
 					}
-					lFA.setEncoding("UTF-8");
-					mAppender = lFA;
-				} catch (IOException ex) {
+				} else {
 					mAppender = new ConsoleAppender(mLayout);
-				}
-			} else {
-				mAppender = new ConsoleAppender(mLayout);
-				if (CONSOLE != mLogTarget) {
-					System.out.println("JWEBSOCKET_HOME"
-							+ " variable not set or invalid configuration,"
-							+ " using console output for log file.");
+					if (CONSOLE != mLogTarget) {
+						System.out.println("JWEBSOCKET_HOME"
+								+ " variable not set or invalid configuration,"
+								+ " using console output for log file.");
+					}
 				}
 			}
+		} else {
+			if (!mSettingsLoaded) {
+				String lLog4JConfigFile = Tools.expandEnvVars(mConfigFile);
+				if (mReloadDelay >= MIN_RELOAD_DELAY) {
+					DOMConfigurator.configureAndWatch(lLog4JConfigFile, mReloadDelay);
+				} else {
+					DOMConfigurator.configure(lLog4JConfigFile);
+				}
+				mSettingsLoaded = true;
+			}
 		}
-
 	}
 
 	/**
@@ -157,8 +174,7 @@ public class Logging {
 	 */
 	public static void initLogs(String aLogLevel, String aLogTarget,
 			String aFilename, String aPattern, Integer aBuffersize,
-			String[] aSearchPaths) {
-		mSearchPaths = aSearchPaths;
+			String aConfigFile, Integer aReloadDelay) {
 		if (aLogLevel != null) {
 			mLogLevel = Level.toLevel(aLogLevel);
 		}
@@ -180,10 +196,20 @@ public class Logging {
 		if (aBuffersize != null) {
 			mBuffersize = aBuffersize;
 		}
+		if (aConfigFile != null) {
+			mConfigFile = aConfigFile;
+		}
+		if (aReloadDelay != null) {
+			mReloadDelay = aReloadDelay;
+		}
+
+		// if no config file goven in jWebSocket.xml use deprecate mechanism!
+		mUseDeprecated = mConfigFile == null;
+
 		checkLogAppender();
 	}
 
-	public static void initLogs(LoggingConfig aLoggingConfig, String[] aSearchPaths) {
+	public static void initLogs(LoggingConfig aLoggingConfig) {
 		if (aLoggingConfig != null) {
 			initLogs(
 					aLoggingConfig.getLevel(),
@@ -191,7 +217,8 @@ public class Logging {
 					aLoggingConfig.getFilename(),
 					aLoggingConfig.getPattern(),
 					aLoggingConfig.getBufferSize(),
-					aSearchPaths);
+					aLoggingConfig.getConfigFile(),
+					aLoggingConfig.getReloadDelay());
 		}
 	}
 
@@ -221,11 +248,17 @@ public class Logging {
 	public static Logger getLogger(Class aClass) {
 		checkLogAppender();
 		Logger logger = Logger.getLogger(aClass);
-		logger.addAppender(mAppender);
-		// don't inherit global log4j settings, we intend to configure that
-		// in our own jWebSocket.xml config file.
-		logger.setAdditivity(false);
-		logger.setLevel(mLogLevel);
+
+		if (mUseDeprecated) {
+			logger.addAppender(mAppender);
+			// don't inherit global log4j settings, we intend to configure that
+			// in our own jWebSocket.xml config file.
+			logger.setAdditivity(false);
+			logger.setLevel(mLogLevel);
+		}
+		// otherwise the logger should be initialized properly already
+		// by the configuration file
+
 		return logger;
 	}
 }

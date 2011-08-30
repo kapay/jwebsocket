@@ -60,9 +60,11 @@ public class JWebSocketSubSystemSample {
 				"%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n", // pattern
 				"debug", // level
 				"jWebSocket.log", // file name, if logging to file only
-				4096 // bufferSize, if logging to file only
+				4096, // bufferSize, if logging to file only
+				"log4j.xml", // config file, overrides above settings!
+				20000 // reload delay
 				);
-		Logging.initLogs(lLoggingConfig, new String[]{"%JWEBSOCKET_HOME%/logs", "%CATALINA_HOME%/logs"});
+		Logging.initLogs(lLoggingConfig);
 		mLog = Logging.getLogger(JWebSocketEmbedded.class);
 
 		// initialize the engine
