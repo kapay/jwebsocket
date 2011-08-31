@@ -186,6 +186,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 
  		String lFieldsStr = null;
 		String lValuesStr = null;
+		/*
 		try {
 			List lTest = new ArrayList();
 			lTest.add("test1");
@@ -195,6 +196,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 		} catch (Exception ex) {
 			mLog.error(ex.getClass().getSimpleName() + ": Method 'test' could not be invoked: " + ex.getMessage());
 		}
+		 */
 		try {
 			lFieldsStr = (String) Tools.invokeUnique(JDBCTools, "fieldListToString", lFields);
 		} catch (Exception ex) {

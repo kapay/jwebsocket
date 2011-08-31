@@ -24,6 +24,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.config.xml.LoggingConfig;
 import org.jwebsocket.util.Tools;
 
@@ -72,7 +74,7 @@ public class Logging {
 	private static String getLogsFolderPath(String aFileName) {
 
 		// try to obtain JWEBSOCKET_HOME environment variable
-		String lWebSocketHome = System.getenv("JWEBSOCKET_HOME");
+		String lWebSocketHome = System.getenv(JWebSocketServerConstants.JWEBSOCKET_HOME);
 		String lFileSep = System.getProperty("file.separator");
 		String lWebSocketLogs = null;
 
@@ -147,7 +149,7 @@ public class Logging {
 				} else {
 					mAppender = new ConsoleAppender(mLayout);
 					if (CONSOLE != mLogTarget) {
-						System.out.println("JWEBSOCKET_HOME"
+						System.out.println(JWebSocketServerConstants.JWEBSOCKET_HOME
 								+ " variable not set or invalid configuration,"
 								+ " using console output for log file.");
 					}
@@ -156,6 +158,8 @@ public class Logging {
 		} else {
 			if (!mSettingsLoaded) {
 				String lLog4JConfigFile = Tools.expandEnvVars(mConfigFile);
+				System.setProperty(JWebSocketServerConstants.JWEBSOCKET_HOME,
+						System.getenv(JWebSocketServerConstants.JWEBSOCKET_HOME));
 				if (mReloadDelay >= MIN_RELOAD_DELAY) {
 					DOMConfigurator.configureAndWatch(lLog4JConfigFile, mReloadDelay);
 				} else {

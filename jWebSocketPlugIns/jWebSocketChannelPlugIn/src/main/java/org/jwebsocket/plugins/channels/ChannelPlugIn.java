@@ -180,7 +180,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 			mChannelManager.startChannels();
 			Map lChannels = mChannelManager.getChannels();
 			if (mLog.isInfoEnabled()) {
-				if( lChannels != null) {
+				if (lChannels != null) {
 					mLog.info(lChannels.size() + " channels started.");
 				} else {
 					mLog.info("No channels configured to be started.");
@@ -689,6 +689,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			}
 		}
 
+		// return channelId for client's convenience
+		lResponseToken.setString("channelId", lChannelId);
 		// send the response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
@@ -765,6 +767,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			broadcastToken(aConnector, lChannelCreated, new BroadcastOptions(true, false));
 		}
 
+		// return channelId for client's convenience
+		lResponseToken.setString("channelId", lChannelId);
 		// send the response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}

@@ -88,7 +88,9 @@ public final class WebSocketHandshake {
 			lAccept = Tools.base64Encode(lBufTarget);
 			// lAccept = Base64.encodeBase64String(lBufTarget);
 		} catch (Exception lEx) {
+			/*
 			System.out.println("calcHybiSecKeyNum: " + lEx.getMessage());
+			 */
 		}
 		return lAccept;
 	}
@@ -435,7 +437,9 @@ public final class WebSocketHandshake {
 				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Origin: " + lOrigin + "\r\n"
 				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Location: " + lLocation + "\r\n";
 		lRes += "\r\n";
+		/*
 		System.out.println(lRes);
+		 */
 		byte[] lBA;
 		try {
 			lBA = lRes.getBytes("US-ASCII");

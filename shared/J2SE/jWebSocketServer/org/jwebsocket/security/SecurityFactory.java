@@ -151,8 +151,6 @@ public class SecurityFactory {
 	}
 
 	public static void init() {
-		// System.out.println(
-		//		"JWEBSOCKET_HOME variable not set, using default configuration...");
 		// initialize the security factory with some default demo data
 		// to show at least something even with no config
 		// TODO: only temporary, will be removed in the final release!

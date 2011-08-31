@@ -35,8 +35,8 @@ jws.ChannelPlugIn = {
 	SUBSCRIBE: "subscribe",
 	UNSUBSCRIBE: "unsubscribe",
 	GET_CHANNELS: "getChannels",
-	CREATE_CHANNEL:  "createChannel",
-	REMOVE_CHANNEL:  "removeChannel",
+	CREATE_CHANNEL: "createChannel",
+	REMOVE_CHANNEL: "removeChannel",
 	GET_SUBSCRIBERS: "getSubscribers",
 	GET_SUBSCRIPTIONS: "getSubscriptions",
 
@@ -255,7 +255,6 @@ jws.ChannelPlugIn = {
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:a:en::aAccessKey:String:Access Key for the channel (required for private channels, optional for public channels).
 	//:r:*:::void:none
-	// TODO: introduce OnResponse here too to get noticed on error or success.
 	channelGetSubscribers: function( aChannel, aAccessKey, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
@@ -275,7 +274,6 @@ jws.ChannelPlugIn = {
 	//:d:en:the channels are not returned due to security reasons.
 	//:a:en:::none
 	//:r:*:::void:none
-	// TODO: introduce OnResponse here too to get noticed on error or success.
 	channelGetSubscriptions: function( aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
@@ -287,19 +285,17 @@ jws.ChannelPlugIn = {
 		return lRes;
 	},
 
-
-	//:m:*:channelPublish
-	//:d:en:Tries to obtain all id of the channels
+	//:m:*:channelGetIds
+	//:d:en:Tries to obtain all ids of the public channels
 	//:a:en:::none
 	//:r:*:::void:none
-	// TODO: introduce OnResponse here too to get noticed on error or success.
 	channelGetIds: function( aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.GET_CHANNELS
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},

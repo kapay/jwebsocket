@@ -79,12 +79,12 @@ public class ReportingPlugIn extends TokenPlugIn {
 	}
 
 	private void mGetSettings() {
-		mReportFolder = getString("reportFolder", "${JWEBSOCKET_HOME}/reports");
+		mReportFolder = getString("reportFolder", "${" + JWebSocketServerConstants.JWEBSOCKET_HOME + "}/reports");
 		mReportFolder = FilenameUtils.separatorsToUnix(Tools.expandEnvVars(mReportFolder));
 		if (!mReportFolder.endsWith("/")) {
 			mReportFolder += "/";
 		}
-		mOutputFolder = getString("outputFolder", "${JWEBSOCKET_HOME}/reports");
+		mOutputFolder = getString("outputFolder", "${" + JWebSocketServerConstants.JWEBSOCKET_HOME + "}/reports");
 		mOutputFolder = FilenameUtils.separatorsToUnix(Tools.expandEnvVars(mOutputFolder));
 		if (!mOutputFolder.endsWith("/")) {
 			mOutputFolder += "/";
@@ -198,7 +198,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 			}
 		}
 		lParams.put("IMAGE_PATH", mReportFolder);
-		
+
 		// instantiate response token
 		lResponse = lServer.createResponse(aToken);
 

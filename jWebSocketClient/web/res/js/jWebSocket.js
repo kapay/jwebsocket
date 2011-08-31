@@ -35,9 +35,9 @@ if( window.MozWebSocket ) {
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b1 (10830)
+	//:const:*:VERSION:String:1.0b1 (10831)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b1 (10830)",
+	VERSION: "1.0b1 (10831)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -2328,6 +2328,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			var lSpawnThread = false;
 			var lL2FragmSize = 0;
 			var lTimeout = jws.DEF_RESP_TIMEOUT;
+			var lKeepRequest = false;
 			var lArgs = null;
 			var lCallbacks = {
 				OnResponse: null,
@@ -2367,6 +2368,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				if( aOptions.fragmentSize ) {
 					lL2FragmSize = aOptions.fragmentSize;
 				}
+				if( aOptions.keepRequest ) {
+					lKeepRequest = true;
+				}
 			}
 			jws.CUR_TOKEN_ID++;
 			if( lControlResponse ) {
@@ -2379,6 +2383,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					args: lArgs,
 					timeout: lTimeout
 				};
+				if( lKeepRequest ) {
+					lClbkRec.request = aToken;
+				}
 				this.fRequestCallbacks[ lClbkId ] = lClbkRec;
 				// set timeout to observe response
 				lClbkRec.hCleanUp = setTimeout( function() {

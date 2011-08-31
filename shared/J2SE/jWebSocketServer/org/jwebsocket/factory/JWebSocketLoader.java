@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.jwebsocket.api.WebSocketInitializer;
 import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.config.xml.JWebSocketConfigHandler;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.security.SecurityFactory;
@@ -57,8 +58,12 @@ public final class JWebSocketLoader {
 			lConfigPath = JWebSocketConfig.getConfigurationPath();
 		}
 		if (lConfigPath == null) {
-			throw new WebSocketException("Either JWEBSOCKET_HOME variable is not set"
-					+ " or jWebSocket.xml file does neither exist at %JWEBSOCKET_HOME%/conf" + " nor at %CLASSPATH%/conf.");
+			throw new WebSocketException("Either "
+					+ JWebSocketServerConstants.JWEBSOCKET_HOME
+					+ " variable is not set"
+					+ " or jWebSocket.xml file does neither exist at ${"
+					+ JWebSocketServerConstants.JWEBSOCKET_HOME
+					+ "}/conf nor at ${CLASSPATH}/conf.");
 		}
 		// load the entire settings from the configuration xml file
 		JWebSocketConfig lConfig = loadConfiguration(lConfigPath);

@@ -40,24 +40,18 @@ public class EngineUtils {
 		String lDraft = (String) lRespMap.get(RequestHeader.WS_DRAFT);
 		Integer lVersion = (Integer) lRespMap.get(RequestHeader.WS_VERSION);
 
-		if (WebSocketProtocolAbstraction.isValidDraft(lDraft)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Client uses draft #" + lDraft + " for protocol communication.");
-			}
-		} else {
+		// run validation
+		if (!WebSocketProtocolAbstraction.isValidDraft(lDraft)) {
 			logger.error("Error in Handshake: Draft #'" + lDraft + "' not supported.");
 			return null;
 		}
-
-		if (WebSocketProtocolAbstraction.isValidVersion(lVersion)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Client uses version #" + lVersion + " for protocol communication.");
-			}
-		} else {
+		if (!WebSocketProtocolAbstraction.isValidVersion(lVersion)) {
 			logger.error("Error in Handshake: Version #'" + lVersion + "' not supported.");
 			return null;
 		}
-
+		if (logger.isDebugEnabled()) {
+			logger.debug("Client uses websocket protocol version #" + lVersion + "/draft #" + lDraft + " for communication.");
+		}
 
 		RequestHeader lHeader = new RequestHeader();
 		Map<String, String> lArgs = new HashMap<String, String>();

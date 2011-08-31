@@ -335,8 +335,8 @@ public class TCPEngine extends BaseEngine {
 
 		/* please keep comment for debugging purposes! */
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Handshake Request:\n" + new String(lReq));
-			mLog.debug("Parsing initial WebSocket handshake...");
+			mLog.debug("Parsing handshake request: " + new String(lReq).replace("\r\n", "\\n"));
+			// mLog.debug("Parsing initial WebSocket handshake...");
 		}
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(
 				lReq,
@@ -358,8 +358,8 @@ public class TCPEngine extends BaseEngine {
 
 		/* please keep comment for debugging purposes!*/
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Handshake Response:\n" + new String(lBA));
-			mLog.debug("Flushing initial WebSocket handshake...");
+			mLog.debug("Flushing handshake response: " + new String(lBA).replace("\r\n", "\\n"));
+			// mLog.debug("Flushing initial WebSocket handshake...");
 		}
 
 		lOut.write(lBA);

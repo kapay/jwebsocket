@@ -95,7 +95,7 @@ function runFullTestSuite() {
 
 		// run JMS tests
 		jws.tests.JMS.runSuite();
-		
+	   
 		// run Channel tests
 		jws.tests.Channels.runSuite();
 		
@@ -104,7 +104,7 @@ function runFullTestSuite() {
 		
 		// run JDBC tests
 		jws.tests.JDBC.runSuite();
-		
+	   
 		// close connections for admin and guest
 		jws.Tests.testCloseSharedAdminConn();
 		jws.Tests.testCloseSharedGuestConn();
