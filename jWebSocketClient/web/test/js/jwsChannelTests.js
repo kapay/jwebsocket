@@ -292,105 +292,160 @@ jws.tests.Channels = {
 		
 		it( lSpec, function () {
 
-			var lPubCnt = 3;
-			var lSubCnt = 6;
-			var lPubsCreated = 0;
+			var lPubCnt = 3, lPubIdx;
+			var lSubCnt = 9, lSubIdx;
+			var lPubsCreated = 0, lSubsCreated = 0;
 
 			var lPubs = [];
 			var lSubs = [];
-			
 			var lPub, lSub;
 			
-			var lLoggedIn = 0, lChannelId = 0;
+			var lChannelId = 0;
+			var lChId;
+			var lPacketsReceived = 0;
 
-			// first create a number of publishers
-			for( var lPubIdx = 0; lPubIdx < lPubCnt; lPubIdx++ ) {
-				lPub = new jws.jWebSocketJSONClient();
-				lPubs[ lPubIdx ] = {
-					client: lPub, 
-					status: jws.tests.Channels.INIT
-				};
-				
-				lPub.logon( jws.getDefaultServerURL(), jws.Tests.ADMIN_USER, jws.Tests.ADMIN_PWD, {
-					OnToken: function ( aToken ) {
-						if( "org.jwebsocket.plugins.system" == aToken.ns
-							&& "login" == aToken.reqType) {
-							lLoggedIn++;
-							lChannelId++;
-							var lChId = "ch_" + lChannelId;
-							console.log( "Creating channel " + lChId + "..." );
-							this.channelCreate( 
-								"ch_" + lChannelId, 
-								"channel_" + lChannelId, 
-								{
-									isPrivate: false,
-									isSystem: false,
-									accessKey: "testAccessKey",
-									secretKey: "testSecretKey"
-								}
+			var lCreateSubs = function() {
+				// now create the given number of subscribers
+				for( lSubIdx = 0; lSubIdx < lSubCnt; lSubIdx++ ) {
+					lSub = new jws.jWebSocketJSONClient();
+					// use parameter to easily access channel id in listener
+					lSub.setParamNS( jws.tests.Channels.NS, "listenOn", "ch_" + ( ( lSubIdx % lPubCnt ) + 1 ) );
+					lSubs[ lSubIdx ] = {
+						client: lSub,
+						status: jws.tests.Channels.INIT
+					};
+					lSub.logon( jws.getDefaultServerURL(), jws.Tests.ADMIN_USER, jws.Tests.ADMIN_PWD, {
+						OnToken: function ( aToken ) {
+							// jws.console.log( "Subscriber Token: " + JSON.stringify( aToken ) );
+							// once logged in subscribe each client to a certain publisher
+							if( "org.jwebsocket.plugins.system" == aToken.ns
+								&& "login" == aToken.reqType) {
+								// use parameter to access channel id to subscribe to
+								lChId = this.getParamNS( jws.tests.Channels.NS, "listenOn" );
+								jws.console.log( "Subscribing at channel " + lChId + "..." );
+								this.channelSubscribe( 
+									lChId, 
+									"testAccessKey"
 								);
-						} else if( "org.jwebsocket.plugins.channels" == aToken.ns
-							&& "createChannel" == aToken.reqType) {
-							lPubsCreated++;
-							console.log( "Channel " + aToken.channelId + " created.");
-							this.channelAuth( 
-								aToken.channelId, 
-								"testAccessKey",
-								"testSecretKey",
-								{
-									OnResponse: function( aToken ) {
-										console.log( "Removed Channel " + aToken.channelId );
+							// once all subscribers are allocated the publishers can fire		
+							} else if( jws.ChannelPlugIn.NS == aToken.ns
+								&& "subscribe" == aToken.reqType
+								// && 0 == aToken.code
+								) {
+								lSubsCreated++;
+
+								jws.console.log( "Subscription at channel " + aToken.channelId + ": " + aToken.code + " " + aToken.msg );
+
+								if( lSubsCreated == lSubCnt ) {
+									// now we can start the publish and receive test
+									for( lPubIdx = 0; lPubIdx < lPubCnt; lPubIdx++ ) {
+										lPub = lPubs[ lPubIdx ].client;
+										lChId = "ch_" + ( lPubIdx + 1 );
+										jws.console.log( "Publishing at channel " + lChId + "..." );
+										lPub.channelPublish( lChId, "Test", {
+											OnResponse: function ( aToken ) {
+												jws.console.log( "Publish Response: " + JSON.stringify( aToken ) );
+											}
+										});
 									}
-								}
+								}	
+							} else if( jws.ChannelPlugIn.NS == aToken.ns
+								&& "data" == aToken.type) {
+								jws.console.log( "Received data from" 
+									+ " channel " + aToken.channelId 
+									+ ", publisher: " + aToken.publisher 
+									+ ": '" + aToken.data + "'." );
+								lPacketsReceived++;
+							}
+
+						}
+					});
+				}
+			}	
+
+			var lCreatePubs = function() {
+				// first create the given number of publishers
+				for( lPubIdx = 0; lPubIdx < lPubCnt; lPubIdx++ ) {
+					lPub = new jws.jWebSocketJSONClient();
+					lPubs[ lPubIdx ] = {
+						client: lPub, 
+						status: jws.tests.Channels.INIT
+					};
+
+					lPub.logon( jws.getDefaultServerURL(), jws.Tests.ADMIN_USER, jws.Tests.ADMIN_PWD, {
+						OnToken: function ( aToken ) {
+							// once logged in the channel can be created
+							if( "org.jwebsocket.plugins.system" == aToken.ns
+								&& "login" == aToken.reqType) {
+								lChannelId++;
+								var lChId = "ch_" + lChannelId;
+								jws.console.log( "Creating channel " + lChId + "..." );
+								this.channelCreate( 
+									"ch_" + lChannelId, 
+									"channel_" + lChannelId, 
+									{
+										isPrivate: false,
+										isSystem: false,
+										accessKey: "testAccessKey",
+										secretKey: "testSecretKey"
+									}
 								);
-						} else if( "org.jwebsocket.plugins.channels" == aToken.ns
-							&& "removeChannel" == aToken.reqType) {
-							// once channel is removed the connectioncan be closed
-							console.log( "Channel " + aToken.channelId + " removed.");
-							if( aToken.channelId.substr( 0, 3 ) == "ch_" ) {
-								this.close();
-							}	
+							// once channel is created authenticate for publishing
+							} else if( jws.ChannelPlugIn.NS == aToken.ns
+								&& "createChannel" == aToken.reqType) {
+								lPubsCreated++;
+								jws.console.log( "Channel " + aToken.channelId + " created.");
+								this.channelAuth( 
+									aToken.channelId, 
+									"testAccessKey",
+									"testSecretKey",
+									{
+										OnResponse: function( aToken ) {
+											jws.console.log( "Channel " + aToken.channelId + " authenticated." );
+											if( lPubsCreated == lPubCnt ) {
+												// lCreateSubs();
+											}
+										}
+									}
+									);
+							// once channel is removed close connection
+							} else if( jws.ChannelPlugIn.NS == aToken.ns
+								&& "removeChannel" == aToken.reqType) {
+								// once channel is removed the connection can be closed
+								jws.console.log( "Channel " + aToken.channelId + " removed.");
+								if( aToken.channelId.substr( 0, 3 ) == "ch_" ) {
+									this.close({ timeout: 1000 });
+								}	
+							}
 						}
-					}
-				});
-			}
+					});
+				}
+			}	
 			
-			// now create a number of subscribers
-			
-			for( var lSubIdx = 0; lSubIdx < lSubCnt; lSubIdx++ ) {
-				lSub = new jws.jWebSocketJSONClient();
-				lSubs[ lSubIdx ] = {
-					client: lSub,
-					status: jws.tests.Channels.INIT
-				};
-				lSub.logon( jws.getDefaultServerURL(), jws.Tests.ADMIN_USER, jws.Tests.ADMIN_PWD, {
-					OnToken: function ( aToken ) {
-						if( "org.jwebsocket.plugins.system" == aToken.ns
-							&& "login" == aToken.reqType) {
-							lLoggedIn++;
-						}
-					}
-				});
-			}
-		   
+			// create all publishers
+			lCreatePubs();
+			// give server a bit to start all channels
+			// TODO: improve! this should be done by events! not by hardcoded timeout!
+			setTimeout( lCreateSubs, 500 );
+
 			waitsFor(
 				function() {
-					// return( lLoggedIn == lPubCnt + lSubCnt );
-					return( lPubsCreated == lPubCnt );
+					return( 
+						lPubsCreated == lPubCnt
+						&& lPacketsReceived == lSubCnt
+					);
 				},
 				lSpec,
 				3000
-				);
+			);
 
 			runs( function() {
-				// expect( lLoggedIn ).toEqual( lPubCnt + lSubCnt );
-				
 				var lClient;
 				// remove created channels and close opened connections
 				for( var lPubIdx = 0; lPubIdx < lPubCnt; lPubIdx++ ) {
 					lClient = lPubs[ lPubIdx ].client;
-					var lChId = "ch_" + (lPubIdx + 1);
-					console.log( "Removing channel " + lChId + "..." );
+					lChId = "ch_" + (lPubIdx + 1);
+					jws.console.log( "Removing channel " + lChId + "..." );
 					lClient.channelRemove( 
 						lChId, 
 						{
@@ -402,11 +457,12 @@ jws.tests.Channels = {
 						}
 						);
 				}
-				/*
+				
 				for( var lSubIdx = 0; lSubIdx < lSubCnt; lSubIdx++ ) {
-					lSubs[ lSubIdx ].client.close();
+					var lChId = "ch_" + (lSubIdx + 1);
+					jws.console.log( "Closing subscriber ch_" + lChId + "..." );
+					lSubs[ lSubIdx ].client.close({ timeout: 1000 });
 				}
-			 */
 			   
 				expect( lPubsCreated ).toEqual( lPubCnt );
 			});
@@ -467,7 +523,7 @@ jws.tests.Channels = {
 				}
 			},
 			1
-			);
+		);
 
 		// testing unsubscribing from existing, pre-defined channels
 		jws.tests.Channels.testUnsubscribe( "systemA", "access" );
@@ -477,7 +533,7 @@ jws.tests.Channels = {
 			{
 			},
 			0
-			);
+		);
 
 		// creating new public channels
 		jws.tests.Channels.testChannelCreate( "myPubSec", "myPublicSecure", "myPublicAccess", "myPublicSecret", false, false, 
@@ -558,6 +614,7 @@ jws.tests.Channels = {
 			"Removing private channel that should alredy have been removed (invalid)", -1 );
 		jws.tests.Channels.testChannelRemove( "myPrivUnsec", "", "",
 			"Removing channel that should never have existed (invalid)", -1 );
+			
 	},
 
 	runSuite: function() {

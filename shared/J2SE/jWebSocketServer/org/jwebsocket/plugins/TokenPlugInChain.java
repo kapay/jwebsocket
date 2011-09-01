@@ -60,7 +60,9 @@ public class TokenPlugInChain extends BasePlugInChain {
 					mLog.error("(plug-in '"
 							+ ((TokenPlugIn) lPlugIn).getNamespace() + "') "
 							+ lEx.getClass().getSimpleName() + ": "
-							+ lEx.getMessage());
+							+ lEx.getMessage()
+							+ ", token: " + aToken.toString()
+					);
 				}
 				if (lPlugInResponse.isChainAborted()) {
 					break;

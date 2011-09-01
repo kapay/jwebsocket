@@ -66,7 +66,6 @@ public class TCPConnector extends BaseConnector {
 		mLogInfo = isSSL() ? SSL_LOG : TCP_LOG;
 		try {
 			mIn = mClientSocket.getInputStream();
-			// mOut = new PrintStream(mClientSocket.getOutputStream(), true, "UTF-8");
 			mOut = mClientSocket.getOutputStream();
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
@@ -149,15 +148,21 @@ public class TCPConnector extends BaseConnector {
 	@Override
 	public synchronized void sendPacket(WebSocketPacket aDataPacket) {
 		try {
-			if (isHixie()) {
-				sendHixie(aDataPacket);
+			if (mClientSocket.isConnected()) {
+				if (isHixie()) {
+					sendHixie(aDataPacket);
+				} else {
+					sendHybi(getVersion(), aDataPacket);
+				}
+				mOut.flush();
 			} else {
-				sendHybi(getVersion(), aDataPacket);
+				mLog.error("Trying to send to closed connection: " 
+						+ getId() + ", " + aDataPacket.getUTF8());
 			}
-			mOut.flush();
 		} catch (IOException lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
-					+ " sending data packet: " + lEx.getMessage());
+					+ " sending data packet: " + lEx.getMessage()
+					+ ", data: " + aDataPacket.getUTF8());
 		}
 	}
 
@@ -203,7 +208,6 @@ public class TCPConnector extends BaseConnector {
 				// (e.g. to release client from streams)
 				lEngine.connectorStopped(mConnector, mCloseReason);
 
-				// br.close();
 				mIn.close();
 				mOut.close();
 				mClientSocket.close();
@@ -266,8 +270,14 @@ public class TCPConnector extends BaseConnector {
 			while (mIsRunning) {
 				try {
 					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(getVersion(), mIn);
-
-					if (WebSocketFrameType.TEXT.equals(lPacket.getFrameType())) {
+					
+					if( lPacket == null ) {
+						if (mLog.isDebugEnabled()) {
+							mLog.debug("Processing client 'disconnect'...");
+						}
+						mCloseReason = CloseReason.CLIENT;
+						mIsRunning = false;
+					} else if (WebSocketFrameType.TEXT.equals(lPacket.getFrameType())) {
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Processing 'text' frame...");
 						}
@@ -296,11 +306,11 @@ public class TCPConnector extends BaseConnector {
 						}
 					}
 				} catch (SocketTimeoutException lEx) {
-					mLog.error("(timeout) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+					mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 					mCloseReason = CloseReason.TIMEOUT;
 					mIsRunning = false;
 				} catch (Exception lEx) {
-					mLog.error("(other) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+					mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 					mCloseReason = CloseReason.SERVER;
 					mIsRunning = false;
 				}

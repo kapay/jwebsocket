@@ -244,7 +244,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			lDisconnect.setInteger("clientCount", getConnectorCount());
 
 			// broadcast to all except source
-			broadcastToken(aConnector, lDisconnect);
+			// broadcastToken(aConnector, lDisconnect);
 		}
 	}
 
@@ -412,7 +412,10 @@ public class SystemPlugIn extends TokenPlugIn {
 					}
 				}
 				if (mLog.isInfoEnabled()) {
-					mLog.info("User '" + lUsername + "' successfully logged in.");
+					mLog.info("User '" + lUsername 
+							+ "' successfully logged in from " 
+							+ aConnector.getRemoteHost() + " ("
+							+ aConnector.getId() + ").");
 				}
 			} else {
 				mLog.warn("Attempt to login with invalid credentials, username: '" + lUsername + "'.");

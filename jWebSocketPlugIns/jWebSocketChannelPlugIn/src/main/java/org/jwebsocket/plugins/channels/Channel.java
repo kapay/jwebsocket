@@ -21,10 +21,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javolution.util.FastList;
+import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.security.Right;
 import org.jwebsocket.security.Rights;
 import org.jwebsocket.security.SecurityFactory;
@@ -66,6 +68,8 @@ import org.jwebsocket.token.Token;
  */
 public final class Channel implements ChannelLifeCycle {
 
+	/** logger */
+	private static Logger mLog = Logging.getLogger(Channel.class);
 	private String mId;
 	private String mName;
 	private boolean mIsPrivate;
@@ -371,10 +375,16 @@ public final class Channel implements ChannelLifeCycle {
 					public void run() {
 						TokenServer lTS = JWebSocketFactory.getTokenServer();
 						WebSocketConnector lConnector = lTS.getConnector(lSubscriber);
-						lTS.sendTokenAsync(lConnector, aToken);
+						if (lConnector != null) {
+							lTS.sendTokenAsync(lConnector, aToken);
+						} else {
+							mLog.warn("Trying to asynchronously broadcast token to unknown subscriber '" 
+									+ lSubscriber + "' " + aToken.toString() + ".");
+						}
 					}
 				});
 			}
+			// TODO: aopprove this weird async implementation
 			try {
 				lExecutor.awaitTermination(1, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
@@ -390,7 +400,12 @@ public final class Channel implements ChannelLifeCycle {
 			TokenServer lTS = JWebSocketFactory.getTokenServer();
 			for (final String lSubscriber : mSubscribers) {
 				WebSocketConnector lConnector = lTS.getConnector(lSubscriber);
-				lTS.sendToken(lConnector, aToken);
+				if (lConnector != null) {
+					lTS.sendToken(lConnector, aToken);
+				} else {
+					mLog.warn("Trying to broadcast token to unknown subscriber '" 
+							+ lSubscriber + "' " + aToken.toString() + ".");
+				}
 			}
 		}
 	}

@@ -75,7 +75,7 @@ function runFullTestSuite() {
 	describe( "jWebSocket Test Suite", function () {
 
 		var lTestSSL = false;
-
+		
 		// open connections for admin and guest
 		jws.Tests.testOpenSharedAdminConn();
 		jws.Tests.testOpenSharedGuestConn();
@@ -83,7 +83,7 @@ function runFullTestSuite() {
 			jws.Tests.testOpenSharedAdminConnSSL();
 			jws.Tests.testOpenSharedGuestConnSSL();
 		}
-
+	
 		// run test suites for the various plug-ins
 		jws.tests.System.runSuite();
 		jws.tests.FileSystem.runSuite();
@@ -95,16 +95,16 @@ function runFullTestSuite() {
 
 		// run JMS tests
 		jws.tests.JMS.runSuite();
-	   
+   
 		// run Channel tests
 		jws.tests.Channels.runSuite();
-		
+	
 		// run Streaming tests
 		jws.tests.Streaming.runSuite();
 		
 		// run JDBC tests
 		jws.tests.JDBC.runSuite();
-	   
+
 		// close connections for admin and guest
 		jws.Tests.testCloseSharedAdminConn();
 		jws.Tests.testCloseSharedGuestConn();

@@ -26,12 +26,16 @@ import org.jwebsocket.plugins.TokenPlugIn;
  */
 public class ChatPlugIn extends TokenPlugIn {
 
-	private static Logger log = Logging.getLogger(ChatPlugIn.class);
+	private static Logger mLog = Logging.getLogger(ChatPlugIn.class);
 
 	public ChatPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
-		if (log.isDebugEnabled()) {
-			log.debug("Instantiating chat plug-in...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Instantiating chat plug-in...");
+		}
+
+		if (mLog.isInfoEnabled()) {
+			mLog.info("Chat plug-in successfully loaded.");
 		}
 	}
 }

@@ -197,6 +197,15 @@ var jws = {
 	//:d:en:Guest user password is "guest" (if not changed on the server).
 	GUEST_USER_PASSWORD: "guest",
 
+	//:const:*:DEMO_ADMIN_LOGINNAME:String:root
+	//:d:en:Root user login name is "root" (if not changed on the server).
+	//:d:en:FOR DEMO AND DEBUG PURPOSES ONLY! NEVER SAVE PRODUCTION ROOT CREDENTIALS HERE!
+	DEMO_ROOT_LOGINNAME: "root",
+	//:const:*:DEMO_ADMIN_PASSWORD:String:root
+	//:d:en:Root user password is "root" (if not changed on the server).
+	//:d:en:FOR DEMO AND DEBUG PURPOSES ONLY! NEVER SAVE PRODUCTION ROOT CREDENTIALS HERE!
+	DEMO_ROOT_PASSWORD: "root",
+	
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
 	//:d:en:Returns the first HTML element with the given id or [tt]null[/tt] _
@@ -534,7 +543,33 @@ var jws = {
 	//:r:en::isPocketIE:Boolean:true, if Browser is Pocket Internet Explorer, otherwise false.
 	isPocketIE: function() {
 		return this.fIsPocketIE;
-	}
+	},
+
+	console: {
+		
+		isActive: false,
+	
+		log: function( aMsg ) {
+			if( window.console && jws.console.isActive ) {
+				console.log( aMsg );
+			}
+		},
+		info: function( aMsg ) {
+			if( window.console && jws.console.isActive ) {
+				console.info( aMsg );
+			}
+		},
+		warn: function( aMsg ) {
+			if( window.console && jws.console.isActive ) {
+				console.warn( aMsg );
+			}
+		},
+		error: function( aMsg ) {
+			if( window.console && jws.console.isActive ) {
+				console.error( aMsg );
+			}
+		}
+	}	
 
 };
 
@@ -727,7 +762,6 @@ var jws = {
 	}
 }());
 	
-
 
 //:package:*:jws.events
 //:class:*:jws.events
@@ -1350,7 +1384,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			this.fReliabilityOptions = jws.RO_OFF;
 		}
 	},
-
+	
 	//:m:*:processOpened
 	//:d:en:Called when the WebSocket connection successfully was established. _
 	//:d:en:Can to be overwritten in descendant classes to process _
@@ -1867,6 +1901,71 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				}
 			}
 */
+		}
+	},
+
+	//:m:*:setParam
+	//:d:en:Sets a certain parameter for the jWebSocket client instance. _
+	//:d:en:Here you can add parameters you need for instance within events fired by this instance.
+	//:d:en:To avoid name space conflicts you should prefer the setParamNS method.
+	//:a:en::aKey:String:The name for the parameter.
+	//:a:en::aValue:Object:The value for the parameter, can also be an object.
+	//:r:*:::Object:Previous value of the parameter if such, otherwise null.
+	setParam: function( aKey, aValue ) {
+		if( !this.fParams ) {
+			this.fParams = {};
+		}
+		var lOldValue = this.getParam( aKey );
+		this.fParams[ aKey ] = aValue;
+		return lOldValue;
+	},
+
+	//:m:*:getParam
+	//:d:en:Gets the value for certain parameter of the jWebSocket client instance. _
+	//:d:en:If no value is stored for the given parameter [tt]null[/tt] is returned.
+	//:d:en:To avoid name space conflicts you should prefer the getParamNS method.
+	//:a:en::aKey:String:The name for the parameter for which the value should be returned.
+	//:r:*:::Object:Value of the parameter if such, otherwise null.
+	getParam: function( aKey ) {
+		if( !this.fParams ) {
+			return null;
+		}
+		var lRes = this.fParams[ aKey ];
+		if( lRes === undefined ) {
+			return null;
+		}
+		return lRes;
+	},
+
+	//:m:*:setParamNS
+	//:d:en:Sets a certain parameter for the jWebSocket client instance. _
+	//:d:en:Here you can add parameters you need for instance within events fired by this instance.
+	//:a:en::aNS:String:The name space for the parameter.
+	//:a:en::aKey:String:The name for the parameter.
+	//:a:en::aValue:Object:The value for the parameter, can also be an object.
+	//:r:*:::Object:Previous value of the parameter if such, otherwise null.
+	setParamNS: function( aNS, aKey, aValue ) {
+		return this.setParam( aNS + "." + aKey, aValue );
+	},
+
+	//:m:*:getParam
+	//:d:en:Gets the value for certain parameter of the jWebSocket client instance. _
+	//:d:en:If no value is stored for the given parameter [tt]null[/tt] is returned.
+	//:a:en::aNS:String:The name space for the parameter.
+	//:a:en::aKey:String:The name for the parameter for which the value should be returned.
+	//:r:*:::Object:Value of the parameter if such, otherwise null.
+	getParamNS: function( aNS, aKey ) {
+		return this.getParam( aNS + "." + aKey );
+	},
+	
+	//:m:*:clearParams
+	//:d:en:Resets all params of this jWebSocket client. _
+	//:d:en:After this operation all params are removed and cannot be used anymore.
+	//:a:en::::none
+	//:r:*:::void:none
+	clearParams: function() {
+		if( this.fParams ) {
+			delete this.fParams;
 		}
 	}
 

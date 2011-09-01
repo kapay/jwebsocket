@@ -193,7 +193,8 @@ public class WebSocketProtocolAbstraction {
 		// begin normal packet read
 		int lFlags = aIS.read();
 		if (lFlags == -1) {
-			throw new WebSocketException("Stream closed.");
+			return null;
+//			throw new WebSocketException("Stream closed.");
 		}
 
 		// TODO: handle if stream gets closed within this method!

@@ -405,6 +405,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			mChannelManager.storeChannel(lChannel);
 		}
 
+		// return channelId for client's convenience
+		lResponseToken.setString("channelId", lChannelId);
 		// send the success response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
@@ -465,6 +467,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			return;
 		}
 
+		// return channelId for client's convenience
+		lResponseToken.setString("channelId", lChannelId);
 		// send the success response
 		sendToken(aConnector, aConnector, lResponseToken);
 	}
@@ -579,6 +583,10 @@ public class ChannelPlugIn extends TokenPlugIn {
 
 				Token lResponseToken = createResponse(aToken);
 				// mChannelManager.publishToLoggerChannel(lResponseToken);
+
+				// return channelId for client's convenience
+				lResponseToken.setString("channelId", lChannelId);
+
 				// send the success response
 				sendToken(aConnector, aConnector, lResponseToken);
 			}
@@ -607,6 +615,8 @@ public class ChannelPlugIn extends TokenPlugIn {
 			return;
 		}
 		Token lResponseToken = createResponse(aToken);
+		// return channelId for client's convenience
+		lResponseToken.setString("channelId", lChannelId);
 		// send the response
 		sendToken(aConnector, aConnector, lResponseToken);
 
@@ -614,6 +624,9 @@ public class ChannelPlugIn extends TokenPlugIn {
 		String lData = aToken.getString(DATA);
 		// mChannelManager.publishToLoggerChannel(lToken);
 		lToken.setString("data", lData);
+		lToken.setString("publisher", lPublisher.getId());
+		// return channelId for client's convenience
+		lToken.setString("channelId", lChannelId);
 		lChannel.broadcastToken(lToken);
 	}
 
@@ -671,6 +684,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 					lAccessKey, // String aAccessKey,
 					lSecretKey, // String aSecretKey,
 					lOwner, // String aOwner,
+					// TODO: think about whether start/stop of channel is desired at all!
 					ChannelState.INITIALIZED // ChannelState aState,
 					);
 			mChannelManager.storeChannel(lChannel);

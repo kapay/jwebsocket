@@ -42,8 +42,8 @@ jws.tests.System = {
 					return( lResponse.code != undefined );
 				},
 				lSpec,
-				3000
-				);
+				1500
+			);
 
 			runs( function() {
 				expect( lResponse.code ).toEqual( 0 );
@@ -78,7 +78,7 @@ jws.tests.System = {
 				},
 				lSpec,
 				1500
-				);
+			);
 
 			runs( function() {
 				expect( lResponse.code ).toEqual( -1 );
@@ -124,7 +124,7 @@ jws.tests.System = {
 				},
 				lSpec,
 				1500
-				);
+			);
 
 			runs( function() {
 				expect( lResponse.data ).toEqual( lMsg );
