@@ -279,6 +279,14 @@ public class SystemPlugIn extends TokenPlugIn {
 		// TODO: The client does not get anything here!
 		lWelcome.setString("subProtocol", aConnector.getSubprot());
 
+		// if anoymous user allowed send corresponding flag for 
+		// clarification that auto anonymous may have been applied.
+		if (ALLOW_ANONYMOUS_LOGIN && ALLOW_AUTO_ANONYMOUS) {
+			lWelcome.setBoolean(
+					"anonymous",
+					null != ANONYMOUS_USER
+					&& ANONYMOUS_USER.equals(lUsername));
+		}
 		sendToken(aConnector, aConnector, lWelcome);
 	}
 
@@ -412,8 +420,8 @@ public class SystemPlugIn extends TokenPlugIn {
 					}
 				}
 				if (mLog.isInfoEnabled()) {
-					mLog.info("User '" + lUsername 
-							+ "' successfully logged in from " 
+					mLog.info("User '" + lUsername
+							+ "' successfully logged in from "
 							+ aConnector.getRemoteHost() + " ("
 							+ aConnector.getId() + ").");
 				}
@@ -448,8 +456,17 @@ public class SystemPlugIn extends TokenPlugIn {
 					+ "') from '" + aConnector + "'...");
 		}
 
-		if (getUsername(aConnector) != null) {
+		String lUsername = getUsername(aConnector);
+		if (null != lUsername) {
 			// send normal answer token, good bye is for close!
+			// if anoymous user allowed send corresponding flag for 
+			// clarification that auto anonymous may have been applied.
+			if (ALLOW_ANONYMOUS_LOGIN && ALLOW_AUTO_ANONYMOUS) {
+				lResponse.setBoolean(
+						"anonymous",
+						null != ANONYMOUS_USER
+						&& ANONYMOUS_USER.equals(lUsername));
+			}
 			sendToken(aConnector, aConnector, lResponse);
 			// send good bye token as response to client
 			// sendGoodBye(aConnector, CloseReason.CLIENT);

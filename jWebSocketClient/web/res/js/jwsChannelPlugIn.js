@@ -51,17 +51,17 @@ jws.ChannelPlugIn = {
 			// directy in the plug-in if desired.
 			if( "event" == aToken.type ) {
 				if( "channelCreated" == aToken.name ) {
-					if( this.OnChannelCreated ) {
-						this.OnChannelCreated( aToken );
+					if( this.fOnChannelCreated ) {
+						this.fOnChannelCreated( aToken );
 					}
 				} else if( "channelRemoved" == aToken.name ) {
-					if( this.OnChannelRemoved ) {
-						this.OnChannelRemoved( aToken );
+					if( this.fOnChannelRemoved ) {
+						this.fOnChannelRemoved( aToken );
 					}
 				} 
 			} else if( "getChannels" == aToken.reqType ) {
-				if( this.OnChannelsReceived ) {
-					this.OnChannelsReceived( aToken );
+				if( this.fOnChannelsReceived ) {
+					this.fOnChannelsReceived( aToken );
 				}
 			}
 		}
@@ -305,13 +305,13 @@ jws.ChannelPlugIn = {
 			aListeners = {};
 		}
 		if( aListeners.OnChannelCreated !== undefined ) {
-			this.OnChannelCreated = aListeners.OnChannelCreated;
+			this.fOnChannelCreated = aListeners.OnChannelCreated;
 		}
 		if( aListeners.OnChannelsReceived !== undefined ) {
-			this.OnChannelsReceived = aListeners.OnChannelsReceived;
+			this.fOnChannelsReceived = aListeners.OnChannelsReceived;
 		}
 		if( aListeners.OnChannelRemoved !== undefined ) {
-			this.OnChannelRemoved = aListeners.OnChannelRemoved;
+			this.fOnChannelRemoved = aListeners.OnChannelRemoved;
 		}
 	}
 

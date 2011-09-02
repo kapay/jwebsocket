@@ -121,6 +121,28 @@
 				} catch( ex ) {
 					log( "Exception: " + ex.message );
 				}
+				
+				// since the login/logout functions are done in the system
+				// plug-in these listener consequently are assigned for the 
+				// plug-in and not for the plug-in itself.
+				lWSC.setSystemCallbacks({
+					// OnLoggedIn event
+					OnLoggedIn: function( aEvent )  {
+						log( "<font style='color:red'>jWebSocket LoggedIn received.</font>" );
+					},
+					// OnLoginError event
+					OnLoginError: function( aEvent )  {
+						log( "<font style='color:red'>jWebSocket LogginError received.</font>" );
+					},
+					// OnLoggedOut event
+					OnLoggedOut: function( aEvent )  {
+						log( "<font style='color:red'>jWebSocket LoggedOut received.</font>" );
+					},
+					// OnLogoutError event
+					OnLogoutError: function( aEvent )  {
+						log( "<font style='color:red'>jWebSocket LogoutError received.</font>" );
+					}
+				});
 			}
 
 			function disconnect() {
