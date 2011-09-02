@@ -19,9 +19,6 @@ jws.tests.Channels = {
 	NS: "jws.tests.channels", 
 	TEST_MESSAGE: "this is a test message",
 	
-	ST_INIT: 0,
-	ST_AUTH: 1,
-
 	// this spec tests the subscribe method of the Channels plug-in
 	testSubscribe: function( aChannelName, aAccessKey ) {
 		var lSpec = this.NS + ": subscribe (" + aChannelName + ")";

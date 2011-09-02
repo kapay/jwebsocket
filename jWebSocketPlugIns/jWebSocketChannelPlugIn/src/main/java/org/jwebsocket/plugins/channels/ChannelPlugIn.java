@@ -528,21 +528,22 @@ public class ChannelPlugIn extends TokenPlugIn {
 		String lChannelId = aToken.getString(CHANNEL);
 		String lAccessKey = aToken.getString(ACCESSKEY);
 		String lSecretKey = aToken.getString(SECRETKEY);
+		/*
 		String lLogin = aToken.getString("login");
-
 		User lUser = SecurityFactory.getUser(lLogin);
 		if (lUser == null) {
-			sendErrorToken(aConnector, aToken, -1,
-					"'" + aConnector.getId()
-					+ "' Authorization failed for channel '"
-					+ lChannelId
-					+ "', channel owner is not registered in the jWebSocket server system");
-			return;
+		sendErrorToken(aConnector, aToken, -1,
+		"'" + aConnector.getId()
+		+ "' Authorization failed for channel '"
+		+ lChannelId
+		+ "', channel owner is not registered in the jWebSocket server system");
+		return;
 		}
+		 */
 		if (lSecretKey == null || lAccessKey == null) {
 			sendErrorToken(aConnector, aToken, -1,
 					"'" + aConnector.getId()
-					+ "' Authorization failed, accessKey secretKey/ pair value is not correct");
+					+ "' Authorization failed, access/secret key pair value is not correct");
 			return;
 		} else {
 			Channel lChannel = mChannelManager.getChannel(lChannelId);
@@ -561,7 +562,6 @@ public class ChannelPlugIn extends TokenPlugIn {
 				// store publisher
 				mChannelManager.storePublisher(lPublisher);
 			}
-
 
 			if (lPublisher == null) {
 				// couldn't authorize the publisher
@@ -639,6 +639,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
+		// TODO: To create system channels a special right needs to be assigned according to specification (manageSystemChannels)
 
 		Token lResponseToken = createResponse(aToken);
 
@@ -737,6 +738,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 			return;
 		}
 		// check if it is a system channel which definitely cannot be removed
+		// TODO: To remove system channels a special right needs to be assigned according to specification
 		if (lChannel.isSystem()) {
 			sendErrorToken(aConnector, aToken, -1,
 					"System channel '" + lChannelId + "' cannot be removed.");
@@ -753,10 +755,12 @@ public class ChannelPlugIn extends TokenPlugIn {
 		String lChannelSecretKey = lChannel.getSecretKey();
 		// check if access key and secret key match
 		boolean lAccessKeyMatch =
-				(lAccessKey == null || lAccessKey.isEmpty()) && (lChannelAccessKey == null || lChannelAccessKey.isEmpty())
+				(lAccessKey == null || lAccessKey.isEmpty())
+				&& (lChannelAccessKey == null || lChannelAccessKey.isEmpty())
 				|| (lAccessKey != null && lAccessKey.equals(lChannelAccessKey));
 		boolean lSecretKeyMatch =
-				(lSecretKey == null || lSecretKey.isEmpty()) && (lChannelSecretKey == null || lChannelSecretKey.isEmpty())
+				(lSecretKey == null || lSecretKey.isEmpty())
+				&& (lChannelSecretKey == null || lChannelSecretKey.isEmpty())
 				|| (lSecretKey != null && lSecretKey.equals(lChannelSecretKey));
 		// check if both access key an secret key match
 		if (!(lAccessKeyMatch && lSecretKeyMatch)) {
@@ -765,7 +769,6 @@ public class ChannelPlugIn extends TokenPlugIn {
 					+ lChannelId + "'.");
 			return;
 		}
-
 
 		// TODO: Add condition to optionally suppress this broadcast
 		if (true) {

@@ -35,9 +35,9 @@ if( window.MozWebSocket ) {
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b1 (10831)
+	//:const:*:VERSION:String:1.0b1 (10902)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b1 (10831)",
+	VERSION: "1.0b1 (10902)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -548,25 +548,59 @@ var jws = {
 	console: {
 		
 		isActive: false,
+		level: 2,
+		ALL: 0,
+		DEBUG: 1,
+		INFO: 2,
+		WARN: 3,
+		ERROR: 4,
+		FATAL: 5,
 	
 		log: function( aMsg ) {
-			if( window.console && jws.console.isActive ) {
+			if( window.console 
+				&& jws.console.isActive
+			) {
 				console.log( aMsg );
 			}
 		},
+		debug: function( aMsg ) {
+			if( window.console
+				&& jws.console.isActive 
+				&& jws.console.level <= jws.console.DEBUG
+			) {
+				console.debug( aMsg );
+			}
+		},
 		info: function( aMsg ) {
-			if( window.console && jws.console.isActive ) {
+			if( window.console 
+				&& jws.console.isActive 
+				&& jws.console.level <= jws.console.INFO
+			) {
 				console.info( aMsg );
 			}
 		},
 		warn: function( aMsg ) {
-			if( window.console && jws.console.isActive ) {
+			if( window.console
+				&& jws.console.isActive
+				&& jws.console.level <= jws.console.WARN
+			) {
 				console.warn( aMsg );
 			}
 		},
 		error: function( aMsg ) {
-			if( window.console && jws.console.isActive ) {
+			if( window.console
+				&& jws.console.isActive
+				&& jws.console.level <= jws.console.ERROR
+			) {
 				console.error( aMsg );
+			}
+		},
+		fatal: function( aMsg ) {
+			if( window.console
+				&& jws.console.isActive
+				&& jws.console.level <= jws.console.FATAL
+			) {
+				console.fatal( aMsg );
 			}
 		}
 	}	

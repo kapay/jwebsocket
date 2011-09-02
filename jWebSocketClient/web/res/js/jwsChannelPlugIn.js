@@ -123,7 +123,7 @@ jws.ChannelPlugIn = {
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.AUTHORIZE,
 				channel: aChannel,
-				login: this.getUsername(),
+				// login: this.getUsername(),
 				accessKey: aAccessKey,
 				secretKey: aSecretKey
 			}, aOptions );

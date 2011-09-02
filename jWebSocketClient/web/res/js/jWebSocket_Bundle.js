@@ -35,9 +35,9 @@ if( window.MozWebSocket ) {
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b1 (10826)
+	//:const:*:VERSION:String:1.0b1 (10902)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b1 (10826)",
+	VERSION: "1.0b1 (10902)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -197,6 +197,15 @@ var jws = {
 	//:d:en:Guest user password is "guest" (if not changed on the server).
 	GUEST_USER_PASSWORD: "guest",
 
+	//:const:*:DEMO_ADMIN_LOGINNAME:String:root
+	//:d:en:Root user login name is "root" (if not changed on the server).
+	//:d:en:FOR DEMO AND DEBUG PURPOSES ONLY! NEVER SAVE PRODUCTION ROOT CREDENTIALS HERE!
+	DEMO_ROOT_LOGINNAME: "root",
+	//:const:*:DEMO_ADMIN_PASSWORD:String:root
+	//:d:en:Root user password is "root" (if not changed on the server).
+	//:d:en:FOR DEMO AND DEBUG PURPOSES ONLY! NEVER SAVE PRODUCTION ROOT CREDENTIALS HERE!
+	DEMO_ROOT_PASSWORD: "root",
+	
 	//:m:*:$
 	//:d:en:Convenience replacement for [tt]document.getElementById()[/tt]. _
 	//:d:en:Returns the first HTML element with the given id or [tt]null[/tt] _
@@ -534,7 +543,67 @@ var jws = {
 	//:r:en::isPocketIE:Boolean:true, if Browser is Pocket Internet Explorer, otherwise false.
 	isPocketIE: function() {
 		return this.fIsPocketIE;
-	}
+	},
+
+	console: {
+		
+		isActive: false,
+		level: 2,
+		ALL: 0,
+		DEBUG: 1,
+		INFO: 2,
+		WARN: 3,
+		ERROR: 4,
+		FATAL: 5,
+	
+		log: function( aMsg ) {
+			if( window.console 
+				&& jws.console.isActive
+			) {
+				console.log( aMsg );
+			}
+		},
+		debug: function( aMsg ) {
+			if( window.console
+				&& jws.console.isActive 
+				&& jws.console.level <= jws.console.DEBUG
+			) {
+				console.debug( aMsg );
+			}
+		},
+		info: function( aMsg ) {
+			if( window.console 
+				&& jws.console.isActive 
+				&& jws.console.level <= jws.console.INFO
+			) {
+				console.info( aMsg );
+			}
+		},
+		warn: function( aMsg ) {
+			if( window.console
+				&& jws.console.isActive
+				&& jws.console.level <= jws.console.WARN
+			) {
+				console.warn( aMsg );
+			}
+		},
+		error: function( aMsg ) {
+			if( window.console
+				&& jws.console.isActive
+				&& jws.console.level <= jws.console.ERROR
+			) {
+				console.error( aMsg );
+			}
+		},
+		fatal: function( aMsg ) {
+			if( window.console
+				&& jws.console.isActive
+				&& jws.console.level <= jws.console.FATAL
+			) {
+				console.fatal( aMsg );
+			}
+		}
+	}	
 
 };
 
@@ -727,7 +796,6 @@ var jws = {
 	}
 }());
 	
-
 
 //:package:*:jws.events
 //:class:*:jws.events
@@ -1350,7 +1418,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			this.fReliabilityOptions = jws.RO_OFF;
 		}
 	},
-
+	
 	//:m:*:processOpened
 	//:d:en:Called when the WebSocket connection successfully was established. _
 	//:d:en:Can to be overwritten in descendant classes to process _
@@ -1868,6 +1936,71 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			}
 */
 		}
+	},
+
+	//:m:*:setParam
+	//:d:en:Sets a certain parameter for the jWebSocket client instance. _
+	//:d:en:Here you can add parameters you need for instance within events fired by this instance.
+	//:d:en:To avoid name space conflicts you should prefer the setParamNS method.
+	//:a:en::aKey:String:The name for the parameter.
+	//:a:en::aValue:Object:The value for the parameter, can also be an object.
+	//:r:*:::Object:Previous value of the parameter if such, otherwise null.
+	setParam: function( aKey, aValue ) {
+		if( !this.fParams ) {
+			this.fParams = {};
+		}
+		var lOldValue = this.getParam( aKey );
+		this.fParams[ aKey ] = aValue;
+		return lOldValue;
+	},
+
+	//:m:*:getParam
+	//:d:en:Gets the value for certain parameter of the jWebSocket client instance. _
+	//:d:en:If no value is stored for the given parameter [tt]null[/tt] is returned.
+	//:d:en:To avoid name space conflicts you should prefer the getParamNS method.
+	//:a:en::aKey:String:The name for the parameter for which the value should be returned.
+	//:r:*:::Object:Value of the parameter if such, otherwise null.
+	getParam: function( aKey ) {
+		if( !this.fParams ) {
+			return null;
+		}
+		var lRes = this.fParams[ aKey ];
+		if( lRes === undefined ) {
+			return null;
+		}
+		return lRes;
+	},
+
+	//:m:*:setParamNS
+	//:d:en:Sets a certain parameter for the jWebSocket client instance. _
+	//:d:en:Here you can add parameters you need for instance within events fired by this instance.
+	//:a:en::aNS:String:The name space for the parameter.
+	//:a:en::aKey:String:The name for the parameter.
+	//:a:en::aValue:Object:The value for the parameter, can also be an object.
+	//:r:*:::Object:Previous value of the parameter if such, otherwise null.
+	setParamNS: function( aNS, aKey, aValue ) {
+		return this.setParam( aNS + "." + aKey, aValue );
+	},
+
+	//:m:*:getParam
+	//:d:en:Gets the value for certain parameter of the jWebSocket client instance. _
+	//:d:en:If no value is stored for the given parameter [tt]null[/tt] is returned.
+	//:a:en::aNS:String:The name space for the parameter.
+	//:a:en::aKey:String:The name for the parameter for which the value should be returned.
+	//:r:*:::Object:Value of the parameter if such, otherwise null.
+	getParamNS: function( aNS, aKey ) {
+		return this.getParam( aNS + "." + aKey );
+	},
+	
+	//:m:*:clearParams
+	//:d:en:Resets all params of this jWebSocket client. _
+	//:d:en:After this operation all params are removed and cannot be used anymore.
+	//:a:en::::none
+	//:r:*:::void:none
+	clearParams: function() {
+		if( this.fParams ) {
+			delete this.fParams;
+		}
 	}
 
 });
@@ -2328,6 +2461,7 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			var lSpawnThread = false;
 			var lL2FragmSize = 0;
 			var lTimeout = jws.DEF_RESP_TIMEOUT;
+			var lKeepRequest = false;
 			var lArgs = null;
 			var lCallbacks = {
 				OnResponse: null,
@@ -2367,6 +2501,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 				if( aOptions.fragmentSize ) {
 					lL2FragmSize = aOptions.fragmentSize;
 				}
+				if( aOptions.keepRequest ) {
+					lKeepRequest = true;
+				}
 			}
 			jws.CUR_TOKEN_ID++;
 			if( lControlResponse ) {
@@ -2379,6 +2516,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					args: lArgs,
 					timeout: lTimeout
 				};
+				if( lKeepRequest ) {
+					lClbkRec.request = aToken;
+				}
 				this.fRequestCallbacks[ lClbkId ] = lClbkRec;
 				// set timeout to observe response
 				lClbkRec.hCleanUp = setTimeout( function() {
@@ -3730,7 +3870,7 @@ jws.APIPlugInClass = {
 			var lToken = aServerPlugIn.supportedTokens[ lIdx ];
 			lToken.ns = aServerPlugIn.namespace;
 
-			console.log( JSON.stringify( lToken ) );
+			// console.log( JSON.stringify( lToken ) );
 
 			// this is the function which has to be executed as a parameter
 			// of the it call within a describe statement (actually the suite).
@@ -3824,8 +3964,8 @@ jws.ChannelPlugIn = {
 	SUBSCRIBE: "subscribe",
 	UNSUBSCRIBE: "unsubscribe",
 	GET_CHANNELS: "getChannels",
-	CREATE_CHANNEL:  "createChannel",
-	REMOVE_CHANNEL:  "removeChannel",
+	CREATE_CHANNEL: "createChannel",
+	REMOVE_CHANNEL: "removeChannel",
 	GET_SUBSCRIBERS: "getSubscribers",
 	GET_SUBSCRIPTIONS: "getSubscriptions",
 
@@ -3912,7 +4052,7 @@ jws.ChannelPlugIn = {
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.AUTHORIZE,
 				channel: aChannel,
-				login: this.getUsername(),
+				// login: this.getUsername(),
 				accessKey: aAccessKey,
 				secretKey: aSecretKey
 			}, aOptions );
@@ -4044,7 +4184,6 @@ jws.ChannelPlugIn = {
 	//:a:en::aChannel:String:The id of the server side data channel.
 	//:a:en::aAccessKey:String:Access Key for the channel (required for private channels, optional for public channels).
 	//:r:*:::void:none
-	// TODO: introduce OnResponse here too to get noticed on error or success.
 	channelGetSubscribers: function( aChannel, aAccessKey, aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
@@ -4064,7 +4203,6 @@ jws.ChannelPlugIn = {
 	//:d:en:the channels are not returned due to security reasons.
 	//:a:en:::none
 	//:r:*:::void:none
-	// TODO: introduce OnResponse here too to get noticed on error or success.
 	channelGetSubscriptions: function( aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
@@ -4076,19 +4214,17 @@ jws.ChannelPlugIn = {
 		return lRes;
 	},
 
-
-	//:m:*:channelPublish
-	//:d:en:Tries to obtain all id of the channels
+	//:m:*:channelGetIds
+	//:d:en:Tries to obtain all ids of the public channels
 	//:a:en:::none
 	//:r:*:::void:none
-	// TODO: introduce OnResponse here too to get noticed on error or success.
 	channelGetIds: function( aOptions ) {
 		var lRes = this.checkConnected();
 		if( 0 == lRes.code ) {
 			this.sendToken({
 				ns: jws.ChannelPlugIn.NS,
 				type: jws.ChannelPlugIn.GET_CHANNELS
-			});
+			}, aOptions );
 		}
 		return lRes;
 	},
