@@ -32,7 +32,6 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.plugins.channels.Channel.ChannelState;
 import org.jwebsocket.security.SecurityFactory;
-import org.jwebsocket.security.User;
 import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;

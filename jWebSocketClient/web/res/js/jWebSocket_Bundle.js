@@ -2835,22 +2835,22 @@ jws.SystemClientPlugIn = {
 		if( jws.NS_SYSTEM == aToken.ns ) {
 			if( "login" == aToken.reqType ) {
 				if( aToken.code == 0 ) {
-					if( this.OnLoggedIn ) {
-						this.OnLoggedIn( aToken );
+					if( this.fOnLoggedIn ) {
+						this.fOnLoggedIn( aToken );
 					}
 				} else {
-					if( this.OnLoginError ) {
-						this.OnLoginError( aToken );
+					if( this.fOnLoginError ) {
+						this.fOnLoginError( aToken );
 					}
 				}
 			} else if( "logout" == aToken.reqType ) {
 				if( aToken.code == 0 ) {
-					if( this.OnLoggedOut ) {
-						this.OnLoggedOut( aToken );
+					if( this.fOnLoggedOut ) {
+						this.fOnLoggedOut( aToken );
 					}
 				} else {
-					if( this.OnLogoutError ) {
-						this.OnLogoutError( aToken );
+					if( this.fOnLogoutError ) {
+						this.fOnLogoutError( aToken );
 					}
 				}
 			}
@@ -3211,7 +3211,25 @@ jws.SystemClientPlugIn = {
 			clearInterval( this.hKeepAlive );
 			this.hKeepAlive = null;
 		}
-	}	
+	},
+
+	setSystemCallbacks: function( aListeners ) {
+		if( !aListeners ) {
+			aListeners = {};
+		}
+		if( aListeners.OnLoggedIn !== undefined ) {
+			this.fOnLoggedIn = aListeners.OnLoggedIn;
+		}
+		if( aListeners.OnLoginError !== undefined ) {
+			this.fOnLoginError = aListeners.OnLoginError;
+		}
+		if( aListeners.OnLoggedOut !== undefined ) {
+			this.fOnLoggedOut = aListeners.OnLoggedOut;
+		}
+		if( aListeners.OnLogoutError !== undefined ) {
+			this.fOnLogoutError = aListeners.OnLogoutError;
+		}
+	}
 };
 
 // add the JWebSocket SystemClient PlugIn into the BaseClient class
@@ -3980,17 +3998,17 @@ jws.ChannelPlugIn = {
 			// directy in the plug-in if desired.
 			if( "event" == aToken.type ) {
 				if( "channelCreated" == aToken.name ) {
-					if( this.OnChannelCreated ) {
-						this.OnChannelCreated( aToken );
+					if( this.fOnChannelCreated ) {
+						this.fOnChannelCreated( aToken );
 					}
 				} else if( "channelRemoved" == aToken.name ) {
-					if( this.OnChannelRemoved ) {
-						this.OnChannelRemoved( aToken );
+					if( this.fOnChannelRemoved ) {
+						this.fOnChannelRemoved( aToken );
 					}
 				} 
 			} else if( "getChannels" == aToken.reqType ) {
-				if( this.OnChannelsReceived ) {
-					this.OnChannelsReceived( aToken );
+				if( this.fOnChannelsReceived ) {
+					this.fOnChannelsReceived( aToken );
 				}
 			}
 		}
@@ -4234,13 +4252,13 @@ jws.ChannelPlugIn = {
 			aListeners = {};
 		}
 		if( aListeners.OnChannelCreated !== undefined ) {
-			this.OnChannelCreated = aListeners.OnChannelCreated;
+			this.fOnChannelCreated = aListeners.OnChannelCreated;
 		}
 		if( aListeners.OnChannelsReceived !== undefined ) {
-			this.OnChannelsReceived = aListeners.OnChannelsReceived;
+			this.fOnChannelsReceived = aListeners.OnChannelsReceived;
 		}
 		if( aListeners.OnChannelRemoved !== undefined ) {
-			this.OnChannelRemoved = aListeners.OnChannelRemoved;
+			this.fOnChannelRemoved = aListeners.OnChannelRemoved;
 		}
 	}
 
