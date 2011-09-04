@@ -57,7 +57,7 @@
 
 				log( "Connecting to " + lURL + " ..." );
 				try {
-					var lRes = lWSC.logon( lURL, "Guest", "guest", {
+					var lRes = lWSC.logon( lURL, jws.GUEST_USER_LOGINNAME, jws.GUEST_USER_PASSWORD, {
 
 						// OnOpen callback
 						OnOpen: function( aEvent ) {

@@ -15,8 +15,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.streaming;
 
+import java.util.Calendar;
 import java.util.Date;
 
+import java.util.GregorianCalendar;
 import org.apache.log4j.Logger;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
@@ -104,10 +106,18 @@ public class TimeStream extends TokenStream {
 				try {
 					Thread.sleep(1000);
 
-					Token lToken = TokenFactory.createToken("event");
+					Token lToken = TokenFactory.createToken("org.jwebsocket.plugins.streaming", "event");
+					GregorianCalendar lCal = new GregorianCalendar();
 					lToken.setString("name", "stream");
-					lToken.setString("msg", new Date().toString());
+					lToken.setString("msg", new Date(lCal.getTimeInMillis()).toString());
 					lToken.setString("streamID", getStreamID());
+					lToken.setInteger("year", lCal.get(Calendar.YEAR));
+					lToken.setInteger("month", lCal.get(Calendar.MONTH));
+					lToken.setInteger("day", lCal.get(Calendar.DAY_OF_MONTH));
+					lToken.setInteger("hours", lCal.get(Calendar.HOUR_OF_DAY));
+					lToken.setInteger("minutes", lCal.get(Calendar.MINUTE));
+					lToken.setInteger("seconds", lCal.get(Calendar.SECOND));
+					lToken.setInteger("millis", lCal.get(Calendar.MILLISECOND));
 
 					// keep this her for demo purposes
 					/*
