@@ -43,13 +43,13 @@ public class TokenClient {
 	 */
 	public final static int AUTHENTICATED = 2;
 	private int CUR_TOKEN_ID = 0;
-	private BaseClientJ2ME client = null;
-	private String lSubProt = "jwebsocket.org/json"; // currently hardcoded for java me
+	private BaseClientJ2ME mClient = null;
+	private String lSubProt = "org.jwebsocket.json"; // currently hardcoded for java me
 	private final static String NS_BASE = "org.jwebsocket";
-	private String fUsername = null;
-	private String fClientId = null;
-	private String fSessionId = null;
-	private String fRestoreSessionId = null;
+	private String mUsername = null;
+	private String mClientId = null;
+	private String mSessionId = null;
+	private String mRestoreSessionId = null;
 	public String DEMO = "DEMO";
 
 	/**
@@ -57,8 +57,8 @@ public class TokenClient {
 	 * @param aClient
 	 */
 	public TokenClient(BaseClientJ2ME aClient) {
-		client = aClient;
-		client.addListener(new Listener());
+		mClient = aClient;
+		mClient.addListener(new Listener());
 	}
 
 	/**
@@ -66,28 +66,28 @@ public class TokenClient {
 	 * @return
 	 */
 	public boolean isConnected() {
-		return client.isConnected();
+		return mClient.isConnected();
 	}
 
 	/**
 	 * @return the fUsername
 	 */
 	public String getUsername() {
-		return fUsername;
+		return mUsername;
 	}
 
 	/**
 	 * @return the fClientId
 	 */
 	public String getClientId() {
-		return fClientId;
+		return mClientId;
 	}
 
 	/**
 	 * @return the fSessionId
 	 */
 	public String getfSessionId() {
-		return fSessionId;
+		return mSessionId;
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class TokenClient {
 	 * @param aListener
 	 */
 	public void addListener(WebSocketClientTokenListener aListener) {
-		client.addListener(aListener);
+		mClient.addListener(aListener);
 	}
 
 	/**
@@ -103,7 +103,7 @@ public class TokenClient {
 	 * @param aListener
 	 */
 	public void removeListener(WebSocketClientTokenListener aListener) {
-		client.removeListener(aListener);
+		mClient.removeListener(aListener);
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class TokenClient {
 	 */
 	public void open(String aURL) throws WebSocketException {
 		try {
-			client.open(aURL);
+			mClient.open(aURL);
 		} catch (Exception ex) {
 			throw new WebSocketException("I can't: " + ex.getMessage());
 		}
@@ -126,7 +126,7 @@ public class TokenClient {
 	 * @throws WebSocketException
 	 */
 	public void send(String aData, String aEncoding) throws WebSocketException {
-		client.send(aData, aEncoding);
+		mClient.send(aData, aEncoding);
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class TokenClient {
 	 * @throws WebSocketException
 	 */
 	public void send(byte[] aData) throws WebSocketException {
-		client.send(aData);
+		mClient.send(aData);
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class TokenClient {
 	 * @throws WebSocketException
 	 */
 	public void send(WebSocketPacket aPacket) throws WebSocketException {
-		client.send(aPacket.getByteArray());
+		mClient.send(aPacket.getByteArray());
 	}
 
 	/**
@@ -152,11 +152,11 @@ public class TokenClient {
 	 * @throws WebSocketException
 	 */
 	public void close() throws WebSocketException {
-		fUsername = null;
-		fClientId = null;
-		fRestoreSessionId = fSessionId;
-		fSessionId = null;
-		client.close();
+		mUsername = null;
+		mClientId = null;
+		mRestoreSessionId = mSessionId;
+		mSessionId = null;
+		mClient.close();
 	}
 
 	// TODO: Check if the following two methods packetToToken and tokenToPacket can be shared for server and client
@@ -285,13 +285,13 @@ public class TokenClient {
 	class Listener implements WebSocketClientListener {
 
 		public void processOpened(WebSocketClientEvent aEvent) {
-			fUsername = null;
-			fClientId = null;
-			fSessionId = null;
+			mUsername = null;
+			mClientId = null;
+			mSessionId = null;
 		}
 
 		public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
-			Iterator lIterator = client.getListeners().iterator();
+			Iterator lIterator = mClient.getListeners().iterator();
 			while (lIterator.hasNext()) {
 				WebSocketClientListener lListener = (WebSocketClientListener) lIterator.next();
 				if (lListener instanceof WebSocketClientTokenListener) {
@@ -303,17 +303,17 @@ public class TokenClient {
 
 					if (lType != null) {
 						if ("welcome".equals(lType)) {
-							fClientId = lToken.getString("sourceId");
-							fSessionId = lToken.getString("usid");
+							mClientId = lToken.getString("sourceId");
+							mSessionId = lToken.getString("usid");
 						} else if ("goodBye".equals(lType)) {
-							fUsername = null;
+							mUsername = null;
 						}
 					}
 					if (lReqType != null) {
 						if ("login".equals(lReqType)) {
-							fUsername = lToken.getString("username");
+							mUsername = lToken.getString("username");
 						} else if ("logout".equals(lReqType)) {
-							fUsername = null;
+							mUsername = null;
 						}
 					}
 					((WebSocketClientTokenListener) lListener).processToken(aEvent, lToken);
@@ -322,13 +322,12 @@ public class TokenClient {
 		}
 
 		public void processClosed(WebSocketClientEvent aEvent) {
-			fUsername = null;
-			fClientId = null;
-			fRestoreSessionId = fSessionId;
-			fSessionId = null;
+			mUsername = null;
+			mClientId = null;
+			mRestoreSessionId = mSessionId;
+			mSessionId = null;
 		}
 	}
-
 	private final static String NS_FILESYSTEM_PLUGIN = NS_BASE + ".plugins.filesystem";
 
 	// @Override
@@ -348,6 +347,4 @@ public class TokenClient {
 		lToken.put("data", String.valueOf(Tools.base64Encode(aData)));
 		sendToken(lToken);
 	}
-
-
 }

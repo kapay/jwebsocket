@@ -1,5 +1,5 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - WebSocket Client for Java Standard Edition (J2SE)
+//	jWebSocket - WebSocket Client for Java Micro Edition (J2ME)
 //	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.SocketConnection;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.client.java.BaseClient;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.kit.WebSocketHandshake;
@@ -32,12 +31,12 @@ import org.jwebsocket.listener.WebSocketClientEvent;
  */
 public class BaseClientJ2ME extends BaseClient {
 
-	private boolean isRunning = false;
-	private Thread inboundThread;
-	private InboundProcess inboundProcess;
-	private SocketConnection socket = null;
-	private InputStream is = null;
-	private OutputStream os = null;
+	private boolean mIsRunning = false;
+	private Thread mInboundThread;
+	private InboundProcess mInboundProcess;
+	private SocketConnection mSocket = null;
+	private InputStream mIn = null;
+	private OutputStream mOut = null;
 
 	public BaseClientJ2ME() {
 	}
@@ -50,26 +49,26 @@ public class BaseClientJ2ME extends BaseClient {
 			} else if( aURL.startsWith("http:") ) {
 				aURL = "socket" + aURL.substring(4);
 			}
-			socket = (SocketConnection) Connector.open(aURL, Connector.READ_WRITE);
+			mSocket = (SocketConnection) Connector.open(aURL, Connector.READ_WRITE);
 			// "socket://localhost:8787"
 
-			is = socket.openInputStream();
-			os = socket.openOutputStream();
+			mIn = mSocket.openInputStream();
+			mOut = mSocket.openOutputStream();
 
 			// send handshake to server
 			byte[] lReq = WebSocketHandshake.generateC2SRequest("localhost:8787", "/");
-			os.write(lReq);
-			os.flush();
+			mOut.write(lReq);
+			mOut.flush();
 
 			// wait on handshake response
-			byte[] lBuff = WebSocketHandshake.readS2CResponse(is);
+			byte[] lBuff = WebSocketHandshake.readS2CResponse(mIn);
 
 			// parse handshake response from server
 			// Map lResp = WebSocketHandshake.parseS2CResponse(lBuff);
 
-			inboundProcess = new InboundProcess();
-			inboundThread = new Thread(inboundProcess);
-			inboundThread.start();
+			mInboundProcess = new InboundProcess();
+			mInboundThread = new Thread(mInboundProcess);
+			mInboundThread.start();
 
 		} catch (Exception ex) {
 			throw new WebSocketException(ex.getClass().getName() + " when opening WebSocket connection: " + ex.getMessage());
@@ -79,10 +78,10 @@ public class BaseClientJ2ME extends BaseClient {
 
 	public void send(String aData, String aEncoding) throws WebSocketException {
 		try {
-			os.write(0x00);
-			os.write(aData.getBytes(aEncoding));
-			os.write(0xff);
-			os.flush();
+			mOut.write(0x00);
+			mOut.write(aData.getBytes(aEncoding));
+			mOut.write(0xff);
+			mOut.flush();
 		} catch (Exception ex) {
 			throw new WebSocketException(ex.getClass().getName() + " when sending via WebSocket connection: " + ex.getMessage());
 			// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
@@ -91,10 +90,10 @@ public class BaseClientJ2ME extends BaseClient {
 
 	public void send(byte[] aData) throws WebSocketException {
 		try {
-			os.write(0x00);
-			os.write(aData);
-			os.write(0xff);
-			os.flush();
+			mOut.write(0x00);
+			mOut.write(aData);
+			mOut.write(0xff);
+			mOut.flush();
 		} catch (Exception ex) {
 			throw new WebSocketException(ex.getClass().getName() + " when sending via WebSocket connection: " + ex.getMessage());
 			// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
@@ -108,11 +107,11 @@ public class BaseClientJ2ME extends BaseClient {
 	}
 
 	public void close() throws WebSocketException {
-		isRunning = false;
+		mIsRunning = false;
 		try {
-			os.close();
-			is.close();
-			socket.close();
+			mOut.close();
+			mIn.close();
+			mSocket.close();
 		} catch (Exception ex) {
 			throw new WebSocketException(ex.getClass().getName()
 					+ " when closing WebSocket connection: " + ex.getMessage());
@@ -123,7 +122,7 @@ public class BaseClientJ2ME extends BaseClient {
 	private class InboundProcess implements Runnable {
 
 		public void run() {
-			isRunning = true;
+			mIsRunning = true;
 			byte[] lBuff = new byte[MAX_FRAME_SIZE];
 			int lPos = -1;
 			int lStart = -1;
@@ -131,9 +130,9 @@ public class BaseClientJ2ME extends BaseClient {
 			WebSocketClientEvent lEvent = new WebSocketClientEvent();
 			notifyOpened(lEvent);
 
-			while (isRunning) {
+			while (mIsRunning) {
 				try {
-					int b = is.read();
+					int b = mIn.read();
 					// start of frame
 					if (b == 0x00) {
 						lPos = 0;
@@ -151,7 +150,7 @@ public class BaseClientJ2ME extends BaseClient {
 						lStart = -1;
 						// end of stream
 					} else if (b < 0) {
-						isRunning = false;
+						mIsRunning = false;
 						// any other byte within or outside a frame
 					} else {
 						if (lStart >= 0) {
@@ -160,7 +159,7 @@ public class BaseClientJ2ME extends BaseClient {
 						lPos++;
 					}
 				} catch (Exception ex) {
-					isRunning = false;
+					mIsRunning = false;
 					// throw new WebSocketException(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 					// System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
@@ -172,6 +171,6 @@ public class BaseClientJ2ME extends BaseClient {
 	}
 
 	public boolean isConnected() {
-		return isRunning;
+		return mIsRunning;
 	}
 }
