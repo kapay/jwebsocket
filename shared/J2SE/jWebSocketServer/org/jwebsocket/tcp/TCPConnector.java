@@ -105,30 +105,13 @@ public class TCPConnector extends BaseConnector {
 		}
 	}
 
-	@Override
-	public void stopConnector(CloseReason aCloseReason) {
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Stopping " + mLogInfo
-					+ " connector (" + aCloseReason.name() + ")...");
-		}
-		int lPort = mClientSocket.getPort();
-		mCloseReason = aCloseReason;
-		mIsRunning = false;
-
-		if (!isHixie()) {
-			// Hybi specs demand that client must be notified with CLOSE control message before disconnect
-			WebSocketPacket lClose = new RawPacket("BYE");
-			lClose.setFrameType(WebSocketFrameType.CLOSE);
-			sendPacket(lClose);
-		}
-
+	public void closeSocketAndStreams(CloseReason aCloseReason) {
+		int lPort = -1;
 		try {
+			lPort = mClientSocket.getPort();
 			mIn.close();
-			if (mLog.isInfoEnabled()) {
-				mLog.info("Stopped " + mLogInfo
-						+ " connector (" + aCloseReason.name()
-						+ ") on port " + lPort + ".");
-			}
+			mOut.close();
+			mClientSocket.close();
 		} catch (IOException lEx) {
 			if (mLog.isDebugEnabled()) {
 				mLog.info(lEx.getClass().getSimpleName()
@@ -137,6 +120,25 @@ public class TCPConnector extends BaseConnector {
 						+ ") on port " + lPort + ": " + lEx.getMessage());
 			}
 		}
+	}
+
+	@Override
+	public void stopConnector(CloseReason aCloseReason) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Stopping " + mLogInfo
+					+ " connector (" + aCloseReason.name() + ")...");
+		}
+		mCloseReason = aCloseReason;
+		mIsRunning = false;
+
+		if (!isHixie()) {
+			// Hybi specs demand that client must be notified
+			// with CLOSE control message before disconnect
+			WebSocketPacket lClose = new RawPacket(WebSocketFrameType.CLOSE, "BYE");
+			sendPacket(lClose);
+		}
+
+		closeSocketAndStreams(aCloseReason);
 	}
 
 	@Override
@@ -156,7 +158,7 @@ public class TCPConnector extends BaseConnector {
 				}
 				mOut.flush();
 			} else {
-				mLog.error("Trying to send to closed connection: " 
+				mLog.error("Trying to send to closed connection: "
 						+ getId() + ", " + aDataPacket.getUTF8());
 			}
 		} catch (IOException lEx) {
@@ -190,7 +192,8 @@ public class TCPConnector extends BaseConnector {
 		public void run() {
 			WebSocketEngine lEngine = getEngine();
 			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
-			Thread.currentThread().setName("jWebSocket TCP-Connector " + getId());
+			Thread.currentThread().setName("jWebSocket " + mLogInfo + "-Connector " + getId());
+			int lPort = getRemotePort();
 			try {
 				// start client listener loop
 				mIsRunning = true;
@@ -208,14 +211,33 @@ public class TCPConnector extends BaseConnector {
 				// (e.g. to release client from streams)
 				lEngine.connectorStopped(mConnector, mCloseReason);
 
-				mIn.close();
-				mOut.close();
-				mClientSocket.close();
-
 			} catch (Exception lEx) {
 				// ignore this exception for now
 				mLog.error("(close) " + lEx.getClass().getSimpleName()
 						+ ": " + lEx.getMessage());
+			}
+			try {
+				mIn.close();
+			} catch (Exception lEx) {
+				// ignore this exception for now
+				mLog.error(lEx.getClass().getSimpleName() + " on closing inbound stream: " + lEx.getMessage());
+			}
+			try {
+				mOut.close();
+			} catch (Exception lEx) {
+				// ignore this exception for now
+				mLog.error(lEx.getClass().getSimpleName() + " on closing outbound stream: " + lEx.getMessage());
+			}
+			try {
+				mClientSocket.close();
+			} catch (Exception lEx) {
+				// ignore this exception for now
+				mLog.error(lEx.getClass().getSimpleName() + " on closing client socket: " + lEx.getMessage());
+			}
+			if (mLog.isInfoEnabled()) {
+				mLog.info("Stopped " + mLogInfo
+						+ " connector (" + mCloseReason
+						+ ") on port " + lPort + ".");
 			}
 		}
 
@@ -262,16 +284,13 @@ public class TCPConnector extends BaseConnector {
 
 		private void readHybi(int aVersion, ByteArrayOutputStream aBuff,
 				WebSocketEngine aEngine) throws IOException {
-			WebSocketFrameType lFrameType;
-			// utilize data input stream, because it has convenient methods for reading
-			// signed/unsigned bytes, shorts, ints and longs
-			DataInputStream lDis = new DataInputStream(mIn);
 
+			int lPort = getRemotePort();
 			while (mIsRunning) {
 				try {
 					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(getVersion(), mIn);
-					
-					if( lPacket == null ) {
+
+					if (lPacket == null) {
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Processing client 'disconnect'...");
 						}
@@ -295,11 +314,14 @@ public class TCPConnector extends BaseConnector {
 						}
 						mCloseReason = CloseReason.CLIENT;
 						mIsRunning = false;
+
 						// As per spec, server must respond to CLOSE with acknowledgment CLOSE (maybe
 						// this should be handled higher up in the hierarchy?)
 						WebSocketPacket lClose = new RawPacket("");
 						lClose.setFrameType(WebSocketFrameType.CLOSE);
 						sendPacket(lClose);
+
+						closeSocketAndStreams(mCloseReason);
 					} else {
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Processing unknown frame type '" + lPacket.getFrameType() + "'...");
@@ -310,9 +332,11 @@ public class TCPConnector extends BaseConnector {
 					mCloseReason = CloseReason.TIMEOUT;
 					mIsRunning = false;
 				} catch (Exception lEx) {
-					mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
-					mCloseReason = CloseReason.SERVER;
-					mIsRunning = false;
+					if (mIsRunning) {
+						mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+						mCloseReason = CloseReason.SERVER;
+						mIsRunning = false;
+					}
 				}
 			}
 		}

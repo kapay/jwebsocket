@@ -160,21 +160,25 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 						} else {
 							mLog.warn("Received invalid policy-file-request (" + lLine + ")...");
 						}
-					} catch (Exception ex) {
-						mLog.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+					} catch (Exception lEx) {
+						mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 					}
 
 					lClientSocket.close();
 					if (mLog.isDebugEnabled()) {
 						mLog.debug("Client disconnected...");
 					}
-				} catch (Exception ex) {
-					mIsRunning = false;
-					mLog.error("Socket state: " + ex.getMessage());
+				} catch (Exception lEx) {
+					if (mIsRunning) {
+						mIsRunning = false;
+						mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+					}
+					// otherwise closing the socket was intended, 
+					// no error in this case!
 				}
 			}
-			if (mLog.isDebugEnabled()) {
-				mLog.debug("FlashBridge process stopped.");
+			if (mLog.isInfoEnabled()) {
+				mLog.info("FlashBridge process stopped.");
 			}
 		}
 	}

@@ -41,17 +41,22 @@ public class AdminPlugIn extends TokenPlugIn {
 	private static Logger mLog = Logging.getLogger(AdminPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_ADMIN = JWebSocketServerConstants.NS_BASE + ".plugins.admin";
+	private static boolean mExternalShutDownAllowed = false;
 
 	/**
 	 * Constructor that takes configuration object
 	 */
-	public AdminPlugIn(PluginConfiguration configuration) {
-		super(configuration);
+	public AdminPlugIn(PluginConfiguration aConfiguration) {
+		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Instantiating admin plug-in...");
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_ADMIN);
+
+		mExternalShutDownAllowed = "true".equalsIgnoreCase(
+				aConfiguration.getString("allowShutdown"));
+
 		// give a success message to the administrator
 		if (mLog.isInfoEnabled()) {
 			mLog.info("Admin plug-in successfully loaded.");
@@ -90,19 +95,20 @@ public class AdminPlugIn extends TokenPlugIn {
 			mLog.debug("Processing 'shutdown'...");
 		}
 
-		// check if 'shutdown' command is allowed at all
-		if (!"true".equalsIgnoreCase(getString("allowShutdown"))) {
+		// check if 'shutdown' request from client command is allowed at all
+		if (!mExternalShutDownAllowed) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			return;
 		}
 
 		// check if user is allowed to run 'shutdown' command
+		// should be limited to administrators
 		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".shutdown")) {
 			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
 			return;
 		}
 
-		// notify clients about pending shutdown
+		// notify all connected clients about pending shutdown
 		Token lResponseToken = lServer.createResponse(aToken);
 		lResponseToken.setString("msg", "Shutdown in progress...");
 		lServer.broadcastToken(lResponseToken);

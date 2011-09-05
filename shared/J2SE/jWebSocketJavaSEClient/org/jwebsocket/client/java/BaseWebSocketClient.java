@@ -80,8 +80,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 	/**
 	 * IO streams
 	 */
-	private InputStream mInput = null;
-	private PrintStream mOutput = null;
+	private InputStream mIn = null;
+	private OutputStream mOut = null;
 	/**
 	 * Data receiver
 	 */
@@ -190,63 +190,16 @@ public class BaseWebSocketClient implements WebSocketClient {
 				mSocket.close();
 			}
 			mSocket = createSocket();
-			mInput = mSocket.getInputStream();
-			mOutput = new PrintStream(mSocket.getOutputStream());
+			mIn = mSocket.getInputStream();
+			mOut = mSocket.getOutputStream();
 
-			mOutput.write(lHandshake.generateC2SRequest());
-
+			mOut.write(lHandshake.generateC2SRequest());
 
 			mStatus = WebSocketStatus.CONNECTING;
-			/*
-			boolean lHandshakeComplete = false;
-			boolean lHeader = true;
-			// TODO: handle this length! >Could lead to buffer overflow!
-			int len = 8192;
-			byte[] lBuffer = new byte[len];
-			int lPos = 0;
-			ArrayList<String> lHandshakeLines = new ArrayList<String>();
-			
-			byte[] lServerResponse = new byte[16];
-			
-			while (!lHandshakeComplete) {
-			int lB = mInput.read();
-			lBuffer[lPos] = (byte) lB;
-			lPos += 1;
-			
-			if (!lHeader) {
-			lServerResponse[lPos - 1] = (byte) lB;
-			if (lPos == 16) {
-			lHandshakeComplete = true;
-			}
-			} else if (lBuffer[lPos - 1] == 0x0A && lBuffer[lPos - 2] == 0x0D) {
-			String line = new String(lBuffer, "UTF-8");
-			if (line.trim().equals("")) {
-			lHeader = false;
-			} else {
-			lHandshakeLines.add(line.trim());
-			}
-			
-			lBuffer = new byte[len];
-			lPos = 0;
-			}
-			}
-			
-			lHandshake.verifyServerStatusLine(lHandshakeLines.get(0));
-			lHandshake.verifyServerResponse(lServerResponse);
-			
-			lHandshakeLines.remove(0);
-			
-			Map<String, String> lHeaders = new FastMap<String, String>();
-			for (String lLine : lHandshakeLines) {
-			String[] lKeyVal = lLine.split(": ", 2);
-			lHeaders.put(lKeyVal[0], lKeyVal[1]);
-			}
-			lHandshake.verifyServerHandshakeHeaders(lHeaders);
-			 */
 
 			Headers lHeaders = new Headers();
-			lHeaders.readFromStream(aVersion, mInput);
-			
+			lHeaders.readFromStream(aVersion, mIn);
+
 			// parse negotiated sub protocol
 			String lProtocol = lHeaders.getField(Headers.SEC_WEBSOCKET_PROTOCOL);
 			if (lProtocol != null) {
@@ -259,7 +212,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 			}
 
 			// create new thread to receive the data from the new client
-			mReceiver = new WebSocketReceiver(mInput);
+			mReceiver = new WebSocketReceiver(mIn);
 			// and start the receiver thread for the port
 			mReceiver.start();
 			// now set official status, may listeners ask for that
@@ -280,8 +233,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 			sendInternal(aData);
 		} else {
 			WebSocketPacket lPacket = new RawPacket(aData);
-			lPacket.setFrameType(WebSocketProtocolAbstraction.encodingToFrameType(mNegotiatedSubProtocol.getEncoding()));
-			sendInternal(WebSocketProtocolAbstraction.rawToProtocolPacket(mVersion, lPacket));
+			lPacket.setFrameType(
+					WebSocketProtocolAbstraction.encodingToFrameType(
+					mNegotiatedSubProtocol.getEncoding()));
+			sendInternal(
+					WebSocketProtocolAbstraction.rawToProtocolPacket(
+					mVersion, lPacket));
 		}
 	}
 
@@ -322,19 +279,19 @@ public class BaseWebSocketClient implements WebSocketClient {
 		try {
 			if (isHixie()) {
 				if (WebSocketEncoding.BINARY.equals(mNegotiatedSubProtocol.getEncoding())) {
-					mOutput.write(0x80);
+					mOut.write(0x80);
 					// TODO: what if frame is longer than 255 characters (8bit?) Refer to IETF spec!
-					mOutput.write(aData.length);
-					mOutput.write(aData);
+					mOut.write(aData.length);
+					mOut.write(aData);
 				} else {
-					mOutput.write(0x00);
-					mOutput.write(aData);
-					mOutput.write(0xff);
+					mOut.write(0x00);
+					mOut.write(aData);
+					mOut.write(0xff);
 				}
 			} else {
-				mOutput.write(aData);
+				mOut.write(aData);
 			}
-			mOutput.flush();
+			mOut.flush();
 		} catch (IOException lEx) {
 			throw new WebSocketException("error while sending socket data: ", lEx);
 		}
@@ -393,6 +350,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 		if (lThrowEx) {
 			throw new WebSocketException(lExMsg);
 		}
+
 		// TODO: add event object
 		notifyClosed(null);
 	}
@@ -403,13 +361,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 		try {
 			if (isHixie()) {
-				mOutput.write(0xff00);
+				mOut.write(0xff00);
 				// TODO: check if final CR/LF is required/valid!
-				mOutput.write("\r\n".getBytes());
+				mOut.write("\r\n".getBytes());
 				// TODO: shouldn't we put a flush here?
 			} else {
-				WebSocketPacket lPacket = new RawPacket("BYE");
-				lPacket.setFrameType(WebSocketFrameType.CLOSE);
+				WebSocketPacket lPacket = new RawPacket(WebSocketFrameType.CLOSE, "BYE");
 				send(lPacket);
 			}
 		} catch (IOException lIOEx) {
@@ -680,72 +637,32 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 
 		private void readHybi() throws WebSocketException, IOException {
-			// utilize data input stream, because it has convenient methods for reading
-			// signed/unsigned bytes, shorts, ints and longs
-			// DataInputStream lDis = new DataInputStream(mIS);
-			// ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
+			WebSocketClientEvent lWSCE;
+			WebSocketFrameType lFrameType;
 
 			while (!mStop) {
 				try {
 					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(mVersion, mIS);
-					WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent();
-					notifyPacket(lWSCE, lPacket);
+					lFrameType = (lPacket != null ? lPacket.getFrameType() : WebSocketFrameType.INVALID);
+					if (WebSocketFrameType.INVALID == lFrameType
+							|| WebSocketFrameType.CLOSE == lFrameType) {
+						mStop = true;
+						mStatus = WebSocketStatus.CLOSED;
+						lWSCE = new WebSocketBaseClientEvent("close", "error");
+						notifyClosed(lWSCE);
+					} else if (WebSocketFrameType.PING == lFrameType) {
+						WebSocketPacket lPong = new RawPacket(
+								WebSocketFrameType.PONG, "");
+						send(lPong);
+					} else if (WebSocketFrameType.PONG == lFrameType) {
+						// TODO: need to process connection management here!
+					} else {
+						lWSCE = new WebSocketTokenClientEvent();
+						notifyPacket(lWSCE, lPacket);
+					}
 				} catch (Exception lEx) {
 					handleErrorAndClose();
 				}
-				/*				
-				// begin normal packet read
-				int lFlags = lDis.read();
-				// determine fragmentation
-				boolean lFragmented = (0x01 & lFlags) == 0x01;
-				// shift 4 bits to skip the first bit and three RSVx bits
-				int lType = lFlags >> 4;
-				lPacketType = WebSocketProtocolAbstraction.toRawPacketType(lType);
-				
-				if (lPacketType == -1) {
-				// Could not determine packet type, ignore the packet.
-				// Maybe we need a setting to decide, if such packets should abort the connection?
-				handleErrorAndClose();
-				} else {
-				// Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
-				long lPayloadLen = mIS.read() >> 1;
-				if (lPayloadLen == 126) {
-				// following two bytes are acutal payload length (16-bit unsigned integer)
-				lPayloadLen = lDis.readUnsignedShort();
-				} else if (lPayloadLen == 127) {
-				// following eight bytes are actual payload length (64-bit unsigned integer)
-				lPayloadLen = lDis.readLong();
-				}
-				
-				if (lPayloadLen > 0) {
-				// payload length may be extremely long, so we read in loop rather
-				// than construct one byte[] array and fill it with read() method,
-				// because java does not allow longs as array size
-				while (lPayloadLen-- > 0) {
-				lBuff.write(lDis.read());
-				}
-				}
-				
-				if (!lFragmented) {
-				if (lPacketType == RawPacket.FRAMETYPE_PING) {
-				// As per spec, we must respond to PING with PONG (maybe
-				// this should be handled higher up in the hierarchy?)
-				WebSocketPacket lPong = new RawPacket(lBuff.toByteArray());
-				lPong.setFrameType(RawPacket.FRAMETYPE_PONG);
-				send(lPong);
-				} else if (lPacketType == RawPacket.FRAMETYPE_CLOSE) {
-				close();
-				}
-				
-				// Packet was read, pass it forward.
-				WebSocketPacket lPacket = new RawPacket(lBuff.toByteArray());
-				lPacket.setFrameType(lPacketType);
-				WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent();
-				notifyPacket(lWSCE, lPacket);
-				lBuff.reset();
-				}
-				}
-				 */
 			}
 		}
 

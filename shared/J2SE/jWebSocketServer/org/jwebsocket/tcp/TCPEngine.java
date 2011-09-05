@@ -174,7 +174,6 @@ public class TCPEngine extends BaseEngine {
 			mLog.debug("Stopping TCP engine '" + getId()
 					+ "' at port " + mTCPListenerPort + "...");
 		}
-
 		// resetting "isRunning" causes engine listener to terminate
 		mIsRunning = false;
 		long lStarted = new Date().getTime();
@@ -485,16 +484,31 @@ public class TCPEngine extends BaseEngine {
 							// immediately disconnect the client.
 							lClientSocket.close();
 						}
-					} catch (UnsupportedEncodingException lEx) {
-						mLog.error("(encoding) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
-					} catch (IOException lEx) {
-						mLog.error("(io) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 					} catch (Exception lEx) {
-						mLog.error("(other) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+						mLog.error(
+								(mServer instanceof SSLServerSocket
+								? "SSL"
+								: "TCP")
+								+ " engine: "
+								+ lEx.getClass().getSimpleName()
+								+ ": " + lEx.getMessage());
 					}
 				} catch (Exception lEx) {
-					mIsRunning = false;
-					mLog.error("(accept) " + lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+					if (mIsRunning) {
+						mIsRunning = false;
+						mLog.error(
+								(mServer instanceof SSLServerSocket ? "SSL" : "TCP")
+								+ " engine: "
+								+ lEx.getClass().getSimpleName()
+								+ ": " + lEx.getMessage());
+					} else {
+						if (mLog.isInfoEnabled()) {
+							mLog.info(
+									(mServer instanceof SSLServerSocket ? "SSL" : "TCP")
+									+ " engine: "
+									+ "Server listener thread stopped.");
+						}
+					}
 				}
 			}
 

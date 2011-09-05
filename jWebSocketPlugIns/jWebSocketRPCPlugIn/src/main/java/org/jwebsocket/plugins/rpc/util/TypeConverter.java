@@ -33,6 +33,8 @@ import org.jwebsocket.token.Token;
  */
 public class TypeConverter {
 
+	private static Logger mLog = Logging.getLogger(RPCPlugIn.class);
+	
 	//allowed type that can be found in the .xml file
 	public final static String PROTOCOL_TYPE_INT = "int";
 	public final static String PROTOCOL_TYPE_BOOLEAN = "boolean";
@@ -41,7 +43,6 @@ public class TypeConverter {
 	public final static String PROTOCOL_TYPE_DOUBLE = "double";
 	public final static String PROTOCOL_TYPE_ARRAY = "array";
 	public final static String PROTOCOL_TYPE_TOKENIZABLE = "tokenizable";
-	private static Logger mLog = Logging.getLogger(RPCPlugIn.class);
 	private final static Map<String, String> mProtocolValue = new FastMap<String, String>();
 	private final static List<String> mProtocolList = new FastList<String>();
 
@@ -62,6 +63,7 @@ public class TypeConverter {
 		mProtocolValue.put(int.class.getName(), PROTOCOL_TYPE_INT);
 		mProtocolValue.put(String.class.getName(), PROTOCOL_TYPE_STRING);
 		mProtocolValue.put(List.class.getName(), PROTOCOL_TYPE_ARRAY);
+		mProtocolValue.put(Map.class.getName(), PROTOCOL_TYPE_MAP);
 		mProtocolValue.put(Token.class.getName(), PROTOCOL_TYPE_MAP);
 		mProtocolValue.put(ITokenizable.class.getName(), PROTOCOL_TYPE_MAP);
 	}

@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.config.Config;
 import org.jwebsocket.kit.WebSocketRuntimeException;
@@ -137,5 +138,57 @@ public final class PluginConfig implements Config, PluginConfiguration {
 		throw new WebSocketRuntimeException(
 				"Missing one of the plugin configuration, "
 				+ "please check your configuration file");
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public String getString(String aKey, String aDefault) {
+		Object lValue = mSettings.get(aKey);
+		String lRes = null;
+		if (lValue != null && lValue instanceof String) {
+			lRes = (String) lValue;
+		}
+		return (lRes != null ? lRes : aDefault);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public String getString(String aKey) {
+		return (aKey != null ? getString(aKey, null) : null);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public JSONObject getJSON(String aKey, JSONObject aDefault) {
+		Object lValue = mSettings.get(aKey);
+		JSONObject lRes = null;
+		if (lValue != null && lValue instanceof JSONObject) {
+			lRes = (JSONObject) lValue;
+		}
+		return (lRes != null ? lRes : aDefault);
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public JSONObject getJSON(String aKey) {
+		return (aKey != null ? getJSON(aKey, null) : null);
 	}
 }

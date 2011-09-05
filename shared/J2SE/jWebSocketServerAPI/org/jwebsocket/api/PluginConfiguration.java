@@ -16,6 +16,7 @@ package org.jwebsocket.api;
 
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 
 /**
  * The Base interface for plugin configuration
@@ -48,4 +49,12 @@ public interface PluginConfiguration extends Configuration {
 	 * @return the settings
 	 */
 	Map<String, Object> getSettings();
+
+	String getString(String aKey, String aDefault);
+
+	String getString(String aKey);
+
+	JSONObject getJSON(String aKey, JSONObject aDefault);
+
+	JSONObject getJSON(String aKey);
 }

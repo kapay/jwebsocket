@@ -52,7 +52,7 @@ public class JWebSocketFactory {
 	 *
 	 */
 	public static void printCopyrightToConsole() {
-		// the following 3 lines may not be removed due to GNU LGPL 3.0 license!
+		// the following 3 lines must not be removed due to GNU LGPL 3.0 license!
 		System.out.println("jWebSocket Ver. "
 				+ JWebSocketServerConstants.VERSION_STR
 				+ " (" + System.getProperty("sun.arch.data.model") + "bit)");
@@ -73,6 +73,7 @@ public class JWebSocketFactory {
 	 * @return
 	 */
 	public static String getConfigOverridePath(String[] aArgs) {
+		// TODO: Evalualation of parameters must become more flexible!
 		String lConfigOverridePath = null;
 		if (aArgs != null && aArgs.length > 0) {
 			if (aArgs.length < 2) {
@@ -242,23 +243,22 @@ public class JWebSocketFactory {
 	 */
 	public static void stop() {
 
+		// set instance status to not accept any new incoming connections
 		JWebSocketInstance.setStatus(JWebSocketInstance.STOPPING);
 
 		if (mLog != null && mLog.isDebugEnabled()) {
 			mLog.debug("Stopping jWebSocket Sub System...");
 		}
 
-		// String lEngineId = "?";
 		// stop engine if previously started successfully
 		if (mEngine != null) {
-			// now stop the servers
 			if (mLog != null && mLog.isDebugEnabled()) {
 				mLog.debug("Stopping engine...");
 			}
 			try {
 				mEngine.stopEngine(CloseReason.SHUTDOWN);
 				if (mLog != null && mLog.isInfoEnabled()) {
-					mLog.info("jWebSocket engine '" + mEngine.getId() + "' stopped");
+					mLog.info("jWebSocket engine '" + mEngine.getId() + "' stopped.");
 				}
 			} catch (WebSocketException lEx) {
 				if (mLog != null) {
@@ -276,7 +276,7 @@ public class JWebSocketFactory {
 				try {
 					lServer.stopServer();
 					if (mLog != null && mLog.isInfoEnabled()) {
-						mLog.info("jWebSocket server '" + lServer.getId() + "' stopped");
+						mLog.info("jWebSocket server '" + lServer.getId() + "' stopped.");
 					}
 				} catch (WebSocketException lEx) {
 					if (mLog != null) {
@@ -291,6 +291,7 @@ public class JWebSocketFactory {
 		}
 		Logging.exitLogs();
 
+		// set instance status
 		JWebSocketInstance.setStatus(JWebSocketInstance.STOPPED);
 	}
 

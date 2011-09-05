@@ -478,6 +478,14 @@ public class SystemPlugIn extends TokenPlugIn {
 			lResponse.setString("sourceId", aConnector.getId());
 			removeUsername(aConnector);
 			removeGroup(aConnector);
+
+			// log successful logout operation
+			if (mLog.isInfoEnabled()) {
+				mLog.info("User '" + lUsername
+						+ "' successfully logged out from "
+						+ aConnector.getRemoteHost() + " ("
+						+ aConnector.getId() + ").");
+			}
 		} else {
 			lResponse.setInteger("code", -1);
 			lResponse.setString("msg", "not logged in");

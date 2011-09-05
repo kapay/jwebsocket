@@ -27,15 +27,6 @@ import org.jwebsocket.api.WebSocketPacket;
  */
 public class RawPacket implements WebSocketPacket {
 
-/*
-	public static final int FRAMETYPE_UTF8 = 0;
-	public static final int FRAMETYPE_BINARY = 1;
-	// control frames
-	public static final int FRAMETYPE_PING = 2;
-	public static final int FRAMETYPE_PONG = 3;
-	public static final int FRAMETYPE_CLOSE = 4;
-	public static final int FRAMETYPE_FRAGMENT = 5;
-*/
 	private byte[] mData = null;
 	private String[] mFragments = null;
 	// private String mUTF8 = null;
@@ -63,10 +54,30 @@ public class RawPacket implements WebSocketPacket {
 
 	/**
 	 * Instantiates a new data packet and initializes its value to the passed
+	 * array of bytes.
+	 * @param aByteArray byte array to be used as value for the data packet.
+	 */
+	public RawPacket(WebSocketFrameType aFrameType, byte[] aByteArray) {
+		setFrameType(aFrameType);
+		setByteArray(aByteArray);
+	}
+
+	/**
+	 * Instantiates a new data packet and initializes its value to the passed
 	 * string using the default encoding.
 	 * @param aString string to be used as value for the data packet.
 	 */
 	public RawPacket(String aString) {
+		setString(aString);
+	}
+
+	/**
+	 * Instantiates a new data packet and initializes its value to the passed
+	 * string using the default encoding.
+	 * @param aString string to be used as value for the data packet.
+	 */
+	public RawPacket(WebSocketFrameType aFrameType, String aString) {
+		setFrameType(aFrameType);
 		setString(aString);
 	}
 
@@ -83,23 +94,23 @@ public class RawPacket implements WebSocketPacket {
 	}
 
 	@Override
-	public void setByteArray(byte[] aByteArray) {
+	public final void setByteArray(byte[] aByteArray) {
 		mData = aByteArray;
 	}
 
 	@Override
-	public void setString(String aString) {
+	public final void setString(String aString) {
 		mData = aString.getBytes();
 	}
 
 	@Override
-	public void setString(String aString, String aEncoding)
+	public final void setString(String aString, String aEncoding)
 			throws UnsupportedEncodingException {
 		mData = aString.getBytes(aEncoding);
 	}
 
 	@Override
-	public void setUTF8(String aString) {
+	public final void setUTF8(String aString) {
 		try {
 			mData = aString.getBytes("UTF-8");
 		} catch (UnsupportedEncodingException lEx) {
@@ -108,7 +119,7 @@ public class RawPacket implements WebSocketPacket {
 	}
 
 	@Override
-	public void setASCII(String aString) {
+	public final void setASCII(String aString) {
 		try {
 			mData = aString.getBytes("US-ASCII");
 		} catch (UnsupportedEncodingException lEx) {
@@ -117,23 +128,23 @@ public class RawPacket implements WebSocketPacket {
 	}
 
 	@Override
-	public byte[] getByteArray() {
+	public final byte[] getByteArray() {
 		return mData;
 	}
 
 	@Override
-	public String getString() {
+	public final String getString() {
 		return new String(mData);
 	}
 
 	@Override
-	public String getString(String aEncoding)
+	public final String getString(String aEncoding)
 			throws UnsupportedEncodingException {
 		return new String(mData, aEncoding);
 	}
 
 	@Override
-	public String getUTF8() {
+	public final String getUTF8() {
 		try {
 			return new String(mData, "UTF-8");
 		} catch (UnsupportedEncodingException lEx) {
@@ -142,7 +153,7 @@ public class RawPacket implements WebSocketPacket {
 	}
 
 	@Override
-	public String getASCII() {
+	public final String getASCII() {
 		try {
 			return new String(mData, "US-ASCII");
 		} catch (UnsupportedEncodingException lEx) {
@@ -154,7 +165,7 @@ public class RawPacket implements WebSocketPacket {
 	 * @return the frameType
 	 */
 	@Override
-	public WebSocketFrameType getFrameType() {
+	public final WebSocketFrameType getFrameType() {
 		return mFrameType;
 	}
 
@@ -162,22 +173,22 @@ public class RawPacket implements WebSocketPacket {
 	 * @param aFrameType the frameType to set
 	 */
 	@Override
-	public void setFrameType(WebSocketFrameType aFrameType) {
+	public final void setFrameType(WebSocketFrameType aFrameType) {
 		this.mFrameType = aFrameType;
 	}
 
 	@Override
-	public boolean isFragmented() {
+	public final boolean isFragmented() {
 		return mIsFragmented;
 	}
 
 	@Override
-	public boolean isComplete() {
+	public final boolean isComplete() {
 		return mIsComplete;
 	}
 
 	@Override
-	public void setFragment(String aString, int aIdx) {
+	public final void setFragment(String aString, int aIdx) {
 		mFragments[aIdx] = aString;
 		mFragmentsLoaded++;
 		mIsComplete = mFragmentsLoaded >= mFragmentsExpected;
@@ -197,28 +208,28 @@ public class RawPacket implements WebSocketPacket {
 	}
 
 	@Override
-	public void initFragmented(int aTotal) {
+	public final void initFragmented(int aTotal) {
 		mFragmentsExpected = aTotal;
 		mFragments = new String[aTotal];
 	}
 
 	@Override
-	public void setCreationDate(Date aDate) {
+	public final void setCreationDate(Date aDate) {
 		mCreationDate = aDate;
 	}
 
 	@Override
-	public Date getCreationDate() {
+	public final Date getCreationDate() {
 		return mCreationDate;
 	}
 
 	@Override
-	public void setTimeout(long aMilliseconds) {
+	public final void setTimeout(long aMilliseconds) {
 		mTimeout = aMilliseconds;
 	}
 
 	@Override
-	public boolean isTimedOut() {
+	public final boolean isTimedOut() {
 		return mCreationDate.getTime() + mTimeout < new Date().getTime();
 	}
 }

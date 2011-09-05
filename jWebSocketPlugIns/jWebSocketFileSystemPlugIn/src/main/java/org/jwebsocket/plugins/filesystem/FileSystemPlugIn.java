@@ -32,9 +32,13 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.io.monitor.FileAlterationListener;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
@@ -63,7 +67,12 @@ public class FileSystemPlugIn extends TokenPlugIn {
 	private static String PRIVATE_DIR_DEF = "${" + JWebSocketServerConstants.JWEBSOCKET_HOME + "}/private/{username}/";
 	private static String PUBLIC_DIR_DEF = "${" + JWebSocketServerConstants.JWEBSOCKET_HOME + "}/public/";
 	private static String WEB_ROOT_DEF = "http://jwebsocket.org/";
+	private static FileAlterationMonitor mPublicMonitor = null;
 
+	/**
+	 * 
+	 * @param aConfiguration
+	 */
 	public FileSystemPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
@@ -75,6 +84,16 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		if (mLog.isInfoEnabled()) {
 			mLog.info("FileSystem plug-in successfully loaded.");
 		}
+	}
+
+	@Override
+	public void engineStarted(WebSocketEngine aEngine) {
+		startPublicMonitor(1000);
+	}
+
+	@Override
+	public void engineStopped(WebSocketEngine aEngine) {
+		stopPublicMonitor();
 	}
 
 	@Override
@@ -92,6 +111,8 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				send(aConnector, aToken);
 			} else if (lType.equals("getFilelist")) {
 				getFilelist(aConnector, aToken);
+			} else if (lType.equals("watch")) {
+				watch(aConnector, aToken);
 			}
 		}
 	}
@@ -451,6 +472,143 @@ public class FileSystemPlugIn extends TokenPlugIn {
 
 		Token lResponse = getFilelist(aToken);
 		lServer.setResponseFields(aToken, lResponse);
+
+		// send response to requester
+		lServer.sendToken(aConnector, lResponse);
+	}
+
+	class ChangeListener implements FileAlterationListener {
+
+		// Directory changed Event.
+		@Override
+		public void onDirectoryChange(File aDirectory) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Directory " + aDirectory.getName() + " has been changed.");
+			}
+		}
+
+		// Directory created Event.
+		@Override
+		public void onDirectoryCreate(File aDirectory) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Directory " + aDirectory.getName() + " has been created.");
+			}
+		}
+
+		//  Directory deleted Event.
+		@Override
+		public void onDirectoryDelete(File aDirectory) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Directory " + aDirectory.getName() + " has been deleted.");
+			}
+		}
+
+		// File changed Event.
+		@Override
+		public void onFileChange(File aFile) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("File " + aFile.getName() + " has been changed.");
+			}
+		}
+
+		// File created Event.
+		@Override
+		public void onFileCreate(File aFile) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("File " + aFile.getName() + " has been created.");
+			}
+		}
+
+		// File deleted Event.
+		@Override
+		public void onFileDelete(File aFile) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("File " + aFile.getName() + " has been deleted.");
+			}
+		}
+
+		// File system observer started checking event.
+		@Override
+		public void onStart(FileAlterationObserver aObserver) {
+			/*
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Monitor has been started.");
+			}
+			 */
+		}
+
+		// File system observer finished checking event.		
+		@Override
+		public void onStop(FileAlterationObserver aObserver) {
+			/*
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Monitor has been stopped.");
+			}
+			 */
+		}
+	}
+
+	/**
+	 * 
+	 * @param aInterval
+	 */
+	public void startPublicMonitor(int aInterval) {
+		if (null == mPublicMonitor) {
+			mPublicMonitor = new FileAlterationMonitor(aInterval);
+			String lBaseDir = Tools.expandEnvVars(getString(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF));
+			String lMask = "*";
+			IOFileFilter lFileFilter = new WildcardFileFilter(lMask);
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Starting public monitor for " + lBaseDir + ", files:" + lMask + "...");
+			}
+			FileAlterationObserver lObserver = new FileAlterationObserver(lBaseDir, lFileFilter);
+			FileAlterationListener lListener = new ChangeListener();
+			lObserver.addListener(lListener);
+			mPublicMonitor.addObserver(lObserver);
+		}
+		try {
+			mPublicMonitor.start();
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName() + " on starting monitor: " + lEx.getMessage());
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public void stopPublicMonitor() {
+		if (null != mPublicMonitor) {
+			try {
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Stopping public monitor...");
+				}
+				mPublicMonitor.stop();
+			} catch (Exception lEx) {
+				mLog.error(lEx.getClass().getSimpleName() + " on stopping monitor: " + lEx.getMessage());
+			}
+		}
+	}
+
+	private void watch(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'watch'...");
+		}
+
+		// check if user is allowed to run 'save' command
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_FILESYSTEM + ".watch")) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Returning 'Access denied'...");
+			}
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
+		String lPath = aToken.getString("path");
+		String lFilename = aToken.getString("filename");
+
+		Token lResponse = createResponse(aToken);
 
 		// send response to requester
 		lServer.sendToken(aConnector, lResponse);

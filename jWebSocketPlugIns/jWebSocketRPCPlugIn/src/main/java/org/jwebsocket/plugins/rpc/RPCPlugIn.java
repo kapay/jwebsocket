@@ -104,8 +104,8 @@ public class RPCPlugIn extends TokenPlugIn {
 		loadClassFromThirdJavaPart();
 
 		// Load map of granted procs
-		Set<String> lPluginRights = SecurityFactory.getGlobalRights(getNamespace()).getRightIdSet();
-		for (String lRightId : lPluginRights) {
+		Set<String> lPlugInRights = SecurityFactory.getGlobalRights(getNamespace()).getRightIdSet();
+		for (String lRightId : lPlugInRights) {
 			// We remove the pluginId because we just want the name of the method:
 			String lFullMethodName = lRightId.substring(getNamespace().length() + 1);
 			// We don't care about global rpc and rrpc rights in this section.
