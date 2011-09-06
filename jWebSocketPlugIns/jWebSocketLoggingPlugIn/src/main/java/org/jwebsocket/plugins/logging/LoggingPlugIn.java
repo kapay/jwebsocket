@@ -161,26 +161,28 @@ public class LoggingPlugIn extends TokenPlugIn {
 		String lTable = aToken.getString("table");
 		List lFields = aToken.getList("fields");
 		List lValues = aToken.getList("values");
+		List lKeys = null;
+		Integer lKey = null;
 		String lPrimaryKey = aToken.getString("primaryKey");
 		String lSequence = aToken.getString("sequence");
 
-		Integer lValue = null;
 		if (lPrimaryKey != null && lSequence != null) {
 			Token lGetNextSeqToken = TokenFactory.createToken(
 					mJDBCPlugIn.getNamespace(), "getNextSeqVal");
 			lGetNextSeqToken.setString("sequence", lSequence);
 			Token lNextSeqVal = mJDBCPlugIn.invoke(aConnector, lGetNextSeqToken);
 
-			lValue = lNextSeqVal.getInteger("value");
-			if (lValue == null) {
+			lKeys = lNextSeqVal.getList("values");
+			if (lValues == null || lValues.size() <= 0) {
 				// take over error message
 				lResponse.setInteger("code", lNextSeqVal.getInteger("code"));
 				lResponse.setString("msg", lNextSeqVal.getString("msg"));
 				lServer.sendToken(aConnector, lResponse);
 				return;
 			}
+			lKey = (Integer)lKeys.get(0);
 			lFields.add(lPrimaryKey);
-			lValues.add(lValue);
+			lValues.add(lKey);
 		}
 
  		String lFieldsStr = null;
@@ -233,7 +235,7 @@ public class LoggingPlugIn extends TokenPlugIn {
 		lResponse.setInteger("code", lExecResp.getInteger("code"));
 		lResponse.setString("msg", lExecResp.getString("msg"));
 		lResponse.setList("rowsAffected", lExecResp.getList("rowsAffected"));
-		lResponse.setInteger("key", lValue);
+		lResponse.setInteger("key", lKey);
 
 		lServer.sendToken(aConnector, lResponse);
 	}

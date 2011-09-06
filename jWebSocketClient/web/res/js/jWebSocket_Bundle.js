@@ -35,9 +35,9 @@ if( window.MozWebSocket ) {
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b1 (10902)
+	//:const:*:VERSION:String:1.0b1 (nightly build 10906)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b1 (10902)",
+	VERSION: "1.0b1 (nightly build 10906)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -6071,6 +6071,26 @@ jws.JDBCPlugIn = {
 		return lRes;
 	},
 	
+	jdbcGetPrimaryKeys: function( aSequence, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lCount = 1;
+			if( aOptions ) {
+				if( aOptions.count != undefined ) {
+					lCount = aOptions.count;
+				}
+			}
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "getNextSeqVal",
+				sequence: aSequence,
+				count: lCount
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	setJDBCCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};

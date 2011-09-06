@@ -405,6 +405,44 @@ jws.tests.JDBC = {
 		});
 	},
 
+	// this spec tests the native SQL select function of the JDBC plug-in
+	testGetPrimaryKeys: function() {
+		
+		var lSpec = this.NS + ": getPrimaryKeys (admin)";
+		it( lSpec, function () {
+			
+			// init response
+			var lResponse = {};
+
+			// try to get 3 new primary keys...
+			jws.Tests.getAdminConn().jdbcGetPrimaryKeys(
+				"sq_pk_system_log",
+				{	count: 3,
+					OnResponse: function( aToken ) {
+						lResponse = aToken;
+					}
+				}
+			);
+			
+			// wait for result, consider reasonable timeout
+			waitsFor(
+				function() {
+					// check response
+					return( lResponse.code !== undefined );
+				},
+				lSpec,
+				1500
+			);
+
+			// check result if ok
+			runs( function() {
+				expect( lResponse.code ).toEqual( 0 );
+				expect( lResponse.values.length ).toEqual( 3 );
+			});
+
+		});
+	},
+
 	runSpecs: function() {
 		// run alls tests within an outer test suite
 		
@@ -422,6 +460,8 @@ jws.tests.JDBC = {
 		this.testUpdate();
 		this.testSelect();
 		this.testDelete();
+		
+		this.testGetPrimaryKeys();
 		
 		// drop the temporary table (test for DDL commands)
 		this.testDropTable();

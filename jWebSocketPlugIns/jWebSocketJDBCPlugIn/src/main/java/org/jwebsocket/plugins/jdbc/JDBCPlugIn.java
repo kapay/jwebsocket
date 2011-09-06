@@ -62,6 +62,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 	private static ServerXmlBeanFactory mBeanFactory;
 	private static NativeAccess mNativeAccess;
 	private static String mSelectSequenceSQL = null;
+	private static String mExecFunctionSQL = null;
+	private static String mExecStoredProcSQL = null;
 
 	// TODO: Check all methods: If mNativeAccess is not set return error!
 	/**
@@ -92,6 +94,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 			mBeanFactory = new ServerXmlBeanFactory(lFSRes, getClass().getClassLoader());
 			mNativeAccess = (NativeAccess) mBeanFactory.getBean("nativeAccess");
 			mSelectSequenceSQL = mNativeAccess.getSelectSequenceSQL();
+			mExecFunctionSQL = mNativeAccess.getExecFunctionSQL();
+			mExecStoredProcSQL = mNativeAccess.getExecStoredProcSQL();
 			// give a success message to the administrator
 			if (mLog.isInfoEnabled()) {
 				mLog.info("JDBC plug-in successfully loaded.");
@@ -239,10 +243,16 @@ public class JDBCPlugIn extends TokenPlugIn {
 		}
 		if (lSQL != null) {
 			lSQLResponse = mNativeAccess.query(lSQL);
-			lResToken.setInteger("colcount", lSQLResponse.getInteger("colcount", -1));
-			lResToken.setInteger("rowcount", lSQLResponse.getInteger("rowcount", -1));
-			lResToken.setList("columns", lSQLResponse.getList("columns"));
-			lResToken.setList("data", lSQLResponse.getList("data"));
+			Integer lCode = lSQLResponse.getInteger("code");
+			if (0 == lCode) {
+				lResToken.setInteger("colcount", lSQLResponse.getInteger("colcount", -1));
+				lResToken.setInteger("rowcount", lSQLResponse.getInteger("rowcount", -1));
+				lResToken.setList("columns", lSQLResponse.getList("columns"));
+				lResToken.setList("data", lSQLResponse.getList("data"));
+			} else {
+				lResToken.setInteger("code", lCode);
+				lResToken.setString("msg", lSQLResponse.getString("msg"));
+			}
 		}
 
 		// send response to requester
@@ -252,26 +262,36 @@ public class JDBCPlugIn extends TokenPlugIn {
 	private Token getNextSeqVal(Token aToken) {
 		String lSequence = aToken.getString("sequence");
 		Integer lCount = aToken.getInteger("count", 1);
-		Token lResToken = TokenFactory.createToken();
+		Token lResToken = createResponse(aToken);
 		if (lSequence != null) {
 			Map<String, String> lVars = new FastMap<String, String>();
 			lVars.put("sequence", lSequence);
-			String lQuery = Tools.expandVars(mSelectSequenceSQL, lVars, Tools.EXPAND_CASE_SENSITIVE);
-			Token lPKToken = mNativeAccess.query(lQuery);
-			Number lNextSeqVal = null;
-			List lRows = lPKToken.getList("data");
-			if (lRows != null) {
-				List lFields = (List) lRows.get(0);
-				if (lFields != null) {
-					lNextSeqVal = (Number) lFields.get(0);
+			List<Integer> lValues = new FastList<Integer>();
+			String lErrMsg = null;
+			for (int lValIdx = 0; lValIdx < lCount; lValIdx++) {
+				String lQuery = Tools.expandVars(mSelectSequenceSQL, lVars, Tools.EXPAND_CASE_SENSITIVE);
+				Token lPKToken = mNativeAccess.query(lQuery);
+				if (0 == lPKToken.getInteger("code")) {
+					Number lNextSeqVal = null;
+					List lRows = lPKToken.getList("data");
+					if (lRows != null) {
+						List lFields = (List) lRows.get(0);
+						if (lFields != null) {
+							lNextSeqVal = (Number) lFields.get(0);
+							lValues.add(lNextSeqVal.intValue());
+						}
+					}
+				} else {
+					lErrMsg = lPKToken.getString("msg");
+					break;
 				}
 			}
-			if (lNextSeqVal != null) {
+			if (null == lErrMsg && lValues.size() > 0) {
 				lResToken.setInteger("code", 0);
-				lResToken.setInteger("value", lNextSeqVal.intValue());
+				lResToken.setList("values", lValues);
 			} else {
 				lResToken.setInteger("code", -1);
-				lResToken.setString("msg", "value could not be obtained: " + lPKToken.getString("msg"));
+				lResToken.setString("msg", "value could not be obtained: " + lErrMsg);
 			}
 		} else {
 			lResToken.setInteger("code", -1);

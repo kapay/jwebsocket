@@ -16,9 +16,6 @@
 package org.jwebsocket.console;
 
 import org.jwebsocket.factory.JWebSocketFactory;
-import org.jwebsocket.instance.JWebSocketInstance;
-import org.jwebsocket.server.CustomServer;
-import org.jwebsocket.server.TokenServer;
 
 /**
  * Main entry point for stand alone jWebSocket server system
@@ -61,8 +58,6 @@ public class JWebSocketServer {
 					lEx.getClass().getSimpleName()
 					+ " on starting jWebsocket server: "
 					+ lEx.getMessage());
-			// TODO: remove that for final release
-			lEx.printStackTrace();
 		} finally {
 			JWebSocketFactory.stop();
 		}

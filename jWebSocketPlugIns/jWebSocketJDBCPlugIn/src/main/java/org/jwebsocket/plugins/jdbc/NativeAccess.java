@@ -29,24 +29,77 @@ public class NativeAccess {
 
 	private JdbcTemplate mJDBCTemplate;
 	private String mSelectSequenceSQL = null;
+	private String mExecFunctionSQL = null;
+	private String mExecStoredProcSQL = null;
 
+	/**
+	 * 
+	 * @param aDataSource
+	 */
 	public void setDataSource(DataSource aDataSource) {
 		mJDBCTemplate = new JdbcTemplate(aDataSource);
+		// TODO: make query time out configurable with spring
 		mJDBCTemplate.setQueryTimeout(10); // seconds
 	}
 
+	/**
+	 * 
+	 * @param aSQL
+	 */
 	public void setSelectSequenceSQL(String aSQL) {
 		mSelectSequenceSQL = aSQL;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getSelectSequenceSQL() {
 		return mSelectSequenceSQL;
 	}
 
+	/**
+	 * @return the mExecFunctionSQL
+	 */
+	public String getExecFunctionSQL() {
+		return mExecFunctionSQL;
+	}
+
+	/**
+	 * @param mExecFunctionSQL the mExecFunctionSQL to set
+	 */
+	public void setExecFunctionSQL(String mExecFunctionSQL) {
+		this.mExecFunctionSQL = mExecFunctionSQL;
+	}
+
+	/**
+	 * @return the mExecStoredProcSQL
+	 */
+	public String getExecStoredProcSQL() {
+		return mExecStoredProcSQL;
+	}
+
+	/**
+	 * @param mExecStoredProcSQL the mExecStoredProcSQL to set
+	 */
+	public void setExecStoredProcSQL(String mExecStoredProcSQL) {
+		this.mExecStoredProcSQL = mExecStoredProcSQL;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
 	public DataSource getDataSource() {
 		return mJDBCTemplate.getDataSource();
 	}
 
+	/**
+	 * 
+	 * @param aSQL
+	 * @param aArgs
+	 * @return
+	 */
 	public Token query(String aSQL, Object[] aArgs) {
 		Token lResToken;
 		SqlRowSet lRowSet;
@@ -57,6 +110,7 @@ public class NativeAccess {
 				lRowSet = mJDBCTemplate.queryForRowSet(aSQL);
 			}
 			lResToken = JDBCTools.resultSetToToken(lRowSet);
+			lResToken.setInteger("code", 0);
 		} catch (Exception lEx) {
 			lResToken = TokenFactory.createToken();
 			lResToken.setInteger("code", -1);
@@ -66,10 +120,21 @@ public class NativeAccess {
 		return lResToken;
 	}
 
+	/**
+	 * 
+	 * @param aSQL
+	 * @return
+	 */
 	public Token query(String aSQL) {
 		return query(aSQL, null);
 	}
 
+	/**
+	 * 
+	 * @param aSQL
+	 * @param aArgs
+	 * @return
+	 */
 	public Token update(String aSQL, Object[] aArgs) {
 		Token lResToken = TokenFactory.createToken();
 		int lAffectedRows = 0;
@@ -90,10 +155,20 @@ public class NativeAccess {
 		return lResToken;
 	}
 
+	/**
+	 * 
+	 * @param aSQL
+	 * @return
+	 */
 	public Token update(String aSQL) {
 		return update(aSQL, null);
 	}
 
+	/**
+	 * 
+	 * @param aSQL
+	 * @return
+	 */
 	public Token exec(String aSQL) {
 		Token lResToken = TokenFactory.createToken();
 		try {

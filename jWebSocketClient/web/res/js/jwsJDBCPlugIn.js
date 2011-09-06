@@ -188,6 +188,26 @@ jws.JDBCPlugIn = {
 		return lRes;
 	},
 	
+	jdbcGetPrimaryKeys: function( aSequence, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lCount = 1;
+			if( aOptions ) {
+				if( aOptions.count != undefined ) {
+					lCount = aOptions.count;
+				}
+			}
+			var lToken = {
+				ns: jws.JDBCPlugIn.NS,
+				type: "getNextSeqVal",
+				sequence: aSequence,
+				count: lCount
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	setJDBCCallbacks: function( aListeners ) {
 		if( !aListeners ) {
 			aListeners = {};

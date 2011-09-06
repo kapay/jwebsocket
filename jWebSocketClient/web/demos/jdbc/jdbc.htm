@@ -47,6 +47,24 @@
 				}
 			}
 			
+			function updateSQL( aToken ) {
+				log( "Not yet implemented." );
+			}
+			
+			function getPrimaryKeys( aToken ) {
+				log( "Getting primary keys..." );
+				if( lWSC.isConnected() ) {
+					lWSC.jdbcGetPrimaryKeys( "sq_pk_system_log", {
+						count: 2,
+						OnResponse: function( aToken ) {
+							// log("Reports " + JSON.stringify( aToken ) );
+						}
+					});
+				} else {
+					log( "Not connected." );
+				}
+			}
+			
 			function handleJDBCRowSet( aToken ) {
 			}
 			
@@ -94,8 +112,10 @@
 					<td>
 						<input class="sbtnDlg" id="sbtnQuerySQL" type="button" value="Query SQL" onclick="querySQL();"
 							   title="Queries the database with a native SQL query.">
-						<input class="sbtnDlg" id="sbtnQuerySQL" type="button" value="Update SQL" onclick="updateSQL();"
+						<input class="sbtnDlg" id="sbtnUpdateSQL" type="button" value="Update SQL" onclick="updateSQL();"
 							   title="Updates the database with a native SQL query.">
+						<input class="sbtnDlg" id="sbtnGetPKs" type="button" value="Get PKs" onclick="getPrimaryKeys();"
+							   title="Retrieves a number of primary keys.">
 					</td>
 				</tr>
 			</table>
