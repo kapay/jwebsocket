@@ -35,9 +35,9 @@ if( window.MozWebSocket ) {
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b1 (nightly build 10906)
+	//:const:*:VERSION:String:1.0b1 (nightly build 10908)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b1 (nightly build 10906)",
+	VERSION: "1.0b1 (nightly build 10908)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -3560,30 +3560,78 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 jws.cache = {};
 
-jws.cache.CachePriority = {
-    Low: 1,
-    Normal: 2,
-    High: 4
+jws.cache.Priority = {
+	Low: 1,
+	Normal: 2,
+	High: 4
 };
+
+// ****************************************************************************
+// MemoryStorage constructor
+// Creates a new storage object
+jws.cache.MemoryStorage = function MemoryStorage(){
+	this.length = 0;
+	this.keys = Array();
+	this.items = {};
+}
+
+jws.cache.MemoryStorage.prototype.key = function(index){
+	return (this.keys[index]) ? this.keys[index] : null;
+}
+
+jws.cache.MemoryStorage.prototype.getItem = function(key){
+	return (undefined != this.items[key]) ? this.items[key] : null;
+}
+
+jws.cache.MemoryStorage.prototype.setItem = function(key, value){
+	this.items[key] = value;
+	this.keys.push(key);
+	this.length++;
+}
+
+jws.cache.MemoryStorage.prototype.removeItem = function(key){
+	if (undefined == this.items[key]) return;
+   
+	var newKeys = Array();
+	for (var i = 0; i < this.keys.length; i++){
+		if (key != this.keys[i]){
+			newKeys.push(this.keys[i]);
+		}
+	}
+	this.keys = newKeys;
+	this.length--;
+	delete this.items[key];
+}
+
+jws.cache.MemoryStorage.prototype.clear = function(){
+	this.length = 0;
+	this.items = {};
+	this.keys = Array();
+}
+
 
 // ****************************************************************************
 // Cache constructor
 // Creates a new cache object
+// INPUT: storage - a referencce to the HTML5 Storage to use
 // INPUT: maxSize (optional) - indicates how many items the cache can hold.
 //                             default is -1, which means no limit on the 
 //                             number of items.
-jws.cache.Cache = function Cache(maxSize) {
-    this.items = {};
-    this.count = 0;
-    if (maxSize == null)
-        maxSize = -1;
-    this.maxSize = maxSize;
-    this.fillFactor = .75;
-    this.purgeSize = Math.round(this.maxSize * this.fillFactor);
+jws.cache.Cache = function Cache(storage, maxSize) {
+	if (!storage){
+		throw new Error("'storage' cannot be null or empty");
+	}
+	this.items = storage;
+	this.count = 0;
+	if (maxSize == null)
+		maxSize = -1;
+	this.maxSize = maxSize;
+	this.fillFactor = .75;
+	this.purgeSize = Math.round(this.maxSize * this.fillFactor);
     
-    this.stats = {};
-    this.stats.hits = 0;
-    this.stats.misses = 0;
+	this.stats = {};
+	this.stats.hits = 0;
+	this.stats.misses = 0;
 }
 
 // ****************************************************************************
@@ -3593,30 +3641,31 @@ jws.cache.Cache = function Cache(maxSize) {
 // INPUT: key - the key to load from the cache
 jws.cache.Cache.prototype.getItem = function(key) {
 
-    // retrieve the item from the cache
-    var item = this.items[key];
+	// retrieve the item from the cache
+	var item = this.items.getItem(key);
     
-    if (item != null) {
-        if (!this._isExpired(item)) {
-            // if the item is not expired
-            // update its last accessed date
-            item.lastAccessed = new Date().getTime();
-        } else {
-            // if the item is expired, remove it from the cache
-            this._removeItem(key);
-            item = null;
-        }
-    }
+	if (item != null) {
+		item = JSON.parse(item);
+		if (!this._isExpired(item)) {
+			// if the item is not expired
+			// update its last accessed date
+			item.lastAccessed = new Date().getTime();
+		} else {
+			// if the item is expired, remove it from the cache
+			this._removeItem(key);
+			item = null;
+		}
+	}
     
-    // return the item value (if it exists), or null
-    var returnVal = null;
-    if (item != null) {
-        returnVal = item.value;
-        this.stats.hits++;
-    } else {
-        this.stats.misses++;
-    }
-    return returnVal;
+	// return the item value (if it exists), or null
+	var returnVal = null;
+	if (item != null) {
+		returnVal = item.value;
+		this.stats.hits++;
+	} else {
+		this.stats.misses++;
+	}
+	return returnVal;
 };
 
 // ****************************************************************************
@@ -3641,30 +3690,30 @@ jws.cache.Cache.prototype.getItem = function(key) {
 //                are passed as parameters to the callback function.
 jws.cache.Cache.prototype.setItem = function(key, value, options) {
 
-    function CacheItem(k, v, o) {
-        if ((k == null) || (k == ''))
-            throw new Error("key cannot be null or empty");
-        this.key = k;
-        this.value = v;
-        if (o == null)
-            o = {};
-        if (o.expirationAbsolute != null)
-            o.expirationAbsolute = o.expirationAbsolute.getTime();
-        if (o.priority == null)
-            o.priority = jws.cache.CachePriority.Normal;
-        this.options = o;
-        this.lastAccessed = new Date().getTime();
-    }
+	function CacheItem(k, v, o) {
+		if ((k == null) || (k == ''))
+			throw new Error("key cannot be null or empty");
+		this.key = k;
+		this.value = v;
+		if (o == null)
+			o = {};
+		if (o.expirationAbsolute != null)
+			o.expirationAbsolute = o.expirationAbsolute.getTime();
+		if (o.priority == null)
+			o.priority = jws.cache.Priority.Normal;
+		this.options = o;
+		this.lastAccessed = new Date().getTime();
+	}
 
-    // add a new cache item to the cache
-    if (this.items[key] != null)
-        this._removeItem(key);
-    this._addItem(new CacheItem(key, value, options));
+	// add a new cache item to the cache
+	if (this.items.getItem(key) != null)
+		this._removeItem(key);
+	this._addItem(new CacheItem(key, value, options));
     
-    // if the cache is full, purge it
-    if ((this.maxSize > 0) && (this.count > this.maxSize)) {
-        this._purge();
-    }
+	// if the cache is full, purge it
+	if ((this.maxSize > 0) && (this.count > this.maxSize)) {
+		this._purge();
+	}
 };
 
 // ****************************************************************************
@@ -3672,10 +3721,12 @@ jws.cache.Cache.prototype.setItem = function(key, value, options) {
 // Remove all items from the cache
 jws.cache.Cache.prototype.clear = function() {
 
-    // loop through each item in the cache and remove it
-    for (var key in this.items) {
-      this._removeItem(key);
-    }  
+	if (this.items.length > 0){
+		var end = this.items.length;
+		for (var i = 0;  i < end; i++){
+			this._removeItem(this.items.key(i));
+		}
+	}
 };
 
 // ****************************************************************************
@@ -3683,91 +3734,97 @@ jws.cache.Cache.prototype.clear = function() {
 // remove old elements from the cache
 jws.cache.Cache.prototype._purge = function() {
     
-    var tmparray = new Array();
+	var tmparray = new Array();
     
-    // loop through the cache, expire items that should be expired
-    // otherwise, add the item to an array
-    for (var key in this.items) {
-        var item = this.items[key];
-        if (this._isExpired(item)) {
-            this._removeItem(key);
-        } else {
-            tmparray.push(item);
-        }
-    }
+	// loop through the cache, expire items that should be expired
+	// otherwise, add the item to an array
+	if (this.items.length > 0){
+		var end = this.items.length;
+		for (var i = 0;  i < end; i++){
+			var item = JSON.parse(this.items.getItem(this.items.key(i)));
+			if (this._isExpired(item)) {
+				this._removeItem(key);
+			} else {
+				tmparray.push(item);
+			}
+		}
+	}
     
-    if (tmparray.length > this.purgeSize) {
+	if (tmparray.length > this.purgeSize) {
 
-        // sort this array based on cache priority and the last accessed date
-        tmparray = tmparray.sort(function(a, b) { 
-            if (a.options.priority != b.options.priority) {
-                return b.options.priority - a.options.priority;
-            } else {
-                return b.lastAccessed - a.lastAccessed;
-            }
-        });
+		// sort this array based on cache priority and the last accessed date
+		tmparray = tmparray.sort(function(a, b) { 
+			if (a.options.priority != b.options.priority) {
+				return b.options.priority - a.options.priority;
+			} else {
+				return b.lastAccessed - a.lastAccessed;
+			}
+		});
         
-        // remove items from the end of the array
-        while (tmparray.length > this.purgeSize) {
-            var ritem = tmparray.pop();
-            this._removeItem(ritem.key);
-        }
-    }
+		// remove items from the end of the array
+		while (tmparray.length > this.purgeSize) {
+			var ritem = tmparray.pop();
+			this._removeItem(ritem.key);
+		}
+	}
 };
 
 // ****************************************************************************
 // Cache._addItem (PRIVATE FUNCTION)
 // add an item to the cache
 jws.cache.Cache.prototype._addItem = function(item) {
-    this.items[item.key] = item;
-    this.count++;
+	this.items.setItem(item.key, JSON.stringify(item));
+	this.count++;
 };
 
 // ****************************************************************************
 // Cache._removeItem (PRIVATE FUNCTION)
 // Remove an item from the cache, call the callback function (if necessary)
 jws.cache.Cache.prototype._removeItem = function(key) {
-    var item = this.items[key];
-    delete this.items[key];
-    this.count--;
+	var item = JSON.parse(this.items.getItem(key));
+	this.items.removeItem(key);
+	this.count--;
     
-    // if there is a callback function, call it at the end of execution
-    if (item.options.callback != null) {
-        var callback = function() {
-            item.options.callback(item.key, item.value);
-        };
-        setTimeout(callback, 0);
-    }
+	// if there is a callback function, call it at the end of execution
+	if (item.options.callback != null) {
+		var callback = function() {
+			item.options.callback(item.key, item.value);
+		};
+		setTimeout(callback, 0);
+	}
 };
 
 // ****************************************************************************
 // Cache._isExpired (PRIVATE FUNCTION)
 // Returns true if the item should be expired based on its expiration options
 jws.cache.Cache.prototype._isExpired = function(item) {
-    var now = new Date().getTime();
-    var expired = false;
-    if ((item.options.expirationAbsolute) && (item.options.expirationAbsolute < now)) {
-        // if the absolute expiration has passed, expire the item
-        expired = true;
-    } 
-    if (!expired && (item.options.expirationSliding)) {
-        // if the sliding expiration has passed, expire the item
-        var lastAccess = item.lastAccessed + (item.options.expirationSliding * 1000);
-        if (lastAccess < now) {
-            expired = true;
-        }
-    }
-    return expired;
+	var now = new Date().getTime();
+	var expired = false;
+	if ((item.options.expirationAbsolute) && (item.options.expirationAbsolute < now)) {
+		// if the absolute expiration has passed, expire the item
+		expired = true;
+	} 
+	if (!expired && (item.options.expirationSliding)) {
+		// if the sliding expiration has passed, expire the item
+		var lastAccess = item.lastAccessed + (item.options.expirationSliding * 1000);
+		if (lastAccess < now) {
+			expired = true;
+		}
+	}
+	return expired;
 };
 
 jws.cache.Cache.prototype.toHtmlString = function() {
-    var returnStr = this.count + " item(s) in cache<br /><ul>";
-    for (var key in this.items) {
-        var item = this.items[key];
-        returnStr = returnStr + "<li>" + item.key.toString() + " = " + item.value.toString() + "</li>";
-    }
-    returnStr = returnStr + "</ul>";
-    return returnStr;
+	var returnStr = this.count + " item(s) in cache<br /><ul>";
+	if (this.items.length > 0){
+		var end = this.items.length;
+		for (var i = 0;  i < end; i++){
+			var item = JSON.parse(this.items.getItem(this.items.key(i)));
+			returnStr = returnStr + "<li>" + item.key.toString() + " = " + item.value.toString() + "</li>";
+		}
+		returnStr = returnStr + "</ul>";
+		return returnStr;
+	}
 };
 //	---------------------------------------------------------------------------
 //	jWebSocket API PlugIn (uses jWebSocket Client and Server)
@@ -4897,6 +4954,61 @@ jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.ClientGamingPlugIn );
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
 
+//:package:*:jws
+//:class:*:jws.EventsCallbacksHandler
+//:ancestor:*:-
+//:d:en:Implementation of the [tt]jws.EventsCallbacksHandler[/tt] class. _
+//:d:en:This class handle request callbacks on the events plug-in
+jws.oop.declareClass( "jws", "EventsCallbacksHandler", null, {
+	OnTimeout: function(rawRequest, aArgs){
+		if (undefined != aArgs.meta.OnTimeout){
+			aArgs.meta.OnTimeout(rawRequest);
+		}
+	}
+	,
+	OnResponse: function(aResponseEvent, aArgs){
+		aArgs.meta.elapsedTime = (new Date().getTime()) - aArgs.sentTime;
+
+		if (undefined != aArgs.meta.eventDefinition){
+			var index = aArgs.filterChain.length - 1;
+			while (index > -1){
+				try
+				{
+					aArgs.filterChain[index].afterCall(aArgs.meta, aResponseEvent);
+				}
+				catch(err)
+				{
+					switch (err)
+					{
+						case "stop_filter_chain":
+							return;
+							break;
+						default:
+							throw err;
+							break;
+					}
+				}
+				index--;
+			}
+		}
+		
+		if (aResponseEvent.code == 0){
+			if (undefined != aArgs.meta.OnResponse)
+				aArgs.meta.OnResponse(aResponseEvent);
+
+			if (undefined != aArgs.meta.OnSuccess)
+				aArgs.meta.OnSuccess(aResponseEvent);
+		}
+		else {
+			if (undefined != aArgs.meta.OnResponse)
+				aArgs.meta.OnResponse(aResponseEvent);
+
+			if (undefined != aArgs.meta.OnFailure)
+				aArgs.meta.OnFailure(aResponseEvent);
+		}
+	}
+});
+
 //:file:*:jwsEventsPlugIn.js
 //:d:en:Implements the EventsPlugIn in the client side
 
@@ -4949,21 +5061,28 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 			
 			aOptions.UTID = jws.tools.generateSharedUTID(lToken);
 			
-			var aOnResponseObject = new jws.OnResponseObject();
-			aOnResponseObject.request = aOptions;
-			aOnResponseObject.filterChain = this.filterChain;
-			aOnResponseObject.sentTime = new Date().getTime();
-
+			var request;
+			if (!aOptions['OnResponse'] && !aOptions['OnSuccess'] && !aOptions['OnFailure'] && !aOptions['OnTimeout']){
+				request = {};
+			}
+			else{
+				request = new jws.EventsCallbacksHandler();	
+			}
+			
+			request.args = {
+				meta: aOptions,
+				filterChain: this.filterChain,
+				sentTime: new Date().getTime()
+			};
+			
+			
 			if (undefined != aOptions.eventDefinition){
 				for (var i = 0; i < this.filterChain.length; i++){
-					try
-					{
-						this.filterChain[i].beforeCall(lToken, aOnResponseObject);
+					try {
+						this.filterChain[i].beforeCall(lToken, request);
 					}
-					catch(err)
-					{
-						switch (err)
-						{
+					catch(err) {
+						switch (err) {
 							case "stop_filter_chain":
 								return;
 								break;
@@ -4975,7 +5094,7 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 				}
 			}
 			
-			this.jwsClient.sendToken(lToken, aOnResponseObject);
+			this.jwsClient.sendToken(lToken, request);
 		}
 		else
 			throw "client:not_connected";
@@ -5017,65 +5136,6 @@ jws.oop.declareClass( "jws", "EventsNotifier", null, {
 				});
 				throw "s2c_event_support_not_found:" + event_name;
 			}
-		}
-	}
-});
-
-//:package:*:jws
-//:class:*:jws.OnResponseObject
-//:ancestor:*:-
-//:d:en:Implementation of the [tt]jws.OnResponseObject[/tt] class. _
-//:d:en:This class offer support for the "OnSuccess" and "OnFailure" callbacks
-jws.oop.declareClass( "jws", "OnResponseObject", null, {
-	request: {}
-	,
-	filterChain: []
-	,
-	OnTimeout: function(rawRequest){
-		if (undefined != this.request.OnTimeout){
-			this.request.OnTimeout(rawRequest);
-		}
-	}
-	,
-	OnResponse: function(aResponseEvent){
-		this.request.elapsedTime = (new Date().getTime()) - this.sentTime;
-
-		if (undefined != this.request.eventDefinition){
-			var index = this.filterChain.length - 1;
-			while (index > -1){
-				try
-				{
-					this.filterChain[index].afterCall(this.request, aResponseEvent);
-				}
-				catch(err)
-				{
-					switch (err)
-					{
-						case "stop_filter_chain":
-							return;
-							break;
-						default:
-							throw err;
-							break;
-					}
-				}
-				index--;
-			}
-		}
-		
-		if (aResponseEvent.code == 0){
-			if (undefined != this.request.OnResponse)
-				this.request.OnResponse(aResponseEvent);
-
-			if (undefined != this.request.OnSuccess)
-				this.request.OnSuccess(aResponseEvent);
-		}
-		else {
-			if (undefined != this.request.OnResponse)
-				this.request.OnResponse(aResponseEvent);
-
-			if (undefined != this.request.OnFailure)
-				this.request.OnFailure(aResponseEvent);
 		}
 	}
 });
@@ -5212,9 +5272,9 @@ jws.oop.declareClass( "jws", "EventsBaseFilter", null, {
 	//:m:*:beforeCall
 	//:d:en:This method is called before every C2S event notification.
 	//:a:en::aToken:Object:The token to be filtered.
-	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
+	//:a:en::aRequest:Object:The OnResponse callback to be called.
 	//:r:*:::void:none
-	beforeCall: function(aToken, aOnResponseObject){}
+	beforeCall: function(aToken, aRequest){}
 	,
 	//:m:*:afterCall
 	//:d:en:This method is called after every C2S event notification.
@@ -5242,10 +5302,10 @@ jws.oop.declareClass( "jws", "SecurityFilter", jws.EventsBaseFilter, {
 	//:d:en:Checks that the logged in user has the correct roles to notify _
 	//:d:en:a custom event in the server.
 	//:a:en::aToken:Object:The token to be filtered.
-	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
+	//:a:en::aRequest:Object:The OnResponse callback to be called.
 	//:r:*:::void:none
-	beforeCall: function(aToken, aOnResponseObject){
-		if (aOnResponseObject.request.eventDefinition.isSecurityEnabled){	
+	beforeCall: function(aToken, aRequest){
+		if (aRequest.args.meta.eventDefinition.isSecurityEnabled){
 			var r, u;
 			var roles, users = null;
 			var exclusion = false;
@@ -5256,17 +5316,19 @@ jws.oop.declareClass( "jws", "SecurityFilter", jws.EventsBaseFilter, {
 			//@TODO: Support IP addresses restrictions checks on the JS client
 
 			//Getting users restrictions
-			users = aOnResponseObject.request.eventDefinition.users;
+			users = aRequest.args.meta.eventDefinition.users;
 
 			//Getting roles restrictions
-			roles = aOnResponseObject.request.eventDefinition.roles;
-
+			roles = aRequest.args.meta.eventDefinition.roles;
+			
 			//Avoid unnecessary checks if the user is not authenticated
 			if (users && roles && !jws.user.isAuthenticated()){
-				aOnResponseObject.OnResponse({
-					code: -1,
-					msg: "User is not authenticated yet!"
-				});
+				if (aRequest.OnResponse){
+					aRequest.OnResponse({
+						code: -1,
+						msg: "User is not authenticated yet!"
+					}, aRequest.args);
+				}
 				this.OnNotAuthorized(aToken);
 				throw "stop_filter_chain";
 			}
@@ -5297,10 +5359,11 @@ jws.oop.declareClass( "jws", "SecurityFilter", jws.EventsBaseFilter, {
 
 				//Not Authorized USER
 				if (!user_authorized && user_match || 0 == roles.length){
-					aOnResponseObject.OnResponse({
+					aRequest.OnResponse({
 						code: -1,
 						msg: "Not autorized to notify this event. USER restrictions: " + users.toString()
-					});
+					}, aRequest.args);
+					
 					this.OnNotAuthorized(aToken);
 					throw "stop_filter_chain";
 				}
@@ -5336,10 +5399,12 @@ jws.oop.declareClass( "jws", "SecurityFilter", jws.EventsBaseFilter, {
 
 				//Not Authorized ROLE
 				if (!role_authorized){
-					aOnResponseObject.OnResponse({
-						code: -1,
-						msg: "Not autorized to notify this event. ROLE restrictions: " + roles.toString()
-					});
+					if (aRequest.OnResponse){
+						aRequest.OnResponse({
+							code: -1,
+							msg: "Not autorized to notify this event. ROLE restrictions: " + roles.toString()
+						}, aRequest.args);
+					}
 					this.OnNotAuthorized(aToken);
 					throw "stop_filter_chain";
 				}
@@ -5391,27 +5456,31 @@ jws.oop.declareClass( "jws", "CacheFilter", jws.EventsBaseFilter, {
 	//:d:en:Checks if exist a non-expired cached response for the outgoing event. _
 	//:d:en:If TRUE, the cached response is used and the server is not notified.
 	//:a:en::aToken:Object:The token to be filtered.
-	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
+	//:a:en::aRequest:jws.OnResponseObject:The OnResponse callback to be called.
 	//:r:*:::void:none
-	beforeCall: function(aToken, aOnResponseObject){
-		if (aOnResponseObject.request.eventDefinition.isCacheEnabled){
-			var key = aOnResponseObject.request.eventDefinition.type 
-			+aOnResponseObject.request.UTID;
+	beforeCall: function(aToken, aRequest){
+		if (aRequest.args.meta.eventDefinition.isCacheEnabled){
+			var key = aRequest.args.meta.eventDefinition.type + aRequest.args.meta.UTID;
 			
 			//Storing in the user private cache storage if required
-			if (aOnResponseObject.request.eventDefinition.isCachePrivate){
+			if (aRequest.args.meta.eventDefinition.isCachePrivate && jws.user.isAuthenticated()){
 				key = jws.user.uuid + key;
 			}
 			
 			var cachedResponseEvent = this.cache.getItem(key);
-			
+
 			if (null != cachedResponseEvent){
 				//Setting the processing time of the cached response to 0
 				cachedResponseEvent.processingTime = 0;
+				
 				//Updating the elapsed time
-				aOnResponseObject.request.elapsedTime = (new Date().getTime()) - aOnResponseObject.sentTime;
+				aRequest.args.meta.elapsedTime = (new Date().getTime()) - aRequest.sentTime;
+				
 				//Calling the OnResponse callback
-				aOnResponseObject.OnResponse(cachedResponseEvent);
+				if (aRequest.OnResponse){
+					aRequest.OnResponse(cachedResponseEvent, aRequest.args);
+				}
+				
 				throw "stop_filter_chain";
 			}
 		}
@@ -5426,10 +5495,9 @@ jws.oop.declareClass( "jws", "CacheFilter", jws.EventsBaseFilter, {
 	//:r:*:::void:none
 	afterCall: function(aRequest, aResponseEvent){
 		if (aRequest.eventDefinition.isCacheEnabled){
-			
-			var key = + aRequest.eventDefinition.type 
+			var key = aRequest.eventDefinition.type 
 			+ aRequest.UTID;
-			
+
 			//Storing in the user private cache storage if required
 			if (aRequest.eventDefinition.isCachePrivate){
 				key = jws.user.uuid + key;
@@ -5457,17 +5525,19 @@ jws.oop.declareClass( "jws", "ValidatorFilter", jws.EventsBaseFilter, {
 	//:d:en:This method is called before every C2S event notification. _
 	//:d:en:Checks if the request arguments match with the validation server rules.
 	//:a:en::aToken:Object:The token to be filtered.
-	//:a:en::aOnResponseObject:jws.OnResponseObject:The OnResponse callback to be called.
+	//:a:en::aRequest:jws.OnResponseObject:The OnResponse callback to be called.
 	//:r:*:::void:none
-	beforeCall: function(aToken, aOnResponseObject){
-		var arguments = aOnResponseObject.request.eventDefinition.incomingArgsValidation;
+	beforeCall: function(aToken, aRequest){
+		var arguments = aRequest.args.meta.eventDefinition.incomingArgsValidation;
 		
 		for (var index = 0; index < arguments.length; index++){
 			if (undefined === aToken[arguments[index].name] && !arguments[index].optional){
-				aOnResponseObject.OnResponse({
-					code: -1,
-					msg: "Argument '"+arguments[index].name+"' is required!"
-				});
+				if (aRequest.OnResponse){
+					aRequest.OnResponse({
+						code: -1,
+						msg: "Argument '"+arguments[index].name+"' is required!"
+					}, aRequest.args);
+				}
 				throw "stop_filter_chain";
 			}else if (aToken.hasOwnProperty(arguments[index].name)){
 				var requiredType = arguments[index].type;
@@ -5477,10 +5547,12 @@ jws.oop.declareClass( "jws", "ValidatorFilter", jws.EventsBaseFilter, {
 						return;
 					}
 
-					aOnResponseObject.OnResponse({
-						code: -1,
-						msg: "Argument '"+arguments[index].name+"' has invalid type. Required: '"+requiredType+"'"
-					});
+					if (aRequest.OnResponse){
+						aRequest.OnResponse({
+							code: -1,
+							msg: "Argument '"+arguments[index].name+"' has invalid type. Required: '"+requiredType+"'"
+						}, aRequest.args);
+					}
 					throw "stop_filter_chain";
 				}
 			}

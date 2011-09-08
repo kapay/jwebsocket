@@ -40,15 +40,26 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<groupId>org.apache.maven.plugins</groupId>
 				<version>2.3.1</version>
-				<!-- create embedded version unpackaged -->
-				<configuration>
-					<outputDirectory>../../../rte/jWebSocket-${project.version}/libs</outputDirectory>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-						</manifest>
-					</archive>
-				</configuration>
+				<executions>
+					<!-- create embedded version unpackaged -->
+					<execution>
+						<id>Standard</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<finalName>jWebSocketAMQStockTicker-${project.version}</finalName>
+							<outputDirectory>../../../rte/jWebSocket-${project.version}/libs
+							</outputDirectory>
+							<archive>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<mainClass>org.jwebsocket.jms.producer.JmsDataSource</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			
 		</plugins>
