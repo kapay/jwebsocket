@@ -285,32 +285,32 @@ public class TCPConnector extends BaseConnector {
 		private void readHybi(int aVersion, ByteArrayOutputStream aBuff,
 				WebSocketEngine aEngine) throws IOException {
 
-			int lPort = getRemotePort();
+			String lFrom = getRemoteHost() + ":" + getRemotePort() + " (" + getId() + ")";
 			while (mIsRunning) {
 				try {
 					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(getVersion(), mIn);
 
 					if (lPacket == null) {
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Processing client 'disconnect'...");
+							mLog.debug("Processing client 'disconnect' from " + lFrom + "...");
 						}
 						mCloseReason = CloseReason.CLIENT;
 						mIsRunning = false;
 					} else if (WebSocketFrameType.TEXT.equals(lPacket.getFrameType())) {
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Processing 'text' frame...");
+							mLog.debug("Processing 'text' frame from " + lFrom + "...");
 						}
 						aEngine.processPacket(mConnector, lPacket);
 					} else if (WebSocketFrameType.PING.equals(lPacket.getFrameType())) {
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Processing 'ping' frame...");
+							mLog.debug("Processing 'ping' frame from " + lFrom + "...");
 						}
 						WebSocketPacket lPong = new RawPacket("");
 						lPong.setFrameType(WebSocketFrameType.PONG);
 						sendPacket(lPong);
 					} else if (WebSocketFrameType.CLOSE.equals(lPacket.getFrameType())) {
 						if (mLog.isDebugEnabled()) {
-							mLog.debug("Processing 'close' frame...");
+							mLog.debug("Processing 'close' frame from " + lFrom + "...");
 						}
 						mCloseReason = CloseReason.CLIENT;
 						mIsRunning = false;

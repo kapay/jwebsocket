@@ -37,7 +37,7 @@ public class EhCacheStorage implements IBasicStorage {
 	private String mName = null;
 	private static CacheManager mCacheManager = null;
 	private Cache mCache = null;
-
+	
 	public EhCacheStorage(String aId) {
 		mInstanceCounter++;
 		mName = aId;

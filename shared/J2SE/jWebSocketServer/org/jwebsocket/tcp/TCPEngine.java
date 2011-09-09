@@ -326,7 +326,10 @@ public class TCPEngine extends BaseEngine {
 		byte[] lBuff = new byte[8192];
 		int lRead = lIn.read(lBuff);
 		if (lRead <= 0) {
-			mLog.warn("Connection did not detect initial handshake.");
+			mLog.warn("Connection " 
+					+ aClientSocket.getInetAddress() + ":" 
+					+ aClientSocket.getPort() 
+					+  " did not detect initial handshake (" + lRead + ").");
 			return null;
 		}
 		byte[] lReq = new byte[lRead];
@@ -437,8 +440,14 @@ public class TCPEngine extends BaseEngine {
 					//	log.debug("Waiting for client...");
 					// }
 					Socket lClientSocket = mServer.accept();
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("Client trying to connect on port #"
+								+ lClientSocket.getPort() + "...");
+					}
+					/*
 					boolean lTCPNoDelay = lClientSocket.getTcpNoDelay();
 					lClientSocket.setTcpNoDelay(true);
+					 */
 					try {
 						// process handshake to parse header data
 						RequestHeader lHeader = processHandshake(lClientSocket);
@@ -468,7 +477,8 @@ public class TCPEngine extends BaseEngine {
 										+ lClientSocket.getPort()
 										+ " with timeout "
 										+ (lSessionTimeout > 0 ? lSessionTimeout + "ms" : "infinite")
-										+ " (TCPNoDelay was: " + lTCPNoDelay + ")...");
+										// + " (TCPNoDelay was: " + lTCPNoDelay + ")"
+										+ "...");
 							}
 
 							// log.debug("Setting header to engine...");
