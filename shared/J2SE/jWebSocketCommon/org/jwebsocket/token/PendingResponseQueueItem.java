@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Server Configuration Constants
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	jWebSocket - jWebSocket Item in the pending responses queue
+//	Copyright (c) 2011 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -13,23 +13,48 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config;
+package org.jwebsocket.token;
 
 /**
- * Provides a global shared container for the jWebSocket configuration settings.
  *
  * @author aschulze
- * @version $Id: JWebSocketServerConstants.java 624 2010-07-06 12:28:44Z fivefeetfurther $
  */
-public final class JWebSocketClientConstants {
-	
+public class PendingResponseQueueItem {
+
+	private Token mToken = null;
+	private WebSocketResponseTokenListener mListener = null;
+
+	public PendingResponseQueueItem(Token aToken,
+			WebSocketResponseTokenListener aListener) {
+		mToken = aToken;
+		mListener = aListener;
+	}
 
 	/**
-	 * Current version string of the jWebSocket package.
+	 * @return the mToken
 	 */
-	public static final String VERSION_STR = "1.0b1 (nightly build 10913)";
+	public Token getToken() {
+		return mToken;
+	}
+
 	/**
-	 * Name space base for tokens and plug-ins.
+	 * @param mToken the mToken to set
 	 */
-	public static final String NS_BASE = "org.jwebsocket";
+	public void setToken(Token aToken) {
+		this.mToken = aToken;
+	}
+
+	/**
+	 * @return the mListener
+	 */
+	public WebSocketResponseTokenListener getListener() {
+		return mListener;
+	}
+
+	/**
+	 * @param mListener the mListener to set
+	 */
+	public void setListener(WebSocketResponseTokenListener aListener) {
+		this.mListener = aListener;
+	}
 }

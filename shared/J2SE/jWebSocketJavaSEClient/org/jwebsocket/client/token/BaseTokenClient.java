@@ -14,6 +14,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.client.token;
 
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import javolution.util.FastMap;
 import org.jwebsocket.api.WebSocketTokenClient;
 import org.jwebsocket.api.WebSocketClientEvent;
 import org.jwebsocket.api.WebSocketClientListener;
@@ -28,9 +32,12 @@ import org.jwebsocket.packetProcessors.XMLProcessor;
 import org.jwebsocket.token.Token;
 import org.apache.commons.codec.binary.Base64;
 import org.jwebsocket.api.WebSocketStatus;
+import org.jwebsocket.client.java.ReliabilityOptions;
 import org.jwebsocket.kit.WebSocketEncoding;
 import org.jwebsocket.kit.WebSocketSubProtocol;
+import org.jwebsocket.token.PendingResponseQueueItem;
 import org.jwebsocket.token.TokenFactory;
+import org.jwebsocket.token.WebSocketResponseTokenListener;
 
 /**
  * Token based implementation of {@code JWebSocketClient}
@@ -57,12 +64,21 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 	private String fUsername = null;
 	private String fClientId = null;
 	private String fSessionId = null;
+	private final Map<Integer, PendingResponseQueueItem> mPendingResponseQueue =
+			new FastMap<Integer, PendingResponseQueueItem>().shared();
+	private final ScheduledThreadPoolExecutor mResponseQueueExecutor = 
+			new ScheduledThreadPoolExecutor(1);
 
 	/**
 	 * Default constructor
 	 */
 	public BaseTokenClient() {
 		this(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT, JWebSocketCommonConstants.WS_ENCODING_DEFAULT);
+	}
+
+	public BaseTokenClient(ReliabilityOptions aReliabilityOptions) {
+		this(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT, JWebSocketCommonConstants.WS_ENCODING_DEFAULT);
+		setReliabilityOptions(aReliabilityOptions);
 	}
 
 	public BaseTokenClient(String aSubProt, WebSocketEncoding aEncoding) {
@@ -78,7 +94,7 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 	}
 
 	/**
-	 * WebSocketClient listener implementation that recieves the data packet and
+	 * WebSocketClient listener implementation that receives the data packet and
 	 * creates <tt>token</tt> objects
 	 *
 	 * @author aschulze
@@ -134,6 +150,35 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 							fUsername = null;
 						}
 					}
+
+					synchronized (mPendingResponseQueue) {
+						// check if the response token is part of the pending responses queue
+						Integer lUTID = lToken.getInteger("utid");
+						Integer lCode = lToken.getInteger("code");
+						// is there unique token id available in the response
+						// and is there a matching pending response at all?
+						PendingResponseQueueItem lPRQI =
+								(lUTID != null ? mPendingResponseQueue.get(lUTID) : null);
+						if (lPRQI != null) {
+							// if so start analyzing
+							WebSocketResponseTokenListener lWSRTL = lPRQI.getListener();
+							if (lWSRTL != null) {
+								// fire on response
+								lWSRTL.OnResponse(lToken);
+								// usable response code available?
+								if (lCode != null) {
+									if (lCode == 0) {
+										lWSRTL.OnSuccess(lToken);
+									} else {
+										lWSRTL.OnFailure(lToken);
+									}
+								}
+							}
+							// and drop the pending queue item
+							mPendingResponseQueue.remove(lUTID);
+						}
+					}
+
 					((WebSocketClientTokenListener) lListener).processToken(aEvent, lToken);
 				}
 			}
@@ -249,6 +294,42 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 		CUR_TOKEN_ID++;
 		aToken.setInteger("utid", CUR_TOKEN_ID);
 		super.send(tokenToPacket(aToken));
+	}
+
+	private class ResponseTimeoutTimer implements Runnable {
+
+		private Integer mUTID = 0;
+
+		public ResponseTimeoutTimer(Integer aUTID) {
+			mUTID = aUTID;
+		}
+
+		@Override
+		public void run() {
+			synchronized (mPendingResponseQueue) {
+				PendingResponseQueueItem lPRQI =
+						(mUTID != null ? mPendingResponseQueue.get(mUTID) : null);
+				if (lPRQI != null) {
+					// if so start analyzing
+					WebSocketResponseTokenListener lWSRTL = lPRQI.getListener();
+					if (lWSRTL != null) {
+						// fire on response
+						lWSRTL.OnTimeout(lPRQI.getToken());
+					}
+					// and drop the pending queue item
+					mPendingResponseQueue.remove(mUTID);
+				}
+			}
+		}
+	}
+
+	public void sendToken(Token aToken, WebSocketResponseTokenListener aResponseListener) throws WebSocketException {
+		PendingResponseQueueItem lPRQI = new PendingResponseQueueItem(aToken, aResponseListener);
+		int lUTID = CUR_TOKEN_ID + 1;
+		mPendingResponseQueue.put(lUTID, lPRQI);
+		ResponseTimeoutTimer lRTT = new ResponseTimeoutTimer(lUTID);
+		mResponseQueueExecutor.schedule(lRTT, aResponseListener.getTimeout(), TimeUnit.MILLISECONDS);
+		sendToken(aToken);
 	}
 	private final static String NS_SYSTEM_PLUGIN = NS_BASE + ".plugins.system";
 

@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - Server Configuration Constants
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	jWebSocket - jWebSocket Client Response Listener Interface
+//	Copyright (c) 2011 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -13,23 +13,47 @@
 //	You should have received a copy of the GNU Lesser General Public License along
 //	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //	---------------------------------------------------------------------------
-package org.jwebsocket.config;
+package org.jwebsocket.token;
 
 /**
- * Provides a global shared container for the jWebSocket configuration settings.
  *
  * @author aschulze
- * @version $Id: JWebSocketServerConstants.java 624 2010-07-06 12:28:44Z fivefeetfurther $
  */
-public final class JWebSocketClientConstants {
-	
+public interface WebSocketResponseTokenListener {
 
 	/**
-	 * Current version string of the jWebSocket package.
+	 * Returns the timeout of the request.
+	 * @return
 	 */
-	public static final String VERSION_STR = "1.0b1 (nightly build 10913)";
+	long getTimeout();
+
 	/**
-	 * Name space base for tokens and plug-ins.
+	 * Specifies the timeout of the request.
+	 * @param aTimeout
 	 */
-	public static final String NS_BASE = "org.jwebsocket";
+	void setTimeout(long aTimeout);
+
+	/**
+	 * Is fired when the given response timeout is exceeded.
+	 * @param aToken
+	 */
+	void OnTimeout(Token aToken);
+
+	/**
+	 * Is fired on any response to a send token.
+	 * @param aToken
+	 */
+	void OnResponse(Token aToken);
+
+	/**
+	 *  Is fired if token.code equals 0 (zero).
+	 * @param aToken
+	 */
+	void OnSuccess(Token aToken);
+
+	/**
+	 * Is fired if token.code does not equal 0 (zero).
+	 * @param aToken
+	 */
+	void OnFailure(Token aToken);
 }

@@ -21,13 +21,13 @@ package org.jwebsocket.client.java;
 public class ReliabilityOptions {
 
 	private boolean mAutoReconnect = false;
-	private int mReconnectDelay = -1;
-	private int mReconnectTimeout = -1;
+	private long mReconnectDelay = -1;
+	private long mReconnectTimeout = -1;
 	private int mQueueItemLimit = -1;
 	private int mQueueSizeLimit = -1;
 
-	public ReliabilityOptions(boolean aAutoReconnect, int aReconnectDelay,
-			int aReconnectTimeout, int aQueueItemLimit, int aQueueSizeLimit) {
+	public ReliabilityOptions(boolean aAutoReconnect, long aReconnectDelay,
+			long aReconnectTimeout, int aQueueItemLimit, int aQueueSizeLimit) {
 		mAutoReconnect = aAutoReconnect;
 		mReconnectDelay = aReconnectDelay;
 		mReconnectTimeout = aReconnectTimeout;
@@ -52,21 +52,21 @@ public class ReliabilityOptions {
 	/**
 	 * @return the ReconnectDelay
 	 */
-	public int getReconnectDelay() {
+	public long getReconnectDelay() {
 		return mReconnectDelay;
 	}
 
 	/**
 	 * @param aReconnectDelay the ReconnectDelay to set
 	 */
-	public void setReconnectDelay(int aReconnectDelay) {
+	public void setReconnectDelay(long aReconnectDelay) {
 		this.mReconnectDelay = aReconnectDelay;
 	}
 
 	/**
 	 * @return the ReconnectTimeout
 	 */
-	public int getReconnectTimeout() {
+	public long getReconnectTimeout() {
 		return mReconnectTimeout;
 	}
 

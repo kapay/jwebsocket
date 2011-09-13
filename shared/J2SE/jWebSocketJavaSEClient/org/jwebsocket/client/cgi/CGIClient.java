@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
 //	jWebSocket - WebSocket CGI Client
-//	Copyright (c) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH
+//	Copyright (c) 2010, 2011 jWebSocket.org, Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -30,12 +30,12 @@ import org.jwebsocket.kit.WebSocketException;
  */
 public class CGIClient extends BaseWebSocketClient {
 
-    private boolean isRunning = false;
-    private Thread inboundThread;
-    private InboundProcess inboundProcess;
-    private InputStream is = null;
-    private OutputStream os = null;
-    private OutputStream es = null;
+    private boolean mIsRunning = false;
+    private Thread mInboundThread;
+    private InboundProcess mInboundProcess;
+    private InputStream mIn = null;
+    private OutputStream mOut = null;
+    private OutputStream mError = null;
 
     /**
      *
@@ -52,14 +52,14 @@ public class CGIClient extends BaseWebSocketClient {
         super.open(aURL);
 
         // assign streams to CGI channels
-        is = System.in;
-        os = System.out;
-        es = System.err;
+        mIn = System.in;
+        mOut = System.out;
+        mError = System.err;
 
         // instantiate thread to process messages coming from stdIn
-        inboundProcess = new InboundProcess();
-        inboundThread = new Thread(inboundProcess);
-        inboundThread.start();
+        mInboundProcess = new InboundProcess();
+        mInboundThread = new Thread(mInboundProcess);
+        mInboundThread.start();
     }
 /*
     @Override
@@ -78,7 +78,7 @@ public class CGIClient extends BaseWebSocketClient {
     @Override
     public void close() throws WebSocketException {
         // stop CGI listener
-        isRunning = false;
+        mIsRunning = false;
         // and close WebSocket connection
     }
 
@@ -86,14 +86,14 @@ public class CGIClient extends BaseWebSocketClient {
 
         @Override
         public void run() {
-            isRunning = true;
+            mIsRunning = true;
             byte[] lBuff = new byte[JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE];
             int lIdx = -1;
             int lStart = -1;
 
-            while (isRunning) {
+            while (mIsRunning) {
                 try {
-                    int b = is.read();
+                    int b = mIn.read();
                     // start of frame
                     if (b == 0x00) {
                         lIdx = 0;
@@ -105,12 +105,12 @@ public class CGIClient extends BaseWebSocketClient {
                             System.arraycopy(lBuff, 0, lBA, 0, lIdx);
                             // Arrays class is not supported in Android
                             // byte[] lBA = Arrays.copyOf(lBuff, pos);
-                            os.write(lBA);
+                            mOut.write(lBA);
                         }
                         lStart = -1;
                         // end of stream
                     } else if (b < 0) {
-                        isRunning = false;
+                        mIsRunning = false;
                         // any other byte within or outside a frame
                     } else {
                         if (lStart >= 0) {
@@ -119,7 +119,7 @@ public class CGIClient extends BaseWebSocketClient {
                         lIdx++;
                     }
                 } catch (Exception ex) {
-                    isRunning = false;
+                    mIsRunning = false;
                     // throw new WebSocketException(ex.getClass().getSimpleName() + ": " + ex.getMessage());
                     // System.out.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
                 }

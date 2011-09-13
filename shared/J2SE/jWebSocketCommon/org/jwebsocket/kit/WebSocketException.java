@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
 //	jWebSocket - WebSocket Exception
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	Copyright (c) 2010, 2011 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -16,30 +16,53 @@
 package org.jwebsocket.kit;
 
 /**
- * Exception class to represent JWebSocketServer related exception
- * @author Puran Singh
- * @version $Id: WebSocketException.java 596 2010-06-22 17:09:54Z fivefeetfurther $
+ * Exception class to represent jWebSocketServer related exception,
+ * extended by unique IDs to identify issue
+ * @author Puran Singh, Alexander Schulze
  *
  */
 public class WebSocketException extends Exception {
 
+	WebSocketExceptionType mExceptionType = WebSocketExceptionType.UNDEFINED;
+
 	/**
 	 * creates the exception with given message
-	 * @param error the error messae
+	 * @param aError the error message
 	 */
-	public WebSocketException(String error) {
-		super(error);
-	}
-	
-	/**
-	 * creates the exception with given message
-	 * @param error the error messae
-	 * @param throwable the cause 
-	 */
-	public WebSocketException(String error, Throwable throwable) {
-		super(error, throwable);
+	public WebSocketException(String aError) {
+		super(aError);
 	}
 
+	/**
+	 * 
+	 * @param aError
+	 * @param aExceptionType
+	 */
+	public WebSocketException(String aError,
+			WebSocketExceptionType aExceptionType) {
+		super(aError);
+		mExceptionType = aExceptionType;
+	}
+
+	/**
+	 * creates the exception with given message
+	 * @param aError the error message
+	 * @param aThrowable the cause
+	 * @param aExceptionType  
+	 */
+	public WebSocketException(String aError,
+			WebSocketExceptionType aExceptionType, Throwable aThrowable) {
+		super(aError, aThrowable);
+		mExceptionType = aExceptionType;
+	}
+
+	/**
+	 * creates the exception with given message
+	 * @param aError the error message
+	 * @param throwable the cause 
+	 */
+	public WebSocketException(String aError, Throwable throwable) {
+		super(aError, throwable);
+	}
 	private static final long serialVersionUID = 1L;
-	
 }

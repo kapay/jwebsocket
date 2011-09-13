@@ -17,7 +17,6 @@ package org.jwebsocket.client.java;
 import java.io.*;
 import java.net.Socket;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -25,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
@@ -44,6 +45,7 @@ import org.jwebsocket.kit.Headers;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.WebSocketEncoding;
 import org.jwebsocket.kit.WebSocketException;
+import org.jwebsocket.kit.WebSocketExceptionType;
 import org.jwebsocket.kit.WebSocketFrameType;
 import org.jwebsocket.kit.WebSocketHandshake;
 import org.jwebsocket.kit.WebSocketProtocolAbstraction;
@@ -95,6 +97,10 @@ public class BaseWebSocketClient implements WebSocketClient {
 	/**
 	 * 
 	 */
+	public static String EVENT_OPEN = "open";
+	/**
+	 * 
+	 */
 	public static String EVENT_CLOSE = "close";
 	/**
 	 * 
@@ -114,11 +120,20 @@ public class BaseWebSocketClient implements WebSocketClient {
 	public static String DATA_CLOSE_SHUTDOWN = "shutdown";
 	private int mVersion = JWebSocketCommonConstants.WS_VERSION_DEFAULT;
 	private WebSocketEncoding mEncoding = WebSocketEncoding.TEXT;
+	private ReliabilityOptions mReliabilityOptions = null;
+	private final ScheduledThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(1);
 
 	/**
 	 * Base constructor
 	 */
 	public BaseWebSocketClient() {
+	}
+
+	/**
+	 * Constructor including reliability options
+	 */
+	public BaseWebSocketClient(ReliabilityOptions aReliabilityOptions) {
+		mReliabilityOptions = aReliabilityOptions;
 	}
 
 	/**
@@ -158,7 +173,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 	 * @param aURI
 	 * @throws WebSocketException
 	 */
-	public void open(int aVersion, String aURI) throws WebSocketException {
+	public void open(int aVersion, String aURI) {
 		String lSubProtocols = generateSubProtocolsHeaderValue();
 		open(aVersion, aURI, lSubProtocols);
 	}
@@ -170,20 +185,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 	 * @param aSubProtocols 
 	 * @throws WebSocketException
 	 */
-	public void open(int aVersion, String aURI, String aSubProtocols) throws WebSocketException {
-		URI lURI = null;
+	public void open(int aVersion, String aURI, String aSubProtocols) {
 		try {
-			lURI = new URI(aURI);
-		} catch (URISyntaxException lEx) {
-			throw new WebSocketException("Error parsing WebSocket URL:" + aURI, lEx);
-		}
-
-		mURI = lURI;
-		mVersion = aVersion;
-
-		// the WebSocket Handshake here generates the initial client side Handshake only
-		WebSocketHandshake lHandshake = new WebSocketHandshake(mVersion, mURI, aSubProtocols);
-		try {
+			mVersion = aVersion;
+			mURI = new URI(aURI);
+			// the WebSocket Handshake here generates the initial client side Handshake only
+			WebSocketHandshake lHandshake = new WebSocketHandshake(mVersion, mURI, aSubProtocols);
 			// close current socket if still connected 
 			// to avoid open connections on server
 			if (mSocket != null && mSocket.isConnected()) {
@@ -218,12 +225,17 @@ public class BaseWebSocketClient implements WebSocketClient {
 			// now set official status, may listeners ask for that
 			mStatus = WebSocketStatus.OPEN;
 			// and finally notify listeners for OnOpen event
-			// TODO: Add event parameter
-			notifyOpened(null);
-		} catch (IOException lIOEx) {
-			throw new WebSocketException(
-					"Error while connecting: "
-					+ lIOEx.getMessage(), lIOEx);
+			WebSocketClientEvent lEvent =
+					new WebSocketBaseClientEvent(EVENT_OPEN, "");
+			notifyOpened(lEvent);
+
+		} catch (Exception lEx) {
+			WebSocketClientEvent lEvent =
+					new WebSocketBaseClientEvent(EVENT_CLOSE,
+					lEx.getClass().getSimpleName() + ": "
+					+ lEx.getMessage());
+			notifyClosed(lEvent);
+			mCheckReconnect(lEvent);
 		}
 	}
 
@@ -293,7 +305,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 			}
 			mOut.flush();
 		} catch (IOException lEx) {
-			throw new WebSocketException("error while sending socket data: ", lEx);
+			throw new WebSocketException("Error while sending socket data: ", lEx);
 		}
 	}
 
@@ -351,13 +363,14 @@ public class BaseWebSocketClient implements WebSocketClient {
 			throw new WebSocketException(lExMsg);
 		}
 
-		// TODO: add event object
-		notifyClosed(null);
+		WebSocketClientEvent lEvent =
+				new WebSocketBaseClientEvent(EVENT_CLOSE, "client");
+		notifyClosed(lEvent);
 	}
 
 	private void sendCloseHandshake() throws WebSocketException {
 		if (!mStatus.isClosable()) {
-			throw new WebSocketException("error while sending close handshake: not connected");
+			throw new WebSocketException("Error while sending close handshake: not connected");
 		}
 		try {
 			if (isHixie()) {
@@ -370,7 +383,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 				send(lPacket);
 			}
 		} catch (IOException lIOEx) {
-			throw new WebSocketException("error while sending close handshake", lIOEx);
+			throw new WebSocketException("Error while sending close handshake", lIOEx);
 		}
 		mStatus = WebSocketStatus.CLOSED;
 	}
@@ -389,9 +402,11 @@ public class BaseWebSocketClient implements WebSocketClient {
 			try {
 				mSocket = new Socket(lHost, lPort);
 			} catch (UnknownHostException lUHEx) {
-				throw new WebSocketException("unknown host: " + lHost, lUHEx);
+				throw new WebSocketException("Unknown host: " + lHost,
+						WebSocketExceptionType.UNKNOWN_HOST, lUHEx);
 			} catch (IOException lIOEx) {
-				throw new WebSocketException("error while creating socket to " + mURI, lIOEx);
+				throw new WebSocketException("Error while creating socket to " + mURI,
+						WebSocketExceptionType.UNABLE_TO_CONNECT, lIOEx);
 			}
 		} else if (lScheme != null && lScheme.equals("wss")) {
 			if (lPort == -1) {
@@ -432,14 +447,17 @@ public class BaseWebSocketClient implements WebSocketClient {
 					throw new RuntimeException("Unable to initialise SSL context", lKMEx);
 				}
 			} catch (UnknownHostException lUHEx) {
-				throw new WebSocketException("unknown host: " + lHost, lUHEx);
+				throw new WebSocketException("Unknown host: " + lHost,
+						WebSocketExceptionType.UNKNOWN_HOST, lUHEx);
 			} catch (IOException lIOEx) {
-				throw new WebSocketException("error while creating secure socket to " + mURI, lIOEx);
+				throw new WebSocketException("Error while creating secure socket to " + mURI,
+						WebSocketExceptionType.UNABLE_TO_CONNECT_SSL, lIOEx);
 			} catch (Exception lEx) {
 				throw new WebSocketException(lEx.getClass().getSimpleName() + " while creating secure socket to " + mURI, lEx);
 			}
 		} else {
-			throw new WebSocketException("unsupported protocol: " + lScheme);
+			throw new WebSocketException("Unsupported protocol: " + lScheme,
+					WebSocketExceptionType.PROTOCOL_NOT_SUPPORTED);
 		}
 
 		return mSocket;
@@ -528,6 +546,40 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 	}
 
+	/**
+	 * @return the mReliabilityOptions
+	 */
+	public ReliabilityOptions getReliabilityOptions() {
+		return mReliabilityOptions;
+	}
+
+	/**
+	 * @param mReliabilityOptions the mReliabilityOptions to set
+	 */
+	public void setReliabilityOptions(ReliabilityOptions mReliabilityOptions) {
+		this.mReliabilityOptions = mReliabilityOptions;
+	}
+	/*
+	class ReOpener implements Runnable {
+	
+	private WebSocketClientEvent mEvent;
+	
+	public ReOpener(WebSocketClientEvent aEvent) {
+	mEvent = aEvent;
+	}
+	
+	@Override
+	public void run() {
+	notifyReconnecting(mEvent);
+	try {
+	open(mURI.toString());
+	} catch (WebSocketException ex) {
+	// TODO: process potential exception here!
+	}
+	}
+	}
+	 */
+
 	class ReOpener implements Runnable {
 
 		private WebSocketClientEvent mEvent;
@@ -541,9 +593,35 @@ public class BaseWebSocketClient implements WebSocketClient {
 			notifyReconnecting(mEvent);
 			try {
 				open(mURI.toString());
-			} catch (WebSocketException ex) {
-				// TODO: process potential exception here!
+				// did we configure reliability options?
+				/*
+				if (mReliabilityOptions != null
+				&& mReliabilityOptions.getReconnectDelay() > 0) {
+				mExecutor.schedule(
+				new ReOpener(aEvent),
+				mReliabilityOptions.getReconnectDelay(),
+				TimeUnit.MILLISECONDS);
+				}
+				 */
+			} catch (Exception lEx) {
+				WebSocketClientEvent lEvent =
+						new WebSocketBaseClientEvent(EVENT_CLOSE,
+						lEx.getClass().getSimpleName() + ": "
+						+ lEx.getMessage());
+				notifyClosed(lEvent);
 			}
+		}
+	}
+
+	private void mCheckReconnect(WebSocketClientEvent aEvent) {
+		// did we configure reliability options?
+		if (mReliabilityOptions != null
+				&& mReliabilityOptions.getReconnectDelay() > 0) {
+			// schedule a re-connect action after the re-connect delay
+			mExecutor.schedule(
+					new ReOpener(aEvent),
+					mReliabilityOptions.getReconnectDelay(),
+					TimeUnit.MILLISECONDS);
 		}
 	}
 
@@ -555,12 +633,6 @@ public class BaseWebSocketClient implements WebSocketClient {
 		for (WebSocketClientListener lListener : getListeners()) {
 			lListener.processClosed(aEvent);
 		}
-		/*
-		ReliabilityManager.getExecutor().schedule(
-		new ReOpener(aEvent),
-		1000,
-		TimeUnit.MILLISECONDS);
-		 */
 	}
 
 	@Override
@@ -648,8 +720,9 @@ public class BaseWebSocketClient implements WebSocketClient {
 							|| WebSocketFrameType.CLOSE == lFrameType) {
 						mStop = true;
 						mStatus = WebSocketStatus.CLOSED;
-						lWSCE = new WebSocketBaseClientEvent("close", "error");
+						lWSCE = new WebSocketBaseClientEvent(EVENT_CLOSE, "error");
 						notifyClosed(lWSCE);
+						mCheckReconnect(lWSCE);
 					} else if (WebSocketFrameType.PING == lFrameType) {
 						WebSocketPacket lPong = new RawPacket(
 								WebSocketFrameType.PONG, "");
@@ -677,8 +750,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 		private void handleErrorAndClose() {
 			if (!mStatus.isClosed()) {
 				mStatus = WebSocketStatus.CLOSED;
-				// TODO: Add event parameter
-				WebSocketClientEvent lEvent = new WebSocketBaseClientEvent("close", "error");
+				WebSocketClientEvent lEvent =
+						new WebSocketBaseClientEvent(EVENT_CLOSE, "error");
 				notifyClosed(lEvent);
 			}
 			stopit();
