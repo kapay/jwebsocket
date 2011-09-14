@@ -92,15 +92,38 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		}
 	}
 
+	private void mLog(String aMessage) {
+		int lMAX = 1000;
+		int lLineCount = txaLog.getLineCount();
+		if (lLineCount > lMAX) {
+			String lText = txaLog.getText();
+			int lIdx = 0;
+			int lCnt = lLineCount;
+			while (lIdx < lText.length() && lCnt > lMAX) {
+				if (lText.charAt(lIdx) == '\n') {
+					lCnt--;
+				}
+				lIdx++;
+			}
+			txaLog.replaceRange("", 0, lIdx);
+		}
+		if (null != aMessage) {
+			txaLog.append(aMessage);
+		} else {
+			txaLog.setText("");
+		}
+		txaLog.setCaretPosition(txaLog.getText().length());
+	}
+
 	@Override
 	public void processOpening(WebSocketClientEvent aEvent) {
-		txaLog.append("Opening...\n");
+		mLog("Opening...\n");
 		checkStatusIcon();
 	}
 
 	@Override
 	public void processOpened(WebSocketClientEvent aEvent) {
-		txaLog.append("Opened.\n");
+		mLog("Opened.\n");
 		checkStatusIcon();
 	}
 
@@ -111,19 +134,19 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 
 	@Override
 	public void processToken(WebSocketClientEvent aEvent, Token aToken) {
-		txaLog.append("Received Token: " + aToken.toString() + "\n");
+		mLog("Received Token: " + aToken.toString() + "\n");
 		checkStatusIcon();
 	}
 
 	@Override
 	public void processClosed(WebSocketClientEvent aEvent) {
-		txaLog.append("Closed (" + aEvent.getData() + ").\n");
+		mLog("Closed (" + aEvent.getData() + ").\n");
 		checkStatusIcon();
 	}
 
 	@Override
 	public void processReconnecting(WebSocketClientEvent aEvent) {
-		txaLog.append("Reconnecting...\n");
+		mLog("Reconnecting...\n");
 		checkStatusIcon();
 	}
 
@@ -174,6 +197,9 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         lblConnection = new javax.swing.JLabel();
         lblAuth = new javax.swing.JLabel();
         lblSend = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
         mnbMain = new javax.swing.JMenuBar();
         pmnFile = new javax.swing.JMenu();
         mniExit = new javax.swing.JMenuItem();
@@ -195,9 +221,10 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        lblTitle.setFont(new java.awt.Font("Arial", 1, 16));
+        lblTitle.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         lblTitle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/Synapso32x32.png"))); // NOI18N
         lblTitle.setText("jWebSocket Java Client {ver}");
+        lblTitle.setToolTipText("jWebSocket - the open source solution for real-time developers");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
@@ -206,6 +233,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(lblTitle, gridBagConstraints);
 
         bntSend.setText("Send");
+        bntSend.setToolTipText("Sends a message to the clients identified by the target field.");
         bntSend.setMaximumSize(new java.awt.Dimension(100, 20));
         bntSend.setMinimumSize(new java.awt.Dimension(100, 20));
         bntSend.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -216,6 +244,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(bntSend, gridBagConstraints);
 
         txaLog.setColumns(20);
+        txaLog.setEditable(false);
         txaLog.setRows(5);
         scpTextArea.setViewportView(txaLog);
 
@@ -231,6 +260,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(scpTextArea, gridBagConstraints);
 
         btnClearLog.setText("Clear");
+        btnClearLog.setToolTipText("Clears the log window.");
         btnClearLog.setMaximumSize(new java.awt.Dimension(100, 20));
         btnClearLog.setMinimumSize(new java.awt.Dimension(100, 20));
         btnClearLog.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -258,6 +288,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(txfMessage, gridBagConstraints);
 
         btnConnect.setText("Connect");
+        btnConnect.setToolTipText("Connects to the Websocket Server at the given URL.");
         btnConnect.setMaximumSize(new java.awt.Dimension(100, 20));
         btnConnect.setMinimumSize(new java.awt.Dimension(100, 20));
         btnConnect.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -273,6 +304,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(btnConnect, gridBagConstraints);
 
         btnDisconnect.setText("Disconnect");
+        btnDisconnect.setToolTipText("Disconnects from the WebSocket Server.");
         btnDisconnect.setMaximumSize(new java.awt.Dimension(100, 20));
         btnDisconnect.setMinimumSize(new java.awt.Dimension(100, 20));
         btnDisconnect.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -288,6 +320,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(btnDisconnect, gridBagConstraints);
 
         btnSend.setText("Send");
+        btnSend.setToolTipText("Sends a message to the clients identified by the target field.");
         btnSend.setMaximumSize(new java.awt.Dimension(100, 20));
         btnSend.setMinimumSize(new java.awt.Dimension(100, 20));
         btnSend.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -298,11 +331,12 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         getContentPane().add(btnSend, gridBagConstraints);
 
         btnBroadcast.setText("Broadcast");
+        btnBroadcast.setToolTipText("Briadcasts a message to all clients\ncurrently connected to the server.");
         btnBroadcast.setMaximumSize(new java.awt.Dimension(100, 20));
         btnBroadcast.setMinimumSize(new java.awt.Dimension(100, 20));
         btnBroadcast.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -313,11 +347,12 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         getContentPane().add(btnBroadcast, gridBagConstraints);
 
         btnPing.setText("Ping");
+        btnPing.setToolTipText("Sends a ping token and expects an answer.");
         btnPing.setMaximumSize(new java.awt.Dimension(100, 20));
         btnPing.setMinimumSize(new java.awt.Dimension(100, 20));
         btnPing.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -333,6 +368,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(btnPing, gridBagConstraints);
 
         btnShutdown.setText("Shutdown");
+        btnShutdown.setToolTipText("Shuts the server down from remote after a confirmation.");
         btnShutdown.setMaximumSize(new java.awt.Dimension(100, 20));
         btnShutdown.setMinimumSize(new java.awt.Dimension(100, 20));
         btnShutdown.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -342,14 +378,14 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         getContentPane().add(btnShutdown, gridBagConstraints);
 
         btnLogin.setText("Login");
-        btnLogin.setToolTipText("Logout");
+        btnLogin.setToolTipText("Authenticates against the WebSocket Server's user repository.");
         btnLogin.setMaximumSize(new java.awt.Dimension(100, 20));
         btnLogin.setMinimumSize(new java.awt.Dimension(100, 20));
         btnLogin.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -365,6 +401,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(btnLogin, gridBagConstraints);
 
         btnLogout.setText("Logout");
+        btnLogout.setToolTipText("Logs out the current user out while the connection is kept.");
         btnLogout.setMaximumSize(new java.awt.Dimension(100, 20));
         btnLogout.setMinimumSize(new java.awt.Dimension(100, 20));
         btnLogout.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -416,6 +453,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         getContentPane().add(lblStatus, gridBagConstraints);
 
+        btnGetSessions.setToolTipText("Lists all currently active sessions on the server (admin feature).");
         btnGetSessions.setLabel("Get Sessions");
         btnGetSessions.setMaximumSize(new java.awt.Dimension(100, 20));
         btnGetSessions.setMinimumSize(new java.awt.Dimension(100, 20));
@@ -426,12 +464,12 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 6;
         getContentPane().add(btnGetSessions, gridBagConstraints);
 
         btnGetUserRights.setText("Rights");
+        btnGetUserRights.setToolTipText("Returns the rights of the currently authenticated user.");
         btnGetUserRights.setMaximumSize(new java.awt.Dimension(100, 20));
         btnGetUserRights.setMinimumSize(new java.awt.Dimension(100, 20));
         btnGetUserRights.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -442,11 +480,12 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         getContentPane().add(btnGetUserRights, gridBagConstraints);
 
         btnGetUserRoles.setText("Roles");
+        btnGetUserRoles.setToolTipText("Returns the roles of the currently authenticated user.");
         btnGetUserRoles.setMaximumSize(new java.awt.Dimension(100, 20));
         btnGetUserRoles.setMinimumSize(new java.awt.Dimension(100, 20));
         btnGetUserRoles.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -456,8 +495,8 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         getContentPane().add(btnGetUserRoles, gridBagConstraints);
 
@@ -470,6 +509,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(lblURL, gridBagConstraints);
 
         txfURL.setText("ws://localhost:8787/jWebSocket/jWebSocket");
+        txfURL.setToolTipText("Use wss:// for SSL together with port 9797.");
         txfURL.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -481,6 +521,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(txfURL, gridBagConstraints);
 
         btnRPC.setText("RPC-Demo");
+        btnRPC.setToolTipText("Calls the getMD5 method on the \nserver using the message as input.");
         btnRPC.setMaximumSize(new java.awt.Dimension(100, 20));
         btnRPC.setMinimumSize(new java.awt.Dimension(100, 20));
         btnRPC.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -490,7 +531,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
@@ -535,6 +576,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         getContentPane().add(pwfPassword, gridBagConstraints);
 
         btnTimeout.setText("Timeout");
+        btnTimeout.setToolTipText("<html>Sends a delay token (answer delay predefined to 2000ms).<br> \n1000ms will cause a timeout, 3000ms a success response.</html>");
         btnTimeout.setMaximumSize(new java.awt.Dimension(100, 20));
         btnTimeout.setMinimumSize(new java.awt.Dimension(100, 20));
         btnTimeout.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -545,20 +587,21 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(btnTimeout, gridBagConstraints);
 
         txfTimeout.setText("1000");
+        txfTimeout.setToolTipText("Specifies the timeout to wait for a response.");
         txfTimeout.setMaximumSize(new java.awt.Dimension(100, 20));
         txfTimeout.setMinimumSize(new java.awt.Dimension(100, 20));
         txfTimeout.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 7;
         getContentPane().add(txfTimeout, gridBagConstraints);
 
-        lblReconnect.setText("Auto-Reconnect (ms)");
+        lblReconnect.setText("Reconnect (ms)");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 8;
@@ -569,12 +612,13 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         lblTimeout.setText("Timeout (ms)");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         getContentPane().add(lblTimeout, gridBagConstraints);
 
         txfReconnectDelay.setText("1500");
+        txfReconnectDelay.setToolTipText("<html>Specifiies the automatic re-connect timeout<br>\nin case of a server restart (0 for none).<html>");
         txfReconnectDelay.setMaximumSize(new java.awt.Dimension(100, 20));
         txfReconnectDelay.setMinimumSize(new java.awt.Dimension(100, 20));
         txfReconnectDelay.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -607,10 +651,34 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         lblSend.setText("Sending data");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         getContentPane().add(lblSend, gridBagConstraints);
+
+        jLabel1.setText("Authorization");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        getContentPane().add(jLabel1, gridBagConstraints);
+
+        jLabel2.setText("Administration");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        getContentPane().add(jLabel2, gridBagConstraints);
+
+        jLabel3.setText("Features");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        getContentPane().add(jLabel3, gridBagConstraints);
 
         pmnFile.setText("File");
 
@@ -659,7 +727,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 				mClient.close();
 			}
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}
 
@@ -684,7 +752,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			mClient.getUserRights(txfTarget.getText());
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}//GEN-LAST:event_btnGetUserRightsActionPerformed
 
@@ -692,7 +760,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			mClient.getUserRoles(txfTarget.getText());
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}//GEN-LAST:event_btnGetUserRolesActionPerformed
 
@@ -739,7 +807,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 			mClient.sendToken(lToken);
 		} catch (WebSocketException ex) {
 			// process potential exception
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}//GEN-LAST:event_btnRPCActionPerformed
 
@@ -752,25 +820,25 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		@Override
 		public void OnTimeout(Token aToken) {
 			// process potential exception
-			txaLog.append("Timeout: " + aToken.toString() + "\n");
+			mLog("Timeout: " + aToken.toString() + "\n");
 		}
 
 		@Override
 		public void OnSuccess(Token aToken) {
 			// process potential exception
-			txaLog.append("Success: " + aToken.toString() + "\n");
+			mLog("Success: " + aToken.toString() + "\n");
 		}
 
 		@Override
 		public void OnFailure(Token aToken) {
 			// process potential exception
-			txaLog.append("Failure: " + aToken.toString() + "\n");
+			mLog("Failure: " + aToken.toString() + "\n");
 		}
 
 		@Override
 		public void OnResponse(Token aToken) {
 			// process potential exception
-			txaLog.append("Response: " + aToken.toString() + "\n");
+			mLog("Response: " + aToken.toString() + "\n");
 		}
 	}
 
@@ -788,7 +856,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 			mClient.sendToken(lToken, lResponseListener);
 		} catch (WebSocketException ex) {
 			// process potential exception
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}//GEN-LAST:event_btnTimeoutActionPerformed
 
@@ -798,7 +866,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 			mReliabilityOptions.setReconnectDelay(lTimeout);
 		} catch (Exception ex) {
 			// process potential exception
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}//GEN-LAST:event_txfReconnectDelayActionPerformed
 
@@ -810,7 +878,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			mClient.close();
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}// GEN-LAST:event_btnDisconnectActionPerformed
 
@@ -820,7 +888,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 			// Thread.sleep(500);
 			// mClient.close();
 		} catch (Exception ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}// GEN-LAST:event_btnShutdownActionPerformed
 
@@ -828,7 +896,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			mClient.login(txfUser.getText(), new String(pwfPassword.getPassword()));
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}// GEN-LAST:event_btnLoginActionPerformed
 
@@ -836,19 +904,19 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			mClient.logout();
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}// GEN-LAST:event_btnLogoutActionPerformed
 
 	private void btnClearLogActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnClearLogActionPerformed
-		txaLog.setText("");
+		mLog(null); // null means clear log
 	}// GEN-LAST:event_btnClearLogActionPerformed
 
 	private void btnBroadcastActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnBroadcastActionPerformed
 		try {
 			mClient.broadcastText(txfMessage.getText());
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}// GEN-LAST:event_btnBroadcastActionPerformed
 
@@ -856,7 +924,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			mClient.ping(true);
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}// GEN-LAST:event_btnPingActionPerformed
 
@@ -864,7 +932,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			mClient.sendText(txfTarget.getText(), txfMessage.getText());
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}// GEN-LAST:event_btnSendActionPerformed
 
@@ -872,7 +940,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 		try {
 			mClient.getConnections();
 		} catch (WebSocketException ex) {
-			txaLog.append(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}// GEN-LAST:event_btnGetSessionsActionPerformed
 
@@ -905,6 +973,9 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
     private javax.swing.JButton btnSend;
     private javax.swing.JButton btnShutdown;
     private javax.swing.JButton btnTimeout;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel lblAuth;
     private javax.swing.JLabel lblConnection;
     private javax.swing.JLabel lblMessage;

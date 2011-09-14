@@ -158,8 +158,6 @@ public class Logging {
 		} else {
 			if (!mSettingsLoaded) {
 				String lLog4JConfigFile = Tools.expandEnvVars(mConfigFile);
-				System.setProperty(JWebSocketServerConstants.JWEBSOCKET_HOME,
-						System.getenv(JWebSocketServerConstants.JWEBSOCKET_HOME));
 				if (mReloadDelay >= MIN_RELOAD_DELAY) {
 					DOMConfigurator.configureAndWatch(lLog4JConfigFile, mReloadDelay);
 				} else {

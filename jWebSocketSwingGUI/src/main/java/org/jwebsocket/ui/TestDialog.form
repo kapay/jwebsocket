@@ -98,6 +98,7 @@
           <Image iconType="3" name="/images/Synapso32x32.png"/>
         </Property>
         <Property name="text" type="java.lang.String" value="jWebSocket Java Client {ver}"/>
+        <Property name="toolTipText" type="java.lang.String" value="jWebSocket - the open source solution for real-time developers"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -108,6 +109,7 @@
     <Component class="javax.swing.JButton" name="bntSend">
       <Properties>
         <Property name="text" type="java.lang.String" value="Send"/>
+        <Property name="toolTipText" type="java.lang.String" value="Sends a message to the clients identified by the target field."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -139,6 +141,7 @@
         <Component class="javax.swing.JTextArea" name="txaLog">
           <Properties>
             <Property name="columns" type="int" value="20"/>
+            <Property name="editable" type="boolean" value="false"/>
             <Property name="rows" type="int" value="5"/>
           </Properties>
         </Component>
@@ -147,6 +150,7 @@
     <Component class="javax.swing.JButton" name="btnClearLog">
       <Properties>
         <Property name="text" type="java.lang.String" value="Clear"/>
+        <Property name="toolTipText" type="java.lang.String" value="Clears the log window."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -185,6 +189,7 @@
     <Component class="javax.swing.JButton" name="btnConnect">
       <Properties>
         <Property name="text" type="java.lang.String" value="Connect"/>
+        <Property name="toolTipText" type="java.lang.String" value="Connects to the Websocket Server at the given URL."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -207,6 +212,7 @@
     <Component class="javax.swing.JButton" name="btnDisconnect">
       <Properties>
         <Property name="text" type="java.lang.String" value="Disconnect"/>
+        <Property name="toolTipText" type="java.lang.String" value="Disconnects from the WebSocket Server."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -229,6 +235,7 @@
     <Component class="javax.swing.JButton" name="btnSend">
       <Properties>
         <Property name="text" type="java.lang.String" value="Send"/>
+        <Property name="toolTipText" type="java.lang.String" value="Sends a message to the clients identified by the target field."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -244,13 +251,14 @@
       </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="5" gridY="3" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="5" gridY="4" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
     <Component class="javax.swing.JButton" name="btnBroadcast">
       <Properties>
         <Property name="text" type="java.lang.String" value="Broadcast"/>
+        <Property name="toolTipText" type="java.lang.String" value="Briadcasts a message to all clients&#xa;currently connected to the server."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -266,13 +274,14 @@
       </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="6" gridY="3" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="6" gridY="4" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
     <Component class="javax.swing.JButton" name="btnPing">
       <Properties>
         <Property name="text" type="java.lang.String" value="Ping"/>
+        <Property name="toolTipText" type="java.lang.String" value="Sends a ping token and expects an answer."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -295,6 +304,7 @@
     <Component class="javax.swing.JButton" name="btnShutdown">
       <Properties>
         <Property name="text" type="java.lang.String" value="Shutdown"/>
+        <Property name="toolTipText" type="java.lang.String" value="Shuts the server down from remote after a confirmation."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -310,14 +320,14 @@
       </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="5" gridY="6" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="15" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="6" gridY="5" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="15" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
     <Component class="javax.swing.JButton" name="btnLogin">
       <Properties>
         <Property name="text" type="java.lang.String" value="Login"/>
-        <Property name="toolTipText" type="java.lang.String" value="Logout"/>
+        <Property name="toolTipText" type="java.lang.String" value="Authenticates against the WebSocket Server&apos;s user repository."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -340,6 +350,7 @@
     <Component class="javax.swing.JButton" name="btnLogout">
       <Properties>
         <Property name="text" type="java.lang.String" value="Logout"/>
+        <Property name="toolTipText" type="java.lang.String" value="Logs out the current user out while the connection is kept."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -411,6 +422,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="btnGetSessions">
       <Properties>
+        <Property name="toolTipText" type="java.lang.String" value="Lists all currently active sessions on the server (admin feature)."/>
         <Property name="label" type="java.lang.String" value="Get Sessions"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
@@ -427,13 +439,14 @@
       </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="5" gridY="4" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="6" gridY="6" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
     <Component class="javax.swing.JButton" name="btnGetUserRights">
       <Properties>
         <Property name="text" type="java.lang.String" value="Rights"/>
+        <Property name="toolTipText" type="java.lang.String" value="Returns the rights of the currently authenticated user."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -449,13 +462,14 @@
       </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="6" gridY="4" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="6" gridY="3" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
     <Component class="javax.swing.JButton" name="btnGetUserRoles">
       <Properties>
         <Property name="text" type="java.lang.String" value="Roles"/>
+        <Property name="toolTipText" type="java.lang.String" value="Returns the roles of the currently authenticated user."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -471,7 +485,7 @@
       </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="6" gridY="5" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="5" gridY="3" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
@@ -488,6 +502,7 @@
     <Component class="javax.swing.JTextField" name="txfURL">
       <Properties>
         <Property name="text" type="java.lang.String" value="ws://localhost:8787/jWebSocket/jWebSocket"/>
+        <Property name="toolTipText" type="java.lang.String" value="Use wss:// for SSL together with port 9797."/>
         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -501,6 +516,7 @@
     <Component class="javax.swing.JButton" name="btnRPC">
       <Properties>
         <Property name="text" type="java.lang.String" value="RPC-Demo"/>
+        <Property name="toolTipText" type="java.lang.String" value="Calls the getMD5 method on the &#xa;server using the message as input."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -516,7 +532,7 @@
       </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="6" gridY="6" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="11" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="5" gridY="6" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="11" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
@@ -575,6 +591,7 @@
     <Component class="javax.swing.JButton" name="btnTimeout">
       <Properties>
         <Property name="text" type="java.lang.String" value="Timeout"/>
+        <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;Sends a delay token (answer delay predefined to 2000ms).&lt;br&gt; &#xa;1000ms will cause a timeout, 3000ms a success response.&lt;/html&gt;"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -590,13 +607,14 @@
       </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="6" gridY="9" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="5" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="6" gridY="7" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="5" insetsLeft="5" insetsBottom="5" insetsRight="5" anchor="10" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
     <Component class="javax.swing.JTextField" name="txfTimeout">
       <Properties>
         <Property name="text" type="java.lang.String" value="1000"/>
+        <Property name="toolTipText" type="java.lang.String" value="Specifies the timeout to wait for a response."/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -609,13 +627,13 @@
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="5" gridY="9" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="5" gridY="7" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
     <Component class="javax.swing.JLabel" name="lblReconnect">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Auto-Reconnect (ms)"/>
+        <Property name="text" type="java.lang.String" value="Reconnect (ms)"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -629,13 +647,14 @@
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="4" gridY="9" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="0" insetsRight="0" anchor="21" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="4" gridY="7" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="0" insetsRight="0" anchor="21" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>
     <Component class="javax.swing.JTextField" name="txfReconnectDelay">
       <Properties>
         <Property name="text" type="java.lang.String" value="1500"/>
+        <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;Specifiies the automatic re-connect timeout&lt;br&gt;&#xa;in case of a server restart (0 for none).&lt;html&gt;"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[100, 20]"/>
         </Property>
@@ -681,7 +700,37 @@
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
+          <GridBagConstraints gridX="4" gridY="4" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="0" insetsRight="0" anchor="21" weightX="0.0" weightY="0.0"/>
+        </Constraint>
+      </Constraints>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Authorization"/>
+      </Properties>
+      <Constraints>
+        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
           <GridBagConstraints gridX="4" gridY="3" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="0" insetsRight="0" anchor="21" weightX="0.0" weightY="0.0"/>
+        </Constraint>
+      </Constraints>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Administration"/>
+      </Properties>
+      <Constraints>
+        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
+          <GridBagConstraints gridX="4" gridY="5" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="0" insetsRight="0" anchor="21" weightX="0.0" weightY="0.0"/>
+        </Constraint>
+      </Constraints>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Features"/>
+      </Properties>
+      <Constraints>
+        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
+          <GridBagConstraints gridX="4" gridY="6" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="0" insetsRight="0" anchor="21" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>

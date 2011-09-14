@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
 //	jWebSocket - The jWebSocket System Plug-In
-//	Copyright (c) 2010 Alexander Schulze, Innotrade GmbH
+//	Copyright (c) 2010, 2011 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -244,7 +244,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			lDisconnect.setInteger("clientCount", getConnectorCount());
 
 			// broadcast to all except source
-			// broadcastToken(aConnector, lDisconnect);
+			broadcastToken(aConnector, lDisconnect);
 		}
 	}
 
