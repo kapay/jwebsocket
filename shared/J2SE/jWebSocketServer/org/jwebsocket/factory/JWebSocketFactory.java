@@ -33,6 +33,7 @@ import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.server.TokenServer;
+import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Factory to initialize and start the jWebSocket components
@@ -47,6 +48,7 @@ public class JWebSocketFactory {
 	private static WebSocketEngine mEngine = null;
 	private static List<WebSocketServer> mServers = null;
 	private static TokenServer mTokenServer = null;
+	private static BeanFactory mBeanFactory;
 
 	/**
 	 *
@@ -103,7 +105,7 @@ public class JWebSocketFactory {
 
 		JWebSocketInstance.setStatus(JWebSocketInstance.STARTING);
 		setProperties();
-		
+
 		JWebSocketLoader loader = new JWebSocketLoader();
 		try {
 			WebSocketInitializer lInitializer =
@@ -302,6 +304,22 @@ public class JWebSocketFactory {
 
 		// set instance status
 		JWebSocketInstance.setStatus(JWebSocketInstance.STOPPED);
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static BeanFactory getBeans() {
+		return mBeanFactory;
+	}
+
+	/**
+	 * 
+	 * @param aCoreBeans
+	 */
+	public static void setBeans(BeanFactory aCoreBeans) {
+		mBeanFactory = aCoreBeans;
 	}
 
 	/**

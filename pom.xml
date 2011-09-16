@@ -18,6 +18,7 @@
 		<module>jWebSocketServer</module>
 		<module>jWebSocketJavaSEClient</module>
 		<module>jWebSocketSamples</module>
+		<module>jWebSocketPlugIns/jWebSocketAuthPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketChatPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketSenchaPlugIn</module>
 		<module>jWebSocketPlugIns/jWebSocketJQueryPlugIn</module>

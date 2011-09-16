@@ -26,6 +26,7 @@
 		<title>jWebSocket Fundamentals Demo</title>
 		<link rel="stylesheet" type="text/css" href="../../res/css/jwebsocket.css">
 		<script src="../../res/js/jWebSocket.js" type="text/javascript"></script>
+		<script src="../../res/js/jwsAuthPlugIn.js" type="text/javascript"></script>
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
@@ -197,6 +198,42 @@
 				}
 			}
 
+			function auth() {
+				if( lWSC ) {
+					log( "Authenticating..." );
+					try {
+						var lRes = lWSC.authLogin(
+							"aschulze", "JWS#nv211"
+							// jws.GUEST_USER_LOGINNAME, 
+							// jws.GUEST_USER_PASSWORD
+						);
+						if( lRes.code == 0 ) {
+							log( "Asychronously waiting for response..." );
+						} else {
+							log( lRes.msg );
+						}
+					} catch( ex ) {
+						log( "Exception: " + ex.message );
+					}
+				}
+			}
+
+			function deauth() {
+				if( lWSC ) {
+					log( "Deauthenticating..." );
+					try {
+						var lRes = lWSC.authLogout();
+						if( lRes.code == 0 ) {
+							log( "Asychronously waiting for response..." );
+						} else {
+							log( lRes.msg );
+						}
+					} catch( ex ) {
+						log( "Exception: " + ex.message );
+					}
+				}
+			}
+
 			function toggleReconnect() {
 				if( lWSC ) {
 					var lReconnect = eReconnect.checked;
@@ -351,6 +388,16 @@
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnLogout" type="button" value="Thread" onclick="thread();"
 							   title="Runs the echo operation as a thread." >
+					</td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnAuth" type="button" value="Auth" onclick="auth();"
+							   title="Authenticates you against the jWebSocket Server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnDeauth" type="button" value="De-Auth" onclick="deauth();"
+							   title="Logs you out and disconnects from the jWebSocket server.">
 					</td>
 				</tr>
 			</table>

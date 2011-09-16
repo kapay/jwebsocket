@@ -16,6 +16,7 @@
 package org.jwebsocket.api;
 import java.util.Map;
 import java.util.Collection;
+import org.jwebsocket.api.IInitializable;
 
 /**
  *

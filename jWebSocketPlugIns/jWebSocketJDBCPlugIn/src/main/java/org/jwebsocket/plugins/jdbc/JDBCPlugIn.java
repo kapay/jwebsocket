@@ -83,6 +83,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 
 		try {
 			String lSpringConfig = getString("spring_config");
+			lSpringConfig = Tools.expandEnvVars(lSpringConfig);
 			String lPath = FilenameUtils.getPath(lSpringConfig);
 			if (lPath == null || lPath.length() <= 0) {
 				lPath = JWebSocketConfig.getConfigFolder(lSpringConfig);
@@ -93,12 +94,16 @@ public class JDBCPlugIn extends TokenPlugIn {
 
 			mBeanFactory = new ServerXmlBeanFactory(lFSRes, getClass().getClassLoader());
 			mNativeAccess = (NativeAccess) mBeanFactory.getBean("nativeAccess");
-			mSelectSequenceSQL = mNativeAccess.getSelectSequenceSQL();
-			mExecFunctionSQL = mNativeAccess.getExecFunctionSQL();
-			mExecStoredProcSQL = mNativeAccess.getExecStoredProcSQL();
-			// give a success message to the administrator
-			if (mLog.isInfoEnabled()) {
-				mLog.info("JDBC plug-in successfully loaded.");
+			if (null != mNativeAccess) {
+				mSelectSequenceSQL = mNativeAccess.getSelectSequenceSQL();
+				mExecFunctionSQL = mNativeAccess.getExecFunctionSQL();
+				mExecStoredProcSQL = mNativeAccess.getExecStoredProcSQL();
+				// give a success message to the administrator
+				if (mLog.isInfoEnabled()) {
+					mLog.info("JDBC plug-in successfully loaded.");
+				}
+			} else {
+				mLog.error("Database bean could not be loaded properly.");
 			}
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName() + " at JDBC plug-in instantiation: " + lEx.getMessage());
@@ -208,14 +213,28 @@ public class JDBCPlugIn extends TokenPlugIn {
 		lServer.sendToken(aConnector, lResToken);
 	}
 
+	private Token mCheckDataSource(Token aToken) {
+		TokenServer lServer = getServer();
+		Token lResToken;
+		if (null == mNativeAccess) {
+			lResToken = lServer.createErrorToken(aToken,
+					-1, "No database connection available.");
+		} else {
+			lResToken = lServer.createResponse(aToken);
+		}
+		return lResToken;
+	}
+
 	/**
 	 *
 	 * @param aConnector
 	 * @param aToken
 	 */
 	private Token query(Token aToken) {
-		TokenServer lServer = getServer();
-
+		Token lResToken = mCheckDataSource(aToken);
+		if (0 != lResToken.getInteger("code")) {
+			return lResToken;
+		}
 		// load SQL query string
 		String lSQL = aToken.getString("sql");
 		// load SQL script
@@ -223,7 +242,10 @@ public class JDBCPlugIn extends TokenPlugIn {
 		// load expiration, default is no cache (expiration = 0)
 		Integer lExpiration = aToken.getInteger("expiration", 0);
 
-		Token lResToken = lServer.createResponse(aToken);
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'query'...");
+		}
+
 		Token lSQLResponse;
 		List<String> lDetails = new FastList<String>();
 		List<Map> lResultSets = new FastList<Map>();
@@ -254,15 +276,18 @@ public class JDBCPlugIn extends TokenPlugIn {
 				lResToken.setString("msg", lSQLResponse.getString("msg"));
 			}
 		}
-
 		// send response to requester
 		return lResToken;
 	}
 
 	private Token getNextSeqVal(Token aToken) {
+		Token lResToken = mCheckDataSource(aToken);
+		if (0 != lResToken.getInteger("code")) {
+			return lResToken;
+		}
+
 		String lSequence = aToken.getString("sequence");
 		Integer lCount = aToken.getInteger("count", 1);
-		Token lResToken = createResponse(aToken);
 		if (lSequence != null) {
 			Map<String, String> lVars = new FastMap<String, String>();
 			lVars.put("sequence", lSequence);
@@ -315,13 +340,16 @@ public class JDBCPlugIn extends TokenPlugIn {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'updateSQL'...");
 		}
+		Token lResToken = mCheckDataSource(aToken);
+		if (0 != lResToken.getInteger("code")) {
+			return lResToken;
+		}
 		TokenServer lServer = getServer();
 		// load SQL string
 		String lSQL = aToken.getString("sql");
 		List<String> lScript = aToken.getList("script");
 
 		Token lSQLResult = null;
-		Token lResToken = lServer.createResponse(aToken);
 		List lDetails = new FastList<String>();
 		List lRowsAffected = new FastList<Integer>();
 		lResToken.setList("details", lDetails);
@@ -372,6 +400,11 @@ public class JDBCPlugIn extends TokenPlugIn {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing 'execSQL'...");
 		}
+		Token lResToken = mCheckDataSource(aToken);
+		if (0 != lResToken.getInteger("code")) {
+			return lResToken;
+		}
+
 		TokenServer lServer = getServer();
 		// load SQL string
 		String lSQL = aToken.getString("sql");

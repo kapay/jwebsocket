@@ -21,9 +21,11 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 /**
@@ -511,6 +513,11 @@ public class Tools {
 		BASE64_CHAR_MAP[lIdx++] = '/';
 	}
 
+	/**
+	 * 
+	 * @param aBA
+	 * @return
+	 */
 	public static String base64Encode(byte[] aBA) {
 		int lLen = aBA.length;
 		int oDataLen = (lLen * 4 + 2) / 3;// output length without padding
@@ -537,4 +544,19 @@ public class Tools {
 		}
 		return new String(out);
 	}
+	
+	/**
+	 * 
+	 * @param aArray
+	 * @return
+	 */
+	public static List<String> parseStringArrayToList(String[] aArray) {
+		FastList<String> lRes = new FastList<String>();
+		int lEnd = aArray.length;
+		for (int lIdx = 0; lIdx < lEnd; lIdx++) {
+			lRes.add(aArray[lIdx]);
+		}
+		return lRes;
+	}
+
 }
