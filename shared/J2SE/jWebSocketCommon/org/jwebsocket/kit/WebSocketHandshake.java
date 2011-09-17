@@ -74,7 +74,7 @@ public final class WebSocketHandshake {
 		}
 	}
 
-	private static String calcHybiSecKeyAccept(String aKey) {
+	public static String calcHybiSecKeyAccept(String aKey) {
 		// add fix GUID according to 
 		// http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-10
 		aKey = aKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -86,11 +86,7 @@ public final class WebSocketHandshake {
 			byte[] lBufSource = aKey.getBytes("UTF-8");
 			byte[] lBufTarget = md.digest(lBufSource);
 			lAccept = Tools.base64Encode(lBufTarget);
-			// lAccept = Base64.encodeBase64String(lBufTarget);
 		} catch (Exception lEx) {
-			/*
-			System.out.println("calcHybiSecKeyNum: " + lEx.getMessage());
-			 */
 		}
 		return lAccept;
 	}
