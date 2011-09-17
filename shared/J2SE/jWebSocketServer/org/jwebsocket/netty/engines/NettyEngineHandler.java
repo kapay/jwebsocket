@@ -52,6 +52,7 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.WebSocketHandshake;
 import org.jwebsocket.kit.WebSocketRuntimeException;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.netty.connectors.NettyConnector;
@@ -82,15 +83,6 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	private ChannelHandlerContext mContext = null;
 	private static final ChannelGroup mChannels = new DefaultChannelGroup();
 	private static final String CONTENT_LENGTH = "Content-Length";
-
-/*	Removed by Alex because these constants now are maintained in RequestHeader
-	private static final String ARGS = "args";
-	private static final String ORIGIN = "origin";
-	private static final String LOCATION = "location";
-	private static final String PATH = "path";
-	private static final String SEARCH_STRING = "searchString";
-	private static final String HOST = "host";
-*/
 
 	public NettyEngineHandler(NettyEngine aEngine) {
 		this.mEngine = aEngine;
@@ -373,16 +365,22 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 	 * @throws NoSuchAlgorithmException
 	 */
 	private HttpResponse constructHandShakeResponse(HttpRequest aReq, ChannelHandlerContext aCtx) throws NoSuchAlgorithmException {
+		boolean secKey = aReq.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY);
 		HttpResponse lResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(101, "Web Socket Protocol Handshake"));
-		lResp.addHeader(HttpHeaders.Names.UPGRADE, HttpHeaders.Values.WEBSOCKET);
+		if (secKey) {
+			lResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(101, "Switching Protocols")); 
+		}
+		lResp.addHeader(HttpHeaders.Names.UPGRADE, "websocket");
 		lResp.addHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.UPGRADE);
 
+		String lProtocol = aReq.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
+		
 		// Fill in the headers and contents depending on handshake method.
 		if (aReq.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY1) && aReq.containsHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY2)) {
 			// New handshake method with a challenge:
 			lResp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_ORIGIN, aReq.getHeader(HttpHeaders.Names.ORIGIN));
 			lResp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_LOCATION, getWebSocketLocation(aReq));
-			String lProtocol = aReq.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
+			
 			// Added by Alex 2010-10-25:
 			// fallback for FlashBridge (which sends "WebSocket-Protocol"
 			// instead of "Sec-WebSocket-Protocol"
@@ -406,11 +404,26 @@ public class NettyEngineHandler extends SimpleChannelUpstreamHandler {
 			lInput.writeLong(lC);
 			ChannelBuffer lOutput = ChannelBuffers.wrappedBuffer(MessageDigest.getInstance("MD5").digest(lInput.array()));
 			lResp.setContent(lOutput);
+		} else if (secKey){
+			//version 14, http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-14			
+			String key = aReq.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY);
+			
+			//get the accept key from handshake util
+			String acceptKey = WebSocketHandshake.calcHybiSecKeyAccept(key);
+			lResp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_ACCEPT, acceptKey);
+			if (lProtocol != null) {
+				lResp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL, lProtocol);
+			} else {
+				lProtocol = aReq.getHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL);
+				if (lProtocol != null) {
+					lResp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL, lProtocol);
+				}
+			}
+			
 		} else {
-			// Old handshake method with no challenge:
+			// Older handshake method with no challenge:
 			lResp.addHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN, aReq.getHeader(HttpHeaders.Names.ORIGIN));
 			lResp.addHeader(HttpHeaders.Names.WEBSOCKET_LOCATION, getWebSocketLocation(aReq));
-			String lProtocol = aReq.getHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL);
 			if (lProtocol != null) {
 				lResp.addHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL, lProtocol);
 			}

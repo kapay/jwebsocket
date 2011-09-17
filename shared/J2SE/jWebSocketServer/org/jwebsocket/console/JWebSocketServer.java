@@ -35,21 +35,6 @@ public class JWebSocketServer {
 		String lOverrideConfigPath = JWebSocketFactory.getConfigOverridePath(aArgs);
 		try {
 			JWebSocketFactory.start(lOverrideConfigPath);
-/*
-			// get the token server
-			TokenServer lTS0 = JWebSocketFactory.getTokenServer();
-			if (lTS0 != null) {
-				// and add the sample listener to the server's listener chain
-				lTS0.addListener(new JWebSocketTokenListenerSample());
-			}
-
-			// get the custom server
-			CustomServer lCS0 = (CustomServer) JWebSocketFactory.getServer("cs0");
-			if (lCS0 != null) {
-				// and add the sample listener to the server's listener chain
-				lCS0.addListener(new JWebSocketCustomListenerSample());
-			}
-*/
 			// run server until shut down request
 			JWebSocketFactory.run();
 

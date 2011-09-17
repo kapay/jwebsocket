@@ -220,6 +220,10 @@ public class HttpHeaders {
          */
         public static final String RETRY_AFTER = "Retry-After";
         /**
+         * {@code "Sec-WebSocket-Key"}
+         */
+        public static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
+        /**
          * {@code "Sec-WebSocket-Key1"}
          */
         public static final String SEC_WEBSOCKET_KEY1 = "Sec-WebSocket-Key1";
@@ -238,7 +242,15 @@ public class HttpHeaders {
         /**
          * {@code "Sec-WebSocket-Protocol"}
          */
-        public static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+        public static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";      
+        /**
+         * {@code "Sec-WebSocket-Version"}
+         */
+        public static final String SEC_WEBSOCKET_VERSION = "Sec-WebSocket-Version";
+        /**
+         * {@code "Sec-WebSocket-Accept"}
+         */
+        public static final String SEC_WEBSOCKET_ACCEPT="Sec-WebSocket-Accept";
         /**
          * {@code "Server"}
          */

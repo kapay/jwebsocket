@@ -65,9 +65,13 @@ public class JWebSocketFactory {
 	/**
 	 * 
 	 */
-	public static void setProperties() {
-		System.setProperty(JWebSocketServerConstants.JWEBSOCKET_HOME,
-				System.getenv(JWebSocketServerConstants.JWEBSOCKET_HOME));
+	public static void setProperties(String aConfigOverridePath) {
+		if (null != aConfigOverridePath && !"".equals(aConfigOverridePath)) {
+			System.setProperty(JWebSocketServerConstants.JWEBSOCKET_HOME, aConfigOverridePath);
+		} else {
+			System.setProperty(JWebSocketServerConstants.JWEBSOCKET_HOME,
+					System.getenv(JWebSocketServerConstants.JWEBSOCKET_HOME));
+		}
 	}
 
 	/**
@@ -104,7 +108,7 @@ public class JWebSocketFactory {
 	public static void start(String aConfigOverridePath) {
 
 		JWebSocketInstance.setStatus(JWebSocketInstance.STARTING);
-		setProperties();
+		setProperties(aConfigOverridePath);
 
 		JWebSocketLoader loader = new JWebSocketLoader();
 		try {
