@@ -233,6 +233,12 @@
 			<artifactId>commons-pool</artifactId>
 			<version>1.5.6</version>
 		</dependency>		
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.2</version>
+		</dependency>
+		
 		<!-- required for the jWebSocket Twitter Plugin -->
 		<dependency>
 			<groupId>org.twitter4j</groupId>

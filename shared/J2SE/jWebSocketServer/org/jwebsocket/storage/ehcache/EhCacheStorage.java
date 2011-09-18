@@ -37,7 +37,11 @@ public class EhCacheStorage implements IBasicStorage {
 	private String mName = null;
 	private static CacheManager mCacheManager = null;
 	private Cache mCache = null;
-	
+
+	/**
+	 * 
+	 * @param aId
+	 */
 	public EhCacheStorage(String aId) {
 		mInstanceCounter++;
 		mName = aId;
@@ -105,8 +109,11 @@ public class EhCacheStorage implements IBasicStorage {
 	 */
 	@Override
 	public Object remove(Object aKey) {
+		// TODO: The interface specs that a previous object is supposed to be returned
+		// this may not be desired and reduce performance, provide second message
+		Object lRes = mCache.get(aKey);
 		mCache.remove(aKey);
-		return null;
+		return lRes;
 	}
 
 	/**

@@ -29,6 +29,7 @@
 		<script type="text/javascript" src="../../res/js/jWebSocket.js"></script>
 		<!-- this one imports the client side mail plug-in -->
 		<script type="text/javascript" src="../../res/js/jwsMailPlugIn.js"></script>
+		<script type="text/javascript" src="../../res/js/jwsFilesystemPlugIn.js"></script>
 		<script type="text/javascript" language="JavaScript">
 
 			var eLog = null;
@@ -56,7 +57,6 @@
 
 				gUsername = eUsername.value;
 				var lPassword = ePassword.value;
-				ePassword.value = "";
 
 				log( "Connecting to " + lURL + " and logging in as '" + gUsername + "'..." );
 				var lRes = lWSC.logon( lURL, gUsername, lPassword, {
@@ -100,17 +100,53 @@
 			}
 
 			function sendMail() {
-				lWSC.sendToken({
-					ns: "org.jwebsocket.plugins.mail",
-					type: "sendMail",
-					from: "aschulze@nvidia.com",
-					to: eTo.value,
-					cc: "",
-					bcc: "",
-					subject: eSubject.value,
-					body: eBody.value,
-					isHTML: false
-				});
+				lWSC.sendMail(
+					"myMail", {}
+				);
+			}
+
+			function createMail() {
+				lWSC.createMail(
+					"a.schulze@jwebsocket.org", // from
+					eTo.value, // to
+					eCC.value, // cc
+					eBCC.value, // bcc
+					eSubject.value, // subject
+					eBody.value, // body
+					jws.MailPlugIn.TEXT_MAIL, // format (is html?)
+					{
+						
+					}
+				);
+			}
+
+			function dropMail() {
+				lWSC.dropMail(
+					{
+						
+					}
+				);
+			}
+
+
+			function addAttachment() {
+				log( "uploading local file to the jWebSocket server..." );
+				// OnLocalFileLoaded refers to onLocalFileLoadedObs
+				var lRes =
+					lWSC.fileLoadLocal( jws.$( "sinpUpload" ), {
+						OnSuccess: function( aToken ) {
+							lWSC.addAttachment("myMail", aToken.fileName, aToken.data, {
+								// file is already base64 encoded
+								suppressEncoder: true,
+								volumeSize: 950000,
+								archiveName: "mailAttachments.zip"
+							});
+						},
+						OnFailure: function( aToken ) {
+							alert( "Failure on loading file" );
+						}
+					});
+				log( lWSC.resultToString( lRes ) );
 			}
 
 			function onMailSentObs( aToken ) {
@@ -121,11 +157,15 @@
 				eLog = jws.$( "sdivChat" );
 
 				eTo = jws.$( "stxfTo" );
+				eCC = jws.$( "stxfCC" );
+				eBCC = jws.$( "stxfBCC" );
 				eSubject = jws.$( "stxfSubject" );
 				eBody = jws.$( "stxaBody" );
 
 				eUsername = jws.$( "stxfUsername" );
 				ePassword = jws.$( "spwfPassword" );
+				eUsername.value = jws.GUEST_USER_LOGINNAME;
+				ePassword.value = jws.GUEST_USER_PASSWORD;
 
 				// jws.browserSupportsWebSockets checks web if sockets are available
 				// either natively, by the Flash Bridge or by the Chrome Frame.
@@ -190,28 +230,51 @@
 			<table class="stlbDlg" border="0" cellpadding="3" cellspacing="0" width="100%">
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Username</td>
-					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="Guest" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="stxfDlg" id="stxfUsername" type="text" value="" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogon" type="button" value="Login" onclick="logon();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnClear" type="button" value="Clear Log" onclick="clearLog();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnCreate" type="button" value="Create Mail" onclick="createMail();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Password</td>
-					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="guest" style="width:150px"></td>
+					<td class="stdDlg" width="5"><input class="spwfDlg" id="spwfPassword" type="password" value="" style="width:150px"></td>
 					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnLogoff" type="button" value="Logoff" onclick="logoff();"></td>
-					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnSendMail" type="button" value="sendMail" onclick="sendMail();"></td>
+					<td class="stdDlg" width="5"><input class="sbtnDlg" id="sbtnSendMail" type="button" value="Send Mail" onclick="sendMail();"></td>
+					<td class="stdDlg" width=""><input class="sbtnDlg" id="sbtnDropMail" type="button" value="Drop Mail" onclick="dropMail();"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">To</td>
-					<td class="stdDlg" width="" colspan="3"><input class="stxfDlg" id="stxfTo" type="text" value="username@domain.tld..." style="width:99%"></td>
+					<td class="stdDlg" width="" colspan="4"><input class="stxfDlg" id="stxfTo" type="text" value="username@domain.tld..." style="width:99%"></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5">CC</td>
+					<td class="stdDlg" width="" colspan="4"><input class="stxfDlg" id="stxfCC" type="text" value="" style="width:99%"></td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" width="5">BCC</td>
+					<td class="stdDlg" width="" colspan="4"><input class="stxfDlg" id="stxfBCC" type="text" value="" style="width:99%"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Subject</td>
-					<td class="stdDlg" width="" colspan="3"><input class="stxfDlg" id="stxfSubject" type="text" value="Subject..." style="width:99%"></td>
+					<td class="stdDlg" width="" colspan="4"><input class="stxfDlg" id="stxfSubject" type="text" value="jWebSocket Mail Demo" style="width:99%"></td>
 				</tr>
 				<tr class="strDlg">
 					<td class="stdDlg" width="5">Message</td>
-					<td class="stdDlg" width="" colspan="3">
-						<textarea class="stxaDlg" rows="3" cols="255" id="stxaBody" style="width:99%">Message-Body...</textarea>
+					<td class="stdDlg" width="" colspan="4">
+						<textarea class="stxaDlg" rows="3" cols="255" id="stxaBody" style="width:99%">
+Ladies and Gentlemen,
+here we proudly present our Mail-Plug-In with its huge set of features.
+It includes attachments as well automatic multi volume messages.
+Best Regards
+Your jWebSocket Team
+						</textarea>
+					</td>
+				</tr>
+				<tr class="strDlg">
+					<td class="stdDlg" colspan ="4"><input class="sbtnDlg" id="sinpUpload" type="file" multiple="multiple" style="width:100%"></td>
+					<td class="stdDlg">
+						<input class="sbtnDlg" id="sbtnUpload" type="button" value="Add Attachm." onclick="addAttachment();"
+							   title="Uploads a file to the server and optionally notifies clients about URL, but does not pass the file itself.">
 					</td>
 				</tr>
 			</table>

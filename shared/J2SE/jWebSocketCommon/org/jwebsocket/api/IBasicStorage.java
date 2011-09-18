@@ -14,20 +14,35 @@
 //  with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.api;
+
 import java.util.Map;
 import java.util.Collection;
-import org.jwebsocket.api.IInitializable;
 
 /**
  *
- ** @author kyberneees
+ * @param <K> 
+ * @param <V> 
+ * @author kyberneees
  */
-public interface IBasicStorage<K,V> extends Map<K,V>, IInitializable{
+public interface IBasicStorage<K, V> extends Map<K, V>, IInitializable {
 
+	/**
+	 * 
+	 * @return
+	 */
 	String getName();
 
-	void setName(String name) throws Exception;
+	/**
+	 * 
+	 * @param aName
+	 * @throws Exception
+	 */
+	void setName(String aName) throws Exception;
 
-	Map<K,V> getAll(Collection<K> keys);
-
+	/**
+	 * 
+	 * @param aKeys
+	 * @return
+	 */
+	Map<K, V> getAll(Collection<K> aKeys);
 }

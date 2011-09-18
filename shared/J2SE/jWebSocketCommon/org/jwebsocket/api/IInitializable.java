@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - EventsPlugIn
+//  jWebSocket - IInitializable
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -17,11 +17,19 @@ package org.jwebsocket.api;
 
 /**
  *
- * @author kyberneees
+ * @author kyberneees, aschulze
  */
 public interface IInitializable {
 
+	/**
+	 * 
+	 * @throws Exception
+	 */
 	public void initialize() throws Exception;
 
+	/**
+	 * 
+	 * @throws Exception
+	 */
 	public void shutdown() throws Exception;
 }

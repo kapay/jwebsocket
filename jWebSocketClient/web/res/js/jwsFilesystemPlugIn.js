@@ -298,7 +298,7 @@ jws.FileSystemPlugIn = {
 			// if file is completely loaded, fire OnLocalFileRead event
 			lReader.onload = (function( aFile ) {
 				return function( aEvent ) {
-					if( lThis.OnLocalFileRead ) {
+					if( lThis.OnLocalFileRead || aOptions.OnSuccess) {
 						var lToken = {
 							encoding: aOptions.encoding,
 							fileName : aFile.fileName,
@@ -313,7 +313,12 @@ jws.FileSystemPlugIn = {
 						if( aOptions.action ) {
 							lToken.action = aOptions.action;
 						}
+					}
+					if( lThis.OnLocalFileRead ) {
 						lThis.OnLocalFileRead( lToken );
+					}
+					if( aOptions.OnSuccess ) {
+						aOptions.OnSuccess( lToken );
 					}
 				}
 			})( lFile );
@@ -321,7 +326,7 @@ jws.FileSystemPlugIn = {
 			// if any error appears fire OnLocalFileError event
 			lReader.onerror = (function( aFile ) {
 				return function( aEvent ) {
-					if( lThis.OnLocalFileError ) {
+					if( lThis.OnLocalFileError || aOptions.OnFailure ) {
 						// TODO: force error case and fill token
 						var lCode = aEvent.target.error.code;
 						var lToken = {
@@ -334,7 +339,12 @@ jws.FileSystemPlugIn = {
 						if( aOptions.action ) {
 							lToken.action = aOptions.action;
 						}
+					}
+					if( lThis.OnLocalFileError ) {
 						lThis.OnLocalFileError( lToken );
+					}
+					if( aOptions.OnFailure ) {
+						aOptions.OnFailure( lToken );
 					}
 				}
 			})( lFile );
@@ -343,7 +353,7 @@ jws.FileSystemPlugIn = {
 			try{
 				lReader.readAsDataURL( lFile );
 			} catch( lEx ) {
-				if( lThis.OnLocalFileError ) {
+				if( lThis.OnLocalFileError || aOptions.OnFailure ) {
 					var lToken = {
 						code: -1,
 						msg: lEx.message
@@ -354,7 +364,12 @@ jws.FileSystemPlugIn = {
 					if( aOptions.action ) {
 						lToken.action = aOptions.action;
 					}
+				}
+				if( lThis.OnLocalFileError ) {
 					lThis.OnLocalFileError( lToken );
+				}
+				if( aOptions.OnFailure ) {
+					aOptions.OnFailure( lToken );
 				}
 			}
 		}

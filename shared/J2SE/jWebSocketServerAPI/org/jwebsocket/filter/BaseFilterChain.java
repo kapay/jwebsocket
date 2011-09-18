@@ -52,6 +52,8 @@ public class BaseFilterChain implements WebSocketFilterChain {
 	public WebSocketServer getServer() {
 		return mServer;
 	}
+	
+	// TODO: Filters are currently organized in a map, which does not allow to specify an order. This needs to be changed!
 
 	@Override
 	public void addFilter(WebSocketFilter aFilter) {
