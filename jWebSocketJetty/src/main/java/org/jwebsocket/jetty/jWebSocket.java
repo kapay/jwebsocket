@@ -61,7 +61,7 @@ public class jWebSocket extends WebSocketServlet {
 	 * @return
 	 */
 	@Override
-	protected WebSocket doWebSocketConnect(HttpServletRequest aRequest, String aProtocol) {
+	public WebSocket doWebSocketConnect(HttpServletRequest aRequest, String aProtocol) {
 		// System.out.println("@doWebSocketConnect");
 		return new JettyWrapper(aRequest, aProtocol);
 	}

@@ -57,7 +57,7 @@ public class JettyServlet extends WebSocketServlet {
 	}
 
 	@Override
-	protected WebSocket doWebSocketConnect(HttpServletRequest aRequest, String aProtocol) {
+	public WebSocket doWebSocketConnect(HttpServletRequest aRequest, String aProtocol) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Processing incoming WebSocket connection...");
 		}

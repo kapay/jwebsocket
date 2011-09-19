@@ -55,6 +55,20 @@ public interface WebSocketConnector {
 	WebSocketEngine getEngine();
 
 	/**
+	 * Processes an incoming ping from a WebSocket client. Usually the
+	 * ping needs to be answered by a pong.
+	 * @param aDataPacket raw web socket data packet
+	 */
+	void processPing(WebSocketPacket aDataPacket);
+	
+	/**
+	 * Processes an incoming pong from a WebSocket client. Usually the
+	 * pong packet is an answer to a previously send ping.
+	 * @param aDataPacket raw web socket data packet
+	 */
+	void processPong(WebSocketPacket aDataPacket);
+	
+	/**
 	 * Processes an incoming datapacket from a WebSocket client. Usually the
 	 * data packet is not processed in any way but only passed up to the
 	 * {@code processPacket} method of the overlying engine.

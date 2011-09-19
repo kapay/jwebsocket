@@ -111,6 +111,24 @@ public class BaseConnector implements WebSocketConnector {
 	}
 
 	@Override
+	public void processPing(WebSocketPacket aDataPacket) {
+		/*
+		if (mEngine != null) {
+			mEngine.processPing(this, aDataPacket);
+		}
+		 */
+	}
+
+	@Override
+	public void processPong(WebSocketPacket aDataPacket) {
+		/*
+		if (mEngine != null) {
+			mEngine.processPong(this, aDataPacket);
+		}
+		 */
+	}
+
+	@Override
 	public void sendPacket(WebSocketPacket aDataPacket) {
 	}
 

@@ -21,14 +21,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.websocket.WebSocket.Outbound;
+import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.kit.RawPacket;
 import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketFrameType;
 import org.jwebsocket.logging.Logging;
@@ -42,7 +41,7 @@ public class JettyConnector extends BaseConnector {
 	private static Logger mLog = Logging.getLogger(JettyConnector.class);
 	private boolean mIsRunning = false;
 	private CloseReason mCloseReason = CloseReason.TIMEOUT;
-	private Outbound mOutbound;
+	private Connection mConnection;
 	private HttpServletRequest mRequest = null;
 	private String mProtocol = null;
 
@@ -55,9 +54,9 @@ public class JettyConnector extends BaseConnector {
 	 * @param aClientSocket
 	 */
 	public JettyConnector(WebSocketEngine aEngine, HttpServletRequest aRequest,
-			String aProtocol, Outbound aOutbound) {
+			String aProtocol, Connection aConnection) {
 		super(aEngine);
-		mOutbound = aOutbound;
+		mConnection = aConnection;
 		mRequest = aRequest;
 		mProtocol = aProtocol;
 
@@ -128,7 +127,7 @@ public class JettyConnector extends BaseConnector {
 				lEngine.connectorStopped(this, aCloseReason);
 			}
 
-			mOutbound.disconnect();
+			mConnection.disconnect();
 			mCloseReason = aCloseReason;
 			mIsRunning = false;
 			if (mLog.isInfoEnabled()) {
@@ -156,9 +155,9 @@ public class JettyConnector extends BaseConnector {
 			if (aDataPacket.getFrameType() == WebSocketFrameType.BINARY) {
 				// mOutbound.sendMessage((byte) 0, );
 				byte[] lBA = aDataPacket.getByteArray();
-				mOutbound.sendMessage((byte) 0, lBA, 0, lBA.length);
+				mConnection.sendMessage(lBA, 0, lBA.length);
 			} else {
-				mOutbound.sendMessage(aDataPacket.getUTF8());
+				mConnection.sendMessage(aDataPacket.getUTF8());
 			}
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName() + " sending data packet: " + lEx.getMessage());

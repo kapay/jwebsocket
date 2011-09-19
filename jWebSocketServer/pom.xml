@@ -157,20 +157,21 @@
 			<artifactId>netty</artifactId>
 			<version>3.2.4.Final</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-websocket</artifactId>
-			<version>8.0.0.M2</version>
+			<version>8.0.0.RC0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlets</artifactId>
-			<version>8.0.0.M2</version>
+			<version>8.0.0.RC0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>8.0.0.M2</version>
+			<version>8.0.0.RC0</version>
 		</dependency>
 
 		<!-- required for the jWebSocket JDBC Plugin -->
@@ -267,6 +268,13 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.servlet</artifactId>
+			<version>3.1.1</version>
+			<scope>provided</scope>
+		</dependency>
+		
 		<!-- to compile groovy code in this project 
 		Refer to: http://docs.codehaus.org/display/GMAVEN/Home
 		-->
@@ -464,7 +472,6 @@
 			<url>https://repository.jboss.org/nexus/content/repositories/spy-releases</url>
 		</repository>		
 		-->
-		
 		<!-- Repositories for the netty engine (JBoss) -->
 		<repository>
 			<id>repository.jboss.org</id>
@@ -483,6 +490,12 @@
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
 			<url>http://repository.springsource.com/maven/bundles/external</url>
 		</repository>
+		
+		<repository>
+			<id>java.net2</id>
+			<name>Repository hosting the jee6 artifacts</name>
+			<url>http://download.java.net/maven/2</url>
+		</repository>		
 		
 		<repository>
 			<id>twitter4j.org</id>

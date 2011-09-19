@@ -225,7 +225,7 @@ public class AuthenticationPlugIn extends TokenPlugIn {
 		}
 
 		//Getting the username
-		String username = aConnector.getUsername();
+		String lUsername = aConnector.getUsername();
 
 		//Cleaning the session
 		aConnector.getSession().getStorage().clear();

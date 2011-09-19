@@ -18,6 +18,11 @@ package org.jwebsocket.jetty;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.websocket.WebSocket;
+import org.eclipse.jetty.websocket.WebSocket.Connection;
+import org.eclipse.jetty.websocket.WebSocket.OnBinaryMessage;
+import org.eclipse.jetty.websocket.WebSocket.OnControl;
+import org.eclipse.jetty.websocket.WebSocket.OnFrame;
+import org.eclipse.jetty.websocket.WebSocket.OnTextMessage;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
@@ -59,7 +64,8 @@ aschulze-dt1:~ alexanderschulze$
  *
  * @author alexanderschulze
  */
-public class JettyWrapper implements WebSocket {
+public class JettyWrapper implements WebSocket,
+		OnTextMessage, OnBinaryMessage, OnFrame, OnControl {
 
 	private static Logger mLog = Logging.getLogger(JettyWrapper.class);
 	private WebSocketConnector mConnector = null;
@@ -79,11 +85,25 @@ public class JettyWrapper implements WebSocket {
 	}
 
 	@Override
-	public void onConnect(Outbound aOutbound) {
+	public boolean onFrame(byte b, byte b1, byte[] bytes, int i, int i1) {
+		return false;
+	}
+
+	@Override
+	public void onHandshake(FrameConnection aFC) {
+	}
+
+	@Override
+	public boolean onControl(byte b, byte[] bytes, int i, int i1) {
+		return false;
+	}
+
+	@Override
+	public void onOpen(Connection aConnection) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Connecting Jetty Client...");
 		}
-		mConnector = new JettyConnector(mEngine, mRequest, mProtocol, aOutbound);
+		mConnector = new JettyConnector(mEngine, mRequest, mProtocol, aConnection);
 		mEngine.addConnector(mConnector);
 		// inherited BaseConnector.startConnector
 		// calls mEngine connector started
@@ -102,44 +122,7 @@ public class JettyWrapper implements WebSocket {
 	}
 
 	@Override
-	public void onMessage(byte aFrame, byte[] aData, int aOffset, int aLength) {
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Message (binary) from Jetty client...");
-		}
-		if (mConnector != null) {
-			WebSocketPacket lDataPacket = new RawPacket(aData);
-			mEngine.processPacket(mConnector, lDataPacket);
-		}
-	}
-
-	@Override
-	public void onFragment(boolean aMore, byte aOpCcode, byte[] aData,
-			int aOffset, int aLength) {
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Fragment from Jetty client...");
-		}
-		if (mConnector != null) {
-			// WebSocketPacket lDataPacket = new RawPacket(aData);
-			// mEngine.processPacket(mConnector, lDataPacket);
-		}
-	}
-
-	@Override
-	public void onMessage(byte aFrame, String aData) {
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Message (string, opcode "
-					+ aFrame
-					+ ") from Jetty client: '"
-					+ aData + "'...");
-		}
-		if (mConnector != null) {
-			WebSocketPacket lDataPacket = new RawPacket(aData);
-			mEngine.processPacket(mConnector, lDataPacket);
-		}
-	}
-
-	@Override
-	public void onDisconnect() {
+	public void onClose(int i, String string) {
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Disconnecting Jetty Client...");
 		}
@@ -148,6 +131,28 @@ public class JettyWrapper implements WebSocket {
 			// calls mEngine connector stopped
 			mConnector.stopConnector(CloseReason.CLIENT);
 			mEngine.removeConnector(mConnector);
+		}
+	}
+
+	@Override
+	public void onMessage(String aMessage) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Message (text) from Jetty client...");
+		}
+		if (mConnector != null) {
+			WebSocketPacket lDataPacket = new RawPacket(aMessage);
+			mEngine.processPacket(mConnector, lDataPacket);
+		}
+	}
+
+	@Override
+	public void onMessage(byte[] aMessage, int i, int i1) {
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Message (binary) from Jetty client...");
+		}
+		if (mConnector != null) {
+			WebSocketPacket lDataPacket = new RawPacket(aMessage);
+			mEngine.processPacket(mConnector, lDataPacket);
 		}
 	}
 }
