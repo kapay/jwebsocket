@@ -35,13 +35,14 @@ public class JWebSocketServer {
 		String lOverrideConfigPath = JWebSocketFactory.getConfigOverridePath(aArgs);
 		try {
 			JWebSocketFactory.start(lOverrideConfigPath);
+
 			// run server until shut down request
 			JWebSocketFactory.run();
 
 		} catch (Exception lEx) {
 			System.out.println(
 					lEx.getClass().getSimpleName()
-					+ " on starting jWebsocket server: "
+					+ " on starting jWebSocket server: "
 					+ lEx.getMessage());
 		} finally {
 			JWebSocketFactory.stop();

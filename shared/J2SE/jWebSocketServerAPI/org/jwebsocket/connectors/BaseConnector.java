@@ -20,6 +20,7 @@ import java.util.Map;
 import javolution.util.FastMap;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketConnectorStatus;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.config.JWebSocketCommonConstants;
@@ -59,8 +60,12 @@ public class BaseConnector implements WebSocketConnector {
 	 * Is connector using SSL encryption?
 	 */
 	private boolean mIsSSL = false;
+	/*
+	 * Status of the connector.
+	 */
+	private volatile WebSocketConnectorStatus mStatus = WebSocketConnectorStatus.DOWN;
 	/**
-	 * the WebSocket protocol version
+	 * The WebSocket protocol version.
 	 */
 	private int mVersion = JWebSocketCommonConstants.WS_VERSION_DEFAULT;
 	/**
@@ -102,6 +107,25 @@ public class BaseConnector implements WebSocketConnector {
 			mEngine.connectorStopped(this, aCloseReason);
 		}
 	}
+	
+		/**
+	 * Returns the current status for the connector.
+	 * Please refer to the WebSocketConnectorStatus enumeration.
+	 */
+	@Override
+	public WebSocketConnectorStatus getStatus() {
+		return mStatus;
+	}
+	
+	/**
+	 * Sets the current status for the connector.
+	 * Please refer to the WebSocketConnectorStatus enumeration.
+	 */
+	@Override
+	public void setStatus(WebSocketConnectorStatus aStatus) {
+		mStatus = aStatus;
+	}
+
 
 	@Override
 	public void processPacket(WebSocketPacket aDataPacket) {

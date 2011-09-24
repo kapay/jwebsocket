@@ -83,7 +83,10 @@ function runFullTestSuite() {
 			jws.Tests.testOpenSharedAdminConnSSL();
 			jws.Tests.testOpenSharedGuestConnSSL();
 		}
-	
+		
+		// run load tests
+		jws.tests.Load.runSuite();
+				
 		// run test suites for the various plug-ins
 		jws.tests.System.runSuite();
 		jws.tests.FileSystem.runSuite();

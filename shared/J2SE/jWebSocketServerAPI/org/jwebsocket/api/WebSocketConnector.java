@@ -49,6 +49,18 @@ public interface WebSocketConnector {
 	void stopConnector(CloseReason aCloseReason);
 
 	/**
+	 * Returns the current status for the connector.
+	 * Please refer to the WebSocketConnectorStatus enumeration.
+	 */
+	WebSocketConnectorStatus getStatus();
+	
+	/**
+	 * Sets the current status for the connector.
+	 * Please refer to the WebSocketConnectorStatus enumeration.
+	 */
+	void setStatus(WebSocketConnectorStatus aStatus);
+	
+	/**
 	 * Returns the engine the connector is bound to.
 	 * @return WebSocketEngine Engine the connector is bound to
 	 */

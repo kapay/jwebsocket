@@ -23,6 +23,7 @@ import javax.net.ssl.SSLSocket;
 
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.api.WebSocketConnectorStatus;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.async.IOFuture;
@@ -48,7 +49,6 @@ public class TCPConnector extends BaseConnector {
 	public static final String TCP_LOG = "TCP";
 	public static final String SSL_LOG = "SSL";
 	private String mLogInfo = TCP_LOG;
-	private boolean mIsRunning = false;
 	private CloseReason mCloseReason = CloseReason.TIMEOUT;
 
 	/**
@@ -129,7 +129,8 @@ public class TCPConnector extends BaseConnector {
 					+ " connector (" + aCloseReason.name() + ")...");
 		}
 		mCloseReason = aCloseReason;
-		mIsRunning = false;
+		setStatus(WebSocketConnectorStatus.DOWN);
+		setStatus(WebSocketConnectorStatus.DOWN);
 
 		if (!isHixie()) {
 			// Hybi specs demand that client must be notified
@@ -149,6 +150,15 @@ public class TCPConnector extends BaseConnector {
 
 	@Override
 	public synchronized void sendPacket(WebSocketPacket aDataPacket) {
+		if (WebSocketConnectorStatus.UP != getStatus()) {
+			// TODO: think about if and how to handle the scenario 
+			// that other threads send data to a closed or closing connector.
+			/*
+			mLog.warn("Trying to send to closing connection: "
+					+ getId() + ", " + aDataPacket.getUTF8());
+			 */
+			return;
+		}
 		try {
 			if (mClientSocket.isConnected()) {
 				if (isHixie()) {
@@ -196,7 +206,7 @@ public class TCPConnector extends BaseConnector {
 			int lPort = getRemotePort();
 			try {
 				// start client listener loop
-				mIsRunning = true;
+				setStatus(WebSocketConnectorStatus.UP);
 
 				// call connectorStarted method of engine
 				lEngine.connectorStarted(mConnector);
@@ -243,7 +253,7 @@ public class TCPConnector extends BaseConnector {
 
 		private void readHixie(ByteArrayOutputStream aBuff,
 				WebSocketEngine aEngine) throws IOException {
-			while (mIsRunning) {
+			while (WebSocketConnectorStatus.UP == getStatus()) {
 				try {
 					int lIn = mIn.read();
 					// start of frame
@@ -263,7 +273,7 @@ public class TCPConnector extends BaseConnector {
 						aBuff.reset();
 					} else if (lIn < 0) {
 						mCloseReason = CloseReason.CLIENT;
-						mIsRunning = false;
+						setStatus(WebSocketConnectorStatus.DOWN);
 						// any other byte within or outside a frame
 					} else {
 						aBuff.write(lIn);
@@ -272,12 +282,12 @@ public class TCPConnector extends BaseConnector {
 					mLog.error("(timeout) " + lEx.getClass().getSimpleName()
 							+ ": " + lEx.getMessage());
 					mCloseReason = CloseReason.TIMEOUT;
-					mIsRunning = false;
+					setStatus(WebSocketConnectorStatus.DOWN);
 				} catch (Exception lEx) {
 					mLog.error("(other) " + lEx.getClass().getSimpleName()
 							+ ": " + lEx.getMessage());
 					mCloseReason = CloseReason.SERVER;
-					mIsRunning = false;
+					setStatus(WebSocketConnectorStatus.DOWN);
 				}
 			}
 		}
@@ -286,7 +296,7 @@ public class TCPConnector extends BaseConnector {
 				WebSocketEngine aEngine) throws IOException {
 
 			String lFrom = getRemoteHost() + ":" + getRemotePort() + " (" + getId() + ")";
-			while (mIsRunning) {
+			while (WebSocketConnectorStatus.UP == getStatus()) {
 				try {
 					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(getVersion(), mIn);
 
@@ -295,7 +305,7 @@ public class TCPConnector extends BaseConnector {
 							mLog.debug("Processing client 'disconnect' from " + lFrom + "...");
 						}
 						mCloseReason = CloseReason.CLIENT;
-						mIsRunning = false;
+						setStatus(WebSocketConnectorStatus.DOWN);
 					} else if (WebSocketFrameType.TEXT.equals(lPacket.getFrameType())) {
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Processing 'text' frame from " + lFrom + "...");
@@ -313,7 +323,7 @@ public class TCPConnector extends BaseConnector {
 							mLog.debug("Processing 'close' frame from " + lFrom + "...");
 						}
 						mCloseReason = CloseReason.CLIENT;
-						mIsRunning = false;
+						setStatus(WebSocketConnectorStatus.DOWN);
 
 						// As per spec, server must respond to CLOSE with acknowledgment CLOSE (maybe
 						// this should be handled higher up in the hierarchy?)
@@ -330,12 +340,12 @@ public class TCPConnector extends BaseConnector {
 				} catch (SocketTimeoutException lEx) {
 					mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 					mCloseReason = CloseReason.TIMEOUT;
-					mIsRunning = false;
+					setStatus(WebSocketConnectorStatus.DOWN);
 				} catch (Exception lEx) {
-					if (mIsRunning) {
+					if (WebSocketConnectorStatus.UP == getStatus()) {
 						mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
 						mCloseReason = CloseReason.SERVER;
-						mIsRunning = false;
+						setStatus(WebSocketConnectorStatus.DOWN);
 					}
 				}
 			}

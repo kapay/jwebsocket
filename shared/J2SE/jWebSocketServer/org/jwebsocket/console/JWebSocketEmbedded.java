@@ -14,6 +14,10 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.console;
 
+import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.server.CustomServer;
+import org.jwebsocket.server.TokenServer;
+
 /**
  *
  * @author aschulze
@@ -28,6 +32,22 @@ public class JWebSocketEmbedded {
 
 		// start the subsystem
 		jWebSocketSubsystem.start();
+
+		// get the token server
+		TokenServer lTS0 = JWebSocketFactory.getTokenServer();
+		if (lTS0 != null) {
+			// and add the sample listener to the server's listener chain
+			lTS0.addListener(new JWebSocketTokenListenerSample());
+		}
+
+		// get the custom server
+		CustomServer lCS0 = (CustomServer) JWebSocketFactory.getServer("cs0");
+		if (lCS0 != null) {
+			// and add the sample listener to the server's listener chain
+			lCS0.addListener(new JWebSocketCustomListenerSample());
+		}
+
+
 		// wait until shutdown requested
 		jWebSocketSubsystem.run();
 		// stop the subsystem

@@ -438,7 +438,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 						}
 					};
 					// Use this trustmanager to not reject unsigned certificates
-					SSLContext lSSLContext = SSLContext.getInstance("SSL");
+					SSLContext lSSLContext = SSLContext.getInstance("TLS");
 					lSSLContext.init(null, lTrustManager, new java.security.SecureRandom());
 					mSocket = (SSLSocket) lSSLContext.getSocketFactory().createSocket(lHost, lPort);
 				} catch (NoSuchAlgorithmException lNSAEx) {
