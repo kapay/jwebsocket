@@ -21,5 +21,6 @@ import java.io.IOException;
  * @author jang
  */
 interface DelayedPacketNotifier {
+
 	void handleDelayedPacket() throws IOException;
 }

@@ -66,7 +66,7 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 	private String fSessionId = null;
 	private final Map<Integer, PendingResponseQueueItem> mPendingResponseQueue =
 			new FastMap<Integer, PendingResponseQueueItem>().shared();
-	private final ScheduledThreadPoolExecutor mResponseQueueExecutor = 
+	private final ScheduledThreadPoolExecutor mResponseQueueExecutor =
 			new ScheduledThreadPoolExecutor(1);
 
 	/**
@@ -76,17 +76,30 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 		this(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT, JWebSocketCommonConstants.WS_ENCODING_DEFAULT);
 	}
 
+	/**
+	 * 
+	 * @param aReliabilityOptions
+	 */
 	public BaseTokenClient(ReliabilityOptions aReliabilityOptions) {
 		this(JWebSocketCommonConstants.WS_SUBPROT_DEFAULT, JWebSocketCommonConstants.WS_ENCODING_DEFAULT);
 		setReliabilityOptions(aReliabilityOptions);
 	}
 
+	/**
+	 * 
+	 * @param aSubProt
+	 * @param aEncoding
+	 */
 	public BaseTokenClient(String aSubProt, WebSocketEncoding aEncoding) {
 		mSubProt = new WebSocketSubProtocol(aSubProt, aEncoding);
 		addSubProtocol(mSubProt);
 		addListener(new TokenClientListener());
 	}
 
+	/**
+	 * 
+	 * @param aSubProt
+	 */
 	public BaseTokenClient(WebSocketSubProtocol aSubProt) {
 		mSubProt = aSubProt;
 		addSubProtocol(mSubProt);
@@ -253,7 +266,6 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 
 	/**
 	 *
-	 * @param aConnector
 	 * @param aPacket
 	 * @return
 	 */
@@ -272,7 +284,6 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 
 	/**
 	 *
-	 * @param aConnector
 	 * @param aToken
 	 * @return
 	 */
@@ -290,6 +301,11 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 		return lPacket;
 	}
 
+	/**
+	 * 
+	 * @param aToken
+	 * @throws WebSocketException
+	 */
 	public void sendToken(Token aToken) throws WebSocketException {
 		CUR_TOKEN_ID++;
 		aToken.setInteger("utid", CUR_TOKEN_ID);
@@ -323,6 +339,12 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 		}
 	}
 
+	/**
+	 * 
+	 * @param aToken
+	 * @param aResponseListener
+	 * @throws WebSocketException
+	 */
 	public void sendToken(Token aToken, WebSocketResponseTokenListener aResponseListener) throws WebSocketException {
 		PendingResponseQueueItem lPRQI = new PendingResponseQueueItem(aToken, aResponseListener);
 		int lUTID = CUR_TOKEN_ID + 1;
@@ -377,6 +399,14 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 	private final static String NS_FILESYSTEM_PLUGIN = NS_BASE + ".plugins.filesystem";
 
 	// @Override
+	/**
+	 * 
+	 * @param aData
+	 * @param aFilename
+	 * @param aScope
+	 * @param aNotify
+	 * @throws WebSocketException
+	 */
 	public void saveFile(byte[] aData, String aFilename, String aScope, Boolean aNotify) throws WebSocketException {
 		Token lToken = TokenFactory.createToken(NS_FILESYSTEM_PLUGIN, "save");
 		lToken.setString("sourceId", getClientId());
@@ -391,6 +421,14 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 		sendToken(lToken);
 	}
 
+	/**
+	 * 
+	 * @param aHeader
+	 * @param aData
+	 * @param aFilename
+	 * @param aTarget
+	 * @throws WebSocketException
+	 */
 	public void sendFile(String aHeader, byte[] aData, String aFilename, String aTarget) throws WebSocketException {
 		Token lToken = TokenFactory.createToken(NS_FILESYSTEM_PLUGIN, "send");
 		lToken.setString("sourceId", getClientId());
@@ -411,6 +449,10 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 	public void disconnect() throws WebSocketException {
 	}
 
+	/**
+	 * 
+	 * @throws WebSocketException
+	 */
 	public void shutdown() throws WebSocketException {
 		Token lToken = TokenFactory.createToken(NS_ADMIN_PLUGIN, "shutdown");
 		sendToken(lToken);
@@ -422,12 +464,22 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 		sendToken(lToken);
 	}
 
+	/**
+	 * 
+	 * @param aUsername
+	 * @throws WebSocketException
+	 */
 	public void getUserRights(String aUsername) throws WebSocketException {
 		Token lToken = TokenFactory.createToken(NS_ADMIN_PLUGIN, "getUserRights");
 		lToken.setString("username", aUsername);
 		sendToken(lToken);
 	}
 
+	/**
+	 * 
+	 * @param aUsername
+	 * @throws WebSocketException
+	 */
 	public void getUserRoles(String aUsername) throws WebSocketException {
 		Token lToken = TokenFactory.createToken(NS_ADMIN_PLUGIN, "getUserRoles");
 		lToken.setString("username", aUsername);

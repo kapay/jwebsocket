@@ -15,10 +15,15 @@
 package org.jwebsocket.client.token;
 
 import org.jwebsocket.api.WebSocketBaseClientEvent;
+import org.jwebsocket.api.WebSocketClient;
 
 /**
  *
  * @author aschulze
  */
 public class WebSocketTokenClientEvent extends WebSocketBaseClientEvent {
+
+	public WebSocketTokenClientEvent(WebSocketClient aClient, String aName, String aData) {
+		super(aClient, aName, aData);
+	}
 }

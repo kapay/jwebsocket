@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
@@ -32,6 +33,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import javolution.util.FastList;
+import javolution.util.FastMap;
 import org.jwebsocket.api.WebSocketBaseClientEvent;
 import org.jwebsocket.api.WebSocketClient;
 import org.jwebsocket.api.WebSocketClientEvent;
@@ -122,6 +124,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 	private WebSocketEncoding mEncoding = WebSocketEncoding.TEXT;
 	private ReliabilityOptions mReliabilityOptions = null;
 	private final ScheduledThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(1);
+	private final Map<String, Object> mParams = new FastMap<String, Object>();
 
 	/**
 	 * Base constructor
@@ -134,6 +137,38 @@ public class BaseWebSocketClient implements WebSocketClient {
 	 */
 	public BaseWebSocketClient(ReliabilityOptions aReliabilityOptions) {
 		mReliabilityOptions = aReliabilityOptions;
+	}
+
+	/**
+	 * 
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	public Object getParam(String aKey, Object aDefault) {
+		Object lValue = mParams.get(aKey);
+		if (null == lValue) {
+			lValue = aDefault;
+		}
+		return lValue;
+	}
+
+	/**
+	 * 
+	 * @param aKey
+	 * @return
+	 */
+	public Object getParam(String aKey) {
+		return mParams.get(aKey);
+	}
+
+	/**
+	 * 
+	 * @param aKey
+	 * @param aValue
+	 */
+	public void setParam(String aKey, Object aValue) {
+		mParams.put(aKey, aValue);
 	}
 
 	/**
@@ -219,19 +254,19 @@ public class BaseWebSocketClient implements WebSocketClient {
 			}
 
 			// create new thread to receive the data from the new client
-			mReceiver = new WebSocketReceiver(mIn);
+			mReceiver = new WebSocketReceiver(this, mIn);
 			// and start the receiver thread for the port
 			mReceiver.start();
 			// now set official status, may listeners ask for that
 			mStatus = WebSocketStatus.OPEN;
 			// and finally notify listeners for OnOpen event
 			WebSocketClientEvent lEvent =
-					new WebSocketBaseClientEvent(EVENT_OPEN, "");
+					new WebSocketBaseClientEvent(this, EVENT_OPEN, "");
 			notifyOpened(lEvent);
 
 		} catch (Exception lEx) {
 			WebSocketClientEvent lEvent =
-					new WebSocketBaseClientEvent(EVENT_CLOSE,
+					new WebSocketBaseClientEvent(this, EVENT_CLOSE,
 					lEx.getClass().getSimpleName() + ": "
 					+ lEx.getMessage());
 			notifyClosed(lEvent);
@@ -364,7 +399,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 
 		WebSocketClientEvent lEvent =
-				new WebSocketBaseClientEvent(EVENT_CLOSE, "client");
+				new WebSocketBaseClientEvent(this, EVENT_CLOSE, "client");
 		notifyClosed(lEvent);
 	}
 
@@ -605,7 +640,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 				 */
 			} catch (Exception lEx) {
 				WebSocketClientEvent lEvent =
-						new WebSocketBaseClientEvent(EVENT_CLOSE,
+						new WebSocketBaseClientEvent(mEvent.getClient(), EVENT_CLOSE,
 						lEx.getClass().getSimpleName() + ": "
 						+ lEx.getMessage());
 				notifyClosed(lEvent);
@@ -664,15 +699,18 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 	class WebSocketReceiver extends Thread {
 
+		private WebSocketClient mClient = null;
 		private InputStream mIS = null;
 		private volatile boolean mStop = false;
 
-		public WebSocketReceiver(InputStream aInput) {
-			this.mIS = aInput;
+		public WebSocketReceiver(WebSocketClient aClient, InputStream aInput) {
+			mClient = aClient;
+			mIS = aInput;
 		}
 
 		@Override
 		public void run() {
+			Thread.currentThread().setName("jWebSocket-Client " + getId());
 			try {
 				if (isHixie()) {
 					readHixie();
@@ -695,7 +733,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 				} else if (lB == 0xff && lFrameStart == true) {
 					lFrameStart = false;
 
-					WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent();
+					WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent(mClient, null, null);
 					RawPacket lPacket = new RawPacket(lBuff.toByteArray());
 
 					lBuff.reset();
@@ -720,7 +758,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 							|| WebSocketFrameType.CLOSE == lFrameType) {
 						mStop = true;
 						mStatus = WebSocketStatus.CLOSED;
-						lWSCE = new WebSocketBaseClientEvent(EVENT_CLOSE, "error");
+						lWSCE = new WebSocketBaseClientEvent(mClient, EVENT_CLOSE, "error");
 						notifyClosed(lWSCE);
 						mCheckReconnect(lWSCE);
 					} else if (WebSocketFrameType.PING == lFrameType) {
@@ -730,7 +768,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 					} else if (WebSocketFrameType.PONG == lFrameType) {
 						// TODO: need to process connection management here!
 					} else {
-						lWSCE = new WebSocketTokenClientEvent();
+						lWSCE = new WebSocketTokenClientEvent(mClient, null, null);
 						notifyPacket(lWSCE, lPacket);
 					}
 				} catch (Exception lEx) {
@@ -751,7 +789,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 			if (!mStatus.isClosed()) {
 				mStatus = WebSocketStatus.CLOSED;
 				WebSocketClientEvent lEvent =
-						new WebSocketBaseClientEvent(EVENT_CLOSE, "error");
+						new WebSocketBaseClientEvent(mClient, EVENT_CLOSE, "error");
 				notifyClosed(lEvent);
 			}
 			stopit();

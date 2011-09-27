@@ -132,6 +132,8 @@ public class NioTcpConnector extends BaseConnector {
 	}
 
 	public void flushPacketBuffer() {
+		// TODO: why does this need to be copied here?
+		// why can't we use mPacketBuffer directly?
 		byte[] lCopy = new byte[mPacketBuffer.length];
 		System.arraycopy(mPacketBuffer, 0, lCopy, 0, mPacketBuffer.length);
 
@@ -141,7 +143,7 @@ public class NioTcpConnector extends BaseConnector {
 		}
 		try {
 			getEngine().processPacket(this, lPacket);
-
+			// empty buffer for next packet
 			mPacketBuffer = null;
 			mPayloadLength = -1;
 			mFrameType = WebSocketFrameType.INVALID;

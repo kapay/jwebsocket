@@ -16,6 +16,7 @@
 package org.jwebsocket.engines;
 
 import java.util.Map;
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 import org.jwebsocket.api.EngineConfiguration;
@@ -38,11 +39,13 @@ public class BaseEngine implements WebSocketEngine {
 
 	private final Map<String, WebSocketServer> mServers =
 			new FastMap<String, WebSocketServer>().shared();
-	private final Map<String, WebSocketConnector> mConnectors =
+	private final FastMap<String, WebSocketConnector> mConnectors =
 			new FastMap<String, WebSocketConnector>().shared();
 	private int mSessionTimeout = JWebSocketCommonConstants.DEFAULT_TIMEOUT;
 	private EngineConfiguration mConfiguration;
 
+	public FastList<WebSocketConnector> lostConnectors = new FastList<WebSocketConnector>();
+	
 	public BaseEngine(EngineConfiguration aConfiguration) {
 		this.mConfiguration = aConfiguration;
 	}
@@ -63,7 +66,7 @@ public class BaseEngine implements WebSocketEngine {
 	public void stopEngine(CloseReason aCloseReason) throws WebSocketException {
 		try {
 			// stop all connectors of this engine
-			for (WebSocketConnector lConnector : getConnectors().values()) {
+			for (WebSocketConnector lConnector : mConnectors.values()) {
 				lConnector.stopConnector(aCloseReason);
 			}
 		} catch (Exception ex) {
@@ -101,12 +104,13 @@ public class BaseEngine implements WebSocketEngine {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector,
 			CloseReason aCloseReason) {
+		// once a connector stopped remove it from the list of connectors
+		// FastMap ensures that the entry is being kept in shared mode
+		mConnectors.remove(aConnector.getId());
 		// notify servers that a connector has stopped
 		for (WebSocketServer lServer : mServers.values()) {
 			lServer.connectorStopped(aConnector, aCloseReason);
 		}
-		// once a connector stopped remove it from the list of connectors
-		getConnectors().remove(aConnector.getId());
 	}
 
 	@Override
@@ -169,7 +173,7 @@ public class BaseEngine implements WebSocketEngine {
 
 	@Override
 	public WebSocketConnector getConnectorByRemotePort(int aRemotePort) {
-		for (WebSocketConnector lConnector : getConnectors().values()) {
+		for (WebSocketConnector lConnector : mConnectors.values()) {
 			if (lConnector.getRemotePort() == aRemotePort) {
 				return lConnector;
 			}

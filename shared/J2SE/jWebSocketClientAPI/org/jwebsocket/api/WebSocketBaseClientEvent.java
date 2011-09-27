@@ -22,11 +22,13 @@ public class WebSocketBaseClientEvent implements WebSocketClientEvent {
 
 	private String mName = null;
 	private String mData = null;
-
+	private WebSocketClient mClient = null;
+/*
 	public WebSocketBaseClientEvent() {
 	}
-
-	public WebSocketBaseClientEvent(String aName, String aData) {
+*/
+	public WebSocketBaseClientEvent(WebSocketClient aClient, String aName, String aData) {
+		mClient = aClient;
 		mName = aName;
 		mData = aData;
 	}
@@ -39,5 +41,10 @@ public class WebSocketBaseClientEvent implements WebSocketClientEvent {
 	@Override
 	public String getData() {
 		return mData;
+	}
+
+	@Override
+	public WebSocketClient getClient() {
+		return mClient;
 	}
 }

@@ -170,6 +170,7 @@ public class NioTcpEngine extends BaseEngine {
 			Thread.currentThread().setName("jWebSocket NIO-Engine SelectorThread");
 
 			engineStarted();
+
 			while (mIsRunning && mSelector.isOpen()) {
 				// check if there's anything to write to any of the clients
 				for (String id : mPendingWrites.keySet()) {
@@ -223,7 +224,7 @@ public class NioTcpEngine extends BaseEngine {
 	private void write(SelectionKey aKey) throws IOException {
 		SocketChannel lSocketChannel = (SocketChannel) aKey.channel();
 		Queue<DataFuture> lQueue = mPendingWrites.get(mChannelToConnectorMap.get(lSocketChannel));
-		while (!lQueue.isEmpty()) {
+		while (null != lQueue && !lQueue.isEmpty()) {
 			DataFuture future = lQueue.peek();
 			try {
 				ByteBuffer lData = future.getData();
@@ -385,19 +386,19 @@ public class NioTcpEngine extends BaseEngine {
 			}
 		}
 
-		private void doRead(NioTcpConnector lConnector, ReadBean lBean) throws IOException {
-			lConnector.setWorkerId(hashCode());
-			if (lConnector.isAfterHandshake()) {
-				boolean lIsHixie = lConnector.isHixie();
+		private void doRead(NioTcpConnector aConnector, ReadBean aBean) throws IOException {
+			aConnector.setWorkerId(hashCode());
+			if (aConnector.isAfterHandshake()) {
+				boolean lIsHixie = aConnector.isHixie();
 				if (lIsHixie) {
-					readHixie(lBean.data, lConnector);
+					readHixie(aBean.data, aConnector);
 				} else {
 					// assume that #02 and #03 are the same regarding packet processing
-					readHybi(lBean.data, lConnector);
+					readHybi(aConnector.getVersion(), aBean.data, aConnector);
 				}
 			} else {
 				// todo: consider ssl connections
-				Map lHeaders = WebSocketHandshake.parseC2SRequest(lBean.data, false);
+				Map lHeaders = WebSocketHandshake.parseC2SRequest(aBean.data, false);
 				byte[] lResponse = WebSocketHandshake.generateS2CResponse(lHeaders);
 				RequestHeader lReqHeader = EngineUtils.validateC2SRequest(lHeaders, mLog);
 				if (lResponse == null || lReqHeader == null) {
@@ -405,19 +406,19 @@ public class NioTcpEngine extends BaseEngine {
 						mLog.warn("TCPEngine detected illegal handshake.");
 					}
 					// disconnect the client
-					clientDisconnect(lConnector);
+					clientDisconnect(aConnector);
 				}
 
-				send(lConnector.getId(), new DataFuture(lConnector, ByteBuffer.wrap(lResponse)));
+				send(aConnector.getId(), new DataFuture(aConnector, ByteBuffer.wrap(lResponse)));
 				int lTimeout = lReqHeader.getTimeout(getSessionTimeout());
 				if (lTimeout > 0) {
-					mConnectorToChannelMap.get(lBean.connectorId).socket().setSoTimeout(lTimeout);
+					mConnectorToChannelMap.get(aBean.connectorId).socket().setSoTimeout(lTimeout);
 				}
-				lConnector.handshakeValidated();
-				lConnector.setHeader(lReqHeader);
-				lConnector.startConnector();
+				aConnector.handshakeValidated();
+				aConnector.setHeader(lReqHeader);
+				aConnector.startConnector();
 			}
-			lConnector.setWorkerId(-1);
+			aConnector.setWorkerId(-1);
 		}
 	}
 
@@ -456,85 +457,106 @@ public class NioTcpEngine extends BaseEngine {
 	 * Read section 4.2 of the spec for detailed explanation.
 	 * </p>
 	 */
-	private void readHybi(byte[] buffer, NioTcpConnector connector) throws IOException {
+	private void readHybi(int aVersion, byte[] aBuffer, NioTcpConnector aConnector) throws IOException {
 		try {
-			if (connector.isPacketBufferEmpty()) {
+			if (aConnector.isPacketBufferEmpty()) {
 				// begin normal packet read
-				int lFlags = buffer[0];
-				// determine fragmentation
-				boolean lFragmented = (0x01 & lFlags) == 0x01;
-				// shift 4 bits to skip the first bit and three RSVx bits
-				int lOpcode = lFlags >> 4;
-				WebSocketFrameType lFrameType = WebSocketProtocolAbstraction.opcodeToFrameType(connector.getVersion(), lOpcode);
+				int lFlags = aBuffer[0];
 
-				int payloadStartIndex = 2;
+				// determine fragmentation
+				boolean lFragmented = (aVersion >= 4
+						? (lFlags & 0x80) == 0x00
+						: (lFlags & 0x80) == 0x80);
+				boolean lMasked = true;
+				int[] lMask = new int[4];
+
+				// ignore upper 4 bits for now
+				int lOpcode = lFlags & 0x0F;
+				WebSocketFrameType lFrameType = WebSocketProtocolAbstraction.opcodeToFrameType(aVersion, lOpcode);
+
+				// assume we start here
+				int lPayloadStartIndex = 2;
+
+				long lPayloadLen = aBuffer[1];
+				lMasked = (lPayloadLen & 0x80) == 0x80;
+				lPayloadLen &= 0x7F;
 
 				if (lFrameType == WebSocketFrameType.INVALID) {
 					// Could not determine packet type, ignore the packet.
 					// Maybe we need a setting to decide, if such packets should abort the connection?
 					mLog.trace("Dropping packet with unknown type: " + lOpcode);
 				} else {
-					connector.setPacketType(lFrameType);
-					// Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
-					long lPayloadLen = buffer[1] >> 1;
+					aConnector.setPacketType(lFrameType);
 					if (lPayloadLen == 126) {
-						// following two bytes are acutal payload length (16-bit unsigned integer)
-						lPayloadLen = (buffer[2] << 8) + buffer[3];
-						payloadStartIndex = 4;
+						// following two bytes are actual payload length (16-bit unsigned integer)
+						lPayloadLen = aBuffer[2] & 0xFF;
+						lPayloadLen = (lPayloadLen << 8) | (aBuffer[3] & 0xFF);
+						lPayloadStartIndex += 2;
 					} else if (lPayloadLen == 127) {
-						// Following eight bytes are actual payload length (64-bit unsigned integer),
-						// but that's ridiculously big number for an array size - in fact, such big arrays are
-						// unsupported in Java. Feel free to make an array of int arrays to support that. I won't
-						// do it, because it's too much work and it's just plain stupid for clients to send
-						// such giant packets. So, if payload size is greater than Integer.MAX_VALUE, client will
-						// be disconnected.
-						lPayloadLen =
-								((long) buffer[2] << 56)
-								+ ((long) (buffer[3] & 255) << 48)
-								+ ((long) (buffer[4] & 255) << 40)
-								+ ((long) (buffer[5] & 255) << 32)
-								+ ((long) (buffer[6] & 255) << 24)
-								+ ((buffer[7] & 255) << 16)
-								+ ((buffer[8] & 255) << 8)
-								+ ((buffer[9] & 255));
-						if (lPayloadLen > Integer.MAX_VALUE) {
-							clientDisconnect(connector);
-							return;
-						}
-						payloadStartIndex = 10;
+						// following eight bytes are actual payload length (64-bit unsigned integer)
+						lPayloadLen = aBuffer[2] & 0xFF;
+						lPayloadLen = (lPayloadLen << 8) | (aBuffer[3] & 0xFF);
+						lPayloadLen = (lPayloadLen << 8) | (aBuffer[4] & 0xFF);
+						lPayloadLen = (lPayloadLen << 8) | (aBuffer[5] & 0xFF);
+						lPayloadLen = (lPayloadLen << 8) | (aBuffer[6] & 0xFF);
+						lPayloadLen = (lPayloadLen << 8) | (aBuffer[7] & 0xFF);
+						lPayloadLen = (lPayloadLen << 8) | (aBuffer[8] & 0xFF);
+						lPayloadLen = (lPayloadLen << 8) | (aBuffer[9] & 0xFF);
+						lPayloadStartIndex += 8;
+					}
+					if (lMasked) {
+						lMask[0] = aBuffer[lPayloadStartIndex + 0] & 0xFF;
+						lMask[1] = aBuffer[lPayloadStartIndex + 1] & 0xFF;
+						lMask[2] = aBuffer[lPayloadStartIndex + 2] & 0xFF;
+						lMask[3] = aBuffer[lPayloadStartIndex + 3] & 0xFF;
+						lPayloadStartIndex += 4;
 					}
 
 					if (lPayloadLen > 0) {
-						connector.setPayloadLength((int) lPayloadLen);
-						connector.extendPacketBuffer(buffer, payloadStartIndex, buffer.length - payloadStartIndex);
+						if (lMasked) {
+							int lMaskIdx = 0;
+							int lBuffIdx = lPayloadStartIndex;
+							long lCounter = lPayloadLen;
+							while (lCounter-- > 0) {
+								aBuffer[lBuffIdx] = (byte) (aBuffer[lBuffIdx] ^ lMask[lMaskIdx]);
+								lBuffIdx++;
+								lMaskIdx++;
+								lMaskIdx &= 3;
+							}
+						}
+						aConnector.setPayloadLength((int) lPayloadLen);
+						mLog.debug(
+								"aBuffer.length: " + aBuffer.length
+								+ ", lPayloadStartIndex: " + lPayloadStartIndex);
+						aConnector.extendPacketBuffer(aBuffer, lPayloadStartIndex, (int)lPayloadLen /* aBuffer.length - lPayloadStartIndex */);
 					}
 				}
 
 				if (lFrameType == WebSocketFrameType.PING) {
 					// As per spec, server must respond to PING with PONG (maybe
 					// this should be handled higher up in the hierarchy?)
-					WebSocketPacket lPong = new RawPacket(connector.getPacketBuffer());
+					WebSocketPacket lPong = new RawPacket(aConnector.getPacketBuffer());
 					lPong.setFrameType(WebSocketFrameType.PONG);
-					connector.sendPacket(lPong);
+					aConnector.sendPacket(lPong);
 				} else if (lFrameType == WebSocketFrameType.CLOSE) {
 					// As per spec, server must respond to CLOSE with acknowledgment CLOSE (maybe
 					// this should be handled higher up in the hierarchy?)
-					WebSocketPacket lClose = new RawPacket(connector.getPacketBuffer());
+					WebSocketPacket lClose = new RawPacket(aConnector.getPacketBuffer());
 					lClose.setFrameType(WebSocketFrameType.CLOSE);
-					connector.sendPacket(lClose);
-					clientDisconnect(connector, CloseReason.CLIENT);
+					aConnector.sendPacket(lClose);
+					clientDisconnect(aConnector, CloseReason.CLIENT);
 				}
 			} else {
-				connector.extendPacketBuffer(buffer, 0, buffer.length);
+				aConnector.extendPacketBuffer(aBuffer, 0, aBuffer.length);
 			}
 
-			if (connector.isPacketBufferFull()) {
+			if (aConnector.isPacketBufferFull()) {
 				// Packet was read, pass it forward.
-				connector.flushPacketBuffer();
+				aConnector.flushPacketBuffer();
 			}
 		} catch (Exception e) {
 			mLog.error("(other) " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
-			clientDisconnect(connector, CloseReason.SERVER);
+			clientDisconnect(aConnector, CloseReason.SERVER);
 		}
 	}
 

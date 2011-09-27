@@ -24,7 +24,7 @@ import org.jwebsocket.kit.WebSocketSession;
 /**
  * Specifies the API for jWebSocket connectors. Connectors are the low level
  * link to the client. Connectors are maintained by the engine only but can be
- * accessed up to the application. Each connector provides a FastMap for shared
+ * accessed up to the application. Each connector provides a Map for shared
  * custom variables (public) which can be used in all overlying tiers.
  * @author aschulze
  */
@@ -51,15 +51,19 @@ public interface WebSocketConnector {
 	/**
 	 * Returns the current status for the connector.
 	 * Please refer to the WebSocketConnectorStatus enumeration.
+	 * 
+	 * @return 
 	 */
 	WebSocketConnectorStatus getStatus();
-	
+
 	/**
 	 * Sets the current status for the connector.
 	 * Please refer to the WebSocketConnectorStatus enumeration.
+	 * 
+	 * @param aStatus 
 	 */
 	void setStatus(WebSocketConnectorStatus aStatus);
-	
+
 	/**
 	 * Returns the engine the connector is bound to.
 	 * @return WebSocketEngine Engine the connector is bound to
@@ -72,14 +76,14 @@ public interface WebSocketConnector {
 	 * @param aDataPacket raw web socket data packet
 	 */
 	void processPing(WebSocketPacket aDataPacket);
-	
+
 	/**
 	 * Processes an incoming pong from a WebSocket client. Usually the
 	 * pong packet is an answer to a previously send ping.
 	 * @param aDataPacket raw web socket data packet
 	 */
 	void processPong(WebSocketPacket aDataPacket);
-	
+
 	/**
 	 * Processes an incoming datapacket from a WebSocket client. Usually the
 	 * data packet is not processed in any way but only passed up to the
@@ -89,14 +93,30 @@ public interface WebSocketConnector {
 	void processPacket(WebSocketPacket aDataPacket);
 
 	/**
-	 * Sends a datapacket to a WebSocket client. Here the packet is finally
-	 * passed to client via the web socket connection.
+	 * Return the synchronization object for send transactions.
+	 * @return
+	 */
+	public Object getSendLock();
+
+	/**
+	 * Sends a data packet to a WebSocket client. Here the packet is finally
+	 * passed to client via the web socket connection. This packet is not 
+	 * synchronized. This allows to send transactions by synchronizing 
+	 * to the getSendLock() object.
+	 * @param aDataPacket raw web socket data packet
+	 */
+	void sendPacketInTransaction(WebSocketPacket aDataPacket);
+
+	/**
+	 * Sends a data packet to a WebSocket client. Here the packet is finally
+	 * passed to client via the web socket connection. This method is 
+	 * synchronized to ensure that not multiple threads send at the same time.
 	 * @param aDataPacket raw web socket data packet
 	 */
 	void sendPacket(WebSocketPacket aDataPacket);
 
 	/**
-	 * Sends a datapacket to a WebSocket client asynchronously. This method immediately returns
+	 * Sends a data packet to a WebSocket client asynchronously. This method immediately returns
 	 * the future object to the caller so that it can proceed with the processing
 	 * and not wait for the response.
 	 * @param aDataPacket raw web socket data packet
@@ -321,7 +341,6 @@ public interface WebSocketConnector {
 	 * @param aIsSSL 
 	 */
 	void setSSL(boolean aIsSSL);
-	
 
 	/**
 	 * 
@@ -334,5 +353,4 @@ public interface WebSocketConnector {
 	 * @return
 	 */
 	boolean isHybi();
-	
 }

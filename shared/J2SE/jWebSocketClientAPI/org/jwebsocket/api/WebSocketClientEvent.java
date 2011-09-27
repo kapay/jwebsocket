@@ -22,7 +22,21 @@ package org.jwebsocket.api;
  */
 public interface WebSocketClientEvent {
 
+	/**
+	 * Returns the name of the event.
+	 * @return
+	 */
 	String getName();
 
+	/**
+	 * Returns the data (usually a message) for the event.
+	 * @return
+	 */
 	String getData();
+
+	/**
+	 * Returns the WebSocket client which fired the event.
+	 * @return
+	 */
+	WebSocketClient getClient();
 }

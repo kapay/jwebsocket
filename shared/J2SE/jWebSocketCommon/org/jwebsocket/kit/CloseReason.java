@@ -22,6 +22,10 @@ package org.jwebsocket.kit;
 public enum CloseReason {
 
 	/**
+	 * The connection was broken.
+	 */
+	BROKEN,
+	/**
 	 * The session timeout exceeded.
 	 */
 	TIMEOUT,

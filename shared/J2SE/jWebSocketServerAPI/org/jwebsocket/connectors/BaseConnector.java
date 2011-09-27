@@ -86,6 +86,8 @@ public class BaseConnector implements WebSocketConnector {
 	 */
 	private final Map<String, Object> mCustomVars = new FastMap<String, Object>();
 
+	private final Object mSendLock = new Object();
+
 	/**
 	 *
 	 * @param aEngine
@@ -107,26 +109,37 @@ public class BaseConnector implements WebSocketConnector {
 			mEngine.connectorStopped(this, aCloseReason);
 		}
 	}
-	
-		/**
+
+	/**
 	 * Returns the current status for the connector.
 	 * Please refer to the WebSocketConnectorStatus enumeration.
+	 * 
+	 * @return 
 	 */
 	@Override
 	public WebSocketConnectorStatus getStatus() {
 		return mStatus;
 	}
-	
+
 	/**
 	 * Sets the current status for the connector.
 	 * Please refer to the WebSocketConnectorStatus enumeration.
+	 * 
+	 * @param aStatus 
 	 */
 	@Override
 	public void setStatus(WebSocketConnectorStatus aStatus) {
 		mStatus = aStatus;
 	}
 
-
+	/**
+	 * 
+	 * @return
+	 */
+	public Object getSendLock() {
+		return mSendLock;
+	}
+	
 	@Override
 	public void processPacket(WebSocketPacket aDataPacket) {
 		if (mEngine != null) {
@@ -138,7 +151,7 @@ public class BaseConnector implements WebSocketConnector {
 	public void processPing(WebSocketPacket aDataPacket) {
 		/*
 		if (mEngine != null) {
-			mEngine.processPing(this, aDataPacket);
+		mEngine.processPing(this, aDataPacket);
 		}
 		 */
 	}
@@ -147,9 +160,13 @@ public class BaseConnector implements WebSocketConnector {
 	public void processPong(WebSocketPacket aDataPacket) {
 		/*
 		if (mEngine != null) {
-			mEngine.processPong(this, aDataPacket);
+		mEngine.processPong(this, aDataPacket);
 		}
 		 */
+	}
+
+	@Override
+	public void sendPacketInTransaction(WebSocketPacket aDataPacket) {
 	}
 
 	@Override
@@ -257,12 +274,18 @@ public class BaseConnector implements WebSocketConnector {
 	public InetAddress getRemoteHost() {
 		return null;
 	}
+	private String mUniqueId = null;
+	private static int mCounter = 0;
 
 	@Override
 	public String getId() {
-		String lNodeId = JWebSocketConfig.getConfig().getNodeId();
-		return ((lNodeId != null && lNodeId.length() > 0) ? lNodeId + "." : "")
-				+ String.valueOf(getRemotePort());
+		if (null == mUniqueId) {
+			String lNodeId = JWebSocketConfig.getConfig().getNodeId();
+			mUniqueId = ((lNodeId != null && lNodeId.length() > 0) ? lNodeId + "." : "")
+					+ String.valueOf(getRemotePort())
+					+ "." + mCounter++;
+		}
+		return mUniqueId;
 	}
 
 	@Override

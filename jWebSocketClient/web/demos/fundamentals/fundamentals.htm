@@ -203,9 +203,8 @@
 					log( "Authenticating..." );
 					try {
 						var lRes = lWSC.authLogin(
-							"aschulze", "JWS#nv211"
-							// jws.GUEST_USER_LOGINNAME, 
-							// jws.GUEST_USER_PASSWORD
+							jws.GUEST_USER_LOGINNAME, 
+							jws.GUEST_USER_PASSWORD
 						);
 						if( lRes.code == 0 ) {
 							log( "Asychronously waiting for response..." );

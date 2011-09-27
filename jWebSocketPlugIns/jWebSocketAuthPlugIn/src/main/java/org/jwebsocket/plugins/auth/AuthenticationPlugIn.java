@@ -14,6 +14,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.auth;
 
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
@@ -33,9 +34,11 @@ import org.jwebsocket.token.Token;
 import org.jwebsocket.util.Tools;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+
 
 /**
  * Spring AuthenticationManager compatible plug-in to handle authentication
@@ -47,7 +50,8 @@ public class AuthenticationPlugIn extends TokenPlugIn {
 	private static Logger mLog = Logging.getLogger(AuthenticationPlugIn.class);
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_AUTH = JWebSocketServerConstants.NS_BASE + ".plugins.auth";
-	private AuthenticationProvider mAuthMgr;
+	private AuthenticationProvider mAuthProv;
+	private ProviderManager mAuthProvMgr;
 	private static Log logger = LogFactory.getLog(AuthenticationPlugIn.class);
 	public static final String USERNAME = "$username";
 	public static final String AUTHORITIES = "$authorities";
@@ -80,10 +84,11 @@ public class AuthenticationPlugIn extends TokenPlugIn {
 
 			mBeanFactory = new ServerXmlBeanFactory(lFSRes, getClass().getClassLoader());
 
-			Object lObj = mBeanFactory.getBean("ldapAuthProvider");
-			mLog.info(lObj.toString());
-			mAuthMgr = (AuthenticationProvider) lObj;
-
+			Object lObj = mBeanFactory.getBean("authenticationManager");
+			mAuthProvMgr = (ProviderManager) lObj;
+			List<AuthenticationProvider> lProviders = mAuthProvMgr.getProviders();
+			mAuthProv = lProviders.get(0);
+			
 			// give a success message to the administrator
 			if (mLog.isInfoEnabled()) {
 				mLog.info("Authentication plug-in successfully loaded.");
@@ -93,12 +98,12 @@ public class AuthenticationPlugIn extends TokenPlugIn {
 		}
 	}
 
-	public AuthenticationProvider getAuthManager() {
-		return mAuthMgr;
+	public AuthenticationProvider getAuthProvider() {
+		return mAuthProv;
 	}
 
 	public void setAuthManager(AuthenticationProvider aAuthMgr) {
-		mAuthMgr = aAuthMgr;
+		mAuthProv = aAuthMgr;
 	}
 
 	@Override
@@ -133,7 +138,7 @@ public class AuthenticationPlugIn extends TokenPlugIn {
 		Authentication lAuthRequest = new UsernamePasswordAuthenticationToken(lUsername, lPassword);
 		Authentication lAuthResult = null;
 		try {
-			AuthenticationProvider lAuthProvider = getAuthManager();
+			AuthenticationProvider lAuthProvider = getAuthProvider();
 			lAuthResult = lAuthProvider.authenticate(lAuthRequest);
 		} catch (Exception ex) {
 			String lMsg = ex.getClass().getSimpleName() + ": " + ex.getMessage();

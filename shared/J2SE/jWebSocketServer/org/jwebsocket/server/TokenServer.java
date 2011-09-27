@@ -39,6 +39,7 @@ import org.jwebsocket.filter.TokenFilterChain;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.FilterResponse;
+import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.listener.WebSocketServerTokenEvent;
 import org.jwebsocket.listener.WebSocketServerTokenListener;
 import org.jwebsocket.plugins.TokenPlugInChain;
@@ -378,8 +379,8 @@ public class TokenServer extends BaseServer {
 
 	private IOFuture sendTokenData(WebSocketConnector aSource,
 			WebSocketConnector aTarget, Token aToken, boolean aIsAsync) {
-		if( null == aTarget ) {
-			mLog.error("Trying to send token to removed or closed connector: " + aToken.toString() );
+		if (null == aTarget) {
+			mLog.error("Trying to send token to removed or closed connector: " + aToken.toString());
 		} else if (aTarget.getBool(VAR_IS_TOKENSERVER)) {
 			// before sending the token push it through filter chain
 			FilterResponse lFilterResponse = getFilterChain().processTokenOut(
@@ -544,20 +545,31 @@ public class TokenServer extends BaseServer {
 
 		// converting the token within the loop is removed in this method!
 		WebSocketPacket lPacket;
-		// lPackets maps protocol formats to appropriate converted packets:
+		// optimization: lPackets maps protocol formats to appropriate converted packets:
+		// only needs to convert packet once per protocol!
 		Map<String, WebSocketPacket> lPackets = new FastMap<String, WebSocketPacket>();
 		String lFormat;
+		// interate through all connectors of all engines
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
-			if (!aSource.equals(lConnector)) {
-				lFormat = lConnector.getHeader().getFormat();
-				lPacket = lPackets.get(lFormat);
-				// if there is no packet for this protocol format already, make one and
-				// store it in the map
-				if (lPacket == null) {
-					lPacket = tokenToPacket(lConnector, aToken);
-					lPackets.put(lFormat, lPacket);
+			if (!aSource.equals(lConnector) /*
+					&& WebSocketConnectorStatus.UP.equals(lConnector.getStatus())*/) {
+				try {
+					RequestHeader lHeader = lConnector.getHeader();
+					if (null != lHeader) {
+						lFormat = lHeader.getFormat();
+						// try to get packet for protocol
+						lPacket = lPackets.get(lFormat);
+						// if there is no packet for this protocol format already, make one and
+						// store it in the map
+						if (null == lPacket) {
+							lPacket = tokenToPacket(lConnector, aToken);
+							lPackets.put(lFormat, lPacket);
+						}
+						lConnector.sendPacket(lPacket);
+					}
+				} catch (Exception ex) {
+					System.out.println(ex);
 				}
-				sendPacket(lConnector, lPacket);
 			}
 		}
 	}
@@ -619,11 +631,11 @@ public class TokenServer extends BaseServer {
 			lNS = aInToken.getString("ns");
 		}
 		aOutToken.setType("response");
-		
+
 		// if code and msg are already part of outgoing token do not overwrite!
 		aOutToken.setInteger("code", aOutToken.getInteger("code", 0));
 		aOutToken.setString("msg", aOutToken.getString("msg", "ok"));
-		
+
 		if (lTokenId != null) {
 			aOutToken.setInteger("utid", lTokenId);
 		}
@@ -653,7 +665,7 @@ public class TokenServer extends BaseServer {
 		lResToken.setString("msg", aMessage);
 		return lResToken;
 	}
-	
+
 	/**
 	 * creates a response token with the standard "not authenticated" message.
 	 *
@@ -661,7 +673,7 @@ public class TokenServer extends BaseServer {
 	 * @return
 	 */
 	public Token createNotAuthToken(Token aInToken) {
-		
+
 		Token lResToken = createErrorToken(aInToken, -1, "not authenticated");
 		/*
 		Token lResToken = createResponse(aInToken);
@@ -717,5 +729,4 @@ public class TokenServer extends BaseServer {
 	public TokenFilterChain getFilterChain() {
 		return (TokenFilterChain) mFilterChain;
 	}
-	
 }
