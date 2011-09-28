@@ -54,7 +54,7 @@ public enum WebSocketStatus {
 	 * 
 	 * @return
 	 */
-	public boolean isWriteble() {
+	public boolean isWritable() {
 		return (this.equals(OPEN)
 				|| this.equals(AUTHENTICATED));
 	}

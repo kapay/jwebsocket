@@ -19,6 +19,7 @@ import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.kit.CloseReason;
 import java.net.InetAddress;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.kit.WebSocketSession;
 
 /**
@@ -111,7 +112,7 @@ public interface WebSocketConnector {
 	 * to the getWriteLock() object.
 	 * @param aDataPacket raw web socket data packet
 	 */
-	void sendPacketInTransaction(WebSocketPacket aDataPacket);
+	void sendPacketInTransaction(WebSocketPacket aDataPacket) throws WebSocketException;
 
 	/**
 	 * Sends a data packet to a WebSocket client. Here the packet is finally

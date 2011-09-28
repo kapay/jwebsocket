@@ -182,6 +182,14 @@ public class WebSocketProtocolAbstraction {
 		return lBuff;
 	}
 
+	private static int read(InputStream aIS) throws Exception {
+		int lByte = aIS.read();
+		if (lByte < 0) {
+			throw new Exception("EOF");
+		}
+		return lByte;
+	}
+	
 	/**
 	 * 
 	 * @param aVersion
@@ -222,7 +230,7 @@ public class WebSocketProtocolAbstraction {
 			 */
 		} else {
 			// Ignore first bit. Payload length is next seven bits, unless its value is greater than 125.
-			long lPayloadLen = aIS.read();
+			long lPayloadLen = read(aIS);
 		
 			// TODO: officially unmasked frames may not be accepted anymore, since hybi draft #10
 			lMasked = (lPayloadLen & 0x80) == 0x80;
@@ -230,25 +238,25 @@ public class WebSocketProtocolAbstraction {
 
 			if (lPayloadLen == 126) {
 				// following two bytes are acutal payload length (16-bit unsigned integer)
-				lPayloadLen = aIS.read() & 0xFF;
-				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
+				lPayloadLen = read(aIS) & 0xFF;
+				lPayloadLen = (lPayloadLen << 8) | (read(aIS) & 0xFF);
 			} else if (lPayloadLen == 127) {
 				// following eight bytes are actual payload length (64-bit unsigned integer)
-				lPayloadLen = aIS.read() & 0xFF;
-				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
-				lPayloadLen = (lPayloadLen << 8) | (aIS.read() & 0xFF);
+				lPayloadLen = read(aIS) & 0xFF;
+				lPayloadLen = (lPayloadLen << 8) | (read(aIS) & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (read(aIS) & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (read(aIS) & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (read(aIS) & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (read(aIS) & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (read(aIS) & 0xFF);
+				lPayloadLen = (lPayloadLen << 8) | (read(aIS) & 0xFF);
 			}
 
 			if (lMasked) {
-				lMask[0] = aIS.read() & 0xFF;
-				lMask[1] = aIS.read() & 0xFF;
-				lMask[2] = aIS.read() & 0xFF;
-				lMask[3] = aIS.read() & 0xFF;
+				lMask[0] = read(aIS) & 0xFF;
+				lMask[1] = read(aIS) & 0xFF;
+				lMask[2] = read(aIS) & 0xFF;
+				lMask[3] = read(aIS) & 0xFF;
 			}
 
 			if (lPayloadLen > 0) {
@@ -258,13 +266,13 @@ public class WebSocketProtocolAbstraction {
 				if (lMasked) {
 					int j = 0;
 					while (lPayloadLen-- > 0) {
-						aBuff.write(aIS.read() ^ lMask[j]);
+						aBuff.write(read(aIS) ^ lMask[j]);
 						j++;
 						j &= 3;
 					}
 				} else {
 					while (lPayloadLen-- > 0) {
-						aBuff.write(aIS.read());
+						aBuff.write(read(aIS));
 					}
 				}
 			}

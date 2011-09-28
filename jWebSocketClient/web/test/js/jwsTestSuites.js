@@ -86,7 +86,8 @@ function runFullTestSuite() {
 		
 		// run load tests
 		jws.tests.Load.runSuite();
-				
+
+/*
 		// run test suites for the various plug-ins
 		jws.tests.System.runSuite();
 		jws.tests.FileSystem.runSuite();
@@ -107,7 +108,7 @@ function runFullTestSuite() {
 		
 		// run JDBC tests
 		jws.tests.JDBC.runSuite();
-
+*/
 		// close connections for admin and guest
 		jws.Tests.testCloseSharedAdminConn();
 		jws.Tests.testCloseSharedGuestConn();

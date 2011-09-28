@@ -19,7 +19,7 @@ import org.jwebsocket.token.TokenFactory;
  */
 public class StressTests implements WebSocketClientTokenListener {
 
-	private int MAX_CONNS = 10;
+	private int MAX_CONNS = 50;
 	private BaseTokenClient[] mClients = new BaseTokenClient[MAX_CONNS];
 	private int PROT_VER = 8;
 	private volatile int mFinished = 0;

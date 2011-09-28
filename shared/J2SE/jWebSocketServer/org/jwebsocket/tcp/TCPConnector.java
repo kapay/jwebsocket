@@ -19,6 +19,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.log4j.Logger;
@@ -31,6 +32,7 @@ import org.jwebsocket.connectors.BaseConnector;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RawPacket;
+import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.kit.WebSocketFrameType;
 import org.jwebsocket.kit.WebSocketProtocolAbstraction;
 import org.jwebsocket.logging.Logging;
@@ -58,6 +60,8 @@ public class TCPConnector extends BaseConnector {
 	private String mLogInfo = TCP_LOG;
 	private CloseReason mCloseReason = CloseReason.TIMEOUT;
 	private Thread mClientThread = null;
+	private static int mHashCounter = 0;
+	private int mHash = 0;
 
 	/**
 	 * creates a new TCP connector for the passed engine using the passed client
@@ -121,26 +125,28 @@ public class TCPConnector extends BaseConnector {
 	private void terminateConnector(CloseReason aCloseReason) {
 		setStatus(WebSocketConnectorStatus.DOWN);
 		int lPort = mClientSocket.getPort();
+		/*
 		try {
-			if (!mClientSocket.isOutputShutdown()) {
-				mClientSocket.shutdownOutput();
-			}
+		if (!mClientSocket.isOutputShutdown()) {
+		mClientSocket.shutdownOutput();
+		}
 		} catch (IOException lEx) {
-			mLog.error(lEx.getClass().getSimpleName()
-					+ " while shutting down outbound stream for " + mLogInfo
-					+ " connector (" + aCloseReason.name()
-					+ ") on port " + lPort + ": " + lEx.getMessage());
+		mLog.error(lEx.getClass().getSimpleName()
+		+ " while shutting down outbound stream for " + mLogInfo
+		+ " connector (" + aCloseReason.name()
+		+ ") on port " + lPort + ": " + lEx.getMessage());
 		}
 		try {
-			if (!mClientSocket.isInputShutdown()) {
-				mClientSocket.shutdownInput();
-			}
-		} catch (IOException lEx) {
-			mLog.error(lEx.getClass().getSimpleName()
-					+ " while shutting down inbound stream for " + mLogInfo
-					+ " connector (" + aCloseReason.name()
-					+ ") on port " + lPort + ": " + lEx.getMessage());
+		if (!mClientSocket.isInputShutdown()) {
+		mClientSocket.shutdownInput();
 		}
+		} catch (IOException lEx) {
+		mLog.error(lEx.getClass().getSimpleName()
+		+ " while shutting down inbound stream for " + mLogInfo
+		+ " connector (" + aCloseReason.name()
+		+ ") on port " + lPort + ": " + lEx.getMessage());
+		}
+		 */
 		try {
 			mOut.close();
 		} catch (IOException lEx) {
@@ -193,7 +199,11 @@ public class TCPConnector extends BaseConnector {
 				// Hybi specs demand that client must be notified
 				// with CLOSE control message before disconnect
 				WebSocketPacket lClose = new RawPacket(WebSocketFrameType.CLOSE, "BYE");
-				sendPacketInTransaction(lClose);
+				try {
+					sendPacketInTransaction(lClose);
+				} catch (WebSocketException ex) {
+					// TODO: check if we need to handle that here!
+				}
 			}
 			stopReader();
 		}
@@ -201,28 +211,24 @@ public class TCPConnector extends BaseConnector {
 	}
 
 	public void stopReader() {
+
 		try {
 			// force input stream to close to terminate reader thread
-			mClientSocket.shutdownInput();
+			if (!mClientSocket.isInputShutdown()
+					&& !mClientSocket.isClosed()) {
+				mClientSocket.shutdownInput();
+			}
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
 					+ " shutting down reader stream (" + getId() + "): " + lEx.getMessage());
 		}
+
 		try {
 			// force input stream to close to terminate reader thread
 			mIn.close();
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
 					+ " closing reader stream (" + getId() + "): " + lEx.getMessage());
-		}
-		try {
-			mClientThread.join(1000);
-		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName()
-					+ " stopping reader thread (" + getId() + "): " + lEx.getMessage());
-		}
-		if (mClientThread.isAlive()) {
-			mLog.error("Reader thread (" + getId() + ") could not be stopped");
 		}
 	}
 
@@ -233,7 +239,7 @@ public class TCPConnector extends BaseConnector {
 	}
 
 	@Override
-	public void sendPacketInTransaction(WebSocketPacket aDataPacket) {
+	public void sendPacketInTransaction(WebSocketPacket aDataPacket) throws WebSocketException {
 		if (WebSocketConnectorStatus.UP != getStatus()) {
 			// TODO: think about if and how to handle the scenario 
 			// that other threads send data to a closed or closing connector.
@@ -244,6 +250,7 @@ public class TCPConnector extends BaseConnector {
 			return;
 		}
 		boolean lSendSuccess = false;
+		String lExMsg = null;
 		try {
 			if (mClientSocket.isConnected()) {
 				if (isHixie()) {
@@ -257,22 +264,30 @@ public class TCPConnector extends BaseConnector {
 						+ getId() + ", " + aDataPacket.getUTF8());
 			}
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName()
-					+ " sending data packet: " + lEx.getMessage()
-					+ ", data: " + aDataPacket.getUTF8());
+			lExMsg = lEx.getMessage();
 		}
-
 		// if sending data leads to an exception ...
 		// we need to terminate the connection
 		if (!lSendSuccess) {
 			stopReader();
+		}
+		if (null != lExMsg) {
+			throw new WebSocketException(lExMsg);
 		}
 	}
 
 	@Override
 	public void sendPacket(WebSocketPacket aDataPacket) {
 		synchronized (getWriteLock()) {
-			sendPacketInTransaction(aDataPacket);
+			try {
+				sendPacketInTransaction(aDataPacket);
+			} catch (Exception lEx) {
+				/*
+				mLog.error(lEx.getClass().getSimpleName()
+				+ " sending data packet: " + lEx.getMessage()
+				+ ", data: " + aDataPacket.getUTF8());
+				 */
+			}
 		}
 	}
 
@@ -487,4 +502,28 @@ public class TCPConnector extends BaseConnector {
 		}
 		return lRes + ")";
 	}
+	/*
+	@Override
+	public int hashCode() {
+	if( mHash <= 0) {
+	mHash = mHashCounter++;
+	}
+	return mHash;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+	if (obj == null) {
+	return false;
+	}
+	if (getClass() != obj.getClass()) {
+	return false;
+	}
+	final TCPConnector other = (TCPConnector) obj;
+	if (this.mHash != other.mHash) {
+	return false;
+	}
+	return true;
+	}
+	 */
 }

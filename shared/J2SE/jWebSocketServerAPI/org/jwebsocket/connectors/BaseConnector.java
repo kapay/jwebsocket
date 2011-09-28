@@ -27,6 +27,7 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.WebSocketException;
 import org.jwebsocket.kit.WebSocketProtocolAbstraction;
 import org.jwebsocket.kit.WebSocketSession;
 
@@ -177,7 +178,7 @@ public class BaseConnector implements WebSocketConnector {
 	}
 
 	@Override
-	public void sendPacketInTransaction(WebSocketPacket aDataPacket) {
+	public void sendPacketInTransaction(WebSocketPacket aDataPacket) throws WebSocketException {
 	}
 
 	@Override

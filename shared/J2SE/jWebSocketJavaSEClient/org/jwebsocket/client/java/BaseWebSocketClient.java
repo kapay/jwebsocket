@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
@@ -125,6 +127,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 	private ReliabilityOptions mReliabilityOptions = null;
 	private final ScheduledThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(1);
 	private final Map<String, Object> mParams = new FastMap<String, Object>();
+	private final Object mWriteLock = new Object();
+	private String mCloseReason = null;
 
 	/**
 	 * Base constructor
@@ -232,6 +236,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 				mSocket.close();
 			}
 			mSocket = createSocket();
+			// don't gather packages, reduce latency
+			mSocket.setTcpNoDelay(true);
 			mIn = mSocket.getInputStream();
 			mOut = mSocket.getOutputStream();
 
@@ -274,8 +280,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 	}
 
-	@Override
-	public void send(byte[] aData) throws WebSocketException {
+	private void sendInTransaction(byte[] aData) throws WebSocketException {
 		if (isHixie()) {
 			sendInternal(aData);
 		} else {
@@ -289,20 +294,29 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 	}
 
+	@Override
+	public void send(byte[] aData) throws WebSocketException {
+		synchronized (mWriteLock) {
+			sendInTransaction(aData);
+		}
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void send(String aData, String aEncoding) throws WebSocketException {
-		byte[] lData;
-		try {
-			lData = aData.getBytes(aEncoding);
-		} catch (UnsupportedEncodingException lEx) {
-			throw new WebSocketException(
-					"Encoding exception while sending the data:"
-					+ lEx.getMessage(), lEx);
+		synchronized (mWriteLock) {
+			byte[] lData;
+			try {
+				lData = aData.getBytes(aEncoding);
+			} catch (UnsupportedEncodingException lEx) {
+				throw new WebSocketException(
+						"Encoding exception while sending the data:"
+						+ lEx.getMessage(), lEx);
+			}
+			send(lData);
 		}
-		send(lData);
 	}
 
 	/**
@@ -312,15 +326,17 @@ public class BaseWebSocketClient implements WebSocketClient {
 	 */
 	@Override
 	public void send(WebSocketPacket aDataPacket) throws WebSocketException {
-		if (isHixie()) {
-			sendInternal(aDataPacket.getByteArray());
-		} else {
-			sendInternal(WebSocketProtocolAbstraction.rawToProtocolPacket(mVersion, aDataPacket));
+		synchronized (mWriteLock) {
+			if (isHixie()) {
+				sendInternal(aDataPacket.getByteArray());
+			} else {
+				sendInternal(WebSocketProtocolAbstraction.rawToProtocolPacket(mVersion, aDataPacket));
+			}
 		}
 	}
 
 	private void sendInternal(byte[] aData) throws WebSocketException {
-		if (!mStatus.isWriteble()) {
+		if (!mStatus.isWritable()) {
 			throw new WebSocketException("Error while sending binary data: not connected");
 		}
 		try {
@@ -340,87 +356,44 @@ public class BaseWebSocketClient implements WebSocketClient {
 			}
 			mOut.flush();
 		} catch (IOException lEx) {
+			mReceiver.stopIt();
 			throw new WebSocketException("Error while sending socket data: ", lEx);
 		}
 	}
 
-	/**
-	 * 
-	 */
-	public void handleReceiverError() {
-		try {
-			if (mStatus.isClosable()) {
-				close();
-			}
-		} catch (WebSocketException lWSE) {
-			// TODO: don't use printStackTrace
-			// wse.printStackTrace();
-		}
-	}
-
 	@Override
-	public synchronized void close() throws WebSocketException {
-		if (!mStatus.isWriteble()) {
+	public synchronized void close() {
+		if (!mStatus.isWritable()) {
 			return;
 		}
-		String lExMsg = "Error(s) on close:";
-		boolean lThrowEx = false;
+		mCloseReason = "client";
 		try {
 			sendCloseHandshake();
 		} catch (Exception lEx) {
-			lExMsg += " " + lEx.getMessage();
-			lThrowEx = true;
+			// ignore that, connection is about to be terminated
 		}
-		// set status AFTER close frame was sent, otherwise sending
-		// close frame leads to an exception.
-		mStatus = WebSocketStatus.CLOSING;
-		if (mReceiver.isRunning()) {
-			mReceiver.stopit();
-		}
-		try {
-			// shutdown methods are not implemented for SSL sockets
-			if (!(mSocket instanceof SSLSocket)) {
-				mSocket.shutdownInput();
-				mSocket.shutdownOutput();
-			}
-		} catch (IOException lIOEx) {
-			lExMsg += " " + lIOEx.getMessage();
-			lThrowEx = true;
-		}
-		try {
-			mSocket.close();
-		} catch (IOException lIOEx) {
-			lExMsg += " " + lIOEx.getMessage();
-			lThrowEx = true;
-		}
-		mStatus = WebSocketStatus.CLOSED;
-		if (lThrowEx) {
-			throw new WebSocketException(lExMsg);
-		}
-
-		WebSocketClientEvent lEvent =
-				new WebSocketBaseClientEvent(this, EVENT_CLOSE, "client");
-		notifyClosed(lEvent);
+		// stopping the receiver thread stops the entire client
+		mReceiver.stopIt();
 	}
 
 	private void sendCloseHandshake() throws WebSocketException {
 		if (!mStatus.isClosable()) {
 			throw new WebSocketException("Error while sending close handshake: not connected");
 		}
-		try {
-			if (isHixie()) {
-				mOut.write(0xff00);
-				// TODO: check if final CR/LF is required/valid!
-				mOut.write("\r\n".getBytes());
-				// TODO: shouldn't we put a flush here?
-			} else {
-				WebSocketPacket lPacket = new RawPacket(WebSocketFrameType.CLOSE, "BYE");
-				send(lPacket);
+		synchronized (mWriteLock) {
+			try {
+				if (isHixie()) {
+					// old hixie close handshake
+					mOut.write(0xff00);
+					mOut.flush();
+				} else {
+					WebSocketPacket lPacket = new RawPacket(WebSocketFrameType.CLOSE, "BYE");
+					send(lPacket);
+				}
+			} catch (IOException lIOEx) {
+				throw new WebSocketException("Error while sending close handshake", lIOEx);
 			}
-		} catch (IOException lIOEx) {
-			throw new WebSocketException("Error while sending close handshake", lIOEx);
 		}
-		mStatus = WebSocketStatus.CLOSED;
 	}
 
 	private Socket createSocket() throws WebSocketException {
@@ -477,9 +450,9 @@ public class BaseWebSocketClient implements WebSocketClient {
 					lSSLContext.init(null, lTrustManager, new java.security.SecureRandom());
 					mSocket = (SSLSocket) lSSLContext.getSocketFactory().createSocket(lHost, lPort);
 				} catch (NoSuchAlgorithmException lNSAEx) {
-					throw new RuntimeException("Unable to initialise SSL context", lNSAEx);
+					throw new RuntimeException("Unable to initialize SSL context", lNSAEx);
 				} catch (KeyManagementException lKMEx) {
-					throw new RuntimeException("Unable to initialise SSL context", lKMEx);
+					throw new RuntimeException("Unable to initialize SSL context", lKMEx);
 				}
 			} catch (UnknownHostException lUHEx) {
 				throw new WebSocketException("Unknown host: " + lHost,
@@ -701,7 +674,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 		private WebSocketClient mClient = null;
 		private InputStream mIS = null;
-		private volatile boolean mStop = false;
+		private volatile boolean mIsRunning = false;
 
 		public WebSocketReceiver(WebSocketClient aClient, InputStream aInput) {
 			mClient = aClient;
@@ -711,88 +684,136 @@ public class BaseWebSocketClient implements WebSocketClient {
 		@Override
 		public void run() {
 			Thread.currentThread().setName("jWebSocket-Client " + getId());
+
+			mIsRunning = true;
+
+			// the hixie and hybi processors handle potential exceptions
+			if (isHixie()) {
+				processHixie();
+			} else {
+				processHybi();
+			}
+
+			// set status AFTER close frame was sent, otherwise sending
+			// close frame leads to an exception.
+			mStatus = WebSocketStatus.CLOSING;
+			String lExMsg = "";
 			try {
-				if (isHixie()) {
-					readHixie();
-				} else {
-					readHybi();
+				// shutdown methods are not implemented for SSL sockets
+				if (!(mSocket instanceof SSLSocket)) {
+					if (!mSocket.isOutputShutdown()) {
+						mSocket.shutdownInput();
+					}
 				}
-			} catch (Exception lEx) {
-				handleErrorAndClose();
+			} catch (IOException lIOEx) {
+				lExMsg += "Shutdown input: " + lIOEx.getMessage() + ", ";
+			}
+			try {
+				// shutdown methods are not implemented for SSL sockets
+				if (!(mSocket instanceof SSLSocket)) {
+					if (!mSocket.isOutputShutdown()) {
+						mSocket.shutdownOutput();
+					}
+				}
+			} catch (IOException lIOEx) {
+				lExMsg += "Shutdown output: " + lIOEx.getMessage() + ", ";
+			}
+			try {
+				if (!mSocket.isClosed()) {
+					mSocket.close();
+				}
+			} catch (IOException lIOEx) {
+				lExMsg += "Socket close: " + lIOEx.getMessage() + ", ";
+			}
+			
+			if (lExMsg.length() > 0) {
+				System.out.println(lExMsg);
+			}
+			
+			// now the connection is really closed
+			// set the status accordingly
+			mStatus = WebSocketStatus.CLOSED;
+
+			WebSocketClientEvent lEvent =
+					new WebSocketBaseClientEvent(mClient, EVENT_CLOSE, mCloseReason);
+			notifyClosed(lEvent);
+
+			if (!"client".equals(mCloseReason)) {
+				// mCheckReconnect(lEvent);
 			}
 		}
 
-		private void readHixie() throws IOException {
+		private void processHixie() {
 			boolean lFrameStart = false;
 			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
-			while (!mStop) {
-				int lB = mIS.read();
-				// TODO: support binary frames
-				if (lB == 0x00) {
-					lFrameStart = true;
-				} else if (lB == 0xff && lFrameStart == true) {
-					lFrameStart = false;
+			while (mIsRunning) {
+				try {
+					int lB = mIS.read();
+					// TODO: support binary frames
+					if (lB == 0x00) {
+						lFrameStart = true;
+					} else if (lB == 0xff && lFrameStart == true) {
+						lFrameStart = false;
 
-					WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent(mClient, null, null);
-					RawPacket lPacket = new RawPacket(lBuff.toByteArray());
+						WebSocketClientEvent lWSCE = new WebSocketTokenClientEvent(mClient, null, null);
+						RawPacket lPacket = new RawPacket(lBuff.toByteArray());
 
-					lBuff.reset();
-					notifyPacket(lWSCE, lPacket);
-				} else if (lFrameStart == true) {
-					lBuff.write(lB);
-				} else if (lB == -1) {
-					handleErrorAndClose();
+						lBuff.reset();
+						notifyPacket(lWSCE, lPacket);
+					} else if (lFrameStart == true) {
+						lBuff.write(lB);
+					} else if (lB == -1) {
+						mCloseReason = "EOF detected.";
+						mIsRunning = false;
+					}
+				} catch (Exception lEx) {
+					mIsRunning = false;
+					mCloseReason = lEx.getClass().getName() + " in hybi processor: " + lEx.getMessage();
 				}
 			}
 		}
 
-		private void readHybi() throws WebSocketException, IOException {
+		private void processHybi() {
 			WebSocketClientEvent lWSCE;
 			WebSocketFrameType lFrameType;
 
-			while (!mStop) {
+			while (mIsRunning) {
 				try {
 					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(mVersion, mIS);
 					lFrameType = (lPacket != null ? lPacket.getFrameType() : WebSocketFrameType.INVALID);
 					if (WebSocketFrameType.INVALID == lFrameType
 							|| WebSocketFrameType.CLOSE == lFrameType) {
-						mStop = true;
-						mStatus = WebSocketStatus.CLOSED;
-						lWSCE = new WebSocketBaseClientEvent(mClient, EVENT_CLOSE, "error");
-						notifyClosed(lWSCE);
-						mCheckReconnect(lWSCE);
+						mIsRunning = false;
+						mCloseReason = "Error: invalid frame type";
 					} else if (WebSocketFrameType.PING == lFrameType) {
 						WebSocketPacket lPong = new RawPacket(
 								WebSocketFrameType.PONG, "");
 						send(lPong);
 					} else if (WebSocketFrameType.PONG == lFrameType) {
 						// TODO: need to process connection management here!
-					} else {
+					} else if (WebSocketFrameType.TEXT == lFrameType) {
 						lWSCE = new WebSocketTokenClientEvent(mClient, null, null);
 						notifyPacket(lWSCE, lPacket);
 					}
 				} catch (Exception lEx) {
-					handleErrorAndClose();
+					mIsRunning = false;
+					mCloseReason = lEx.getClass().getName() + " in hybi processor: " + lEx.getMessage();
 				}
 			}
 		}
 
-		public void stopit() {
-			mStop = true;
+		public void stopIt() {
+			// ensure that reader loops are not continued
+			mIsRunning = false;
+			try {
+				mIn.close();
+			} catch (IOException ex) {
+				// just to force client reader to stop
+			}
 		}
 
 		public boolean isRunning() {
-			return !mStop;
-		}
-
-		private void handleErrorAndClose() {
-			if (!mStatus.isClosed()) {
-				mStatus = WebSocketStatus.CLOSED;
-				WebSocketClientEvent lEvent =
-						new WebSocketBaseClientEvent(mClient, EVENT_CLOSE, "error");
-				notifyClosed(lEvent);
-			}
-			stopit();
+			return mIsRunning;
 		}
 	}
 }

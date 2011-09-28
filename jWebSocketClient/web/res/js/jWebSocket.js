@@ -1829,8 +1829,8 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			this.fConn.onopen = null;
 			this.fConn.onmessage = null;
 			this.fConn.onclose = null;
-			// TODO: what about CONNECTING state ?!
-			if( this.fConn.readyState == jws.OPEN ) {
+			if( this.fConn.readyState == jws.OPEN
+					|| this.fConn.readyState == jws.CONNECTING ) {
 				this.fConn.close();
 			}
 			// TODO: should be called only if client was really opened before
@@ -2744,23 +2744,25 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 			// if connected and timeout is passed give server a chance to
 			// register the disconnect properly and send a good bye response.
 			if( lRes.code == 0 ) {
-				var lToken = {
-					ns: jws.NS_SYSTEM,
-					type: "close",
-					timeout: lTimeout
-				};
-				// only add the following optional fields to
-				// the close token on explicit request
-				if( lNoGoodBye ) {
-					lToken.noGoodBye = true;
+				if( lTimeout > 0 ) {
+					var lToken = {
+						ns: jws.NS_SYSTEM,
+						type: "close",
+						timeout: lTimeout
+					};
+					// only add the following optional fields to
+					// the close token on explicit request
+					if( lNoGoodBye ) {
+						lToken.noGoodBye = true;
+					}
+					if( lNoLogoutBroadcast ) {
+						lToken.noLogoutBroadcast = true;
+					}
+					if( lNoDisconnectBroadcast ) {
+						lToken.noDisconnectBroadcast = true;
+					}
+					this.sendToken( lToken );
 				}
-				if( lNoLogoutBroadcast ) {
-					lToken.noLogoutBroadcast = true;
-				}
-				if( lNoDisconnectBroadcast ) {
-					lToken.noDisconnectBroadcast = true;
-				}
-				this.sendToken( lToken );
 				// call inherited disconnect, catching potential exception
 				arguments.callee.inherited.call( this, aOptions );
 			} else {

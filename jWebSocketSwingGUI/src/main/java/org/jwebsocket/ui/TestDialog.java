@@ -766,12 +766,8 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
     }// </editor-fold>//GEN-END:initComponents
 
 	public void checkDisconnect() {
-		try {
-			if (mClient.isConnected()) {
-				mClient.close();
-			}
-		} catch (WebSocketException ex) {
-			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+		if (mClient.isConnected()) {
+			mClient.close();
 		}
 	}
 
@@ -960,11 +956,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 	}// GEN-LAST:event_btnConnectActionPerformed
 
 	private void btnDisconnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnDisconnectActionPerformed
-		try {
-			mClient.close();
-		} catch (WebSocketException ex) {
-			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
-		}
+		mClient.close();
 	}// GEN-LAST:event_btnDisconnectActionPerformed
 
 	private void btnShutdownActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnShutdownActionPerformed

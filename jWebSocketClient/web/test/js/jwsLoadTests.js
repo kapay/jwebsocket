@@ -53,7 +53,7 @@ jws.tests.Load = {
 					return( lLoggedIn == aAmount );
 				},
 				lSpec,
-				aAmount * 200
+				aAmount * 300
 			);
 
 			runs( function() {
@@ -116,8 +116,8 @@ jws.tests.Load = {
 
 	runSpecs: function() {
 		// jws.tests.System.testEcho();
-		for( var lIdx = 0; lIdx < 50; lIdx++ ) {
-			jws.tests.Load.testConcurrentConnections( 50 );
+		for( var lIdx = 0; lIdx < 10; lIdx++ ) {
+			jws.tests.Load.testConcurrentConnections( 20 );
 		}
 	},
 

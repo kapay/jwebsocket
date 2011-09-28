@@ -75,11 +75,13 @@ public class CGIClient extends BaseWebSocketClient {
         }
     }
 */
+	
     @Override
-    public void close() throws WebSocketException {
+    public void close() {
         // stop CGI listener
         mIsRunning = false;
         // and close WebSocket connection
+		super.close();
     }
 
     private class InboundProcess implements Runnable {

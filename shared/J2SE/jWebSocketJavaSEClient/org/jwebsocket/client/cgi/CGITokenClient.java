@@ -66,7 +66,7 @@ public class CGITokenClient extends BaseTokenClient {
 	}
 
 	@Override
-	public void close() throws WebSocketException {
+	public void close() {
 		// stop CGI listener
 		mIsRunning = false;
 		// and close WebSocket connection

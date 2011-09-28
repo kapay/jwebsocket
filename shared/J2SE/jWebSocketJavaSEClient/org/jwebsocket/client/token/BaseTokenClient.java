@@ -217,20 +217,20 @@ public class BaseTokenClient extends BaseWebSocketClient implements WebSocketTok
 	}
 
 	@Override
-	public void addTokenClientListener(WebSocketClientTokenListener tokenListener) {
-		super.addListener(tokenListener);
+	public void addTokenClientListener(WebSocketClientTokenListener aTokenListener) {
+		super.addListener(aTokenListener);
 	}
 
 	@Override
-	public void removeTokenClientListener(WebSocketClientTokenListener tokenListener) {
-		super.removeListener(tokenListener);
+	public void removeTokenClientListener(WebSocketClientTokenListener aTokenListener) {
+		super.removeListener(aTokenListener);
 	}
 
 	/**
 	 * {@
 	 */
 	@Override
-	public void close() throws WebSocketException {
+	public void close() {
 		super.close();
 		fUsername = null;
 		fClientId = null;

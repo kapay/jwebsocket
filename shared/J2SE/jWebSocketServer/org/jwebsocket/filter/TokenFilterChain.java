@@ -46,7 +46,7 @@ public class TokenFilterChain extends BaseFilterChain {
 	 */
 	@Override
 	public TokenServer getServer() {
-		return (TokenServer)super.getServer();
+		return (TokenServer) super.getServer();
 	}
 
 	@Override
@@ -91,11 +91,13 @@ public class TokenFilterChain extends BaseFilterChain {
 	 */
 	public FilterResponse processTokenIn(WebSocketConnector aConnector, Token aToken) {
 		FilterResponse lFilterResponse = new FilterResponse();
-		for (WebSocketFilter filter : getFilters()) {
+		for (WebSocketFilter lFilter : getFilters()) {
 			try {
-				((TokenFilter) filter).processTokenIn(lFilterResponse, aConnector, aToken);
-			} catch (Exception ex) {
-				log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				((TokenFilter) lFilter).processTokenIn(lFilterResponse, aConnector, aToken);
+			} catch (Exception lEx) {
+				log.error(lEx.getClass().getSimpleName()
+						+ " in filter: " + lFilter.getId()
+						+ ": " + lEx.getMessage());
 			}
 			if (lFilterResponse.isRejected()) {
 				break;
@@ -106,11 +108,13 @@ public class TokenFilterChain extends BaseFilterChain {
 
 	public FilterResponse processTokenOut(WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
 		FilterResponse lFilterResponse = new FilterResponse();
-		for (WebSocketFilter filter : getFilters()) {
+		for (WebSocketFilter lFilter : getFilters()) {
 			try {
-				((TokenFilter) filter).processTokenOut(lFilterResponse, aSource, aTarget, aToken);
-			} catch (Exception ex) {
-				log.error(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+				((TokenFilter) lFilter).processTokenOut(lFilterResponse, aSource, aTarget, aToken);
+			} catch (Exception lEx) {
+				log.error(lEx.getClass().getSimpleName()
+						+ " in filter: " + lFilter.getId()
+						+ ": " + lEx.getMessage());
 			}
 			if (lFilterResponse.isRejected()) {
 				break;
