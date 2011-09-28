@@ -31,7 +31,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
-import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
@@ -376,7 +375,7 @@ public class TCPEngine extends BaseEngine {
 					+ "'), check for FlashBridge plug-in.");
 		}
 
-
+		
 		// if we detected a flash policy-file-request return "null"
 		// (no websocket header detected)
 		if (lFlashBridgeReq != null) {
@@ -445,10 +444,12 @@ public class TCPEngine extends BaseEngine {
 						mLog.debug("Client trying to connect on port #"
 								+ lClientSocket.getPort() + "...");
 					}
-					/*
-					boolean lTCPNoDelay = lClientSocket.getTcpNoDelay();
+					
+					// boolean lTCPNoDelay = lClientSocket.getTcpNoDelay();
+					// ensure that all packets are sent immediately w/o delay
+					// to achieve better latency, no waiting and packaging.
 					lClientSocket.setTcpNoDelay(true);
-					 */
+					
 					try {
 						// process handshake to parse header data
 						RequestHeader lHeader = processHandshake(lClientSocket);

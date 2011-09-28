@@ -86,7 +86,8 @@ public class BaseConnector implements WebSocketConnector {
 	 */
 	private final Map<String, Object> mCustomVars = new FastMap<String, Object>();
 
-	private final Object mSendLock = new Object();
+	private final Object mWriteLock = new Object();
+	private final Object mReadLock = new Object();
 
 	/**
 	 *
@@ -136,8 +137,18 @@ public class BaseConnector implements WebSocketConnector {
 	 * 
 	 * @return
 	 */
-	public Object getSendLock() {
-		return mSendLock;
+	@Override
+	public Object getWriteLock() {
+		return mWriteLock;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	@Override
+	public Object getReadLock() {
+		return mReadLock;
 	}
 	
 	@Override
@@ -274,18 +285,21 @@ public class BaseConnector implements WebSocketConnector {
 	public InetAddress getRemoteHost() {
 		return null;
 	}
+	
 	private String mUniqueId = null;
-	private static int mCounter = 0;
+	private static Integer mCounter = 0;
 
 	@Override
 	public String getId() {
-		if (null == mUniqueId) {
-			String lNodeId = JWebSocketConfig.getConfig().getNodeId();
-			mUniqueId = ((lNodeId != null && lNodeId.length() > 0) ? lNodeId + "." : "")
-					+ String.valueOf(getRemotePort())
-					+ "." + mCounter++;
-		}
-		return mUniqueId;
+		synchronized(mCounter) {
+			if (null == mUniqueId) {
+				String lNodeId = JWebSocketConfig.getConfig().getNodeId();
+				mUniqueId = ((lNodeId != null && lNodeId.length() > 0) ? lNodeId + "." : "")
+						+ String.valueOf(getRemotePort())
+						+ "." + mCounter++;
+			}
+			return mUniqueId;
+		}	
 	}
 
 	@Override

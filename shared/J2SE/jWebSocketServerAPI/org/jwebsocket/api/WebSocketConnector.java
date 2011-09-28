@@ -93,16 +93,22 @@ public interface WebSocketConnector {
 	void processPacket(WebSocketPacket aDataPacket);
 
 	/**
-	 * Return the synchronization object for send transactions.
+	 * Return the synchronization object for write transactions.
 	 * @return
 	 */
-	public Object getSendLock();
+	public Object getWriteLock();
 
+	/**
+	 * Return the synchronization object for read transactions.
+	 * @return
+	 */
+	public Object getReadLock();
+	
 	/**
 	 * Sends a data packet to a WebSocket client. Here the packet is finally
 	 * passed to client via the web socket connection. This packet is not 
 	 * synchronized. This allows to send transactions by synchronizing 
-	 * to the getSendLock() object.
+	 * to the getWriteLock() object.
 	 * @param aDataPacket raw web socket data packet
 	 */
 	void sendPacketInTransaction(WebSocketPacket aDataPacket);

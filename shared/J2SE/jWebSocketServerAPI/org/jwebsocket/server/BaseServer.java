@@ -272,11 +272,6 @@ public class BaseServer implements WebSocketServer {
 		// iterate through all engines
 		for (WebSocketEngine lEngine : mEngines.values()) {
 			// and through all connectors of each engine
-			/*
-			FastMap<String, WebSocketConnector> lMap = (FastMap)lEngine.getConnectors();
-			for (FastMap.Entry<String, WebSocketConnector> e = lMap.head(), end = lMap.tail(); (e = e.getNext()) != end;) {
-			WebSocketConnector lConnector = e.getValue();
-			 */
 			for (WebSocketConnector lConnector : lEngine.getConnectors().values()) {
 				boolean lMatch = true;
 				for (String lKey : aFilter.keySet()) {
@@ -301,7 +296,6 @@ public class BaseServer implements WebSocketServer {
 				}
 			}
 		}
-		// return (FastMap)(lClients.unmodifiable());
 		return lClients;
 	}
 

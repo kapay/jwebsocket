@@ -122,53 +122,63 @@ public class TCPConnector extends BaseConnector {
 		setStatus(WebSocketConnectorStatus.DOWN);
 		int lPort = mClientSocket.getPort();
 		try {
-			mIn.close();
-		} catch (IOException lEx) {
-			if (mLog.isDebugEnabled()) {
-				mLog.info(lEx.getClass().getSimpleName()
-						+ " while closing inbound stream for " + mLogInfo
-						+ " connector (" + aCloseReason.name()
-						+ ") on port " + lPort + ": " + lEx.getMessage());
+			if (!mClientSocket.isOutputShutdown()) {
+				mClientSocket.shutdownOutput();
 			}
+		} catch (IOException lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " while shutting down outbound stream for " + mLogInfo
+					+ " connector (" + aCloseReason.name()
+					+ ") on port " + lPort + ": " + lEx.getMessage());
+		}
+		try {
+			if (!mClientSocket.isInputShutdown()) {
+				mClientSocket.shutdownInput();
+			}
+		} catch (IOException lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " while shutting down inbound stream for " + mLogInfo
+					+ " connector (" + aCloseReason.name()
+					+ ") on port " + lPort + ": " + lEx.getMessage());
 		}
 		try {
 			mOut.close();
 		} catch (IOException lEx) {
-			if (mLog.isDebugEnabled()) {
-				mLog.info(lEx.getClass().getSimpleName()
-						+ " while closing outbound stream for " + mLogInfo
-						+ " connector (" + aCloseReason.name()
-						+ ") on port " + lPort + ": " + lEx.getMessage());
-			}
-		}
-		try {
-			mClientSocket.close();
-		} catch (IOException lEx) {
-			if (mLog.isDebugEnabled()) {
-				mLog.info(lEx.getClass().getSimpleName()
-						+ " while closing socket " + mLogInfo
-						+ " connector (" + aCloseReason.name()
-						+ ") on port " + lPort + ": " + lEx.getMessage());
-			}
-		}
-		try {
-			mClientThread.join(500);
-		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
-					+ " while shutting down client thread for " + mLogInfo
+					+ " while closing outbound stream for " + mLogInfo
 					+ " connector (" + aCloseReason.name()
 					+ ") on port " + lPort + ": " + lEx.getMessage());
 		}
-
-		// call client stopped method of engine
-		// (e.g. to release client from streams)
-		getEngine().connectorStopped(this, aCloseReason);
-
-		if (mLog.isInfoEnabled()) {
-			mLog.info("Stopped " + mLogInfo
-					+ " connector (" + aCloseReason
-					+ ") on port " + lPort + ".");
+		try {
+			mIn.close();
+		} catch (IOException lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " while closing inbound stream for " + mLogInfo
+					+ " connector (" + aCloseReason.name()
+					+ ") on port " + lPort + ": " + lEx.getMessage());
 		}
+		try {
+			if (!mClientSocket.isClosed()) {
+				mClientSocket.close();
+			}
+		} catch (IOException lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " while closing socket " + mLogInfo
+					+ " connector (" + aCloseReason.name()
+					+ ") on port " + lPort + ": " + lEx.getMessage());
+		}
+		/*
+		try {
+		// mClientThread.join(300);
+		// mClientThread.interrupt();
+		// mClientThread.stop();
+		} catch (Exception lEx) {
+		mLog.error(lEx.getClass().getSimpleName()
+		+ " while shutting down client thread for " + mLogInfo
+		+ " connector (" + aCloseReason.name()
+		+ ") on port " + lPort + ": " + lEx.getMessage());
+		}
+		 */
 	}
 
 	@Override
@@ -178,13 +188,42 @@ public class TCPConnector extends BaseConnector {
 					+ " connector (" + aCloseReason.name() + ")...");
 		}
 		mCloseReason = aCloseReason;
-		if (!isHixie()) {
-			// Hybi specs demand that client must be notified
-			// with CLOSE control message before disconnect
-			WebSocketPacket lClose = new RawPacket(WebSocketFrameType.CLOSE, "BYE");
-			sendPacket(lClose);
+		synchronized (getWriteLock()) {
+			if (!isHixie()) {
+				// Hybi specs demand that client must be notified
+				// with CLOSE control message before disconnect
+				WebSocketPacket lClose = new RawPacket(WebSocketFrameType.CLOSE, "BYE");
+				sendPacketInTransaction(lClose);
+			}
+			stopReader();
 		}
-		terminateConnector(aCloseReason);
+		// the connector is removed in th read thread once terminated
+	}
+
+	public void stopReader() {
+		try {
+			// force input stream to close to terminate reader thread
+			mClientSocket.shutdownInput();
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " shutting down reader stream (" + getId() + "): " + lEx.getMessage());
+		}
+		try {
+			// force input stream to close to terminate reader thread
+			mIn.close();
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " closing reader stream (" + getId() + "): " + lEx.getMessage());
+		}
+		try {
+			mClientThread.join(1000);
+		} catch (Exception lEx) {
+			mLog.error(lEx.getClass().getSimpleName()
+					+ " stopping reader thread (" + getId() + "): " + lEx.getMessage());
+		}
+		if (mClientThread.isAlive()) {
+			mLog.error("Reader thread (" + getId() + ") could not be stopped");
+		}
 	}
 
 	@Override
@@ -198,7 +237,7 @@ public class TCPConnector extends BaseConnector {
 		if (WebSocketConnectorStatus.UP != getStatus()) {
 			// TODO: think about if and how to handle the scenario 
 			// that other threads send data to a closed or closing connector.
-				/*
+			/*
 			mLog.warn("Trying to send to closing connection: "
 			+ getId() + ", " + aDataPacket.getUTF8());
 			 */
@@ -217,21 +256,22 @@ public class TCPConnector extends BaseConnector {
 				mLog.error("Trying to send to closed connection: "
 						+ getId() + ", " + aDataPacket.getUTF8());
 			}
-		} catch (IOException lEx) {
+		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
 					+ " sending data packet: " + lEx.getMessage()
 					+ ", data: " + aDataPacket.getUTF8());
 		}
-		// if sending data leads to an exception 
+
+		// if sending data leads to an exception ...
 		// we need to terminate the connection
 		if (!lSendSuccess) {
-			terminateConnector(CloseReason.BROKEN);
+			stopReader();
 		}
 	}
 
 	@Override
 	public void sendPacket(WebSocketPacket aDataPacket) {
-		synchronized (getSendLock()) {
+		synchronized (getWriteLock()) {
 			sendPacketInTransaction(aDataPacket);
 		}
 	}
@@ -293,6 +333,7 @@ public class TCPConnector extends BaseConnector {
 			// start client listener loop
 			setStatus(WebSocketConnectorStatus.UP);
 			mCloseReason = CloseReason.SERVER;
+			int lPort = mClientSocket.getPort();
 
 			// call connectorStarted method of engine
 			lEngine.connectorStarted(mConnector);
@@ -301,17 +342,27 @@ public class TCPConnector extends BaseConnector {
 			// readHixie and readHybi process potential exceptions already!
 			try {
 				if (isHixie()) {
-					readHixie(lBuff, lEngine);
+					processHixie(lBuff, lEngine);
 				} else {
-					readHybi(getVersion(), lBuff, lEngine);
+					processHybi(getVersion(), lBuff, lEngine);
 				}
 			} finally {
 				((BaseEngine) lEngine).lostConnectors.remove(mConnector);
 				terminateConnector(mCloseReason);
 			}
+
+			// call client stopped method of engine
+			// (e.g. to release client from streams)
+			lEngine.connectorStopped(mConnector, mCloseReason);
+
+			if (mLog.isInfoEnabled()) {
+				mLog.info("Stopped " + mLogInfo
+						+ " connector (" + mCloseReason
+						+ ") on port " + lPort + ".");
+			}
 		}
 
-		private void readHixie(ByteArrayOutputStream aBuff,
+		private void processHixie(ByteArrayOutputStream aBuff,
 				WebSocketEngine aEngine) {
 			while (WebSocketConnectorStatus.UP == getStatus()) {
 				try {
@@ -352,14 +403,13 @@ public class TCPConnector extends BaseConnector {
 			}
 		}
 
-		private void readHybi(int aVersion, ByteArrayOutputStream aBuff,
+		private void processHybi(int aVersion, ByteArrayOutputStream aBuff,
 				WebSocketEngine aEngine) {
 
 			String lFrom = getRemoteHost() + ":" + getRemotePort() + " (" + getId() + ")";
 			while (WebSocketConnectorStatus.UP == getStatus()) {
 				try {
 					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(getVersion(), mIn);
-
 					if (lPacket == null) {
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Processing client 'disconnect' from " + lFrom + "...");
@@ -389,18 +439,18 @@ public class TCPConnector extends BaseConnector {
 						// this should be handled higher up in the hierarchy?)
 						WebSocketPacket lClose = new RawPacket("");
 						lClose.setFrameType(WebSocketFrameType.CLOSE);
-						sendPacket(lClose);
+						// sendPacket(lClose);
 						// the streams are closed in the run method
 					} else {
 						mLog.error("Unknown frame type '" + lPacket.getFrameType() + "', ignoring frame.");
 					}
 				} catch (SocketTimeoutException lEx) {
-					mLog.error(lEx.getClass().getSimpleName() + " reading hybi: " + lEx.getMessage());
+					mLog.error(lEx.getClass().getSimpleName() + " reading hybi (" + getId() + "): " + lEx.getMessage());
 					mCloseReason = CloseReason.TIMEOUT;
 					setStatus(WebSocketConnectorStatus.DOWN);
 				} catch (Exception lEx) {
 					if (WebSocketConnectorStatus.UP == getStatus()) {
-						mLog.error(lEx.getClass().getSimpleName() + " reading hybi: " + lEx.getMessage());
+						mLog.error(lEx.getClass().getSimpleName() + " reading hybi (" + getId() + "): " + lEx.getMessage());
 					}
 					mCloseReason = CloseReason.SERVER;
 					setStatus(WebSocketConnectorStatus.DOWN);

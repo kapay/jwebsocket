@@ -16,6 +16,7 @@
 package org.jwebsocket.engines;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -41,6 +42,10 @@ public class BaseEngine implements WebSocketEngine {
 			new FastMap<String, WebSocketServer>().shared();
 	private final FastMap<String, WebSocketConnector> mConnectors =
 			new FastMap<String, WebSocketConnector>().shared();
+/*	
+	private final ConcurrentHashMap<String, WebSocketConnector> mConnectors =
+			new ConcurrentHashMap<String, WebSocketConnector>();
+ */
 	private int mSessionTimeout = JWebSocketCommonConstants.DEFAULT_TIMEOUT;
 	private EngineConfiguration mConfiguration;
 
@@ -104,13 +109,13 @@ public class BaseEngine implements WebSocketEngine {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector,
 			CloseReason aCloseReason) {
-		// once a connector stopped remove it from the list of connectors
-		// FastMap ensures that the entry is being kept in shared mode
-		mConnectors.remove(aConnector.getId());
 		// notify servers that a connector has stopped
 		for (WebSocketServer lServer : mServers.values()) {
 			lServer.connectorStopped(aConnector, aCloseReason);
 		}
+		// once a connector stopped remove it from the list of connectors
+		// FastMap ensures that the entry is being kept in shared mode
+		mConnectors.remove(aConnector.getId());
 	}
 
 	@Override

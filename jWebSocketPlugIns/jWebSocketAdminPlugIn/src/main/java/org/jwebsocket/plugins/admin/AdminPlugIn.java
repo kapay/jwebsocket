@@ -72,6 +72,8 @@ public class AdminPlugIn extends TokenPlugIn {
 			// remote shut down server
 			if (lType.equals("shutdown")) {
 				shutdown(aConnector, aToken);
+			} else if (lType.equals("gc")) {
+				gc(aConnector, aToken);
 			} else if (lType.equals("getConnections")) {
 				getConnections(aConnector, aToken);
 			} else if (lType.equals("getUserRights")) {
@@ -114,6 +116,34 @@ public class AdminPlugIn extends TokenPlugIn {
 		lServer.broadcastToken(lResponseToken);
 
 		JWebSocketInstance.setStatus(JWebSocketInstance.SHUTTING_DOWN);
+	}
+
+	/**
+	 * shutdown server
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	private void gc(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'Garbage Collection '...");
+		}
+
+		// check if user is allowed to run 'shutdown' command
+		// should be limited to administrators
+		if (!SecurityFactory.hasRight(lServer.getUsername(aConnector), NS_ADMIN + ".gc")) {
+			lServer.sendToken(aConnector, lServer.createAccessDenied(aToken));
+			return;
+		}
+
+		System.gc();
+		
+		// notify all connected clients about pending shutdown
+		Token lResponse = lServer.createResponse(aToken);
+		lResponse.setString("msg", "Garbage Collection in progress...");
+		lServer.sendToken(aConnector, lResponse);
 	}
 
 	/**

@@ -201,6 +201,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         jLabel3 = new javax.swing.JLabel();
         btnStressTest = new javax.swing.JButton();
         btnDebugOut = new javax.swing.JButton();
+        btnGC = new javax.swing.JButton();
         mnbMain = new javax.swing.JMenuBar();
         pmnFile = new javax.swing.JMenu();
         mniExit = new javax.swing.JMenuItem();
@@ -709,6 +710,20 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
         gridBagConstraints.gridy = 12;
         getContentPane().add(btnDebugOut, gridBagConstraints);
 
+        btnGC.setText("Garb.Coll.");
+        btnGC.setMaximumSize(new java.awt.Dimension(100, 20));
+        btnGC.setMinimumSize(new java.awt.Dimension(100, 20));
+        btnGC.setPreferredSize(new java.awt.Dimension(100, 20));
+        btnGC.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGCActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 12;
+        getContentPane().add(btnGC, gridBagConstraints);
+
         pmnFile.setText("File");
 
         mniExit.setText("Exit");
@@ -908,14 +923,16 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 	}
 
 	private void btnStressTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStressTestActionPerformed
-		new Thread() {
+		for (int i = 0; i < 10; i++) {
+			new Thread() {
 
-			@Override
-			public void run() {
-				StressTests lTests = new StressTests(new MyLogListener());
-				lTests.runStressTest(txfURL.getText());
-			}
-		}.start();
+				@Override
+				public void run() {
+					StressTests lTests = new StressTests(new MyLogListener());
+					lTests.runStressTest(txfURL.getText());
+				}
+			}.start();
+		}
 	}//GEN-LAST:event_btnStressTestActionPerformed
 
 	private void btnDebugOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDebugOutActionPerformed
@@ -927,6 +944,16 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
 			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
 		}
 	}//GEN-LAST:event_btnDebugOutActionPerformed
+
+	private void btnGCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGCActionPerformed
+		try {
+			Token lToken = TokenFactory.createToken("org.jwebsocket.plugins.admin", "gc");
+			mClient.sendToken(lToken);
+		} catch (Exception ex) {
+			mLog(ex.getClass().getSimpleName() + ":  " + ex.getMessage() + "\n");
+		}
+
+	}//GEN-LAST:event_btnGCActionPerformed
 
 	private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnConnectActionPerformed
 		mClient.open(8, txfURL.getText());
@@ -1022,6 +1049,7 @@ public class TestDialog extends javax.swing.JFrame implements WebSocketClientTok
     private javax.swing.JButton btnConnect;
     private javax.swing.JButton btnDebugOut;
     private javax.swing.JButton btnDisconnect;
+    private javax.swing.JButton btnGC;
     private javax.swing.JButton btnGetSessions;
     private javax.swing.JButton btnGetUserRights;
     private javax.swing.JButton btnGetUserRoles;
