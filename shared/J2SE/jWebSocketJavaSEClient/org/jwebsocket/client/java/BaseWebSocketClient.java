@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
@@ -122,6 +120,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 	 * 
 	 */
 	public static String DATA_CLOSE_SHUTDOWN = "shutdown";
+	private static final String CR_CLIENT = "Client closed connection";
 	private int mVersion = JWebSocketCommonConstants.WS_VERSION_DEFAULT;
 	private WebSocketEncoding mEncoding = WebSocketEncoding.TEXT;
 	private ReliabilityOptions mReliabilityOptions = null;
@@ -226,6 +225,10 @@ public class BaseWebSocketClient implements WebSocketClient {
 	 */
 	public void open(int aVersion, String aURI, String aSubProtocols) {
 		try {
+			// set default close reason in case 
+			// connection could not be established.
+			mCloseReason = "Connection could not be established.";
+
 			mVersion = aVersion;
 			mURI = new URI(aURI);
 			// the WebSocket Handshake here generates the initial client side Handshake only
@@ -258,7 +261,6 @@ public class BaseWebSocketClient implements WebSocketClient {
 						JWebSocketCommonConstants.WS_SUBPROT_DEFAULT,
 						JWebSocketCommonConstants.WS_ENCODING_DEFAULT);
 			}
-
 			// create new thread to receive the data from the new client
 			mReceiver = new WebSocketReceiver(this, mIn);
 			// and start the receiver thread for the port
@@ -270,11 +272,11 @@ public class BaseWebSocketClient implements WebSocketClient {
 					new WebSocketBaseClientEvent(this, EVENT_OPEN, "");
 			notifyOpened(lEvent);
 
+			// reset close reason to be specified by next reason
+			mCloseReason = null;
 		} catch (Exception lEx) {
 			WebSocketClientEvent lEvent =
-					new WebSocketBaseClientEvent(this, EVENT_CLOSE,
-					lEx.getClass().getSimpleName() + ": "
-					+ lEx.getMessage());
+					new WebSocketBaseClientEvent(this, EVENT_CLOSE, mCloseReason);
 			notifyClosed(lEvent);
 			mCheckReconnect(lEvent);
 		}
@@ -361,12 +363,18 @@ public class BaseWebSocketClient implements WebSocketClient {
 		}
 	}
 
+	private void setCloseReason(String aCloseReason) {
+		if (null == mCloseReason) {
+			mCloseReason = aCloseReason;
+		}
+	}
+
 	@Override
 	public synchronized void close() {
 		if (!mStatus.isWritable()) {
 			return;
 		}
-		mCloseReason = "client";
+		setCloseReason(CR_CLIENT);
 		try {
 			sendCloseHandshake();
 		} catch (Exception lEx) {
@@ -725,11 +733,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 			} catch (IOException lIOEx) {
 				lExMsg += "Socket close: " + lIOEx.getMessage() + ", ";
 			}
-			
-			if (lExMsg.length() > 0) {
-				System.out.println(lExMsg);
-			}
-			
+
 			// now the connection is really closed
 			// set the status accordingly
 			mStatus = WebSocketStatus.CLOSED;
@@ -738,8 +742,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 					new WebSocketBaseClientEvent(mClient, EVENT_CLOSE, mCloseReason);
 			notifyClosed(lEvent);
 
-			if (!"client".equals(mCloseReason)) {
-				// mCheckReconnect(lEvent);
+			if (!CR_CLIENT.equals(mCloseReason)) {
+				mCheckReconnect(lEvent);
 			}
 		}
 
@@ -763,12 +767,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 					} else if (lFrameStart == true) {
 						lBuff.write(lB);
 					} else if (lB == -1) {
-						mCloseReason = "EOF detected.";
+						setCloseReason("Inbound stream terminated");
 						mIsRunning = false;
 					}
 				} catch (Exception lEx) {
 					mIsRunning = false;
-					mCloseReason = lEx.getClass().getName() + " in hybi processor: " + lEx.getMessage();
+					setCloseReason(lEx.getClass().getName() + " in hybi processor: " + lEx.getMessage());
 				}
 			}
 		}
@@ -781,10 +785,15 @@ public class BaseWebSocketClient implements WebSocketClient {
 				try {
 					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(mVersion, mIS);
 					lFrameType = (lPacket != null ? lPacket.getFrameType() : WebSocketFrameType.INVALID);
-					if (WebSocketFrameType.INVALID == lFrameType
-							|| WebSocketFrameType.CLOSE == lFrameType) {
+					if (null == lFrameType) {
 						mIsRunning = false;
-						mCloseReason = "Error: invalid frame type";
+						setCloseReason("Connection broken");
+					} else if (WebSocketFrameType.INVALID == lFrameType) {
+						mIsRunning = false;
+						setCloseReason("Invalid hybi frame type detected");
+					} else if (WebSocketFrameType.CLOSE == lFrameType) {
+						mIsRunning = false;
+						setCloseReason("Server closed connection");
 					} else if (WebSocketFrameType.PING == lFrameType) {
 						WebSocketPacket lPong = new RawPacket(
 								WebSocketFrameType.PONG, "");
@@ -797,7 +806,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 					}
 				} catch (Exception lEx) {
 					mIsRunning = false;
-					mCloseReason = lEx.getClass().getName() + " in hybi processor: " + lEx.getMessage();
+					setCloseReason(lEx.getClass().getName() + " in hybi processor: " + lEx.getMessage());
 				}
 			}
 		}

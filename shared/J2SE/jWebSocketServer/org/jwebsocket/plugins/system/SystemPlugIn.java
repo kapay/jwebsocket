@@ -49,7 +49,7 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	private static Logger mLog = Logging.getLogger(SystemPlugIn.class);
 	// specify name space for system plug-in
-	private static final String NS_SYSTEM_DEFAULT = JWebSocketServerConstants.NS_BASE + ".plugins.system";
+	private static final String NS_SYSTEM = JWebSocketServerConstants.NS_BASE + ".plugins.system";
 	// specify token types processed by system plug-in
 	private static final String TT_SEND = "send";
 	private static final String TT_RESPOND = "respond";
@@ -66,7 +66,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String TT_ALLOC_CHANNEL = "alloc";
 	private static final String TT_DEALLOC_CHANNEL = "dealloc";
 	// specify shared connector variables
-	private static final String VAR_GROUP = NS_SYSTEM_DEFAULT + ".group";
+	private static final String VAR_GROUP = NS_SYSTEM + ".group";
 	private static boolean BROADCAST_OPEN = true;
 	private static final String BROADCAST_OPEN_KEY = "broadcastOpenEvent";
 	private static boolean BROADCAST_CLOSE = true;
@@ -90,7 +90,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			mLog.debug("Instantiating system plug-in...");
 		}
 		// specify default name space for system plugin
-		this.setNamespace(NS_SYSTEM_DEFAULT);
+		this.setNamespace(NS_SYSTEM);
 		mGetSettings();
 		// give a success message to the administrator
 		if (mLog.isInfoEnabled()) {
@@ -206,7 +206,7 @@ public class SystemPlugIn extends TokenPlugIn {
 				mLog.debug("Broadcasting connect...");
 			}
 			// broadcast connect event to other clients of the jWebSocket network
-			Token lConnect = TokenFactory.createToken(BaseToken.TT_EVENT);
+			Token lConnect = TokenFactory.createToken(NS_SYSTEM, BaseToken.TT_EVENT);
 			lConnect.setString("name", "connect");
 			// lConnect.put("usid", getSessionId(aConnector));
 			lConnect.setString("sourceId", aConnector.getId());
@@ -235,7 +235,7 @@ public class SystemPlugIn extends TokenPlugIn {
 				mLog.debug("Broadcasting disconnect...");
 			}
 			// broadcast connect event to other clients of the jWebSocket network
-			Token lDisconnect = TokenFactory.createToken(BaseToken.TT_EVENT);
+			Token lDisconnect = TokenFactory.createToken(NS_SYSTEM, BaseToken.TT_EVENT);
 			lDisconnect.setString("name", "disconnect");
 			// lDisconnect.put("usid", getSessionId(aConnector));
 			lDisconnect.setString("sourceId", aConnector.getId());
@@ -256,8 +256,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			mLog.debug("Sending welcome...");
 		}
 		// send "welcome" token to client
-		Token lWelcome = TokenFactory.createToken(TT_WELCOME);
-		lWelcome.setString("ns", getNamespace());
+		Token lWelcome = TokenFactory.createToken(NS_SYSTEM, TT_WELCOME);
 		lWelcome.setString("vendor", JWebSocketCommonConstants.VENDOR);
 		lWelcome.setString("version", JWebSocketServerConstants.VERSION_STR);
 		// here the session id is MANDATORY! to pass to the client!
@@ -303,7 +302,7 @@ public class SystemPlugIn extends TokenPlugIn {
 				mLog.debug("Broadcasting login event...");
 			}
 			// broadcast login event to other clients of the jWebSocket network
-			Token lLogin = TokenFactory.createToken(BaseToken.TT_EVENT);
+			Token lLogin = TokenFactory.createToken(NS_SYSTEM, BaseToken.TT_EVENT);
 			lLogin.setString("name", "login");
 			lLogin.setString("username", getUsername(aConnector));
 			lLogin.setInteger("clientCount", getConnectorCount());
@@ -330,8 +329,7 @@ public class SystemPlugIn extends TokenPlugIn {
 				mLog.debug("Broadcasting logout event...");
 			}
 			// broadcast login event to other clients of the jWebSocket network
-			Token lLogout = TokenFactory.createToken(BaseToken.TT_EVENT);
-			lLogout.setString("ns", getNamespace());
+			Token lLogout = TokenFactory.createToken(NS_SYSTEM, BaseToken.TT_EVENT);
 			lLogout.setString("name", "logout");
 			lLogout.setString("username", getUsername(aConnector));
 			lLogout.setInteger("clientCount", getConnectorCount());
@@ -498,7 +496,7 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	private void send(WebSocketConnector aConnector, Token aToken) {
 		// check if user is allowed to run 'send' command
-		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_SYSTEM_DEFAULT + ".send")) {
+		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_SYSTEM + ".send")) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}
@@ -584,7 +582,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	private void broadcast(WebSocketConnector aConnector, Token aToken) {
 
 		// check if user is allowed to run 'broadcast' command
-		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_SYSTEM_DEFAULT + ".broadcast")) {
+		if (!SecurityFactory.hasRight(getUsername(aConnector), NS_SYSTEM + ".broadcast")) {
 			sendToken(aConnector, aConnector, createAccessDenied(aToken));
 			return;
 		}

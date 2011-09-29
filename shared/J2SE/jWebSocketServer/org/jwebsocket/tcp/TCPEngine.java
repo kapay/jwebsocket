@@ -15,7 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.tcp;
 
-import com.sun.net.ssl.internal.ssl.SSLSocketImpl;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +30,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
+import javax.net.ssl.SSLSocket;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
@@ -342,7 +342,7 @@ public class TCPEngine extends BaseEngine {
 		}
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(
 				lReq,
-				aClientSocket instanceof SSLSocketImpl);
+				aClientSocket instanceof SSLSocket);
 		RequestHeader lHeader = EngineUtils.validateC2SRequest(lRespMap, mLog);
 		if (lHeader == null) {
 			return null;

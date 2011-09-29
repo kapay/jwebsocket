@@ -94,6 +94,8 @@ public class StressTests implements WebSocketClientTokenListener {
 
 		String lNS = aToken.getNS();
 		String lType = aToken.getType();
+		String lName = aToken.getString("name");
+		String lSourceId = aToken.getString("sourceId");
 		String lReqType = aToken.getString("reqType");
 
 		if ("org.jwebsocket.plugins.system".equals(lNS)) {
@@ -116,7 +118,19 @@ public class StressTests implements WebSocketClientTokenListener {
 			} else if ("echo".equals(lReqType)) {
 				mLog("Received echo response for client #" + lClient.getParam("idx") + ".");
 				mFinished++;
+			} else if ("connect".equals(lName)) {
+				mLog("Received client (" + lSourceId + ") connect.");
+			} else if ("disconnect".equals(lName)) {
+				mLog("Received client (" + lSourceId + ") disconnect.");
+			} else if ("login".equals(lName)) {
+				mLog("Received client (" + lSourceId + ") login.");
+			} else if ("logout".equals(lName)) {
+				mLog("Received client (" + lSourceId + ") logout.");
+			} else {
+				mLog("Received other system plug-in token from network.");
 			}
+		} else {
+			mLog("Received non system plug-in token from network.");
 		}
 	}
 

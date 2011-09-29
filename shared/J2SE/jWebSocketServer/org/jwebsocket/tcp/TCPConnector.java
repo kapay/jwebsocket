@@ -19,7 +19,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.log4j.Logger;
@@ -454,7 +453,7 @@ public class TCPConnector extends BaseConnector {
 						// this should be handled higher up in the hierarchy?)
 						WebSocketPacket lClose = new RawPacket("");
 						lClose.setFrameType(WebSocketFrameType.CLOSE);
-						// sendPacket(lClose);
+						sendPacket(lClose);
 						// the streams are closed in the run method
 					} else {
 						mLog.error("Unknown frame type '" + lPacket.getFrameType() + "', ignoring frame.");
