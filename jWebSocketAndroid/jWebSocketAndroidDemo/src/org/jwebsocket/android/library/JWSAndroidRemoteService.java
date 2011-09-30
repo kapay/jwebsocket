@@ -59,11 +59,11 @@ public class JWSAndroidRemoteService extends Service {
 	private final static int MT_ERROR = -1;
 	private final static String CONFIG_FILE = "jWebSocket";
 	private static String jwsURL = "ws://jwebsocket.org:8787";
-	private static BaseTokenClient tokenClient;
+	private static BaseTokenClient mTokenClient;
 
 	@Override
 	public void onCreate() {
-		tokenClient = new BaseTokenClient();
+		mTokenClient = new BaseTokenClient();
 		Properties lProps = new Properties();
 		try {
 			lProps.load(openFileInput(CONFIG_FILE));
@@ -102,7 +102,7 @@ public class JWSAndroidRemoteService extends Service {
 			try {
 				String error = (String) message.obj;
 				jwsCallbackList.getBroadcastItem(i).onError(error);
-			} catch (RemoteException e) {
+			} catch (RemoteException lEx) {
 				// The RemoteCallbackList will take care of removing
 				// the dead object for us.
 			}
@@ -117,104 +117,100 @@ public class JWSAndroidRemoteService extends Service {
 	 */
 	private final IJWSAndroidRemoteService.Stub mBinder = new IJWSAndroidRemoteService.Stub() {
 
-		private void handleException(String tag, String error, Throwable e) {
-			Log.e(tag, error, e);
-			Message errorMsg = Message.obtain(jwsHandler, MT_ERROR, e.getMessage());
+		private void handleException(String tag, String error, Throwable lEx) {
+			Log.e(tag, error, lEx);
+			Message errorMsg = Message.obtain(jwsHandler, MT_ERROR, lEx.getMessage());
 			jwsHandler.sendMessage(errorMsg);
 		}
 
 		@Override
 		public void open() throws RemoteException {
 			try {
-				tokenClient.open(jwsURL);
-			} catch (WebSocketException e) {
-				handleException("OPEN", "Error opening jWebSocket connection", e);
+				mTokenClient.open(jwsURL);
+			} catch (WebSocketException lEx) {
+				handleException("OPEN", "Error opening jWebSocket connection", lEx);
 			}
 		}
 
 		@Override
 		public void close() throws RemoteException {
-			try {
-				tokenClient.close();
-			} catch (WebSocketException e) {
-				handleException("CLOSE", "Error closing jWebSocket connection", e);
-			}
+			mTokenClient.close();
 		}
 
 		@Override
 		public void disconnect() throws RemoteException {
 			try {
-				tokenClient.disconnect();
-			} catch (WebSocketException e) {
-				handleException("DISCONNECT", "Error disconnecting from the jWebSocket server", e);
+				mTokenClient.disconnect();
+			} catch (WebSocketException lEx) {
+				handleException("DISCONNECT", "Error disconnecting from the jWebSocket server", lEx);
 			}
 		}
 
 		@Override
 		public void send(String data) throws RemoteException {
 			try {
-				tokenClient.send(data, "UTF-8");
-			} catch (WebSocketException e) {
-				handleException("SEND", "Error sending data to the jWebSocket server", e);
+				mTokenClient.send(data, "UTF-8");
+			} catch (WebSocketException lEx) {
+				handleException("SEND", "Error sending data to the jWebSocket server", lEx);
 			}
 		}
 
 		@Override
 		public void sendText(String target, String data) throws RemoteException {
 			try {
-				tokenClient.sendText(target, data);
-			} catch (WebSocketException e) {
-				handleException("SENDTEXT", "Error sending text data to the jWebSocket server", e);
+				mTokenClient.sendText(target, data);
+			} catch (WebSocketException lEx) {
+				handleException("SENDTEXT", "Error sending text data to the jWebSocket server", lEx);
 			}
 		}
 
 		@Override
 		public void broadcastText(String data) throws RemoteException {
 			try {
-				tokenClient.broadcastText(data);
-			} catch (WebSocketException e) {
-				handleException("BROADCAST", "Error broadcasting data to the jWebSocket server", e);
+				mTokenClient.broadcastText(data);
+			} catch (WebSocketException lEx) {
+				handleException("BROADCAST", "Error broadcasting data to the jWebSocket server", lEx);
 			}
 		}
 
 		@Override
 		public void sendToken(ParcelableToken token) throws RemoteException {
 			try {
-				tokenClient.sendToken(token.getToken());
-			} catch (WebSocketException e) {
-				handleException("SENDTOKEN", "Error sending token data to the jWebSocket server", e);
+				mTokenClient.sendToken(token.getToken());
+			} catch (WebSocketException lEx) {
+				handleException("SENDTOKEN", "Error sending token data to the jWebSocket server", lEx);
 			}
 		}
 
 		@Override
 		public void saveFile(String fileName, String scope, boolean notify, byte[] data) throws RemoteException {
 			try {
-				tokenClient.saveFile(data, fileName, scope, notify);
-			} catch (WebSocketException e) {
-				handleException("FILESAVE", "Error saving file to jWebSocket server", e);
+				mTokenClient.saveFile(data, fileName, scope, notify);
+			} catch (WebSocketException lEx) {
+				handleException("FILESAVE", "Error saving file to jWebSocket server", lEx);
 			}
 		}
 
 		@Override
 		public String getUsername() throws RemoteException {
-			return tokenClient.getUsername();
+			return mTokenClient.getUsername();
 		}
 
 		@Override
 		public void login(String aUsername, String aPassword) throws RemoteException {
 			try {
-				tokenClient.login(aUsername, aPassword);
-			} catch (WebSocketException e) {
-				handleException("LOGIN", "Error login to jWebSocket server", e);
+				mTokenClient.login(aUsername, aPassword);
+			} catch (WebSocketException lEx) {
+				handleException("LOGIN", "Error login to jWebSocket server", lEx);
 			}
 		}
 
 		@Override
 		public void logout() throws RemoteException {
 			try {
-				tokenClient.logout();
-			} catch (WebSocketException e) {
-				handleException("LOGOUT", "Error logout from jWebSocket server", e);
+				mTokenClient.logout();
+			} catch (WebSocketException lEx) {
+				handleException("LOGOUT", "Error logout from jWebSocket server", lEx);
 			}
 		}
 
@@ -222,9 +218,9 @@ public class JWSAndroidRemoteService extends Service {
 		public void ping(boolean echo) throws RemoteException {
 			//TODO://fix this either display a notification or something visible to the user
 			try {
-				tokenClient.ping(echo);
-			} catch (WebSocketException e) {
-				handleException("PING", "Error ping operation to jWebSocket server", e);
+				mTokenClient.ping(echo);
+			} catch (WebSocketException lEx) {
+				handleException("PING", "Error ping operation to jWebSocket server", lEx);
 			}
 		}
 
@@ -236,7 +232,7 @@ public class JWSAndroidRemoteService extends Service {
 
 		@Override
 		public boolean isAuthenticated() throws RemoteException {
-			return tokenClient.isAuthenticated();
+			return mTokenClient.isAuthenticated();
 		}
 
 		@Override
