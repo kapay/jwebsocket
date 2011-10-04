@@ -44,15 +44,11 @@ public class SecurityFactory {
 	private static boolean mAutoAnonymous = false;
 
 	/**
-	 * initializes the security system with some default settings to allow to
-	 * startup without a config file, this will be removed in the final release!
+	 * Initializes the security system programmatically to allow to
+	 * a startup without a config file in embedded environments!
 	 */
+	/*
 	public static void initDefault() {
-		/*
-		if (log.isDebugEnabled()) {
-		log.debug("Initializing demo rights, roles and users...");
-		}
-		 */
 		mRights = new Rights();
 		// specify rights
 		Right lRPC = new Right("org.jwebsocket.plugins.rpc", "rpc", "Allow Remote Procedure Calls (RPC) to server");
@@ -88,7 +84,8 @@ public class SecurityFactory {
 
 		// log.info("Default rights, roles and users initialized.");
 	}
-
+	 */
+	
 	/**
 	 * initializes the security system with the settings from the
 	 * jWebSocket.xml.
@@ -154,7 +151,7 @@ public class SecurityFactory {
 		// initialize the security factory with some default demo data
 		// to show at least something even with no config
 		// TODO: only temporary, will be removed in the final release!
-		SecurityFactory.initDefault();
+		// SecurityFactory.initDefault();
 	}
 
 	/**
