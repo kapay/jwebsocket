@@ -2971,6 +2971,32 @@ jws.SystemClientPlugIn = {
 		}
 		return lRes;
 	},
+	
+	systemLogon: function( aUsername, aPassword, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.SystemClientPlugIn.NS,
+				type: "logon",
+				username: aUsername,
+				password: aPassword
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	systemLogoff: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.SystemClientPlugIn.NS,
+				type: "logoff"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
 
 	//:m:*:isLoggedIn
 	//:d:en:Returns [tt]true[/tt] when the client is authenticated, _

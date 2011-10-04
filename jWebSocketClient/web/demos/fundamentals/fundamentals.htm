@@ -202,7 +202,7 @@
 				if( lWSC ) {
 					log( "Authenticating..." );
 					try {
-						var lRes = lWSC.authLogin(
+						var lRes = lWSC.systemLogon(
 							jws.GUEST_USER_LOGINNAME, 
 							jws.GUEST_USER_PASSWORD
 						);
@@ -221,7 +221,7 @@
 				if( lWSC ) {
 					log( "Deauthenticating..." );
 					try {
-						var lRes = lWSC.authLogout();
+						var lRes = lWSC.systemLogoff();
 						if( lRes.code == 0 ) {
 							log( "Asychronously waiting for response..." );
 						} else {
