@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -28,7 +27,6 @@ import org.apache.log4j.Logger;
  */
 public class Roles {
 
-	private static Logger log = Logger.getLogger(Roles.class);
 	private Map<String, Role> mRoles = new FastMap<String, Role>();
 
 	/**
@@ -128,7 +126,6 @@ public class Roles {
 		}
 		return Collections.unmodifiableSet(lSet);
 	}
-
 
 	/**
 	 * checks if the roles contain a certain role . The role is passed as a

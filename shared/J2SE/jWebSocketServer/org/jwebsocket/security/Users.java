@@ -17,7 +17,6 @@ package org.jwebsocket.security;
 
 import java.util.Map;
 import javolution.util.FastMap;
-import org.apache.log4j.Logger;
 
 /**
  * maintains the internal jWebSocket user FastMap. The users are loaded during the
@@ -26,8 +25,7 @@ import org.apache.log4j.Logger;
  */
 public class Users {
 
-	private static Logger log = Logger.getLogger(Users.class);
-	private Map<String, User> users = new FastMap<String, User>();
+	private Map<String, User> mUsers = new FastMap<String, User>();
 
 	/**
 	 * returns the user identified by its login name or <tt>null</tt> if no
@@ -37,7 +35,7 @@ public class Users {
 	 */
 	public User getUserByLoginName(String aLoginName) {
 		if (aLoginName != null) {
-			return users.get(aLoginName);
+			return mUsers.get(aLoginName);
 		}
 		return null;
 	}
@@ -49,7 +47,7 @@ public class Users {
 	 */
 	public void addUser(User aUser) {
 		if (aUser != null) {
-			users.put(aUser.getLoginname(), aUser);
+			mUsers.put(aUser.getLoginname(), aUser);
 		}
 	}
 
@@ -61,7 +59,7 @@ public class Users {
 	 */
 	public void removeUser(String aLoginName) {
 		if (aLoginName != null) {
-			users.remove(aLoginName);
+			mUsers.remove(aLoginName);
 		}
 	}
 
@@ -72,7 +70,7 @@ public class Users {
 	 */
 	public void removeUser(User aUser) {
 		if (aUser != null) {
-			users.remove(aUser.getLoginname());
+			mUsers.remove(aUser.getLoginname());
 		}
 	}
 }

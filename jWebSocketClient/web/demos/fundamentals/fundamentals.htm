@@ -233,6 +233,22 @@
 				}
 			}
 
+			function getAuth() {
+				if( lWSC ) {
+					log( "Getting authorities..." );
+					try {
+						var lRes = lWSC.systemGetAuthorities();
+						if( lRes.code == 0 ) {
+							log( "Asychronously waiting for response..." );
+						} else {
+							log( lRes.msg );
+						}
+					} catch( ex ) {
+						log( "Exception: " + ex.message );
+					}
+				}
+			}
+			
 			function toggleReconnect() {
 				if( lWSC ) {
 					var lReconnect = eReconnect.checked;
@@ -397,6 +413,10 @@
 					<td class="stdDlg" width="5">
 						<input class="sbtnDlg" id="sbtnDeauth" type="button" value="De-Auth" onclick="deauth();"
 							   title="Logs you out and disconnects from the jWebSocket server.">
+					</td>
+					<td class="stdDlg" width="5">
+						<input class="sbtnDlg" id="sbtnDeauth" type="button" value="Get Auth." onclick="getAuth();"
+							   title="Retreives the authorities for the user.">
 					</td>
 				</tr>
 			</table>

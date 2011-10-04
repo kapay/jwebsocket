@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import javolution.util.FastMap;
-import org.apache.log4j.Logger;
 
 /**
  * implements a FastMap of rights to act as a role.
@@ -28,7 +27,6 @@ import org.apache.log4j.Logger;
  */
 public class Rights {
 
-	private static Logger mLog = Logger.getLogger(Rights.class);
 	private Map<String, Right> mRights = new FastMap<String, Right>();
 
 	/**

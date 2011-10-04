@@ -2998,6 +2998,18 @@ jws.SystemClientPlugIn = {
 		return lRes;
 	},
 
+	systemGetAuthorities: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.SystemClientPlugIn.NS,
+				type: "getAuthorities"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
 	//:m:*:isLoggedIn
 	//:d:en:Returns [tt]true[/tt] when the client is authenticated, _
 	//:d:en:otherwise [tt]false[/tt].

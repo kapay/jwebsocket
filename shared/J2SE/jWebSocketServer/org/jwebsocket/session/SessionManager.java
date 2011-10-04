@@ -17,17 +17,17 @@ package org.jwebsocket.session;
 import java.util.Map;
 import java.util.Random;
 import javolution.util.FastMap;
+import org.apache.log4j.Logger;
 import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.IInitializable;
 import org.jwebsocket.api.ISessionReconnectionManager;
 import org.jwebsocket.api.IStorageProvider;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jwebsocket.api.ISessionManager;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketServerListener;
 import org.jwebsocket.kit.WebSocketServerEvent;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.util.Tools;
 
 /**
@@ -36,60 +36,88 @@ import org.jwebsocket.util.Tools;
  */
 public class SessionManager implements ISessionManager, IInitializable, WebSocketServerListener {
 
-	private IStorageProvider storageProvider;
-	private ISessionReconnectionManager reconnectionManager;
-	private static Log logger = LogFactory.getLog(SessionManager.class);
-	private Map<String, IBasicStorage<String, Object>> sessions;
+	private IStorageProvider mStorageProvider;
+	private ISessionReconnectionManager mReconnectionManager;
+	private static Logger mLog = Logging.getLogger(SessionManager.class);
+	private Map<String, IBasicStorage<String, Object>> mSessions;
 
+	/**
+	 * 
+	 * @return
+	 */
 	public ISessionReconnectionManager getReconnectionManager() {
-		return reconnectionManager;
+		return mReconnectionManager;
 	}
 
+	/**
+	 * 
+	 * @param reconnectionManager
+	 */
 	public void setReconnectionManager(ISessionReconnectionManager reconnectionManager) {
-		this.reconnectionManager = reconnectionManager;
+		this.mReconnectionManager = reconnectionManager;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public IStorageProvider getStorageProvider() {
-		return storageProvider;
+		return mStorageProvider;
 	}
 
+	/**
+	 * 
+	 * @param storageProvider
+	 */
 	public void setStorageProvider(IStorageProvider storageProvider) {
-		this.storageProvider = storageProvider;
+		this.mStorageProvider = storageProvider;
 	}
 
+	/**
+	 * 
+	 * @param aConnector
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
 	public IBasicStorage<String, Object> getSession(WebSocketConnector aConnector) throws Exception {
 		return getSession(aConnector.getSession().getSessionId());
 	}
 
+	/**
+	 * 
+	 * @param aSessionId
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
 	public IBasicStorage<String, Object> getSession(String aSessionId) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Getting session for: " + aSessionId + "...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Getting session for: " + aSessionId + "...");
 		}
 
-		if (sessions.containsKey(aSessionId)) {
+		if (mSessions.containsKey(aSessionId)) {
 			//Getting the local cached storage instance if exists
-			return sessions.get(aSessionId);
+			return mSessions.get(aSessionId);
 		}
 
-		if (reconnectionManager.isExpired(aSessionId)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Creating a blank storage for session: " + aSessionId + "...");
+		if (mReconnectionManager.isExpired(aSessionId)) {
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Creating a blank storage for session: " + aSessionId + "...");
 			}
-			IBasicStorage<String, Object> s = storageProvider.getStorage(aSessionId);
+			IBasicStorage<String, Object> s = mStorageProvider.getStorage(aSessionId);
 			s.clear();
-			sessions.put(aSessionId, s);
+			mSessions.put(aSessionId, s);
 
 			return s;
 		} else {
 			//Avoid security holes 
-			reconnectionManager.getReconnectionIndex().remove(aSessionId);
+			mReconnectionManager.getReconnectionIndex().remove(aSessionId);
 			//Recovered session, require to be removed from the trash
-			reconnectionManager.getSessionIdsTrash().remove(aSessionId);
+			mReconnectionManager.getSessionIdsTrash().remove(aSessionId);
 
-			IBasicStorage<String, Object> s = storageProvider.getStorage(aSessionId);
-			sessions.put(aSessionId, s);
+			IBasicStorage<String, Object> s = mStorageProvider.getStorage(aSessionId);
+			mSessions.put(aSessionId, s);
 
 			return s;
 		}
@@ -97,12 +125,12 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 
 	@Override
 	public void initialize() throws Exception {
-		sessions = new FastMap<String, IBasicStorage<String, Object>>();
+		mSessions = new FastMap<String, IBasicStorage<String, Object>>();
 	}
 
 	@Override
 	public void shutdown() throws Exception {
-		sessions.clear();
+		mSessions.clear();
 	}
 
 	@Override
@@ -110,15 +138,15 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 		//Allowing all connectors for a reconnection
 		String sid = aEvent.getConnector().getSession().getSessionId();
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Putting the session: " + sid + ", in reconnection mode...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Putting the session: " + sid + ", in reconnection mode...");
 		}
 
 		synchronized (this) {
 			//Removing the local cached storage instance. Free space if 
 			//the client never gets reconnected
-			sessions.remove(sid);
-			reconnectionManager.putInReconnectionMode(sid);
+			mSessions.remove(sid);
+			mReconnectionManager.putInReconnectionMode(sid);
 		}
 	}
 
@@ -132,15 +160,15 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 			//@TODO: if unique node id is passed check if already assigned in the
 			// network and reject connect if so!
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Setting the session identifier: " + aEvent.getConnector().getId());
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Setting the session identifier: " + aEvent.getConnector().getId());
 			}
 			aEvent.getSession().setSessionId(
 					Tools.getMD5(aEvent.getConnector().generateUID()
 					+ "." + lRand.nextInt()));
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Creating the WebSocketSession persistent storage "
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Creating the WebSocketSession persistent storage "
 						+ "for connector: " + aEvent.getConnector().getId());
 			}
 			aEvent.getSession().setStorage((Map<String, Object>) (getSession(aEvent.getSessionId())));

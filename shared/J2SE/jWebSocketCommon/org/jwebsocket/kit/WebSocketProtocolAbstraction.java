@@ -182,7 +182,7 @@ public class WebSocketProtocolAbstraction {
 		return lBuff;
 	}
 
-	private static int read(InputStream aIS) throws Exception {
+	public static int read(InputStream aIS) throws Exception {
 		int lByte = aIS.read();
 		if (lByte < 0) {
 			throw new Exception("EOF");

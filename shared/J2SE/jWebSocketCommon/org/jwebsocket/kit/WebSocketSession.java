@@ -16,6 +16,7 @@
 package org.jwebsocket.kit;
 
 import java.util.Map;
+import javolution.util.FastMap;
 
 /**
  *
@@ -24,37 +25,37 @@ import java.util.Map;
  */
 public class WebSocketSession {
 
-	private String sessionId = null;
-	private Map<String, Object> storage;
+	private String mSessionId = null;
+	private Map<String, Object> mStorage = new FastMap<String, Object>();
 
 	public WebSocketSession() {
 	}
 
 	public WebSocketSession(String aSessionId) {
-		sessionId = aSessionId;
+		mSessionId = aSessionId;
 	}
 
 	/**
 	 * @return the sessionId
 	 */
 	public String getSessionId() {
-		return sessionId;
+		return mSessionId;
 	}
 
 	/**
 	 * @param sessionId the sessionId to set
 	 */
 	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
+		this.mSessionId = sessionId;
 	}
 
 	public Map<String, Object> getStorage() {
-		return storage;
+		return mStorage;
 	}
 
 	public void setStorage(Map<String, Object> aStorage) {
-		if (null == storage) {
-			storage = aStorage;
+		if (null == mStorage) {
+			mStorage = aStorage;
 		} else {
 			throw new UnsupportedOperationException("This operation is dedicated to the system level only!");
 		}

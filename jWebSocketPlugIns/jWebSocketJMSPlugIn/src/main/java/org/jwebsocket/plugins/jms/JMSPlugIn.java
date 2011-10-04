@@ -36,6 +36,7 @@ import org.jwebsocket.plugins.jms.util.RightJms;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.spring.ServerXmlBeanFactory;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.util.Tools;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.io.FileSystemResource;
 
@@ -67,8 +68,8 @@ public class JMSPlugIn extends TokenPlugIn {
 
 	private void createBeanFactory() {
 		String lSpringConfig = getString("spring_config");
+		lSpringConfig = Tools.expandEnvVars(lSpringConfig);
 		String lPath = FilenameUtils.getPath(lSpringConfig);
-
 		if (lPath == null || lPath.length() <= 0) {
 			lPath = JWebSocketConfig.getConfigFolder(lSpringConfig);
 		} else {

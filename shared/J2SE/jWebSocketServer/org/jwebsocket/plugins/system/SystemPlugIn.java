@@ -15,7 +15,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins.system;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -40,6 +39,7 @@ import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.security.User;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.session.SessionManager;
 import org.jwebsocket.spring.ServerXmlBeanFactory;
 import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
@@ -51,6 +51,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
  * implements the jWebSocket system tokens like login, logout, send, broadcast
@@ -75,7 +76,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	// new spring based auth
 	private static final String TT_LOGON = "logon";
 	private static final String TT_LOGOFF = "logoff";
-	
+	private static final String TT_GET_AUTHORITIES = "getAuthorities";
 	private static final String TT_CLOSE = "close";
 	private static final String TT_GETCLIENTS = "getClients";
 	private static final String TT_PING = "ping";
@@ -98,16 +99,15 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static boolean ALLOW_ANONYMOUS_LOGIN = false;
 	private static String ALLOW_AUTO_ANONYMOUS_KEY = "allowAutoAnonymous";
 	private static boolean ALLOW_AUTO_ANONYMOUS = false;
-	
 	private AuthenticationProvider mAuthProv;
 	private ProviderManager mAuthProvMgr;
-	
+	private UserDetailsService mUserDetails;
+	private SessionManager mSessionManager; 
 	public static final String USERNAME = "$username";
 	public static final String AUTHORITIES = "$authorities";
 	public static final String UUID = "$uuid";
 	public static final String IS_AUTHENTICATED = "$is_authenticated";
 	private static ServerXmlBeanFactory mBeanFactory;
-	
 
 	/**
 	 * Constructor with configuration object
@@ -120,7 +120,7 @@ public class SystemPlugIn extends TokenPlugIn {
 		// specify default name space for system plugin
 		this.setNamespace(NS_SYSTEM);
 		mGetSettings();
-		
+
 		try {
 			String lSpringConfig = getString("spring_config");
 			lSpringConfig = Tools.expandEnvVars(lSpringConfig);
@@ -134,20 +134,23 @@ public class SystemPlugIn extends TokenPlugIn {
 
 			mBeanFactory = new ServerXmlBeanFactory(lFSRes, getClass().getClassLoader());
 
-			Object lObj = mBeanFactory.getBean("authenticationManager");
+			Object lObj = mBeanFactory.getBean("authManager");
 			mAuthProvMgr = (ProviderManager) lObj;
 			List<AuthenticationProvider> lProviders = mAuthProvMgr.getProviders();
 			mAuthProv = lProviders.get(0);
+
+			lObj = mBeanFactory.getBean("sessionManager");
+			mSessionManager = (SessionManager)lObj;
 			
 			// give a success message to the administrator
 			if (mLog.isInfoEnabled()) {
-				mLog.info("Authentication plug-in successfully loaded.");
+				mLog.info("System plug-in successfully loaded.");
 			}
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName() + " at Authentication plug-in instantiation: " + lEx.getMessage());
+			mLog.error(lEx.getClass().getSimpleName() + " at System plug-in instantiation: " + lEx.getMessage());
 		}
-		
-		
+
+
 		// give a success message to the administrator
 		if (mLog.isInfoEnabled()) {
 			mLog.info("System plug-in successfully loaded.");
@@ -155,44 +158,6 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	public AuthenticationProvider getAuthProvider() {
-		Authentication lAuth = new Authentication() {
-
-			@Override
-			public Collection<GrantedAuthority> getAuthorities() {
-				throw new UnsupportedOperationException("Not supported yet.");
-			}
-
-			@Override
-			public Object getCredentials() {
-				throw new UnsupportedOperationException("Not supported yet.");
-			}
-
-			@Override
-			public Object getDetails() {
-				throw new UnsupportedOperationException("Not supported yet.");
-			}
-
-			@Override
-			public Object getPrincipal() {
-				throw new UnsupportedOperationException("Not supported yet.");
-			}
-
-			@Override
-			public boolean isAuthenticated() {
-				throw new UnsupportedOperationException("Not supported yet.");
-			}
-
-			@Override
-			public void setAuthenticated(boolean bln) throws IllegalArgumentException {
-				throw new UnsupportedOperationException("Not supported yet.");
-			}
-
-			@Override
-			public String getName() {
-				throw new UnsupportedOperationException("Not supported yet.");
-			}
-		};
-		Authentication l2Auth = mAuthProv.authenticate(lAuth);
 		return mAuthProv;
 	}
 
@@ -220,31 +185,24 @@ public class SystemPlugIn extends TokenPlugIn {
 		if (lType != null && getNamespace().equals(lNS)) {
 			if (lType.equals(TT_SEND)) {
 				send(aConnector, aToken);
-				aResponse.abortChain();
 			} else if (lType.equals(TT_RESPOND)) {
 				respond(aConnector, aToken);
-				aResponse.abortChain();
 			} else if (lType.equals(TT_BROADCAST)) {
 				broadcast(aConnector, aToken);
-				aResponse.abortChain();
 			} else if (lType.equals(TT_LOGIN)) {
 				login(aConnector, aToken);
-				aResponse.abortChain();
 			} else if (lType.equals(TT_LOGOUT)) {
 				logout(aConnector, aToken);
-				aResponse.abortChain();
 			} else if (lType.equals(TT_LOGON)) {
 				logon(aConnector, aToken);
-				aResponse.abortChain();
 			} else if (lType.equals(TT_LOGOFF)) {
 				logoff(aConnector, aToken);
-				aResponse.abortChain();
+			} else if (lType.equals(TT_GET_AUTHORITIES)) {
+				getAuthorities(aConnector, aToken);
 			} else if (lType.equals(TT_CLOSE)) {
 				close(aConnector, aToken);
-				aResponse.abortChain();
 			} else if (lType.equals(TT_GETCLIENTS)) {
 				getClients(aConnector, aToken);
-				aResponse.abortChain();
 			} else if (lType.equals(TT_PING)) {
 				ping(aConnector, aToken);
 			} else if (lType.equals(TT_ECHO)) {
@@ -258,6 +216,7 @@ public class SystemPlugIn extends TokenPlugIn {
 			} else if (lType.equals("getLostConnectors")) {
 				getLostConnectors(aConnector, aToken);
 			}
+			aResponse.abortChain();
 		}
 	}
 
@@ -912,9 +871,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		lResponse.setList("connectors", lEngine.lostConnectors);
 		sendToken(aConnector, aConnector, lResponse);
 	}
-	
+
 	// new spring based authentication
-	
 	void logon(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		if (SecurityHelper.isUserAuthenticated(aConnector)) {
@@ -939,14 +897,13 @@ public class SystemPlugIn extends TokenPlugIn {
 			String lMsg = ex.getClass().getSimpleName() + ": " + ex.getMessage();
 			Token lResponse = getServer().createErrorToken(aToken, -1, lMsg);
 			sendToken(aConnector, aConnector, lResponse);
-
 			if (mLog.isDebugEnabled()) {
 				mLog.debug(lMsg);
 			}
 			return; // Stop the execution flow
 		}
 
-		if (true) {
+		if (null != lAuthResult) {
 			// Creating the response
 			Token lResponse = createResponse(aToken);
 			Object lObj;
@@ -962,59 +919,57 @@ public class SystemPlugIn extends TokenPlugIn {
 			lResponse.setString("authorities", (lObj == null ? "null" : lObj.toString()));
 			// Sending the response
 			sendToken(aConnector, aConnector, lResponse);
-			return;
+//			return;
 		}
 
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Updating the user session...");
 		}
 
-		//Getting the session
-		Map<String, Object> lSession = aConnector.getSession().getStorage();
+		// Getting the session
+		Map<String, Object> lSessionParms = aConnector.getSession().getStorage();
 
 		//Setting the is_authenticated flag
-		lSession.put(IS_AUTHENTICATED, lAuthResult.isAuthenticated());
+		lSessionParms.put(IS_AUTHENTICATED, lAuthResult.isAuthenticated());
 
 		//Setting the username
-		lSession.put(USERNAME, lUsername);
+		lSessionParms.put(USERNAME, lUsername);
 		aConnector.setUsername(lUsername);
 
-		//Setting the uuid
-		String uuid;
-		Object details = lAuthResult.getDetails();
-		if (null != details && details instanceof IUserUniqueIdentifierContainer) {
-			uuid = ((IUserUniqueIdentifierContainer) details).getUUID();
+		// Setting the uuid
+		String lUUID;
+		Object lDetails = lAuthResult.getDetails();
+		if (null != lDetails && lDetails instanceof IUserUniqueIdentifierContainer) {
+			lUUID = ((IUserUniqueIdentifierContainer) lDetails).getUUID();
 		} else {
-			uuid = lUsername;
+			lUUID = lUsername;
 		}
-		lSession.put(UUID, uuid);
+		lSessionParms.put(UUID, lUUID);
 
-		//Setting the authorities
-		String authorities = "";
-		for (GrantedAuthority ga : lAuthResult.getAuthorities()) {
-			authorities = authorities.concat(ga.getAuthority() + " ");
+		// Setting the authorities
+		String lAuthorities = "";
+		for (GrantedAuthority lGA : lAuthResult.getAuthorities()) {
+			lAuthorities = lAuthorities.concat(lGA.getAuthority() + " ");
 		}
-		//Storing the user authorities as a string to avoid serialization problems
-		lSession.put(AUTHORITIES, authorities);
+		// Storing the user authorities as a string to avoid serialization problems
+		lSessionParms.put(AUTHORITIES, lAuthorities);
 
-		//Creating the response
+		// Creating the response
 		Token response = createResponse(aToken);
-		response.setString("uuid", uuid);
+		response.setString("uuid", lUUID);
 		response.setString("username", lUsername);
-		response.setList("authorities", Tools.parseStringArrayToList(authorities.split(" ")));
+		response.setList("authorities", Tools.parseStringArrayToList(lAuthorities.split(" ")));
 
-		//Sending the response
-		getServer().sendToken(aConnector, response);
+		// Sending the response
+		sendToken(aConnector, aConnector, response);
 		if (mLog.isDebugEnabled()) {
 			mLog.debug("Logon process finished successfully!");
 		}
 
-		try {
-			//Notifying the UserLogon event to available listeners
-			// TODO: broadcast message until events are fully merged
-			// notify(new UserLogon(result), null, false);
-		} catch (Exception ex) {
-			mLog.error(ex.getMessage());
+		// if successfully logged in...
+		if (lUsername != null) {
+			// broadcast "login event" to other clients
+			broadcastLoginEvent(aConnector);
 		}
 	}
 
@@ -1045,5 +1000,23 @@ public class SystemPlugIn extends TokenPlugIn {
 			mLog.error(ex.getMessage());
 		}
 	}
-	
+
+	void getAuthorities(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		if (!SecurityHelper.isUserAuthenticated(aConnector)) {
+			sendToken(aConnector, aConnector, lServer.createNotAuthToken(aToken));
+			return;
+		}
+		String lUsername = aConnector.getUsername();
+		Map<String, Object> lSessionParms = aConnector.getSession().getStorage();
+		String lAuthorities = (String) lSessionParms.get(AUTHORITIES);
+
+		// Creating the response
+		Token lResponse = createResponse(aToken);
+		lResponse.setString("username", lUsername);
+		lResponse.setList("authorities", Tools.parseStringArrayToList(lAuthorities.split(" ")));
+
+		// Sending the response
+		sendToken(aConnector, aConnector, lResponse);
+	}
 }

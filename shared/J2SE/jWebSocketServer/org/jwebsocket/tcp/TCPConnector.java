@@ -380,7 +380,7 @@ public class TCPConnector extends BaseConnector {
 				WebSocketEngine aEngine) {
 			while (WebSocketConnectorStatus.UP == getStatus()) {
 				try {
-					int lIn = mIn.read();
+					int lIn = WebSocketProtocolAbstraction.read(mIn);
 					// start of frame
 					if (lIn == 0x00) {
 						aBuff.reset();
