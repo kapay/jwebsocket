@@ -19,8 +19,8 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.storage.ehcache.EhCacheStorage;
 
 /**
  * JDBC store based extension of SubscriberStore interface.
@@ -28,27 +28,34 @@ import org.jwebsocket.storage.ehcache.EhCacheStorage;
  * @author puran, aschulze
  * @version $Id: BaseSubscriberStore.java 1592 2011-02-20 00:49:48Z fivefeetfurther $
  */
-public class BaseSubscriberStore
-		extends EhCacheStorage
-		implements SubscriberStore {
+public class BaseSubscriberStore implements SubscriberStore {
 
 	/** logger object */
 	private static Logger mLog = Logging.getLogger(BaseSubscriberStore.class);
 	private static final String ID = "id";
 	private static final String CHANNELS = "channels";
+	private IBasicStorage mStorage = null;
 
 	/**
 	 * default constructor
 	 */
-	public BaseSubscriberStore() {
-		super("channelSubscribers");
+	public BaseSubscriberStore(IBasicStorage aStorage) {
+		setStorage(aStorage);
+	}
+
+	public final void setStorage(IBasicStorage aStorage) {
+		mStorage = aStorage;
+	}
+
+	public final IBasicStorage getStorage() {
+		return mStorage;
 	}
 
 	@Override
 	public Subscriber getSubscriber(String aId) {
 		JSONObject lSubscriberObject = null;
 		try {
-			String lStr = (String) super.get(aId);
+			String lStr = (String) mStorage.get(aId);
 			lSubscriberObject = new JSONObject(lStr);
 		} catch (Exception lEx) {
 		}
@@ -87,7 +94,7 @@ public class BaseSubscriberStore
 			lSubscriberObject.put(CHANNELS, lJSONArray);
 			// TODO: updated by Alex: subscriberObject.toString() instead of subscriberObject (JSONObject is not serializable!)
 			// TODO: Need to think about how to return potential error (Exception?)
-			super.put(aSubscriber.getId(), lSubscriberObject.toString());
+			mStorage.put(aSubscriber.getId(), lSubscriberObject.toString());
 			return true;
 		} catch (JSONException lEx) {
 			mLog.error("Error constructing JSON data for the given subscriber '"
@@ -98,16 +105,16 @@ public class BaseSubscriberStore
 
 	@Override
 	public void removeSubscriber(String id) {
-		super.remove(id);
+		mStorage.remove(id);
 	}
 
 	@Override
 	public void clearSubscribers() {
-		super.clear();
+		mStorage.clear();
 	}
 
 	@Override
 	public int getSubscribersStoreSize() {
-		return super.size();
+		return mStorage.size();
 	}
 }

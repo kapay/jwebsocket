@@ -15,33 +15,39 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.plugins.channels;
 
-
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.storage.ehcache.EhCacheStorage;
 
 /**
  *
  * @author aschulze
  */
-public class BasePublisherStore
-		extends EhCacheStorage
-		implements PublisherStore {
+public class BasePublisherStore implements PublisherStore {
 
 	/* logger object */
 	private static Logger mLog = Logging.getLogger(BaseSubscriberStore.class);
 	/* properties */
 	private static final String ID = "id";
 	private static final String CHANNELS = "channels";
+	private IBasicStorage mStorage = null;
 
 	/**
 	 * default constructor
 	 */
-	public BasePublisherStore() {
-		super("channelPublishers");
+	public BasePublisherStore(IBasicStorage aStorage) {
+		setStorage(aStorage);
+	}
+
+	public final void setStorage(IBasicStorage aStorage) {
+		mStorage = aStorage;
+	}
+
+	public final IBasicStorage getStorage() {
+		return mStorage;
 	}
 
 	/**
@@ -53,7 +59,7 @@ public class BasePublisherStore
 	public Publisher getPublisher(String aId) {
 		JSONObject lPublisherObject = null;
 		try {
-			String lStr = (String) super.get(aId);
+			String lStr = (String) mStorage.get(aId);
 			lPublisherObject = new JSONObject(lStr);
 		} catch (Exception lEx) {
 		}
@@ -92,7 +98,7 @@ public class BasePublisherStore
 			lPublisherObject.put(CHANNELS, lJSONArray);
 			// TODO: updated by Alex: PublisherObject.toString() instead of PublisherObject (JSONObject is not serializable!)
 			// TODO: Need to think about how to return potential error (Exception?)
-			super.put(aPublisher.getId(), lPublisherObject.toString());
+			mStorage.put(aPublisher.getId(), lPublisherObject.toString());
 			return true;
 		} catch (JSONException lEx) {
 			mLog.error("Error constructing JSON data for the given Publisher '"
@@ -103,16 +109,16 @@ public class BasePublisherStore
 
 	@Override
 	public void removePublisher(String aId) {
-		super.remove(aId);
+		mStorage.remove(aId);
 	}
 
 	@Override
 	public void clearPublishers() {
-		super.clear();
+		mStorage.clear();
 	}
 
 	@Override
 	public int getPublisherStoreSize() {
-		return size();
+		return mStorage.size();
 	}
 }

@@ -21,57 +21,81 @@ import org.jwebsocket.api.ISessionReconnectionManager;
 
 /**
  *
- * @author kyberneees
+ * @author kyberneees, aschulze
  */
 public abstract class BaseReconnectionManager implements ISessionReconnectionManager, IInitializable {
-	private IBasicCacheStorage<String, Object> reconnectionIndex;
-	private String cacheStorageName;
-	private Integer sessionExpirationTime = 60; //One minute by default
-	private IBasicStorage<String, Object> sessionIdsTrash;
-	private String trashStorageName;
+	private IBasicCacheStorage<String, Object> mReconnectionIndex;
+	private String mCacheStorageName;
+	private Integer mSessionExpirationTime = 60; //One minute by default
+	private IBasicStorage<String, Object> mSessionIdsTrash;
+	private String mTrashStorageName;
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getCacheStorageName() {
-		return cacheStorageName;
+		return mCacheStorageName;
 	}
 
-	public void setCacheStorageName(String cacheStorageName) {
-		this.cacheStorageName = cacheStorageName;
+	/**
+	 * 
+	 * @param aCacheStorageName
+	 */
+	public void setCacheStorageName(String aCacheStorageName) {
+		this.mCacheStorageName = aCacheStorageName;
 	}
 
 	@Override
 	public IBasicCacheStorage<String, Object> getReconnectionIndex() {
-		return reconnectionIndex;
+		return mReconnectionIndex;
 	}
 
-	public void setReconnectionIndex(IBasicCacheStorage<String, Object> reconnectionIndex) {
-		this.reconnectionIndex = reconnectionIndex;
+	/**
+	 * 
+	 * @param aReconnectionIndex
+	 */
+	public void setReconnectionIndex(IBasicCacheStorage<String, Object> aReconnectionIndex) {
+		this.mReconnectionIndex = aReconnectionIndex;
 	}
 
 	@Override
 	public Integer getSessionExpirationTime() {
-		return sessionExpirationTime;
+		return mSessionExpirationTime;
 	}
 
 	@Override
-	public void setSessionExpirationTime(Integer sessionExpirationTime) {
-		this.sessionExpirationTime = sessionExpirationTime;
+	public void setSessionExpirationTime(Integer aSessionExpirationTime) {
+		this.mSessionExpirationTime = aSessionExpirationTime;
 	}
 
 	@Override
 	public IBasicStorage<String, Object> getSessionIdsTrash() {
-		return sessionIdsTrash;
+		return mSessionIdsTrash;
 	}
 
-	public void setSessionIdsTrash(IBasicStorage<String, Object> sessionIdsTrash) {
-		this.sessionIdsTrash = sessionIdsTrash;
+	/**
+	 * 
+	 * @param aSessionIdsTrash
+	 */
+	public void setSessionIdsTrash(IBasicStorage<String, Object> aSessionIdsTrash) {
+		this.mSessionIdsTrash = aSessionIdsTrash;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getTrashStorageName() {
-		return trashStorageName;
+		return mTrashStorageName;
 	}
 
-	public void setTrashStorageName(String trashStorageName) {
-		this.trashStorageName = trashStorageName;
+	/**
+	 * 
+	 * @param aTrashStorageName
+	 */
+	public void setTrashStorageName(String aTrashStorageName) {
+		this.mTrashStorageName = aTrashStorageName;
 	}
 	
 	@Override

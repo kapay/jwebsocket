@@ -149,12 +149,6 @@ public class SystemPlugIn extends TokenPlugIn {
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName() + " at System plug-in instantiation: " + lEx.getMessage());
 		}
-
-
-		// give a success message to the administrator
-		if (mLog.isInfoEnabled()) {
-			mLog.info("System plug-in successfully loaded.");
-		}
 	}
 
 	public AuthenticationProvider getAuthProvider() {

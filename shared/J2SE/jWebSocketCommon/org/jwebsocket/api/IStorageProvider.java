@@ -15,16 +15,18 @@
 package org.jwebsocket.api;
 
 /**
- *
- * @author kyberneees
+ * Provides the getStorage method to obtain a persistence 
+ * storage with a given name.
+ * @author kyberneees, aschulze
  */
 public interface IStorageProvider {
 	
 	/**
 	 * Get a storage instance giving a name
 	 * 
-	 * @param name
+	 * @param aName 
 	 * @return The storage instance
+	 * @throws Exception  
 	 */
-	IBasicStorage<String, Object> getStorage(String name) throws Exception;
+	IBasicStorage<String, Object> getStorage(String aName) throws Exception;
 }

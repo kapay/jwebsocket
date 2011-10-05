@@ -25,8 +25,8 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.storage.ehcache.EhCacheStorage;
 
 /**
  * Base JDBC based implementation of the <tt>ChannelStore</tt>
@@ -34,9 +34,7 @@ import org.jwebsocket.storage.ehcache.EhCacheStorage;
  * @author puran, aschulze
  * @version $Id: BaseChannelStore.java 1101 2010-10-19 12:36:12Z fivefeetfurther$
  */
-public class BaseChannelStore
-		extends EhCacheStorage
-		implements ChannelStore {
+public class BaseChannelStore implements ChannelStore {
 
 	/** logger object */
 	private static Logger logger = Logging.getLogger(BaseChannelStore.class);
@@ -50,12 +48,21 @@ public class BaseChannelStore
 	private static final String STATE = "state";
 	private static final String SUBSCRIBERS = "subscribers";
 	private static final String PUBLISHERS = "publishers";
+	private IBasicStorage mStorage = null;
 
 	/**
 	 * default constructor
 	 */
-	public BaseChannelStore() {
-		super("channelStore");
+	public BaseChannelStore(IBasicStorage aStorage) {
+		setStorage(aStorage);
+	}
+
+	public final void setStorage(IBasicStorage aStorage) {
+		mStorage = aStorage;
+	}
+
+	public final IBasicStorage getStorage() {
+		return mStorage;
 	}
 
 	/**
@@ -65,7 +72,7 @@ public class BaseChannelStore
 	 */
 	@Override
 	public Channel getChannel(String aId) {
-		Object lObj = super.get(aId);
+		Object lObj = mStorage.get(aId);
 		String lJSONString = (String) lObj;
 		if (null == lJSONString) {
 			return null;
@@ -140,7 +147,7 @@ public class BaseChannelStore
 
 			// now save
 			// TODO: Need to think about how to return potential error (Exception?)
-			super.put(aChannel.getId(), lJSON.toString());
+			mStorage.put(aChannel.getId(), lJSON.toString());
 			return true;
 		} catch (JSONException e) {
 			logger.error("Error constructing JSON data for the given channel '"
@@ -154,7 +161,7 @@ public class BaseChannelStore
 	 */
 	@Override
 	public void removeChannel(String id) {
-		super.remove(id);
+		mStorage.remove(id);
 	}
 
 	/**
@@ -162,7 +169,7 @@ public class BaseChannelStore
 	 */
 	@Override
 	public void clearChannels() {
-		super.clear();
+		mStorage.clear();
 	}
 
 	/**
@@ -170,17 +177,17 @@ public class BaseChannelStore
 	 */
 	@Override
 	public int getChannelStoreSize() {
-		return size();
+		return mStorage.size();
 	}
 
 	@Override
 	public Map<String, Channel> getChannels() {
 		// TODO: EhCacheStorage does not yet implement values and entryset! Implement to be more efficient!
-		Set lKeys = keySet();
+		Set lKeys = mStorage.keySet();
 		Map lRes = new FastMap<String, Channel>();
 		if (lKeys != null) {
 			for (Object lKey : lKeys) {
-				Object lValue = get((String) lKey);
+				Object lValue = mStorage.get((String) lKey);
 				Channel lChannel = json2Channel((String) lValue);
 				lRes.put(lChannel.getId(), lChannel);
 			}

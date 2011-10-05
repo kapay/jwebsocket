@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
+import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.channels.Channel.ChannelState;
 import org.jwebsocket.token.Token;
@@ -42,9 +43,9 @@ public class ChannelManager {
 	private static final String USE_PERSISTENT_STORE = "use_persistent_store";
 	private static final String ALLOW_NEW_CHANNELS = "allow_new_channels";
 	/** persistent storage objects */
-	private final ChannelStore mChannelStore = new BaseChannelStore();
-	private final SubscriberStore mSubscriberStore = new BaseSubscriberStore();
-	private final PublisherStore mPublisherStore = new BasePublisherStore();
+	private final ChannelStore mChannelStore;
+	private final SubscriberStore mSubscriberStore;
+	private final PublisherStore mPublisherStore;
 	/** in-memory store maps */
 	// private final Map<String, Channel> mChannels = new ConcurrentHashMap<String, Channel>();
 	private Map<String, Object> mChannelPluginSettings = null;
@@ -59,77 +60,93 @@ public class ChannelManager {
 	/** setting to check if new channel creation or registration is allowed */
 	private static boolean mAllowNewChannels;
 
-	private ChannelManager(Map<String, Object> aSettings) {
+	private ChannelManager(Map aSettings,
+			IBasicStorage aChannelStorage,
+			IBasicStorage aSubscriberStorage,
+			IBasicStorage aPublisherStorage) {
+
+		mChannelStore = new BaseChannelStore(aChannelStorage);
+		mSubscriberStore = new BaseSubscriberStore(aSubscriberStorage);
+		mPublisherStore = new BasePublisherStore(aPublisherStorage);
+
 		this.mChannelPluginSettings = new ConcurrentHashMap<String, Object>(aSettings);
-		
+
 		Object lAllowNewChannels = mChannelPluginSettings.get(ALLOW_NEW_CHANNELS);
 		if (lAllowNewChannels != null && lAllowNewChannels.equals("true")) {
 			mAllowNewChannels = true;
 		}
 		int lSuccess = 0;
-		for (String lOption : aSettings.keySet()) {
+		for (Object lKey : aSettings.keySet()) {
+			String lOption = (String) lKey;
 			if (lOption.startsWith("channel:")) {
 				String lChannelId = lOption.substring(8);
 				Object lObj = aSettings.get(lOption);
 				JSONObject lJSON = null;
+				boolean lParseOk = false;
 				if (lObj instanceof JSONObject) {
 					lJSON = (JSONObject) lObj;
+					lParseOk = true;
 				} else {
-					lJSON = new JSONObject();
+					try {
+						lJSON = new JSONObject((String) lObj);
+						lParseOk = true;
+					} catch (Exception Ex) {
+					}
 				}
+				if (lParseOk) {
+					String lName = null;
+					String lAccessKey = null;
+					String lSecretKey = null;
+					String lOwner = null;
+					boolean lIsPrivate = false;
+					boolean lIsSystem = false;
+					try {
+						lName = lJSON.getString("name");
+					} catch (Exception lEx) {
+					}
+					try {
+						lAccessKey = lJSON.getString("access_key");
+					} catch (Exception lEx) {
+					}
+					try {
+						lSecretKey = lJSON.getString("secret_key");
+					} catch (Exception lEx) {
+					}
+					try {
+						lOwner = lJSON.getString("owner");
+					} catch (Exception lEx) {
+					}
+					try {
+						lIsPrivate = lJSON.getBoolean("isPrivate");
+					} catch (Exception lEx) {
+					}
+					try {
+						lIsSystem = lJSON.getBoolean("isSystem");
+					} catch (Exception lEx) {
+					}
 
-				String lName = null;
-				String lAccessKey = null;
-				String lSecretKey = null;
-				String lOwner = null;
-				boolean lIsPrivate = false;
-				boolean lIsSystem = false;
-				try {
-					lName = lJSON.getString("name");
-				} catch (Exception lEx) {
-				}
-				try {
-					lAccessKey = lJSON.getString("access_key");
-				} catch (Exception lEx) {
-				}
-				try {
-					lSecretKey = lJSON.getString("secret_key");
-				} catch (Exception lEx) {
-				}
-				try {
-					lOwner = lJSON.getString("owner");
-				} catch (Exception lEx) {
-				}
-				try {
-					lIsPrivate = lJSON.getBoolean("isPrivate");
-				} catch (Exception lEx) {
-				}
-				try {
-					lIsSystem = lJSON.getBoolean("isSystem");
-				} catch (Exception lEx) {
-				}
+					if (mLog.isDebugEnabled()) {
+						mLog.debug("Instantiating channel '"
+								+ lChannelId + "' by configuration"
+								+ " (private: "
+								+ lIsPrivate
+								+ ", system: " + lIsSystem + ")...");
+					}
 
-				if (mLog.isDebugEnabled()) {
-					mLog.debug("Instantiating channel '"
-							+ lChannelId + "' by configuration"
-							+ " (private: "
-							+ lIsPrivate
-							+ ", system: " + lIsSystem + ")...");
+					Channel lChannel = new Channel(
+							lChannelId, // String aId,
+							lName, // String aName,
+							lIsPrivate, // boolean aPrivateChannel,
+							lIsSystem, // boolean aSystemChannel,
+							lAccessKey, // String aAccessKey,
+							lSecretKey, // String aSecretKey,
+							lOwner, // String aOwner,
+							ChannelState.INITIALIZED // ChannelState aState,
+							);
+					// put in channels map
+					mChannelStore.storeChannel(lChannel);
+					lSuccess++;
 				}
-
-				Channel lChannel = new Channel(
-						lChannelId, // String aId,
-						lName, // String aName,
-						lIsPrivate, // boolean aPrivateChannel,
-						lIsSystem, // boolean aSystemChannel,
-						lAccessKey, // String aAccessKey,
-						lSecretKey, // String aSecretKey,
-						lOwner, // String aOwner,
-						ChannelState.INITIALIZED // ChannelState aState,
-						);
-				// put in channels map
-				mChannelStore.storeChannel(lChannel);
-				lSuccess++;
 			}
 		}
 		if (mLog.isDebugEnabled()) {
@@ -141,10 +158,11 @@ public class ChannelManager {
 	 * @param aSettings
 	 * @return the static manager instance
 	 */
+	/*
 	public static ChannelManager getChannelManager(Map<String, Object> aSettings) {
-		return new ChannelManager(aSettings);
+	return new ChannelManager(aSettings);
 	}
-
+	 */
 	/**
 	 * Starts the system channels within the jWebSocket system configured via
 	 * jWebSocket.xml, Note that it doesn't insert the system channels to the
@@ -157,13 +175,13 @@ public class ChannelManager {
 		/*
 		User lRoot = SecurityFactory.getRootUser();
 		for (Channel lChannel : mChannels.values()) {
-			try {
-				lChannel.start(lRoot.getLoginname());
-			} catch (Exception lEx) {
-				mLog.error(lEx.getClass().getSimpleName()
-						+ " on starting channel '" + lChannel.getId() + "': "
-						+ lEx.getMessage());
-			}
+		try {
+		lChannel.start(lRoot.getLoginname());
+		} catch (Exception lEx) {
+		mLog.error(lEx.getClass().getSimpleName()
+		+ " on starting channel '" + lChannel.getId() + "': "
+		+ lEx.getMessage());
+		}
 		}
 		 */
 	}
@@ -178,13 +196,13 @@ public class ChannelManager {
 		/*
 		User lRoot = SecurityFactory.getRootUser();
 		for (Channel lChannel : mChannels.values()) {
-			try {
-				lChannel.stop(lRoot.getLoginname());
-			} catch (Exception lEx) {
-				mLog.error(lEx.getClass().getSimpleName()
-						+ " on stopping channel '" + lChannel.getId() + "': "
-						+ lEx.getMessage());
-			}
+		try {
+		lChannel.stop(lRoot.getLoginname());
+		} catch (Exception lEx) {
+		mLog.error(lEx.getClass().getSimpleName()
+		+ " on stopping channel '" + lChannel.getId() + "': "
+		+ lEx.getMessage());
+		}
 		}
 		 */
 	}

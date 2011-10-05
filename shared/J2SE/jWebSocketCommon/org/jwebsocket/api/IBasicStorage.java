@@ -19,10 +19,12 @@ import java.util.Map;
 import java.util.Collection;
 
 /**
- *
+ * A storage is a named key/value list. This is the basic interface for all 
+ * higher level implementations and persistence engines, like MemoryCache, 
+ * EhCache or MongoDBCache.
  * @param <K> 
  * @param <V> 
- * @author kyberneees
+ * @author kyberneees, aschulze
  */
 public interface IBasicStorage<K, V> extends Map<K, V>, IInitializable {
 
