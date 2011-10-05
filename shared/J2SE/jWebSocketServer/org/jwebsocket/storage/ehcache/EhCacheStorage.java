@@ -22,29 +22,25 @@ import javolution.util.FastSet;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
 import org.jwebsocket.api.IBasicStorage;
-import org.jwebsocket.config.JWebSocketConfig;
 
 /**
- *
+ * a named storage (a map of key/value pairs) in EhCache. Please consider 
+ * that each storage is maintained in its own file on the hard disk.
  * @author aschulze
  */
 public class EhCacheStorage implements IBasicStorage {
 
-	private static final int DEF_MAX_IN_MEMORY = 1000;
-	private static int mInstanceCounter = 0;
 	private String mName = null;
 	private static CacheManager mCacheManager = null;
 	private Cache mCache = null;
 
 	/**
 	 * 
-	 * @param aId
+	 * @param aName
 	 */
-	public EhCacheStorage(String aId) {
-		mInstanceCounter++;
-		mName = aId;
+	public EhCacheStorage(String aName) {
+		mName = aName;
 		initialize();
 	}
 
@@ -213,18 +209,9 @@ public class EhCacheStorage implements IBasicStorage {
 	 */
 	@Override
 	public void initialize() {
-		if (mCacheManager == null) {
-			mCacheManager = new CacheManager(JWebSocketConfig.getConfigFolder("ehcache.xml"));
-		}
+		mCacheManager = EhCacheManager.getInstance();
 		if (mCacheManager != null) {
-			// TODO: currenly hard coded, make configurable!
 			mCache = mCacheManager.getCache(mName);
-			if (mCache == null) {
-				mCache = new Cache(new CacheConfiguration(mName, DEF_MAX_IN_MEMORY));
-				mCacheManager.addCache(mCache);
-			}
-			// ;.memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU).overflowToDisk(false).eternal(true).diskPersistent(false).diskExpiryThreadIntervalSeconds(0));
-			// makes no sense for eternal setting: timeToLiveSeconds(60).timeToIdleSeconds(30).
 		}
 	}
 

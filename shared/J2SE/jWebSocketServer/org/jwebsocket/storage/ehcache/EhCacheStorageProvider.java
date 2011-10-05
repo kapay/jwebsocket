@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - MemoryStorageProvider
+//  jWebSocket - EhCacheStorageProvider
 //  Copyright (c) 2011 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -19,7 +19,7 @@ import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.api.IStorageProvider;
 
 /**
- *
+ * Provides a getStorage method to return an EhCache storage with a given name.
  * @author kyberneees, aschulze
  */
 public class EhCacheStorageProvider implements IStorageProvider {

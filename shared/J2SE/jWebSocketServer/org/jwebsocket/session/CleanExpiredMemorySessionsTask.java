@@ -16,36 +16,37 @@ package org.jwebsocket.session;
 
 import java.util.Iterator;
 import java.util.TimerTask;
+import org.apache.log4j.Logger;
 import org.jwebsocket.api.IBasicStorage;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.storage.memory.MemoryStorage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  *
- * @author kyberneees
+ * @author kyberneees,aschulze
  */
 public class CleanExpiredMemorySessionsTask extends TimerTask {
 
-	private IBasicStorage<String, Object> sessionIdsTrash;
-	private static Log logger = LogFactory.getLog(CleanExpiredMemorySessionsTask.class);
+	private IBasicStorage<String, Object> mSessionIdsTrash;
+	private static Logger mLog = Logging.getLogger(CleanExpiredMemorySessionsTask.class);
 
 	public CleanExpiredMemorySessionsTask(IBasicStorage<String, Object> sessionIdsTrash) {
-		this.sessionIdsTrash = sessionIdsTrash;
+		this.mSessionIdsTrash = sessionIdsTrash;
 	}
 
 	@Override
 	public void run() {
-		if (logger.isDebugEnabled()) {
-			logger.debug(">> Cleaning expired sessions ...");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Cleaning expired sessions ...");
 		}
 
-		Iterator<String> keys = sessionIdsTrash.keySet().iterator();
-		while (keys.hasNext()) {
-			String k = keys.next();
+		Iterator<String> lKeys = mSessionIdsTrash.keySet().iterator();
+		while (lKeys.hasNext()) {
+			String lKey = lKeys.next();
 
-			if (MemoryStorage.getContainer().containsKey(k) && ((Long) (sessionIdsTrash.get(k)) < System.currentTimeMillis())) {
-				MemoryStorage.getContainer().remove(k);
+			if (MemoryStorage.getContainer().containsKey(lKey)
+					&& ((Long) (mSessionIdsTrash.get(lKey)) < System.currentTimeMillis())) {
+				MemoryStorage.getContainer().remove(lKey);
 			}
 		}
 	}

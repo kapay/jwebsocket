@@ -15,7 +15,6 @@
 package org.jwebsocket.session;
 
 import java.util.Map;
-import java.util.Random;
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.IBasicStorage;
@@ -24,17 +23,14 @@ import org.jwebsocket.api.IInitializable;
 import org.jwebsocket.api.ISessionReconnectionManager;
 import org.jwebsocket.api.IStorageProvider;
 import org.jwebsocket.api.ISessionManager;
-import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.api.WebSocketServerListener;
-import org.jwebsocket.kit.WebSocketServerEvent;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.util.Tools;
 
 /**
- *
- * @author kyberneees
+ * Manages the jWebSocket sessions. It uses a cache implementation, 
+ * which can be configured by Spring.
+ * @author kyberneees, aschulze
  */
-public class SessionManager implements ISessionManager, IInitializable, WebSocketServerListener {
+public class SessionManager implements ISessionManager, IInitializable /*, WebSocketServerListener */ {
 
 	private IStorageProvider mStorageProvider;
 	private ISessionReconnectionManager mReconnectionManager;
@@ -51,10 +47,10 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 
 	/**
 	 * 
-	 * @param reconnectionManager
+	 * @param aReconnectionManager
 	 */
-	public void setReconnectionManager(ISessionReconnectionManager reconnectionManager) {
-		this.mReconnectionManager = reconnectionManager;
+	public void setReconnectionManager(ISessionReconnectionManager aReconnectionManager) {
+		this.mReconnectionManager = aReconnectionManager;
 	}
 
 	/**
@@ -67,10 +63,10 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 
 	/**
 	 * 
-	 * @param storageProvider
+	 * @param aStorageProvider
 	 */
-	public void setStorageProvider(IStorageProvider storageProvider) {
-		this.mStorageProvider = storageProvider;
+	public void setStorageProvider(IStorageProvider aStorageProvider) {
+		this.mStorageProvider = aStorageProvider;
 	}
 
 	/**
@@ -97,7 +93,7 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 		}
 
 		if (mSessions.containsKey(aSessionId)) {
-			//Getting the local cached storage instance if exists
+			// Getting the local cached storage instance if exists
 			return mSessions.get(aSessionId);
 		}
 
@@ -105,21 +101,21 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Creating a blank storage for session: " + aSessionId + "...");
 			}
-			IBasicStorage<String, Object> s = mStorageProvider.getStorage(aSessionId);
-			s.clear();
-			mSessions.put(aSessionId, s);
+			IBasicStorage<String, Object> lStorage = mStorageProvider.getStorage(aSessionId);
+			lStorage.clear();
+			mSessions.put(aSessionId, lStorage);
 
-			return s;
+			return lStorage;
 		} else {
-			//Avoid security holes 
+			// Avoid security holes 
 			mReconnectionManager.getReconnectionIndex().remove(aSessionId);
-			//Recovered session, require to be removed from the trash
+			// Recovered session, require to be removed from the trash
 			mReconnectionManager.getSessionIdsTrash().remove(aSessionId);
 
-			IBasicStorage<String, Object> s = mStorageProvider.getStorage(aSessionId);
-			mSessions.put(aSessionId, s);
+			IBasicStorage<String, Object> lStorage = mStorageProvider.getStorage(aSessionId);
+			mSessions.put(aSessionId, lStorage);
 
-			return s;
+			return lStorage;
 		}
 	}
 
@@ -133,23 +129,24 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 		mSessions.clear();
 	}
 
+/*
 	@Override
 	public void processClosed(WebSocketServerEvent aEvent) {
 		//Allowing all connectors for a reconnection
-		String sid = aEvent.getConnector().getSession().getSessionId();
+		String lSessionId = aEvent.getConnector().getSession().getSessionId();
 
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Putting the session: " + sid + ", in reconnection mode...");
+			mLog.debug("Putting the session: " + lSessionId + ", in reconnection mode...");
 		}
 
 		synchronized (this) {
 			//Removing the local cached storage instance. Free space if 
 			//the client never gets reconnected
-			mSessions.remove(sid);
-			mReconnectionManager.putInReconnectionMode(sid);
+			mSessions.remove(lSessionId);
+			mReconnectionManager.putInReconnectionMode(lSessionId);
 		}
 	}
-
+	
 	@Override
 	public void processOpened(WebSocketServerEvent aEvent) {
 		try {
@@ -157,7 +154,7 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 			// method
 			Random lRand = new Random(System.nanoTime());
 
-			//@TODO: if unique node id is passed check if already assigned in the
+			// @TODO: if unique node id is passed check if already assigned in the
 			// network and reject connect if so!
 
 			if (mLog.isDebugEnabled()) {
@@ -173,13 +170,13 @@ public class SessionManager implements ISessionManager, IInitializable, WebSocke
 			}
 			aEvent.getSession().setStorage((Map<String, Object>) (getSession(aEvent.getSessionId())));
 		} catch (Exception ex) {
-			/**
-			 * @TODO try this with the ExceptionHandler
-			 */
+			 // TODO: try this with the ExceptionHandler
 		}
 	}
 
 	@Override
 	public void processPacket(WebSocketServerEvent aEvent, WebSocketPacket aPacket) {
 	}
+*/
+
 }
