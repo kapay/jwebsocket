@@ -222,16 +222,25 @@ public class JWebSocketCommonConstants {
 	public static final String SCOPE_PUBLIC = "public";
 
 	static {
+		// hixie support (versions)
 		WS_SUPPORTED_HIXIE_VERSIONS.add(75);
 		WS_SUPPORTED_HIXIE_VERSIONS.add(76);
 
-		WS_SUPPORTED_HYBI_VERSIONS.add(6);
-		WS_SUPPORTED_HYBI_VERSIONS.add(7);
-		WS_SUPPORTED_HYBI_VERSIONS.add(8);
-
+		// hixie support (drafts)
 		WS_SUPPORTED_HIXIE_DRAFTS.add("75");
 		WS_SUPPORTED_HIXIE_DRAFTS.add("76");
 
+		// hybi support (versions)
+		WS_SUPPORTED_HYBI_VERSIONS.add(6);
+		WS_SUPPORTED_HYBI_VERSIONS.add(7);
+		WS_SUPPORTED_HYBI_VERSIONS.add(8);
+		WS_SUPPORTED_HYBI_VERSIONS.add(9);
+		WS_SUPPORTED_HYBI_VERSIONS.add(10);
+		WS_SUPPORTED_HYBI_VERSIONS.add(11);
+		WS_SUPPORTED_HYBI_VERSIONS.add(12);
+		WS_SUPPORTED_HYBI_VERSIONS.add(13);
+
+		// hybi support (drafts)
 		WS_SUPPORTED_HYBI_DRAFTS.add("6");
 		WS_SUPPORTED_HYBI_DRAFTS.add("7");
 		WS_SUPPORTED_HYBI_DRAFTS.add("8");
@@ -241,5 +250,8 @@ public class JWebSocketCommonConstants {
 		WS_SUPPORTED_HYBI_DRAFTS.add("12");
 		WS_SUPPORTED_HYBI_DRAFTS.add("13");
 		WS_SUPPORTED_HYBI_DRAFTS.add("14");
+		WS_SUPPORTED_HYBI_DRAFTS.add("15");
+		WS_SUPPORTED_HYBI_DRAFTS.add("16");
+		WS_SUPPORTED_HYBI_DRAFTS.add("17");
 	}
 }

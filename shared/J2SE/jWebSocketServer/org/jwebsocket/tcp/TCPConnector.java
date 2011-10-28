@@ -59,8 +59,7 @@ public class TCPConnector extends BaseConnector {
 	private String mLogInfo = TCP_LOG;
 	private CloseReason mCloseReason = CloseReason.TIMEOUT;
 	private Thread mClientThread = null;
-	private static int mHashCounter = 0;
-	private int mHash = 0;
+	private TimeoutOutputStreamNIOWriter mOutputStreamNIOSender;
 
 	/**
 	 * creates a new TCP connector for the passed engine using the passed client
@@ -78,6 +77,9 @@ public class TCPConnector extends BaseConnector {
 		try {
 			mIn = mClientSocket.getInputStream();
 			mOut = mClientSocket.getOutputStream();
+
+			// @TODO: Make the timeout constructor argument configurable for the future
+			mOutputStreamNIOSender = new TimeoutOutputStreamNIOWriter(this, mOut, 1000);
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
 					+ " instantiating "
@@ -124,28 +126,6 @@ public class TCPConnector extends BaseConnector {
 	private void terminateConnector(CloseReason aCloseReason) {
 		setStatus(WebSocketConnectorStatus.DOWN);
 		int lPort = mClientSocket.getPort();
-		/*
-		try {
-		if (!mClientSocket.isOutputShutdown()) {
-		mClientSocket.shutdownOutput();
-		}
-		} catch (IOException lEx) {
-		mLog.error(lEx.getClass().getSimpleName()
-		+ " while shutting down outbound stream for " + mLogInfo
-		+ " connector (" + aCloseReason.name()
-		+ ") on port " + lPort + ": " + lEx.getMessage());
-		}
-		try {
-		if (!mClientSocket.isInputShutdown()) {
-		mClientSocket.shutdownInput();
-		}
-		} catch (IOException lEx) {
-		mLog.error(lEx.getClass().getSimpleName()
-		+ " while shutting down inbound stream for " + mLogInfo
-		+ " connector (" + aCloseReason.name()
-		+ ") on port " + lPort + ": " + lEx.getMessage());
-		}
-		 */
 		try {
 			mOut.close();
 		} catch (IOException lEx) {
@@ -172,18 +152,6 @@ public class TCPConnector extends BaseConnector {
 					+ " connector (" + aCloseReason.name()
 					+ ") on port " + lPort + ": " + lEx.getMessage());
 		}
-		/*
-		try {
-		// mClientThread.join(300);
-		// mClientThread.interrupt();
-		// mClientThread.stop();
-		} catch (Exception lEx) {
-		mLog.error(lEx.getClass().getSimpleName()
-		+ " while shutting down client thread for " + mLogInfo
-		+ " connector (" + aCloseReason.name()
-		+ ") on port " + lPort + ": " + lEx.getMessage());
-		}
-		 */
 	}
 
 	@Override
@@ -210,7 +178,6 @@ public class TCPConnector extends BaseConnector {
 	}
 
 	public void stopReader() {
-
 		try {
 			// force input stream to close to terminate reader thread
 			if (!mClientSocket.isInputShutdown()
@@ -221,7 +188,6 @@ public class TCPConnector extends BaseConnector {
 			mLog.error(lEx.getClass().getSimpleName()
 					+ " shutting down reader stream (" + getId() + "): " + lEx.getMessage());
 		}
-
 		try {
 			// force input stream to close to terminate reader thread
 			mIn.close();
@@ -275,19 +241,32 @@ public class TCPConnector extends BaseConnector {
 		}
 	}
 
+	/* this is called by the TimeoutOutputstreamWriter, the data 
+	 * is first written into a queue and then send by a watched thread
+	 */
+	public synchronized void _sendPacket(WebSocketPacket aDataPacket) {
+		try {
+			if (isHixie()) {
+				sendHixie(aDataPacket);
+			} else {
+				sendHybi(getVersion(), aDataPacket);
+			}
+			mOut.flush();
+		} catch (IOException lEx) {
+			// in case a socket gets closed due to a timeout
+			// in a write operation, this is not necessarily an error.
+			// TODO: think how to eventually better deal with this.
+			/*
+			mLog.error(lEx.getClass().getSimpleName()
+			+ " sending data packet: " + lEx.getMessage());
+			 */
+		}
+	}
+
 	@Override
 	public void sendPacket(WebSocketPacket aDataPacket) {
-		synchronized (getWriteLock()) {
-			try {
-				sendPacketInTransaction(aDataPacket);
-			} catch (Exception lEx) {
-				/*
-				mLog.error(lEx.getClass().getSimpleName()
-				+ " sending data packet: " + lEx.getMessage()
-				+ ", data: " + aDataPacket.getUTF8());
-				 */
-			}
-		}
+		mOutputStreamNIOSender.sendPacket(aDataPacket);
+		// _sendPacket(aDataPacket);
 	}
 
 	@Override

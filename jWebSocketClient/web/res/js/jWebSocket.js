@@ -20,7 +20,7 @@
 // ## :#d:en:Implements the jWebSocket Web Client.
 
 
-// Firefox temporarily used MozWebSocket (why?), anyway, consider this here.
+// Firefox temporarily used MozWebSocket (why??), anyway, consider this here.
 // Since the browserSupportNativeWebSocket method evaluates the existance of
 // the window.WebSocket class, this abstraction need to be done on the very top.
 // please do not move this lines down.
@@ -35,9 +35,9 @@ if( window.MozWebSocket ) {
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b2 (nightly build 10930)
+	//:const:*:VERSION:String:1.0b3 (nightly build 11024)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b2 (nightly build 10930)",
+	VERSION: "1.0b3 (nightly build 11024)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
