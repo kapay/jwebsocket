@@ -79,7 +79,7 @@ public class TCPConnector extends BaseConnector {
 			mOut = mClientSocket.getOutputStream();
 
 			// @TODO: Make the timeout constructor argument configurable for the future
-			mOutputStreamNIOSender = new TimeoutOutputStreamNIOWriter(this, mOut, 1000);
+			mOutputStreamNIOSender = new TimeoutOutputStreamNIOWriter(this, mIn, mOut, 1000);
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName()
 					+ " instantiating "

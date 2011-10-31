@@ -16,15 +16,18 @@
 package org.jwebsocket.tcp;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.logging.Logging;
 
 /**
  * This works OK, the only pending question is that the write method
@@ -39,17 +42,25 @@ import org.jwebsocket.kit.CloseReason;
  */
 public class TimeoutOutputStreamNIOWriter {
 
+	private static Logger mLog = Logging.getLogger(TimeoutOutputStreamNIOWriter.class);
 	/**
 	 * Singleton Timer instance to control all timeout tasks
 	 */
 	private int mTimeout;
-	private static Timer mTimer = new Timer();
+	private static final Timer mTimer = new Timer();
+	private static final Timer mPurgeTimer = new Timer();
+	private static boolean mIsDebug = true;
 	// the size of this executor service should be adjusted to the maximum
 	// of expected client send operations that concurrently might get 
 	// to a timeout case.
 	private static ExecutorService mPool = Executors.newScheduledThreadPool(25); // @TODO make this configurable after
 	private OutputStream mOut = null;
+	private InputStream mIn = null;
 	private WebSocketConnector mConnector = null;
+
+	static {
+		mPurgeTimer.schedule(new PurgeCancelledWriterTasks(mTimer), 0, 2000);
+	}
 
 	/**
 	 * 
@@ -58,10 +69,11 @@ public class TimeoutOutputStreamNIOWriter {
 	 * @param aOut  
 	 */
 	public TimeoutOutputStreamNIOWriter(WebSocketConnector aConnector,
-			OutputStream aOut, int aTimeout) {
-		mTimeout = aTimeout;
-		mOut = aOut;
+			InputStream aIn, OutputStream aOut, int aTimeout) {
 		mConnector = aConnector;
+		mIn = aIn;
+		mOut = aOut;
+		mTimeout = aTimeout;
 	}
 
 	/**
@@ -105,6 +117,10 @@ public class TimeoutOutputStreamNIOWriter {
 		private WebSocketPacket mPacket;
 		private TimerTask mTimeoutTask;
 
+		public InputStream getIn() {
+			return mIn;
+		}
+
 		public OutputStream getOut() {
 			return mOut;
 		}
@@ -121,9 +137,15 @@ public class TimeoutOutputStreamNIOWriter {
 		public Object call() throws Exception {
 			// @TODO This always is being executed quickly even when the connector get's stopped
 			// this sends the packet to the socket output stream
+			if (mIsDebug && mLog.isDebugEnabled()) {
+				mLog.debug("Physically sending packet to '" + mConnector.getId() + "' under timeout control...");
+			}
 			((TCPConnector) mConnector)._sendPacket(mPacket);
 			// this cancels the timeout task in case 
 			// the send operation did not block for the given timeout
+			if (mIsDebug && mLog.isDebugEnabled()) {
+				mLog.debug("Cancelling timeout control for '" + mConnector.getId() + "' because packet had been sent properly...");
+			}
 			mTimeoutTask.cancel();
 			return null;
 		}
@@ -143,9 +165,15 @@ public class TimeoutOutputStreamNIOWriter {
 			try {
 				// close the outbound stream to fire exception
 				// timed out write operation
+				if (mIsDebug && mLog.isDebugEnabled()) {
+					mLog.debug("Closing stream to '" + mConnector.getId() + "' due to timeout!");
+				}
+				mSendOperation.getIn().close();
 				mSendOperation.getOut().close();
+				/*
 				mConnector.getEngine().connectorStopped(
-						mConnector, CloseReason.CLIENT);
+				mConnector, CloseReason.CLIENT);
+				 */
 			} catch (IOException ex) {
 				// TODO check this
 			}
@@ -157,6 +185,9 @@ public class TimeoutOutputStreamNIOWriter {
 	 * @param aDataPacket
 	 */
 	public void sendPacket(WebSocketPacket aDataPacket) {
+		if (mIsDebug && mLog.isDebugEnabled()) {
+			mLog.debug("Scheduling send operation to '" + mConnector.getId() + "'...");
+		}
 		// create a timer task to send the packet
 		SendOperation lSend = new SendOperation(aDataPacket);
 		// create a timeout timer task to watch the send operation
