@@ -35,9 +35,9 @@ if( window.MozWebSocket ) {
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b3 (nightly build 11024)
+	//:const:*:VERSION:String:1.0b4 (nightly build 11125)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b3 (nightly build 11024)",
+	VERSION: "1.0b4 (nightly build 11125)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -61,7 +61,7 @@ var jws = {
 	//:d:en:Default schema, [tt]wss[/tt] for secured WebSocket-Connections.
 	JWS_SERVER_SSL_SCHEMA: "wss",
 	//:const:*:JWS_SERVER_HOST:String:[hostname|localhost|IP-Number]
-	//:d:en:Default hostname of current webbite or [tt]localhost|127.0.0.1[/tt] if no hostname can be detected.
+	//:d:en:Default hostname of current website or [tt]localhost|127.0.0.1[/tt] if no hostname can be detected.
 	JWS_SERVER_HOST: ( self.location.hostname ? self.location.hostname : "127.0.0.1" ),
 	//:const:*:JWS_SERVER_PORT:Integer:8787
 	//:d:en:Default port number, 8787 for stand-alone un-secured servers, _
