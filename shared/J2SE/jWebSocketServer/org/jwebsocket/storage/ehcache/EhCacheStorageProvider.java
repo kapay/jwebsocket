@@ -24,10 +24,20 @@ import org.jwebsocket.api.IStorageProvider;
  */
 public class EhCacheStorageProvider implements IStorageProvider {
 
+    
+    
 	@Override
 	public IBasicStorage<String, Object> getStorage(String aName) throws Exception {
 		EhCacheStorage lStorage = new EhCacheStorage(aName);
 		lStorage.initialize();
+        lStorage.put("name", "Alex");
+        System.out.print(lStorage.get("name"));
 		return lStorage;
 	}
+
+    @Override
+    public void removeStorage(String aName) throws Exception {
+        EhCacheManager.getInstance().removeCache(aName);
+    }
+    
 }

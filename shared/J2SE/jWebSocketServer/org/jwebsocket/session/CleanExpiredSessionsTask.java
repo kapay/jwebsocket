@@ -16,8 +16,10 @@ package org.jwebsocket.session;
 
 import java.util.Iterator;
 import java.util.TimerTask;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.IBasicStorage;
+import org.jwebsocket.api.IStorageProvider;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.storage.memory.MemoryStorage;
 
@@ -25,13 +27,15 @@ import org.jwebsocket.storage.memory.MemoryStorage;
  *
  * @author kyberneees,aschulze
  */
-public class CleanExpiredMemorySessionsTask extends TimerTask {
+public class CleanExpiredSessionsTask extends TimerTask {
 
 	private IBasicStorage<String, Object> mSessionIdsTrash;
-	private static Logger mLog = Logging.getLogger(CleanExpiredMemorySessionsTask.class);
+    private IStorageProvider mStorageProvider;
+	private static Logger mLog = Logging.getLogger(CleanExpiredSessionsTask.class);
 
-	public CleanExpiredMemorySessionsTask(IBasicStorage<String, Object> sessionIdsTrash) {
+	public CleanExpiredSessionsTask(IBasicStorage<String, Object> sessionIdsTrash, IStorageProvider aStorageProvider) {
 		this.mSessionIdsTrash = sessionIdsTrash;
+        this.mStorageProvider = aStorageProvider;
 	}
 
 	@Override
@@ -44,10 +48,16 @@ public class CleanExpiredMemorySessionsTask extends TimerTask {
 		while (lKeys.hasNext()) {
 			String lKey = lKeys.next();
 
-			if (MemoryStorage.getContainer().containsKey(lKey)
-					&& ((Long) (mSessionIdsTrash.get(lKey)) < System.currentTimeMillis())) {
-				MemoryStorage.getContainer().remove(lKey);
+			if (((Long) (mSessionIdsTrash.get(lKey)) < System.currentTimeMillis())) {
+                try {
+                    mStorageProvider.removeStorage(lKey);
+                    mSessionIdsTrash.remove(lKey);
+                } catch (Exception ex) {
+                    mLog.error(ex.getMessage());
+                }
 			}
 		}
 	}
+    
+    // TODO: create something similar to clean-up session index (reconnection manager)
 }
