@@ -26,7 +26,6 @@ import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -137,15 +136,19 @@ public class TimeoutOutputStreamNIOWriter {
 		public Object call() throws Exception {
 			// @TODO This always is being executed quickly even when the connector get's stopped
 			// this sends the packet to the socket output stream
+			/*
 			if (mIsDebug && mLog.isDebugEnabled()) {
 				mLog.debug("Physically sending packet to '" + mConnector.getId() + "' under timeout control...");
 			}
+			 */
 			((TCPConnector) mConnector)._sendPacket(mPacket);
 			// this cancels the timeout task in case 
 			// the send operation did not block for the given timeout
+			/*
 			if (mIsDebug && mLog.isDebugEnabled()) {
 				mLog.debug("Cancelling timeout control for '" + mConnector.getId() + "' because packet had been sent properly...");
 			}
+			 */
 			mTimeoutTask.cancel();
 			return null;
 		}
