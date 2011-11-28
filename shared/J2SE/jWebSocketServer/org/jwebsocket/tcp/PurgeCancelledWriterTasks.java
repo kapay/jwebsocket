@@ -1,6 +1,6 @@
 //	---------------------------------------------------------------------------
-//	jWebSocket - PurgeCancelledWriterTasks
-//	Copyright (c) 2011 Innotrade GmbH
+//	jWebSocket - PurgeCancelledWriterTimeouts
+//	Copyright (c) 2011 Alexander Schulze, Innotrade GmbH
 //	---------------------------------------------------------------------------
 //	This program is free software; you can redistribute it and/or modify it
 //	under the terms of the GNU Lesser General Public License as published by the
@@ -24,26 +24,20 @@ import org.jwebsocket.logging.Logging;
  *
  * @author kyberneees, aschulze
  */
-
 public class PurgeCancelledWriterTasks extends TimerTask {
 
 	private Timer mTimer;
 	private static Logger mLog = Logging.getLogger(PurgeCancelledWriterTasks.class);
 
 	public PurgeCancelledWriterTasks(Timer aTimer) {
-		this.mTimer = aTimer;
+		mTimer = aTimer;
 	}
 
 	@Override
 	public void run() {
-		// Keep the timer cleaned up
-		int lPurged = mTimer.purge(); 
-		// this works, no need for debug output, 
-		// but please keep commented in case of changes
-		/*
-		if (lPurged > 0 && mLog.isDebugEnabled()) {
-			mLog.debug("Purged " + lPurged + " cancelled taks...");
+		int lCount = mTimer.purge(); // Keep the timer cleaned up
+		if (lCount > 0 && mLog.isDebugEnabled()) {
+			mLog.debug("Purged " + lCount + " cancelled TCP writer tasks.");
 		}
-		 */
 	}
 }
