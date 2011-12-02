@@ -46,13 +46,14 @@ public class TimeoutOutputStreamNIOWriter {
 	 * Singleton Timer instance to control all timeout tasks
 	 */
 	private int mTimeout;
-	private static final Timer mTimer = new Timer();
-	private static final Timer mPurgeTimer = new Timer();
-	private static boolean mIsDebug = true;
+	private static final Timer mTimer = new Timer("jWebSocket TCP-Engine SendScheduler");
+	private static final Timer mPurgeTimer = new Timer("jWebSocket TCP-Engine PurgeTimer");
+	// can be set to "true" for heavy debugging purposes
+	private static boolean mIsDebug = false;
 	// the size of this executor service should be adjusted to the maximum
 	// of expected client send operations that concurrently might get 
 	// to a timeout case.
-	private static ExecutorService mPool = Executors.newScheduledThreadPool(25); // @TODO make this configurable after
+	private static ExecutorService mPool = Executors.newScheduledThreadPool(100); // @TODO make this configurable after
 	private OutputStream mOut = null;
 	private InputStream mIn = null;
 	private WebSocketConnector mConnector = null;
@@ -136,19 +137,16 @@ public class TimeoutOutputStreamNIOWriter {
 		public Object call() throws Exception {
 			// @TODO This always is being executed quickly even when the connector get's stopped
 			// this sends the packet to the socket output stream
-			/*
 			if (mIsDebug && mLog.isDebugEnabled()) {
 				mLog.debug("Physically sending packet to '" + mConnector.getId() + "' under timeout control...");
 			}
-			 */
 			((TCPConnector) mConnector)._sendPacket(mPacket);
 			// this cancels the timeout task in case 
 			// the send operation did not block for the given timeout
-			/*
+			
 			if (mIsDebug && mLog.isDebugEnabled()) {
 				mLog.debug("Cancelling timeout control for '" + mConnector.getId() + "' because packet had been sent properly...");
 			}
-			 */
 			mTimeoutTask.cancel();
 			return null;
 		}

@@ -28,8 +28,8 @@ public class EhCacheStorageProvider implements IStorageProvider {
 	public IBasicStorage<String, Object> getStorage(String aName) throws Exception {
 		EhCacheStorage lStorage = new EhCacheStorage(aName);
 		lStorage.initialize();
-		lStorage.put("name", "Alex");
-		System.out.print(lStorage.get("name"));
+		// lStorage.put("name", "Alex");
+		// System.out.print(lStorage.get("name"));
 		return lStorage;
 	}
 

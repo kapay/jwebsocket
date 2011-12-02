@@ -20,7 +20,7 @@
 // ## :#d:en:Implements the jWebSocket Web Client.
 
 
-// Firefox temporarily used MozWebSocket (why?), anyway, consider this here.
+// Firefox temporarily used MozWebSocket (why??), anyway, consider this here.
 // Since the browserSupportNativeWebSocket method evaluates the existance of
 // the window.WebSocket class, this abstraction need to be done on the very top.
 // please do not move this lines down.
@@ -35,9 +35,9 @@ if( window.MozWebSocket ) {
 //:d:en:including various utility methods.
 var jws = {
 
-	//:const:*:VERSION:String:1.0b2 (nightly build 10930)
+	//:const:*:VERSION:String:1.0b4 (nightly build 11125)
 	//:d:en:Version of the jWebSocket JavaScript Client
-	VERSION: "1.0b2 (nightly build 10930)",
+	VERSION: "1.0b4 (nightly build 11201)",
 
 	//:const:*:NS_BASE:String:org.jwebsocket
 	//:d:en:Base namespace
@@ -61,7 +61,7 @@ var jws = {
 	//:d:en:Default schema, [tt]wss[/tt] for secured WebSocket-Connections.
 	JWS_SERVER_SSL_SCHEMA: "wss",
 	//:const:*:JWS_SERVER_HOST:String:[hostname|localhost|IP-Number]
-	//:d:en:Default hostname of current webbite or [tt]localhost|127.0.0.1[/tt] if no hostname can be detected.
+	//:d:en:Default hostname of current website or [tt]localhost|127.0.0.1[/tt] if no hostname can be detected.
 	JWS_SERVER_HOST: ( self.location.hostname ? self.location.hostname : "127.0.0.1" ),
 	//:const:*:JWS_SERVER_PORT:Integer:8787
 	//:d:en:Default port number, 8787 for stand-alone un-secured servers, _
@@ -546,15 +546,27 @@ var jws = {
 	},
 
 	console: {
-		
+		// per deploy default set isActive to false and level = 2 (info)
 		isActive: false,
-		level: 2,
+		level: 2, 
+			// don't use below constants her for the level! 
+			// They are not yet defined at this point in time!
 		ALL: 0,
 		DEBUG: 1,
 		INFO: 2,
 		WARN: 3,
 		ERROR: 4,
 		FATAL: 5,
+	
+		isDebugEnabled: function() {
+			return( window.console && jws.console.isActive
+				&& jws.console.level <= jws.console.DEBUG );
+		},
+	
+		isInfoEnabled: function() {
+			return( window.console && jws.console.isActive
+				&& jws.console.level <= jws.console.INFO );
+		},
 	
 		log: function( aMsg ) {
 			if( window.console 
@@ -563,6 +575,7 @@ var jws = {
 				console.log( aMsg );
 			}
 		},
+		
 		debug: function( aMsg ) {
 			if( window.console
 				&& jws.console.isActive 
@@ -571,6 +584,7 @@ var jws = {
 				console.debug( aMsg );
 			}
 		},
+		
 		info: function( aMsg ) {
 			if( window.console 
 				&& jws.console.isActive 
@@ -579,6 +593,7 @@ var jws = {
 				console.info( aMsg );
 			}
 		},
+		
 		warn: function( aMsg ) {
 			if( window.console
 				&& jws.console.isActive
@@ -587,6 +602,7 @@ var jws = {
 				console.warn( aMsg );
 			}
 		},
+		
 		error: function( aMsg ) {
 			if( window.console
 				&& jws.console.isActive
@@ -595,6 +611,7 @@ var jws = {
 				console.error( aMsg );
 			}
 		},
+		
 		fatal: function( aMsg ) {
 			if( window.console
 				&& jws.console.isActive
@@ -1495,7 +1512,6 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 					&& aOptions.openTimeout ) {
 					this.fOpenTimeout = aOptions.openTimeout;
 					this.hOpenTimeout = setTimeout( function() {
-						// debugger;
 						lThis.fOpenTimeout = null;
 						var aToken = {};
 						aOptions.OnOpenTimeout( aToken );
@@ -1511,6 +1527,9 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				// assign the listeners to local functions (closure) to allow
 				// to handle event before and after the application
 				this.fConn.onopen = function( aEvent ) {
+					if( jws.console.isDebugEnabled() ) {
+						jws.console.debug("[onopen]: " + JSON.stringify( aEvent ));
+					}	
 					if( lThis.hOpenTimeout ) {
 						clearTimeout( lThis.hOpenTimeout );
 						lThis.hOpenTimeout = null;
@@ -1526,6 +1545,9 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				};
 
 				this.fConn.onmessage = function( aEvent ) {
+					if( jws.console.isDebugEnabled() ) {
+						jws.console.debug("[onmessage]: " + JSON.stringify( aEvent ));
+					}	
 					lValue = lThis.processPacket( aEvent );
 					// give application change to handle event first
 					if( aOptions.OnMessage ) {
@@ -1534,6 +1556,9 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				};
 
 				this.fConn.onclose = function( aEvent ) {
+					if( jws.console.isDebugEnabled() ) {
+						jws.console.debug("[onclose]: " + JSON.stringify( aEvent ));
+					}	
 					if( lThis.hOpenTimeout ) {
 						clearTimeout( lThis.hOpenTimeout );
 						lThis.hOpenTimeout = null;
@@ -1638,7 +1663,7 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 				this.fConn.send( aData );
 			} catch( lEx ) {
 				// this is never fired !
-				// console.log( "Could not send!" );
+				jws.console.error( "[sendStream]: Exception on send: " + lEx.message );
 			}
 		} else {
 			if( this.isWriteable() ) {
@@ -1824,7 +1849,6 @@ jws.oop.declareClass( "jws", "jWebSocketBaseClient", null, {
 			}
 		}
 		if( this.fConn ) {
-			// if( window.console ) { console.log( "forcing close...." ); }
 			// reset listeners to prevent any kind of potential memory leaks.
 			this.fConn.onopen = null;
 			this.fConn.onmessage = null;
@@ -2558,7 +2582,9 @@ jws.oop.declareClass( "jws", "jWebSocketTokenClient", jws.jWebSocketBaseClient, 
 					// console.log( "sending fragment " + lFragment + "..." );
 				}
 			} else {
-				// console.log( "sending stream " + lStream + "..." );
+				if( jws.console.isDebugEnabled() ) {
+					jws.console.debug( "[sendToken]: Sending stream " + lStream + "..." );
+				}
 				this.sendStream( lStream );
 			}
 		}
@@ -2968,6 +2994,44 @@ jws.SystemClientPlugIn = {
 				ns: jws.SystemClientPlugIn.NS,
 				type: "logout"
 			});
+		}
+		return lRes;
+	},
+	
+	systemLogon: function( aUsername, aPassword, aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.SystemClientPlugIn.NS,
+				type: "logon",
+				username: aUsername,
+				password: aPassword
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	systemLogoff: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.SystemClientPlugIn.NS,
+				type: "logoff"
+			};
+			this.sendToken( lToken,	aOptions );
+		}
+		return lRes;
+	},
+
+	systemGetAuthorities: function( aOptions ) {
+		var lRes = this.checkConnected();
+		if( 0 == lRes.code ) {
+			var lToken = {
+				ns: jws.SystemClientPlugIn.NS,
+				type: "getAuthorities"
+			};
+			this.sendToken( lToken,	aOptions );
 		}
 		return lRes;
 	},
@@ -4004,106 +4068,6 @@ jws.APIPlugIn = function() {
 	}
 
 jws.APIPlugIn.prototype = jws.APIPlugInClass;
-//	---------------------------------------------------------------------------
-//	jWebSocket Authentication Client PlugIn (uses jWebSocket Client and Server)
-//	(C) 2011 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath
-//	---------------------------------------------------------------------------
-//	This program is free software; you can redistribute it and/or modify it
-//	under the terms of the GNU Lesser General Public License as published by the
-//	Free Software Foundation; either version 3 of the License, or (at your
-//	option) any later version.
-//	This program is distributed in the hope that it will be useful, but WITHOUT
-//	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-//	FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-//	more details.
-//	You should have received a copy of the GNU Lesser General Public License along
-//	with this program; if not, see <http://www.gnu.org/licenses/lgpl.html>.
-//	---------------------------------------------------------------------------
-
-
-//	---------------------------------------------------------------------------
-//  jWebSocket Authentication Client Plug-In
-//	---------------------------------------------------------------------------
-
-jws.AuthPlugIn = {
-
-	// namespace for filesystem plugin
-	// if namespace is changed update server plug-in accordingly!
-	NS: jws.NS_BASE + ".plugins.auth",
-
-	processToken: function( aToken ) {
-		// check if namespace matches
-		if( aToken.ns == jws.AuthPlugIn.NS ) {
-			// here you can handle incomimng tokens from the server
-			// directy in the plug-in if desired.
-			/*
-			if( "load" == aToken.reqType ) {
-				if( aToken.code == 0 ) {
-					aToken.data = Base64.decode( aToken.data );
-					if( this.OnFileLoaded ) {
-						this.OnFileLoaded( aToken );
-					}
-				} else {
-					if( this.OnFileError ) {
-						this.OnFileError( aToken );
-					}
-				}
-			} else if( "event" == aToken.type ) {
-				if( "filesaved" == aToken.name ) {
-					if( this.OnFileSaved ) {
-						this.OnFileSaved( aToken );
-					}
-				} else if( "filesent" == aToken.name ) {
-					if( this.OnFileSent ) {
-						this.OnFileSent( aToken );
-					}
-				}
-			}
-			*/
-		}
-	},
-
-	authLogin: function( aUsername, aPassword, aOptions ) {
-		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
-			var lToken = {
-				ns: jws.AuthPlugIn.NS,
-				type: "logon",
-				username: aUsername,
-				password: aPassword
-			};
-			this.sendToken( lToken,	aOptions );
-		}
-		return lRes;
-	},
-
-	authLogout: function( aOptions ) {
-		var lRes = this.checkConnected();
-		if( 0 == lRes.code ) {
-			var lToken = {
-				ns: jws.AuthPlugIn.NS,
-				type: "logoff"
-			};
-			this.sendToken( lToken,	aOptions );
-		}
-		return lRes;
-	},
-
-	setFileSystemCallbacks: function( aListeners ) {
-		if( !aListeners ) {
-			aListeners = {};
-		}
-		/*
-		if( aListeners.OnFileLoaded !== undefined ) {
-			this.OnFileLoaded = aListeners.OnFileLoaded;
-		}
-		*/
-	}
-
-}
-
-// add the JWebSocket Authentication PlugIn into the TokenClient class
-jws.oop.addPlugIn( jws.jWebSocketTokenClient, jws.AuthPlugIn );
 //	---------------------------------------------------------------------------
 //	jWebSocket Channel PlugIn (uses jWebSocket Client and Server)
 //	(C) 2010 jWebSocket.org, Alexander Schulze, Innotrade GmbH, Herzogenrath

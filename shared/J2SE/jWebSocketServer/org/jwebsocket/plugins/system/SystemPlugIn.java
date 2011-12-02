@@ -101,7 +101,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	private AuthenticationProvider mAuthProv;
 	private ProviderManager mAuthProvMgr;
 	private UserDetailsService mUserDetails;
-	private SessionManager mSessionManager; 
+	private SessionManager mSessionManager;
 	public static final String USERNAME = "$username";
 	public static final String AUTHORITIES = "$authorities";
 	public static final String UUID = "$uuid";
@@ -128,19 +128,19 @@ public class SystemPlugIn extends TokenPlugIn {
 			} else {
 				lPath = lSpringConfig;
 			}
-/*
-            FileSystemResource lFSRes = new FileSystemResource(lPath);
+			/*
+			FileSystemResource lFSRes = new FileSystemResource(lPath);
 			mBeanFactory = new ServerXmlBeanFactory(lFSRes, getClass().getClassLoader());
-*/
-            JWebSocketBeanFactory.load(lPath, getClass().getClassLoader());
+			 */
+			JWebSocketBeanFactory.load(lPath, getClass().getClassLoader());
 			Object lObj = JWebSocketBeanFactory.getInstance().getBean("authManager");
 			mAuthProvMgr = (ProviderManager) lObj;
 			List<AuthenticationProvider> lProviders = mAuthProvMgr.getProviders();
 			mAuthProv = lProviders.get(0);
-      
+
 			lObj = JWebSocketBeanFactory.getInstance().getBean("sessionManager");
-			mSessionManager = (SessionManager)lObj;
-			
+			mSessionManager = (SessionManager) lObj;
+
 			// give a success message to the administrator
 			if (mLog.isInfoEnabled()) {
 				mLog.info("System plug-in successfully loaded.");
@@ -222,22 +222,25 @@ public class SystemPlugIn extends TokenPlugIn {
 
 			// @TODO: if unique node id is passed check if already assigned in the
 			// network and reject connect if so!
+			// Session management is not yet stable!
 
+			/*
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Setting the session identifier: " + aConnector.getId());
 			}
+			 */
 			aConnector.getSession().setSessionId(
 					Tools.getMD5(aConnector.generateUID()
 					+ "." + lRand.nextInt()));
-
+			/*
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Creating the WebSocketSession persistent storage "
 						+ "for connector: " + aConnector.getId());
 			}
-			aConnector.getSession().setStorage((Map<String, Object>) (
-                    mSessionManager.getSession(aConnector.getSession().getSessionId())));
+			aConnector.getSession().setStorage((Map<String, Object>) (mSessionManager.getSession(aConnector.getSession().getSessionId())));
+			 */
 		} catch (Exception ex) {
-			 // TODO: try this with the ExceptionHandler
+			// TODO: try this with the ExceptionHandler
 		}
 
 		if (ALLOW_ANONYMOUS_LOGIN) {
@@ -252,20 +255,25 @@ public class SystemPlugIn extends TokenPlugIn {
 
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
-		//Allowing all connectors for a reconnection
-		String lSessionId = aConnector.getSession().getSessionId();
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Putting the session: " + lSessionId + ", in reconnection mode...");
+		// Allowing all connectors for a reconnection
+		// TODO: Why can a session ever be null? Check with stress test!
+		// Session management is not yet stable!
+		/*
+		WebSocketSession lSession = aConnector.getSession();
+		if (lSession != null && mSessionManager != null) {
+			String lSessionId = lSession.getSessionId();
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Putting the session: " + lSessionId + ", in reconnection mode...");
+			}
+			synchronized (this) {
+				// Removing the local cached storage instance. Free space if 
+				// the client never gets reconnected
+				mSessionManager.getSessionsReferences().remove(lSessionId);
+				mSessionManager.getReconnectionManager().putInReconnectionMode(lSessionId);
+			}
 		}
-
-		synchronized (this) {
-			//Removing the local cached storage instance. Free space if 
-			//the client never gets reconnected
-			mSessionManager.getSessionsReferences().remove(lSessionId);
-			mSessionManager.getReconnectionManager().putInReconnectionMode(lSessionId);
-		}
-        
+		*/
+		
 		// notify other clients that client disconnected
 		broadcastDisconnectEvent(aConnector);
 	}
@@ -1040,5 +1048,4 @@ public class SystemPlugIn extends TokenPlugIn {
 		// Sending the response
 		sendToken(aConnector, aConnector, lResponse);
 	}
-
 }

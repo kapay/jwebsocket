@@ -35,9 +35,12 @@ public class PurgeCancelledWriterTasks extends TimerTask {
 
 	@Override
 	public void run() {
+		mTimer.purge(); // Keep the timer cleaned up
+		/*
 		int lCount = mTimer.purge(); // Keep the timer cleaned up
 		if (lCount > 0 && mLog.isDebugEnabled()) {
 			mLog.debug("Purged " + lCount + " cancelled TCP writer tasks.");
 		}
+		 */
 	}
 }

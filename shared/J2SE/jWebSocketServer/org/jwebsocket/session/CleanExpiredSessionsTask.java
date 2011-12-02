@@ -16,12 +16,10 @@ package org.jwebsocket.session;
 
 import java.util.Iterator;
 import java.util.TimerTask;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.api.IStorageProvider;
 import org.jwebsocket.logging.Logging;
-import org.jwebsocket.storage.memory.MemoryStorage;
 
 /**
  *
@@ -30,34 +28,32 @@ import org.jwebsocket.storage.memory.MemoryStorage;
 public class CleanExpiredSessionsTask extends TimerTask {
 
 	private IBasicStorage<String, Object> mSessionIdsTrash;
-    private IStorageProvider mStorageProvider;
+	private IStorageProvider mStorageProvider;
 	private static Logger mLog = Logging.getLogger(CleanExpiredSessionsTask.class);
 
-	public CleanExpiredSessionsTask(IBasicStorage<String, Object> sessionIdsTrash, IStorageProvider aStorageProvider) {
-		this.mSessionIdsTrash = sessionIdsTrash;
-        this.mStorageProvider = aStorageProvider;
+	public CleanExpiredSessionsTask(IBasicStorage<String, Object> aSessionIdsTrash,
+			IStorageProvider aStorageProvider) {
+		this.mSessionIdsTrash = aSessionIdsTrash;
+		this.mStorageProvider = aStorageProvider;
 	}
 
 	@Override
 	public void run() {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug("Cleaning expired sessions ...");
+			mLog.debug("Cleaning expired sessions...");
 		}
-
 		Iterator<String> lKeys = mSessionIdsTrash.keySet().iterator();
 		while (lKeys.hasNext()) {
 			String lKey = lKeys.next();
-
 			if (((Long) (mSessionIdsTrash.get(lKey)) < System.currentTimeMillis())) {
-                try {
-                    mStorageProvider.removeStorage(lKey);
-                    mSessionIdsTrash.remove(lKey);
-                } catch (Exception ex) {
-                    mLog.error(ex.getMessage());
-                }
+				try {
+					mStorageProvider.removeStorage(lKey);
+					mSessionIdsTrash.remove(lKey);
+				} catch (Exception lEx) {
+					mLog.error(lEx.getClass().getSimpleName() + ": " + lEx.getMessage());
+				}
 			}
 		}
 	}
-    
-    // TODO: create something similar to clean-up session index (reconnection manager)
+	// TODO: create something similar to clean-up session index (reconnection manager)
 }

@@ -126,7 +126,7 @@ public abstract class BaseReconnectionManager implements ISessionReconnectionMan
     }
 
     public void initialize() throws Exception {
-        mTimer = new Timer();
+        mTimer = new Timer("jWebSocket BaseReconnection Timer");
         mTimer.scheduleAtFixedRate(
                 new CleanExpiredSessionsTask(
                 getSessionIdsTrash(), getStorageProvider()), 0, 600000);
