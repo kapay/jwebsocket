@@ -50,7 +50,15 @@ public interface WebSocketFilter {
 	 * @return the filterChain
 	 */
 	public WebSocketFilterChain getFilterChain();
-
+	
+	/**
+	 * Returns the filter configuration object based on the configuration file
+	 * values
+	 *
+	 * @return the filter configuration object
+	 */
+	public FilterConfiguration getFilterConfiguration();
+	
 	/**
 	 * @return the Id of the filter
 	 */
@@ -60,4 +68,16 @@ public interface WebSocketFilter {
 	 * @return the name space of the filter
 	 */
 	public String getNS();
+	
+	boolean getEnabled();
+
+	/**
+	 * sets the enabled status of the plug-in.
+	 */
+	void setEnabled(boolean aEnabled);
+
+	/**
+	 * notifies the plug-in about a change in enabled status.
+	 */
+	void processEnabled(boolean aEnabled);
 }

@@ -24,7 +24,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -32,7 +31,6 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
 import javax.net.ssl.SSLSocket;
-import javolution.util.FastList;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
@@ -344,6 +342,9 @@ public class TCPEngine extends BaseEngine {
 		}
 		Map lRespMap = WebSocketHandshake.parseC2SRequest(
 				lReq, aClientSocket instanceof SSLSocket);
+		if (lRespMap == null) {
+			return null;
+		}
 		RequestHeader lHeader = EngineUtils.validateC2SRequest(
 				getConfiguration().getDomains(), lRespMap, mLog);
 		if (lHeader == null) {
@@ -474,6 +475,7 @@ public class TCPEngine extends BaseEngine {
 							// log.debug("Instantiating connector...");
 							WebSocketConnector lConnector = new TCPConnector(mEngine, lClientSocket);
 							lConnector.setVersion(lHeader.getVersion());
+							lConnector.setSubprot(lHeader.getSubProtocol());
 
 							String lLogInfo = lConnector.isSSL() ? "SSL" : "TCP";
 							if (mLog.isDebugEnabled()) {
@@ -497,6 +499,9 @@ public class TCPEngine extends BaseEngine {
 							// if header could not be parsed properly
 							// immediately disconnect the client.
 							lClientSocket.close();
+							mLog.error("Client not accepted on port "
+									+ lClientSocket.getPort()
+									+ " due to handshake issues");
 						}
 					} catch (Exception lEx) {
 						mLog.error(
