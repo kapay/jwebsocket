@@ -40,6 +40,8 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	private final int mTimeout;
 	private final int mMaxframesize;
 	private final List<String> mDomains;
+	private final Integer mMaxConnections;
+	private final String mOnMaxConnectionsStrategy;
 
 	/**
 	 * Constructor for engine
@@ -56,7 +58,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	public EngineConfig(String aId, String aName, String aJar, Integer aPort,
 			Integer aSSLPort, String aKeyStore, String aKeyStorePassword,
 			String aContext, String aServlet, int aTimeout,
-			int aMaxFrameSize, List<String> aDomains) {
+			int aMaxFrameSize, List<String> aDomains, Integer aMaxConnections, String aOnMaxConnectionsStrategy) {
 		this.mId = aId;
 		this.mName = aName;
 		this.mJar = aJar;
@@ -69,6 +71,9 @@ public final class EngineConfig implements Config, EngineConfiguration {
 		this.mTimeout = aTimeout;
 		this.mMaxframesize = aMaxFrameSize;
 		this.mDomains = aDomains;
+		this.mMaxConnections = aMaxConnections;
+		this.mOnMaxConnectionsStrategy = aOnMaxConnectionsStrategy;
+		
 		validate();
 	}
 
@@ -172,7 +177,9 @@ public final class EngineConfig implements Config, EngineConfiguration {
 				|| (mSSLPort >= 0 && mSSLPort < 65536
 				&& mKeyStore != null && mKeyStore.length() > 0
 				&& mKeyStorePassword != null && mKeyStorePassword.length() > 0))
-				&& mTimeout >= 0) {
+				&& mTimeout >= 0 
+				&& mMaxConnections > 0
+				&& null != mOnMaxConnectionsStrategy && mOnMaxConnectionsStrategy.length() > 0) {
 			return;
 		}
 		throw new WebSocketRuntimeException(
@@ -183,6 +190,7 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	/**
 	 * @return the KeyStore
 	 */
+	@Override
 	public String getKeyStore() {
 		return mKeyStore;
 	}
@@ -190,7 +198,28 @@ public final class EngineConfig implements Config, EngineConfiguration {
 	/**
 	 * @return the KeyStorePassword
 	 */
+	@Override
 	public String getKeyStorePassword() {
 		return mKeyStorePassword;
 	}
+
+	/**
+	 * {@inheritDoc }
+	 */
+	@Override
+	public Integer getMaxConnections() {
+		return mMaxConnections;
+	}
+
+	/**
+	 * {@inheritDoc }
+	 */
+	@Override
+	public String getOnMaxConnectionStrategy() {
+		return mOnMaxConnectionsStrategy;
+	}
+	
+	
+	
+	
 }

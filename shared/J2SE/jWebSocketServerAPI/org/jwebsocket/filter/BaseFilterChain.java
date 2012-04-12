@@ -30,6 +30,7 @@ import org.jwebsocket.logging.Logging;
 /**
  *
  * @author aschulze
+ * @author Marcos Antonio González Huerta (markos0886, UCI)
  */
 public class BaseFilterChain implements WebSocketFilterChain {
 
@@ -49,6 +50,7 @@ public class BaseFilterChain implements WebSocketFilterChain {
 	/**
 	 * @return the server
 	 */
+	@Override
 	public WebSocketServer getServer() {
 		return mServer;
 	}
@@ -111,5 +113,11 @@ public class BaseFilterChain implements WebSocketFilterChain {
 			}
 		}
 		return lResponse;
+	}
+
+	@Override
+	public void addFilter(Integer aPosition, WebSocketFilter aFilter) {
+		mFilters.add(aPosition, aFilter);
+		aFilter.setFilterChain(this);
 	}
 }

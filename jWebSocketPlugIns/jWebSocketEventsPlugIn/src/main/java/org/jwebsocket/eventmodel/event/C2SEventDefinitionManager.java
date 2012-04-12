@@ -15,18 +15,18 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.event;
 
-import org.jwebsocket.api.IInitializable;
 import java.util.Set;
 import javolution.util.FastSet;
+import org.jwebsocket.eventmodel.api.IC2SEventDefinitionManager;
 import org.jwebsocket.eventmodel.observable.Event;
 
 /**
  *
  * @author kyberneees
  */
-public class C2SEventDefinitionManager implements IInitializable {
+public class C2SEventDefinitionManager implements IC2SEventDefinitionManager {
 
-	private Set<C2SEventDefinition> set = new FastSet<C2SEventDefinition>();
+	private Set<C2SEventDefinition> mDefinitions = new FastSet();
 
 	/**
 	 * {@inheritDoc}
@@ -45,26 +45,24 @@ public class C2SEventDefinitionManager implements IInitializable {
 	/**
 	 * @return The C2SEventDefinition collection 
 	 */
-	public Set<C2SEventDefinition> getSet() {
-		return set;
+	public Set<C2SEventDefinition> getDefinitions() {
+		return mDefinitions;
 	}
 
 	/**
-	 * @param set The C2SEventDefinition collection to set
+	 * @param aSet The C2SEventDefinition collection to set
 	 */
-	public void setSet(Set<C2SEventDefinition> set) {
-		this.set.addAll(set);
+	public void setDefinitions(Set<C2SEventDefinition> aSet) {
+		this.mDefinitions.addAll(aSet);
 	}
 
 	/**
-	 * Indicates if exists a C2SEventDefinition with a custom identifier
-	 * 
-	 * @param aEventId The C2SEventDefinition identifier
-	 * @return <tt>TRUE</tt> if the C2SEventDefinition exists, <tt>FALSE</tt> otherwise
+	 * {@inheritDoc } 
 	 */
+	@Override
 	public boolean hasDefinition(String aEventId) {
-		for (C2SEventDefinition def : set) {
-			if (def.getId().equals(aEventId)) {
+		for (C2SEventDefinition lDef : mDefinitions) {
+			if (lDef.getId().equals(aEventId)) {
 				return true;
 			}
 		}
@@ -73,16 +71,13 @@ public class C2SEventDefinitionManager implements IInitializable {
 	}
 
 	/**
-	 * Get a C2SEventDefinition using it identifier
-	 *
-	 * @param aEventId The C2SEventDefinition identifier
-	 * @return The C2SEventDefinition 
-	 * @throws Exception
+	 * {@inheritDoc } 
 	 */
+	@Override
 	public C2SEventDefinition getDefinition(String aEventId) throws Exception {
-		for (C2SEventDefinition def : set) {
-			if (def.getId().equals(aEventId)) {
-				return def;
+		for (C2SEventDefinition lDef : mDefinitions) {
+			if (lDef.getId().equals(aEventId)) {
+				return lDef;
 			}
 		}
 
@@ -90,19 +85,16 @@ public class C2SEventDefinitionManager implements IInitializable {
 	}
 
 	/**
-	 * Get the C2SEventDefinition identifier using it class
-	 * 
-	 * @param aEventClass The C2SEventDefinition class
-	 * @return The C2SEventDefinition identifier
-	 * @throws Exception
+	 * {@inheritDoc } 
 	 */
+	@Override
 	public String getIdByClass(Class<? extends Event> aEventClass) throws Exception {
-		for (C2SEventDefinition def : set) {
-			if (def.getEventClass().equals(aEventClass)) {
-				return def.getId();
+		for (C2SEventDefinition lDef : mDefinitions) {
+			if (lDef.getEventClass().equals(aEventClass)) {
+				return lDef.getId();
 			}
 		}
 
-		throw new IndexOutOfBoundsException("The event definition with class '" + aEventClass.toString() + "' does not exists!");
+		throw new IndexOutOfBoundsException("The event definition for class '" + aEventClass.getCanonicalName() + "' does not exists!");
 	}
 }

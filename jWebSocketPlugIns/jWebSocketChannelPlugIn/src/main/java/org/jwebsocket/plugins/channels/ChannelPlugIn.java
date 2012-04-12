@@ -19,13 +19,10 @@ import java.util.List;
 import java.util.Map;
 import javolution.util.FastList;
 import javolution.util.FastMap;
-
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
@@ -34,13 +31,10 @@ import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.plugins.channels.Channel.ChannelState;
 import org.jwebsocket.security.SecurityFactory;
-import org.jwebsocket.spring.JWebSocketBeanFactory;
-import org.jwebsocket.spring.ServerXmlBeanFactory;
 import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
-import org.jwebsocket.util.Tools;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Token based implementation of the channel plugin. It's based on a
@@ -123,7 +117,7 @@ import org.springframework.core.io.FileSystemResource;
 public class ChannelPlugIn extends TokenPlugIn {
 
 	/** logger */
-	private static Logger mLog = Logging.getLogger(ChannelPlugIn.class);
+	private static Logger mLog = Logging.getLogger();
 	/** channel manager */
 	private ChannelManager mChannelManager = null;
 	/** name space for channels */
@@ -150,6 +144,7 @@ public class ChannelPlugIn extends TokenPlugIn {
 	private static final String OWNER = "owner";
 	private static final String CHANNEL = "channel";
 	private static final String CONNECTED = "connected";
+	private static ApplicationContext mBeanFactory;
 	
 	/**
 	 * Constructor with plug-in config
@@ -166,27 +161,12 @@ public class ChannelPlugIn extends TokenPlugIn {
 		this.setNamespace(NS_CHANNELS);
 
 		try {
-			String lSpringConfig = getString("spring_config");
-			lSpringConfig = Tools.expandEnvVars(lSpringConfig);
-			String lPath = FilenameUtils.getPath(lSpringConfig);
-			if (lPath == null || lPath.length() <= 0) {
-				lPath = JWebSocketConfig.getConfigFolder(lSpringConfig);
-			} else {
-				lPath = lSpringConfig;
-			}
-			FileSystemResource lFSRes = new FileSystemResource(lPath);
-
-            JWebSocketBeanFactory.load(lPath, getClass().getClassLoader());
-
-			// mBeanFactory = new ServerXmlBeanFactory(lFSRes, getClass().getClassLoader());
-            
-			Object lObj;
-			lObj = JWebSocketBeanFactory.getInstance().getBean("channelManager");
-			mChannelManager = (ChannelManager) lObj;
+			mBeanFactory = getConfigBeanFactory();
+			mChannelManager = (ChannelManager) mBeanFactory.getBean("channelManager");
 
 			// give a success message to the administrator
 			if (mLog.isInfoEnabled()) {
-				mLog.info("Channel plug-in successfully loaded.");
+				mLog.info("Channel plug-in successfully instantiated.");
 			}
 		} catch (Exception lEx) {
 			mLog.error(lEx.getClass().getSimpleName() + " at Channel plug-in instantiation: " + lEx.getMessage());

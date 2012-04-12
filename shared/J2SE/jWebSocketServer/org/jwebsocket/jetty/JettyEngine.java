@@ -23,7 +23,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketServerConstants;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.WebSocketException;
@@ -35,7 +35,7 @@ import org.jwebsocket.logging.Logging;
  */
 public class JettyEngine extends BaseEngine {
 
-	private static Logger mLog = Logging.getLogger(JettyEngine.class);
+	private static Logger mLog = Logging.getLogger();
 	private boolean mIsRunning = false;
 	private Server mJettyServer = null;
 
@@ -84,8 +84,9 @@ public class JettyEngine extends BaseEngine {
 			mJettyServer = new Server(lPort);
 
 			SslSelectChannelConnector lSSLConnector = new SslSelectChannelConnector();
-			String lWebSocketHome = System.getenv(JWebSocketServerConstants.JWEBSOCKET_HOME);
-			String lKeyStore = lWebSocketHome + "/conf/jWebSocket.ks";
+			String lWebSocketHome = JWebSocketConfig.getJWebSocketHome(); 
+			// System.getenv(JWebSocketServerConstants.JWEBSOCKET_HOME);
+			String lKeyStore = lWebSocketHome + "conf/jWebSocket.ks";
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Loading SSL cert from keystore '" + lKeyStore + "'...");
 			}

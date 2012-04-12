@@ -19,8 +19,8 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Map;
 import javax.net.ssl.SSLSocket;
-
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketConnectorStatus;
@@ -28,12 +28,7 @@ import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.connectors.BaseConnector;
-import org.jwebsocket.engines.BaseEngine;
-import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.kit.RawPacket;
-import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.kit.WebSocketFrameType;
-import org.jwebsocket.kit.WebSocketProtocolAbstraction;
+import org.jwebsocket.kit.*;
 import org.jwebsocket.logging.Logging;
 
 /**
@@ -44,16 +39,17 @@ import org.jwebsocket.logging.Logging;
  */
 public class TCPConnector extends BaseConnector {
 
-	private static Logger mLog = Logging.getLogger(TCPConnector.class);
+	private static Logger mLog = Logging.getLogger();
 	private InputStream mIn = null;
 	private OutputStream mOut = null;
 	private Socket mClientSocket = null;
+	private static final int CONNECT_TIMEOUT = 2000;
 	/**
-	 * 
+	 *
 	 */
 	public static final String TCP_LOG = "TCP";
 	/**
-	 * 
+	 *
 	 */
 	public static final String SSL_LOG = "SSL";
 	private String mLogInfo = TCP_LOG;
@@ -121,6 +117,7 @@ public class TCPConnector extends BaseConnector {
 
 	/**
 	 * This closes all streams, the client socket and shuts down the tread.
+	 *
 	 * @param aCloseReason
 	 */
 	private void terminateConnector(CloseReason aCloseReason) {
@@ -165,16 +162,26 @@ public class TCPConnector extends BaseConnector {
 			if (!isHixie()) {
 				// Hybi specs demand that client must be notified
 				// with CLOSE control message before disconnect
-				WebSocketPacket lClose = new RawPacket(WebSocketFrameType.CLOSE, "BYE");
+
+				// @TODO the close reason has to be notified to the client
+				// following the WebSocket protocol specification for this
+				// @see http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-17#page-45
+				WebSocketPacket lClose;
+				lClose = new RawPacket(WebSocketFrameType.CLOSE, WebSocketProtocolAbstraction.calcCloseData(1000, aCloseReason.name()));
+				WebSocketConnectorStatus lStatus = getStatus();
 				try {
+					// to ensure that the close packet can be sent at all!
+					setStatus(WebSocketConnectorStatus.UP);
 					sendPacketInTransaction(lClose);
 				} catch (WebSocketException ex) {
 					// TODO: check if we need to handle that here!
+				} finally {
+					setStatus(lStatus);
 				}
 			}
 			stopReader();
 		}
-		// the connector is removed in th read thread once terminated
+		// the connector is removed in the read thread once terminated
 	}
 
 	public void stopReader() {
@@ -182,18 +189,18 @@ public class TCPConnector extends BaseConnector {
 			// force input stream to close to terminate reader thread
 			if (!mClientSocket.isInputShutdown()
 					&& !mClientSocket.isClosed()) {
-				mClientSocket.shutdownInput();
+				if (!(mClientSocket instanceof SSLSocket)) {
+					mClientSocket.shutdownInput();
+				}
 			}
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName()
-					+ " shutting down reader stream (" + getId() + "): " + lEx.getMessage());
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "shutting down reader stream (" + getId() + ")"));
 		}
 		try {
 			// force input stream to close to terminate reader thread
 			mIn.close();
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName()
-					+ " closing reader stream (" + getId() + "): " + lEx.getMessage());
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "closing reader stream (" + getId() + ")"));
 		}
 	}
 
@@ -209,8 +216,8 @@ public class TCPConnector extends BaseConnector {
 			// TODO: think about if and how to handle the scenario 
 			// that other threads send data to a closed or closing connector.
 			/*
-			mLog.warn("Trying to send to closing connection: "
-			+ getId() + ", " + aDataPacket.getUTF8());
+			 * mLog.warn("Trying to send to closing connection: " + getId() + ",
+			 * " + aDataPacket.getUTF8());
 			 */
 			return;
 		}
@@ -241,8 +248,9 @@ public class TCPConnector extends BaseConnector {
 		}
 	}
 
-	/* this is called by the TimeoutOutputstreamWriter, the data 
-	 * is first written into a queue and then send by a watched thread
+	/*
+	 * this is called by the TimeoutOutputstreamWriter, the data is first
+	 * written into a queue and then send by a watched thread
 	 */
 	public synchronized void _sendPacket(WebSocketPacket aDataPacket) {
 		try {
@@ -257,8 +265,8 @@ public class TCPConnector extends BaseConnector {
 			// in a write operation, this is not necessarily an error.
 			// TODO: think how to eventually better deal with this.
 			/*
-			mLog.error(lEx.getClass().getSimpleName()
-			+ " sending data packet: " + lEx.getMessage());
+			 * mLog.error(lEx.getClass().getSimpleName() + " sending data
+			 * packet: " + lEx.getMessage());
 			 */
 		}
 	}
@@ -304,6 +312,105 @@ public class TCPConnector extends BaseConnector {
 		mOut.flush();
 	}
 
+	private RequestHeader processHandshake(Socket aClientSocket)
+			throws UnsupportedEncodingException, IOException {
+
+		InputStream lIn = aClientSocket.getInputStream();
+		OutputStream lOut = aClientSocket.getOutputStream();
+
+		ByteArrayOutputStream lBAOS = new ByteArrayOutputStream(4096);
+		byte[] lBuff = new byte[4096];
+		int lRead = 0, lTotal = 0;
+		long lStart = System.currentTimeMillis();
+		do {
+			lRead = lIn.read(lBuff, 0, lBuff.length);
+			if (lRead != -1) {
+				lTotal += lRead;
+				lBAOS.write(lBuff, 0, lRead);
+				String lAsStr = lBAOS.toString();
+				if (null != lAsStr
+						&& lAsStr.indexOf("\r\n\r\n") > 0) {
+					break;
+				}
+			} else {
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException ex) {
+				}
+			}
+		} while (System.currentTimeMillis() - lStart < CONNECT_TIMEOUT);
+		if (lTotal <= 0) {
+			mLog.warn("Connection "
+					+ aClientSocket.getInetAddress() + ":"
+					+ aClientSocket.getPort()
+					+ " did not detect initial handshake (total bytes read: " + lTotal + ").");
+			return null;
+		}
+		byte[] lReq = lBAOS.toByteArray();
+
+		/*
+		 * please keep comment for debugging purposes!
+		 */
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Parsing handshake request: " + new String(lReq).replace("\r\n", "\\n"));
+		}
+		Map lRespMap = WebSocketHandshake.parseC2SRequest(
+				lReq, aClientSocket instanceof SSLSocket);
+		if (lRespMap == null) {
+			return null;
+		}
+		RequestHeader lHeader = EngineUtils.validateC2SRequest(
+				getEngine().getConfiguration().getDomains(), lRespMap, mLog);
+		if (lHeader == null) {
+			return null;
+		}
+
+		// generate the websocket handshake
+		// if policy-file-request is found answer it
+		byte[] lBA = WebSocketHandshake.generateS2CResponse(lRespMap);
+		if (lBA == null) {
+			if (mLog.isDebugEnabled()) {
+				mLog.warn("TCPEngine detected illegal handshake.");
+			}
+			return null;
+		}
+
+		/*
+		 * please keep comment for debugging purposes!
+		 */
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Flushing handshake response: " + new String(lBA).replace("\r\n", "\\n"));
+			// mLog.debug("Flushing initial WebSocket handshake...");
+		}
+
+		lOut.write(lBA);
+		lOut.flush();
+
+		// maybe the request is a flash policy-file-request
+		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
+		if (lFlashBridgeReq != null) {
+			mLog.warn("TCPEngine returned policy file request ('"
+					+ lFlashBridgeReq
+					+ "'), check for FlashBridge plug-in.");
+		}
+
+
+		// if we detected a flash policy-file-request return "null"
+		// (no websocket header detected)
+		if (lFlashBridgeReq != null) {
+			mLog.warn("TCP Engine returned policy file response ('"
+					+ new String(lBA, "US-ASCII")
+					+ "'), check for FlashBridge plug-in.");
+			return null;
+		}
+
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Handshake flushed.");
+		}
+
+		return lHeader;
+	}
+
 	private class ClientProcessor implements Runnable {
 
 		private WebSocketConnector mConnector = null;
@@ -320,7 +427,6 @@ public class TCPConnector extends BaseConnector {
 		@Override
 		public void run() {
 			WebSocketEngine lEngine = getEngine();
-			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
 			Thread.currentThread().setName("jWebSocket " + mLogInfo + "-Connector " + getId());
 
 			// start client listener loop
@@ -328,19 +434,67 @@ public class TCPConnector extends BaseConnector {
 			mCloseReason = CloseReason.SERVER;
 			int lPort = mClientSocket.getPort();
 
+			String lLogInfo = isSSL() ? "SSL" : "TCP";
+			boolean lOk = false;
+			try {
+				boolean lTCPNoDelay = mClientSocket.getTcpNoDelay();
+				// ensure that all packets are sent immediately w/o delay
+				// to achieve better latency, no waiting and packaging.
+				mClientSocket.setTcpNoDelay(true);
+
+				RequestHeader lHeader = processHandshake(mClientSocket);
+				if (lHeader != null) {
+					setHeader(lHeader);
+					int lSessionTimeout = lHeader.getTimeout(getEngine().getSessionTimeout());
+					if (lSessionTimeout > 0) {
+						mClientSocket.setSoTimeout(lSessionTimeout);
+					}
+					setVersion(lHeader.getVersion());
+					setSubprot(lHeader.getSubProtocol());
+					if (mLog.isDebugEnabled()) {
+						mLog.debug(lLogInfo + " client accepted on port "
+								+ mClientSocket.getPort()
+								+ " with timeout "
+								+ (lSessionTimeout > 0 ? lSessionTimeout + "ms" : "infinite")
+								+ " (TCPNoDelay was: " + lTCPNoDelay + ")"
+								+ "...");
+					}
+					lOk = true;
+				} else {
+					mLog.error("Client not accepted on port "
+							+ mClientSocket.getPort()
+							+ " due to handshake issues");
+				}
+			} catch (Exception lEx) {
+				mLog.error(Logging.getSimpleExceptionMessage(lEx, "executing handshake"));
+			}
+			try {
+				if (!lOk) {
+					// if header could not be parsed properly
+					// immediately disconnect the client.
+					mClientSocket.close();
+					return;
+				}
+			} catch (Exception lEx) {
+				mLog.error(Logging.getSimpleExceptionMessage(lEx, "closing socket"));
+				return;
+			}
+
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Starting " + lLogInfo + " connector...");
+			}
+			
 			// call connectorStarted method of engine
 			lEngine.connectorStarted(mConnector);
 
-			((BaseEngine) lEngine).lostConnectors.add(mConnector);
 			// readHixie and readHybi process potential exceptions already!
 			try {
 				if (isHixie()) {
-					processHixie(lBuff, lEngine);
+					processHixie(lEngine);
 				} else {
-					processHybi(getVersion(), lBuff, lEngine);
+					processHybi(getVersion(), lEngine);
 				}
 			} finally {
-				((BaseEngine) lEngine).lostConnectors.remove(mConnector);
 				terminateConnector(mCloseReason);
 			}
 
@@ -355,17 +509,18 @@ public class TCPConnector extends BaseConnector {
 			}
 		}
 
-		private void processHixie(ByteArrayOutputStream aBuff,
+		private void processHixie(
 				WebSocketEngine aEngine) {
+			ByteArrayOutputStream lBuff = new ByteArrayOutputStream();
 			while (WebSocketConnectorStatus.UP == getStatus()) {
 				try {
 					int lIn = WebSocketProtocolAbstraction.read(mIn);
 					// start of frame
 					if (lIn == 0x00) {
-						aBuff.reset();
+						lBuff.reset();
 						// end of frame
 					} else if (lIn == 0xFF) {
-						RawPacket lPacket = new RawPacket(aBuff.toByteArray());
+						RawPacket lPacket = new RawPacket(lBuff.toByteArray());
 						try {
 							aEngine.processPacket(mConnector, lPacket);
 						} catch (Exception lEx) {
@@ -374,13 +529,13 @@ public class TCPConnector extends BaseConnector {
 									+ mConnector.getClass().getSimpleName()
 									+ ": " + lEx.getMessage());
 						}
-						aBuff.reset();
+						lBuff.reset();
 					} else if (lIn < 0) {
 						mCloseReason = CloseReason.CLIENT;
 						setStatus(WebSocketConnectorStatus.DOWN);
 						// any other byte within or outside a frame
 					} else {
-						aBuff.write(lIn);
+						lBuff.write(lIn);
 					}
 				} catch (SocketTimeoutException lEx) {
 					mLog.error(lEx.getClass().getSimpleName()
@@ -396,13 +551,12 @@ public class TCPConnector extends BaseConnector {
 			}
 		}
 
-		private void processHybi(int aVersion, ByteArrayOutputStream aBuff,
-				WebSocketEngine aEngine) {
+		private void processHybi(int aVersion, WebSocketEngine aEngine) {
 
 			String lFrom = getRemoteHost() + ":" + getRemotePort() + " (" + getId() + ")";
 			while (WebSocketConnectorStatus.UP == getStatus()) {
 				try {
-					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(getVersion(), mIn);
+					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(aVersion, mIn);
 					if (lPacket == null) {
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Processing client 'disconnect' from " + lFrom + "...");
@@ -480,5 +634,4 @@ public class TCPConnector extends BaseConnector {
 		}
 		return lRes + ")";
 	}
-	
 }

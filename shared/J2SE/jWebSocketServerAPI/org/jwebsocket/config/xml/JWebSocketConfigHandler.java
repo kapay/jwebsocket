@@ -32,6 +32,7 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
+import org.jwebsocket.config.Config;
 
 /**
  * Handler class that handles the <tt>jWebSocket.xml</tt> configuration. This
@@ -39,9 +40,11 @@ import org.jdom.output.XMLOutputter;
  * handler, to read the whole config file.
  * 
  * @author puran
+ * @author Marcos Antonio González Huerta (markos0886, UCI)
  * @version $Id: JWebSocketConfigHandler.java 596 2010-06-22 17:09:54Z
  *          fivefeetfurther $
  */
+@SuppressWarnings("StaticNonFinalUsedInInitialization")
 public class JWebSocketConfigHandler implements ConfigHandler {
 
 	// We cannot use the logging subsystem here because its config needs to be
@@ -50,7 +53,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_PROTOCOL = "protocol";
 	private static final String ELEMENT_NODE_ID = "node_id";
 	private static final String ELEMENT_INITIALIZER_CLASS = "initializerClass";
-	private static final String ELEMENT_JWEBSOCKET_HOME = "jWebSocketHome";
 	private static final String ELEMENT_LIBRARY_FOLDER = "libraryFolder";
 	private static final String ELEMENT_LIBRARIES = "libraries";
 	private static final String ELEMENT_LIBRARY = "library";
@@ -58,10 +60,10 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_ENGINE = "engine";
 	private static final String ELEMENT_SERVERS = "servers";
 	private static final String ELEMENT_SERVER = "server";
-	private static final String ELEMENT_PLUGINS = "plugins";
-	private static final String ELEMENT_PLUGIN = "plugin";
-	private static final String ELEMENT_FILTERS = "filters";
-	private static final String ELEMENT_FILTER = "filter";
+	protected static final String ELEMENT_PLUGINS = "plugins";
+	protected static final String ELEMENT_PLUGIN = "plugin";
+	protected static final String ELEMENT_FILTERS = "filters";
+	protected static final String ELEMENT_FILTER = "filter";
 	private static final String ELEMENT_LOGGING = "logging";
 	private static final String ELEMENT_LOG4J = "log4j";
 	private static final String ELEMENT_RIGHTS = "rights";
@@ -70,9 +72,10 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	private static final String ELEMENT_ROLE = "role";
 	private static final String ELEMENT_USERS = "users";
 	private static final String ELEMENT_USER = "user";
-	private static final String JWEBSOCKET = "jWebSocket";
+	protected static final String JWEBSOCKET = "jWebSocket";
 	private static final String ELEMENT_THREAD_POOL = "threadPool";
 	private static Map<String, ConfigHandler> handlerContext = new FastMap<String, ConfigHandler>();
+	private static String JWS_MGMT_DESK_PATH = "AdminPlugIn" + System.getProperty("file.separator") + "jwsMgmtDesk.xml";
 
 	// initialize the different config handler implementations
 	static {
@@ -92,7 +95,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public JWebSocketConfig processConfig(XMLStreamReader aStreamReader) {
+	public Config processConfig(XMLStreamReader aStreamReader) {
 		JWebSocketConfig.Builder lConfigBuilder = new JWebSocketConfig.Builder();
 
 		try {
@@ -112,9 +115,6 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 					} else if (lElementName.equals(ELEMENT_NODE_ID)) {
 						aStreamReader.next();
 						lConfigBuilder.setNodeId(aStreamReader.getText());
-					} else if (lElementName.equals(ELEMENT_JWEBSOCKET_HOME)) {
-						aStreamReader.next();
-						lConfigBuilder.setJWebSocketHome(aStreamReader.getText());
 					} else if (lElementName.equals(ELEMENT_LIBRARY_FOLDER)) {
 						aStreamReader.next();
 						lConfigBuilder.setLibraryFolder(aStreamReader.getText());
@@ -275,7 +275,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	 * @throws XMLStreamException
 	 *           if exception occurs while reading
 	 */
-	private List<PluginConfig> handlePlugins(XMLStreamReader aStreamReader) throws XMLStreamException {
+	protected List<PluginConfig> handlePlugins(XMLStreamReader aStreamReader) throws XMLStreamException {
 		List<PluginConfig> lPlugins = new FastList<PluginConfig>();
 		while (aStreamReader.hasNext()) {
 			aStreamReader.next();
@@ -306,7 +306,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 	 * @throws XMLStreamException
 	 *           if exception occurs while reading
 	 */
-	private List<FilterConfig> handleFilters(XMLStreamReader aStreamReader) throws XMLStreamException {
+	protected List<FilterConfig> handleFilters(XMLStreamReader aStreamReader) throws XMLStreamException {
 		List<FilterConfig> lFilters = new FastList<FilterConfig>();
 		while (aStreamReader.hasNext()) {
 			aStreamReader.next();
@@ -451,20 +451,20 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		return lEngines;
 	}
 
-	private Document getDocument() throws Exception {
+	protected Document getDocument(String aPath) throws Exception {
 		SAXBuilder lBuilder = new SAXBuilder();
-		File lFile = new File(JWebSocketConfig.getConfigurationPath());
+		File lFile = new File(aPath);
 		return (Document) lBuilder.build(lFile);
 	}
 
-	private void saveChange(Document aDoc) throws IOException {
+	protected void saveChange(Document aDoc, String aPath) throws IOException {
 		XMLOutputter lXmlOutput = new XMLOutputter();
 		lXmlOutput.setFormat(Format.getPrettyFormat());
-		lXmlOutput.output(aDoc, new FileWriter(JWebSocketConfig.getConfigurationPath()));
+		lXmlOutput.output(aDoc, new FileWriter(aPath));
 	}
 
 	public void setEnabledPlugIn(String aId, Boolean aEnabled) throws Exception {
-		Document lDoc = getDocument();
+		Document lDoc = getDocument(JWebSocketConfig.getConfigPath());
 		Element lRootNode = lDoc.getRootElement();
 		Element lPlugins = lRootNode.getChild(ELEMENT_PLUGINS);
 		List<Element> lPluginsList = lPlugins.getChildren(ELEMENT_PLUGIN);
@@ -479,11 +479,11 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 			}
 		}
 
-		saveChange(lDoc);
+		saveChange(lDoc, JWebSocketConfig.getConfigPath());
 	}
 
 	public void setEnabledFilter(String aId, Boolean aEnabled) throws Exception {
-		Document lDoc = getDocument();
+		Document lDoc = getDocument(JWebSocketConfig.getConfigPath());
 		Element lRootNode = lDoc.getRootElement();
 		Element lFilters = lRootNode.getChild(ELEMENT_FILTERS);
 		List<Element> lFiltersList = lFilters.getChildren(ELEMENT_FILTER);
@@ -498,36 +498,145 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 			}
 		}
 
-		saveChange(lDoc);
+		saveChange(lDoc, JWebSocketConfig.getConfigPath());
+	}
+
+	public void addPlugInConfig(String aId) throws Exception {
+		Document lDoc = getDocument(JWebSocketConfig.getConfigPath());
+		Document lDocAdmin = getDocument(JWebSocketConfig.getConfigFolder(JWS_MGMT_DESK_PATH));
+
+		Element lRootNodeAdmin = lDocAdmin.getRootElement();
+		Element lPluginsAdmin = lRootNodeAdmin.getChild(ELEMENT_PLUGINS);
+		List<Element> lPluginsList = lPluginsAdmin.getChildren(ELEMENT_PLUGIN);
+
+		Element lRootNode = lDoc.getRootElement();
+		Element lPlugins = lRootNode.getChild(ELEMENT_PLUGINS);
+
+		for (int i = 0; i < lPluginsList.size(); i++) {
+			if (aId.equals(lPluginsList.get(i).getChildText("id"))) {
+				lPlugins.addContent((Element)lPluginsList.get(i).clone());
+				lPluginsList.remove(i);
+				break;
+			}
+		}
+
+		saveChange(lDoc, JWebSocketConfig.getConfigPath());
+		saveChange(lDocAdmin, JWebSocketConfig.getConfigFolder(JWS_MGMT_DESK_PATH));
+	}
+
+	public void addFilterConfig(String aId) throws Exception {
+		Document lDoc = getDocument(JWebSocketConfig.getConfigPath());
+		Document lDocAdmin = getDocument(JWebSocketConfig.getConfigFolder(JWS_MGMT_DESK_PATH));
+
+		Element lRootNodeAdmin = lDocAdmin.getRootElement();
+		Element lFiltersAdmin = lRootNodeAdmin.getChild(ELEMENT_FILTERS);
+		List<Element> lFiltersList = lFiltersAdmin.getChildren(ELEMENT_FILTER);
+
+		Element lRootNode = lDoc.getRootElement();
+		Element lFilters = lRootNode.getChild(ELEMENT_FILTERS);
+
+		for (int i = 0; i < lFiltersList.size(); i++) {
+			if (aId.equals(lFiltersList.get(i).getChildText("id"))) {
+				lFilters.addContent((Element)lFiltersList.get(i).clone());
+				lFiltersList.remove(i);
+				break;
+			}
+		}
+
+		saveChange(lDoc, JWebSocketConfig.getConfigPath());
+		saveChange(lDocAdmin, JWebSocketConfig.getConfigFolder(JWS_MGMT_DESK_PATH));
 	}
 
 	public void removePlugInConfig(String aId) throws Exception {
-		Document lDoc = getDocument();
+		Document lDoc = getDocument(JWebSocketConfig.getConfigPath());
+		Document lDocAdmin = getDocument(JWebSocketConfig.getConfigFolder(JWS_MGMT_DESK_PATH));
+
 		Element lRootNode = lDoc.getRootElement();
 		Element lPlugins = lRootNode.getChild(ELEMENT_PLUGINS);
 		List<Element> lPluginsList = lPlugins.getChildren(ELEMENT_PLUGIN);
 
-		for (int i = 0; i < lPluginsList.size(); i++) {
-			if (aId.equals(lPluginsList.get(i).getChildText("id"))) {
-				lPluginsList.remove(i);
+		Element lRootNodeAdmin = lDocAdmin.getRootElement();
+		Element lPluginsAdmin = lRootNodeAdmin.getChild(ELEMENT_PLUGINS);
+		List<Element> lPluginsAdminList = lPluginsAdmin.getChildren(ELEMENT_PLUGIN);
+		
+		Boolean lExist = false;
+		for (int i = 0; i < lPluginsAdminList.size(); i++) {
+			if (aId.equals(lPluginsAdminList.get(i).getChildText("id"))) {
+				lExist = true;
+				break;
 			}
 		}
 
-		saveChange(lDoc);
+		for (int i = 0; i < lPluginsList.size(); i++) {
+			if (aId.equals(lPluginsList.get(i).getChildText("id"))) {
+				if(false == lExist) {
+					lPluginsAdmin.addContent((Element)lPluginsList.get(i).clone());
+				}
+				lPluginsList.remove(i);
+				break;
+			}
+		}
+
+		saveChange(lDoc, JWebSocketConfig.getConfigPath());
+		saveChange(lDocAdmin, JWebSocketConfig.getConfigFolder(JWS_MGMT_DESK_PATH));
 	}
-	
+
 	public void removeFilterConfig(String aId) throws Exception {
-		Document lDoc = getDocument();
+		Document lDoc = getDocument(JWebSocketConfig.getConfigPath());
+		Document lDocAdmin = getDocument(JWebSocketConfig.getConfigFolder(JWS_MGMT_DESK_PATH));
+
 		Element lRootNode = lDoc.getRootElement();
 		Element lFilters = lRootNode.getChild(ELEMENT_FILTERS);
 		List<Element> lFiltersList = lFilters.getChildren(ELEMENT_FILTER);
 
+		Element lRootNodeAdmin = lDocAdmin.getRootElement();
+		Element lFiltersAdmin = lRootNodeAdmin.getChild(ELEMENT_FILTERS);
+
 		for (int i = 0; i < lFiltersList.size(); i++) {
 			if (aId.equals(lFiltersList.get(i).getChildText("id"))) {
+				lFiltersAdmin.addContent((Element)lFiltersList.get(i).clone());
 				lFiltersList.remove(i);
+				break;
 			}
 		}
 
-		saveChange(lDoc);
+		saveChange(lDoc, JWebSocketConfig.getConfigPath());
+		saveChange(lDocAdmin, JWebSocketConfig.getConfigFolder(JWS_MGMT_DESK_PATH));
+	}
+
+	public void changeOrderOfPlugInConfig(String aId, Integer aSteps) throws Exception {
+		Document lDoc = getDocument(JWebSocketConfig.getConfigPath());
+		Element lRootNode = lDoc.getRootElement();
+		Element lPlugins = lRootNode.getChild(ELEMENT_PLUGINS);
+		List<Element> lPluginsList = lPlugins.getChildren(ELEMENT_PLUGIN);
+		
+		for (int i = 0; i < lPluginsList.size(); i++) {
+			if (aId.equals(lPluginsList.get(i).getChildText("id"))) {
+				Element lPlugIn = (Element)lPluginsList.get(i).clone();
+				lPluginsList.set(i, (Element)lPluginsList.get(i + aSteps).clone());
+				lPluginsList.set(i + aSteps, lPlugIn);
+				break;
+			}
+		}
+
+		saveChange(lDoc, JWebSocketConfig.getConfigPath());
+	}
+	
+	public void changeOrderOfFilterConfig(String aId, Integer aSteps) throws Exception {
+		Document lDoc = getDocument(JWebSocketConfig.getConfigPath());
+		Element lRootNode = lDoc.getRootElement();
+		Element lFilters = lRootNode.getChild(ELEMENT_FILTERS);
+		List<Element> lFiltersList = lFilters.getChildren(ELEMENT_FILTER);
+		
+		for (int i = 0; i < lFiltersList.size(); i++) {
+			if (aId.equals(lFiltersList.get(i).getChildText("id"))) {
+				Element lFilter = (Element)lFiltersList.get(i).clone();
+				lFiltersList.set(i, (Element)lFiltersList.get(i + aSteps).clone());
+				lFiltersList.set(i + aSteps, lFilter);
+				break;
+			}
+		}
+
+		saveChange(lDoc, JWebSocketConfig.getConfigPath());
 	}
 }

@@ -20,9 +20,9 @@ package org.jwebsocket.api;
  * @author kyberneees, aschulze
  */
 public interface IStorageProvider {
-	
+
 	/**
-	 * Get a storage instance giving a name
+	 * Get a storage instance for a giving a name
 	 * 
 	 * @param aName 
 	 * @return The storage instance
@@ -30,8 +30,11 @@ public interface IStorageProvider {
 	 */
 	IBasicStorage<String, Object> getStorage(String aName) throws Exception;
 
-    void removeStorage(String aName) throws Exception;
-    
-    
-
+	/**
+	 * Remove a storage from a given name
+	 * 
+	 * @param aName
+	 * @throws Exception 
+	 */
+	void removeStorage(String aName) throws Exception;
 }

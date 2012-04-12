@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - EventsPlugIn
+//  jWebSocket - JcPlugIn
 //  Copyright (c) 2011 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -20,14 +20,14 @@ import java.util.Set;
 import javax.smartcardio.CommandAPDU;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
-import org.apache.commons.codec.binary.Base64;
 import org.jwebsocket.eventmodel.event.C2SResponseEvent;
 import org.jwebsocket.eventmodel.event.S2CEvent;
 import org.jwebsocket.eventmodel.event.card.JcTerminalNotReady;
 import org.jwebsocket.eventmodel.event.card.JcTerminalReady;
-import org.jwebsocket.eventmodel.exception.MissingTokenSender;
+import org.jwebsocket.eventmodel.exception.MissingTokenSenderException;
 import org.jwebsocket.eventmodel.plugin.EventModelPlugIn;
 import org.jwebsocket.token.Token;
+import org.jwebsocket.util.Tools;
 
 /**
  *
@@ -44,12 +44,12 @@ import org.jwebsocket.token.Token;
 //
 //			@Override
 //			public void success(ResponseAPDU response, String from) {
-//				System.out.println(">> success " + from + " " + response.getBytes());
+//				System.out.println("success " + from + " " + response.getBytes());
 //			}
 //
 //			@Override
 //			public void failure(FailureReason reason, String from) {
-//				System.out.println(">> failure " + from + " " + reason.name());
+//				System.out.println("failure " + from + " " + reason.name());
 //			}
 //		});
  */
@@ -58,13 +58,13 @@ public class JcPlugIn extends EventModelPlugIn {
 	/**
 	 * @TODO: Replace this by storages to support clusters
 	 */
-	private Map<String, Set<String>> terminals = new FastMap<String, Set<String>>().shared();
+	private Map<String, Set<String>> mTerminals = new FastMap<String, Set<String>>().shared();
 
 	public Set<String> getTerminals(String aConnectorId) {
-		if (!terminals.containsKey(aConnectorId)) {
-			terminals.put(aConnectorId, new FastSet<String>());
+		if (!mTerminals.containsKey(aConnectorId)) {
+			mTerminals.put(aConnectorId, new FastSet<String>());
 		}
-		return terminals.get(aConnectorId);
+		return mTerminals.get(aConnectorId);
 	}
 
 	/**
@@ -92,23 +92,23 @@ public class JcPlugIn extends EventModelPlugIn {
 	 */
 	class TransmitEvent extends S2CEvent {
 
-		private byte[] bytes;
-		private String terminalId;
+		private byte[] mBytes;
+		private String mTerminalId;
 
 		public TransmitEvent(byte[] aBytes, String aTerminalId) {
-			this.bytes = aBytes;
-			this.terminalId = aTerminalId;
+			this.mBytes = aBytes;
+			this.mTerminalId = aTerminalId;
 
 			setResponseType("string");
 			setId("transmit");
-			setTimeout(5000);
+			setTimeout(10000);
 		}
 
 		@Override
 		public void writeToToken(Token aToken) {
 			//Base64 encoded to save the bytes integrity
-			aToken.setString("apdu", Base64.encodeBase64String(bytes));
-			aToken.setString("terminal", terminalId);
+			aToken.setString("apdu", Tools.hexByteArrayToString(mBytes));
+			aToken.setString("terminal", mTerminalId);
 		}
 	}
 
@@ -121,8 +121,7 @@ public class JcPlugIn extends EventModelPlugIn {
 	 * @param aCallback
 	 * @throws MissingTokenSender 
 	 */
-	public void transmit(String aConnectorId, String aTerminalId,
-			CommandAPDU aCommand, JcResponseCallback aCallback) throws MissingTokenSender {
+	public void transmit(String aConnectorId, String aTerminalId, CommandAPDU aCommand, JcResponseCallback aCallback) throws MissingTokenSenderException {
 		this.notifyS2CEvent(new TransmitEvent(aCommand.getBytes(), aTerminalId)).to(aConnectorId, aCallback);
 	}
 

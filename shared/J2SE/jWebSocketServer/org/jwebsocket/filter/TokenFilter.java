@@ -18,6 +18,7 @@ package org.jwebsocket.filter;
 import org.jwebsocket.api.FilterConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketPacket;
+import org.jwebsocket.kit.ChangeType;
 import org.jwebsocket.kit.FilterResponse;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
@@ -25,43 +26,39 @@ import org.jwebsocket.token.Token;
 /**
  * 
  * @author aschulze
+ * @author Marcos Antonio González Huerta (markos0886, UCI)
  */
 public class TokenFilter extends BaseFilter {
 
-/*
-  public TokenFilter(String theId) {
-    super(theId);
-  }
-*/
+	public TokenFilter(FilterConfiguration configuration) {
+		super(configuration);
+	}
 
-  public TokenFilter(FilterConfiguration configuration) {
-    super(configuration);
-  }
+	@Override
+	public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aPacket) {
+	}
 
-  @Override
-  public void processPacketIn(FilterResponse aResponse, WebSocketConnector aConnector, WebSocketPacket aPacket) {
-  }
+	@Override
+	public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket) {
+	}
 
-  @Override
-  public void processPacketOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket) {
-  }
+	public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
+	}
 
-  public void processTokenIn(FilterResponse aResponse, WebSocketConnector aConnector, Token aToken) {
-  }
+	public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
+	}
 
-  public void processTokenOut(FilterResponse aResponse, WebSocketConnector aSource, WebSocketConnector aTarget, Token aToken) {
-  }
-
-  /**
-   * 
-   * @return
-   */
-  public TokenServer getServer() {
-    TokenServer lServer = null;
-    TokenFilterChain filterChain = (TokenFilterChain) getFilterChain();
-    if (filterChain != null) {
-      lServer = (TokenServer) filterChain.getServer();
-    }
-    return lServer;
-  }
+	public void createReasonOfChange(Token aResponse, ChangeType aType, String aVersion, String aReason) {
+		aResponse.setNS(getFilterConfiguration().getNamespace());
+		aResponse.setType("processChangeOfPlugIn");
+		aResponse.setString("changeType", aType.toString());
+		aResponse.setString("version", aVersion);
+		aResponse.setString("reason", aReason);
+		aResponse.setString("id", getId());
+	}
+	
+	@Override
+	public TokenServer getServer(){
+		return (TokenServer) super.getServer();
+	}
 }

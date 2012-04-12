@@ -20,21 +20,21 @@ import java.util.Map;
 /**
  * Base interface for filter configuration
  * 
- * @author puran
- * @version $Id$
+ * @author puran, aschulze
  */
 public interface FilterConfiguration extends Configuration {
-  String getJar();
 
-  String getPackageName();
+	String getJar();
 
-  String getNamespace();
+	String getPackageName();
 
-  List<String> getServers();
+	String getNamespace();
 
-  Map<String, String> getSettings();
-  
-  /**
+	List<String> getServers();
+
+	Map<String, String> getSettings();
+
+	/**
 	 * returns the enabled status of the plug-in.
 	 * @return
 	 */

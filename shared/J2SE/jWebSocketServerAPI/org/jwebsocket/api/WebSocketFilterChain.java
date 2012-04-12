@@ -21,15 +21,23 @@ import org.jwebsocket.kit.FilterResponse;
 /**
  *
  * @author aschulze
+ * @author Marcos Antonio González Huerta (markos0886, UCI)
  */
 public interface WebSocketFilterChain {
 
 	void addFilter(WebSocketFilter aFilter);
+	
+	void addFilter(Integer aPosition, WebSocketFilter aFilter);
+	
 	void removeFilter(WebSocketFilter aFilter);
+	
 	List<WebSocketFilter> getFilters();
+	
 	WebSocketFilter getFilterById(String aId);
 
 	FilterResponse processPacketIn(WebSocketConnector aSource, WebSocketPacket aPacket);
+	
 	FilterResponse processPacketOut(WebSocketConnector aSource, WebSocketConnector aTarget, WebSocketPacket aPacket);
 
+	WebSocketServer getServer();
 }

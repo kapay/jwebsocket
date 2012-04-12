@@ -18,16 +18,10 @@ package org.jwebsocket.plugins;
 import java.util.Map;
 import javolution.util.FastMap;
 import org.json.JSONObject;
-import org.jwebsocket.kit.PlugInResponse;
-import org.jwebsocket.api.PluginConfiguration;
-import org.jwebsocket.api.WebSocketPlugIn;
-import org.jwebsocket.api.WebSocketPlugInChain;
-import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.api.WebSocketServer;
+import org.jwebsocket.api.*;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.kit.PlugInResponse;
 
 /**
  * Abstract implementation of WebSocketPlugin
@@ -36,6 +30,7 @@ import org.jwebsocket.kit.CloseReason;
  */
 public abstract class BasePlugIn implements WebSocketPlugIn {
 
+	private String mVersion = null;
 	private WebSocketPlugInChain mPlugInChain = null;
 	private Map<String, Object> mSettings = new FastMap<String, Object>();
 	private PluginConfiguration mConfiguration;
@@ -53,15 +48,6 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	/*
-	@Override
-	public void setPluginConfiguration(PluginConfiguration aConfiguration) {
-	this.mConfiguration = aConfiguration;
-	}
-	 */
 	/**
 	 * {@inheritDoc}
 	 */
@@ -354,13 +340,24 @@ public abstract class BasePlugIn implements WebSocketPlugIn {
 	@Override
 	public void setEnabled(boolean aEnabled) {
 		Boolean lOldEnabled = mConfiguration.getEnabled();
-		mConfiguration = new PluginConfig(mConfiguration.getId(), 
-				mConfiguration.getName(), mConfiguration.getPackage(), 
-				mConfiguration.getJar(), mConfiguration.getNamespace(), 
+		mConfiguration = new PluginConfig(mConfiguration.getId(),
+				mConfiguration.getName(), mConfiguration.getPackage(),
+				mConfiguration.getJar(), mConfiguration.getNamespace(),
 				mConfiguration.getServers(), mSettings, aEnabled);
 		// notify plug-in for change of enabled status
 		if (aEnabled != lOldEnabled) {
 			processEnabled(aEnabled);
 		}
 	}
+
+	@Override
+	public String getVersion() {
+		return mVersion;
+	}
+
+	@Override
+	public void setVersion(String aVersion) {
+		this.mVersion = aVersion;
+	}
+
 }

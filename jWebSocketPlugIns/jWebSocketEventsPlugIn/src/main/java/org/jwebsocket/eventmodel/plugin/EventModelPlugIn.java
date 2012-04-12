@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - EventsPlugIn
+//  jWebSocket - EventModelPlugIn
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -15,25 +15,26 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.plugin;
 
-import org.jwebsocket.eventmodel.s2c.S2CEventNotification;
 import java.util.Collection;
-import org.jwebsocket.eventmodel.observable.ObservableObject;
-import org.jwebsocket.eventmodel.api.IEventModelPlugIn;
-import org.jwebsocket.eventmodel.core.EventModel;
-import org.jwebsocket.eventmodel.observable.Event;
-import org.jwebsocket.eventmodel.observable.ResponseEvent;
 import java.util.Map;
 import java.util.Set;
+import javolution.util.FastMap;
+import org.apache.log4j.Logger;
 import org.jwebsocket.api.WebSocketConnector;
+import org.jwebsocket.eventmodel.api.IEventModelPlugIn;
+import org.jwebsocket.eventmodel.core.EventModel;
+import org.jwebsocket.eventmodel.event.C2SEventDefinition;
 import org.jwebsocket.eventmodel.event.C2SEventDefinitionManager;
 import org.jwebsocket.eventmodel.event.S2CEvent;
-import org.jwebsocket.eventmodel.event.C2SEventDefinition;
+import org.jwebsocket.eventmodel.observable.Event;
+import org.jwebsocket.eventmodel.observable.ObservableObject;
+import org.jwebsocket.eventmodel.observable.ResponseEvent;
+import org.jwebsocket.eventmodel.s2c.S2CEventNotification;
 import org.jwebsocket.eventmodel.s2c.S2CEventNotificationHandler;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.spring.JWebSocketBeanFactory;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
-import org.jwebsocket.logging.Logging;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -41,10 +42,11 @@ import org.apache.log4j.Logger;
  */
 public abstract class EventModelPlugIn extends ObservableObject implements IEventModelPlugIn {
 
-	private String id;
-	private EventModel em;
-	private Map<String, Class<? extends Event>> clientAPI;
+	private String mId;
+	private EventModel mEm;
+	private Map<String, Class<? extends Event>> mClientAPI;
 	private static Logger mLog = Logging.getLogger(EventModelPlugIn.class);
+	private S2CEventNotificationHandler mS2CEventNotificationHandler = null;
 
 	/**
 	 * {@inheritDoc }
@@ -58,11 +60,11 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	/**
 	 * Short-cut to set the plug-in events definitions
 	 * 
-	 * @param defs The plug-in events definitions
+	 * @param aDefs The plug-in events definitions
 	 */
-	public void setEventsDefinitions(Set<C2SEventDefinition> defs) {
+	public void setEventsDefinitions(Set<C2SEventDefinition> aDefs) {
 		((C2SEventDefinitionManager) (JWebSocketBeanFactory.getInstance(getEm().getNamespace()).
-				getBean("EventDefinitionManager"))).getSet().addAll(defs);
+				getBean("EventDefinitionManager"))).getDefinitions().addAll(aDefs);
 	}
 
 	/**
@@ -70,7 +72,9 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	 */
 	@Override
 	public void processEvent(Event aEvent, ResponseEvent aResponseEvent) {
-		System.out.println(">> Response from '" + this.getClass().getName() + "', please override this method!");
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Response from '" + this.getClass().getName() + "', please override this method!");
+		}
 	}
 
 	@Override
@@ -91,32 +95,48 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	 */
 	@Override
 	public S2CEventNotification notifyS2CEvent(S2CEvent aEvent) {
-		return new S2CEventNotification(this.getId(), aEvent,
-				((S2CEventNotificationHandler) JWebSocketBeanFactory.getInstance(getEm().getNamespace()).
-				getBean("S2CEventNotificationHandler")));
+		if (null == mS2CEventNotificationHandler) {
+			mS2CEventNotificationHandler = (S2CEventNotificationHandler) JWebSocketBeanFactory.getInstance(getEm().getNamespace()).
+					getBean("S2CEventNotificationHandler");
+		}
+
+		return new S2CEventNotification(this.getId(), aEvent, mS2CEventNotificationHandler);
 	}
 
 	/**
 	 * Register the events in the EventModel subject and the plug-in as a listener for them
 	 *
-	 * @param emEvents The events to register
+	 * @param aEmEvents The events to register
 	 * @throws Exception
 	 */
-	public void setEmEvents(Collection<Class<? extends Event>> emEvents) throws Exception {
-		getEm().addEvents(emEvents);
-		getEm().on(emEvents, this);
+	public void setEmEvents(Collection<Class<? extends Event>> aEmEvents) throws Exception {
+		getEm().addEvents(aEmEvents);
+		getEm().on(aEmEvents, this);
 	}
 
 	/**
 	 * Event Model events registration and client API definition
 	 *
-	 * @param emEvents
+	 * @param aEmEvents
 	 * @throws Exception
 	 */
-	public void setEmEventsAndClientAPI(Map<String, Class<? extends Event>> emEvents) throws Exception {
-		setClientAPI(emEvents);
-		getEm().addEvents(emEvents.values());
-		getEm().on(emEvents.values(), this);
+	public void setEmEventsAndClientAPI(Map<String, Class<? extends Event>> aEmEvents) throws Exception {
+		setClientAPI(aEmEvents);
+		getEm().addEvents(aEmEvents.values());
+		getEm().on(aEmEvents.values(), this);
+	}
+
+	public void setEmEventClassesAndClientAPI(Map<String, String> aEmEvents) throws Exception {
+		Map lClasses = new FastMap<String, Class>();
+		for (String lClass : aEmEvents.keySet()) {
+			try {
+				lClasses.put(lClass, Class.forName(aEmEvents.get(lClass)));
+			} catch (ClassNotFoundException ex) {
+			}
+		}
+		setClientAPI(lClasses);
+		getEm().addEvents(lClasses.values());
+		getEm().on(lClasses.values(), this);
 	}
 
 	/**
@@ -124,15 +144,15 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	 */
 	@Override
 	public String getId() {
-		return id;
+		return mId;
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void setId(String id) {
-		this.id = id;
+	public void setId(String aId) {
+		this.mId = aId;
 	}
 
 	/**
@@ -140,15 +160,15 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	 */
 	@Override
 	public EventModel getEm() {
-		return em;
+		return mEm;
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void setEm(EventModel em) {
-		this.em = em;
+	public void setEm(EventModel aEm) {
+		this.mEm = aEm;
 	}
 
 	/**
@@ -156,15 +176,15 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	 */
 	@Override
 	public Map<String, Class<? extends Event>> getClientAPI() {
-		return clientAPI;
+		return mClientAPI;
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void setClientAPI(Map<String, Class<? extends Event>> clientAPI) {
-		this.clientAPI = clientAPI;
+	public void setClientAPI(Map<String, Class<? extends Event>> aClientAPI) {
+		this.mClientAPI = aClientAPI;
 	}
 
 	/**
@@ -198,28 +218,25 @@ public abstract class EventModelPlugIn extends ObservableObject implements IEven
 	 */
 	@Override
 	public void writeToToken(Token aToken) {
-		Token lApi = TokenFactory.createToken();
+		Map lApi = new FastMap();
 		Token lTokenEventDef;
 		C2SEventDefinition lEventDef = null;
 
-		for (String key : getClientAPI().keySet()) {
-
+		for (String lKey : getClientAPI().keySet()) {
 			try {
-				String aEventId = getEm().getEventFactory().
-						eventToString(getClientAPI().get(key));
-
+				String aEventId = getEm().getEventFactory().eventToString(getClientAPI().get(lKey));
 				lEventDef = getEm().getEventFactory().getEventDefinitions().getDefinition(aEventId);
 
 				lTokenEventDef = TokenFactory.createToken();
 				lEventDef.writeToToken(lTokenEventDef);
 
-				lApi.setToken(key, lTokenEventDef);
+				lApi.put(lKey, lTokenEventDef.getMap());
 			} catch (Exception ex) {
 				mLog.debug(ex.getMessage(), ex);
 			}
 		}
 
 		aToken.setString("id", getId());
-		aToken.setToken("api", lApi);
+		aToken.setMap("api", lApi);
 	}
 }

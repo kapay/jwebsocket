@@ -5,11 +5,17 @@
 	<formats>
 		<format>jar</format>
 	</formats>
+	
 	<includeBaseDirectory>false</includeBaseDirectory>
+	
 	<dependencySets>
+		
 		<dependencySet>
 			<outputDirectory/>
 			<unpack>true</unpack>
 		</dependencySet>
+		
 	</dependencySets>
+	
+	
 </assembly>

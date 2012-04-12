@@ -21,27 +21,17 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import javolution.util.FastMap;
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.ServerConfiguration;
-import org.jwebsocket.api.WebSocketPacket;
-import org.jwebsocket.config.JWebSocketServerConstants;
-import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.logging.Logging;
-import org.jwebsocket.api.WebSocketPlugIn;
-import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketServerListener;
+import org.jwebsocket.api.*;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.filter.TokenFilterChain;
-import org.jwebsocket.kit.BroadcastOptions;
-import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.kit.FilterResponse;
-import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.*;
 import org.jwebsocket.listener.WebSocketServerTokenEvent;
 import org.jwebsocket.listener.WebSocketServerTokenListener;
+import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugInChain;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
@@ -115,13 +105,14 @@ public class TokenServer extends BaseServer {
 			try {
 				// Wait a while for existing tasks to terminate
 				if (!mCachedThreadPool.awaitTermination(TIME_OUT_TERMINATION_THREAD, TimeUnit.SECONDS)) {
-					mCachedThreadPool.shutdownNow(); // Cancel currently
-					// executing tasks
-					// Wait a while for tasks to respond to being cancelled
-					if (!mCachedThreadPool.awaitTermination(TIME_OUT_TERMINATION_THREAD, TimeUnit.SECONDS)) {
-						mLog.error("Pool did not terminate");
-						mCachedThreadPool.shutdownNow();
-					}
+					mCachedThreadPool.shutdownNow();
+					/*
+					 * // Cancel currently // executing tasks // Wait a while
+					 * for tasks to respond to being cancelled if
+					 * (!mCachedThreadPool.awaitTermination(TIME_OUT_TERMINATION_THREAD,
+					 * TimeUnit.SECONDS)) { mLog.error("Pool did not
+					 * terminate"); mCachedThreadPool.shutdownNow(); }
+					 */
 				}
 			} catch (InterruptedException lEx) {
 				// (Re-)Cancel if current thread also interrupted
@@ -420,8 +411,7 @@ public class TokenServer extends BaseServer {
 	 * Broadcasts the passed token to all token based connectors of the
 	 * underlying engines that belong to the specified group.
 	 *
-	 * @param aToken
-	 *            - token to broadcast
+	 * @param aToken - token to broadcast
 	 */
 	public void broadcastGroup(Token aToken) {
 		String lGroup = aToken.getString("group");
@@ -552,7 +542,8 @@ public class TokenServer extends BaseServer {
 		// interate through all connectors of all engines
 		for (WebSocketConnector lConnector : selectConnectors(lFilter).values()) {
 			if (!aSource.equals(lConnector) /*
-					&& WebSocketConnectorStatus.UP.equals(lConnector.getStatus())*/) {
+					 * && WebSocketConnectorStatus.UP.equals(lConnector.getStatus())
+					 */) {
 				try {
 					RequestHeader lHeader = lConnector.getHeader();
 					if (null != lHeader) {
@@ -619,7 +610,7 @@ public class TokenServer extends BaseServer {
 	 * creates a standard response
 	 *
 	 * @param aInToken
-	 * @return
+	 * @param aOutToken 
 	 */
 	public void setResponseFields(Token aInToken, Token aOutToken) {
 		Integer lTokenId = null;
@@ -647,6 +638,11 @@ public class TokenServer extends BaseServer {
 		}
 	}
 
+	/**
+	 * 
+	 * @param aInToken
+	 * @return
+	 */
 	public Token createResponse(Token aInToken) {
 		Token lResToken = TokenFactory.createToken();
 		setResponseFields(aInToken, lResToken);
@@ -657,6 +653,8 @@ public class TokenServer extends BaseServer {
 	 * creates an error token yet with a code and a message
 	 *
 	 * @param aInToken
+	 * @param aCode 
+	 * @param aMessage 
 	 * @return
 	 */
 	public Token createErrorToken(Token aInToken, int aCode, String aMessage) {
@@ -676,9 +674,9 @@ public class TokenServer extends BaseServer {
 
 		Token lResToken = createErrorToken(aInToken, -1, "not authenticated");
 		/*
-		Token lResToken = createResponse(aInToken);
-		lResToken.setInteger("code", -1);
-		lResToken.setString("msg", "not authenticated");
+		 * Token lResToken = createResponse(aInToken);
+		 * lResToken.setInteger("code", -1); lResToken.setString("msg", "not
+		 * authenticated");
 		 */
 		return lResToken;
 	}
@@ -692,15 +690,16 @@ public class TokenServer extends BaseServer {
 	public Token createAccessDenied(Token aInToken) {
 		Token lResToken = createErrorToken(aInToken, -1, "access denied");
 		/*
-		Token lResToken = createResponse(aInToken);
-		lResToken.setInteger("code", -1);
-		lResToken.setString("msg", "access denied");
+		 * Token lResToken = createResponse(aInToken);
+		 * lResToken.setInteger("code", -1); lResToken.setString("msg", "access
+		 * denied");
 		 */
 		return lResToken;
 	}
 
 	/**
 	 * creates an error response token based on
+	 *
 	 * @param aConnector
 	 * @param aInToken
 	 * @param aErrCode

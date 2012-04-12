@@ -15,9 +15,8 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.filter;
 
-import java.util.Map;
 import java.util.Set;
-import org.jwebsocket.api.IBasicStorage;
+import javolution.util.FastSet;
 import org.jwebsocket.api.IInitializable;
 import org.jwebsocket.eventmodel.observable.ObservableObject;
 import org.jwebsocket.eventmodel.api.IEventModelFilter;
@@ -35,8 +34,8 @@ import org.jwebsocket.eventmodel.observable.ResponseEvent;
  */
 public abstract class EventModelFilter extends ObservableObject implements IEventModelFilter, IInitializable, IListener {
 
-	private String id;
-	private EventModel em;
+	private String mId;
+	private EventModel mEm;
 
 	/**
 	 * {@inheritDoc } 
@@ -71,19 +70,27 @@ public abstract class EventModelFilter extends ObservableObject implements IEven
 	 */
 	@Override
 	public void processEvent(Event aEvent, ResponseEvent aResponseEvent) {
-		System.out.println(">> Response from '" + this.getClass().getName() + "', please override this method!");
+		System.out.println("Response from '" + this.getClass().getName() + "', please override this method!");
 	}
 
 	/**
 	 * The collection of events to register in the EventModel component.
 	 *
-	 * @param emEvents The collection of events to register
+	 * @param aEmEvents The collection of events to register
 	 * @throws Exception
 	 */
-	public void setEmEvents(Set<Class<? extends Event>> emEvents) throws Exception {
-		getEm().addEvents(emEvents);
-		getEm().on(emEvents, this);
+	public void setEmEvents(Set<Class<? extends Event>> aEmEvents) throws Exception {
+		getEm().addEvents(aEmEvents);
+		getEm().on(aEmEvents, this);
+	}
 
+	public void setEmEventClasses(Set<String> aEmEvents) throws Exception {
+		Set lClasses = new FastSet();
+		for (String lClass : aEmEvents) {
+			lClasses.add(Class.forName(lClass));
+		}
+		getEm().addEvents(lClasses);
+		getEm().on(lClasses, this);
 	}
 
 	/**
@@ -91,15 +98,15 @@ public abstract class EventModelFilter extends ObservableObject implements IEven
 	 */
 	@Override
 	public String getId() {
-		return id;
+		return mId;
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void setId(String id) {
-		this.id = id;
+	public void setId(String aId) {
+		this.mId = aId;
 	}
 
 	/**
@@ -107,15 +114,15 @@ public abstract class EventModelFilter extends ObservableObject implements IEven
 	 */
 	@Override
 	public EventModel getEm() {
-		return em;
+		return mEm;
 	}
 
 	/**
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void setEm(EventModel em) {
-		this.em = em;
+	public void setEm(EventModel aEm) {
+		this.mEm = aEm;
 	}
 
 	/**
@@ -124,13 +131,5 @@ public abstract class EventModelFilter extends ObservableObject implements IEven
 	@Override
 	public String toString() {
 		return getId();
-	}
-	
-	public Map<String, Object> getSession(WebSocketConnector aConnector) throws Exception {
-		return aConnector.getSession().getStorage();
-	}
-	
-	public Map<String, Object> getSession(String aSessionId) throws Exception {
-		return getEm().getSessionFactory().getSession(aSessionId);
 	}
 }

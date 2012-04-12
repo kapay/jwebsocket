@@ -18,6 +18,7 @@ package org.jwebsocket.api;
 import org.jwebsocket.kit.CloseReason;
 import org.jwebsocket.kit.PlugInResponse;
 import java.util.List;
+import org.jwebsocket.token.Token;
 
 /**
  * A plug-in chain maintains a map of plug-ins. A server in the jWebSocket model
@@ -26,6 +27,7 @@ import java.util.List;
  * until the first plug-in aborts or breaks the chain by returning the
  * corresponding PlugInResponse.
  * @author aschulze
+ * @author Marcos Antonio González Huerta (markos0886, UCI)
  */
 public interface WebSocketPlugInChain {
 
@@ -91,6 +93,14 @@ public interface WebSocketPlugInChain {
 	 * @param aPlugIn Plug-in to be added from the plug-in chain.
 	 */
 	void addPlugIn(WebSocketPlugIn aPlugIn);
+	
+	/**
+	 * appends a plug-in to the plug-in chain. All subsequent incoming data packet
+	 * will be forwarded to that plug-in too.
+	 * @param aPosition Position of the Plug-in to be added from the plug-in chain.
+	 * @param aPlugIn Plug-in to be added from the plug-in chain.
+	 */
+	void addPlugIn(Integer aPosition, WebSocketPlugIn aPlugIn);
 
 	/**
 	 * removes a plug-in from the plug-in chain. All subsequent incoming data

@@ -17,41 +17,41 @@ package org.jwebsocket.plugins.events;
 
 import java.util.Set;
 import javolution.util.FastSet;
-import org.jwebsocket.logging.Logging;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.kit.PlugInResponse;
-import org.jwebsocket.plugins.TokenPlugIn;
-import org.jwebsocket.token.Token;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.eventmodel.api.ISecureComponent;
-import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.eventmodel.api.IServerSecureComponent;
 import org.jwebsocket.eventmodel.core.EventModel;
+import org.jwebsocket.eventmodel.event.C2SEvent;
 import org.jwebsocket.eventmodel.event.em.ConnectorStarted;
 import org.jwebsocket.eventmodel.event.em.ConnectorStopped;
 import org.jwebsocket.eventmodel.event.em.EngineStarted;
 import org.jwebsocket.eventmodel.event.em.EngineStopped;
-import org.jwebsocket.eventmodel.event.C2SEvent;
 import org.jwebsocket.factory.JWebSocketFactory;
+import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.kit.PlugInResponse;
+import org.jwebsocket.logging.Logging;
+import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.spring.JWebSocketBeanFactory;
+import org.jwebsocket.token.Token;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
  *
  * @author kyberneees
  */
-public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
+public class EventsPlugIn extends TokenPlugIn implements IServerSecureComponent {
 
-	private String configFile;
-	private EventModel em;
+	private String mConfigFile;
+	private EventModel mEm;
 	private static Logger mLog = Logging.getLogger(EventsPlugIn.class);
-	//IWebSocketSecureObject fields
-	private boolean securityEnabled = false;
-	private Set<String> roles = new FastSet<String>();
-	private Set<String> users = new FastSet<String>();
-	private Set<String> ipAddresses = new FastSet<String>();
+	// IWebSocketSecureObject fields
+	private boolean mSecurityEnabled = false;
+	private Set<String> mRoles = new FastSet<String>();
+	private Set<String> mUsers = new FastSet<String>();
+	private Set<String> mIpAddresses = new FastSet<String>();
 
 	/**
 	 * @return The Spring IOC bean factory singleton instance
@@ -62,16 +62,15 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 
 	/**
 	 *
-	 * @param configuration 
+	 * @param aConfiguration
 	 * @throws Exception
 	 */
-	public EventsPlugIn(PluginConfiguration configuration) throws Exception {
-		super(configuration);
-
-		this.setNamespace(configuration.getNamespace());
+	public EventsPlugIn(PluginConfiguration aConfiguration) throws Exception {
+		super(aConfiguration);
+		setNamespace(aConfiguration.getNamespace());
 
 		if (mLog.isDebugEnabled()) {
-			mLog.debug(">> Creating EventsPlugIn instance for application '" + getNamespace() + "'...");
+			mLog.debug("Creating EventsPlugIn instance for application '" + getNamespace() + "'...");
 		}
 
 		//Calling the init method
@@ -83,33 +82,34 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 */
 	public void initialize() {
 		try {
-			//Load application jars
+			// Load application jars
 			if (getSettings().containsKey("jars")) {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug(">> Loading jars for '" + getNamespace() + "' application...");
+					mLog.debug("Loading jars for '" + getNamespace() + "' application...");
 				}
 
 				String[] lJars = getString("jars").split(",");
-				for (int i = 0; i < lJars.length; i++) {
-					JWebSocketFactory.getClassLoader().add(JWebSocketConfig.getLibsFolder(lJars[i]));
+				for (int lIndex = 0; lIndex < lJars.length; lIndex++) {
+					JWebSocketFactory.getClassLoader().add(JWebSocketConfig.getLibsFolder(lJars[lIndex]));
 					if (mLog.isDebugEnabled()) {
-						mLog.debug(">> Loading jar '" + lJars[i] + "'...");
+						mLog.debug("Loading jar: '" + lJars[lIndex] + "'...");
 					}
 				}
 			}
 
-			//Loading plug-in beans
-			String lPath = JWebSocketConfig.getConfigFolder("EventsPlugIn/" + getNamespace() + "-application/bootstrap.xml");
-			JWebSocketBeanFactory.load(getNamespace(), lPath, JWebSocketFactory.getClassLoader());
+			ClassLoader lClassLoader = getClass().getClassLoader();
+			String lPath =
+					"${JWEBSOCKET_HOME}conf/EventsPlugIn/"
+					+ getNamespace() + "-application/bootstrap.xml";
+			lPath = JWebSocketConfig.expandEnvAndJWebSocketVars(lPath);
+			JWebSocketBeanFactory.load(getNamespace(), lPath, lClassLoader);
 
-			//Getting the EventModel service instance
-			em = (EventModel) getBeanFactory().getBean("EventModel");
-
-			//Initializing the event model
-			em.setParent(this);
-			em.initialize();
-		} catch (Exception ex) {
-			mLog.error(ex.toString(), ex);
+			mEm = (EventModel) JWebSocketBeanFactory.getInstance(getNamespace()).getBean("EventModel");
+			// Initializing the event model
+			mEm.setParent(this);
+			mEm.initialize();
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "initializing " + getNamespace() + "-application"));
 		}
 	}
 
@@ -119,17 +119,24 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 */
 	@Override
 	public void engineStarted(WebSocketEngine aEngine) {
-		//Engine started event notification
+		// Engine started event notification
 		try {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug(">> Engine.started(" + aEngine.toString() + ") event notification...");
+				mLog.debug("Engine.started (id '" + aEngine.getId() + "') event notification...");
 			}
-			EngineStarted e = (EngineStarted) getEm().getEventFactory().stringToEvent("engine.started");
-			e.setEngine(aEngine);
-			e.initialize();
-			em.notify(e, null, true);
-		} catch (Exception ex) {
-			mLog.error(ex.toString(), ex);
+			EventModel lEM = getEm();
+			if (null != lEM) {
+				EngineStarted lEvent = (EngineStarted) lEM.getEventFactory().stringToEvent("engine.started");
+				lEvent.setEngine(aEngine);
+				lEvent.initialize();
+				mEm.notify(lEvent, null, true);
+			} else {
+				mLog.error("EventModel instance not available on engine start "
+						+ "for " + getNamespace()
+						+ "-application, probably wrong Spring configuration.");
+			}
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "engine started"));
 		}
 	}
 
@@ -142,14 +149,21 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 		//Engine started event notification
 		try {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug(">> Engine.stopped(" + aEngine.toString() + ") event notification...");
+				mLog.debug("Engine.stopped(" + aEngine.toString() + ") event notification...");
 			}
-			EngineStopped e = (EngineStopped) getEm().getEventFactory().stringToEvent("engine.stopped");
-			e.setEngine(aEngine);
-			e.initialize();
-			em.notify(e, null, true);
-		} catch (Exception ex) {
-			mLog.error(ex.toString(), ex);
+			EventModel lEM = getEm();
+			if (null != lEM) {
+				EngineStopped lEvent = (EngineStopped) lEM.getEventFactory().stringToEvent("engine.stopped");
+				lEvent.setEngine(aEngine);
+				lEvent.initialize();
+				mEm.notify(lEvent, null, true);
+			} else {
+				mLog.error("EventModel instance not available on engine stop "
+						+ "for " + getNamespace()
+						+ "-application, probably wrong Spring configuration.");
+			}
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "engine stopped"));
 		}
 	}
 
@@ -162,14 +176,18 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 		//Connector started event notification
 		try {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug(">> Connector.started(" + aConnector.toString() + ") event notification...");
+				mLog.debug("Connector.started (" + aConnector.toString() + ") event notification...");
 			}
-			ConnectorStarted e = (ConnectorStarted) getEm().getEventFactory().stringToEvent("connector.started");
-			e.setConnector(aConnector);
-			e.initialize();
-			em.notify(e, null, true);
-		} catch (Exception ex) {
-			mLog.error(ex.toString(), ex);
+			EventModel lEM = getEm();
+			if (null != lEM) {
+				ConnectorStarted lEvent =
+						(ConnectorStarted) lEM.getEventFactory().stringToEvent("connector.started");
+				lEvent.setConnector(aConnector);
+				lEvent.initialize();
+				mEm.notify(lEvent, null, true);
+			}
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "connector started"));
 		}
 	}
 
@@ -180,31 +198,33 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	@Override
 	public void processToken(PlugInResponse aResponse, WebSocketConnector aConnector, Token aToken) {
 		if (getNamespace().equals(aToken.getNS())) {
-			C2SEvent e = null;
+			C2SEvent lEvent = null;
 			try {
 				if (mLog.isDebugEnabled()) {
-					mLog.debug(">> Processing token as event: '" + aToken.getType() + "'...");
+					mLog.debug("Processing token as event: '" + aToken.getType() + "'...");
 				}
-				e = getEm().getEventFactory().tokenToEvent(aToken);
-				e.setConnector(aConnector);
-				e.initialize();
-			} catch (Exception ex) {
-				mLog.error(ex.toString(), ex);
+				lEvent = getEm().getEventFactory().tokenToEvent(aToken);
+				lEvent.setConnector(aConnector);
+
+				//Initializing the event...
+				lEvent.initialize();
+			} catch (Exception lEx) {
+				mLog.error(Logging.getSimpleExceptionMessage(lEx, "process token"));
 			}
 
-			processEvent(aConnector, e);
+			processEvent(aConnector, lEvent);
 			aResponse.abortChain();
 		}
 	}
 
 	/**
 	 * Process incoming events from the client
-	 * 
+	 *
 	 * @param aConnector The client connector
 	 * @param aEvent The event from the client
 	 */
 	public void processEvent(WebSocketConnector aConnector, C2SEvent aEvent) {
-		em.processEvent(aEvent, null);
+		mEm.processEvent(aEvent, null);
 	}
 
 	/**
@@ -216,15 +236,19 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 		//Connector stopped event notification
 		try {
 			if (mLog.isDebugEnabled()) {
-				mLog.debug(">> Connector.stopped(" + aConnector.toString() + ") event notification...");
+				mLog.debug("Connector.stopped (" + aConnector.toString() + ") event notification...");
 			}
-			ConnectorStopped e = (ConnectorStopped) getEm().getEventFactory().stringToEvent("connector.stopped");
-			e.setConnector(aConnector);
-			e.setCloseReason(aCloseReason);
-			e.initialize();
-			em.notify(e, null, true);
-		} catch (Exception ex) {
-			mLog.error(ex.toString(), ex);
+			EventModel lEM = getEm();
+			if (null != lEM) {
+				ConnectorStopped lEvent =
+						(ConnectorStopped) lEM.getEventFactory().stringToEvent("connector.stopped");
+				lEvent.setConnector(aConnector);
+				lEvent.setCloseReason(aCloseReason);
+				lEvent.initialize();
+				mEm.notify(lEvent, null, true);
+			}
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "connector stopped"));
 		}
 	}
 
@@ -232,14 +256,14 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 * @return The EventModel instance
 	 */
 	public EventModel getEm() {
-		return em;
+		return mEm;
 	}
 
 	/**
 	 * @param em The EventModel instance to set
 	 */
-	public void setEm(EventModel em) {
-		this.em = em;
+	public void setEm(EventModel aEm) {
+		this.mEm = aEm;
 	}
 
 	/**
@@ -248,7 +272,7 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 */
 	@Override
 	public boolean isSecurityEnabled() {
-		return securityEnabled;
+		return mSecurityEnabled;
 	}
 
 	/**
@@ -256,8 +280,8 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void setSecurityEnabled(boolean securityEnabled) {
-		this.securityEnabled = securityEnabled;
+	public void setSecurityEnabled(boolean aSecurityEnabled) {
+		this.mSecurityEnabled = aSecurityEnabled;
 	}
 
 	/**
@@ -266,7 +290,7 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 */
 	@Override
 	public Set<String> getRoles() {
-		return roles;
+		return mRoles;
 	}
 
 	/**
@@ -274,8 +298,8 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void setRoles(Set<String> roles) {
-		this.roles.addAll(roles);
+	public void setRoles(Set<String> aRoles) {
+		this.mRoles.addAll(aRoles);
 	}
 
 	/**
@@ -284,7 +308,7 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 */
 	@Override
 	public Set<String> getUsers() {
-		return users;
+		return mUsers;
 	}
 
 	/**
@@ -292,8 +316,8 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void setUsers(Set<String> users) {
-		this.users.addAll(users);
+	public void setUsers(Set<String> aUsers) {
+		this.mUsers.addAll(aUsers);
 	}
 
 	/**
@@ -302,7 +326,7 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 */
 	@Override
 	public Set<String> getIpAddresses() {
-		return ipAddresses;
+		return mIpAddresses;
 	}
 
 	/**
@@ -310,14 +334,14 @@ public class EventsPlugIn extends TokenPlugIn implements ISecureComponent {
 	 * {@inheritDoc }
 	 */
 	@Override
-	public void setIpAddresses(Set<String> ipAddresses) {
-		this.ipAddresses.addAll(ipAddresses);
+	public void setIpAddresses(Set<String> aIpAddresses) {
+		this.mIpAddresses.addAll(aIpAddresses);
 	}
 
 	/**
 	 * @return The path to the XML root file
 	 */
 	public String getConfigFile() {
-		return configFile;
+		return mConfigFile;
 	}
 }

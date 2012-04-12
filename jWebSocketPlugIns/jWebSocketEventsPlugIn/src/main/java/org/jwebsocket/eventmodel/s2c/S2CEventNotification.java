@@ -17,7 +17,7 @@ package org.jwebsocket.eventmodel.s2c;
 
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.eventmodel.event.S2CEvent;
-import org.jwebsocket.eventmodel.exception.MissingTokenSender;
+import org.jwebsocket.eventmodel.exception.MissingTokenSenderException;
 
 /**
  *
@@ -25,8 +25,8 @@ import org.jwebsocket.eventmodel.exception.MissingTokenSender;
  */
 public class S2CEventNotification {
 
-	private S2CEvent event;
-	private S2CEventNotificationHandler S2CNotificationHandler;
+	private S2CEvent mEvent;
+	private S2CEventNotificationHandler mS2CNotificationHandler;
 
 	/**
 	 *
@@ -35,8 +35,8 @@ public class S2CEventNotification {
 	 */
 	public S2CEventNotification(String plugInId, S2CEvent aEvent, S2CEventNotificationHandler aS2CNotificationHandler) {
 		aEvent.setPlugInId(plugInId);
-		event = aEvent;
-		S2CNotificationHandler = aS2CNotificationHandler;
+		mEvent = aEvent;
+		mS2CNotificationHandler = aS2CNotificationHandler;
 	}
 
 	/**
@@ -45,9 +45,20 @@ public class S2CEventNotification {
 	 * @param aConnector The client connector
 	 * @param aOnResponse The server on-response callbacks 
 	 */
-	public void to(WebSocketConnector aConnector, OnResponse aOnResponse) throws MissingTokenSender {
+	public void to(WebSocketConnector aConnector, OnResponse aOnResponse) throws MissingTokenSenderException {
 		//Sending the event
-		S2CNotificationHandler.send(event, aConnector, aOnResponse);
+		mS2CNotificationHandler.send(mEvent, aConnector, aOnResponse);
+	}
+	
+	/**
+	 * Send the event to a giving client connector
+	 * 
+	 * @param aConnector The client connector
+	 * @param aOnResponse The server on-response callbacks 
+	 */
+	public void to(WebSocketConnector aConnector) throws MissingTokenSenderException {
+		//Sending the event
+		mS2CNotificationHandler.send(mEvent, aConnector, null);
 	}
 
 	/**
@@ -56,8 +67,18 @@ public class S2CEventNotification {
 	 * @param aConnector The client connector
 	 * @param aOnResponse The server on-response callbacks 
 	 */
-	public void to(String aConnectorId, OnResponse aOnResponse) throws MissingTokenSender {
+	public void to(String aConnectorId, OnResponse aOnResponse) throws MissingTokenSenderException {
 		//Sending the event
-		S2CNotificationHandler.send(event, aConnectorId, aOnResponse);
+		mS2CNotificationHandler.send(mEvent, aConnectorId, aOnResponse);
+	}
+	
+	/**
+	 * Send the event to a giving client connector
+	 * 
+	 * @param aConnector The client connector
+	 */
+	public void to(String aConnectorId) throws MissingTokenSenderException {
+		//Sending the event
+		mS2CNotificationHandler.send(mEvent, aConnectorId, null);
 	}
 }

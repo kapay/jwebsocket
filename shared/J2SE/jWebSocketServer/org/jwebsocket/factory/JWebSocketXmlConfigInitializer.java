@@ -18,34 +18,26 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
-
 import javolution.util.FastList;
 import javolution.util.FastMap;
-
-import org.jwebsocket.api.EngineConfiguration;
-import org.jwebsocket.api.FilterConfiguration;
-import org.jwebsocket.api.PluginConfiguration;
-import org.jwebsocket.api.ServerConfiguration;
-import org.jwebsocket.api.WebSocketEngine;
-import org.jwebsocket.api.WebSocketFilter;
-import org.jwebsocket.api.WebSocketPlugIn;
-import org.jwebsocket.api.WebSocketServer;
+import org.apache.log4j.Logger;
+import org.jwebsocket.api.*;
 import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.config.xml.EngineConfig;
-import org.jwebsocket.config.xml.FilterConfig;
-import org.jwebsocket.config.xml.LibraryConfig;
-import org.jwebsocket.config.xml.PluginConfig;
-import org.jwebsocket.config.xml.ServerConfig;
+import org.jwebsocket.config.xml.*;
+import org.jwebsocket.logging.Logging;
 
 /**
- * Intialize the engine, servers and plugins based on jWebSocket.xml
+ * Intialize the engine, servers and plug-ins based on jWebSocket.xml
  * configuration
+ *
  * @author puran
- * @version $Id: JWebSocketXmlConfigInitializer.java 424 2010-05-01 19:11:04Z mailtopuran $
+ * @version $Id: JWebSocketXmlConfigInitializer.java 424 2010-05-01 19:11:04Z
+ * mailtopuran $
  */
 public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitializer {
 
-	private final JWebSocketJarClassLoader mClassLoader = new JWebSocketJarClassLoader();
+	private static Logger mLog = Logging.getLogger();
+	private final static JWebSocketJarClassLoader mClassLoader = new JWebSocketJarClassLoader();
 
 	/**
 	 * private constructor
@@ -53,8 +45,12 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 	public JWebSocketXmlConfigInitializer(JWebSocketConfig aConfig) {
 		super(aConfig);
 
-		//Saving the initializer class loader reference
+		// Saving the initializer class loader reference
 		JWebSocketFactory.setClassLoader(mClassLoader);
+	}
+
+	public static ClassLoader getClassLoader() {
+		return mClassLoader;
 	}
 
 	/**
@@ -64,7 +60,8 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 	 * @return the initializer object
 	 */
 	public static JWebSocketXmlConfigInitializer getInitializer(JWebSocketConfig aConfig) {
-		return new JWebSocketXmlConfigInitializer(aConfig);
+		JWebSocketXmlConfigInitializer lInitializer = new JWebSocketXmlConfigInitializer(aConfig);
+		return lInitializer;
 	}
 
 	@Override
@@ -77,11 +74,17 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 						mLog.debug("Adding external library '" + lLibConf.getId()
 								+ "' from '" + lLibConf.getURL() + "'...");
 					}
-					mClassLoader.addFile(lLibConf.getURL());
-					ClassPathUpdater.add(new File(lLibConf.getURL()));
+					String lPath = JWebSocketConfig.expandEnvAndJWebSocketVars(lLibConf.getURL());
+					mClassLoader.addFile(lPath);
+					ClassPathUpdater.add(new File(lPath));
+					if (mLog.isInfoEnabled()) {
+						mLog.info("External library '" + lLibConf.getId()
+								+ "' from '" + lPath
+								+ "' successfully added.");
+					}
 				}
-			} catch (Exception ex) {
-				System.out.println(ex.toString());
+			} catch (Exception lEx) {
+				mLog.error(Logging.getSimpleExceptionMessage(lEx, "adding external libraries"));
 			}
 		} else {
 			if (mLog.isDebugEnabled()) {
@@ -226,10 +229,13 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 						mLog.debug("Plug-in '" + lPlugInConfig.getName()
 								+ "' trying to load from file...");
 					}
-					String lJarFilePath = JWebSocketConfig.getLibsFolder(lPlugInConfig.getJar());
+					String lJarFilePath = JWebSocketConfig.getLibsFolder(
+							lPlugInConfig.getJar(),
+							Thread.currentThread().getContextClassLoader());
 					// jarFilePath may be null if .jar is included in server bundle
 					if (lJarFilePath != null) {
 						mClassLoader.addFile(lJarFilePath);
+						ClassPathUpdater.add(new File(lJarFilePath));
 						if (mLog.isDebugEnabled()) {
 							mLog.debug("Loading plug-in '"
 									+ lPlugInConfig.getName()
@@ -240,9 +246,9 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 				}
 				// if class found try to create an instance
 				if (lPlugInClass != null) {
-					WebSocketPlugIn lPlugIn = null;
+					WebSocketPlugIn lPlugIn;
 
-					Constructor<WebSocketPlugIn> lPlugInConstructor = null;
+					Constructor<WebSocketPlugIn> lPlugInConstructor;
 					lPlugInConstructor =
 							lPlugInClass.getConstructor(PluginConfiguration.class);
 					if (lPlugInConstructor != null) {
@@ -288,10 +294,9 @@ public class JWebSocketXmlConfigInitializer extends AbstractJWebSocketInitialize
 		// now initialize the filter
 		for (FilterConfig lFilterConfig : jWebSocketConfig.getFilters()) {
 			try {
+				// try to load filter from classpath first, could be located in server bundle
 				Class<WebSocketFilter> lFilterClass =
 						loadFilterFromClasspath(lFilterConfig.getName());
-				// try to load filter from classpath first, could be located in server bundle
-				lFilterClass = loadFilterFromClasspath(lFilterConfig.getName());
 				if (lFilterClass == null) {
 					String lJarFilePath =
 							JWebSocketConfig.getLibsFolder(lFilterConfig.getJar());

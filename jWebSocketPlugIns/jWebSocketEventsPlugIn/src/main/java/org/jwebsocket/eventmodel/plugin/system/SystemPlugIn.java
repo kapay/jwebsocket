@@ -1,5 +1,5 @@
 //  ---------------------------------------------------------------------------
-//  jWebSocket - EventsPlugIn
+//  jWebSocket - SystemPlugIn
 //  Copyright (c) 2010 Innotrade GmbH, jWebSocket.org
 //  ---------------------------------------------------------------------------
 //  This program is free software; you can redistribute it and/or modify it
@@ -51,15 +51,15 @@ public class SystemPlugIn extends EventModelPlugIn {
 	 */
 	public void processEvent(GetPlugInList aEvent, C2SResponseEvent aResponseEvent) throws Exception {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug(">> Exporting the plugIns identifiers list...");
+			mLog.debug("Exporting the plugIns identifiers list...");
 		}
 
-		FastList<String> plugInIdentifiers = new FastList<String>();
-		for (IEventModelPlugIn p : getEm().getPlugIns()) {
-			plugInIdentifiers.add(p.getId());
+		FastList<String> lPlugInIds = new FastList<String>();
+		for (IEventModelPlugIn lPlugIn : getEm().getPlugIns()) {
+			lPlugInIds.add(lPlugIn.getId());
 		}
 
-		aResponseEvent.getArgs().setList("identifiers", plugInIdentifiers);
+		aResponseEvent.getArgs().setList("identifiers", lPlugInIds);
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class SystemPlugIn extends EventModelPlugIn {
 	 */
 	public void processEvent(ClientCacheAspectStatus aEvent, C2SResponseEvent aResponseEvent) throws Exception {
 		if (mLog.isDebugEnabled()) {
-			mLog.debug(">> Setting the client cache aspect status ...");
+			mLog.debug("Setting the client cache aspect status ...");
 		}
 
 		aEvent.getConnector().setVar(CacheFilter.CLIENT_CACHE_ASPECT_STATUS, aEvent.isEnabled());
@@ -85,15 +85,15 @@ public class SystemPlugIn extends EventModelPlugIn {
 	 * @throws Exception
 	 */
 	public void processEvent(HasPlugIn aEvent, C2SResponseEvent aResponseEvent) throws Exception {
-		boolean has = false;
-		for (IEventModelPlugIn p : getEm().getPlugIns()) {
-			if (p.getId().equals(aEvent.getPluginId())) {
-				has = true;
+		boolean lHas = false;
+		for (IEventModelPlugIn lPlugIn : getEm().getPlugIns()) {
+			if (lPlugIn.getId().equals(aEvent.getPluginId())) {
+				lHas = true;
 				break;
 			}
 		}
 
-		aResponseEvent.getArgs().setBoolean("has", has);
+		aResponseEvent.getArgs().setBoolean("has", lHas);
 	}
 
 	/**
@@ -104,12 +104,12 @@ public class SystemPlugIn extends EventModelPlugIn {
 	 * @throws Exception
 	 */
 	public void processEvent(GetPlugInAPI aEvent, C2SResponseEvent aResponseEvent) throws Exception {
-		String aPlugInId = aEvent.getPluginId();
+		String lPlugInId = aEvent.getPlugInId();
 		if (mLog.isDebugEnabled()) {
-			mLog.debug(">> Exporting API for '" + aPlugInId + "' plugIn...");
+			mLog.debug("Exporting API for '" + lPlugInId + "' plugIn...");
 		}
 
-		IEventModelPlugIn lPlugIn = getEm().getPlugIn(aPlugInId);
+		IEventModelPlugIn lPlugIn = getEm().getPlugIn(lPlugInId);
 		lPlugIn.writeToToken(aResponseEvent.getArgs());
 	}
 }

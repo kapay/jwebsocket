@@ -30,10 +30,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,6 +76,7 @@ public class RPCDemoActivity extends Activity implements
 		final CheckBox checkbox = (CheckBox) findViewById(R.id.rrpcCheckBox);
 		checkbox.setOnClickListener(new OnClickListener() {
 
+			@Override
 			public void onClick(View v) {
 				if (((CheckBox) v).isChecked()) {
 					targetTxt.setVisibility(EditText.VISIBLE);
@@ -102,6 +99,7 @@ public class RPCDemoActivity extends Activity implements
 
 		invokeBtn.setOnClickListener(new OnClickListener() {
 
+			@Override
 			public void onClick(View arg0) {
 				sendMethodInvokeToken();
 			}
@@ -212,6 +210,7 @@ public class RPCDemoActivity extends Activity implements
 		}
 	}
 
+	@Override
 	public void processToken(WebSocketClientEvent aEvent, Token aToken) {
 		if ((CommonRpcPlugin.RPC_TYPE).equals(aToken.getString("reqType"))) {
 			if (aToken.getInteger("code") == 0) {
@@ -222,21 +221,26 @@ public class RPCDemoActivity extends Activity implements
 		}
 	}
 
+	@Override
 	public void processOpened(WebSocketClientEvent aEvent) {
 		if (statusImage != null) {
 			statusImage.setImageResource(R.drawable.authenticated);
 		}
 	}
 
+	@Override
 	public void processPacket(WebSocketClientEvent aEvent, WebSocketPacket aPacket) {
 	}
 
+	@Override
 	public void processClosed(WebSocketClientEvent aEvent) {
 	}
 
+	@Override
 	public void processOpening(WebSocketClientEvent aEvent) {
 	}
 
+	@Override
 	public void processReconnecting(WebSocketClientEvent aEvent) {
 	}
 	private static Handler handler = new Handler() {

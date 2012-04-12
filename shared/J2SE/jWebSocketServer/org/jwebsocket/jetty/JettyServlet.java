@@ -30,7 +30,7 @@ import org.jwebsocket.logging.Logging;
  */
 public class JettyServlet extends WebSocketServlet {
 
-	private static Logger mLog = Logging.getLogger(JettyServlet.class);
+	private static Logger mLog = Logging.getLogger();
 
 	@Override
 	protected void doGet(HttpServletRequest aRequest, HttpServletResponse aResponse)
@@ -64,6 +64,15 @@ public class JettyServlet extends WebSocketServlet {
 		return new JettyWrapper(aRequest, aProtocol);
 	}
 
+	@Override
+	public boolean checkOrigin(HttpServletRequest aRequest, String aOrigin) {
+		boolean lOk = super.checkOrigin(aRequest, aOrigin);
+		lOk = true;
+		return lOk;
+	}
+
+	
+	
 	/**
 	 * Returns a short description of the servlet.
 	 * @return a String containing servlet description

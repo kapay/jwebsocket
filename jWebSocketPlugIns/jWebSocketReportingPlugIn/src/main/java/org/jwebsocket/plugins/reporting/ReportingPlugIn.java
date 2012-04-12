@@ -27,15 +27,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 import javolution.util.FastList;
 import javolution.util.FastMap;
-import net.sf.jasperreports.engine.JRExpression;
-import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
@@ -48,6 +41,7 @@ import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 import org.jwebsocket.util.Tools;
+import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -55,15 +49,33 @@ import org.jwebsocket.util.Tools;
  */
 public class ReportingPlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(ReportingPlugIn.class);
+	private static Logger mLog = Logging.getLogger();
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_REPORTING = JWebSocketServerConstants.NS_BASE + ".plugins.reporting";
 	private static final String VAR_FILES_TO_DELETE = NS_REPORTING + ".filesToDelete";
-	private String mReportFolder = null;
-	private String mOutputFolder = null;
-	private String mOutputURL = null;
-	private String mReportNamePattern = null;
-
+	private static ApplicationContext mBeanFactory;
+	private static Settings mSettings;
+	
+/*
+	static {
+		try {
+			URL lURL;
+			ClassLoader lCL = getClass().getClassLoader();
+			lURL = new URL("file:///c:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs/commons-digester-2.1.jar");
+			ClassPathUpdater.add(lURL, lCL);
+			lURL = new URL("file:///c:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs/jasperreports-4.5.0.jar");
+			ClassPathUpdater.add(lURL, lCL);
+			lURL = new URL("file:///c:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs/jWebSocketReportingPlugIn-1.0.jar");
+			ClassPathUpdater.add(lURL, lCL);
+		
+			// ClassPathUpdater.add("jWebSocketReportingPlugIn-1.0.jar");
+			// ClassPathUpdater.add("c:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs");
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "adding Jasper libs to class path"));
+		}
+	}
+*/
+	
 	/**
 	 *
 	 * @param aConfiguration
@@ -75,26 +87,39 @@ public class ReportingPlugIn extends TokenPlugIn {
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_REPORTING);
-		mGetSettings();
-	}
-
-	private void mGetSettings() {
-		mReportFolder = getString("reportFolder", "${" + JWebSocketServerConstants.JWEBSOCKET_HOME + "}/reports");
-		mReportFolder = FilenameUtils.separatorsToUnix(Tools.expandEnvVars(mReportFolder));
-		if (!mReportFolder.endsWith("/")) {
-			mReportFolder += "/";
+		
+/*
+		try {
+			URL lURL;
+			ClassLoader lCL = getClass().getClassLoader();
+			lURL = new URL("file:///c:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs/commons-digester-2.1.jar");
+			ClassPathUpdater.add(lURL, lCL);
+			lURL = new URL("file:///c:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs/jasperreports-4.5.0.jar");
+			ClassPathUpdater.add(lURL);
+			lURL = new URL("file:///c:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs/jWebSocketReportingPlugIn-1.0.jar");
+			ClassPathUpdater.add(lURL, lCL);
+		
+			// ClassPathUpdater.add("jWebSocketReportingPlugIn-1.0.jar");
+			// ClassPathUpdater.add("c:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs");
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "adding Jasper libs to class path"));
 		}
-		mOutputFolder = getString("outputFolder", "${" + JWebSocketServerConstants.JWEBSOCKET_HOME + "}/reports");
-		mOutputFolder = FilenameUtils.separatorsToUnix(Tools.expandEnvVars(mOutputFolder));
-		if (!mOutputFolder.endsWith("/")) {
-			mOutputFolder += "/";
+*/
+		
+		try {
+			mBeanFactory = getConfigBeanFactory();
+			if (null == mBeanFactory) {
+				mLog.error("No or invalid spring configuration for reporting plug-in, some features may not be available.");
+			} else {
+				mBeanFactory = getConfigBeanFactory();
+				mSettings = (Settings) mBeanFactory.getBean("settings");
+				if (mLog.isInfoEnabled()) {
+					mLog.info("Reporting plug-in successfully instantiated.");
+				}
+			}
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "instantiating reporting plug-in"));
 		}
-		mOutputURL = getString("outputURL", "http://localhost/");
-		mOutputURL = FilenameUtils.separatorsToUnix(Tools.expandEnvVars(mOutputURL));
-		if (!mOutputURL.endsWith("/")) {
-			mOutputURL += "/";
-		}
-		mReportNamePattern = getString("reportNamePattern", "${reportname}_${username}_${timestamp}");
 	}
 
 	@Override
@@ -129,8 +154,12 @@ public class ReportingPlugIn extends TokenPlugIn {
 		}
 	}
 
-	private String getReportPath(String aReportId) {
-		return mReportFolder + aReportId + ".jrxml";
+	private String getJRXMLPath(String aReportId) {
+		return mSettings.getReportFolder() + aReportId + ".jrxml";
+	}
+
+	private String getJasperPath(String aReportId) {
+		return mSettings.getReportFolder() + aReportId + ".jasper";
 	}
 
 	private String generateReportName(WebSocketConnector aConnector, String aReportName) {
@@ -138,7 +167,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 		lVars.put("reportname", aReportName);
 		lVars.put("username", aConnector.getUsername());
 		lVars.put("timestamp", new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS").format(new Date()));
-		aReportName = Tools.expandVars(mReportNamePattern, lVars,
+		aReportName = Tools.expandVars(mSettings.getReportNamePattern(), lVars,
 				Tools.EXPAND_CASE_INSENSITIVE);
 		return aReportName;
 	}
@@ -156,7 +185,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 		}
 
 		String lReportId = aToken.getString("reportId");
-		if (lReportId == null) {
+		if (lReportId == null || lReportId.isEmpty()) {
 			lResponse = lServer.createErrorToken(aToken, -1, "No report id passed.");
 			lServer.sendToken(aConnector, lResponse);
 			return;
@@ -173,7 +202,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 			return;
 		}
 		try {
-			FileUtils.forceMkdir(new File(mOutputFolder));
+			FileUtils.forceMkdir(new File(mSettings.getOutputFolder()));
 		} catch (Exception ex) {
 			lResponse = lServer.createErrorToken(aToken, -1, ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			lServer.sendToken(aConnector, lResponse);
@@ -197,33 +226,67 @@ public class ReportingPlugIn extends TokenPlugIn {
 				}
 			}
 		}
-		lParams.put("IMAGE_PATH", mReportFolder);
+		lParams.put("IMAGE_PATH", mSettings.getReportFolder());
+
+		/*
+		 * ClassLoader lCL = ClassLoader.getSystemClassLoader(); try { URL lURL;
+		 * lURL = new
+		 * URL("file:///C:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs/commons-digester-2.1.jar");
+		 * ClassPathUpdater.add(lURL); lURL = new
+		 * URL("file:///C:/svn/jWebSocketDev/rte/jWebSocket-1.0/libs/jasperreports-4.5.0.jar");
+		 * ClassPathUpdater.add(lURL); // lParams.put("REPORT_CLASS_LOADER",
+		 * JWebSocketXmlConfigInitializer.getClassLoader());
+		 * lParams.put("REPORT_CLASS_LOADER", lCL);
+		 *
+		 * ClassLoader lCL = getClass().getClassLoader();
+		 * lParams.put("REPORT_CLASS_LOADER", lCL);
+		 */
 
 		// instantiate response token
 		lResponse = lServer.createResponse(aToken);
 
-		DataSource lDataSource = null;
+		DataSource lDataSource;
 		Connection lConnection = null;
 		try {
-			lDataSource = (DataSource) Tools.invoke(
-					lJDBCPlugIn, "getNativeDataSource");
+			Object lObject = Tools.invoke(lJDBCPlugIn, "getNativeDataSource");
+			lDataSource = (DataSource) lObject;
+			// Caution! 
+			// setLoginTimeout are setLoginTimeout is not supported by org.apache.commons.dbcp.BasicDataSource!
+			// int lTMO = lDataSource.getLoginTimeout();
+			// if (mLog.isDebugEnabled()) {
+			//	mLog.debug("Database login timeout is " + lTMO + "s.");
+			// }
 			lConnection = lDataSource.getConnection();
-			JasperReport lReport = JasperCompileManager.compileReport(
-					getReportPath(lReportId));
+
+			/*
+			 * JasperReport lReport = (JasperReport)
+			 * JRLoader.loadObjectFromFile(getJasperPath(lReportId));
+			 * JasperDesign lDesign =
+			 * JRXmlLoader.load(getJRXMLPath(getJasperPath)); JasperReport
+			 * lReport = JasperCompileManager.compileReport(lDesign);
+			 */
+
+			String lJRXMLPath = getJRXMLPath(lReportId);
+			// Class lClass = Class.forName("net.sf.jasperreports.engine.xml.JRReportSaxParserFactory");
+			/*
+			 * JRProperties.setProperty("net.sf.jasperreports.compiler.xml.parser.factory",
+			 * "javax.xml.parsers.SAXParserFactory");
+			 */
+			JasperReport lReport = JasperCompileManager.compileReport(lJRXMLPath);
 			JasperPrint lPrint = JasperFillManager.fillReport(lReport,
 					lParams, lConnection);
 			String lReportName = generateReportName(aConnector, lReportId);
 			String lExportFilePath;
 			if ("pdf".equals(lOutputType)) {
-				lExportFilePath = mOutputFolder + lReportName + ".pdf";
-				JasperExportManager.exportReportToPdfFile(lPrint,
+				lExportFilePath = mSettings.getOutputFolder() + lReportName + ".pdf";
+				JasperExportManager.exportReportToPdfFile(lPrint, 
 						lExportFilePath);
-				lResponse.setString("url", mOutputURL + lReportName + ".pdf");
+				lResponse.setString("url", mSettings.getOutputURL() + lReportName + ".pdf");
 			} else {
-				lExportFilePath = mOutputFolder + lReportName + ".html";
+				lExportFilePath = mSettings.getOutputFolder() + lReportName + ".html";
 				JasperExportManager.exportReportToHtmlFile(lPrint,
 						lExportFilePath);
-				lResponse.setString("url", mOutputURL + lReportName + ".html");
+				lResponse.setString("url", mSettings.getOutputURL() + lReportName + ".html");
 			}
 			List<String> lFiles = (List<String>) aConnector.getVar(VAR_FILES_TO_DELETE);
 			if (lFiles == null) {
@@ -307,7 +370,7 @@ public class ReportingPlugIn extends TokenPlugIn {
 		}
 
 		try {
-			String lReportPath = getReportPath(lReportId);
+			String lReportPath = getJRXMLPath(lReportId);
 			JasperReport lReport = JasperCompileManager.compileReport(lReportPath);
 
 			List lParamsList = new FastList<Map>();

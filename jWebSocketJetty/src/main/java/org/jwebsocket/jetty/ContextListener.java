@@ -17,6 +17,7 @@ package org.jwebsocket.jetty;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.console.JWebSocketTokenListenerSample;
 import org.jwebsocket.factory.JWebSocketFactory;
 import org.jwebsocket.server.TokenServer;
@@ -33,8 +34,13 @@ public class ContextListener implements ServletContextListener {
 	 */
 	@Override
 	public void contextInitialized(ServletContextEvent aSCE) {
-		// start the jWebSocket server sub system
-		JWebSocketFactory.start("","");
+		// the following line must not be removed due to GNU LGPL 3.0 license!
+		JWebSocketFactory.printCopyrightToConsole();
+		
+		JWebSocketConfig.initForWebApp(aSCE.getServletContext());
+		
+		// start the jWebSocket server sub system with default config and bootstrap
+		JWebSocketFactory.start();
 
 		// get the token server
 		// and and a listener to it (for demo purposes)

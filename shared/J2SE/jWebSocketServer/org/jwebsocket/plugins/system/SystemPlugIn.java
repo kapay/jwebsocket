@@ -20,32 +20,30 @@ import java.util.Map;
 import java.util.Random;
 import javolution.util.FastList;
 import javolution.util.FastMap;
-
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.IUserUniqueIdentifierContainer;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.config.JWebSocketCommonConstants;
-import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.connectors.BaseConnector;
-import org.jwebsocket.engines.BaseEngine;
 import org.jwebsocket.kit.BroadcastOptions;
 import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.kit.RequestHeader;
+import org.jwebsocket.kit.WebSocketSession;
+import org.jwebsocket.logging.Logging;
+import org.jwebsocket.packetProcessors.JSONProcessor;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.security.User;
 import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.session.SessionManager;
-import org.jwebsocket.spring.JWebSocketBeanFactory;
 import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 import org.jwebsocket.util.Tools;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -56,12 +54,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 /**
  * implements the jWebSocket system tokens like login, logout, send, broadcast
  * etc...
- * 
+ *
  * @author aschulze
  */
 public class SystemPlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(SystemPlugIn.class);
+	private static Logger mLog = Logging.getLogger();
 	// specify name space for system plug-in
 	private static final String NS_SYSTEM = JWebSocketServerConstants.NS_BASE + ".plugins.system";
 	// specify token types processed by system plug-in
@@ -70,6 +68,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	private static final String TT_BROADCAST = "broadcast";
 	private static final String TT_WELCOME = "welcome";
 	private static final String TT_GOODBYE = "goodBye";
+	private static final String TT_HEADER = "header";
 	// old future deprecated
 	private static final String TT_LOGIN = "login";
 	private static final String TT_LOGOUT = "logout";
@@ -103,13 +102,33 @@ public class SystemPlugIn extends TokenPlugIn {
 	private ProviderManager mAuthProvMgr;
 	private UserDetailsService mUserDetails;
 	private SessionManager mSessionManager;
+	/**
+	 * 
+	 */
 	public static final String USERNAME = "$username";
+	/**
+	 * 
+	 */
 	public static final String AUTHORITIES = "$authorities";
+	/**
+	 * 
+	 */
 	public static final String UUID = "$uuid";
+	/**
+	 * 
+	 */
 	public static final String IS_AUTHENTICATED = "$is_authenticated";
+	private static ApplicationContext mBeanFactory;
+	/*
+	static {
+	Logging.addLogger(SystemPlugIn.class);
+	}
+	 */
 
 	/**
 	 * Constructor with configuration object
+	 * 
+	 * @param aConfiguration 
 	 */
 	public SystemPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
@@ -121,40 +140,36 @@ public class SystemPlugIn extends TokenPlugIn {
 		mGetSettings();
 
 		try {
-			String lSpringConfig = getString("spring_config");
-			lSpringConfig = Tools.expandEnvVars(lSpringConfig);
-			String lPath = FilenameUtils.getPath(lSpringConfig);
-			if (lPath == null || lPath.length() <= 0) {
-				lPath = JWebSocketConfig.getConfigFolder(lSpringConfig);
+			mBeanFactory = getConfigBeanFactory();
+			if (null == mBeanFactory) {
+				mLog.error("No or invalid spring configuration for system plug-in, some features may not be available.");
 			} else {
-				lPath = lSpringConfig;
-			}
-			/*
-			FileSystemResource lFSRes = new FileSystemResource(lPath);
-			mBeanFactory = new ServerXmlBeanFactory(lFSRes, getClass().getClassLoader());
-			 */
-			JWebSocketBeanFactory.load(lPath, getClass().getClassLoader());
-			Object lObj = JWebSocketBeanFactory.getInstance().getBean("authManager");
-			mAuthProvMgr = (ProviderManager) lObj;
-			List<AuthenticationProvider> lProviders = mAuthProvMgr.getProviders();
-			mAuthProv = lProviders.get(0);
-
-			lObj = JWebSocketBeanFactory.getInstance().getBean("sessionManager");
-			mSessionManager = (SessionManager) lObj;
-
-			// give a success message to the administrator
-			if (mLog.isInfoEnabled()) {
-				mLog.info("System plug-in successfully loaded.");
+				mAuthProvMgr = (ProviderManager) mBeanFactory.getBean("authManager");
+				List<AuthenticationProvider> lProviders = mAuthProvMgr.getProviders();
+				mAuthProv = lProviders.get(0);
+				mSessionManager = (SessionManager) mBeanFactory.getBean("sessionManager");
+				// give a success message to the administrator
+				if (mLog.isInfoEnabled()) {
+					mLog.info("System plug-in successfully instantiated.");
+				}
 			}
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName() + " at System plug-in instantiation: " + lEx.getMessage());
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "instantiating system plug-in"));
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public AuthenticationProvider getAuthProvider() {
 		return mAuthProv;
 	}
 
+	/**
+	 * 
+	 * @param aAuthMgr
+	 */
 	public void setAuthManager(AuthenticationProvider aAuthMgr) {
 		mAuthProv = aAuthMgr;
 	}
@@ -181,6 +196,8 @@ public class SystemPlugIn extends TokenPlugIn {
 				send(aConnector, aToken);
 			} else if (lType.equals(TT_RESPOND)) {
 				respond(aConnector, aToken);
+			} else if (lType.equals(TT_HEADER)) {
+				getHeaders(aConnector, aToken);
 			} else if (lType.equals(TT_BROADCAST)) {
 				broadcast(aConnector, aToken);
 			} else if (lType.equals(TT_LOGIN)) {
@@ -207,8 +224,6 @@ public class SystemPlugIn extends TokenPlugIn {
 				allocChannel(aConnector, aToken);
 			} else if (lType.equals(TT_DEALLOC_CHANNEL)) {
 				deallocChannel(aConnector, aToken);
-			} else if (lType.equals("getLostConnectors")) {
-				getLostConnectors(aConnector, aToken);
 			}
 			aResponse.abortChain();
 		}
@@ -227,17 +242,17 @@ public class SystemPlugIn extends TokenPlugIn {
 
 
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Setting the session identifier: " + aConnector.getId());
+				mLog.debug("Setting session identifier to '" + aConnector.getId() + "'...");
 			}
 			aConnector.getSession().setSessionId(
 					Tools.getMD5(aConnector.generateUID()
-					+ "." + lRand.nextInt()));
+					+ "." + lRand.nextInt()) + aConnector.getHeader().get(RequestHeader.WS_PATH));
 
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Creating the WebSocketSession persistent storage "
-						+ "for connector: " + aConnector.getId());
+						+ "for connector '" + aConnector.getId() + "'...");
 			}
-			aConnector.getSession().setStorage((Map<String, Object>) (mSessionManager.getSession(aConnector.getSession().getSessionId() + aConnector.getHeader().get(RequestHeader.WS_PATH))));
+			aConnector.getSession().setStorage((Map<String, Object>) (mSessionManager.getSession(aConnector.getSession().getSessionId())));
 
 		} catch (Exception ex) {
 			// TODO: try this with the ExceptionHandler
@@ -256,23 +271,21 @@ public class SystemPlugIn extends TokenPlugIn {
 	@Override
 	public void connectorStopped(WebSocketConnector aConnector, CloseReason aCloseReason) {
 		// Allowing all connectors for a reconnection
-		// TODO: Why can a session ever be null? Check with stress test!
-		// Session management is not yet stable!
-		/*
 		WebSocketSession lSession = aConnector.getSession();
 		if (lSession != null && mSessionManager != null) {
-		String lSessionId = lSession.getSessionId();
-		if (mLog.isDebugEnabled()) {
-		mLog.debug("Putting the session: " + lSessionId + ", in reconnection mode...");
+			String lSessionId =
+					lSession.getSessionId();
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Putting the session: " + lSessionId
+						+ ", in reconnection mode...");
+			}
+			synchronized (this) {
+				// Removing the local cached  storage instance. 
+				//Free space if the client never gets reconnected
+				mSessionManager.getSessionsReferences().remove(lSessionId);
+				mSessionManager.getReconnectionManager().putInReconnectionMode(lSessionId);
+			}
 		}
-		synchronized (this) {
-		// Removing the local cached storage instance. Free space if 
-		// the client never gets reconnected
-		mSessionManager.getSessionsReferences().remove(lSessionId);
-		mSessionManager.getReconnectionManager().putInReconnectionMode(lSessionId);
-		}
-		}
-		 */
 
 		// notify other clients that client disconnected
 		broadcastDisconnectEvent(aConnector);
@@ -356,7 +369,8 @@ public class SystemPlugIn extends TokenPlugIn {
 		lWelcome.setString("vendor", JWebSocketCommonConstants.VENDOR);
 		lWelcome.setString("version", JWebSocketServerConstants.VERSION_STR);
 		// here the session id is MANDATORY! to pass to the client!
-		lWelcome.setString("usid", aConnector.getSession().getSessionId());
+		lWelcome.setString("usid", aConnector.getSession().getSessionId().
+				replace(aConnector.getHeader().get(RequestHeader.WS_PATH).toString(), ""));
 		lWelcome.setString("sourceId", aConnector.getId());
 		// if a unique node id is specified for the client include that
 		String lNodeId = aConnector.getNodeId();
@@ -523,7 +537,7 @@ public class SystemPlugIn extends TokenPlugIn {
 							+ aConnector.getId() + ").");
 				}
 			} else {
-				mLog.warn("Attempt to login with invalid credentials, username: '" + lUsername + "'.");
+				mLog.warn("Attempt to login with invalid credentials, username '" + lUsername + "'.");
 				lResponse.setInteger("code", -1);
 				lResponse.setString("msg", "Invalid credentials");
 				// reset username to not send login event, see below
@@ -713,8 +727,8 @@ public class SystemPlugIn extends TokenPlugIn {
 			sendToken(aConnector, aConnector, lResponse);
 		}
 		/*
-		 * } else { lResponse.put("code", -1); lResponse.put("msg",
-		 * "not logged in"); sendToken(aConnector, lResponse); }
+		 * } else { lResponse.put("code", -1); lResponse.put("msg", "not logged
+		 * in"); sendToken(aConnector, lResponse); }
 		 */
 	}
 
@@ -798,6 +812,7 @@ public class SystemPlugIn extends TokenPlugIn {
 	 * simply waits for a certain amount of time and does not perform any _
 	 * operation. This feature is used for debugging and simulation purposes _
 	 * only and is not related to any business logic.
+	 *
 	 * @param aToken
 	 */
 	private void wait(WebSocketConnector aConnector, Token aToken) {
@@ -824,6 +839,26 @@ public class SystemPlugIn extends TokenPlugIn {
 		// to simulate this error condition
 		if (lIsResponseRequested) {
 			sendToken(aConnector, aConnector, lResponse);
+		}
+	}
+
+	/**
+	 * Gets the client headers and put them into connector variables
+	 *
+	 * @param aConnector
+	 * @param aToken
+	 */
+	private void getHeaders(WebSocketConnector aConnector, Token aToken) {
+		aConnector.setVar("clientType", aToken.getString("clientType"));
+		aConnector.setVar("clientName", aToken.getString("clientName"));
+		aConnector.setVar("clientVersion", aToken.getString("clientVersion"));
+		aConnector.setVar("clientInfo", aToken.getString("clientInfo"));
+		aConnector.setVar("jwsType", aToken.getString("jwsType"));
+		aConnector.setVar("jwsVersion", aToken.getString("jwsVersion"));
+		aConnector.setVar("jwsInfo", aToken.getString("jwsInfo"));
+		if (mLog.isDebugEnabled()) {
+			mLog.debug("Processing 'getHeaders' from connector '"
+					+ aConnector.getId() + "'...");
 		}
 	}
 
@@ -860,7 +895,8 @@ public class SystemPlugIn extends TokenPlugIn {
 	}
 
 	/**
-	 * allocates a "non-interruptable" communication channel between two clients.
+	 * allocates a "non-interruptable" communication channel between two
+	 * clients.
 	 *
 	 * @param aConnector
 	 * @param aToken
@@ -890,18 +926,13 @@ public class SystemPlugIn extends TokenPlugIn {
 		}
 	}
 
-	public void getLostConnectors(WebSocketConnector aConnector, Token aToken) {
-		Token lResponse = createResponse(aToken);
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Processing 'getLostConnectors' from '"
-					+ aConnector + "'...");
-		}
-		BaseEngine lEngine = (BaseEngine) aConnector.getEngine();
-		lResponse.setList("connectors", lEngine.lostConnectors);
-		sendToken(aConnector, aConnector, lResponse);
-	}
-
-	// new spring based authentication
+	/**
+	 * Logon a user given the username and password by using 
+	 * the Spring Security module
+	 * 
+	 * @param aConnector 
+	 * @param aToken The token with the username and password
+	 */
 	void logon(WebSocketConnector aConnector, Token aToken) {
 		TokenServer lServer = getServer();
 		if (SecurityHelper.isUserAuthenticated(aConnector)) {
@@ -958,10 +989,10 @@ public class SystemPlugIn extends TokenPlugIn {
 		// Getting the session
 		Map<String, Object> lSessionParms = aConnector.getSession().getStorage();
 
-		//Setting the is_authenticated flag
+		// Setting the is_authenticated flag
 		lSessionParms.put(IS_AUTHENTICATED, lAuthResult.isAuthenticated());
 
-		//Setting the username
+		// Setting the username
 		lSessionParms.put(USERNAME, lUsername);
 		aConnector.setUsername(lUsername);
 

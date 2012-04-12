@@ -15,28 +15,29 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.plugins;
 
-import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.api.PluginConfiguration;
-import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.kit.BroadcastOptions;
+import org.jwebsocket.kit.ChangeType;
 import org.jwebsocket.kit.CloseReason;
+import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.server.TokenServer;
+import org.jwebsocket.spring.JWebSocketBeanFactory;
 import org.jwebsocket.token.Token;
+import org.springframework.context.ApplicationContext;
 
 /**
  * 
  * @author aschulze
+ * @author Marcos Antonio González Huerta (markos0886, UCI)
  */
 public class TokenPlugIn extends BasePlugIn {
-	
+
 	private String mNamespace = null;
-	/*
-	public TokenPlugIn() {
-	}
-	 */
+	private static boolean mBeanFactoryLoaded = false;
 
 	/**
 	 *
@@ -72,8 +73,9 @@ public class TokenPlugIn extends BasePlugIn {
 	}
 
 	/**
-	 * 
+	 * @param aConnector
 	 * @param aToken
+	 * 
 	 * @return
 	 */
 	public Token invoke(WebSocketConnector aConnector, Token aToken) {
@@ -220,5 +222,35 @@ public class TokenPlugIn extends BasePlugIn {
 		if (lServer != null) {
 			lServer.sendErrorToken(aConnector, aInToken, aErrCode, aMessage);
 		}
+	}
+
+	/**
+	 * 
+	 * @param aResponse
+	 * @param aType
+	 * @param aVersion
+	 * @param aReason
+	 */
+	public void createReasonOfChange(Token aResponse, ChangeType aType, String aVersion, String aReason) {
+		aResponse.setNS(getNamespace());
+		aResponse.setType("processChangeOfPlugIn");
+		aResponse.setString("changeType", aType.toString());
+		aResponse.setString("version", aVersion);
+		aResponse.setString("reason", aReason);
+		aResponse.setString("id", getId());
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public ApplicationContext getConfigBeanFactory() {
+		String lSpringConfig = getString("spring_config");
+		if (null == lSpringConfig || lSpringConfig.isEmpty()) {
+			return null;
+		}
+		JWebSocketBeanFactory.load(lSpringConfig, getClass().getClassLoader());
+
+		return JWebSocketBeanFactory.getInstance();
 	}
 }

@@ -23,9 +23,10 @@ import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.ServerConfiguration;
 import org.jwebsocket.api.WebSocketServerListener;
 import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
-import org.jwebsocket.config.xml.LoggingConfig;
 import org.jwebsocket.config.xml.EngineConfig;
+import org.jwebsocket.config.xml.LoggingConfig;
 import org.jwebsocket.config.xml.PluginConfig;
 import org.jwebsocket.config.xml.ServerConfig;
 import org.jwebsocket.factory.JWebSocketFactory;
@@ -40,6 +41,7 @@ import org.jwebsocket.tcp.TCPEngine;
 
 /**
  * Example of a pure programmatic embedded jWebSocket server.
+ *
  * @author aschulze
  */
 public class JWebSocketSubSystemSample {
@@ -50,18 +52,14 @@ public class JWebSocketSubSystemSample {
 
 	/**
 	 */
-	public JWebSocketSubSystemSample() {
+	public JWebSocketSubSystemSample(String[] aArgs) {
 		// the following line may not be removed due to GNU LGPL 3.0 license!
 		JWebSocketFactory.printCopyrightToConsole();
+		// check if home, config or bootstrap path are passed by command line
+		JWebSocketConfig.initForConsoleApp(aArgs);
 
 		// initialize the logging system
 		LoggingConfig lLoggingConfig = new LoggingConfig(
-				"console", // target
-				"%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p - %C{1}: %m%n", // pattern
-				"debug", // level
-				"jWebSocket.log", // file name, if logging to file only
-				4096, // bufferSize, if logging to file only
-				"log4j.xml", // config file, overrides above settings!
 				20000 // reload delay
 				);
 		Logging.initLogs(lLoggingConfig);
@@ -82,7 +80,9 @@ public class JWebSocketSubSystemSample {
 				JWebSocketCommonConstants.JWEBSOCKET_DEF_SERVLET, // servlet if such
 				JWebSocketCommonConstants.DEFAULT_TIMEOUT, // default session timeout
 				JWebSocketCommonConstants.DEFAULT_MAX_FRAME_SIZE, // max framesize
-				lDomains // list of accepted domains
+				lDomains, // list of accepted domains
+				JWebSocketServerConstants.DEFAULT_MAX_CONNECTIONS, // max connections
+				JWebSocketServerConstants.DEFAULT_ON_MAX_CONNECTIONS_STRATEGY // on max connections reached strategy
 				);
 		mEngine = new TCPEngine(lEngineConfig);
 
@@ -158,6 +158,7 @@ public class JWebSocketSubSystemSample {
 
 	/**
 	 * adds a new listener to the server of the jWebSocket subsystem.
+	 *
 	 * @param aListener
 	 */
 	public void addListener(WebSocketServerListener aListener) {
@@ -169,6 +170,7 @@ public class JWebSocketSubSystemSample {
 
 	/**
 	 * removes a listener from the server of the jWebSocket subsystem.
+	 *
 	 * @param aListener
 	 */
 	public void removeListener(WebSocketServerListener aListener) {

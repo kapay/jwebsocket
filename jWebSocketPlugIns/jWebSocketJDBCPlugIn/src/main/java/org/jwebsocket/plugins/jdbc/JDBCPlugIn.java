@@ -29,24 +29,21 @@ import java.util.Map;
 import javax.sql.DataSource;
 import javolution.util.FastList;
 import javolution.util.FastMap;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.IBasicStorage;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
-import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
 import org.jwebsocket.security.SecurityFactory;
 import org.jwebsocket.server.TokenServer;
-import org.jwebsocket.spring.ServerXmlBeanFactory;
 import org.jwebsocket.storage.ehcache.EhCacheStorage;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 import org.jwebsocket.util.Tools;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.context.ApplicationContext;
 
 /**
  * 
@@ -54,12 +51,12 @@ import org.springframework.core.io.FileSystemResource;
  */
 public class JDBCPlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(JDBCPlugIn.class);
+	private static Logger mLog = Logging.getLogger();
 	// if namespace changed updateSQL client plug-in accordingly!
 	private static final String NS_JDBC = JWebSocketServerConstants.NS_BASE + ".plugins.jdbc";
 	private IBasicStorage mCache = null;
 	private int mConnValTimeout = 300;
-	private static ServerXmlBeanFactory mBeanFactory;
+	private static ApplicationContext mBeanFactory;
 	private static NativeAccess mNativeAccess;
 	private static String mSelectSequenceSQL = null;
 	private static String mExecFunctionSQL = null;
@@ -82,17 +79,8 @@ public class JDBCPlugIn extends TokenPlugIn {
 		String lVal = getString("conn_val_timeout");
 
 		try {
-			String lSpringConfig = getString("spring_config");
-			lSpringConfig = Tools.expandEnvVars(lSpringConfig);
-			String lPath = FilenameUtils.getPath(lSpringConfig);
-			if (lPath == null || lPath.length() <= 0) {
-				lPath = JWebSocketConfig.getConfigFolder(lSpringConfig);
-			} else {
-				lPath = lSpringConfig;
-			}
-			FileSystemResource lFSRes = new FileSystemResource(lPath);
-
-			mBeanFactory = new ServerXmlBeanFactory(lFSRes, getClass().getClassLoader());
+			mBeanFactory = getConfigBeanFactory();
+			
 			mNativeAccess = (NativeAccess) mBeanFactory.getBean("nativeAccess");
 			if (null != mNativeAccess) {
 				mSelectSequenceSQL = mNativeAccess.getSelectSequenceSQL();
@@ -100,7 +88,7 @@ public class JDBCPlugIn extends TokenPlugIn {
 				mExecStoredProcSQL = mNativeAccess.getExecStoredProcSQL();
 				// give a success message to the administrator
 				if (mLog.isInfoEnabled()) {
-					mLog.info("JDBC plug-in successfully loaded.");
+					mLog.info("JDBC plug-in successfully instantiated.");
 				}
 			} else {
 				mLog.error("Database bean could not be loaded properly.");

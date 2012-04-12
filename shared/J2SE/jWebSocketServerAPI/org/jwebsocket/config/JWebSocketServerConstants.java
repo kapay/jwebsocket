@@ -19,14 +19,13 @@ package org.jwebsocket.config;
  * Provides a global shared container for the jWebSocket configuration settings.
  *
  * @author aschulze
- * @version $Id: JWebSocketServerConstants.java 624 2010-07-06 12:28:44Z fivefeetfurther $
  */
 public final class JWebSocketServerConstants {
 
 	/**
 	 * Current version string of the jWebSocket package.
 	 */
-	public static final String VERSION_STR = "1.0b5 (nightly build 20105)";
+	public static final String VERSION_STR = "1.0b6 (nightly build 20412)";
 	/**
 	 * Name space base for tokens and plug-ins.
 	 */
@@ -40,25 +39,25 @@ public final class JWebSocketServerConstants {
 	 */
 	public static final String JWEBSOCKET_HOME = "JWEBSOCKET_HOME";
 	/**
-	 * Constant for CATALINA_HOME
+	 * Constant for bootstrap.xml configuration file
 	 */
-	public static final String CATALINA_HOME = "CATALINA_HOME";
+	public static final String BOOTSTRAP_XML = "bootstrap.xml";
 	/**
 	 * Constant for jWebSocket.xml configuration file
 	 */
 	public static final String JWEBSOCKET_XML = "jWebSocket.xml";
 	/**
+	 * Constant for jWebSocketDevTemplate.xml configuration file
+	 */
+	public static final String JWEBSOCKET_DEV_TEMPLATE_XML = "jWebSocketDevTemplate.xml";
+	/**
 	 * Constant for jWebSocket.ks key store file
 	 */
 	public static final String JWEBSOCKET_KEYSTORE = "jWebSocket.ks";
 	/**
-	 * Default password for demo keystore
+	 * Default password for demo key store
 	 */
 	public static final String JWEBSOCKET_KS_DEF_PWD = "jWebSocket";
-	/**
-	 * Constant for jWebSocket.xml configuration file
-	 */
-	public static final String JWEBSOCKET_OVERRIDE_XML = "jWebSocket-override.xml";
 
 	/**
 	 * Default engine for jWebSocket server.
@@ -69,4 +68,15 @@ public final class JWebSocketServerConstants {
 	 * Empty means do not use node-id for single stand-alone systems
 	 */
 	public static String DEFAULT_NODE_ID = "";
+	
+	/**
+	 * the default maximum number of connections allowed by an engine
+	 */
+	public static final int DEFAULT_MAX_CONNECTIONS = 10000;
+	
+	/**
+	 * the default "on max connections reached" strategy {wait, close, reject, redirect}
+	 */
+	public static final String DEFAULT_ON_MAX_CONNECTIONS_STRATEGY = "reject";
+	
 }

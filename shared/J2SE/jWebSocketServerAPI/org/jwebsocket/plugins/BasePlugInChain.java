@@ -23,7 +23,6 @@ import java.util.List;
 import javolution.util.FastList;
 
 import org.apache.log4j.Logger;
-import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.api.WebSocketPacket;
@@ -36,6 +35,7 @@ import org.jwebsocket.logging.Logging;
  * when data packets are received. Each data packet is pushed through the chain
  * and can be processed by the plug-ins.
  * @author aschulze
+ * @author Marcos Antonio González Huerta (markos0886, UCI)
  */
 public class BasePlugInChain implements WebSocketPlugInChain {
 
@@ -235,8 +235,7 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 	public WebSocketPlugIn getPlugIn(String aId) {
 		if (aId != null) {
 			for (WebSocketPlugIn lPlugIn : mPlugins) {
-				PluginConfiguration lConfig = lPlugIn.getPluginConfiguration();
-				if (lConfig != null && aId.equals(lConfig.getId())) {
+				if (lPlugIn.getId() != null && aId.equals(lPlugIn.getId())) {
 					return lPlugIn;
 				}
 			}
@@ -250,5 +249,11 @@ public class BasePlugInChain implements WebSocketPlugInChain {
 	@Override
 	public WebSocketServer getServer() {
 		return mServer;
+	}
+
+	@Override
+	public void addPlugIn(Integer aPosition, WebSocketPlugIn aPlugIn) {
+		mPlugins.add(aPosition, aPlugIn);
+		aPlugIn.setPlugInChain(this);
 	}
 }

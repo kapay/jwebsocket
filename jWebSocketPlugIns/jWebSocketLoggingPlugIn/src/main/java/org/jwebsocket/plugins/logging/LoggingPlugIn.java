@@ -29,6 +29,7 @@ import org.jwebsocket.server.TokenServer;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 import org.jwebsocket.util.Tools;
+import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -36,17 +37,21 @@ import org.jwebsocket.util.Tools;
  */
 public class LoggingPlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(LoggingPlugIn.class);
+	private static Logger mLog = Logging.getLogger();
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_LOGGING =
 			JWebSocketServerConstants.NS_BASE + ".plugins.logging";
 	private ILogger mLogger = null;
-	private static final String DEF_IMPL = "log4j";
-	private String mImplementation = DEF_IMPL;
 	private Map<String, String> mListeners = new FastMap<String, String>();
 	private Class JDBCTools = null;
 	private TokenPlugIn mJDBCPlugIn = null;
+	private static ApplicationContext mBeanFactory;
+	private static Settings mSettings;
 
+	/**
+	 * 
+	 * @param aConfiguration
+	 */
 	public LoggingPlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
@@ -54,14 +59,25 @@ public class LoggingPlugIn extends TokenPlugIn {
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_LOGGING);
-		mGetSettings();
+
+		try {
+			mBeanFactory = getConfigBeanFactory();
+			if (null == mBeanFactory) {
+				mLog.error("No or invalid spring configuration for logging plug-in, some features may not be available.");
+			} else {
+				mBeanFactory = getConfigBeanFactory();
+				mSettings = (Settings) mBeanFactory.getBean("settings");
+				mLogger = mSettings.getTarget();
+				if (mLog.isInfoEnabled()) {
+					mLog.info("Logging plug-in successfully instantiated.");
+				}
+			}
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "instantiating logging Plug-in"));
+		}
 	}
 
-	private void mGetSettings() {
-		mImplementation = getString("implementation", DEF_IMPL);
-		mLogger = new Log4JLogger();
-	}
-
+	// check if the JDBC Plug-in was laoded properly
 	private boolean getJDBCPlugIn() {
 		TokenServer lServer = getServer();
 		mJDBCPlugIn = (TokenPlugIn) lServer.getPlugInById("jws.jdbc");
@@ -69,8 +85,8 @@ public class LoggingPlugIn extends TokenPlugIn {
 			JDBCTools = (Class) Tools.invoke(mJDBCPlugIn, "getJDBCTools");
 			// JDBCTools.getClassLoader().loadClass(JDBCTools.getName());
 			return true;
-		} catch (Exception ex) {
-			mLog.error("Logging plug-in requires JDBC-Plug-in.");
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "loading tools from JDBC plug-in"));
 		}
 		return false;
 	}
@@ -92,10 +108,12 @@ public class LoggingPlugIn extends TokenPlugIn {
 
 		if (lType != null && getNamespace().equals(lNS)) {
 
+			// check JDBC plug-in, required for logging to SQL databases
 			TokenServer lServer = getServer();
 			if (mJDBCPlugIn == null || JDBCTools == null) {
 				getJDBCPlugIn();
 			}
+			// if JDBC plug-in was not loaded return an error token
 			if (mJDBCPlugIn == null || JDBCTools == null) {
 				// send response to requester
 				Token lResponse = lServer.createErrorToken(aToken, -1, "JDBC plug-in not loaded.");
@@ -111,9 +129,9 @@ public class LoggingPlugIn extends TokenPlugIn {
 			} else if (lType.equals("getEvents")) {
 				getEvents(aConnector, aToken);
 			} else if (lType.equals("subscribe")) {
-				// logEvent(aConnector, aToken);
+				subscribe(aConnector, aToken);
 			} else if (lType.equals("unsubscribe")) {
-				// logEvent(aConnector, aToken);
+				unsubscribe(aConnector, aToken);
 			}
 
 		}
@@ -149,9 +167,19 @@ public class LoggingPlugIn extends TokenPlugIn {
 	}
 
 	private void subscribe(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		Token lResponse = lServer.createResponse(aToken);
+		lResponse.setInteger("code", -1);
+		lResponse.setString("msg", "not yet implemented");
+		lServer.sendToken(aConnector, lResponse);
 	}
 
 	private void unsubscribe(WebSocketConnector aConnector, Token aToken) {
+		TokenServer lServer = getServer();
+		Token lResponse = lServer.createResponse(aToken);
+		lResponse.setInteger("code", -1);
+		lResponse.setString("msg", "not yet implemented");
+		lServer.sendToken(aConnector, lResponse);
 	}
 
 	private void logEvent(WebSocketConnector aConnector, Token aToken) {
@@ -180,38 +208,27 @@ public class LoggingPlugIn extends TokenPlugIn {
 				lServer.sendToken(aConnector, lResponse);
 				return;
 			}
-			lKey = (Integer)lKeys.get(0);
+			lKey = (Integer) lKeys.get(0);
 			lFields.add(lPrimaryKey);
 			lValues.add(lKey);
 		}
 
- 		String lFieldsStr = null;
+		String lFieldsStr = null;
 		String lValuesStr = null;
-		/*
 		try {
-			List lTest = new ArrayList();
-			lTest.add("test1");
-			lTest.add("test2");
-			String lInt = (String) Tools.invokeUnique(JDBCTools, "test", lTest);
-			System.out.println("test: "+ lInt);
-		} catch (Exception ex) {
-			mLog.error(ex.getClass().getSimpleName() + ": Method 'test' could not be invoked: " + ex.getMessage());
-		}
-		 */
-		try {
-			lFieldsStr = (String) Tools.invokeUnique(JDBCTools, "fieldListToString", lFields);
-		} catch (Exception ex) {
+			lFieldsStr = (String) Tools.invoke(JDBCTools, "fieldListToString", lFields);
+		} catch (Exception lEx) {
 			// TODO: return error here
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Method 'fieldListToString' could not be invoked: " + ex.getMessage());
+				mLog.debug("Method 'fieldListToString' could not be invoked: " + lEx.getMessage());
 			}
 		}
 		try {
-			lValuesStr = (String) Tools.invokeUnique(JDBCTools, "valueListToString", lValues);
-		} catch (Exception ex) {
+			lValuesStr = (String) Tools.invoke(JDBCTools, "valueListToString", lValues);
+		} catch (Exception lEx) {
 			// TODO: return error here
 			if (mLog.isDebugEnabled()) {
-				mLog.debug("Method 'valueListToString' could not be invoked: " + ex.getMessage());
+				mLog.debug("Method 'valueListToString' could not be invoked: " + lEx.getMessage());
 			}
 		}
 		// JDBCTools.

@@ -15,47 +15,26 @@
 //  ---------------------------------------------------------------------------
 package org.jwebsocket.eventmodel.event.auth;
 
-import org.jwebsocket.eventmodel.annotation.ImportFromToken;
 import org.jwebsocket.eventmodel.event.C2SEvent;
 
 /**
- * The client order to log on 
+ * The client event representing the Logon operation
  * 
  * @author kyberneees
  */
 public class Logon extends C2SEvent {
 
-	private String username;
-
-	private String password;
-
 	/**
 	 * @return the username
 	 */
 	public String getUsername() {
-		return username;
-	}
-
-	/**
-	 * @param username the username to set
-	 */
-	@ImportFromToken
-	public void setUsername(String username) {
-		this.username = username;
+		return getArgs().getString("username");
 	}
 
 	/**
 	 * @return the password
 	 */
 	public String getPassword() {
-		return password;
-	}
-
-	/**
-	 * @param password the password to set
-	 */
-	@ImportFromToken
-	public void setPassword(String password) {
-		this.password = password;
+		return getArgs().getString("password");
 	}
 }

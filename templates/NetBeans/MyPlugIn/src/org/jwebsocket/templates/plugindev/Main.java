@@ -61,15 +61,8 @@ public class Main {
 
 				lServer.getPlugInChain().addPlugIn(new MyPlugIn(lPlugInConfig));
 			}
-
-			// remain here until shut down request
-			while (JWebSocketInstance.getStatus() != JWebSocketInstance.SHUTTING_DOWN) {
-				try {
-					Thread.sleep(250);
-				} catch (InterruptedException lEx) {
-					// no handling required here
-				}
-			}
+			// run server until shut down request
+			JWebSocketFactory.run();
 		} catch (Exception lEx) {
 			System.out.println(
 					lEx.getClass().getSimpleName()

@@ -19,24 +19,23 @@ import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
 /**
- * Provides some convenience methods to support the web socket
- * development.
+ * Provides some convenience methods to support the web socket development.
+ *
  * @author aschulze
  */
 public class Tools {
 
 	private static final Map<String, String> JAVA_2_GENERIC_MAP = new FastMap<String, String>();
 	private static final Map<String, String> GENERIC_2_JAVA_MAP = new FastMap<String, String>();
+	private static Timer mTimer = null;
 
 	static {
 		JAVA_2_GENERIC_MAP.put("java.lang.String", "string");
@@ -74,21 +73,22 @@ public class Tools {
 		GENERIC_2_JAVA_MAP.put("datetime", "java.util.Date");
 	}
 	/**
-	 * 
+	 *
 	 */
 	public final static boolean EXPAND_CASE_SENSITIVE = false;
 	/**
-	 * 
+	 *
 	 */
 	public final static boolean EXPAND_CASE_INSENSITIVE = true;
 
 	/**
 	 * Returns the MD5 sum of the given string. The output always has 32 digits.
+	 *
 	 * @param aMsg String the string to calculate the MD5 sum for.
 	 * @return MD5 sum of the given string.
 	 */
 	public static String getMD5(String aMsg) {
-		MessageDigest md = null;
+		MessageDigest md;
 		try {
 			md = MessageDigest.getInstance("MD5");
 			byte[] lBufSource = aMsg.getBytes("UTF-8");
@@ -106,12 +106,14 @@ public class Tools {
 	}
 
 	/**
-	 * Returns the SHA1 sum of the given string. The output always has 32 digits.
+	 * Returns the SHA1 sum of the given string. The output always has 32
+	 * digits.
+	 *
 	 * @param aMsg String the string to calculate the MD5 sum for.
 	 * @return MD5 sum of the given string.
 	 */
 	public static String getSHA1(String aMsg) {
-		MessageDigest md = null;
+		MessageDigest md;
 		try {
 			md = MessageDigest.getInstance("SHA-1");
 			byte[] lBufSource = aMsg.getBytes("UTF-8");
@@ -132,6 +134,7 @@ public class Tools {
 	 * Returns the hex value of the given int as a string. If {@code aLen} is
 	 * greater than zero the output is cut or filled to the given length
 	 * otherwise the exact number of digits is returned.
+	 *
 	 * @param aInt Integer to be converted into a hex-string.
 	 * @param aLen Number of hex digits (optionally filled or cut if needed)
 	 * @return Hex-string of the given integer.
@@ -152,6 +155,7 @@ public class Tools {
 	 * Returns the hex value of the given int as a string. If {@code aLen} is
 	 * greater than zero the output is cut or filled to the given length
 	 * otherwise the exact number of digits is returned.
+	 *
 	 * @param aInt Integer to be converted into a string.
 	 * @param aLen Number of digits (optionally filled or cut if needed)
 	 * @return String of the given integer.
@@ -169,11 +173,14 @@ public class Tools {
 	}
 
 	/**
-	 * Converts a string into an integer value and automatically sets it to
-	 * a given default value if the string could not be parsed.
+	 * Converts a string into an integer value and automatically sets it to a
+	 * given default value if the string could not be parsed.
+	 *
 	 * @param aString string to be converted into an integer.
-	 * @param aDefault default value assigned to the result in case of an exception.
-	 * @return integer value of string or given default value in case of exception.
+	 * @param aDefault default value assigned to the result in case of an
+	 * exception.
+	 * @return integer value of string or given default value in case of
+	 * exception.
 	 */
 	public static int stringToInt(String aString, int aDefault) {
 		int lRes;
@@ -186,10 +193,12 @@ public class Tools {
 	}
 
 	/**
-	 * Converts a string into a long value and automatically sets it to
-	 * a given default value if the string could not be parsed.
+	 * Converts a string into a long value and automatically sets it to a given
+	 * default value if the string could not be parsed.
+	 *
 	 * @param aString string to be converted into a long.
-	 * @param aDefault default value assigned to the result in case of an exception.
+	 * @param aDefault default value assigned to the result in case of an
+	 * exception.
 	 * @return long value of string or given default value in case of exception.
 	 */
 	public static long stringToLong(String aString, long aDefault) {
@@ -203,7 +212,7 @@ public class Tools {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aISO8601Date
 	 * @return
 	 */
@@ -243,10 +252,21 @@ public class Tools {
 	}
 
 	/**
+	 * Tries to convert a generic type to the correspondant java type
+	 *
+	 * @param aGenericType
+	 * @return
+	 */
+	public static String getJavaClassnameFromGenericType(String aGenericType) {
+		return GENERIC_2_JAVA_MAP.get(aGenericType);
+	}
+
+	/**
 	 * Tries to convert a given object into the given java data type
+	 *
 	 * @param aValue
 	 * @param aFromType
-	 * @param aToType 
+	 * @param aToType
 	 * @return
 	 */
 	public static Object castGenericToJava(Object aValue, String aFromType, String aToType) {
@@ -300,7 +320,8 @@ public class Tools {
 
 	/**
 	 * Tries to convert a given object into the given java data type
-	 * @param aClassname 
+	 *
+	 * @param aClassname
 	 * @return
 	 */
 	public static String getGenericTypeStringFromJavaClassname(String aClassname) {
@@ -308,7 +329,7 @@ public class Tools {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aString
 	 * @param aVars
 	 * @param aIgnoreCase
@@ -338,17 +359,60 @@ public class Tools {
 	}
 
 	/**
-	 * 
+	 * Replaces all pattern ${name} in a string by the values of the 
+	 * corresponding environment variable.
 	 * @param aString
 	 * @return
 	 */
 	public static String expandEnvVars(String aString) {
-		Map<String, String> lEnvVars = System.getenv();
-		return expandVars(aString, lEnvVars, EXPAND_CASE_INSENSITIVE);
+		Map<String, String> lVarsMap = System.getenv();
+		return expandVars(aString, lVarsMap, EXPAND_CASE_INSENSITIVE);
 	}
 
 	/**
-	 * 
+	 * Replaces all pattern ${name} in a string by the values of the 
+	 * corresponding system property.
+	 * @param aString
+	 * @return
+	 */
+	public static String expandProps(String aString) {
+		Map<String, String> lVarsMap = new FastMap<String, String>();
+		Properties lProps = System.getProperties();
+		for (Entry lEntry : lProps.entrySet()) {
+			Object lKey = lEntry.getKey();
+			Object lValue = lEntry.getValue();
+			if (lKey instanceof String && lValue instanceof String) {
+				lVarsMap.put((String) lKey, (String) lValue);
+			}
+		}
+		return expandVars(aString, lVarsMap, EXPAND_CASE_INSENSITIVE);
+	}
+	
+	/**
+	 * Replaces all pattern ${name} in a string by the values of the 
+	 * corresponding environment variable or system property. The setting
+	 * of a system property overrides the setting of the environment variable.
+	 * @param aString
+	 * @return
+	 */
+	public static String expandEnvVarsAndProps(String aString) {
+		Map<String, String> lVarsMap = new FastMap<String, String>(System.getenv());
+		Properties lProps = System.getProperties();
+		for (Entry lEntry : lProps.entrySet()) {
+			Object lKey = lEntry.getKey();
+			Object lValue = lEntry.getValue();
+			if (null != lKey && null != lValue 
+					&& lKey instanceof String
+					&& lValue instanceof String) {
+				lVarsMap.put((String) lKey, (String) lValue);
+			}
+		}
+		return expandVars(aString, lVarsMap, EXPAND_CASE_INSENSITIVE);
+	}
+	
+
+	/**
+	 *
 	 * @param aClassName
 	 * @param aMethodName
 	 * @param aArgs
@@ -359,11 +423,10 @@ public class Tools {
 			Object... aArgs) throws Exception {
 		Class lClass = Class.forName(aClassName);
 		/*
-		if (lClass == null) {
-		throw new Exception("Class '" + aClassName + "' not found.");
-		}
+		 * if (lClass == null) { throw new Exception("Class '" + aClassName + "'
+		 * not found."); }
 		 */
-		Object lRes = null;
+		Object lRes;
 
 		Class[] lArgClasses = null;
 		if (aArgs != null) {
@@ -374,9 +437,8 @@ public class Tools {
 		}
 		Method lMthd = lClass.getMethod(aMethodName, lArgClasses);
 		/*
-		if (lMthd == null) {
-		throw new Exception("Method '" + aMethodName + "' not found.");
-		}
+		 * if (lMthd == null) { throw new Exception("Method '" + aMethodName +
+		 * "' not found."); }
 		 */
 		lRes = lMthd.invoke(null, aArgs);
 
@@ -384,7 +446,7 @@ public class Tools {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aClass
 	 * @param aMethodName
 	 * @param aArgs
@@ -396,7 +458,7 @@ public class Tools {
 		if (aClass == null) {
 			throw new Exception("No class passed for call.");
 		}
-		Object lRes = null;
+		Object lRes;
 
 		Class[] lArgClasses = null;
 		if (aArgs != null) {
@@ -407,18 +469,16 @@ public class Tools {
 			}
 		}
 		Method lMthd = aClass.getMethod(aMethodName, lArgClasses);
-		/*
 		if (lMthd == null) {
-		throw new Exception("Method '" + aMethodName + "' not found.");
+			throw new Exception("Method '" + aMethodName + "' not found.");
 		}
-		 */
 		lRes = lMthd.invoke(null, aArgs);
 
 		return lRes;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aClass
 	 * @param aMethodName
 	 * @param aArgs
@@ -433,9 +493,9 @@ public class Tools {
 		if (aMethodName == null) {
 			throw new Exception("No method name passed for call.");
 		}
-		Object lRes = null;
+		Object lRes;
 
-		Class[] lArgClasses = null;
+		Class[] lArgClasses;
 		if (aArgs != null) {
 			lArgClasses = new Class[aArgs.length];
 			for (int lIdx = 0; lIdx < lArgClasses.length; lIdx++) {
@@ -461,7 +521,54 @@ public class Tools {
 	}
 
 	/**
-	 * 
+	 *
+	 * @param aClass
+	 * @param aMethodName
+	 * @param aArgs
+	 * @param aClasses
+	 * @return
+	 * @throws Exception
+	 */
+	public static Object invokeUnique(Class aClass, String aMethodName,
+			Object[] aArgs, Class[] aClasses) throws Exception {
+		if (aClass == null) {
+			throw new Exception("No class passed for call.");
+		}
+		if (aArgs != null && aClasses != null && aArgs.length != aClasses.length) {
+			throw new Exception("Number of aclasses must match the number of arguments.");
+		}
+		if (aMethodName == null) {
+			throw new Exception("No method name passed for call.");
+		}
+		Object lRes;
+
+		Class[] lArgClasses;
+		if (aArgs != null) {
+			lArgClasses = new Class[aArgs.length];
+			for (int lIdx = 0; lIdx < lArgClasses.length; lIdx++) {
+				Class lClass = aClasses[lIdx].getClass();
+				lArgClasses[lIdx] = lClass;
+			}
+		}
+
+		Method lMthd = null;
+		Method[] lMethods = aClass.getMethods();
+		for (int lIdx = 0; lIdx < lMethods.length; lIdx++) {
+			if (aMethodName.equals(lMethods[lIdx].getName())) {
+				lMthd = lMethods[lIdx];
+				break;
+			}
+		}
+		if (lMthd == null) {
+			throw new Exception("Method '" + aMethodName + "' not found.");
+		}
+		lRes = lMthd.invoke(null, aArgs);
+
+		return lRes;
+	}
+
+	/**
+	 *
 	 * @param aInstance
 	 * @param aMethodName
 	 * @param aArgs
@@ -474,7 +581,7 @@ public class Tools {
 			throw new Exception("No instance passed for call.");
 		}
 		Class lClass = aInstance.getClass();
-		Object lRes = null;
+		Object lRes;
 
 		Class[] lArgClasses = null;
 		if (aArgs != null) {
@@ -485,9 +592,8 @@ public class Tools {
 		}
 		Method lMthd = lClass.getMethod(aMethodName, lArgClasses);
 		/*
-		if (lMthd == null) {
-		throw new Exception("Method '" + aMethodName + "' not found.");
-		}
+		 * if (lMthd == null) { throw new Exception("Method '" + aMethodName +
+		 * "' not found."); }
 		 */
 		if (aArgs == null) {
 			aArgs = new Object[0];
@@ -514,7 +620,7 @@ public class Tools {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aBA
 	 * @return
 	 */
@@ -544,9 +650,9 @@ public class Tools {
 		}
 		return new String(out);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param aArray
 	 * @return
 	 */
@@ -559,4 +665,69 @@ public class Tools {
 		return lRes;
 	}
 
+	/**
+	 *
+	 */
+	public static void startUtilityTimer() {
+		if (null == mTimer) {
+			mTimer = new Timer("jWebSocket Utility Timer");
+		}
+	}
+
+	/**
+	 *
+	 */
+	public static void stopUtilityTimer() {
+		if (null != mTimer) {
+			mTimer.cancel();
+			mTimer.purge();
+		}
+	}
+
+	/**
+	 *
+	 * @return A jWebSocket shared utility timer
+	 */
+	public static Timer getTimer() {
+		if (null == mTimer) {
+			startUtilityTimer();
+		}
+		return mTimer;
+	}
+
+	/**
+	 * From
+	 * http://stackoverflow.com/questions/140131/convert-a-string-representation-of-a-hex-dump-to-a-byte-array-using-java
+	 *
+	 *
+	 * @param aString
+	 * @return
+	 */
+	public static byte[] hexStringToByteArray(String aString) {
+		int lLength = aString.length();
+		byte[] lData = new byte[lLength / 2];
+		for (int lIndex = 0; lIndex < lLength; lIndex += 2) {
+			lData[lIndex / 2] = (byte) ((Character.digit(aString.charAt(lIndex), 16) << 4)
+					+ Character.digit(aString.charAt(lIndex + 1), 16));
+		}
+		return lData;
+	}
+	static final String HEXES = "0123456789ABCDEF";
+
+	/**
+	 * From http://www.rgagnon.com/javadetails/java-0596.html
+	 *
+	 * @param aByteArray
+	 * @return
+	 */
+	public static String hexByteArrayToString(byte[] aByteArray) {
+		if (aByteArray == null) {
+			return null;
+		}
+		final StringBuilder lHexBuilder = new StringBuilder(2 * aByteArray.length);
+		for (final byte lByte : aByteArray) {
+			lHexBuilder.append(HEXES.charAt((lByte & 0xF0) >> 4)).append(HEXES.charAt((lByte & 0x0F)));
+		}
+		return lHexBuilder.toString();
+	}
 }

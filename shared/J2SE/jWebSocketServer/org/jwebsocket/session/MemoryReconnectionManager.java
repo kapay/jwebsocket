@@ -14,8 +14,6 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.session;
 
-import java.util.Timer;
-import org.jwebsocket.api.IStorageProvider;
 import org.jwebsocket.cachestorage.memory.MemoryCacheStorage;
 import org.jwebsocket.storage.memory.MemoryStorage;
 
@@ -28,16 +26,7 @@ public class MemoryReconnectionManager extends BaseReconnectionManager {
 	public MemoryReconnectionManager() {
 		super();
 	}
-	
-	@Override
-	public boolean isExpired(String aSessionId) {
-		if (getReconnectionIndex().containsKey(aSessionId)) {
-			return false;
-		}
 
-		return true;
-	}
-	
 	@Override
 	public void initialize() throws Exception {
 		setReconnectionIndex(new MemoryCacheStorage<String, Object>(getCacheStorageName()));
@@ -45,13 +34,11 @@ public class MemoryReconnectionManager extends BaseReconnectionManager {
 
 		setSessionIdsTrash(new MemoryStorage<String, Object>(getTrashStorageName()));
 		getSessionIdsTrash().initialize();
-		
+
 		super.initialize();
 	}
 
 	@Override
 	public void shutdown() throws Exception {
 	}
-    
-
 }

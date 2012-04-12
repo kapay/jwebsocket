@@ -26,21 +26,31 @@ import org.jwebsocket.kit.PlugInResponse;
  */
 public interface WebSocketPlugIn {
 
-	//TODO: Incluir los get y set del atributo enable
 	/**
 	 * returns the id of the plug-in.
 	 * @return
 	 */
 	String getId();
+	
+	/**
+	 * return the version of the plug-in.
+	 * @return
+	 */
+	String getVersion();
+	
+	/**
+	 * set the version of the plug-in.
+	 */
+	void setVersion(String aVersion);
 
 	/**
-	 * returns the enabled status of the plug-in.
+	 * return the enabled status of the plug-in.
 	 * @return
 	 */
 	boolean getEnabled();
 
 	/**
-	 * sets the enabled status of the plug-in.
+	 * set the enabled status of the plug-in.
 	 */
 	void setEnabled(boolean aEnabled);
 

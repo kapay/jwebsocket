@@ -41,6 +41,7 @@ import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
 import org.jwebsocket.api.WebSocketEngine;
 import org.jwebsocket.config.JWebSocketCommonConstants;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.kit.PlugInResponse;
 import org.jwebsocket.logging.Logging;
@@ -51,6 +52,7 @@ import org.jwebsocket.token.BaseToken;
 import org.jwebsocket.token.Token;
 import org.jwebsocket.token.TokenFactory;
 import org.jwebsocket.util.Tools;
+import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -58,7 +60,7 @@ import org.jwebsocket.util.Tools;
  */
 public class FileSystemPlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(FileSystemPlugIn.class);
+	private static Logger mLog = Logging.getLogger();
 	// if namespace changed update client plug-in accordingly!
 	private static final String NS_FILESYSTEM = JWebSocketServerConstants.NS_BASE + ".plugins.filesystem";
 	// TODO: make these settings configurable
@@ -69,6 +71,9 @@ public class FileSystemPlugIn extends TokenPlugIn {
 	private static String PUBLIC_DIR_DEF = "${" + JWebSocketServerConstants.JWEBSOCKET_HOME + "}/public/";
 	private static String WEB_ROOT_DEF = "http://jwebsocket.org/";
 	private static FileAlterationMonitor mPublicMonitor = null;
+	
+	private static ApplicationContext mBeanFactory;
+	private static Settings mSettings;
 
 	/**
 	 * 
@@ -81,9 +86,20 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		}
 		// specify default name space for admin plugin
 		this.setNamespace(NS_FILESYSTEM);
-		// give a success message to the administrator
-		if (mLog.isInfoEnabled()) {
-			mLog.info("FileSystem plug-in successfully loaded.");
+
+		try {
+			mBeanFactory = getConfigBeanFactory();
+			if (null == mBeanFactory) {
+				mLog.error("No or invalid spring configuration for filesystem plug-in, some features may not be available.");
+			} else {
+				mBeanFactory = getConfigBeanFactory();
+				mSettings = (Settings) mBeanFactory.getBean("settings");
+				if (mLog.isInfoEnabled()) {
+					mLog.info("Filesystem plug-in successfully instantiated.");
+				}
+			}
+		} catch (Exception lEx) {
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "instantiating filesystem plug-in"));
 		}
 	}
 
@@ -166,7 +182,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			String lUsername = getUsername(aConnector);
 			lBaseDir = getString(PRIVATE_DIR_KEY, PRIVATE_DIR_DEF);
 			if (lUsername != null) {
-				lBaseDir = Tools.expandEnvVars(lBaseDir).replace("{username}", lUsername);
+				lBaseDir = JWebSocketConfig.expandEnvAndJWebSocketVars(lBaseDir).replace("{username}", lUsername);
 			} else {
 				lMsg = "not authenticated to save private file";
 				if (mLog.isDebugEnabled()) {
@@ -179,7 +195,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				return;
 			}
 		} else if (JWebSocketCommonConstants.SCOPE_PUBLIC.equals(lScope)) {
-			lBaseDir = Tools.expandEnvVars(getString(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF));
+			lBaseDir = JWebSocketConfig.expandEnvAndJWebSocketVars(getString(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF));
 		} else {
 			lMsg = "invalid scope";
 			if (mLog.isDebugEnabled()) {
@@ -207,7 +223,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				lBA = lData.getBytes("UTF-8");
 			}
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName() + " on save: " + lEx.getMessage());
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "saving file"));
 		}
 
 		// complete the response token
@@ -286,7 +302,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 			String lUsername = getUsername(aConnector);
 			lBaseDir = getString(PRIVATE_DIR_KEY, PRIVATE_DIR_DEF);
 			if (lUsername != null) {
-				lBaseDir = Tools.expandEnvVars(lBaseDir).replace("{username}", lUsername);
+				lBaseDir = JWebSocketConfig.expandEnvAndJWebSocketVars(lBaseDir).replace("{username}", lUsername);
 			} else {
 				lMsg = "not authenticated to load private file";
 				if (mLog.isDebugEnabled()) {
@@ -299,7 +315,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				return;
 			}
 		} else if (JWebSocketCommonConstants.SCOPE_PUBLIC.equals(lScope)) {
-			lBaseDir = Tools.expandEnvVars(getString(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF));
+			lBaseDir = JWebSocketConfig.expandEnvAndJWebSocketVars(getString(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF));
 		} else {
 			lMsg = "invalid scope";
 			if (mLog.isDebugEnabled()) {
@@ -404,12 +420,11 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		String lFolder = null;
 		Token lToken = TokenFactory.createToken();
 
-		Map<String, Object> lSettings = getSettings();
-		if (lSettings != null) {
-			lObject = lSettings.get("alias:" + lAlias);
+		if (mSettings != null) {
+			lObject = mSettings.getAlias(lAlias);
 			if (lObject != null) {
 				lFolder = (String) lObject;
-				File lDir = new File(Tools.expandEnvVars(lFolder));
+				File lDir = new File(JWebSocketConfig.expandEnvAndJWebSocketVars(lFolder));
 				lFolder = lDir.getPath();
 				// IOFileFilter lFileFilter = FileFilterUtils.nameFileFilter(lFilemask);
 				String[] lFilemaskArray = new String[lFilemasks.size()];
@@ -568,7 +583,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		if (null == mPublicMonitor) {
 			mPublicMonitor = new FileAlterationMonitor(aInterval);
 			mPublicMonitor.setThreadFactory(new MonitorThreadFactory());
-			String lBaseDir = Tools.expandEnvVars(getString(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF));
+			String lBaseDir = JWebSocketConfig.expandEnvAndJWebSocketVars(getString(PUBLIC_DIR_KEY, PUBLIC_DIR_DEF));
 			String lMask = "*";
 			IOFileFilter lFileFilter = new WildcardFileFilter(lMask);
 			if (mLog.isDebugEnabled()) {
@@ -582,7 +597,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 		try {
 			mPublicMonitor.start();
 		} catch (Exception lEx) {
-			mLog.error(lEx.getClass().getSimpleName() + " on starting monitor: " + lEx.getMessage());
+			mLog.error(Logging.getSimpleExceptionMessage(lEx, "starting monitor"));
 		}
 	}
 
@@ -597,7 +612,7 @@ public class FileSystemPlugIn extends TokenPlugIn {
 				}
 				mPublicMonitor.stop();
 			} catch (Exception lEx) {
-				mLog.error(lEx.getClass().getSimpleName() + " on stopping monitor: " + lEx.getMessage());
+				mLog.error(Logging.getSimpleExceptionMessage(lEx, "stopping monitor"));
 			}
 		}
 	}

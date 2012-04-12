@@ -21,24 +21,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Date;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.api.WebSocketEngine;
+import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.logging.Logging;
 import org.jwebsocket.plugins.TokenPlugIn;
-import org.jwebsocket.util.Tools;
 
 /**
  * This plug-in processes the policy-file-request from the browser side flash
  * plug-in. This makes jWebSocket cross-browser-compatible.
- * 
+ *
  * @author aschulze
  */
 public class FlashBridgePlugIn extends TokenPlugIn {
 
-	private static Logger mLog = Logging.getLogger(FlashBridgePlugIn.class);
+	private static Logger mLog = Logging.getLogger();
 	private ServerSocket mServerSocket = null;
 	private int mListenerPort = 843;
 	private boolean mIsRunning = false;
@@ -50,7 +51,11 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 			"<cross-domain-policy>"
 			+ "<allow-access-from domain=\"*\" to-ports=\"*\" />"
 			+ "</cross-domain-policy>";
-
+	
+	/**
+	 *
+	 * @param aConfiguration
+	 */
 	public FlashBridgePlugIn(PluginConfiguration aConfiguration) {
 		super(aConfiguration);
 		if (mLog.isDebugEnabled()) {
@@ -66,10 +71,10 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 			mBridgeThread = new Thread(mBridgeProcess);
 			mBridgeThread.start();
 			if (mLog.isInfoEnabled()) {
-				mLog.info("FlashBridge plug-in successfully loaded.");
+				mLog.info("FlashBridge plug-in successfully instantiated.");
 			}
-		} catch (IOException ex) {
-			mLog.error("FlashBridge could not be started: " + ex.getMessage());
+		} catch (IOException lEx) {
+			mLog.error("FlashBridge could not be started: " + lEx.getMessage());
 		}
 	}
 
@@ -81,11 +86,15 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 				if (mLog.isDebugEnabled()) {
 					mLog.debug("Trying to load " + lPathToCrossDomainXML + "...");
 				}
-				lPathToCrossDomainXML = Tools.expandEnvVars(lPathToCrossDomainXML);
+				lPathToCrossDomainXML = JWebSocketConfig.expandEnvAndJWebSocketVars(lPathToCrossDomainXML);
 				if (mLog.isDebugEnabled()) {
 					mLog.debug("Trying to load expanded " + lPathToCrossDomainXML + "...");
 				}
-				File lFile = new File(lPathToCrossDomainXML);
+				URL lURL = JWebSocketConfig.getURLFromPath(lPathToCrossDomainXML);
+				if (mLog.isDebugEnabled()) {
+					mLog.debug("Trying to load from URL " + lURL + "...");
+				}
+				File lFile = new File(lURL.getPath());
 				mCrossDomainXML = FileUtils.readFileToString(lFile, "UTF-8");
 				if (mLog.isInfoEnabled()) {
 					mLog.info("crossdomain config successfully loaded from " + lPathToCrossDomainXML + ".");
@@ -108,7 +117,7 @@ public class FlashBridgePlugIn extends TokenPlugIn {
 		 * @param aPlugIn
 		 */
 		public BridgeProcess(FlashBridgePlugIn aPlugIn) {
-			this.mPlugIn = aPlugIn;
+			mPlugIn = aPlugIn;
 		}
 
 		@Override

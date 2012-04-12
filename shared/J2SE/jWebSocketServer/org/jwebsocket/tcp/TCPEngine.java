@@ -17,20 +17,15 @@ package org.jwebsocket.tcp;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.security.KeyStore;
 import java.util.Date;
-import java.util.Map;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
-
-import javax.net.ssl.SSLSocket;
 import org.apache.log4j.Logger;
 import org.jwebsocket.api.EngineConfiguration;
 import org.jwebsocket.api.WebSocketConnector;
@@ -39,21 +34,20 @@ import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.config.JWebSocketConfig;
 import org.jwebsocket.config.JWebSocketServerConstants;
 import org.jwebsocket.engines.BaseEngine;
-import org.jwebsocket.logging.Logging;
 import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.kit.RequestHeader;
 import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.kit.WebSocketHandshake;
+import org.jwebsocket.logging.Logging;
 
 /**
  * Implementation of the jWebSocket TCP engine. The TCP engine provide a Java
  * Socket implementation of the WebSocket protocol. It contains the handshake
+ *
  * @author aschulze
  * @author jang
  */
 public class TCPEngine extends BaseEngine {
 
-	private static Logger mLog = Logging.getLogger(TCPEngine.class);
+	private static Logger mLog = Logging.getLogger();
 	private ServerSocket mTCPServerSocket = null;
 	private SSLServerSocket mSSLServerSocket = null;
 	private int mTCPListenerPort = JWebSocketCommonConstants.DEFAULT_PORT;
@@ -78,6 +72,10 @@ public class TCPEngine extends BaseEngine {
 	@Override
 	public void startEngine()
 			throws WebSocketException {
+
+		// start timeout surveillance timer
+		TimeoutOutputStreamNIOWriter.startTimer();
+
 		setSessionTimeout(mSessionTimeout);
 
 		// create unencrypted server socket for ws:// protocol
@@ -107,36 +105,48 @@ public class TCPEngine extends BaseEngine {
 					+ getId() + "' started' at port "
 					+ mTCPListenerPort + " with default timeout "
 					+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
-					+ ".");
+					+ "...");
 		}
+
+		// tutorial see: http://javaboutique.internet.com/tutorials/jkey/index.html
 
 		// create encrypted (SSL) server socket for wss:// protocol
 		if (mSSLListenerPort > 0) {
+			// create unencrypted server socket for ws:// protocol
+			if (mLog.isDebugEnabled()) {
+				mLog.debug("Trying to initiate SSL on port " + mSSLListenerPort + "...");
+			}
 			if (mKeyStore != null && !mKeyStore.isEmpty()
 					&& mKeyStorePassword != null && !mKeyStorePassword.isEmpty()) {
 				if (mLog.isDebugEnabled()) {
+					mLog.debug("Using keystore " + mKeyStore + "...");
 					mLog.debug("Starting SSL engine '"
 							+ getId()
-							+ "' at port " + mSSLListenerPort
+							+ "' at port " + mSSLListenerPort + ","
 							+ " with default timeout "
 							+ (mSessionTimeout > 0 ? mSessionTimeout + "ms" : "infinite")
 							+ "...");
 				}
 				try {
-					SSLContext lSSLContext = SSLContext.getInstance("SSL");
+					SSLContext lSSLContext = SSLContext.getInstance("TLS");
 					KeyManagerFactory lKMF = KeyManagerFactory.getInstance("SunX509");
 					KeyStore lKeyStore = KeyStore.getInstance("JKS");
 
-					String lKeyStorePath = JWebSocketConfig.getConfigFolder(mKeyStore);
+					String lKeyStorePath = JWebSocketConfig.expandEnvAndJWebSocketVars(mKeyStore);
 					if (lKeyStorePath != null) {
 						char[] lPassword = mKeyStorePassword.toCharArray();
-						lKeyStore.load(new FileInputStream(lKeyStorePath), lPassword);
+						URL lURL = JWebSocketConfig.getURLFromPath(lKeyStorePath);
+						lKeyStore.load(new FileInputStream(lURL.getPath()), lPassword);
 						lKMF.init(lKeyStore, lPassword);
 
-						lSSLContext.init(lKMF.getKeyManagers(), null, null);
+						lSSLContext.init(lKMF.getKeyManagers(), null, new java.security.SecureRandom());
 						SSLServerSocketFactory lSSLFactory = lSSLContext.getServerSocketFactory();
 						mSSLServerSocket = (SSLServerSocket) lSSLFactory.createServerSocket(
 								mSSLListenerPort);
+						// enable all protocols
+						mSSLServerSocket.setEnabledProtocols(mSSLServerSocket.getEnabledProtocols());
+						// enable all cipher suites
+						mSSLServerSocket.setEnabledCipherSuites(mSSLServerSocket.getSupportedCipherSuites());
 						EngineListener lSSLListener = new EngineListener(this, mSSLServerSocket);
 						mSSLEngineThread = new Thread(lSSLListener);
 						mSSLEngineThread.start();
@@ -154,8 +164,7 @@ public class TCPEngine extends BaseEngine {
 								+ "KeyStore '" + mKeyStore + "' not found.");
 					}
 				} catch (Exception lEx) {
-					mLog.error("SSL engine could not be instantiated: "
-							+ lEx.getMessage());
+					mLog.error(Logging.getSimpleExceptionMessage(lEx, "instantiating SSL engine"));
 				}
 			} else {
 				mLog.error("SSL engine could not be instantiated due to missing configuration,"
@@ -298,6 +307,9 @@ public class TCPEngine extends BaseEngine {
 				}
 			}
 		}
+
+		// stop timeout surveillance timer
+		TimeoutOutputStreamNIOWriter.stopTimer();
 	}
 
 	@Override
@@ -316,85 +328,6 @@ public class TCPEngine extends BaseEngine {
 		super.connectorStopped(aConnector, aCloseReason);
 	}
 
-	private RequestHeader processHandshake(Socket aClientSocket)
-			throws UnsupportedEncodingException, IOException {
-
-		InputStream lIn = aClientSocket.getInputStream();
-		OutputStream lOut = aClientSocket.getOutputStream();
-
-		// TODO: Replace this structure by more dynamic ByteArrayOutputStream?
-		byte[] lBuff = new byte[8192];
-		int lRead = lIn.read(lBuff);
-		if (lRead <= 0) {
-			mLog.warn("Connection "
-					+ aClientSocket.getInetAddress() + ":"
-					+ aClientSocket.getPort()
-					+ " did not detect initial handshake (" + lRead + ").");
-			return null;
-		}
-		byte[] lReq = new byte[lRead];
-		System.arraycopy(lBuff, 0, lReq, 0, lRead);
-
-		/* please keep comment for debugging purposes! */
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Parsing handshake request: " + new String(lReq).replace("\r\n", "\\n"));
-			// mLog.debug("Parsing initial WebSocket handshake...");
-		}
-		Map lRespMap = WebSocketHandshake.parseC2SRequest(
-				lReq, aClientSocket instanceof SSLSocket);
-		if (lRespMap == null) {
-			return null;
-		}
-		RequestHeader lHeader = EngineUtils.validateC2SRequest(
-				getConfiguration().getDomains(), lRespMap, mLog);
-		if (lHeader == null) {
-			return null;
-		}
-
-		// generate the websocket handshake
-		// if policy-file-request is found answer it
-		byte[] lBA = WebSocketHandshake.generateS2CResponse(lRespMap);
-		if (lBA == null) {
-			if (mLog.isDebugEnabled()) {
-				mLog.warn("TCPEngine detected illegal handshake.");
-			}
-			return null;
-		}
-
-		/* please keep comment for debugging purposes!*/
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Flushing handshake response: " + new String(lBA).replace("\r\n", "\\n"));
-			// mLog.debug("Flushing initial WebSocket handshake...");
-		}
-
-		lOut.write(lBA);
-		lOut.flush();
-
-		// maybe the request is a flash policy-file-request
-		String lFlashBridgeReq = (String) lRespMap.get("policy-file-request");
-		if (lFlashBridgeReq != null) {
-			mLog.warn("TCPEngine returned policy file request ('"
-					+ lFlashBridgeReq
-					+ "'), check for FlashBridge plug-in.");
-		}
-
-
-		// if we detected a flash policy-file-request return "null"
-		// (no websocket header detected)
-		if (lFlashBridgeReq != null) {
-			mLog.warn("TCP Engine returned policy file response ('"
-					+ new String(lBA, "US-ASCII")
-					+ "'), check for FlashBridge plug-in.");
-			return null;
-		}
-
-		if (mLog.isDebugEnabled()) {
-			mLog.debug("Handshake flushed.");
-		}
-
-		return lHeader;
-	}
-
 	@Override
 	/*
 	 * Returns {@code true} if the TCP engine is running or {@code false}
@@ -411,8 +344,9 @@ public class TCPEngine extends BaseEngine {
 		private ServerSocket mServer = null;
 
 		/**
-		 * Creates the server socket listener for new
-		 * incoming socket connections.
+		 * Creates the server socket listener for new incoming socket
+		 * connections.
+		 *
 		 * @param aEngine
 		 */
 		public EngineListener(WebSocketEngine aEngine, ServerSocket aServerSocket) {
@@ -436,72 +370,87 @@ public class TCPEngine extends BaseEngine {
 
 			mIsRunning = true;
 			while (mIsRunning) {
+
 				try {
 					// accept is blocking so here is no need
 					// to put any sleeps into this loop
 					// if (log.isDebugEnabled()) {
 					//	log.debug("Waiting for client...");
 					// }
-					Socket lClientSocket = mServer.accept();
+					Socket lClientSocket = null;
+					boolean lReject = false;
+					boolean lRedirect = false;
+					String lOnMaxConnectionStrategy = mEngine.getConfiguration().getOnMaxConnectionStrategy();
+
+					// Accept new connections only if the maximun number of connections
+					// has not been reached
+					if ("wait".equals(lOnMaxConnectionStrategy)) {
+						if (mEngine.getConnectors().size() >= mEngine.getMaxConnections()) {
+							Thread.sleep(1000);
+							continue;
+						} else {
+							lClientSocket = mServer.accept();
+						}
+					} else if ("close".equals(lOnMaxConnectionStrategy)) {
+						lClientSocket = mServer.accept();
+						if (mEngine.getConnectors().size() >= mEngine.getMaxConnections()) {
+							if (mLog.isDebugEnabled()) {
+								mLog.debug("Closing incoming socket client on  port '" + lClientSocket.getPort() + "' "
+										+ "because the maximum number of connections "
+										+ "has been reached...");
+							}
+
+							lClientSocket.close();
+							continue;
+						}
+					} else if ("reject".equals(lOnMaxConnectionStrategy)) {
+						lClientSocket = mServer.accept();
+						if (mEngine.getConnectors().size() >= mEngine.getMaxConnections()) {
+							lReject = true;
+						}
+					} else if ("redirect".equals(lOnMaxConnectionStrategy)) {
+						lClientSocket = mServer.accept();
+						if (mEngine.getConnectors().size() >= mEngine.getMaxConnections()) {
+							lRedirect = true;
+						}
+					}
+
 					if (mLog.isDebugEnabled()) {
 						mLog.debug("Client trying to connect on port #"
 								+ lClientSocket.getPort() + "...");
 					}
 
-					// boolean lTCPNoDelay = lClientSocket.getTcpNoDelay();
-					// ensure that all packets are sent immediately w/o delay
-					// to achieve better latency, no waiting and packaging.
-					lClientSocket.setTcpNoDelay(true);
-
 					try {
-						// process handshake to parse header data
-						RequestHeader lHeader = processHandshake(lClientSocket);
-						if (lHeader != null) {
-							// set socket timeout to given amount of milliseconds
-							// use tcp engine's timeout as default and
-							// check system's min and max timeout ranges
-							int lSessionTimeout = lHeader.getTimeout(getSessionTimeout());
-							/* min and max range removed since 0.9.0.0602, see config documentation
-							if (lSessionTimeout > JWebSocketServerConstants.MAX_TIMEOUT) {
-							lSessionTimeout = JWebSocketServerConstants.MAX_TIMEOUT;
-							} else if (lSessionTimeout < JWebSocketServerConstants.MIN_TIMEOUT) {
-							lSessionTimeout = JWebSocketServerConstants.MIN_TIMEOUT;
-							}
-							 */
-							if (lSessionTimeout > 0) {
-								lClientSocket.setSoTimeout(lSessionTimeout);
-							}
-							// create connector and pass header
-							// log.debug("Instantiating connector...");
-							WebSocketConnector lConnector = new TCPConnector(mEngine, lClientSocket);
-							lConnector.setVersion(lHeader.getVersion());
-							lConnector.setSubprot(lHeader.getSubProtocol());
+						WebSocketConnector lConnector = new TCPConnector(mEngine, lClientSocket);
 
-							String lLogInfo = lConnector.isSSL() ? "SSL" : "TCP";
+						// Check for maximum connections reached strategies
+						if (lReject) {
 							if (mLog.isDebugEnabled()) {
-								mLog.debug(lLogInfo + " client accepted on port "
-										+ lClientSocket.getPort()
-										+ " with timeout "
-										+ (lSessionTimeout > 0 ? lSessionTimeout + "ms" : "infinite")
-										// + " (TCPNoDelay was: " + lTCPNoDelay + ")"
-										+ "...");
+								mLog.debug("Rejecting incoming connector '"
+										+ lConnector.getId() + "' "
+										+ "because the maximum number of connections "
+										+ "has been reached.");
 							}
+							lConnector.stopConnector(CloseReason.SERVER_REJECT_CONNECTION);
 
-							// log.debug("Setting header to engine...");
-							lConnector.setHeader(lHeader);
+							continue;
+						} else if (lRedirect) {
+							// TODO: Pending for implementation to discover the redirection
+							// server URL
+
+							if (mLog.isDebugEnabled()) {
+								mLog.debug("Redirecting incoming connector '" + lConnector.getId() + "' "
+										+ "because the maximum number of connections "
+										+ "has been reached.");
+							}
+							lConnector.stopConnector(CloseReason.SERVER_REDIRECT_CONNECTION);
+
+							continue;
+						} else {
 							// log.debug("Adding connector to engine...");
 							getConnectors().put(lConnector.getId(), lConnector);
-							if (mLog.isDebugEnabled()) {
-								mLog.debug("Starting " + lLogInfo + " connector...");
-							}
+							//Starting new connection
 							lConnector.startConnector();
-						} else {
-							// if header could not be parsed properly
-							// immediately disconnect the client.
-							lClientSocket.close();
-							mLog.error("Client not accepted on port "
-									+ lClientSocket.getPort()
-									+ " due to handshake issues");
 						}
 					} catch (Exception lEx) {
 						mLog.error(
