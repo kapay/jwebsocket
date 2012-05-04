@@ -17,7 +17,6 @@ package org.jwebsocket.config.xml;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONObject;
 import org.jwebsocket.api.PluginConfiguration;
 import org.jwebsocket.config.Config;
@@ -123,7 +122,7 @@ public final class PluginConfig implements Config, PluginConfiguration {
 	 */
 	@Override
 	public Map<String, Object> getSettings() {
-		return mSettings; // (FastMap)(settings.unmodifiable());
+		return (null == mSettings) ? null : Collections.unmodifiableMap(mSettings);
 	}
 
 	/**

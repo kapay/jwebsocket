@@ -21,25 +21,26 @@ package org.jwebsocket.api;
 public interface ISessionReconnectionManager {
 
 	/**
-	 * 
+	 *
 	 * @return The session expiration time after a client gets disconnected
 	 */
 	Integer getSessionExpirationTime();
 
 	/**
-	 * 
-	 * @param expTime The session expiration time to set
+	 *
+	 * @return The garbage collector process time. 
+	 * Remove expired session storages.
 	 */
-	void setSessionExpirationTime(Integer expTime);
+	Integer getGCProcessTime();
 
 	/**
-	 * 
+	 *
 	 * @return Contains the sessions identifiers to be expired
 	 */
 	IBasicCacheStorage<String, Object> getReconnectionIndex();
 
 	/**
-	 * 
+	 *
 	 * @param aSessionId The session identifier
 	 * @return TRUE if the session has been expired, FALSE otherwise
 	 */
@@ -47,29 +48,22 @@ public interface ISessionReconnectionManager {
 
 	/**
 	 * Put a session identifier in "reconnection mode", this means, the client
-	 * data will be stored for a future reconnection. 
-	 * <br>
-	 * The "sessionExpirationTime" is used
-	 * 
-	 * @param aSessionId 
+	 * data will be stored for a future reconnection. <br> The
+	 * "sessionExpirationTime" is used
+	 *
+	 * @param aSessionId
 	 */
 	void putInReconnectionMode(String aSessionId);
-	
+
 	/**
-	 * 
-	 * @return The session identifiers trash. Contains obsolete sessions identifiers
+	 *
+	 * @return The session identifiers trash. Contains obsolete sessions
+	 * identifiers
 	 */
 	IBasicStorage<String, Object> getSessionIdsTrash();
-	
+
 	/**
-     * @return the mStorageProvider
-     */
-    public IStorageProvider getStorageProvider();
-
-    /**
-     * @param mStorageProvider the mStorageProvider to set
-     */
-    public void setStorageProvider(IStorageProvider mStorageProvider);
-
-	
+	 * @return the mStorageProvider
+	 */
+	IStorageProvider getStorageProvider();
 }

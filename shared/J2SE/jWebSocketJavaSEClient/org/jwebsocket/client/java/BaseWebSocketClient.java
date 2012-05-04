@@ -15,6 +15,7 @@
 package org.jwebsocket.client.java;
 
 import java.io.*;
+import java.net.HttpCookie;
 import java.net.Socket;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -23,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -32,27 +32,13 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
 import javolution.util.FastList;
 import javolution.util.FastMap;
-import org.jwebsocket.api.WebSocketBaseClientEvent;
-import org.jwebsocket.api.WebSocketClient;
-import org.jwebsocket.api.WebSocketClientEvent;
-import org.jwebsocket.api.WebSocketClientListener;
-import org.jwebsocket.api.WebSocketPacket;
-
-import org.jwebsocket.api.WebSocketStatus;
+import org.jwebsocket.api.*;
 import org.jwebsocket.client.token.WebSocketTokenClientEvent;
 import org.jwebsocket.config.JWebSocketCommonConstants;
-import org.jwebsocket.kit.Headers;
-import org.jwebsocket.kit.RawPacket;
-import org.jwebsocket.kit.WebSocketEncoding;
-import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.kit.WebSocketExceptionType;
-import org.jwebsocket.kit.WebSocketFrameType;
-import org.jwebsocket.kit.WebSocketHandshake;
-import org.jwebsocket.kit.WebSocketProtocolAbstraction;
-import org.jwebsocket.kit.WebSocketSubProtocol;
+import org.jwebsocket.kit.*;
+import org.jwebsocket.util.Tools;
 
 /**
  * Base {@code WebSocket} implementation based on
@@ -66,10 +52,11 @@ import org.jwebsocket.kit.WebSocketSubProtocol;
  * @author puran
  * @author jang
  * @author aschulze
- * @version $Id:$
+ * @author kyberneees
  */
 public class BaseWebSocketClient implements WebSocketClient {
 
+	private static final int RECEIVER_SHUTDOWN_TIMEOUT = 3000;
 	/**
 	 * WebSocket connection URI
 	 */
@@ -98,27 +85,27 @@ public class BaseWebSocketClient implements WebSocketClient {
 	private List<WebSocketSubProtocol> mSubprotocols;
 	private WebSocketSubProtocol mNegotiatedSubProtocol;
 	/**
-	 * 
+	 *
 	 */
 	public static String EVENT_OPEN = "open";
 	/**
-	 * 
+	 *
 	 */
 	public static String EVENT_CLOSE = "close";
 	/**
-	 * 
+	 *
 	 */
 	public static String DATA_CLOSE_ERROR = "error";
 	/**
-	 * 
+	 *
 	 */
 	public static String DATA_CLOSE_CLIENT = "client";
 	/**
-	 * 
+	 *
 	 */
 	public static String DATA_CLOSE_SERVER = "server";
 	/**
-	 * 
+	 *
 	 */
 	public static String DATA_CLOSE_SHUTDOWN = "shutdown";
 	private static final String CR_CLIENT = "Client closed connection";
@@ -132,11 +119,22 @@ public class BaseWebSocketClient implements WebSocketClient {
 	private ScheduledFuture mReconnectorTask = null;
 	private Boolean mIsReconnecting = false;
 	private final Object mReconnectLock = new Object();
+	private Headers mHeaders = null;
+	private List<HttpCookie> mCookies = new ArrayList<HttpCookie>();
 
 	/**
 	 * Base constructor
 	 */
 	public BaseWebSocketClient() {
+	}
+
+	public void setStatus(WebSocketStatus aStatus) throws Exception {
+		if (aStatus.equals(WebSocketStatus.AUTHENTICATED)) {
+			this.mStatus = aStatus;
+		} else {
+			throw new Exception("The value '" + aStatus.name()
+					+ "' cannot be assigned. Restricted to internal usage only!");
+		}
 	}
 
 	/**
@@ -147,7 +145,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aKey
 	 * @param aDefault
 	 * @return
@@ -161,7 +159,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aKey
 	 * @return
 	 */
@@ -170,7 +168,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aKey
 	 * @param aValue
 	 */
@@ -180,8 +178,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * @param aURI 
+	 *
+	 * @param aURI
 	 */
 	@Override
 	public void open(String aURI) throws WebSocketException {
@@ -189,8 +187,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * Make a sub protocol string for Sec-WebSocket-Protocol header.
-	 * The result is something like this:
+	 * Make a sub protocol string for Sec-WebSocket-Protocol header. The result
+	 * is something like this:
 	 * <pre>
 	 * org.jwebsocket.json org.websocket.text org.jwebsocket.binary
 	 * </pre>
@@ -210,7 +208,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aVersion
 	 * @param aURI
 	 * @throws WebSocketException
@@ -221,10 +219,10 @@ public class BaseWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param aVersion
 	 * @param aURI
-	 * @param aSubProtocols 
+	 * @param aSubProtocols
 	 * @throws WebSocketException
 	 */
 	public void open(int aVersion, String aURI, String aSubProtocols) {
@@ -250,19 +248,57 @@ public class BaseWebSocketClient implements WebSocketClient {
 			mIn = mSocket.getInputStream();
 			mOut = mSocket.getOutputStream();
 
-			byte[] lBA = lHandshake.generateC2SRequest();
+			// pass session cookie, if already was set for this client instance
+			byte[] lBA;
+			List<HttpCookie> lTempCookies = new ArrayList();
+			if (null != mCookies) {
+				HttpCookie lCookie;
+				for (int lIndex = 0; lIndex < mCookies.size(); lIndex++) {
+					lCookie = mCookies.get(lIndex);
+					boolean lValid = Tools.isCookieValid(mURI, lCookie);
+					if (lValid) {
+						// Cookie is valid
+						lTempCookies.add(lCookie);
+					}
+				}
+			}
+			lBA = lHandshake.generateC2SRequest(lTempCookies);
 			mOut.write(lBA);
 
 			mStatus = WebSocketStatus.CONNECTING;
 
-			Headers lHeaders = new Headers();
+			mHeaders = new Headers();
 			try {
-				lHeaders.readFromStream(aVersion, mIn);
+				mHeaders.readFromStream(aVersion, mIn);
 			} catch (Exception lEx) {
 				// ignore exception here, will be processed afterwards
 			}
 
-			if (!lHeaders.isValid()) {
+			// registering new cookies from the server response
+			String lSetCookie = mHeaders.getField("Set-Cookie");
+			if (null != lSetCookie) {
+				List<HttpCookie> lCookies = HttpCookie.parse(lSetCookie);
+				if (mCookies.isEmpty()) {
+					mCookies.addAll(lCookies);
+				} else {
+					for (HttpCookie lCookie : lCookies) {
+						for (int lIndex = 0; lIndex < mCookies.size(); lIndex++) {
+							if (null == mCookies.get(lIndex).getDomain()
+									|| HttpCookie.domainMatches(mCookies.get(lIndex).getDomain(), mURI.getHost())
+									&& (null == lCookie.getPath()
+									|| (null != mURI.getPath()
+									&& mURI.getPath().startsWith(lCookie.getPath())))) {
+								mCookies.set(lIndex, lCookie);
+							}
+						}
+						if (!mCookies.contains(lCookie)) {
+							mCookies.add(lCookie);
+						}
+					}
+				}
+			}
+
+			if (!mHeaders.isValid()) {
 				WebSocketClientEvent lEvent =
 						new WebSocketBaseClientEvent(this, EVENT_CLOSE, "Handshake rejected.");
 				notifyClosed(lEvent);
@@ -271,7 +307,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 			}
 
 			// parse negotiated sub protocol
-			String lProtocol = lHeaders.getField(Headers.SEC_WEBSOCKET_PROTOCOL);
+			String lProtocol = mHeaders.getField(Headers.SEC_WEBSOCKET_PROTOCOL);
 			if (lProtocol != null) {
 				mNegotiatedSubProtocol = new WebSocketSubProtocol(lProtocol, mEncoding);
 			} else {
@@ -289,6 +325,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 			// and finally notify listeners for OnOpen event
 			WebSocketClientEvent lEvent =
 					new WebSocketBaseClientEvent(this, EVENT_OPEN, "");
+			// notify listeners that client has opened.
 			notifyOpened(lEvent);
 
 			// reset close reason to be specified by next reason
@@ -342,8 +379,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * @param aDataPacket 
+	 *
+	 * @param aDataPacket
 	 */
 	@Override
 	public void send(WebSocketPacket aDataPacket) throws WebSocketException {
@@ -378,9 +415,21 @@ public class BaseWebSocketClient implements WebSocketClient {
 			}
 			mOut.flush();
 		} catch (IOException lEx) {
-			mReceiver.stopIt();
+			terminateReceiverThread();
 			throw new WebSocketException("Error while sending socket data: ", lEx);
 		}
+	}
+
+	private void terminateReceiverThread() throws WebSocketException {
+		mReceiver.quit();
+		try {
+			mReceiver.join(RECEIVER_SHUTDOWN_TIMEOUT);
+		} catch (InterruptedException lEx) {
+			throw new WebSocketException(
+					"Receiver thread did not stop within "
+					+ RECEIVER_SHUTDOWN_TIMEOUT + " ms", lEx);
+		}
+		mReceiver = null;
 	}
 
 	private void setCloseReason(String aCloseReason) {
@@ -394,6 +443,9 @@ public class BaseWebSocketClient implements WebSocketClient {
 		// on an explicit close operation ...
 		// cancel all potential re-connection tasks.
 		mAbortReconnect();
+		if (null != mReceiver) {
+			mReceiver.quit();
+		}
 
 		if (!mStatus.isWritable()) {
 			return;
@@ -404,8 +456,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 		} catch (Exception lEx) {
 			// ignore that, connection is about to be terminated
 		}
-		// stopping the receiver thread stops the entire client
-		mReceiver.stopIt();
+		try {
+			// stopping the receiver thread stops the entire client
+			terminateReceiverThread();
+		} catch (Exception lEx) {
+			// ignore that, connection is about to be terminated
+		}
 	}
 
 	private void sendCloseHandshake() throws WebSocketException {
@@ -457,6 +513,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 					// TODO: Make acceptance of unsigned certificates optional!
 					// This methodology is used to accept unsigned certficates
 					// on the SSL server. Be careful with this in production environments!
+
 					// Create a trust manager to accept unsigned certificates
 					TrustManager[] lTrustManager = new TrustManager[]{
 						new X509TrustManager() {
@@ -518,8 +575,8 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 	/**
 	 * {@inheritDoc }
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public WebSocketStatus getConnectionStatus() {
 		return mStatus;
@@ -600,25 +657,23 @@ public class BaseWebSocketClient implements WebSocketClient {
 		this.mReliabilityOptions = mReliabilityOptions;
 	}
 	/*
-	class ReOpener implements Runnable {
-	
-	private WebSocketClientEvent mEvent;
-	
-	public ReOpener(WebSocketClientEvent aEvent) {
-	mEvent = aEvent;
-	}
-	
-	@Override
-	public void run() {
-	notifyReconnecting(mEvent);
-	try {
-	open(mURI.toString());
-	} catch (WebSocketException ex) {
-	// TODO: process potential exception here!
-	}
-	}
-	}
+	 * class ReOpener implements Runnable {
+	 *
+	 * private WebSocketClientEvent mEvent;
+	 *
+	 * public ReOpener(WebSocketClientEvent aEvent) { mEvent = aEvent; }
+	 *
+	 * @Override public void run() { notifyReconnecting(mEvent); try {
+	 * open(mURI.toString()); } catch (WebSocketException ex) { // TODO: process
+	 * potential exception here! } } }
 	 */
+
+	/**
+	 * @return the mHeaders
+	 */
+	public Headers getHeaders() {
+		return mHeaders;
+	}
 
 	class ReOpener implements Runnable {
 
@@ -636,13 +691,11 @@ public class BaseWebSocketClient implements WebSocketClient {
 				open(mURI.toString());
 				// did we configure reliability options?
 				/*
-				if (mReliabilityOptions != null
-				&& mReliabilityOptions.getReconnectDelay() > 0) {
-				mExecutor.schedule(
-				new ReOpener(aEvent),
-				mReliabilityOptions.getReconnectDelay(),
-				TimeUnit.MILLISECONDS);
-				}
+				 * if (mReliabilityOptions != null &&
+				 * mReliabilityOptions.getReconnectDelay() > 0) {
+				 * mExecutor.schedule( new ReOpener(aEvent),
+				 * mReliabilityOptions.getReconnectDelay(),
+				 * TimeUnit.MILLISECONDS); }
 				 */
 			} catch (Exception lEx) {
 				WebSocketClientEvent lEvent =
@@ -657,9 +710,9 @@ public class BaseWebSocketClient implements WebSocketClient {
 	private void mAbortReconnect() {
 		synchronized (mReconnectLock) {
 			// cancel running re-connect task
-			if( null != mReconnectorTask ) {
+			if (null != mReconnectorTask) {
 				mReconnectorTask.cancel(true);
-			}	
+			}
 			// reset internal re-connection flag
 			mIsReconnecting = false;
 			mReconnectorTask = null;
@@ -684,7 +737,7 @@ public class BaseWebSocketClient implements WebSocketClient {
 						mReliabilityOptions.getReconnectDelay(),
 						TimeUnit.MILLISECONDS);
 			}
-		}	
+		}
 	}
 
 	/**
@@ -786,7 +839,10 @@ public class BaseWebSocketClient implements WebSocketClient {
 
 			WebSocketClientEvent lEvent =
 					new WebSocketBaseClientEvent(mClient, EVENT_CLOSE, mCloseReason);
+			// notify listeners that client has closed
 			notifyClosed(lEvent);
+
+			quit();
 
 			if (!CR_CLIENT.equals(mCloseReason)) {
 				mCheckReconnect(lEvent);
@@ -832,8 +888,12 @@ public class BaseWebSocketClient implements WebSocketClient {
 					WebSocketPacket lPacket = WebSocketProtocolAbstraction.protocolToRawPacket(mVersion, mIS);
 					lFrameType = (lPacket != null ? lPacket.getFrameType() : WebSocketFrameType.INVALID);
 					if (null == lFrameType) {
+						if (mIsRunning) {
+							setCloseReason("Connection broken");
+						} else {
+							setCloseReason("Client terminated");
+						}
 						mIsRunning = false;
-						setCloseReason("Connection broken");
 					} else if (WebSocketFrameType.INVALID == lFrameType) {
 						mIsRunning = false;
 						setCloseReason("Invalid hybi frame type detected");
@@ -857,11 +917,11 @@ public class BaseWebSocketClient implements WebSocketClient {
 			}
 		}
 
-		public void stopIt() {
+		public void quit() {
 			// ensure that reader loops are not continued
 			mIsRunning = false;
 			try {
-				mIn.close();
+				mIS.close();
 			} catch (IOException ex) {
 				// just to force client reader to stop
 			}

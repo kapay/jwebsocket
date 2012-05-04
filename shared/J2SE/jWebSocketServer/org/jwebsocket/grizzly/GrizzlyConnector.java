@@ -17,9 +17,11 @@ package org.jwebsocket.grizzly;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.HttpRequestPacket;
+import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.http.util.MimeHeaders;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.jwebsocket.api.WebSocketConnectorStatus;
@@ -28,13 +30,9 @@ import org.jwebsocket.api.WebSocketPacket;
 import org.jwebsocket.async.IOFuture;
 import org.jwebsocket.config.JWebSocketCommonConstants;
 import org.jwebsocket.connectors.BaseConnector;
-import org.jwebsocket.kit.CloseReason;
-import org.jwebsocket.kit.RawPacket;
-import org.jwebsocket.kit.RequestHeader;
-import org.jwebsocket.kit.WebSocketException;
-import org.jwebsocket.kit.WebSocketFrameType;
-import org.jwebsocket.kit.WebSocketProtocolAbstraction;
+import org.jwebsocket.kit.*;
 import org.jwebsocket.logging.Logging;
+import org.jwebsocket.tcp.EngineUtils;
 
 /**
  *
@@ -42,16 +40,16 @@ import org.jwebsocket.logging.Logging;
  */
 public class GrizzlyConnector extends BaseConnector {
 
-	private static Logger mLog = Logging.getLogger(GrizzlyConnector.class);
+	private static Logger mLog = Logging.getLogger();
 	private boolean mRunning = false;
 	private WebSocket mConnection;
 	private HttpRequestPacket mRequest = null;
 	private String mProtocol = null;
 
 	/**
-	 * Creates a new Grizzly connector for the passed engine using the passed client
-	 * socket. Usually connectors are instantiated by their engine only, not by
-	 * the application.
+	 * Creates a new Grizzly connector for the passed engine using the passed
+	 * client socket. Usually connectors are instantiated by their engine only,
+	 * not by the application.
 	 *
 	 * @param aEngine
 	 * @param aHttpRequestPacket
@@ -98,6 +96,7 @@ public class GrizzlyConnector extends BaseConnector {
 		}
 		// TODO: check with Alex what is exactly search string
 		lHeader.put(RequestHeader.WS_SEARCHSTRING, aRequest.getQueryString());
+		
 		setHeader(lHeader);
 	}
 

@@ -14,25 +14,25 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.config.xml;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javolution.util.FastList;
 import javolution.util.FastMap;
-import org.jwebsocket.config.ConfigHandler;
-import org.jwebsocket.config.JWebSocketConfig;
-import org.jwebsocket.kit.WebSocketRuntimeException;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
+import org.json.JSONObject;
 import org.jwebsocket.config.Config;
+import org.jwebsocket.config.ConfigHandler;
+import org.jwebsocket.config.JWebSocketConfig;
+import org.jwebsocket.kit.WebSocketRuntimeException;
 
 /**
  * Handler class that handles the <tt>jWebSocket.xml</tt> configuration. This
@@ -49,10 +49,10 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 
 	// We cannot use the logging subsystem here because its config needs to be
 	// loaded first!
-	private static final String ELEMENT_INSTALLATION = "installation";
+	// private static final String ELEMENT_INSTALLATION = "installation";
 	private static final String ELEMENT_PROTOCOL = "protocol";
 	private static final String ELEMENT_NODE_ID = "node_id";
-	private static final String ELEMENT_INITIALIZER_CLASS = "initializerClass";
+	// private static final String ELEMENT_INITIALIZER_CLASS = "initializerClass";
 	private static final String ELEMENT_LIBRARY_FOLDER = "libraryFolder";
 	private static final String ELEMENT_LIBRARIES = "libraries";
 	private static final String ELEMENT_LIBRARY = "library";
@@ -103,13 +103,7 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 				aStreamReader.next();
 				if (aStreamReader.isStartElement()) {
 					String lElementName = aStreamReader.getLocalName();
-					if (lElementName.equals(ELEMENT_INSTALLATION)) {
-						aStreamReader.next();
-						lConfigBuilder.setInstallation(aStreamReader.getText());
-					} else if (lElementName.equals(ELEMENT_INITIALIZER_CLASS)) {
-						aStreamReader.next();
-						lConfigBuilder.setInitializer(aStreamReader.getText());
-					} else if (lElementName.equals(ELEMENT_PROTOCOL)) {
+					if (lElementName.equals(ELEMENT_PROTOCOL)) {
 						aStreamReader.next();
 						lConfigBuilder.setProtocol(aStreamReader.getText());
 					} else if (lElementName.equals(ELEMENT_NODE_ID)) {
@@ -638,5 +632,58 @@ public class JWebSocketConfigHandler implements ConfigHandler {
 		}
 
 		saveChange(lDoc, JWebSocketConfig.getConfigPath());
+	}
+	
+	
+	public static final String SETTINGS = "settings";
+	public static final String SETTING = "setting";
+	/**
+	 * Read the map of plug-in specific settings
+	 * @param aStreamReader
+	 *            the stream reader object
+	 * @return the list of domains for the engine
+	 * @throws XMLStreamException
+	 *             in case of stream exception
+	 */
+	public static Map<String, Object> getSettings(XMLStreamReader aStreamReader)
+			throws XMLStreamException {
+
+		Map<String, Object> lSettings = new FastMap<String, Object>();
+		while (aStreamReader.hasNext()) {
+			aStreamReader.next();
+			if (aStreamReader.isStartElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SETTING)) {
+					String lKey = aStreamReader.getAttributeValue(null, "key");
+					String lType = aStreamReader.getAttributeValue(null, "type");
+
+					aStreamReader.next();
+					String lValue = aStreamReader.getText();
+
+					if (lKey != null && lValue != null) {
+						if ("json".equalsIgnoreCase(lType)) {
+							JSONObject lJSON = null;
+							try {
+								lJSON = new JSONObject(lValue);
+							} catch (Exception lEx) {
+								// TODO: handle invalid JSON code in settings properly!
+							}
+							lSettings.put(lKey, lJSON);
+						} else {
+							lSettings.put(lKey, lValue);
+						}
+					}
+				}
+			}
+
+			if (aStreamReader.isEndElement()) {
+				String lElementName = aStreamReader.getLocalName();
+				if (lElementName.equals(SETTINGS)) {
+					break;
+				}
+			}
+		}
+		
+		return lSettings;
 	}
 }

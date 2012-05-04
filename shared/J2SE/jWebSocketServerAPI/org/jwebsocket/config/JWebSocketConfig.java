@@ -30,7 +30,6 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import static org.jwebsocket.config.JWebSocketCommonConstants.WS_SUBPROT_DEFAULT;
-import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_INSTALLATION;
 import static org.jwebsocket.config.JWebSocketServerConstants.DEFAULT_NODE_ID;
 import org.jwebsocket.config.xml.*;
 import org.jwebsocket.kit.WebSocketRuntimeException;
@@ -47,11 +46,9 @@ import org.jwebsocket.util.Tools;
 public class JWebSocketConfig implements Config {
 
 	private static Logger mLog = null;
-	private final String mInstallation;
 	private final String mNodeId;
 	private final String mProtocol;
 	private final String mLibraryFolder;
-	private final String mInitializer;
 	private final List<LibraryConfig> mLibraries;
 	private final List<EngineConfig> mEngines;
 	private final List<ServerConfig> mServers;
@@ -71,7 +68,7 @@ public class JWebSocketConfig implements Config {
 	public static Logger getLogger() {
 		return mLog;
 	}
-	
+
 	/**
 	 * @return the mClassLoader
 	 */
@@ -85,16 +82,6 @@ public class JWebSocketConfig implements Config {
 	 */
 	public static void setClassLoader(ClassLoader aClassLoader) {
 		mClassLoader = aClassLoader;
-	}
-
-	/**
-	 * @return the installation
-	 */
-	public String getInstallation() {
-		if (mInstallation == null || mInstallation.length() == 0) {
-			return DEFAULT_INSTALLATION;
-		}
-		return mInstallation;
 	}
 
 	/**
@@ -161,29 +148,45 @@ public class JWebSocketConfig implements Config {
 			File lDir;
 
 			// we are in development mode (NetBeans)?
-			lDir = new File("../../../rte/jWebSocket-1.0/libs");
-			lFiles = FileUtils.listFiles(lDir, lFileFilter, lDirFilter);
-			if (!lFiles.isEmpty()) {
+			try {
+				lDir = new File("../../../rte/jWebSocket-1.0/libs");
+				lFiles = FileUtils.listFiles(lDir, lFileFilter, lDirFilter);
+			} catch (Exception lEx) {
+				lFiles = null;
+			}
+			if (null != lFiles && !lFiles.isEmpty()) {
 				lDir = new File("../../../rte/jWebSocket-1.0");
 				mJWebSocketHome = FilenameUtils.normalize(lDir.getAbsolutePath());
 			} else {
 				// we are in the /libs folder?
-				lDir = new File(".");
-				lFiles = FileUtils.listFiles(lDir, lFileFilter, lDirFilter);
-				if (!lFiles.isEmpty()) {
+				try {
+					lDir = new File(".");
+					lFiles = FileUtils.listFiles(lDir, lFileFilter, lDirFilter);
+				} catch (Exception lEx) {
+					lFiles = null;
+				}
+				if (null != lFiles && !lFiles.isEmpty()) {
 					lDir = new File("../");
 					mJWebSocketHome = FilenameUtils.normalize(lDir.getAbsolutePath());
 				} else {
 					// we are in the /bin folder?
-					lDir = new File("../libs");
-					lFiles = FileUtils.listFiles(lDir, lFileFilter, lDirFilter);
-					if (!lFiles.isEmpty()) {
+					try {
+						lDir = new File("../libs");
+						lFiles = FileUtils.listFiles(lDir, lFileFilter, lDirFilter);
+					} catch (Exception lEx) {
+						lFiles = null;
+					}
+					if (null != lFiles && !lFiles.isEmpty()) {
 						lDir = new File("../");
 						mJWebSocketHome = FilenameUtils.normalize(lDir.getAbsolutePath());
 					} else {
 						// we are in the base folder?
-						lDir = new File("libs");
-						lFiles = FileUtils.listFiles(lDir, lFileFilter, lDirFilter);
+						try {
+							lDir = new File("libs");
+							lFiles = FileUtils.listFiles(lDir, lFileFilter, lDirFilter);
+						} catch (Exception lEx) {
+							lFiles = null;
+						}
 						if (!lFiles.isEmpty()) {
 							lDir = new File(".");
 							mJWebSocketHome = FilenameUtils.normalize(lDir.getAbsolutePath());
@@ -217,8 +220,7 @@ public class JWebSocketConfig implements Config {
 		}
 		return mJWebSocketHome;
 	}
-	
-	
+
 	/**
 	 *
 	 * @return
@@ -317,7 +319,7 @@ public class JWebSocketConfig implements Config {
 						// check trailing backslash
 						adjustJWebSocketHome();
 						System.setProperty(
-							JWebSocketServerConstants.JWEBSOCKET_HOME, mJWebSocketHome);
+								JWebSocketServerConstants.JWEBSOCKET_HOME, mJWebSocketHome);
 						System.out.println(
 								"Using command-line argument -home "
 								+ mJWebSocketHome);
@@ -340,7 +342,7 @@ public class JWebSocketConfig implements Config {
 
 		try {
 			String lLog4JPath = mJWebSocketHome + "conf/log4j.xml";
- 			DOMConfigurator.configure(lLog4JPath);
+			DOMConfigurator.configure(lLog4JPath);
 			mLog = Logger.getLogger(JWebSocketConfig.class);
 			if (mLog.isDebugEnabled()) {
 				mLog.debug("Console-Mode: Logs successfully configured by '" + lLog4JPath + "'.");
@@ -414,13 +416,6 @@ public class JWebSocketConfig implements Config {
 	}
 
 	/**
-	 * @return the initializer
-	 */
-	public String getInitializer() {
-		return mInitializer;
-	}
-
-	/**
 	 * @return the config
 	 */
 	public static JWebSocketConfig getConfig() {
@@ -441,11 +436,9 @@ public class JWebSocketConfig implements Config {
 				|| aBuilder.mLoggingConfig == null) {
 			throw new WebSocketRuntimeException("Configuration is not loaded completely.");
 		}
-		mInstallation = aBuilder.mInstallation;
 		mProtocol = aBuilder.mProtocol;
 		mNodeId = aBuilder.mNodeId;
 		mLibraryFolder = aBuilder.mLibraryFolder;
-		mInitializer = aBuilder.mInitializer;
 		mLibraries = aBuilder.mLibraries;
 		mEngines = aBuilder.mEngines;
 		mServers = aBuilder.mServers;
@@ -466,11 +459,9 @@ public class JWebSocketConfig implements Config {
 	 */
 	public static class Builder {
 
-		private String mInstallation;
 		private String mProtocol;
 		private String mNodeId;
 		private String mLibraryFolder;
-		private String mInitializer;
 		private List<LibraryConfig> mLibraries;
 		private List<EngineConfig> mEngines;
 		private List<ServerConfig> mServers;
@@ -480,16 +471,6 @@ public class JWebSocketConfig implements Config {
 		private LoggingConfig mLoggingConfig;
 		private List<RightConfig> mGlobalRights;
 		private List<RoleConfig> mGlobalRoles;
-
-		/**
-		 *
-		 * @param aInstallation
-		 * @return
-		 */
-		public Builder setInstallation(String aInstallation) {
-			mInstallation = aInstallation;
-			return this;
-		}
 
 		/**
 		 *
@@ -508,16 +489,6 @@ public class JWebSocketConfig implements Config {
 		 */
 		public Builder setNodeId(String aNodeId) {
 			mNodeId = aNodeId;
-			return this;
-		}
-
-		/**
-		 *
-		 * @param aInitializer
-		 * @return
-		 */
-		public Builder setInitializer(String aInitializer) {
-			mInitializer = aInitializer;
 			return this;
 		}
 
@@ -907,7 +878,7 @@ public class JWebSocketConfig implements Config {
 	public static String getLibsFolder(String aFilename, ClassLoader aClassLoader) {
 		return getSubFolder(
 				"library",
-				(isWebApp() ? "lib": "libs"),
+				(isWebApp() && isLoadConfigFromResource() ? "lib" : "libs"),
 				aFilename,
 				aClassLoader);
 	}
@@ -919,9 +890,9 @@ public class JWebSocketConfig implements Config {
 	 */
 	public static String getLibsFolder(String aFilename) {
 		return getSubFolder(
-				"library", 
-				(isWebApp() ? "lib": "libs"),
-				aFilename, 
+				"library",
+				(isWebApp() ? "lib" : "libs"),
+				aFilename,
 				null);
 	}
 

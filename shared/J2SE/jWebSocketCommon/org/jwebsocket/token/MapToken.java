@@ -15,6 +15,7 @@
 //	---------------------------------------------------------------------------
 package org.jwebsocket.token;
 
+import org.jwebsocket.api.ITokenizable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -225,6 +226,45 @@ public class MapToken extends BaseToken implements Token {
 
 	@Override
 	public void setInteger(String aKey, Integer aValue) {
+		try {
+			mData.put(aKey, aValue);
+		} catch (Exception lEx) {
+			// TODO: handle exception
+		}
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @param aDefault
+	 * @return
+	 */
+	@Override
+	public Long getLong(String aKey, Long aDefault) {
+		Long lResult;
+		try {
+			lResult = (Long) mData.get(aKey);
+			if (lResult == null) {
+				lResult = aDefault;
+			}
+		} catch (Exception lEx) {
+			lResult = aDefault;
+		}
+		return lResult;
+	}
+
+	/**
+	 *
+	 * @param aKey
+	 * @return
+	 */
+	@Override
+	public Long getLong(String aKey) {
+		return getLong(aKey, null);
+	}
+
+	@Override
+	public void setLong(String aKey, Long aValue) {
 		try {
 			mData.put(aKey, aValue);
 		} catch (Exception lEx) {

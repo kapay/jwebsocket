@@ -19,12 +19,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.HttpCookie;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.jwebsocket.config.JWebSocketCommonConstants;
@@ -32,6 +34,7 @@ import org.jwebsocket.util.Tools;
 
 /**
  * Utility class for all the handshaking related request/response.
+ *
  * @author aschulze
  * @version $Id:$
  */
@@ -57,7 +60,7 @@ public final class WebSocketHandshake {
 	 * @param aURI
 	 * @param aProtocol
 	 * @param aVersion
-	 * @throws WebSocketException  
+	 * @throws WebSocketException
 	 */
 	public WebSocketHandshake(int aVersion, URI aURI, String aProtocol) throws WebSocketException {
 		this.mURI = aURI;
@@ -123,14 +126,14 @@ public final class WebSocketHandshake {
 	 * connection.
 	 *
 	 * @param aReq
-	 * @param aIsSSL 
+	 * @param aIsSSL
 	 * @return
 	 */
 	public static Map parseC2SRequest(byte[] aReq, boolean aIsSSL) {
-		String lHost = null;
-		String lOrigin = null;
-		String lLocation = null;
-		String lPath = null;
+		String lHost;
+		String lOrigin;
+		String lLocation;
+		String lPath;
 		String lSubProt = null;
 		String lDraft = null;
 		Integer lVersion = null;
@@ -138,7 +141,7 @@ public final class WebSocketHandshake {
 		String lSecKey1 = null;
 		String lSecKey2 = null;
 		byte[] lSecKey3 = new byte[8];
-		Boolean lIsSecure = false;
+		Boolean lIsSecure;
 		String lSecKeyAccept = null;
 		Long lSecNum1 = null;
 		Long lSecNum2 = null;
@@ -150,6 +153,7 @@ public final class WebSocketHandshake {
 		String lAcceptLanguage = null;
 		String lAcceptEncoding = null;
 		String lCacheControl = null;
+		String lCookies = null;
 
 		Map lRes = new HashMap();
 
@@ -358,6 +362,25 @@ public final class WebSocketHandshake {
 			}
 		}
 
+		/**
+		 * Getting client cookies
+		 *
+		 * @See http://tools.ietf.org/rfc/rfc6265.txt
+		 */
+		lPos = lRequest.indexOf("Cookie: ");
+		if (lPos > 0) {
+			lPos += 8;
+			lCookies = lRequest.substring(lPos);
+			lPos = lCookies.indexOf("\r\n");
+			lCookies = lCookies.substring(0, lPos);
+		}
+
+		/**
+		 * Setting the headers map
+		 */
+		if (null != lCookies) {
+			lRes.put(RequestHeader.WS_COOKIES, lCookies);
+		}
 		lRes.put(RequestHeader.WS_PATH, lPath);
 		lRes.put(RequestHeader.WS_HOST, lHost);
 		lRes.put(RequestHeader.WS_ORIGIN, lOrigin);
@@ -446,11 +469,10 @@ public final class WebSocketHandshake {
 				+ (lSecKeyAccept != null ? "Sec-WebSocket-Accept: " + lSecKeyAccept + "\r\n" : "")
 				+ (lSubProt != null ? (lIsSecure ? "Sec-" : "") + "WebSocket-Protocol: " + lSubProt + "\r\n" : "")
 				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Origin: " + lOrigin + "\r\n"
-				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Location: " + lLocation + "\r\n";
+				+ (lIsSecure ? "Sec-" : "") + "WebSocket-Location: " + lLocation + "\r\n"
+				+ "Set-Cookie: " + JWebSocketCommonConstants.SESSIONID_COOKIE_NAME + "=" + ((Map) aRequest.get(RequestHeader.WS_COOKIES)).get(JWebSocketCommonConstants.SESSIONID_COOKIE_NAME) + "; HttpOnly\r\n";
 		lRes += "\r\n";
-		/*
-		System.out.println(lRes);
-		 */
+
 		byte[] lBA;
 		try {
 			lBA = lRes.getBytes("US-ASCII");
@@ -529,11 +551,12 @@ public final class WebSocketHandshake {
 	}
 
 	/**
-	 * Generates the initial Handshake from a Java Client to the WebSocket 
+	 * Generates the initial Handshake from a Java Client to the WebSocket
 	 * Server.
+	 *
 	 * @return
 	 */
-	public byte[] generateC2SRequest() {
+	public byte[] generateC2SRequest(List<HttpCookie> aCookies) {
 		String lPath = mURI.getPath();
 		String lHost = mURI.getHost();
 		mOrigin = "http://" + lHost;
@@ -550,6 +573,19 @@ public final class WebSocketHandshake {
 				+ "Sec-WebSocket-Origin: " + mOrigin + "\r\n";
 		if (mProtocol != null) {
 			lHandshake += "Sec-WebSocket-Protocol: " + mProtocol + "\r\n";
+		}
+
+		// Set client cookies
+		if (null != aCookies && !aCookies.isEmpty()) {
+			//Generating Cookie header
+			String lCookies = "";
+			for (HttpCookie lCookie : aCookies){
+				if (!lCookies.equals("")){
+					lCookies += "; ";
+				}
+				lCookies += lCookie.getName() + "=" + lCookie.getValue();
+			}
+			lHandshake += "Cookie: " + lCookies + "\r\n";
 		}
 
 		if (WebSocketProtocolAbstraction.isHixieVersion(mVersion)) {
@@ -577,6 +613,10 @@ public final class WebSocketHandshake {
 		}
 
 		return lHandshakeBytes;
+	}
+
+	public byte[] generateC2SRequest() {
+		return generateC2SRequest(null);
 	}
 
 	/**
